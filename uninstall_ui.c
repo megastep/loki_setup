@@ -205,49 +205,8 @@ void perform_uninstall_slot(GtkWidget* w, gpointer data)
         widget = GTK_WIDGET(list->data);
         poopy = gtk_container_children(GTK_CONTAINER(widget));
         widget = GTK_WIDGET(poopy->data);
-        /* Now do the primary components */
+        /* First do the addon components */
         clist = gtk_container_children(GTK_CONTAINER(widget));
-        while ( clist && ! uninstall_cancelled ) {
-            button = GTK_WIDGET(clist->data);
-            if ( gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)) ) {
-                component = gtk_object_get_data(GTK_OBJECT(button), "data");
-                if ( ! loki_isdefault_component(component->component) ) {
-                    clist = clist->next;
-                    continue;
-                }
-                /* Put up the status */
-                strncpy(text, component->info->description, sizeof(text));
-                set_status_text(text);
-
-                /* See if the user wants to cancel the uninstall */
-                while( gtk_events_pending() ) {
-                    gtk_main_iteration();
-                }
-
-                /* Remove the component */
-printf("Uninstalling product %s\n", text);
-                perform_uninstall(component->product, component->info);
-                remove_product(component->product);
-
-                /* Update the progress bar */
-                if ( total && progress ) {
-                    size += component->size/1024;
-                    gtk_progress_set_percentage(GTK_PROGRESS(progress),
-                                                (float)size/total);
-                }
-
-                /* See if the user wants to cancel the uninstall */
-                while( gtk_events_pending() ) {
-                    gtk_main_iteration();
-                }
-                break;
-            }
-            clist = clist->next;
-        }
-        /* If product not uninstalled, check the add-on components */
-        if ( ! clist ) {
-            clist = gtk_container_children(GTK_CONTAINER(widget));
-        }
         while ( clist && ! uninstall_cancelled ) {
             button = GTK_WIDGET(clist->data);
             if ( gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)) ) {
@@ -268,8 +227,45 @@ printf("Uninstalling product %s\n", text);
                 }
 
                 /* Remove the component */
-printf("Uninstalling component %s\n", text);
                 uninstall_component(component->component, component->info);
+
+                /* Update the progress bar */
+                if ( total && progress ) {
+                    size += component->size/1024;
+                    gtk_progress_set_percentage(GTK_PROGRESS(progress),
+                                                (float)size/total);
+                }
+                gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), FALSE);
+
+                /* See if the user wants to cancel the uninstall */
+                while( gtk_events_pending() ) {
+                    gtk_main_iteration();
+                }
+            }
+            clist = clist->next;
+        }
+        /* Now do the primary components */
+        clist = gtk_container_children(GTK_CONTAINER(widget));
+        while ( clist && ! uninstall_cancelled ) {
+            button = GTK_WIDGET(clist->data);
+            if ( gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)) ) {
+                component = gtk_object_get_data(GTK_OBJECT(button), "data");
+                if ( ! loki_isdefault_component(component->component) ) {
+                    clist = clist->next;
+                    continue;
+                }
+                /* Put up the status */
+                strncpy(text, component->info->description, sizeof(text));
+                set_status_text(text);
+
+                /* See if the user wants to cancel the uninstall */
+                while( gtk_events_pending() ) {
+                    gtk_main_iteration();
+                }
+
+                /* Remove the component */
+                perform_uninstall(component->product, component->info);
+                remove_product(component->product);
 
                 /* Update the progress bar */
                 if ( total && progress ) {
@@ -282,6 +278,7 @@ printf("Uninstalling component %s\n", text);
                 while( gtk_events_pending() ) {
                     gtk_main_iteration();
                 }
+                break;
             }
             clist = clist->next;
         }
