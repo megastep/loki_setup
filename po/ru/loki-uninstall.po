@@ -1,0 +1,193 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR Free Software Foundation, Inc.
+# Anatoly Zhigunov <anatol_z@mail.ru>, 2001.
+# Created with FAR 1.70 beta 2
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2000-12-06 16:42-0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=KOI8-R\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# SOME DESCRIPTIVE TITLE
+#: uninstall.glade:298
+msgid "%P %%"
+msgstr "%P %%"
+
+#: uninstall.glade:94
+msgid "... LOADING PRODUCT LIST ..."
+msgstr "... Загрузка Списка Программ ..."
+
+#: uninstall.glade:142
+msgid "0 MB"
+msgstr "0 Мб"
+
+#: uninstall.glade:357
+msgid "Cancel"
+msgstr "Отмена"
+
+#: uninstall.glade:188
+msgid "Exit"
+msgstr "Выход"
+
+#: uninstall.glade:370
+msgid "Finished"
+msgstr "Завершено"
+
+#: uninstall.glade:23
+msgid "Loki Uninstall Tool"
+msgstr "Программа удаления Локи"
+
+#: uninstall.glade:229
+msgid "Performing uninstall:"
+msgstr "Производится удаление"
+
+#: uninstall.glade:51
+msgid "Please select the packages you would like to uninstall:"
+msgstr "Выберите пакеты, которые вы хотите удалить:"
+
+#: uninstall.glade:125
+msgid "Recovered space: "
+msgstr "Освобождённое пространство:"
+
+#: uninstall.glade:201
+msgid "Uninstall"
+msgstr "Удалить"
+
+#: uninstall.glade:263
+msgid "[current component]"
+msgstr "[current component]"
+
+#: uninstall.c:30
+#, c-format
+msgid ""
+"Usage: %s product to uninstall the product\n"
+"       %s -l      to list all products\n"
+"       %s product -l        to list all components\n"
+"       %s product component to uninstall a single component\n"
+msgstr ""
+"Использование: %s программа            удалить программу\n"
+"               %s -l                   получить список программ\n"
+"               %s программа -l         получить список компонент программ\n"
+"               %s программа компонент  удалить один компонент\n"
+
+#: uninstall.c:108
+#, c-format
+msgid "Signal %d caught. Aborting.\n"
+msgstr "Получен сигнал %d. Прекращение работы.\n"
+
+#: uninstall.c:122
+#, c-format
+msgid "Could not change to directory: %s\n"
+msgstr "Невозможно зайти в каталог %s\n"
+
+#: uninstall.c:144
+#, c-format
+msgid "Notice: the %s RPM was installed for this product.\n"
+msgstr "Примечание: для этой программы был установлен RPM %s.\n"
+
+#: uninstall.c:179
+#, c-format
+msgid "Component %s has been successfully uninstalled.\n"
+msgstr "Компонет %s был успешно удалён.\n"
+
+#: uninstall.c:217
+msgid ""
+"No write access to the installation directory.\n"
+"Aborting.\n"
+msgstr ""
+"Нет доступа на запись в каталог установки.\n"
+"Прекращение работы.\n"
+
+#: uninstall.c:225
+#, c-format
+msgid ""
+"No write access to the registry file: %s.\n"
+"Aborting.\n"
+msgstr ""
+"Нет доступа на запись к файлу реестра: %s.\n"
+"Прекращение работы.\n"
+
+#: uninstall.c:347
+msgid "Installed products:\n"
+msgstr "Установленные программы:\n"
+
+#: uninstall.c:353
+#, c-format
+msgid "installed in %s\n"
+msgstr "установлено в %s\n"
+
+#: uninstall.c:356
+msgid " Error while accessing product info\n"
+msgstr " Ошибка во время доступа к информации о программе\n"
+
+#: uninstall.c:368
+#, c-format
+msgid "Could not open product information for %s\n"
+msgstr "Невозможно открыть информацию о программе %s\n"
+
+#: uninstall.c:374
+#, c-format
+msgid ""
+"Product: %s\n"
+"Installed in %s\n"
+msgstr ""
+"Программа: %s\n"
+"Установлена в %s\n"
+
+#: uninstall.c:381
+msgid "Components:\n"
+msgstr "Компоненты:\n"
+
+#: uninstall.c:394
+#, c-format
+msgid "Unable to find component %s\n"
+msgstr "Невозможно найти компонент %s\n"
+
+#: uninstall.c:398
+msgid "Too many arguments for the command\n"
+msgstr "Слишком много аргументов команды\n"
+
+#: uninstall.c:405
+msgid "An error occured during the uninstallation process.\n"
+msgstr "Произошла ошибка во время процесса удаления.\n"
+
+#: uninstall.c:409
+#, c-format
+msgid "%s has been successfully uninstalled.\n"
+msgstr "%s была успешно удалена.\n"
+
+#: uninstall_ui.c:169
+#, c-format
+msgid "%d MB"
+msgstr "%d Мб"
+
+#: uninstall_ui.c:314
+msgid "Uninstall cancelled"
+msgstr "Удаление отменено"
+
+#: uninstall_ui.c:316
+msgid "Uninstall complete"
+msgstr "Удаление завершено"
+
+#: uninstall_ui.c:407
+msgid "No uninstall_vbox in glade file!\n"
+msgstr "Нет uninstall_vbox в файле glade!\n"
+
+#: uninstall_ui.c:439
+msgid "Complete uninstall"
+msgstr "Закончить удаление"
+
+#: uninstall_ui.c:476
+msgid ""
+"No products found.\n"
+"Are you the one that installed the software?"
+msgstr ""
+"Программы не найдены.\n"
+"Вы их устанавливали?"
+
