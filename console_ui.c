@@ -72,9 +72,9 @@ static yesno_answer console_prompt(const char *prompt, yesno_answer suggest)
         fprintf(stderr, _("Warning, invalid yesno prompt: %s\n"), prompt);
         return(RESPONSE_INVALID);
     }
-	if(!strncasecmp(line, gettext (yes_letter), 1)) {
+	if(!strncasecmp(line, _(yes_letter), 1)) {
 		return RESPONSE_YES;
-	} else if(!strncasecmp(line, gettext (no_letter), 1)) {
+	} else if(!strncasecmp(line, _(no_letter), 1)) {
 		return RESPONSE_NO;
 	} else {
 		return RESPONSE_INVALID;
@@ -98,9 +98,9 @@ static yesno_answer prompt_yesnohelp(const char *prompt, yesno_answer suggest)
             fprintf(stderr, _("Warning, invalid yesno prompt: %s\n"), prompt);
             return(RESPONSE_INVALID);
     }
-	if(!strncasecmp(line, gettext (yes_letter), 1)) {
+	if(!strncasecmp(line, _(yes_letter), 1)) {
 		return RESPONSE_YES;
-	} else if(!strncasecmp(line, gettext (no_letter), 1)) {
+	} else if(!strncasecmp(line, _(no_letter), 1)) {
 		return RESPONSE_NO;
 	} else if(!strncasecmp(line, "?", 1)) {
 		return RESPONSE_HELP;

@@ -2,6 +2,7 @@
 #ifndef _install_h
 #define _install_h
 
+#include "config.h"
 #include "setupdb.h"
 #include "detect.h"
 #include "arch.h"
