@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Setup 1.5\n"
-"POT-Creation-Date: 2000-12-01 14:33-0800\n"
+"POT-Creation-Date: 2000-12-06 16:42-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -71,10 +71,10 @@ msgid ""
 "       %s product -l        to list all components\n"
 "       %s product component to uninstall a single component\n"
 msgstr ""
-"Usage: % producto	para deinstalar el producto\n"
-"	%s -l	   	para ver la lista de todos los productos\n"
-"	%s producto -l		para ver la lista de todos los componentes\n"
-"	%s producto componente	para deinstalar solo un componente\n"
+"Usage: % producto\tpara deinstalar el producto\n"
+"\t%s -l\t   \tpara ver la lista de todos los productos\n"
+"\t%s producto -l\t\tpara ver la lista de todos los componentes\n"
+"\t%s producto componente\tpara deinstalar solo un componente\n"
 
 #: uninstall.c:108
 #, c-format
@@ -103,7 +103,6 @@ msgid ""
 msgstr ""
 "No puedes escribir al directorio de instalacion.\n"
 "Saliendo.\n"
-
 
 #: uninstall.c:225
 #, c-format
