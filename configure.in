@@ -184,7 +184,7 @@ dnl Check for correct setupdb installation
 if test -f $SETUPDB/$ARCH/libsetupdb.a; then
     AC_MSG_RESULT([SetupDB library found in $SETUPDB/$ARCH])
 else
-    AC_MSG_ERROR([*** Please compile setupdb first!])
+    AC_MSG_ERROR([*** Please compile loki_setupdb first!])
 fi
 
 CFLAGS="$CFLAGS -I$SETUPDB"
@@ -345,6 +345,8 @@ if test x$enable_zip = xyes; then
   CFLAGS="$CFLAGS -DZIP_SUPPORT"
   AC_DEFINE(ENABLE_ZIP, 1, ZIP support.)
 fi
+
+PLUGINS="$PLUGINS uz2.c"
 
 dnl enable RPM support
 AC_ARG_ENABLE(rpm,
