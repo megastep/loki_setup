@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.114 2003-07-29 02:58:43 megastep Exp $ */
+/* $Id: install.c,v 1.115 2003-08-08 03:14:26 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1872,6 +1872,29 @@ install_state launch_game(install_info *info)
     return SETUP_EXIT;
 }
 
+static void symlink_desktop_file(install_info *info, const char *file, const char *dir, struct bin_elem *elem)
+{
+	if ( !access(dir, F_OK) ) {
+		char newlink[4096];
+		char* bname;
+		char* finalbufcopy;
+		
+		finalbufcopy = strdup(file);
+		bname = strrchr(finalbufcopy, '/');
+		if ( bname )
+			bname ++;
+		else
+			bname = finalbufcopy;
+		snprintf(newlink, sizeof(newlink), 
+				 "%s/%s/%s", dir,
+				 elem->menu ? elem->menu : "Games",
+				 bname);
+		
+		file_symlink(info, file, newlink);
+		free(finalbufcopy);
+	}
+}
+
 /* Install the desktop menu items; returns a boolean indicating if we should stop
    installing more menu items after this */
 int install_menuitems(install_info *info, desktop_type desktop)
@@ -1918,8 +1941,9 @@ int install_menuitems(install_info *info, desktop_type desktop)
 		} else {
 			app_links[i++] = "/opt/kde/share/applnk/";
 		}
-		app_links[i++] = "/opt/kde2/share/applnk/";
+		app_links[i++] = "/etc/opt/kde3/share/applnk/SuSE/"; /* SuSE 8.2 */
 		app_links[i++] = "/opt/kde3/share/applnk/";
+		app_links[i++] = "/opt/kde2/share/applnk/";
 		app_links[i++] = "/usr/X11R6/share/applnk/";
 		app_links[i++] = "/usr/share/applnk/";
 		desk_base = getenv("KDEHOME");
@@ -1928,8 +1952,8 @@ int install_menuitems(install_info *info, desktop_type desktop)
 			app_links[i++] = home_base;
 		} else {
 			app_links[i++] = "~/.kde/share/applnk-redhat/"; /* for RH 8.0 KDE */
-			app_links[i++] = "~/.kde2/share/applnk/";
 			app_links[i++] = "~/.kde3/share/applnk/";
+			app_links[i++] = "~/.kde2/share/applnk/";
 			app_links[i++] = "~/.kde/share/applnk/";
 		}
 		app_links[i++] = NULL;
@@ -1993,10 +2017,10 @@ int install_menuitems(install_info *info, desktop_type desktop)
     for (comp = info->components_list; comp; comp = comp->next ) {
         for (opt = comp->options_list; opt; opt = opt->next ) {
             for (elem = opt->bin_list; elem; elem = elem->next ) {      
-		/* Presumably if there is no icon, no desktop entry */
-		if ( (elem->icon == NULL) || (elem->symlink == NULL) ) {
-		    continue;
-		}
+				/* Presumably if there is no icon, no desktop entry */
+				if ( (elem->icon == NULL) || (elem->symlink == NULL) ) {
+					continue;
+				}
 
                 for ( tmp_links = app_links; *tmp_links; ++tmp_links ) {
                     FILE *fp;
@@ -2071,9 +2095,10 @@ int install_menuitems(install_info *info, desktop_type desktop)
 			fp = fopen(finalbuf, "w");
 			if (fp) {
 			    if (desktop == DESKTOP_KDE) {
-				fprintf(fp, "# KDE Config File\n");
+					fprintf(fp, "# KDE Config File\n");
 			    }
 			    fprintf(fp, "[%sDesktop Entry]\n"
+						"Encoding=UTF-8\n"
 						"Name=%s\n"
 						"Comment=%s\n"
 						"Exec=%s\n"
@@ -2093,26 +2118,12 @@ int install_menuitems(install_info *info, desktop_type desktop)
 					   directory; not strictly necessary but it will
 					   allow menuitem to show up in kde without an x
 					   restart */
+					symlink_desktop_file(info, finalbuf, "/usr/share/applnk-redhat", elem);
+			    } else  if (desktop == DESKTOP_GNOME && info->distro==DISTRO_SUSE ) {
+					/* Now for some SuSE nonsense */
+					symlink_desktop_file(info, finalbuf, "/etc/opt/gnome/SuSE", elem);
+				}
 
-					char newlink[4096];
-					char* bname;
-					char* finalbufcopy;
-
-					finalbufcopy = strdup(finalbuf);
-					bname = strrchr(finalbufcopy, '/');
-					if ( bname )
-						bname ++;
-					else
-						bname = finalbufcopy;
-					snprintf(newlink, sizeof(newlink), 
-							 "/usr/share/applnk-redhat/%s/%s", 
-							 elem->menu ? elem->menu : "Games",
-							 bname);
-				
-					file_symlink(info, finalbuf, newlink);
-					free(finalbufcopy);
-			    }
-			    
 			    /* successful REDHAT takes care of KDE/GNOME
 			       tell caller no need to continue others
 			       UNLESS we are Redhat 6.1 or earlier, in which case we need to install
@@ -2236,28 +2247,30 @@ int install_menuitems(install_info *info, desktop_type desktop)
     }
 
     if ( num_items > 0 ) {
-	switch(desktop) {
-	case DESKTOP_MENUDEBIAN:
-	    /* Run update-menus */
+		switch(desktop) {
+		case DESKTOP_MENUDEBIAN:
+			/* Run update-menus */
             if ( loki_valid_program("update-menus") )
-	    	run_command(info, "update-menus", NULL, 1);
-	    install_updatemenus_script = 1;
-	    break;
-	case DESKTOP_KDE:
-	    /* Run kbuildsycoca */
+				run_command(info, "update-menus", NULL, 1);
+			install_updatemenus_script = 1;
+			break;
+		case DESKTOP_KDE:
+			/* Run kbuildsycoca */
             if ( loki_valid_program("kbuildsycoca") )
-	    	run_command(info, "kbuildsycoca", NULL, 0);
-	    install_updatemenus_script = 1;
-	    break;
-	case DESKTOP_CDE:
-	    /* Run dtaction */
+				run_command(info, "kbuildsycoca", NULL, 0);
+			install_updatemenus_script = 1;
+			break;
+		case DESKTOP_CDE:
+			/* Run dtaction */
             if ( loki_valid_program("dtaction") )
-	    	run_command(info, "dtaction", "RestorePanel", 0);
-	    install_updatemenus_script = 1;
-	    break;
-	default:
-	    break;
-	}
+				run_command(info, "dtaction", "RestorePanel", 0);
+			install_updatemenus_script = 1;
+			break;
+		default:
+			break;
+		}
+		if ( loki_valid_program("susewm") )
+	    	run_command(info, "susewm", "-q", 0);
     }
     return ret_val;
 }

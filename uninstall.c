@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.42 2003-07-30 03:39:07 megastep Exp $ */
+/* $Id: uninstall.c,v 1.43 2003-08-08 03:14:26 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -215,11 +215,12 @@ static int check_for_message(product_component_t *comp)
 		if ( env && atoi(env) )
 			return 1;
 
-		if ( isatty(0) ) { /* If we have a TTY, try to get user input */
+		if ( isatty(STDIN_FILENO) ) { /* If we have a TTY, try to get user input */
 			int c;
-			fflush(stdin);
 			puts(message);
 			printf(_("Uninstall ? [Y/n] "));
+			fflush(stdin);
+			setbuf(stdin, NULL);
 			c = getchar();
 			if ( c == 'n' || c == 'N' ) {
 				printf(_("Aborted.\n"));
