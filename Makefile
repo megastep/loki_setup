@@ -65,6 +65,7 @@ endif
 
 CONSOLE_LIBS = $(LIBS)
 GUI_LIBS = plugins/libplugins.a $(SETUPDB)/$(arch)/libsetupdb.a
+ifeq ($(arch),Linux)
 GUI_LIBS += -Wl,-Bstatic
 GUI_LIBS += -L$(shell libglade-config --prefix)/lib
 GUI_LIBS +=  -lglade
@@ -74,6 +75,10 @@ GUI_LIBS += -L$(shell xml-config --prefix)/lib
 GUI_LIBS += -lxml -lz
 GUI_LIBS += -Wl,-Bdynamic
 GUI_LIBS += -L/usr/X11R6/lib -lXi -lXext -lX11 -lm -ldl
+else
+GUI_LIST += $(shell libglade-config --libs) $(xml-config --libs)
+GUI_LIST += -lm -ldl
+endif
 
 all: do-plugins setup setup.gtk uninstall
 
