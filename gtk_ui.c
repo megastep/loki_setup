@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.20 1999-12-09 23:33:10 hercules Exp $
+   $Id: gtk_ui.c,v 1.21 1999-12-11 03:43:09 hercules Exp $
 */
 
 #include <limits.h>
@@ -44,7 +44,8 @@ typedef enum
     COPY_PAGE,
     DONE_PAGE,
     ABORT_PAGE,
-    WARNING_PAGE
+    WARNING_PAGE,
+    WEBSITE_PAGE
 } InstallPages;
 
 typedef struct {
@@ -191,6 +192,11 @@ void setup_button_warning_cancel_slot( GtkWidget* widget, gpointer func_data )
     warning_dialog = WARNING_NONE;
 }
 
+void setup_button_complete( GtkWidget* _widget, gpointer func_data )
+{
+    GtkWidget *widget;
+}
+
 void setup_button_play_slot( GtkWidget* _widget, gpointer func_data )
 {
     GtkWidget *widget;
@@ -210,24 +216,31 @@ void setup_button_play_slot( GtkWidget* _widget, gpointer func_data )
     }
 }
 
-void setup_button_exit_slot( GtkWidget* gtklist, gpointer func_data )
+void setup_button_exit_slot( GtkWidget* widget, gpointer func_data )
 {
     cur_state = SETUP_EXIT;
 }
 
-void setup_button_cancel_slot( GtkWidget* gtklist, gpointer func_data )
+void setup_button_cancel_slot( GtkWidget* widget, gpointer func_data )
 {
     cur_state = SETUP_ABORT;
     abort_install();
 }
 
-void setup_button_install_slot( GtkWidget* gtklist, gpointer func_data )
+void setup_button_install_slot( GtkWidget* widget, gpointer func_data )
 {
     GtkWidget *notebook;
 
     notebook = glade_xml_get_widget(setup_glade, "setup_notebook");
     gtk_notebook_set_page(GTK_NOTEBOOK(notebook), COPY_PAGE);
     cur_state = SETUP_INSTALL;
+}
+
+void setup_button_browser_slot( GtkWidget* widget, gpointer func_data )
+{
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
+    
+    launch_browser(cur_info, run_netscape);
 }
 
 /* Checks if we can enable the "Begin install" button */
@@ -741,6 +754,16 @@ static void gtkui_abort(install_info *info)
     } else {
         fprintf(stderr, "Unable to open %s, aborting!\n", SETUP_GLADE);
     }
+}
+
+static install_state gtkui_website(install_info *info)
+{
+    GtkWidget *notebook;
+
+    notebook = glade_xml_get_widget(setup_glade, "setup_notebook");
+    gtk_notebook_set_page(GTK_NOTEBOOK(notebook), WEBSITE_PAGE);
+
+    return iterate_for_state();
 }
 
 static install_state gtkui_complete(install_info *info)

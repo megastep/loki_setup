@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.12 1999-12-09 23:33:10 hercules Exp $ */
+/* $Id: main.c,v 1.13 1999-12-11 03:43:09 hercules Exp $ */
 
 #include <stdio.h>
 #include <setjmp.h>
@@ -166,6 +166,9 @@ int main(int argc, char **argv)
                 uninstall(info);
                 state = SETUP_EXIT;
                 break;
+            case SETUP_WEBSITE:
+                state = UI.website(info);
+                break;
             case SETUP_COMPLETE:
                 state = UI.complete(info);
                 break;
@@ -174,9 +177,6 @@ int main(int argc, char **argv)
             case SETUP_EXIT:
                 /* Not reached */
                 break;
-        }
-        if ( state == SETUP_COMPLETE ) {
-            launch_browser(info, UI.browser);
         }
     }
 

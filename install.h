@@ -28,6 +28,7 @@ typedef enum {
     SETUP_LICENSE,
     SETUP_OPTIONS,
     SETUP_INSTALL,
+    SETUP_WEBSITE,
     SETUP_COMPLETE,
     SETUP_PLAY,
     SETUP_EXIT
@@ -37,8 +38,8 @@ typedef enum {
 typedef enum {
     DESKTOP_KDE,
     DESKTOP_GNOME,
-	MAX_DESKTOPS
-	/* More to come ? */
+    MAX_DESKTOPS
+    /* More to come ? */
 } desktop_type;
 
 /* Forward declaration (used by UI) */

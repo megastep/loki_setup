@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.24 1999-12-01 22:30:51 hercules Exp $ */
+/* $Id: install.c,v 1.25 1999-12-11 03:43:09 hercules Exp $ */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -369,6 +369,7 @@ install_state install(install_info *info,
             void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     xmlNodePtr node;
+    install_state state;
 
     /* Walk the install tree */
     node = info->config->root->childs;
@@ -380,7 +381,14 @@ install_state install(install_info *info,
         install_menuitems(info, i);
     }
     generate_uninstall(info);
-    return SETUP_COMPLETE;
+
+    /* Return the new install state */
+    if ( GetProductURL(info) ) {
+        state = SETUP_WEBSITE;
+    } else {
+        state = SETUP_COMPLETE;
+    }
+    return state;
 }
 
 /* Remove a partially installed product */
@@ -438,7 +446,6 @@ void uninstall(install_info *info)
         free(elem->release);
         free(elem);
     }
-
 }
 
 void generate_uninstall(install_info *info)

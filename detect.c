@@ -57,13 +57,12 @@ const char *detect_libc(void) {
     libcfile = libclist[i];
 
     if ( libcfile ) {
-      FILE* fp;
       char buffer[1024];
       sprintf( buffer, 
 	       "fgrep GLIBC_2.1 %s 2>&1 >/dev/null",
 	       libcfile );
       
-      if ( system(buffer)==0 )
+      if ( system(buffer) == 0 )
 	return "glibc-2.1";
       else
 	return "glibc-2.0";

@@ -48,13 +48,19 @@ There are several optional attributes of the install element:
             proceed.
 
  url        This is a web site which is launched after the install is
-            completed.  The current implementation first tries to open
-            the web site in a new netscape window, then falls back to
-            using lynx if that fails for some reason.
+            completed.
 
  localurl   This is the local HTML file that is loaded if the network
             is down, or the web site cannot be reached.  It should be
             specified as a path relative to the setup working directory.
+            This is a secondary URL, and should not be specified without
+            also specifying a primary URL in the "url" attribute.
+
+ auto_url   This is a flag which tells whether or not to automatically
+            launch the web browser on the product URL.  It can be either
+            "true" to launch the browser, or "false" to prompt the user.
+            The default behavior is to prompt the user as to whether or
+            not to launch the web browser.
 
 
 The OPTION element:
