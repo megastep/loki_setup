@@ -587,6 +587,12 @@ static install_state carbonui_readme(install_info *info)
 
     //!!!TODO - It doesn't look like the readme step really does anything
     // except move on to the next state?!?!
+    // SP: This is true for the GTK+ backend because the readme is setup
+    // with callbacks from the appropriate buttons by libglade. So there
+    // is no need to do anything at this point, unlike licenses which are very
+    // similar but for which user interaction is not free.
+    // The mechanism to view the Readme may be different on Carbon ?
+    // This state was needed for linear UIs like console or ncurses
     if(GetProductAllowsExpress(info))
         cur_state = SETUP_CLASS;
     else
@@ -760,6 +766,11 @@ static void carbonui_abort(install_info *info)
 
     //!!!TODO - I think we can always display the abort screen unlike
     //the GTK version which checks to see if the window is visible.
+    // SP: Not necessarily... This function can be called at any time during the
+    // installer lifespan (even if ^C is pressed for instance), and in GTK it
+    // was necessary to check for the window presence to avoid some problems...
+    // For instance it may have already been closed because we started the
+    // program after installation already (state SETUP_PLAY))
     carbon_ShowInstallScreen(MyRes, ABORT_PAGE);
     carbon_IterateForState(MyRes, &cur_state);
 }
