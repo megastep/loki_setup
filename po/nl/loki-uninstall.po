@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Setup 1.5\n"
-"POT-Creation-Date: 2002-09-12 01:09-0700\n"
+"POT-Creation-Date: 2004-06-30 16:57-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -63,134 +63,208 @@ msgstr ""
 msgid "_Uninstall"
 msgstr ""
 
-#: uninstall.c:35
+#: uninstall.c:45
 #, c-format
 msgid ""
-"Usage: %s product to uninstall the product\n"
-"       %s -l      to list all products\n"
-"       %s product -l        to list all components\n"
-"       %s product component to uninstall a single component\n"
+"Usage: %s [args]\n"
+"args can be any of the following:\n"
+"\n"
+"  -h | --help      : Print this help message.\n"
+"  -l | --list      : List all installed products and components.\n"
+"  -v | --version   : Get version information.\n"
+"  product [component] : Uninstalls the specified product, or its "
+"subcomponent.\n"
+"  product < -l | --list > : List installed subcomponents of product.\n"
 msgstr ""
 
-#: uninstall.c:113
+#: uninstall.c:125
 #, c-format
 msgid "Signal %d caught. Aborting.\n"
 msgstr ""
 
-#: uninstall.c:127
+#: uninstall.c:140
 #, c-format
 msgid "Could not change to directory: %s\n"
 msgstr ""
 
-#: uninstall.c:149
+#: uninstall.c:165
 #, c-format
 msgid "Notice: the %s RPM was installed for this product.\n"
 msgstr ""
 
-#: uninstall.c:184
+#: uninstall.c:198
 #, c-format
-msgid "Component %s has been successfully uninstalled.\n"
+msgid "Post-uninstall scripts for %s have failed.\n"
 msgstr ""
 
-#: uninstall.c:222
+#: uninstall.c:203
+#, c-format
+msgid ""
+"Component %s has been successfully uninstalled.\n"
+"\n"
+msgstr ""
+
+#: uninstall.c:223
+msgid "Uninstall ? [Y/n] "
+msgstr ""
+
+#: uninstall.c:227
+msgid "n"
+msgstr ""
+
+#: uninstall.c:227
+msgid "N"
+msgstr ""
+
+#: uninstall.c:228
+msgid "Aborted.\n"
+msgstr ""
+
+#: uninstall.c:278
 msgid ""
 "No write access to the installation directory.\n"
 "Aborting.\n"
 msgstr ""
 
-#: uninstall.c:230
+#: uninstall.c:286
 #, c-format
 msgid ""
 "No write access to the registry file: %s.\n"
 "Aborting.\n"
 msgstr ""
 
-#: uninstall.c:315
+#: uninstall.c:483
+msgid "Warning: Unable to replicate uninstallation program.\n"
+msgstr ""
+
+#: uninstall.c:487
+#, c-format
+msgid "Unable to open %s for writing.\n"
+msgstr ""
+
+#: uninstall.c:491
+#, c-format
+msgid "Unable to open %s for copying.\n"
+msgstr ""
+
+#: uninstall.c:503
 msgid "Couldn't change to install directory\n"
 msgstr ""
 
-#: uninstall.c:352
+#: uninstall.c:534
 msgid "Installed products:\n"
 msgstr ""
 
-#: uninstall.c:358
+#: uninstall.c:542
 #, c-format
-msgid "installed in %s\n"
+msgid ""
+"installed in %s\n"
+"\tComponents:\n"
 msgstr ""
 
-#: uninstall.c:361
+#: uninstall.c:549
 msgid " Error while accessing product info\n"
 msgstr ""
 
-#: uninstall.c:373
+#: uninstall.c:553
+msgid ""
+"No products could be found. Maybe you need to run as a different user?\n"
+msgstr ""
+
+#: uninstall.c:568
 #, c-format
 msgid "Could not open product information for %s\n"
 msgstr ""
 
-#: uninstall.c:379
+#: uninstall.c:576
 #, c-format
 msgid ""
 "Product: %s\n"
 "Installed in %s\n"
 msgstr ""
 
-#: uninstall.c:386
+#: uninstall.c:584
 msgid "Components:\n"
 msgstr ""
 
-#: uninstall.c:403
+#: uninstall.c:602
+#, c-format
+msgid "Failed to properly uninstall component %s\n"
+msgstr ""
+
+#: uninstall.c:606
 #, c-format
 msgid "Unable to find component %s\n"
 msgstr ""
 
-#: uninstall.c:407
+#: uninstall.c:610
 msgid "Too many arguments for the command\n"
 msgstr ""
 
-#: uninstall.c:414
+#: uninstall.c:618
 msgid "An error occured during the uninstallation process.\n"
 msgstr ""
 
-#: uninstall.c:418
+#: uninstall.c:622
 #, c-format
-msgid "%s has been successfully uninstalled.\n"
+msgid ""
+"%s has been successfully uninstalled.\n"
+"\n"
 msgstr ""
 
-#: uninstall_ui.c:67
+#: uninstall_ui.c:71
 msgid "OK"
 msgstr ""
 
-#: uninstall_ui.c:68
+#: uninstall_ui.c:78
 msgid "Abort"
 msgstr ""
 
-#: uninstall_ui.c:89
+#: uninstall_ui.c:93
 msgid "Message"
 msgstr ""
 
-#: uninstall_ui.c:224
+#: uninstall_ui.c:228
 #, c-format
 msgid "%d MB"
 msgstr ""
 
-#: uninstall_ui.c:385
+#: uninstall_ui.c:337
+#, c-format
+msgid ""
+"Uninstallation of component %s has failed!\n"
+"The whole uninstallation may be incomplete.\n"
+msgstr ""
+
+#: uninstall_ui.c:389
+#, c-format
+msgid ""
+"Uninstallation of product %s has failed!\n"
+"Aborting the rest of the uninstallation.\n"
+msgstr ""
+
+#: uninstall_ui.c:416
 msgid "Uninstall cancelled"
 msgstr ""
 
-#: uninstall_ui.c:387
+#: uninstall_ui.c:419
+msgid "Uninstall aborted"
+msgstr ""
+
+#: uninstall_ui.c:422
 msgid "Uninstall complete"
 msgstr ""
 
-#: uninstall_ui.c:478
+#: uninstall_ui.c:515
 msgid "No uninstall_vbox in glade file!\n"
 msgstr ""
 
-#: uninstall_ui.c:510
+#: uninstall_ui.c:547
 msgid "Complete uninstall"
 msgstr ""
 
-#: uninstall_ui.c:547
+#: uninstall_ui.c:584
 msgid ""
-"No products found.\n"
-"Are you the one that installed the software?"
+"No products were installed by this user.\n"
+"You may need to run this tool as an administrator."
 msgstr ""

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Setup 1.5\n"
-"POT-Creation-Date: 2002-09-12 01:09-0700\n"
+"POT-Creation-Date: 2004-06-30 16:57-0700\n"
 "PO-Revision-Date: 2000-12-01 18:04-08:00\n"
 "Last-Translator: David Hedbor <david@hedbor.org>\n"
 "Language-Team: Swedish\n"
@@ -65,40 +65,65 @@ msgstr "Avsluta"
 msgid "_Uninstall"
 msgstr "Avinstallera"
 
-#: uninstall.c:35
+#: uninstall.c:45
 #, c-format
 msgid ""
-"Usage: %s product to uninstall the product\n"
-"       %s -l      to list all products\n"
-"       %s product -l        to list all components\n"
-"       %s product component to uninstall a single component\n"
+"Usage: %s [args]\n"
+"args can be any of the following:\n"
+"\n"
+"  -h | --help      : Print this help message.\n"
+"  -l | --list      : List all installed products and components.\n"
+"  -v | --version   : Get version information.\n"
+"  product [component] : Uninstalls the specified product, or its "
+"subcomponent.\n"
+"  product < -l | --list > : List installed subcomponents of product.\n"
 msgstr ""
-"Användning: %s produkt för att avinstallera produkten\n"
-"       %s -l      för att lista alla produkter\n"
-"       %s product -l        to lista alla komponenter\n"
-"       %s product komponent för att avinstallera en komponent\n"
 
-#: uninstall.c:113
+#: uninstall.c:125
 #, c-format
 msgid "Signal %d caught. Aborting.\n"
 msgstr "Signal %d fångad. Avbryter.\n"
 
-#: uninstall.c:127
+#: uninstall.c:140
 #, c-format
 msgid "Could not change to directory: %s\n"
 msgstr "Kunde inte byta bibliotek till: %s\n"
 
-#: uninstall.c:149
+#: uninstall.c:165
 #, c-format
 msgid "Notice: the %s RPM was installed for this product.\n"
 msgstr "Notera: RPM-filen %s installedes för den här produkten.\n"
 
-#: uninstall.c:184
+#: uninstall.c:198
 #, c-format
-msgid "Component %s has been successfully uninstalled.\n"
+msgid "Post-uninstall scripts for %s have failed.\n"
+msgstr ""
+
+#: uninstall.c:203
+#, fuzzy, c-format
+msgid ""
+"Component %s has been successfully uninstalled.\n"
+"\n"
 msgstr "Komponenten %s har avinstallerats.\n"
 
-#: uninstall.c:222
+#: uninstall.c:223
+#, fuzzy
+msgid "Uninstall ? [Y/n] "
+msgstr "Avinstallera"
+
+#: uninstall.c:227
+msgid "n"
+msgstr ""
+
+#: uninstall.c:227
+msgid "N"
+msgstr ""
+
+#: uninstall.c:228
+msgid "Aborted.\n"
+msgstr ""
+
+#: uninstall.c:278
 msgid ""
 "No write access to the installation directory.\n"
 "Aborting.\n"
@@ -106,7 +131,7 @@ msgstr ""
 "Kan inte skriva till installationsbiblioteket.\n"
 "Avbryter.\n"
 
-#: uninstall.c:230
+#: uninstall.c:286
 #, c-format
 msgid ""
 "No write access to the registry file: %s.\n"
@@ -115,30 +140,51 @@ msgstr ""
 "Kan inte skriva till registerfilen %s.\n"
 "Avbryter.\n"
 
-#: uninstall.c:315
+#: uninstall.c:483
+msgid "Warning: Unable to replicate uninstallation program.\n"
+msgstr ""
+
+#: uninstall.c:487
+#, fuzzy, c-format
+msgid "Unable to open %s for writing.\n"
+msgstr "Kan inte hitta komponent %s\n"
+
+#: uninstall.c:491
+#, fuzzy, c-format
+msgid "Unable to open %s for copying.\n"
+msgstr "Kan inte hitta komponent %s\n"
+
+#: uninstall.c:503
 #, fuzzy
 msgid "Couldn't change to install directory\n"
 msgstr "Kunde inte byta bibliotek till: %s\n"
 
-#: uninstall.c:352
+#: uninstall.c:534
 msgid "Installed products:\n"
 msgstr "Installerade produkter:\n"
 
-#: uninstall.c:358
-#, c-format
-msgid "installed in %s\n"
+#: uninstall.c:542
+#, fuzzy, c-format
+msgid ""
+"installed in %s\n"
+"\tComponents:\n"
 msgstr "installerad i %s\n"
 
-#: uninstall.c:361
+#: uninstall.c:549
 msgid " Error while accessing product info\n"
 msgstr " Fel vid hämtning av produktinformation\n"
 
-#: uninstall.c:373
+#: uninstall.c:553
+msgid ""
+"No products could be found. Maybe you need to run as a different user?\n"
+msgstr ""
+
+#: uninstall.c:568
 #, c-format
 msgid "Could not open product information for %s\n"
 msgstr "Kunde inte öppna produktinformation för %s\n"
 
-#: uninstall.c:379
+#: uninstall.c:576
 #, c-format
 msgid ""
 "Product: %s\n"
@@ -147,65 +193,107 @@ msgstr ""
 "Produkt: %s\n"
 "Installerad i %s\n"
 
-#: uninstall.c:386
+#: uninstall.c:584
 msgid "Components:\n"
 msgstr "Komponenter:\n"
 
-#: uninstall.c:403
+#: uninstall.c:602
+#, fuzzy, c-format
+msgid "Failed to properly uninstall component %s\n"
+msgstr "Kan inte hitta komponent %s\n"
+
+#: uninstall.c:606
 #, c-format
 msgid "Unable to find component %s\n"
 msgstr "Kan inte hitta komponent %s\n"
 
-#: uninstall.c:407
+#: uninstall.c:610
 msgid "Too many arguments for the command\n"
 msgstr "För många argument till programmet.\n"
 
-#: uninstall.c:414
+#: uninstall.c:618
 msgid "An error occured during the uninstallation process.\n"
 msgstr "Ett fel uppstod under avinstallationen.\n"
 
-#: uninstall.c:418
-#, c-format
-msgid "%s has been successfully uninstalled.\n"
+#: uninstall.c:622
+#, fuzzy, c-format
+msgid ""
+"%s has been successfully uninstalled.\n"
+"\n"
 msgstr "Avinstallation av %s lyckades.\n"
 
-#: uninstall_ui.c:67
+#: uninstall_ui.c:71
 msgid "OK"
 msgstr ""
 
-#: uninstall_ui.c:68
+#: uninstall_ui.c:78
 msgid "Abort"
 msgstr ""
 
-#: uninstall_ui.c:89
+#: uninstall_ui.c:93
 msgid "Message"
 msgstr ""
 
-#: uninstall_ui.c:224
+#: uninstall_ui.c:228
 #, c-format
 msgid "%d MB"
 msgstr "%d MB"
 
-#: uninstall_ui.c:385
+#: uninstall_ui.c:337
+#, c-format
+msgid ""
+"Uninstallation of component %s has failed!\n"
+"The whole uninstallation may be incomplete.\n"
+msgstr ""
+
+#: uninstall_ui.c:389
+#, c-format
+msgid ""
+"Uninstallation of product %s has failed!\n"
+"Aborting the rest of the uninstallation.\n"
+msgstr ""
+
+#: uninstall_ui.c:416
 msgid "Uninstall cancelled"
 msgstr "Avinstallation avbruten"
 
-#: uninstall_ui.c:387
+#: uninstall_ui.c:419
+#, fuzzy
+msgid "Uninstall aborted"
+msgstr "Avinstallation klar"
+
+#: uninstall_ui.c:422
 msgid "Uninstall complete"
 msgstr "Avinstallation klar"
 
-#: uninstall_ui.c:478
+#: uninstall_ui.c:515
 msgid "No uninstall_vbox in glade file!\n"
 msgstr "Ingen uninstall_vbox i glade-filen!\n"
 
-#: uninstall_ui.c:510
+#: uninstall_ui.c:547
 msgid "Complete uninstall"
 msgstr "Komplett avinstallation"
 
-#: uninstall_ui.c:547
+#: uninstall_ui.c:584
 msgid ""
-"No products found.\n"
-"Are you the one that installed the software?"
+"No products were installed by this user.\n"
+"You may need to run this tool as an administrator."
 msgstr ""
-"Inga produkter funna.\n"
-"Var du den som installerade mjukvaran?"
+
+#~ msgid ""
+#~ "Usage: %s product to uninstall the product\n"
+#~ "       %s -l      to list all products\n"
+#~ "       %s product -l        to list all components\n"
+#~ "       %s product component to uninstall a single component\n"
+#~ msgstr ""
+#~ "Användning: %s produkt för att avinstallera produkten\n"
+#~ "       %s -l      för att lista alla produkter\n"
+#~ "       %s product -l        to lista alla komponenter\n"
+#~ "       %s product komponent för att avinstallera en komponent\n"
+
+#~ msgid ""
+#~ "No products found.\n"
+#~ "Are you the one that installed the software?"
+#~ msgstr ""
+#~ "Inga produkter funna.\n"
+#~ "Var du den som installerade mjukvaran?"
