@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.82 2000-11-10 23:29:59 megastep Exp $ */
+/* $Id: install.c,v 1.83 2000-11-11 01:42:12 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -457,6 +457,14 @@ install_info *create_install(const char *configfile, int log_level,
     if (disable_binary_path) {
         strncpy(info->symlinks_path, binary_path, sizeof(info->symlinks_path));
     }
+
+    if ( info->product ) {
+        product_info_t *pinfo = loki_getinfo_product(info->product);
+            
+        disable_install_path = 1;
+        strncpy(info->install_path, pinfo->root, sizeof(info->install_path));
+    }
+
     /* Handle component stuff */
     compname = GetProductComponent(info);
     if ( compname && info->product ) {
@@ -464,12 +472,8 @@ install_info *create_install(const char *configfile, int log_level,
         if ( info->component ) {
             info->component = NULL;
         } else {
-            product_info_t *pinfo = loki_getinfo_product(info->product);
-            
             info->component = loki_create_component(info->product, compname,
                                                     info->version);
-            disable_install_path = 1;
-            strncpy(info->install_path, pinfo->root, sizeof(info->install_path));
         }
     }
     
