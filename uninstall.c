@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.53 2004-08-04 03:12:34 megastep Exp $ */
+/* $Id: uninstall.c,v 1.54 2004-08-13 01:08:25 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -15,9 +15,9 @@
 #include <sys/stat.h>
 
 #include "arch.h"
-#include "setupdb.h"
 #include "install.h"
 #include "install_ui.h"
+#include "setupdb.h"
 #ifdef UNINSTALL_UICARBON
 #include "uninstall_uicarbon.h"
 #elif UNINSTALL_UI
@@ -401,6 +401,14 @@ int main(int argc, char *argv[])
 	int c, is_listing = 0, ret = 0;
 	const char *use_locale = NULL;
 
+	struct option long_options[] = { 
+		{ "help", no_argument, NULL, 'h' },
+		{ "version", no_argument, NULL, 'v' },
+		{ "list", no_argument, NULL, 'l' },
+		{ "locale", required_argument, NULL, 'L' },
+		{ 0, 0, 0, 0 }
+	};
+
 #if defined(darwin)
 	printf("Your command line:\n");
 	{ 
@@ -524,7 +532,7 @@ int main(int argc, char *argv[])
 #endif
 #endif
 
-	while ( (c=getopt(argc, argv, "hlL:v")) != EOF ) {
+	while ( (c=getopt_long(argc, argv, "hlL:v", long_options, NULL)) != EOF ) {
 		switch(c) {
 		case 'h':
 			print_usage(argv[0]);

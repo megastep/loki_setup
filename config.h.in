@@ -6,6 +6,12 @@
 /* Define if you have the _getpty function.  */
 #undef HAVE__GETPTY
 
+/* Define if you have the getopt function.  */
+#undef HAVE_GETOPT
+
+/* Define if you have the getopt_long function.  */
+#undef HAVE_GETOPT_LONG
+
 /* Define if you have the openpty function.  */
 #undef HAVE_OPENPTY
 
@@ -38,6 +44,9 @@
 
 /* Define if you have the <fstab.h> header file.  */
 #undef HAVE_FSTAB_H
+
+/* Define if you have the <getopt.h> header file.  */
+#undef HAVE_GETOPT_H
 
 /* Define if you have the <gtk.h> header file.  */
 #undef HAVE_GTK_H
