@@ -165,6 +165,9 @@
 /* ZIP support. */
 #undef ENABLE_ZIP
 
+/* UZ2 support. */
+#undef ENABLE_UZ2
+
 /* RPM support. */
 #undef ENABLE_RPM
 

@@ -14,6 +14,9 @@ extern SetupPlugin opkg_plugin;
 #ifdef ZIP_SUPPORT
 extern SetupPlugin zip_plugin;
 #endif
+#ifdef UZ2_SUPPORT
+extern SetupPlugin uz2_plugin;
+#endif
 #endif /* !DYNAMIC_PLUGINS */
 
 extern SetupPlugin cpio_plugin;
@@ -29,6 +32,9 @@ SetupPlugin *static_plugins[] = {
 #endif
 #ifdef ZIP_SUPPORT
 	&zip_plugin,
+#endif
+#ifdef UZ2_SUPPORT
+	&uz2_plugin,
 #endif
 #ifdef OUTRAGE_SUPPORT
  	&opkg_plugin,
