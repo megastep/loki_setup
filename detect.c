@@ -798,7 +798,7 @@ int match_locale(const char *str)
 {
 	if ( ! str )
 		return 1;
-	if ( current_locale && !strncmp(current_locale, str, 2)) {
+	if ( current_locale && !strncmp(current_locale, str, strlen(str))) {
 		return 1;
 	} else if ( !strcmp(str, "none") ) {
 		return 1;
