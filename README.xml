@@ -205,6 +205,30 @@ applies to. Here is an example to clarify all this :
 This provides French and Spanish translations of the "You really need this"
 help message. Please forgive my very poor Spanish ;-)
 
+The EXCLUSIVE element:
+
+This special element is used to describe a set of OPTION elements that are
+mutually exclusive, i.e. only one of them may be selected and installed.
+
+Its usage is very simple; just surround the group of options with an
+encompassing 'exclusive' element, as such :
+
+<exclusive>
+ <option install="true">
+   Option A
+ </option>
+ ...
+ <option>
+   Option X
+ </option>
+</exclusive>
+
+
+WARNING: You should always define a default option within the group of
+exclusive options, by setting its 'install' attribute to 'true'.
+
+So far, the EXCLUSIVE element does not have any attribute.
+
 
 The BINARY element:
 

@@ -103,12 +103,15 @@ static yesno_answer prompt_warning(const char *warning)
 	return (console_prompt(_("Continue?"), RESPONSE_NO));
 }
 
-static void parse_option(install_info *info, xmlNodePtr node)
+/* This function returns a boolean value that tells if parsing for this node's siblings
+   should continue (used for exclusive options) */
+static int parse_option(install_info *info, xmlNodePtr node, int exclusive)
 {
     const char *help;
     char line[BUFSIZ];
     char prompt[BUFSIZ];
     const char *wanted;
+	int retval = 1;
     yesno_answer response, default_response;
 
     /* See if this node matches the current architecture */
@@ -133,13 +136,13 @@ static void parse_option(install_info *info, xmlNodePtr node)
         }
         free(copy);
         if ( ! matched_arch ) {
-            return;
+            return retval;
         }
     }
     wanted = xmlGetProp(node, "libc");
     if ( wanted && ((strcmp(wanted, "any") != 0) &&
                     (strcmp(wanted, info->libc) != 0)) ) {
-        return;
+        return retval;
     }
 
     /* See if the user wants this option */
@@ -169,11 +172,17 @@ static void parse_option(install_info *info, xmlNodePtr node)
             /* Recurse down any other options */
             node = node->childs;
             while ( node ) {
-                if ( strcmp(node->name, "option") == 0 ) {
-                    parse_option(info, node);
-                }
+                if ( ! strcmp(node->name, "option") ) {
+                    parse_option(info, node, 0);
+                } else if ( ! strcmp(node->name, "exclusive") ) {
+					xmlNodePtr child;
+					for ( child = node->childs; child && parse_option(info, child, 1); child = child->next)
+						;
+				}
                 node = node->next;
             }
+			if ( exclusive ) /* We stop prompting the user once an option has been chosen */
+				retval = 0;
             break;
 
         case RESPONSE_HELP:
@@ -182,7 +191,7 @@ static void parse_option(install_info *info, xmlNodePtr node)
             } else {
                 printf("No help available\n");
             }
-            parse_option(info, node);
+            parse_option(info, node, exclusive);
             break;
 
         default:
@@ -190,6 +199,7 @@ static void parse_option(install_info *info, xmlNodePtr node)
             mark_option(info, node, "false", 1);
             break;
     }
+	return retval;
 }
 
 static install_state console_init(install_info *info, int argc, char **argv)
@@ -355,8 +365,13 @@ static install_state console_setup(install_info *info)
 			info->install_size = 0;
 			node = info->config->root->childs;
 			while ( node ) {
-				if ( strcmp(node->name, "option") == 0 ) {
-					parse_option(info, node);
+				if ( ! strcmp(node->name, "option") ) {
+					parse_option(info, node, 0);
+				} else if ( ! strcmp(node->name, "exclusive") ) {
+					xmlNodePtr child;
+					for ( child = node->childs; child; child = child->next) {
+						parse_option(info, child, 1);
+					}
 				}
 				node = node->next;
 			}

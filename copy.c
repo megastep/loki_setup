@@ -836,6 +836,12 @@ size_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
 					}
 				}
 			}
+		} else if ( ! strcmp(node->name, "exclusive" ) ) {
+			/* Recurse in the sub-options (only one should be enabled! */
+			copied = copy_tree(info, node->childs, dest, update);
+			if ( copied > 0 ) {
+				size += copied;
+			}
 		}
         node = node->next;
     }
@@ -1013,6 +1019,8 @@ size_t size_tree(install_info *info, xmlNodePtr node)
 				size += size_node(info, node);
 				size += size_tree(info, node->childs);
 			}
+		} else if ( !strcmp(node->name, "exclusive") ) {
+			size += size_tree(info, node->childs);
 		} else if ( !strcmp(node->name, "readme") || !strcmp(node->name, "eula") ) {
 			size += size_readme(info, node);
 		}

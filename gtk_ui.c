@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.37 2000-06-28 01:37:53 megastep Exp $
+   $Id: gtk_ui.c,v 1.38 2000-07-04 00:13:01 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -702,7 +702,7 @@ static void init_menuitems_option(install_info *info, xmlNodePtr node)
     }
 }
 
-static void parse_option(install_info *info, xmlNodePtr node, GtkWidget *window, GtkWidget *box, int level, GtkWidget *parent)
+static void parse_option(install_info *info, xmlNodePtr node, GtkWidget *window, GtkWidget *box, int level, GtkWidget *parent, int exclusive, GSList **radio)
 {
     char text[1024];
     const char *help;
@@ -752,6 +752,9 @@ static void parse_option(install_info *info, xmlNodePtr node, GtkWidget *window,
 	if ( GetProductIsMeta(info) ) {
 		button = gtk_radio_button_new_with_label(radio_list, text);
 		radio_list = gtk_radio_button_group(GTK_RADIO_BUTTON(button));
+	} else if ( exclusive ) {
+		button = gtk_radio_button_new_with_label(*radio, text);
+		*radio = gtk_radio_button_group(GTK_RADIO_BUTTON(button));		
 	} else {
 		button = gtk_check_button_new_with_label(text);
 	}
@@ -782,8 +785,8 @@ static void parse_option(install_info *info, xmlNodePtr node, GtkWidget *window,
     /* If this is a sub-option and parent is not active, then disable option */
     wanted = xmlGetProp(node, "install");
     if( level>0 && !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(parent)) ) {
-      wanted = "false";
-      gtk_widget_set_sensitive(GTK_WIDGET(button), FALSE);
+		wanted = "false";
+		gtk_widget_set_sensitive(GTK_WIDGET(button), FALSE);
     }
     gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(button), FALSE, FALSE, 0);
     
@@ -799,10 +802,16 @@ static void parse_option(install_info *info, xmlNodePtr node, GtkWidget *window,
     /* Recurse down any other options */
     node = node->childs;
     while ( node ) {
-      if ( strcmp(node->name, "option") == 0 ) {
-        parse_option(info, node, window, box, level+1, button);
-      }
-      node = node->next;
+		if ( !strcmp(node->name, "option") ) {
+			parse_option(info, node, window, box, level+1, button, 0, NULL);
+		} else if ( !strcmp(node->name, "exclusive") ) {
+			xmlNodePtr child;
+			GSList *list = NULL;
+			for ( child = node->childs; child; child = child->next) {
+				parse_option(info, child, window, box, level+1, button, 1, &list);
+			}
+		}
+		node = node->next;
     }
 }
 
@@ -969,10 +978,16 @@ static install_state gtkui_setup(install_info *info)
     node = info->config->root->childs;
 	radio_list = NULL;
     while ( node ) {
-      if ( strcmp(node->name, "option") == 0 ) {
-        parse_option(info, node, window, options, 0, NULL);
-      }
-      node = node->next;
+		if ( ! strcmp(node->name, "option") ) {
+			parse_option(info, node, window, options, 0, NULL, 0, NULL);
+		} else if ( ! strcmp(node->name, "exclusive") ) {
+			xmlNodePtr child;
+			GSList *list = NULL;
+			for ( child = node->childs; child; child = child->next) {
+				parse_option(info, child, window, options, 0, NULL, 1, &list);
+			}
+		}
+		node = node->next;
     }
     init_install_path();
     init_binary_path();

@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.49 2000-06-28 01:37:53 megastep Exp $ */
+/* $Id: install.c,v 1.50 2000-07-04 00:13:01 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
    04/12/2000: Modifed run_script function to put the full pathname of the
@@ -476,9 +476,10 @@ void mark_option(install_info *info, xmlNodePtr node,
     if ( recurse ) {
         node = node->childs;
         while ( node ) {
-            if ( strcmp(node->name, "option") == 0 ) {
+            if ( !strcmp(node->name, "option") ) {
                 mark_option(info, node, value, recurse);
             }
+			/* We don't touch exclusive options */
             node = node->next;
         }
     }

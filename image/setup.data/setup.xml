@@ -22,6 +22,14 @@
       Manual
       maps.tar.gz
     </files>
+    <exclusive>
+	  <option>
+    	x86 binaries
+	  </option>
+	  <option>
+	   PPC binaries
+	  </option>
+    </exclusive>
   </option>
   <option>
     Classic Campaign (can run from CD)
