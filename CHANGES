@@ -1,22 +1,25 @@
 Current:
-Ryan C. Gordon (icculus.org) - Mon Mar  1 22:50:18 EST 2004
+Ryan C. Gordon (Epic Games) - Thu Mar  4 01:18:00 EST 2004
+ * Changed "please insert/mount disc" text; please update your setup.xml
+   files and localizations!
+Ryan C. Gordon (Epic Games) - Mon Mar  1 22:50:18 EST 2004
  * Wedged in support for install tag's "cdkey" attribute for
    GTK, dialog, and console UIs.
-Ryan C. Gordon (icculus.org) - Mon Mar  1 01:30:09 EST 2004
+Ryan C. Gordon (Epic Games) - Mon Mar  1 01:30:09 EST 2004
  * Only check for CD on each <files> tag that needs a disc, not each file
    inside that tag.
  * Respect ISOs on loopback devices as mounted CDs.
-Ryan C. Gordon (icculus.org) - Sat Feb 28 10:44:11 EST 2004
+Ryan C. Gordon (Epic Games) - Sat Feb 28 10:44:11 EST 2004
  * Total install size is now held in 64-bits and may now exceed 4 gigabytes.
  * uz2 and zip plugins now update total install progress properly.
  * A couple of Mac Carbon tweaks.
-Ryan C. Gordon (icculus.org) - Wed Feb 25 03:12:39 EST 2004
+Ryan C. Gordon (Epic Games) - Wed Feb 25 03:12:39 EST 2004
  * Added an UnrealEngine2 .uz2 plugin.
-Ryan C. Gordon (icculus.org) - Tue Feb 24 23:12:54 EST 2004
+Ryan C. Gordon (Epic Games) - Tue Feb 24 23:12:54 EST 2004
  * file_skip() will seek in uncompressed files instead of reading sequentially.
-Ryan C. Gordon (icculus.org) - Tue Feb 24 21:32:31 EST 2004
+Ryan C. Gordon (Epic Games) - Tue Feb 24 21:32:31 EST 2004
  * Fixed wrong file path in "process" tag handling.
-Ryan C. Gordon (icculus.org) - Tue Feb 24 21:32:31 EST 2004
+Ryan C. Gordon (Epic Games) - Tue Feb 24 21:32:31 EST 2004
  * Added --nomd5 and --nocrc options to makeself.sh
 Stephane Peter (Codehost) - Tue Feb 17 19:54:25 PST 2004
  * Preliminary support for installing man pages (<manpage> tag).
