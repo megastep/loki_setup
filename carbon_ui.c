@@ -647,11 +647,11 @@ static void OnCommandWebsite()
 
 static void OnCommandCDKeyContinue()
 {
-    char CDKey[1024];
-    char CDConfirmKey[1024];
+    char CDKey[256];
+    char CDConfirmKey[256];
 
-    carbon_GetEntryText(MyRes, CDKEY_ENTRY_ID, CDKey, 1024);
-    carbon_GetEntryText(MyRes, CDKEY_CONFIRM_ENTRY_ID, CDConfirmKey, 1024);
+    carbon_GetEntryText(MyRes, CDKEY_ENTRY_ID, CDKey, sizeof (CDKey));
+    carbon_GetEntryText(MyRes, CDKEY_CONFIRM_ENTRY_ID, CDConfirmKey, sizeof (CDConfirmKey));
 
     if(strcasecmp(CDKey, CDConfirmKey) != 0)
         carbon_Prompt(MyRes, PromptType_OK, "CD keys do not match.  Please try again.", NULL, 0);
@@ -659,15 +659,33 @@ static void OnCommandCDKeyContinue()
         carbon_Prompt(MyRes, PromptType_OK, "Please specify a CD key!", NULL, 0);
     else
     {
-        char *p;
         CDKeyOK = true;
-        p = CDKey;
-        while(*p != 0x00)
+
+        // HACK: Use external cd key validation program, if it exists. --ryan.
+        #define CDKEYCHECK_PROGRAM "./vcdk"
+        if (access(CDKEYCHECK_PROGRAM, X_OK) == 0)
         {
-            *p = toupper(*p);
-            p++;
+            char cmd[sizeof (CDKey) + sizeof (CDKEYCHECK_PROGRAM) + 1];
+            strcpy(cmd, CDKEYCHECK_PROGRAM);
+            strcat(cmd, " ");
+            strcat(cmd, CDKey);
+            if (system(cmd) == 0)  // binary ran and reported key invalid?
+                CDKeyOK = false;
         }
-        strcpy(CDKeyString, CDKey);
+
+        if (CDKeyOK == false)
+            carbon_Prompt(MyRes, PromptType_OK, "CD key is invalid!", NULL, 0);
+        else
+        {
+            char *p;
+            p = CDKey;
+            while(*p != 0x00)
+            {
+                *p = toupper(*p);
+                p++;
+            }
+            strcpy(CDKeyString, CDKey);
+        }
     }
 }
 
