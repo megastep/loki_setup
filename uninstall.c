@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.39 2003-06-23 22:35:09 megastep Exp $ */
+/* $Id: uninstall.c,v 1.40 2003-06-27 22:45:29 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -447,14 +447,21 @@ printf("\n\n");
 
 				o = fopen(tmpscript, "w");
 				if ( o ) {
+					int i;
+
 					fprintf(o,
 							"#!/bin/sh\n\n"
 							"SETUP_DONT_COPY=1\n"
 							"export SETUP_DONT_COPY\n"
-							"cd %s\n"
-							"%s $*\n"
+							"cd \"%s\"\n"
+							"\"%s\" ",
+							installpath, tmpbin);
+					for ( i=1; i < argc; ++i ) {
+						fprintf(o, "\"%s\" ", argv[i]);
+					}
+					fprintf(o,"\n"
 							"rm -f \"%s\" \"%s\"\n",
-							installpath, tmpbin, tmpbin, tmpscript);
+							 tmpbin, tmpscript);
 					fchmod(fileno(o), 0755);
 					fclose(o);
 					
