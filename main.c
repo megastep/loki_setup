@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.39 2000-11-11 03:14:02 megastep Exp $ */
+/* $Id: main.c,v 1.40 2000-11-11 07:13:38 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -22,7 +22,6 @@ Modifications by Borland/Inprise Corp.:
 
  */
 #include <stdio.h>
-#include <setjmp.h>
 #include <signal.h>
 #include <string.h>
 #include <stdlib.h>
@@ -55,22 +54,33 @@ int force_manual = 0;
 #endif
 const char *argv0 = NULL;
 
+static install_info *info = NULL;
 Install_UI UI;
 
 static char *current_locale = NULL;
 
-/* A way to jump to the abort handling code */
-jmp_buf abort_jmpbuf;
+void exit_setup(int ret)
+{
+    /* Cleanup afterwards */
+    if ( info )
+        delete_install(info);
+    FreePlugins();
+    exit(ret);
+}
 
 void signal_abort(int sig)
 {
-    longjmp(abort_jmpbuf, sig);
+    signal(SIGINT, SIG_IGN);
+    if ( UI.abort )
+        UI.abort(info);
+    uninstall(info);
+    exit_setup(0);
 }
 
 /* Abort a running installation (to be called from the update function) */
 void abort_install(void)
 {
-    longjmp(abort_jmpbuf, 1);
+    signal_abort(1);
 }
     
 /* List of UI drivers */
@@ -172,7 +182,6 @@ int main(int argc, char **argv)
 {
     int exit_status;
     int i, c;
-    install_info *info;
     install_state state;
     char *xml_file = SETUP_CONFIG;
     int log_level = LOG_NORMAL;
@@ -242,7 +251,7 @@ int main(int argc, char **argv)
 	    case 'i':
 	        strcpy(install_path, optarg);
 			disable_install_path = 1;
-			break;
+ 			break;
 	    case 'b':
 	        strcpy(binary_path, optarg);
 			disable_binary_path = 1;
@@ -284,11 +293,7 @@ int main(int argc, char **argv)
     }
 
     /* Setup the interrupt handlers */
-    if ( setjmp(abort_jmpbuf) == 0 ) {
-        state = SETUP_INIT;
-    } else {
-        state = SETUP_ABORT;
-    }
+    state = SETUP_INIT;
     signal(SIGINT, signal_abort);
     signal(SIGHUP, signal_abort);
     signal(SIGTERM, signal_abort);
@@ -358,12 +363,6 @@ int main(int argc, char **argv)
                 state = install(info, UI.update);
                 install_postinstall(info);
                 break;
-            case SETUP_ABORT:
-                signal(SIGINT, SIG_IGN);
-                UI.abort(info);
-                uninstall(info);
-                state = SETUP_EXIT;
-                break;
             case SETUP_WEBSITE:
                 state = UI.website(info);
                 break;
@@ -372,14 +371,15 @@ int main(int argc, char **argv)
                 break;
             case SETUP_PLAY:
                 state = launch_game(info);
+            case SETUP_ABORT:
+                abort_install();
+                break;
             case SETUP_EXIT:
                 /* Not reached */
                 break;
         }
     }
 
-    /* Cleanup afterwards */
-    delete_install(info);
-    FreePlugins();
-    return(exit_status);
+    exit_setup(exit_status);
+    return 0;
 }
