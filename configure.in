@@ -342,7 +342,7 @@ if test ! -z "$HAVEXML"; then
     CFLAGS="$CFLAGS $XML_CFLAGS"
     if test "$STATIC" = ""; then
         LIBS="$LIBS $BSTATIC -L$XML_PREFIX/lib$LIBSUFFIX -lxml"
-        GUI_LIBS="$GUI_LIBS -L$XML_PREFIX/lib$LIBSUFFIX -lxml"
+        GUI_LIBS="$GUI_LIBS $BSTATIC -L$XML_PREFIX/lib$LIBSUFFIX -lxml"
         CARBON_LIBS="$CARBON_LIBS -L$XML_PREFIX/lib$LIBSUFFIX -lxml"
     else
         LIBS="$LIBS $XML_PREFIX/lib$LIBSUFFIX/libxml.a"
