@@ -513,7 +513,11 @@ encompassing 'exclusive' element, as such :
 WARNING: You should always define a default option within the group of
 exclusive options, by setting its 'install' attribute to 'true'.
 
-So far, the EXCLUSIVE element does not have any attribute.
+The EXCLUSIVE element has the following optional attributes :
+
+ reinstall  If this is a reinstallation, and this is set to "false", then
+            the choices from the original installation will be preserved
+            and won't be modifiable by the user.
 
 
 The BINARY element:

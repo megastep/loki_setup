@@ -2,6 +2,9 @@ Current:
 Stephane Peter (Codehost) - Mon Jul 28 19:55:15 PDT 2003
  * Added the "reinstall" attribute for options, as well as a warning
    to the user when reinstalling. Also export SETUP_REINSTALL in scripts.
+ * Added it to the "exclusive" tag as well, for exclusive options.
+ * Remove existing binary files before replacing them, to try to avoid
+   "file busy" errors.
 Stephane Peter (Codehost) - Mon Jul 28 19:55:15 PDT 2003
  * Added the "reinstall" attribute for options, as well as a warning
    to the user when reinstalling.

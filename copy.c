@@ -304,6 +304,10 @@ ssize_t copy_file(install_info *info, const char *cdrom, const char *path, const
 		if ( input == NULL ) {
 			return(-1);
 		}
+		/* To avoid problem with busy binary files, remove them first if they exist */
+		if ( binary && file_exists(final) ) {
+			unlink(final);
+		}
 		output = file_open(info, final, (mut && *mut=='y') ? "wm" : "w");
 		if ( output == NULL ) {
 			file_close(info, input);

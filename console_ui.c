@@ -117,13 +117,13 @@ static yesno_answer prompt_warning(const char *warning)
 
 /* This function returns a boolean value that tells if parsing for this node's siblings
    should continue (used for exclusive options) */
-static int parse_option(install_info *info, const char *component, xmlNodePtr node, int exclusive)
+static int parse_option(install_info *info, const char *component, xmlNodePtr node, int exclusive, int excl_reinst)
 {
 	const char *help = "", *name;
     char line[BUFSIZ];
     char prompt[BUFSIZ];
     const char *wanted, *warn;
-	int retval = 1, reinstall;
+	int retval = 1;
     yesno_answer response = RESPONSE_INVALID, default_response = RESPONSE_INVALID;
 
 	/* Check if we are on a valid tag */
@@ -152,33 +152,64 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
     }
 
     /* Skip any options that are already installed */
-	reinstall = GetProductReinstall(info);
-    if ( info->product && (!reinstall || (reinstall && !GetReinstallNode(info, node)) ) ) {
-        product_component_t *comp;
-
-        if ( component ) {
-            comp = loki_find_component(info->product, component);
-        } else {
-            comp = loki_getdefault_component(info->product);
-        }
-        if ( comp &&
-             loki_find_option(comp, get_option_name(info,node,NULL,0)) ) {
-            /* Recurse down any other options */
-            node = node->childs;
-            while ( node ) {
-                if ( ! strcmp(node->name, "option") ) {
-                    parse_option(info, component, node, 0);
-                } else if ( ! strcmp(node->name, "exclusive") ) {
+    if ( info->product ) {
+		product_component_t *comp;
+		if ( excl_reinst ) {
+			if ( component ) {
+				comp = loki_find_component(info->product, component);
+			} else {
+				comp = loki_getdefault_component(info->product);
+			}
+			if ( comp &&
+				 loki_find_option(comp, get_option_name(info,node,NULL,0)) ) {
+				printf(_("Previously installed option '%s' will be installed.\n"), get_option_name(info,node,line,BUFSIZ));
+				response = RESPONSE_YES;
+			} else {
+				response = RESPONSE_NO;
+			}
+		} else if ( ! GetProductReinstall(info) ) {
+			if ( component ) {
+				comp = loki_find_component(info->product, component);
+			} else {
+				comp = loki_getdefault_component(info->product);
+			}
+			if ( comp &&
+				 loki_find_option(comp, get_option_name(info,node,NULL,0)) ) {
+				/* Recurse down any other options */
+				node = node->childs;
+				while ( node ) {
+					if ( ! strcmp(node->name, "option") ) {
+						parse_option(info, component, node, 0, 0);
+					} else if ( ! strcmp(node->name, "exclusive") ) {
+						xmlNodePtr child;
+						int reinst = ! GetReinstallNode(info, node);
+						for ( child = node->childs; child && parse_option(info, component, child, 1, reinst); child = child->next)
+							;
+					}
+					node = node->next;
+				}
+				if ( exclusive ) /* We stop prompting the user once an option has been chosen */
+					retval = 0;
+				return(retval);
+			}
+		} else if (!GetReinstallNode(info, node)) {
+			/* Recurse down any other options */
+			node = node->childs;
+			while ( node ) {
+				if ( ! strcmp(node->name, "option") ) {
+					parse_option(info, component, node, 0, 0);
+				} else if ( ! strcmp(node->name, "exclusive") ) {
 					xmlNodePtr child;
-					for ( child = node->childs; child && parse_option(info, component, child, 1); child = child->next)
+					int reinst = ! GetReinstallNode(info, node);
+					for ( child = node->childs; child && parse_option(info, component, child, 1, reinst); child = child->next)
 						;
 				}
-                node = node->next;
-            }
+				node = node->next;
+			}
 			if ( exclusive ) /* We stop prompting the user once an option has been chosen */
 				retval = 0;
-            return(retval);
-        }
+			return(retval);
+		}
     }
 
 	/* Check for required option */
@@ -221,7 +252,7 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
 
 			if ( default_response != RESPONSE_YES ) {
 				warn = get_option_warn(info, node);
-				if ( warn ) { /* Display a warning message to the user */
+				if ( warn && ! excl_reinst ) { /* Display a warning message to the user */
 					console_prompt(warn, RESPONSE_OK);
 				}
 			}
@@ -236,10 +267,11 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
             node = node->childs;
             while ( node ) {
                 if ( ! strcmp(node->name, "option") ) {
-                    parse_option(info, component, node, 0);
+                    parse_option(info, component, node, 0, 0);
                 } else if ( ! strcmp(node->name, "exclusive") ) {
 					xmlNodePtr child;
-					for ( child = node->childs; child && parse_option(info, component, child, 1); child = child->next)
+					int reinst = ! GetReinstallNode(info, node);
+					for ( child = node->childs; child && parse_option(info, component, child, 1, reinst); child = child->next)
 						;
 				}
                 node = node->next;
@@ -254,7 +286,7 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
             } else {
                 printf(_("No help available\n"));
             }
-            parse_option(info, component, node, exclusive);
+            parse_option(info, component, node, exclusive, 0);
             break;
 
         default:
@@ -480,11 +512,12 @@ static install_state console_setup(install_info *info)
 			node = info->config->root->childs;
 			while ( node ) {
 				if ( ! strcmp(node->name, "option") ) {
-					parse_option(info, NULL, node, 0);
+					parse_option(info, NULL, node, 0, 0);
 				} else if ( ! strcmp(node->name, "exclusive") ) {
 					xmlNodePtr child;
+					int reinst = ! GetReinstallNode(info, node);
 					for ( child = node->childs; child; child = child->next) {
-						parse_option(info, NULL, child, 1);
+						parse_option(info, NULL, child, 1, reinst);
 					}
 				} else if ( ! strcmp(node->name, "component") ) {
                     if ( match_arch(info, xmlGetProp(node, "arch")) &&
@@ -495,7 +528,7 @@ static install_state console_setup(install_info *info)
                             printf(_("\n%s component\n\n"), xmlGetProp(node, "name"));
                         }
                         for ( child = node->childs; child; child = child->next) {
-                            parse_option(info, xmlGetProp(node, "name"), child, 0);
+                            parse_option(info, xmlGetProp(node, "name"), child, 0, 0);
                         }
                     }
                 }
@@ -516,7 +549,8 @@ static install_state console_setup(install_info *info)
 			printf("\n");
 			if ( console_prompt(_("Continue install?"), RESPONSE_YES) == RESPONSE_YES ) {
 				okay = 1;
-			}
+			} else
+				return SETUP_ABORT;
 		}
 	}
     return SETUP_INSTALL;

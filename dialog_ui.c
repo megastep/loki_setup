@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.12 2003-07-29 02:58:43 megastep Exp $
+ * $Id: dialog_ui.c,v 1.13 2003-07-30 03:39:07 megastep Exp $
  */
 
 #include <limits.h>
@@ -140,7 +140,7 @@ install_state dialog_readme(install_info *info)
 
 /* This function returns a boolean value that tells if parsing for this node's siblings
    should continue (used for exclusive options) */
-static int parse_option(install_info *info, const char *component, xmlNodePtr parent, int exclusive,
+static int parse_option(install_info *info, const char *component, xmlNodePtr parent, int exclusive, int excl_reinst,
 						const char *text)
 {
 	const char *choices[MAX_CHOICES*4];
@@ -158,7 +158,6 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr pa
 			set = xmlGetProp(node, "required");
 		}
 	    if ( ! strcmp(node->name, "option") ) {
-		    int reinstall;
 
 			if ( ! match_arch(info, xmlGetProp(node, "arch")) )
 				continue;
@@ -174,18 +173,32 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr pa
 			}
 
 			/* Skip options that are already installed */
-			reinstall = GetProductReinstall(info);
-			if ( info->product && (!reinstall || (reinstall && !GetReinstallNode(info, node)) ) ) {
+			if ( info->product ) {
 				product_component_t *comp;
-				
-				if ( component ) {
-					comp = loki_find_component(info->product, component);
-				} else {
-					comp = loki_getdefault_component(info->product);
-				}
-				if ( comp && loki_find_option(comp, get_option_name(info, node, NULL, 0)) ) {
+				if ( excl_reinst ) {
+					if ( component ) {
+						comp = loki_find_component(info->product, component);
+					} else {
+						comp = loki_getdefault_component(info->product);
+					}
+					if ( comp && loki_find_option(comp, get_option_name(info, node, NULL, 0)) ) {
+						mark_option(info, node, "true", 0);
+					} else {
+						mark_option(info, node, "false", 0);
+					}
 					continue;
-				}
+				} else if ( ! GetProductReinstall(info) ) {
+					if ( component ) {
+						comp = loki_find_component(info->product, component);
+					} else {
+						comp = loki_getdefault_component(info->product);
+					}
+					if ( comp && loki_find_option(comp, get_option_name(info, node, NULL, 0)) ) {
+						continue;
+					}
+				} else if (!GetReinstallNode(info, node)) {
+					continue;
+				} 
 			}
 			nodes[nb_choices] = node;
 			choices[i++] = "";
@@ -211,6 +224,8 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr pa
 	    }
 	}
 
+	if ( nb_choices == 0 )
+		return 0;
 
 	/* TTimo: loop until the selected options are all validated by possible EULA */
 options_loop:  
@@ -284,10 +299,10 @@ options_loop:
 				mark_option(info, nodes[i], "false", 0);
 		    }
 		} else if ( !strcmp(nodes[i]->name, "exclusive") && result[i]) {
-		    parse_option(info, component, nodes[i], 1, get_option_name(info, nodes[i], NULL, 0));
+		    parse_option(info, component, nodes[i], 1, !GetReinstallNode(info, nodes[i]), get_option_name(info, nodes[i], NULL, 0));
 		} else if ( !strcmp(nodes[i]->name, "component") && result[i]) {
 			snprintf(buf, sizeof(buf), _("Component: %s"), xmlGetProp(nodes[i], "name"));
-		    parse_option(info, xmlGetProp(nodes[i], "name"), nodes[i], 1, buf);
+		    parse_option(info, xmlGetProp(nodes[i], "name"), nodes[i], 1, 0, buf);
 		}
 	}
 	return 1;
@@ -438,7 +453,7 @@ install_state dialog_setup(install_info *info)
 				} else {
 					label = _("Please choose the options to install");
 				}
-				if ( parse_option(info, NULL, info->config->root, 0, label) ) {
+				if ( parse_option(info, NULL, info->config->root, 0, 0, label) ) {
 					okay = TRUE;
 				} else {
 					return SETUP_ABORT;

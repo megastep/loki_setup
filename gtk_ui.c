@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.82 2003-07-29 02:58:43 megastep Exp $
+   $Id: gtk_ui.c,v 1.83 2003-07-30 03:39:07 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -463,7 +463,8 @@ void setup_button_exit_slot( GtkWidget* widget, gpointer func_data )
 
 void setup_button_abort_slot( GtkWidget* widget, gpointer func_data )
 {
-	cur_state = SETUP_EXIT;
+	/* Make sure that the state will be different so that we can iterate */
+	cur_state = (cur_state == SETUP_ABORT) ? SETUP_EXIT : SETUP_ABORT;
 }
 
 void setup_button_cancel_slot( GtkWidget* widget, gpointer func_data )
@@ -1030,14 +1031,14 @@ static void init_menuitems_option(install_info *info)
     }
 }
 
-static void parse_option(install_info *info, const char *component, xmlNodePtr node, GtkWidget *window, GtkWidget *box, int level, GtkWidget *parent, int exclusive, GSList **radio)
+static void parse_option(install_info *info, const char *component, xmlNodePtr node, GtkWidget *window, GtkWidget *box, int level, GtkWidget *parent, int exclusive, int excl_reinst, GSList **radio)
 {
     xmlNodePtr child;
     char text[1024] = "";
     const char *help;
     const char *wanted;
     gchar *name;
-    int i, reinstall;
+    int i;
     GtkWidget *button = NULL;
 
     /* See if this node matches the current architecture */
@@ -1143,33 +1144,54 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
     child = node->childs;
     while ( child ) {
 		if ( !strcmp(child->name, "option") ) {
-			parse_option(info, component, child, window, box, level+1, button, 0, NULL);
+			parse_option(info, component, child, window, box, level+1, button, 0, 0, NULL);
 		} else if ( !strcmp(child->name, "exclusive") ) {
 			xmlNodePtr exchild;
 			GSList *list = NULL;
+			int reinst = ! GetReinstallNode(info, node);
+
 			for ( exchild = child->childs; exchild; exchild = exchild->next) {
-				parse_option(info, component, exchild, window, box, level+1, button, 1, &list);
+				parse_option(info, component, exchild, window, box, level+1, button, 1, reinst, &list);
 			}
 		}
 		child = child->next;
     }
 
     /* Disable any options that are already installed */
-	reinstall = GetProductReinstall(info);
-    if ( info->product && (!reinstall || (reinstall && !GetReinstallNode(info, node)) ) ) {
-        product_component_t *comp;
-
-        if ( component ) {
-            comp = loki_find_component(info->product, component);
-        } else {
-            comp = loki_getdefault_component(info->product);
-        }
-        if ( comp && loki_find_option(comp, name) ) {
-            /* Unmark this option for installation */
-            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), FALSE);
-            gtk_widget_set_sensitive(button, FALSE);
-            mark_option(info, node, "false", 1);
-        }
+    if ( info->product ) {
+		product_component_t *comp;
+		if ( excl_reinst ) { /* Reinstall an exclusive option - make sure to select the installed one */
+			gtk_widget_set_sensitive(button, FALSE);
+			if ( component ) {
+				comp = loki_find_component(info->product, component);
+			} else {
+				comp = loki_getdefault_component(info->product);
+			}
+			if ( comp && loki_find_option(comp, name) ) {
+				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
+				mark_option(info, node, "true", 1);
+			} else {
+				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), FALSE);
+				mark_option(info, node, "false", 1);
+			}
+		} else if ( ! GetProductReinstall(info) ) {			
+			if ( component ) {
+				comp = loki_find_component(info->product, component);
+			} else {
+				comp = loki_getdefault_component(info->product);
+			}
+			if ( comp && loki_find_option(comp, name) ) {
+				/* Unmark this option for installation */
+				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), FALSE);
+				gtk_widget_set_sensitive(button, FALSE);
+				mark_option(info, node, "false", 1);
+			}
+		} else if (!GetReinstallNode(info, node)) {
+			/* Unmark this option for installation */
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), FALSE);
+			gtk_widget_set_sensitive(button, FALSE);
+			mark_option(info, node, "false", 1);
+		}
     }
 }
 
@@ -1480,12 +1502,13 @@ static install_state gtkui_setup(install_info *info)
     in_setup = TRUE;
     while ( node ) {
 		if ( ! strcmp(node->name, "option") ) {
-			parse_option(info, NULL, node, window, options, 0, NULL, 0, NULL);
+			parse_option(info, NULL, node, window, options, 0, NULL, 0, 0, NULL);
 		} else if ( ! strcmp(node->name, "exclusive") ) {
 			xmlNodePtr child;
 			GSList *list = NULL;
+			int reinst = ! GetReinstallNode(info, node);
 			for ( child = node->childs; child; child = child->next) {
-				parse_option(info, NULL, child, window, options, 0, NULL, 1, &list);
+				parse_option(info, NULL, child, window, options, 0, NULL, 1, reinst, &list);
 			}
 		} else if ( ! strcmp(node->name, "component") ) {
             if ( match_arch(info, xmlGetProp(node, "arch")) &&
@@ -1502,12 +1525,13 @@ static install_state gtkui_setup(install_info *info)
                 }
                 for ( child = node->childs; child; child = child->next) {
 					if ( ! strcmp(child->name, "option") ) {
-						parse_option(info, xmlGetProp(node, "name"), child, window, options, 0, NULL, 0, NULL);
+						parse_option(info, xmlGetProp(node, "name"), child, window, options, 0, NULL, 0, 0, NULL);
 					} else if ( ! strcmp(child->name, "exclusive") ) {
 						xmlNodePtr child2;
 						GSList *list = NULL;
+						int reinst = ! GetReinstallNode(info, node);
 						for ( child2 = child->childs; child2; child2 = child2->next) {
-							parse_option(info, xmlGetProp(node, "name"), child2, window, options, 0, NULL, 1, &list);
+							parse_option(info, xmlGetProp(node, "name"), child2, window, options, 0, NULL, 1, reinst, &list);
 						}
 					}
                 }
@@ -1599,6 +1623,7 @@ static void gtkui_abort(install_info *info)
         notebook = glade_xml_get_widget(setup_glade, "setup_notebook");
         gtk_notebook_set_page(GTK_NOTEBOOK(notebook), ABORT_PAGE);
         iterate_for_state();
+		gtk_widget_hide(w);
     } else {
         fprintf(stderr, _("Unable to open %s, aborting!\n"), SETUP_GLADE);
     }
@@ -1687,12 +1712,12 @@ static void gtkui_shutdown(install_info *info)
 
     gtk_widget_hide(window);
     if ( setup_glade_readme ) {
-	window = glade_xml_get_widget(setup_glade_readme, "readme_dialog");
-	gtk_widget_hide(window);
+		window = glade_xml_get_widget(setup_glade_readme, "readme_dialog");
+		gtk_widget_hide(window);
     }
     if ( setup_glade_license ) {
-	window = glade_xml_get_widget(setup_glade_license, "license_dialog");
-	gtk_widget_hide(window);
+		window = glade_xml_get_widget(setup_glade_license, "license_dialog");
+		gtk_widget_hide(window);
     }
     gtkui_idle(info);
 }
