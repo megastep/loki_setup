@@ -146,6 +146,7 @@ install-loki_uninstall: loki_uninstall
 	        cp -v $$file $$path; \
 	    done; \
 	fi
+	@echo "Don't forget to update the version in setup.xml to $(UNINSTALL_VERSION)"
 
 po-image:
 	for lang in $(LOCALES); do \
