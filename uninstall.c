@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.57 2004-09-02 03:19:59 megastep Exp $ */
+/* $Id: uninstall.c,v 1.58 2004-09-09 01:41:28 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -633,7 +633,7 @@ int main(int argc, char *argv[])
 				printf("\t%s\n", loki_getname_component(comp));
 			}
 		} else if ( (optind+1) < argc ) {
-			if ( !strcmp(argv[optind+1], "Default") ) { 
+			if ( !strcmp(argv[optind+1], "Default") || !strcmp(argv[optind+1], "") ) { 
 				/* The default component is parent to all other components, therefore do a full uninstall */
 				goto full_uninstall; /* I feel so dirty :-/ */
 			} else { /* Uninstall one or more component */

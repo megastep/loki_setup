@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.105 2004-09-07 22:09:00 megastep Exp $
+   $Id: gtk_ui.c,v 1.106 2004-09-09 01:41:28 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -345,7 +345,8 @@ void setup_destroy_view_readme_slot( GtkWidget* w, gpointer data )
 
     if ( setup_glade_readme ) {
         widget = glade_xml_get_widget(setup_glade_readme, "readme_dialog");
-        gtk_widget_hide(widget);
+		if (widget)
+			gtk_widget_hide(widget);
         gtk_object_unref(GTK_OBJECT(setup_glade_readme));
         setup_glade_readme = NULL;
         /*
