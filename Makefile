@@ -60,13 +60,13 @@ all: do-plugins setup setup.gtk uninstall
 testxml: testxml.o
 	$(CC) -o $@ $^ $(LIBS)
 
-uninstall: $(UNINSTALL_OBJS)
+uninstall: $(UNINSTALL_OBJS) $(SETUPDB)/libsetupdb.a
 	$(CC) -o $@ $^ $(CONSOLE_LIBS) -static
 
-setup:	$(CONSOLE_OBJS)
+setup:	$(CONSOLE_OBJS) $(SETUPDB)/libsetupdb.a
 	$(CC) -o $@ $^ $(CONSOLE_LIBS) -static
 
-setup.gtk: $(GUI_OBJS)
+setup.gtk: $(GUI_OBJS) $(SETUPDB)/libsetupdb.a
 	$(CC) -o $@ $^ $(GUI_LIBS)
 
 do-plugins:
