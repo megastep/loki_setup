@@ -1,8 +1,9 @@
-#include "plugins.h"
-#include "detect.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+
+#include "arch.h"
+#include "plugins.h"
 
 #ifdef DYNAMIC_PLUGINS
 #include <dlfcn.h>

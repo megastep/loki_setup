@@ -32,51 +32,6 @@
 char *cdroms[MAX_DRIVES];
 int  num_cdroms = 0;
 
-/* Function to detect the current version of libc */
-const char *detect_libc(void)
-{
-#ifdef __FreeBSD__
-	return "glibc-2.1";
-#else
-    static const char *libclist[] = {
-        "/lib/libc.so.6",
-        "/lib/libc.so.6.1",
-        NULL
-    };
-    int i;
-    const char *libc;
-    const char *libcfile;
-
-    /* See if there is an environment override */
-    libc = getenv("SETUP_LIBC");
-    if ( libc != NULL ) {
-        return(libc);
-    }
-
-    /* Look for the highest version of libc */
-    for ( i=0; libclist[i]; ++i ) {
-        if ( access(libclist[i], F_OK) == 0 ) {
-            break;
-        }
-    }
-    libcfile = libclist[i];
-
-    if ( libcfile ) {
-      char buffer[1024];
-      snprintf( buffer, sizeof(buffer), 
-           "fgrep GLIBC_2.1 %s 2>&1 >/dev/null",
-           libcfile );
-      
-      if ( system(buffer) == 0 )
-		  return "glibc-2.1";
-      else
-		  return "glibc-2.0";
-    }
-    /* Default to version 5 */
-    return "libc5";
-#endif
-}
-
 
 /* Function to detect the MB of diskspace on a path */
 int detect_diskspace(const char *path)
