@@ -2,7 +2,7 @@
 /* Functions for unpacking and copying files with status bar update */
 
 #include <sys/types.h>
-#include <gnome-xml/parser.h>
+#include <parser.h>			/* From gnome-xml */
 
 #include "install.h"
 

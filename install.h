@@ -3,7 +3,7 @@
 #define _install_h
 
 #include <limits.h>
-#include <gnome-xml/parser.h>
+#include <parser.h>		/* From gnome-xml */
 #include <libintl.h>
 #define _(String) gettext (String)
 #define gettext_noop(String) (String)
