@@ -11,7 +11,7 @@ msgstr ""
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: ENCODING\n"
 
 # SOME DESCRIPTIVE TITLE
@@ -415,7 +415,7 @@ msgstr "Sólo puede haber un binario con un atributo 'play'"
 
 #: install.c:1062
 msgid "The only valid values for the 'play' attribute are yes, gui and no"
-msgstr "Los únicos valores válidos para el atributo "play" son sí, igu y no"
+msgstr "Los únicos valores válidos para el atributo 'play' son sí, igu y no"
 
 #: install.c:1087
 msgid "Couldn't find your home directory"
