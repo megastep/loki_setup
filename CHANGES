@@ -1,4 +1,6 @@
 Current:
+Ryan C. Gordon (Epic Games) - Sun Mar  7 11:30:01 EST 2004
+ * Carbon_ui's main window is now set to compositing.
 Ryan C. Gordon (Epic Games) - Fri Mar  5 05:40:55 EST 2004
  * Made carbon_ui's install progress conform to Apple HI Guidelines.
 Ryan C. Gordon (Epic Games) - Fri Mar  5 05:10:50 EST 2004
