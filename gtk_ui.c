@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.107 2004-11-02 03:48:57 megastep Exp $
+   $Id: gtk_ui.c,v 1.108 2004-11-17 20:17:16 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1465,6 +1465,7 @@ static install_state gtkui_init(install_info *info, int argc, char **argv, int n
     /* Glade segfaults if the file can't be read */
     opened = fopen(glade_file, "r");
     if ( opened == NULL ) {
+        fprintf(stderr, _("Unable to open %s, aborting!\n"), glade_file);
         return SETUP_ABORT;
     }
     fclose(opened);
@@ -1860,7 +1861,7 @@ static void gtkui_abort(install_info *info)
 
 	/* No point in waiting for a change of state if the window is not there */
 	w = glade_xml_get_widget(setup_glade, "setup_window");
-	if ( ! GTK_WIDGET_VISIBLE(w) )
+	if ( !w || ! GTK_WIDGET_VISIBLE(w) )
 		return;
 
     if ( setup_glade ) {

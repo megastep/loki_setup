@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.144 2004-11-02 03:48:57 megastep Exp $ */
+/* $Id: install.c,v 1.145 2004-11-17 20:17:16 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -359,12 +359,10 @@ int GetProductPromptOverwrite(install_info *info)
 static char check_deviant_paths(xmlNodePtr node, install_info *info, char* path_ret)
 {
     while ( node ) {
-        char *wanted;
         char *orig_dpath;
 		const char *dpath;
 
-        wanted = xmlGetProp(node, "install");
-        if ( wanted  && (strcmp(wanted, "true") == 0) ) {
+        if ( xmlNodePropIsTrue(node, "install") ) {
             xmlNodePtr elements = node->childs;
             while ( elements ) {
                 dpath = orig_dpath = xmlGetProp(elements, "path");
@@ -376,9 +374,9 @@ static char check_deviant_paths(xmlNodePtr node, install_info *info, char* path_
 					if ( path_up[0] != '/' ) { /* Not an absolute path */
 						char buf[PATH_MAX];
 						snprintf(buf, PATH_MAX, "%s/%s", info->install_path, path_up);
-						xmlFree(orig_dpath);
 						if (!dir_is_accessible(buf))
 						{
+							xmlFree(orig_dpath);
 							if(path_ret) strcpy(path_ret, buf);
 							return 1;
 						}
@@ -394,7 +392,6 @@ static char check_deviant_paths(xmlNodePtr node, install_info *info, char* path_
             if (check_deviant_paths(node->childs, info, path_ret))
                 return 1;
         }
-		xmlFree(wanted);
         node = node->next;
     }
     return 0;
