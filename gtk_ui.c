@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.51 2000-10-31 02:32:01 megastep Exp $
+   $Id: gtk_ui.c,v 1.52 2000-10-31 02:51:56 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1160,7 +1160,11 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
 
     /* Set up the window title */
     window = glade_xml_get_widget(setup_glade, "setup_window");
-    snprintf(title, sizeof(title), _("%s Setup"), info->desc);
+    if ( info->component ) {
+        snprintf(title, sizeof(title), _("%s / %s Setup"), info->desc, GetProductComponent(info));
+    } else {
+        snprintf(title, sizeof(title), _("%s Setup"), info->desc);
+    }
     gtk_window_set_title(GTK_WINDOW(window), title);
 
     /* Set the initial state */

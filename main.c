@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.35 2000-09-23 01:29:51 megastep Exp $ */
+/* $Id: main.c,v 1.36 2000-10-31 02:51:57 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -260,11 +260,30 @@ int main(int argc, char **argv)
     /* Run the little state machine */
     exit_status = 0;
     while ( state != SETUP_EXIT ) {
+        char buf[1024];
         switch (state) {
             case SETUP_INIT:
                 state = UI.init(info,argc,argv);
                 if ( state == SETUP_ABORT ) {
                     exit_status = 1;
+                }
+                /* Check for the presence of the product if we install a component */
+                if ( GetProductComponent(info) ) {
+                    if ( info->product ) {
+                        if ( ! info->component ) {
+                            snprintf(buf, sizeof(buf), _("\nThe %s component is already installed.\n"
+                                                         "Please uninstall it beforehand.\n"),
+                                     GetProductComponent(info));
+                            UI.prompt(buf, RESPONSE_OK);
+                            state = SETUP_EXIT;
+                        }
+                    } else {                        
+                        snprintf(buf, sizeof(buf), _("\nYou must install %s before running this\n"
+													 "installation program.\n"),
+                                info->desc);
+                        UI.prompt(buf, RESPONSE_OK);
+                        state = SETUP_EXIT;
+                    }
                 }
                 /* Check for the presence of a CDROM if required */
                 if ( GetProductCDROMRequired(info) ) {
@@ -275,8 +294,6 @@ int main(int argc, char **argv)
                     response = RESPONSE_YES;
                     tag = GetProductCDROMFile(info);
                     while ( !detect_cdrom(tag) && (response == RESPONSE_YES) ) {
-                        char buf[1024];
-            
                         snprintf(buf, sizeof(buf), _("\nPlease mount the %s CDROM.\n"
 													 "Choose Yes to retry, No to cancel"),
                                 info->desc);

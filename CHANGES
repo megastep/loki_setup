@@ -8,6 +8,9 @@ Stéphane Peter - Tue Oct 10 19:18:24 PDT 2000
  * Moved away from uninstall scripts and use the 'setupdb' API to manage
    a database of installed products and components, managed through XML
    files.
+Stéphane Peter - Mon Oct 30 18:48:44 PST 2000
+ * Added 'component' attribute to the install element to handle
+   component-only installations.
  
 1.4.0:
 Sam Lantinga - Tue Aug 22 12:32:29 PDT 2000

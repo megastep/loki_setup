@@ -220,7 +220,12 @@ static install_state console_init(install_info *info, int argc, char **argv)
 {
     install_state state;
 
-    printf(_("----====== %s installation program ======----\n"), info->desc);
+    if ( info->component ) {
+        printf(_("----====== %s / %s installation program ======----\n"), info->desc,
+               GetProductComponent(info));
+    } else {
+        printf(_("----====== %s installation program ======----\n"), info->desc);
+    }
     printf("\n");
     printf(_("You are running a %s machine with %s\n"), info->arch, info->libc);
     printf(_("Hit Control-C anytime to cancel this installation program.\n"));

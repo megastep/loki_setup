@@ -134,6 +134,13 @@ There are several optional attributes of the install element:
             product installation.
             See the section "About Meta-Installation" below.
 
+ component  When this attribute is present, its value is the name of the component
+            that will created by this installer. This means that the files will be added
+            to an existing installation of the product, and that basic configuration parameters
+            such as the installation path will be used from the previous installation.
+            Currently setup is not able to update an existing component, thus if the component
+            is detected as already installed the installation will fail.
+
 The README and EULA elements:
 
 Those elements are used to mark special files, that are unique for

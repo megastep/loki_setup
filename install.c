@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.74 2000-10-26 21:13:16 megastep Exp $ */
+/* $Id: install.c,v 1.75 2000-10-31 02:51:57 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -97,6 +97,12 @@ const char *GetProductDesc(install_info *info)
     }
     return desc;
 }
+
+const char *GetProductComponent(install_info *info)
+{
+    return xmlGetProp(info->config->root, "component");
+}
+
 const char *GetProductUninstall(install_info *info)
 {
     const char *desc;
@@ -334,11 +340,12 @@ const char *GetInstallOption(install_info *info, const char *option)
 
 /* Create the initial installation information */
 install_info *create_install(const char *configfile, int log_level,
-			     const char *install_path,
-			     const char *binary_path)
+                             const char *install_path,
+                             const char *binary_path)
 {
     install_info *info;
 	char *temppath;
+    const char *compname;
 
     /* Allocate the installation info block */
     info = (install_info *)malloc(sizeof *info);
@@ -371,6 +378,10 @@ install_info *create_install(const char *configfile, int log_level,
     info->arch = detect_arch();
     info->libc = detect_libc();
 
+    /* Set product DB stuff to nothing by default */
+    info->product = NULL;
+    info->component = NULL;
+
 	getcwd(info->setup_path, PATH_MAX);
 
     /* Read the optional default arguments for the game */
@@ -391,12 +402,30 @@ install_info *create_install(const char *configfile, int log_level,
 
     /* if paths were passed in as command line args, set them here */
     if (disable_install_path) {
-        strcpy(info->install_path, install_path);
+        strncpy(info->install_path, install_path, sizeof(info->install_path));
     }
     if (disable_binary_path) {
-        strcpy(info->symlinks_path, binary_path);
+        strncpy(info->symlinks_path, binary_path, sizeof(info->symlinks_path));
     }
-    
+    /* Handle component stuff */
+    compname = GetProductComponent(info);
+    if ( compname ) {
+        info->product = loki_openproduct(info->name);
+        if ( info->product ) {
+            info->component = loki_find_component(info->product, compname);
+            if ( info->component ) {
+                info->component = NULL;
+            } else {
+                product_info_t *pinfo = loki_getinfo_product(info->product);
+
+                info->component = loki_create_component(info->product, compname,
+                                                        info->version);
+                disable_install_path = 1;
+                strncpy(info->install_path, pinfo->root, sizeof(info->install_path));
+            }
+        }
+    }
+
     /* Start a network lookup for any URL */
     if ( GetProductURL(info) ) {
         info->lookup = open_lookup(info, GetProductURL(info));
@@ -906,9 +935,14 @@ void generate_uninstall(install_info *info)
     product_component_t *component;
     product_option_t *option;
 
-	product = loki_create_product(info->name, info->install_path, info->desc,
-                                  info->update_url);
-    component = loki_create_component(product, "Default", info->version);
+    if ( info->component ) {
+        product = info->product;
+        component = info->component;
+    } else {
+        product = loki_create_product(info->name, info->install_path, info->desc,
+                                      info->update_url);
+        component = loki_create_component(product, "Default", info->version);
+    }
 
 	if ( product && component ) {
 		struct file_elem *felem;

@@ -153,7 +153,12 @@ typedef struct {
         } *rpm_list;
 
         struct option_elem *next;
+
     } *options_list;
+
+    /* Product and component DB information */
+    product_t *product;
+    product_component_t *component;
 
     /* Arguments to the game when launching it */
     const char *args;
@@ -172,6 +177,7 @@ extern int MatchLocale(const char *str);
 /* Functions to retrieve attribution information from the XML tree */
 extern const char *GetProductName(install_info *info);
 extern const char *GetProductDesc(install_info *info);
+extern const char *GetProductComponent(install_info *info);
 extern const char *GetProductUninstall(install_info *info);
 extern const char *GetProductVersion(install_info *info);
 extern int         GetProductCDROMRequired(install_info *info);
