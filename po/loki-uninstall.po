@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2004-09-08 14:44-0700\n"
+"POT-Creation-Date: 2004-11-10 12:11-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -78,131 +78,131 @@ msgid ""
 "  product < -l > : List installed subcomponents of product.\n"
 msgstr ""
 
-#: uninstall.c:129
+#: uninstall.c:124
 #, c-format
 msgid "Signal %d caught. Aborting.\n"
 msgstr ""
 
-#: uninstall.c:144
+#: uninstall.c:139
 #, c-format
 msgid "Could not change to directory: %s\n"
 msgstr ""
 
-#: uninstall.c:169
+#: uninstall.c:164
 #, c-format
 msgid "Notice: the %s RPM was installed for this product.\n"
 msgstr ""
 
-#: uninstall.c:202
+#: uninstall.c:197
 #, c-format
 msgid "Post-uninstall scripts for %s have failed.\n"
 msgstr ""
 
-#: uninstall.c:207
+#: uninstall.c:202
 #, c-format
 msgid ""
 "Component %s has been successfully uninstalled.\n"
 "\n"
 msgstr ""
 
-#: uninstall.c:227
+#: uninstall.c:222
 msgid "Uninstall ? [Y/n] "
 msgstr ""
 
-#: uninstall.c:231
+#: uninstall.c:226
 msgid "n"
 msgstr ""
 
-#: uninstall.c:231
+#: uninstall.c:226
 msgid "N"
 msgstr ""
 
-#: uninstall.c:232
+#: uninstall.c:227
 msgid "Aborted.\n"
 msgstr ""
 
-#: uninstall.c:282
+#: uninstall.c:277
 msgid ""
 "No write access to the installation directory.\n"
 "Aborting.\n"
 msgstr ""
 
-#: uninstall.c:290
+#: uninstall.c:285
 #, c-format
 msgid ""
 "No write access to the registry file: %s.\n"
 "Aborting.\n"
 msgstr ""
 
-#: uninstall.c:514
+#: uninstall.c:510
 msgid "Warning: Unable to replicate uninstallation program.\n"
 msgstr ""
 
-#: uninstall.c:518
+#: uninstall.c:514
 #, c-format
 msgid "Unable to open %s for writing.\n"
 msgstr ""
 
-#: uninstall.c:522
+#: uninstall.c:518
 #, c-format
 msgid "Unable to open %s for copying.\n"
 msgstr ""
 
-#: uninstall.c:534
+#: uninstall.c:530
 msgid "Couldn't change to install directory\n"
 msgstr ""
 
-#: uninstall.c:585
+#: uninstall.c:581
 msgid "Installed products:\n"
 msgstr ""
 
-#: uninstall.c:593
+#: uninstall.c:589
 #, c-format
 msgid ""
 "installed in %s\n"
 "\tComponents:\n"
 msgstr ""
 
-#: uninstall.c:600
+#: uninstall.c:596
 msgid " Error while accessing product info\n"
 msgstr ""
 
-#: uninstall.c:604
+#: uninstall.c:600
 msgid ""
 "No products could be found. Maybe you need to run as a different user?\n"
 msgstr ""
 
-#: uninstall.c:616
+#: uninstall.c:612
 #, c-format
 msgid "Could not open product information for %s\n"
 msgstr ""
 
-#: uninstall.c:624
+#: uninstall.c:620
 #, c-format
 msgid ""
 "Product: %s\n"
 "Installed in %s\n"
 msgstr ""
 
-#: uninstall.c:630
+#: uninstall.c:626
 msgid "Components:\n"
 msgstr ""
 
-#: uninstall.c:652
+#: uninstall.c:648
 #, c-format
 msgid "Failed to properly uninstall component %s\n"
 msgstr ""
 
-#: uninstall.c:655
+#: uninstall.c:651
 #, c-format
 msgid "Unable to find component %s\n"
 msgstr ""
 
-#: uninstall.c:666
+#: uninstall.c:662
 msgid "An error occured during the uninstallation process.\n"
 msgstr ""
 
-#: uninstall.c:670
+#: uninstall.c:666
 #, c-format
 msgid ""
 "%s has been successfully uninstalled.\n"

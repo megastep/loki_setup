@@ -950,12 +950,9 @@ ssize_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
 			const char *text;
 			static char line[BUFSIZ], buf[BUFSIZ];
 			char *prop = xmlGetProp(node, "lang");
-			if ( match_locale(prop) ) {
+			if ( current_component->message==NULL && match_locale(prop) ) {
 				if ( ! current_component ) {
 					log_fatal(_("The remove_msg element should be within a component!\n"));
-				}
-				if ( current_component->message ) {
-					log_fatal(_("Only one remove_msg per component is allowed.\n"));
 				}
 				text = xmlNodeListGetString(info->config, node->childs, 1);
 				if (text) {

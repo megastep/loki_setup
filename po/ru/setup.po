@@ -1343,11 +1343,11 @@ msgstr "Параметры установки"
 
 # console_ui.c:241
 #: dialog_ui.c:77
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "You are running a %s machine with %s\n"
 "Operating System: %s %d.%d"
-msgstr "У вас запущена %s машина с %s\n"
+msgstr ""
 
 #: dialog_ui.c:128
 msgid "README"
@@ -1355,29 +1355,21 @@ msgstr ""
 
 # console_ui.c:457
 #: dialog_ui.c:215
-#, fuzzy
 msgid "Component"
 msgstr ""
-"\n"
-"%s компонент\n"
-"\n"
 
 # console_ui.c:475
 #: dialog_ui.c:234 dialog_ui.c:653
-#, fuzzy, c-format
+#, c-format
 msgid "Installation of %s"
-msgstr "Установка в %s\n"
+msgstr ""
 
 # main.c:356
 #: dialog_ui.c:236
-#, fuzzy
 msgid ""
 "No installation options detected. If the product is already\n"
 "installed, please uninstall it before reinstalling.\n"
 msgstr ""
-"\n"
-"Компонент %s уже установлен.\n"
-"Сначала удалите его.\n"
 
 #: dialog_ui.c:271
 #, c-format
@@ -1395,12 +1387,9 @@ msgstr ""
 
 # console_ui.c:457
 #: dialog_ui.c:306
-#, fuzzy, c-format
+#, c-format
 msgid "Component: %s"
 msgstr ""
-"\n"
-"%s компонент\n"
-"\n"
 
 #: dialog_ui.c:355
 msgid "Choose the product"
@@ -1420,9 +1409,8 @@ msgstr "Путь установки:"
 
 # console_ui.c:378 console_ui.c:432
 #: dialog_ui.c:393
-#, fuzzy
 msgid "Failed permissions"
-msgstr "Нет права на запись в %s\n"
+msgstr ""
 
 # image/setup.data/setup.glade:193
 #: dialog_ui.c:427
@@ -1460,9 +1448,8 @@ msgstr ""
 
 # image/setup.data/setup.glade:1183
 #: dialog_ui.c:533
-#, fuzzy
 msgid "vcdk is missing. Installation aborted.\n"
-msgstr "Установка была прервана"
+msgstr ""
 
 #: dialog_ui.c:540 gtk_ui.c:515 gtk_ui.c:524
 msgid "Problem"
@@ -1472,13 +1459,12 @@ msgstr ""
 #: dialog_ui.c:583
 #, fuzzy, c-format
 msgid "Installing %s ..."
-msgstr "Установка %s ...\n"
+msgstr "Установка %s ..."
 
 # console_ui.c:493
 #: dialog_ui.c:584 dialog_ui.c:586
-#, fuzzy
 msgid "Installing..."
-msgstr "Установка %s ...\n"
+msgstr ""
 
 #: dialog_ui.c:601
 msgid "Aborting"
@@ -1502,9 +1488,8 @@ msgstr ""
 
 # console_ui.c:516
 #: dialog_ui.c:629
-#, fuzzy
 msgid "Installation complete!"
-msgstr "Установка завершена.\n"
+msgstr ""
 
 #: dialog_ui.c:638
 msgid "Express installation using detected defaults"
@@ -1640,9 +1625,9 @@ msgstr ""
 
 # console_ui.c:493
 #: carbon_ui.c:1226
-#, fuzzy, c-format
+#, c-format
 msgid "Installing %s : %d%%"
-msgstr "Установка %s ...\n"
+msgstr ""
 
 #: xsu.c:336
 msgid "Login Prompt"
@@ -1689,9 +1674,8 @@ msgstr ""
 
 # plugins/outrage.c:73
 #: plugins/cpio.c:113
-#, fuzzy
 msgid "Invalid CPIO header\n"
-msgstr "OPKG: Неверный заголовок пакета"
+msgstr ""
 
 # plugins/cpio.c:155
 #: plugins/cpio.c:173
