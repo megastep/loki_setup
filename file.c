@@ -141,7 +141,7 @@ stream *file_open_install(install_info *info, const char *path, const char *mode
 
 		if ( prompt_overwrite ) {
 			char msg[128];
-			snprintf(msg, sizeof(msg), _("File '%25s' already exists, overwrite?"), path);
+			snprintf(msg, sizeof(msg), _("File '%25s' already exists, overwrite?"), loki_basename(path));
 			if ( UI.prompt(msg, RESPONSE_YES) != RESPONSE_YES ) {
 				return NULL;
 			}

@@ -471,7 +471,7 @@ static ssize_t copy_list(install_info *info, const char *filedesc, const char *d
 		  xmlNodePtr node,
 		  UIUpdateFunc update)
 {
-    char fpat[BUFSIZ];
+    char fpat[PATH_MAX];
     int i;
     glob_t globbed;
     ssize_t size, copied;
@@ -1093,7 +1093,7 @@ ssize_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
 ssize_t size_manpage(install_info *info, xmlNodePtr node, const char *from_cdrom)
 {
     struct stat sb;
-    char fpat[BUFSIZ];
+    char fpat[PATH_MAX];
 	char *section = xmlGetProp(node, "section"), *name = xmlGetProp(node, "name");
     ssize_t size = 0;
 
@@ -1123,7 +1123,7 @@ ssize_t size_manpage(install_info *info, xmlNodePtr node, const char *from_cdrom
 ssize_t size_binary(install_info *info, const char *from_cdrom, const char *filedesc)
 {
     struct stat sb;
-    char fpat[BUFSIZ], final[BUFSIZ];
+    char fpat[PATH_MAX], final[PATH_MAX];
     ssize_t size;
 
     size = 0;

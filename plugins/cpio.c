@@ -65,7 +65,7 @@ size_t copy_cpio_stream(install_info *info, stream *input, const char *dest, con
     int dir_len = strlen(dest) + 1;
     size_t nread, left, copied;
     size_t size = 0;
-    char buf[BUFSIZ];
+    char buf[PATH_MAX];
     int count = 0;
 	unsigned int user_mode = 0;
     /* Optional MD5 sum can be specified in the XML file */

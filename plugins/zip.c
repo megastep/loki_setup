@@ -1,5 +1,5 @@
 /* ZIP plugin for setup */
-/* $Id: zip.c,v 1.9 2004-11-02 03:48:57 megastep Exp $ */
+/* $Id: zip.c,v 1.10 2005-01-25 03:00:57 megastep Exp $ */
 
 #include "plugins.h"
 #include "file.h"
@@ -665,7 +665,7 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
 					  xmlNodePtr node,
 					  UIUpdateFunc update)
 {
-    char final[BUFSIZ];
+    char final[PATH_MAX];
     z_stream zstr;
     size_t retval = 0;
     ZIPinfo zipinfo;
@@ -850,7 +850,7 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
 
         if (symlnk)
         {
-            char lnkname[BUFSIZ];
+            char lnkname[PATH_MAX];
             /* null-terminate string. */
             zip_buf_out[entry->uncompressed_size] = '\0';
             zip_expand_symlink_path(zip_buf_out);

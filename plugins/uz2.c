@@ -1,5 +1,5 @@
 /* UnrealEngine2-compressed files (.uz2) plugin for setup */
-/* $Id: uz2.c,v 1.6 2004-11-02 03:48:57 megastep Exp $ */
+/* $Id: uz2.c,v 1.7 2005-01-25 03:00:57 megastep Exp $ */
 
 #include <stdlib.h>
 #include <string.h>
@@ -103,7 +103,7 @@ static size_t UZ2Copy(install_info *info, const char *path, const char *dest, co
     uint32 csize;  /* compressed size */
     uint32 usize;  /* uncompressed size */
     size_t insize = 0;
-    char final[BUFSIZ];
+    char final[PATH_MAX];
     stream *in;
     stream *out;
 	unsigned int user_mode = 0;

@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.149 2004-12-12 22:39:37 megastep Exp $ */
+/* $Id: install.c,v 1.150 2005-01-25 03:00:57 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -508,7 +508,7 @@ const char *GetProductEULANode(install_info *info, xmlNodePtr node, int *keepdir
 
     eula = xmlGetProp(node, "eula");
 	if (eula) {
-		strncpy(matched_name, eula, BUFSIZ);
+		strncpy(matched_name, eula, sizeof(matched_name));
 		found = 1;
 		log_warning("The 'eula' attribute is deprecated, please use the 'eula' element from now on.");
 		xmlFree(eula);
@@ -559,7 +559,7 @@ const char *GetProductREADME(install_info *info, int *keepdirs)
     if ( ! ret ) {
         strcpy(matched_name, "README");
     } else {
-		strncpy(matched_name, ret, BUFSIZ);
+		strncpy(matched_name, ret, sizeof(matched_name));
 		found = 1;
 		log_warning("The 'readme' attribute is deprecated, please use the 'readme' element from now on.");
 		xmlFree(ret);

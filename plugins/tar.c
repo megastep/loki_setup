@@ -1,5 +1,5 @@
 /* TAR plugin for setup */
-/* $Id: tar.c,v 1.12 2004-11-02 03:48:57 megastep Exp $ */
+/* $Id: tar.c,v 1.13 2005-01-25 03:00:57 megastep Exp $ */
 
 #include "config.h"
 #include "plugins.h"
@@ -44,7 +44,7 @@ static size_t TarCopy(install_info *info, const char *path, const char *dest, co
 {
     static tar_record zeroes;
     tar_record record;
-    char final[BUFSIZ];
+    char final[PATH_MAX];
     stream *input, *output;
     size_t size, copied;
     size_t this_size;
