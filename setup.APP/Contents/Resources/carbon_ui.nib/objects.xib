@@ -4,9 +4,9 @@
   <object name="rootObject" class="NSCustomObject" id="1">
     <string name="customClass">NSApplication</string>
   </object>
-  <array count="125" name="allObjects">
+  <array count="124" name="allObjects">
     <object class="IBCarbonWindow" id="166">
-      <string name="windowRect">119 290 674 1675 </string>
+      <string name="windowRect">104 -258 659 1127 </string>
       <string name="title">Window</string>
       <object name="rootControl" class="IBCarbonRootControl" id="167">
         <string name="bounds">0 0 555 1385 </string>
@@ -733,7 +733,7 @@
                 <int name="controlID">702</int>
                 <boolean name="small">TRUE</boolean>
                 <string name="title">Continue</string>
-                <ostype name="command">cont</ostype>
+                <ostype name="command">wcon</ostype>
               </object>
             </array>
             <ostype name="controlSignature">loki</ostype>
@@ -751,7 +751,7 @@
                 <int name="controlID">807</int>
                 <boolean name="small">TRUE</boolean>
                 <string name="title">Continue</string>
-                <ostype name="command">cont</ostype>
+                <ostype name="command">con1</ostype>
               </object>
               <object class="IBCarbonButton" id="248">
                 <string name="bounds">239 1156 256 1264 </string>
@@ -759,6 +759,7 @@
                 <int name="controlID">806</int>
                 <boolean name="small">TRUE</boolean>
                 <string name="title">View Readme</string>
+                <ostype name="command">read</ostype>
               </object>
               <object class="IBCarbonButton" id="245">
                 <string name="bounds">239 1049 256 1128 </string>
@@ -797,6 +798,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">804</int>
                 <string name="title">Launch Browser</string>
+                <ostype name="command">webb</ostype>
               </object>
               <object class="IBCarbonStaticText" id="324">
                 <string name="bounds">25 1178 41 1364 </string>
@@ -867,11 +869,7 @@
           <string name="title">Application</string>
           <object name="submenu" class="IBCarbonMenu" id="268">
             <string name="title">Application</string>
-            <array count="2" name="items">
-              <object class="IBCarbonMenuItem" id="269">
-                <string name="title">About Application</string>
-                <int name="keyEquivalentModifier">0</int>
-              </object>
+            <array count="1" name="items">
               <object class="IBCarbonMenuItem" id="267">
                 <boolean name="separator">TRUE</boolean>
               </object>
@@ -884,7 +882,6 @@
     <reference idRef="266"/>
     <reference idRef="267"/>
     <reference idRef="268"/>
-    <reference idRef="269"/>
     <reference idRef="270"/>
     <reference idRef="273"/>
     <reference idRef="298"/>
@@ -1041,7 +1038,7 @@
     <reference idRef="408"/>
     <reference idRef="409"/>
   </array>
-  <array count="125" name="allParents">
+  <array count="124" name="allParents">
     <reference idRef="1"/>
     <reference idRef="166"/>
     <reference idRef="167"/>
@@ -1089,7 +1086,6 @@
     <reference idRef="263"/>
     <reference idRef="268"/>
     <reference idRef="266"/>
-    <reference idRef="268"/>
     <reference idRef="239"/>
     <reference idRef="239"/>
     <reference idRef="182"/>

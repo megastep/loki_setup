@@ -80,11 +80,14 @@
 #define COMMAND_EXIT            'exit'
 #define COMMAND_CANCEL          'cncl'
 #define COMMAND_CONTINUE        'cont'
+#define COMMAND_WARN_CONTINUE   'wcon'
+#define COMMAND_WEB_CONTINUE    'con1'
 #define COMMAND_README          'read'
 #define COMMAND_INSTALLPATH     'inst'
 #define COMMAND_BEGIN_INSTALL   'begn'
 #define COMMAND_RECOMMENDED     'recc'
 #define COMMAND_EXPERT          'expr'
+#define COMMAND_WEBSITE         'webb'
 
 #define COMMAND_PROMPT_YES      'yes '
 #define COMMAND_PROMPT_NO       'no  '
@@ -129,6 +132,7 @@ typedef struct
     WindowRef Window;
     WindowRef PromptWindow;
     WindowRef ReadmeWindow;
+    MenuRef Menu;
     ControlRef MessageLabel;
     ControlRef PageHandles[PAGE_COUNT];
 
@@ -184,6 +188,8 @@ typedef struct
     void *Box;
     void *Group;
     char Name[MAX_BUTTON_NAME];
+    // Last state of radio button
+    int LastState;  
 }OptionsButton;
 
 typedef struct
@@ -230,5 +236,6 @@ int carbon_OptionsGetValue(OptionsButton *);
 void carbon_OptionsShowBox(OptionsBox *);
 void carbon_SetProperWindowSize(OptionsBox *, int);
 OptionsButton *carbon_GetButtonByName(OptionsBox *, const char *);
+int carbon_LaunchURL(const char *);
 
 #endif

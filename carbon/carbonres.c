@@ -50,42 +50,82 @@ static int OptionsSetRadioButton(OptionsButton *Button)
     RadioGroup *Group = (RadioGroup *)Button->Group;
     int Value;
     int i;
+    int ReturnValue;
 
     carbon_debug("OptionsSetRadioButton()\n");
 
     // If click event was on a radio button
     if(Button->Type == ButtonType_Radio)
     {
-        // Make sure all buttons in that group are unchecked.  If we got
-        // a click event, the box gets checked automatically by Carbon on
-        // the current button.
-        for(i = 0; i < Group->ButtonCount; i++)
+        // Only do something if button state as changed
+        Value = GetControl32BitValue(Button->Control);
+        printf("OptionsSetRadioButton() - Current state = %d\n", Value);
+        printf("OptionsSetRadioButton() - Last state = %d\n", Button->LastState);
+        if(Value != Button->LastState)
         {
-            // Only uncheck buttons that aren't the current button.  We're using
-            //  the SetControl32BitValue command so that a click event will not
-            //  be generated when calling carbon_OptionsSetValue()
-            if(Group->Buttons[i] != Button)
+            // Save the new state as current state for the radio button
+            Button->LastState = Value;
+            // Make sure all buttons in that group are unchecked.  If we got
+            // a click event, the box gets checked automatically by Carbon on
+            // the current button.
+            for(i = 0; i < Group->ButtonCount; i++)
             {
-                Value = GetControl32BitValue(Group->Buttons[i]->Control);
-                SetControl32BitValue(Group->Buttons[i]->Control, kControlRadioButtonUncheckedValue);
-                // If previous state of radio button was checked
-                if(Value == kControlRadioButtonCheckedValue)
+                // Only uncheck buttons that aren't the current button.  We're using
+                //  the SetControl32BitValue command so that a click event will not
+                //  be generated when calling carbon_OptionsSetValue()
+                if(Group->Buttons[i] != Button)
                 {
-                    carbon_debug("OptionsSetRadoiButton() - Raise event for toggle button uncheck\n");
-                    // Raise event for radio button that got unselected.  This
-                    // emulates the functionality of GTK
-                    ((OptionsBox *)Button->Box)->OptionClickCallback(Group->Buttons[i]);
+                    Value = GetControl32BitValue(Group->Buttons[i]->Control);
+                    SetControl32BitValue(Group->Buttons[i]->Control, kControlRadioButtonUncheckedValue);
+                    Group->Buttons[i]->LastState = kControlRadioButtonUncheckedValue;
+                    // If previous state of radio button was checked
+                    if(Value == kControlRadioButtonCheckedValue)
+                    {
+                        carbon_debug("OptionsSetRadoiButton() - Raise event for toggle button uncheck\n");
+                        // Raise event for radio button that got unselected.  This
+                        // emulates the functionality of GTK
+                        ((OptionsBox *)Button->Box)->OptionClickCallback(Group->Buttons[i]);
+                    }
                 }
             }
+
+            // For radio buttons, we only raise the event on state change instead of
+            //  a click like other controls.
+            ReturnValue = ((OptionsBox *)Button->Box)->OptionClickCallback(Button);
         }
     }
+    // It's not a radio button, so just propogate the event to the app's
+    //  option event handler
     else
-        carbon_debug("OptionsSetRadioButton() - Called on non-radio button\n");
+    {
+        // Raise event of the value change (emulates the "click" event)
+        // GTK raises a toggle event when the state changes, even if it
+        // changes programmatically.
+        ReturnValue = ((OptionsBox *)Button->Box)->OptionClickCallback(Button);
+    }
 
-    // Raise event of the value change (emulates the "click" event)
-    // GTK raises a toggle event when the state changes, even if it
-    // changes programmatically.
-    return ((OptionsBox *)Button->Box)->OptionClickCallback(Button);
+    return ReturnValue;
+}
+
+static pascal OSStatus MouseDownEventHandler(EventHandlerCallRef HandlerRef, EventRef Event, void *UserData)
+{
+    OSStatus err = eventNotHandledErr;	// Default is event is not handled by this function
+    HICommand command;
+    CarbonRes *Res = (CarbonRes *)UserData;
+    WindowRef DummyWindow;
+    Point ThePoint;
+
+    carbon_debug("MouseDownEventHandler()\n");
+
+    GetEventParameter(Event, kEventParamMouseLocation, typeQDPoint, NULL, sizeof(Point), NULL, &ThePoint);
+    if(FindWindow(ThePoint, &DummyWindow) == inMenuBar)
+    {
+        carbon_debug("MouseDownEventHandler() - Menubar click\n");
+        MenuSelect(ThePoint);
+        err = noErr;
+    }
+
+    return err;
 }
 
 static pascal OSStatus OptionButtonEventHandler(EventHandlerCallRef HandlerRef, EventRef Event, void *UserData)
@@ -298,7 +338,8 @@ CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32))
     
     // Once the nib reference is created, set the menu bar. "MainMenu" is the name of the menu bar
     // object. This name is set in InterfaceBuilder when the nib is created.
-    err = SetMenuBarFromNib(nibRef, CFSTR("install_menu"));
+    err = CreateMenuFromNib(nibRef, CFSTR("install_menu"), &NewRes->Menu);
+    err = SetRootMenu(NewRes->Menu);
     require_noerr(err, CantSetMenuBar);
 
     // Then create a window. "MainWindow" is the name of the window object. This name is set in 
@@ -330,8 +371,10 @@ CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32))
     // Install default event handler for window since we're not calling
     // RunApplicationEventLoop() to process events.
     InstallStandardEventHandler(GetWindowEventTarget(NewRes->Window));
-    // Hide the menu bar since we're not using it for the installer
-    HideMenuBar();
+    // Install mouse-down click event for detecting menu clicks
+    EventTypeSpec commMouseDownSpec = {kEventClassMouse, kEventMouseDown};
+    InstallApplicationEventHandler(NewEventHandlerUPP(MouseDownEventHandler),
+        1, &commMouseDownSpec, (void *)NewRes, NULL);
     // Setup the event handler associated with the main window
     InstallWindowEventHandler(NewRes->Window,
         NewEventHandlerUPP(WindowEventHandler), 1, &commSpec, (void *)NewRes,
@@ -834,6 +877,8 @@ OptionsButton *carbon_OptionsNewRadioButton(OptionsBox *Box, const char *Name, R
     AddOptionsButton(Box, Button);
     // Set button type accordingly
     Button->Type = ButtonType_Radio;
+    // Default state for radio buttons is unchecked
+    Button->LastState = kControlRadioButtonUncheckedValue;
 
     // If radio group has not been created yet, create it
     if(*Group == NULL)
@@ -988,6 +1033,9 @@ void carbon_SetProperWindowSize(OptionsBox *Box, int OptionsNotOther)
     int NewHeight;
     int NewWidth;
 
+    // Hide window while we're making changes to it
+    HideWindow(Box->Res->Window);
+
     // If true (and there are more options than can fit in default size,
     // then set window size based on OPTIONS screen
     if(OptionsNotOther && Box->ButtonCount > BOX_START_COUNT)
@@ -1010,6 +1058,9 @@ void carbon_SetProperWindowSize(OptionsBox *Box, int OptionsNotOther)
 
     // Redraw it
     DrawControls(Box->Res->Window);
+
+    // Show window in new state
+    ShowWindow(Box->Res->Window);
 }
 
 OptionsButton *carbon_GetButtonByName(OptionsBox *Box, const char *Name)
@@ -1032,4 +1083,21 @@ OptionsButton *carbon_GetButtonByName(OptionsBox *Box, const char *Name)
     // No button found...rock.
     carbon_debug("GetButtonByName() - Name not found\n");
     return NULL;
+}
+
+int carbon_LaunchURL(const char *url)
+{
+    int ReturnValue;
+    printf("carbon_LaunchURL: %s", url);
+
+    CFURLRef theCFURL = CFURLCreateWithBytes(kCFAllocatorDefault, url, strlen(url),
+        kCFStringEncodingMacRoman, NULL);
+ 
+    if(LSOpenCFURLRef(theCFURL, NULL) == noErr)
+        ReturnValue = 0;
+    else
+        ReturnValue = -1;
+
+    CFRelease(theCFURL);
+    return ReturnValue;
 }

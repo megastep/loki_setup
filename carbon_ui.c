@@ -22,6 +22,11 @@ static RadioGroup *radio_list = NULL; // Group for the radio buttons
 #define MAX_README_SIZE     65535
 #define DEFAULT_INSTALL_FOLDER "/Applications/test"
 
+static enum {
+    WARNING_NONE,
+    WARNING_ROOT
+} warning_dialog;
+
 /******* PROTOTYPE DECLARATION *******/
 static const char *check_for_installation(install_info *);
 static void update_size(void);
@@ -329,7 +334,6 @@ static void OnCommandContinue()
 {
     carbon_debug("OnCommandContinue()\n");
 
-    //!!!TODO - I don't think this check is needed
 	if(cur_state == SETUP_CLASS)
     {
 	    express_setup = carbon_GetInstallClass(MyRes);
@@ -376,9 +380,8 @@ static void OnCommandReadme(void)
         carbon_debug("OnCommandReadme() - Readme file not loaded.\n");
 }
 
-static void OnCommandExit(void)
+static void OnCommandExit()
 {
-    carbon_debug("OnCommandExit()\n");
     cur_state = SETUP_EXIT;
 }
 
@@ -386,22 +389,16 @@ static void OnCommandCancel(void)
 {
     carbon_debug("OnCommandCancel()\n");
 
-    switch(cur_state)
+    if(cur_state == SETUP_INSTALL)
     {
-        case SETUP_CLASS:
-        case SETUP_OPTIONS:
-            cur_state = SETUP_EXIT;
-            break;
-        case SETUP_INSTALL:
-		    if(carbonui_prompt(_("Are you sure you want to abort\nthis installation?"), RESPONSE_NO) == RESPONSE_YES)
-            {
-			    cur_state = SETUP_ABORT;
-			    abort_install();
-		    }
-		    break;
-        default:
-            carbon_debug("OnCommandCancel() - OnCommandCancel event occured in invalid state\n");
+		if(carbonui_prompt(_("Are you sure you want to abort\nthis installation?"), RESPONSE_NO) == RESPONSE_YES)
+        {
+			cur_state = SETUP_ABORT;
+			abort_install();
+		}
     }
+    else
+        cur_state = SETUP_EXIT;
 }
 
 static void OnCommandInstallPath(void)
@@ -591,6 +588,12 @@ int OnOptionClickEvent(OptionsButton *ButtonWithEventClick)
     return true;
 }
 
+static void OnCommandWebsite()
+{
+    carbon_debug("OnCommandWebsite()\n");
+    launch_browser(cur_info, carbon_LaunchURL);
+}
+
 int OnCommandEvent(UInt32 CommandID)
 {
     int ReturnValue = false;
@@ -603,11 +606,26 @@ int OnCommandEvent(UInt32 CommandID)
             OnCommandContinue();
             ReturnValue = true;
             break;
+        case COMMAND_WEB_CONTINUE:
+            cur_state = SETUP_COMPLETE;
+            break;
+        case COMMAND_WARN_CONTINUE:
+            switch (warning_dialog)
+            {
+                case WARNING_NONE:
+                    break;
+                case WARNING_ROOT:
+                    cur_state = SETUP_PLAY;
+                    break;
+            }
+            warning_dialog = WARNING_NONE;
+            break;
         case COMMAND_README:
             OnCommandReadme();
             ReturnValue = true;
             break;
         case COMMAND_CANCEL:
+        case 'quit':
             OnCommandCancel();
             ReturnValue = true;
             break;
@@ -632,6 +650,10 @@ int OnCommandEvent(UInt32 CommandID)
             //!!!TODO - This is kind of a hack, but sure made it easy to toggle
             // the two radio buttons.  Surely there's a better way.
             carbon_SetInstallClass(MyRes, false);
+            break;
+        case COMMAND_WEBSITE:
+            OnCommandWebsite();
+            ReturnValue = true;
             break;
         default:
             carbon_debug("OnCommandEvent() - Invalid command received.\n");
@@ -1025,7 +1047,7 @@ static install_state carbonui_website(install_info *info)
 
     // Automatically launch the browser if necessary
     if(do_launch)
-        launch_browser(info, loki_launchURL);
+        launch_browser(info, carbon_LaunchURL);
 
     return carbon_IterateForState(MyRes, &cur_state);
 }
