@@ -148,7 +148,9 @@ which are installed for this option.
 
 You may specify relative paths and shell wildcard patterns for the files.
 
-There are no attributes for the files element.
+There is an optional attribute of the files element:
+
+ path       This is a system path that these files should be installed into.
 
 
 The SCRIPT element:

@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.23 2000-01-22 00:16:31 megastep Exp $
+   $Id: gtk_ui.c,v 1.24 2000-02-14 20:39:06 hercules Exp $
 */
 
 #include <limits.h>
@@ -260,26 +260,67 @@ void setup_button_browser_slot( GtkWidget* widget, gpointer func_data )
     launch_browser(cur_info, run_netscape);
 }
 
+
+void topmost_valid_path(char *target, const char *src) {
+    char *cp;
+  
+    /* Get the topmost valid path */
+    strcpy(target, src);
+    if ( target[0] == '/' ) {
+        cp = target+strlen(target);
+        while ( access(target, F_OK) < 0 ) {
+            while ( (cp > (target+1)) && (*cp != '/') ) {
+                --cp;
+            }
+            *cp = '\0';
+        }
+    }
+}
+
+
+/* returns true if any deviant paths are not writable */
+char check_deviant_paths(xmlNodePtr node)
+{
+    char path_up[PATH_MAX];
+
+    while ( node ) {
+        const char *wanted;
+        const char *dpath;
+        char deviant_path[PATH_MAX];
+
+        wanted = xmlGetProp(node, "install");
+        if ( wanted  && (strcmp(wanted, "true") == 0) ) {
+            xmlNodePtr elements = node->childs;
+            while ( elements ) {
+                dpath = xmlGetProp(elements, "path");
+                if ( dpath ) {
+                parse_line(&dpath, deviant_path, PATH_MAX);
+                    topmost_valid_path(path_up, deviant_path);
+                    if (access(path_up, W_OK) < 0 )
+                        return 1;
+                }
+                elements = elements->next;
+            }
+            if (check_deviant_paths(node->childs))
+                return 1;
+        }
+        node = node->next;
+    }
+    return 0;
+}
+
+
 /* Checks if we can enable the "Begin install" button */
 static void check_install_button(void)
 {
     const char *message;
     GtkWidget *options_status;
     GtkWidget *button_install;
-    char path_up[PATH_MAX], *cp;
+    char path_up[PATH_MAX];
     struct stat st;
   
     /* Get the topmost valid path */
-    strcpy(path_up, cur_info->install_path);
-    if ( path_up[0] == '/' ) {
-        cp = path_up+strlen(path_up);
-        while ( access(path_up, F_OK) < 0 ) {
-            while ( (cp > (path_up+1)) && (*cp != '/') ) {
-                --cp;
-            }
-            *cp = '\0';
-        }
-    }
+    topmost_valid_path(path_up, cur_info->install_path);
  
     /* See if we can install yet */
     message = "";
@@ -295,6 +336,8 @@ static void check_install_button(void)
         message = "Install path is not a directory";
     } else if ( access(path_up, W_OK) < 0 ) {
         message = "No write permissions on the install directory";
+    } else if ( check_deviant_paths(cur_info->config->root->childs) ) {
+        message = "No write permissions to install a selected package";
     } else if ( cur_info->symlinks_path[0] &&
                (access(cur_info->symlinks_path, W_OK) < 0) ) {
         message = "No write permissions on the binary directory";
@@ -838,7 +881,7 @@ static install_state gtkui_complete(install_info *info)
     gtk_label_set_text(GTK_LABEL(widget), info->install_path);
     widget = glade_xml_get_widget(setup_glade, "play_game_label");
     if ( info->installed_symlink ) {
-        sprintf(text, "Type '%s' to play the game", info->installed_symlink);
+        sprintf(text, "Type '%s' to start the program", info->installed_symlink);
     } else {
         strcpy(text, "");
     }

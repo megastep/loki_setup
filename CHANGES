@@ -1,4 +1,12 @@
 
+1.2.1:
+Troy A. Griffitts - Fri, 11 Feb 2000 12:07:39 -0700
+ * Added "path" attribute to the files element
+ * Added environment variable parsing to the parse_line() function
+Bernd Kreimeier - 1999-12-10
+ * detect.c (detect_diskspace): replaced Karl's libc detection code
+   (which failed on glibc-2.0 on our testbox) with new one.
+
 1.2:  Third public release
 SOL -   Set the umask for the installer to: 022 
 SOL -   Added "arch" and "libc" attributes to the option element

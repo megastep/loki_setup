@@ -40,11 +40,29 @@
 static char current_option[200];
 extern char *rpm_root;
 
+void getToken(const char *src, const char **end) {
+    *end = 0;
+    while (*++src) {
+        if (*src == '}') {
+            *end = src;
+            break;
+        }
+    }
+}
+
 int parse_line(const char **srcpp, char *buf, int maxlen)
 {
     const char *srcp;
     char *dstp;
+    const char *subst = 0;
+    char *tokenval = 0;
+    char *token = 0;
+    const char *end;
 
+    if (!*srcpp) { // assert
+        *buf = 0;
+        return 0;
+    }
     /* Skip leading whitespace */
     srcp = *srcpp;
     while ( *srcp && isspace(*srcp) ) {
@@ -53,12 +71,33 @@ int parse_line(const char **srcpp, char *buf, int maxlen)
 
     /* Copy the line */
     dstp = buf;
-    while ( *srcp && (*srcp != '\r') && (*srcp != '\n') ) {
+    while ( (*srcp || subst) && (*srcp != '\r') && (*srcp != '\n') ) {
         if ( (dstp-buf) >= maxlen ) {
             break;
         }
+        if (!*srcp && subst) { // if we're substituting and done
+            srcp = subst;
+            subst = 0;
+        }
+        if ((!subst) && (*srcp == '$') && (*(srcp+1) == '{')) {
+            getToken(srcp+2, &end);
+            if (end) {	// we've got a good token
+                if (token) free(token);
+                token = calloc((end-(srcp+2))+1, 1);
+                memcpy(token, srcp+2, (end-(srcp+2)));
+                strtok(token, "|"); // in case a default val is specified
+                tokenval = getenv(token);
+                if (!tokenval) // if no env set, check for default
+                    tokenval = strtok(0, "|");
+                if (tokenval) {
+                    subst = end+1;  // where to continue after tokenval
+                    srcp = tokenval;
+                }
+            }
+        }
         *dstp++ = *srcp++;
     }
+    if (token) free(token);
 
     /* Trim whitespace */
     while ( (dstp > buf) && isspace(*(dstp-1)) ) {
@@ -597,17 +636,25 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
                 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     size_t size, copied;
+    char tmppath[PATH_MAX];
 
     size = 0;
     node = node->childs;
     while ( node ) {
+        const char *path = xmlGetProp(node, "path");
+        if (!path)
+            path = dest;
+        else {
+            parse_line(&path, tmppath, PATH_MAX);
+            path = tmppath;
+        }
 /* printf("Checking node element '%s'\n", node->name); */
         if ( strcmp(node->name, "files") == 0 ) {
             const char *str = xmlNodeListGetString(info->config, (node->parent)->childs, 1);
             parse_line(&str, current_option, sizeof(current_option));
             copied = copy_list(info,
                                xmlNodeListGetString(info->config, node->childs, 1),
-                               dest, update);
+                               path, update);
             if ( copied > 0 ) {
                 size += copied;
             }
@@ -615,7 +662,7 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
         if ( strcmp(node->name, "binary") == 0 ) {
             copied = copy_binary(info, node,
                                xmlNodeListGetString(info->config, node->childs, 1),
-                               dest, update);
+                               path, update);
             if ( copied > 0 ) {
                 size += copied;
             }
@@ -623,7 +670,7 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
         if ( strcmp(node->name, "script") == 0 ) {
             copy_script(info, node,
                         xmlNodeListGetString(info->config, node->childs, 1),
-                        dest);
+                        path);
         }
         node = node->next;
     }
@@ -634,6 +681,7 @@ size_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
                 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     size_t size, copied;
+    char tmppath[PATH_MAX];
 
     size = 0;
     while ( node ) {
@@ -641,7 +689,14 @@ size_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
 
         wanted = xmlGetProp(node, "install");
         if ( wanted  && (strcmp(wanted, "true") == 0) ) {
-            copied = copy_node(info, node, info->install_path, update);
+            const char *deviant_path = xmlGetProp(node, "path");
+            if (!deviant_path)
+                deviant_path = info->install_path;
+            else {
+                parse_line(&deviant_path, tmppath, PATH_MAX);
+                deviant_path = tmppath;
+            }
+            copied = copy_node(info, node, deviant_path, update);
             if ( copied > 0 ) {
                 size += copied;
             }

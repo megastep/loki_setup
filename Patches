@@ -1,0 +1,371 @@
+*************************************************************************
+*** Applied ***
+*************************************************************************
+Date: Sat, 05 Feb 2000 14:41:09 -0700
+From: "Troy A. Griffitts" <scribe@crosswire.org>
+Subject: setup patches
+
+Sam,
+
+    I've added another feature that we needed that I feel will be useful
+to others.  We're keeping a copy on our CVS server if you would like to
+grab a patched copy.  I'm also attaching the patch.  It expects the
+previous patch that I sent to already be applied.
+
+The new feature allows syntax like the following
+
+...
+        <files path=${KDEDIR|/usr/local}/share>
+                kdesharebase.tar.gz
+        </files>
+...
+
+This parses any ${ENVVAR} token and replaces it with the environment
+variable value.  You may also specify a default value if the environment
+variable is not set: ${ENVVAR|default_value}
+
+Hope this is useful.
+
+our anonymous cvs info:
+
+$ export CVSROOT=:pserver:anonymous@cvs.crosswire.org:/usr/local/cvsroot
+$ cvs login
+Password: anonymous
+$ cvs checkout setup
+
+Thanks again for a great tool!
+
+        -Troy A. Griffitts
+        http://www.crosswire.org
+
+Index: copy.c
+===================================================================
+RCS file: /usr/local/cvsroot/setup/copy.c,v
+retrieving revision 1.1
+retrieving revision 1.3
+diff -u -r1.1 -r1.3
+--- copy.c	2000/02/06 01:03:56	1.1
++++ copy.c	2000/02/11 18:34:04	1.3
+@@ -34,11 +34,29 @@
+ static char current_option[200];
+ extern char *rpm_root;
+ 
++void getToken(const char *src, const char **end) {
++    *end = 0;
++    while (*++src) {
++        if (*src == '}') {
++            *end = src;
++            break;
++        }
++    }
++}
++
+ int parse_line(const char **srcpp, char *buf, int maxlen)
+ {
+     const char *srcp;
+     char *dstp;
++    const char *subst = 0;
++    char *tokenval = 0;
++    char *token = 0;
++    const char *end;
+ 
++    if (!*srcpp) { // assert
++        *buf = 0;
++        return 0;
++    }
+     /* Skip leading whitespace */
+     srcp = *srcpp;
+     while ( *srcp && isspace(*srcp) ) {
+@@ -47,12 +65,33 @@
+ 
+     /* Copy the line */
+     dstp = buf;
+-    while ( *srcp && (*srcp != '\r') && (*srcp != '\n') ) {
++    while ( (*srcp || subst) && (*srcp != '\r') && (*srcp != '\n') ) {
+         if ( (dstp-buf) >= maxlen ) {
+             break;
+         }
++        if (!*srcp && subst) { // if we're substituting and done
++            srcp = subst;
++            subst = 0;
++        }
++        if ((!subst) && (*srcp == '$') && (*(srcp+1) == '{')) {
++            getToken(srcp+2, &end);
++            if (end) {	// we've got a good token
++                if (token) free(token);
++                token = calloc((end-(srcp+2))+1, 1);
++                memcpy(token, srcp+2, (end-(srcp+2)));
++                strtok(token, "|"); // in case a default val is specified
++                tokenval = getenv(token);
++                if (!tokenval) // if no env set, check for default
++                    tokenval = strtok(0, "|");
++                if (tokenval) {
++                    subst = end+1;  // where to continue after tokenval
++                    srcp = tokenval;
++                }
++            }
++        }
+         *dstp++ = *srcp++;
+     }
++    if (token) free(token);
+ 
+     /* Trim whitespace */
+     while ( (dstp > buf) && isspace(*(dstp-1)) ) {
+@@ -591,6 +630,7 @@
+                 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+ {
+     size_t size, copied;
++    char tmppath[PATH_MAX];
+ 
+     size = 0;
+     node = node->childs;
+@@ -598,6 +638,10 @@
+         const char *path = xmlGetProp(node, "path");
+         if (!path)
+             path = dest;
++        else {
++            parse_line(&path, tmppath, PATH_MAX);
++            path = tmppath;
++        }
+ /* printf("Checking node element '%s'\n", node->name); */
+         if ( strcmp(node->name, "files") == 0 ) {
+             const char *str = xmlNodeListGetString(info->config, (node->parent)->childs, 1);
+@@ -643,6 +687,7 @@
+                 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+ {
+     size_t size, copied;
++    char tmppath[PATH_MAX];
+ 
+     size = 0;
+     while ( node ) {
+@@ -651,8 +696,13 @@
+         wanted = xmlGetProp(node, "install");
+         if ( wanted  && (strcmp(wanted, "true") == 0) ) {
+             const char *deviant_path = xmlGetProp(node, "path");
+-            copied = copy_node(info, node,
+-                (deviant_path) ? deviant_path : info->install_path, update);
++            if (!deviant_path)
++                deviant_path = info->install_path;
++            else {
++                parse_line(&deviant_path, tmppath, PATH_MAX);
++                deviant_path = tmppath;
++            }
++            copied = copy_node(info, node, deviant_path, update);
+             if ( copied > 0 ) {
+                 size += copied;
+             }
+Index: gtk_ui.c
+===================================================================
+RCS file: /usr/local/cvsroot/setup/gtk_ui.c,v
+retrieving revision 1.1
+retrieving revision 1.3
+diff -u -r1.1 -r1.3
+--- gtk_ui.c	2000/02/06 01:03:59	1.1
++++ gtk_ui.c	2000/02/11 18:34:04	1.3
+@@ -253,16 +253,19 @@
+ char check_deviant_paths(xmlNodePtr node)
+ {
+     char path_up[PATH_MAX];
++
+     while ( node ) {
+         const char *wanted;
+-        const char *deviant_path;
++        const char *dpath;
++        char deviant_path[PATH_MAX];
+ 
+         wanted = xmlGetProp(node, "install");
+         if ( wanted  && (strcmp(wanted, "true") == 0) ) {
+             xmlNodePtr elements = node->childs;
+             while ( elements ) {
+-                deviant_path = xmlGetProp(elements, "path");
+-                if ( deviant_path ) {
++                dpath = xmlGetProp(elements, "path");
++                if ( dpath ) {
++                parse_line(&dpath, deviant_path, PATH_MAX);
+                     topmost_valid_path(path_up, deviant_path);
+                     if (access(path_up, W_OK) < 0 )
+                         return 1;
+*** Applied ***
+Date: Sat, 05 Feb 2000 14:41:09 -0700
+From: "Troy A. Griffitts" <scribe@crosswire.org>
+Subject: setup patches
+
+Sam and Stephane,
+        Here are some more patches to the setup util.  I haven't had much
+time to work on it, but these were quick and should provide some useful
+features.
+
+        I've added a path="/deviant/path/" option to option components. 
+This allows an install developer to place components like:
+        <files path="/usr/lib">
+                libbase.tar.gz
+        </files>
+        <files path="/usr/share">
+                sharebase.tar.gz
+        </files>
+
+When all other components still install into the user's selected
+directory, these 'deviant' entries will install to the set locations.
+
+The gtk_ui checks write permission for these paths if the option is
+selected before enabling install.
+
+diff -Pru setup-1.1.orig/copy.c setup-1.1/copy.c
+--- setup-1.1.orig/copy.c	Wed Dec  1 16:15:26 1999
++++ setup-1.1/copy.c	Fri Feb  4 01:38:17 2000
+@@ -595,21 +595,36 @@
+     size = 0;
+     node = node->childs;
+     while ( node ) {
++        const char *path = xmlGetProp(node, "path");
++        if (!path)
++            path = dest;
+ /* printf("Checking node element '%s'\n", node->name); */
+         if ( strcmp(node->name, "files") == 0 ) {
+             const char *str = xmlNodeListGetString(info->config, (node->parent)->childs, 1);
+             parse_line(&str, current_option, sizeof(current_option));
+             copied = copy_list(info,
+                                xmlNodeListGetString(info->config, node->childs, 1),
+-                               dest, update);
++                               path, update);
+             if ( copied > 0 ) {
+                 size += copied;
+             }
+         }
++        if ( strcmp(node->name, "xfonts") == 0 ) {
++            if (info->copy_xfonts) {
++                const char *str = xmlNodeListGetString(info->config, (node->parent)->childs, 1);
++                parse_line(&str, current_option, sizeof(current_option));
++                copied = (*info->copy_xfonts)(info,
++                            xmlNodeListGetString(info->config, node->childs, 1),
++                            update);
++                if ( copied > 0 ) {
++                    size += copied;
++                }
++            }
++        }
+         if ( strcmp(node->name, "binary") == 0 ) {
+             copied = copy_binary(info, node,
+                                xmlNodeListGetString(info->config, node->childs, 1),
+-                               dest, update);
++                               path, update);
+             if ( copied > 0 ) {
+                 size += copied;
+             }
+@@ -617,7 +632,7 @@
+         if ( strcmp(node->name, "script") == 0 ) {
+             copy_script(info, node,
+                         xmlNodeListGetString(info->config, node->childs, 1),
+-                        dest);
++                        path);
+         }
+         node = node->next;
+     }
+@@ -635,7 +650,9 @@
+ 
+         wanted = xmlGetProp(node, "install");
+         if ( wanted  && (strcmp(wanted, "true") == 0) ) {
+-            copied = copy_node(info, node, info->install_path, update);
++            const char *deviant_path = xmlGetProp(node, "path");
++            copied = copy_node(info, node,
++                (deviant_path) ? deviant_path : info->install_path, update);
+             if ( copied > 0 ) {
+                 size += copied;
+             }
+diff -Pru setup-1.1.orig/gtk_ui.c setup-1.1/gtk_ui.c
+--- setup-1.1.orig/gtk_ui.c	Wed Dec  1 16:15:26 1999
++++ setup-1.1/gtk_ui.c	Fri Feb  4 01:38:17 2000
+@@ -230,26 +231,64 @@
+     cur_state = SETUP_INSTALL;
+ }
+ 
++
++void topmost_valid_path(char *target, const char *src) {
++    char *cp;
++  
++    /* Get the topmost valid path */
++    strcpy(target, src);
++    if ( target[0] == '/' ) {
++        cp = target+strlen(target);
++        while ( access(target, F_OK) < 0 ) {
++            while ( (cp > (target+1)) && (*cp != '/') ) {
++                --cp;
++            }
++            *cp = '\0';
++        }
++    }
++}
++
++
++/* returns true if any deviant paths are not writable */
++char check_deviant_paths(xmlNodePtr node)
++{
++    char path_up[PATH_MAX];
++    while ( node ) {
++        const char *wanted;
++        const char *deviant_path;
++
++        wanted = xmlGetProp(node, "install");
++        if ( wanted  && (strcmp(wanted, "true") == 0) ) {
++            xmlNodePtr elements = node->childs;
++            while ( elements ) {
++                deviant_path = xmlGetProp(elements, "path");
++                if ( deviant_path ) {
++                    topmost_valid_path(path_up, deviant_path);
++                    if (access(path_up, W_OK) < 0 )
++                        return 1;
++                }
++                elements = elements->next;
++            }
++            if (check_deviant_paths(node->childs))
++                return 1;
++        }
++        node = node->next;
++    }
++    return 0;
++}
++
++
+ /* Checks if we can enable the "Begin install" button */
+ static void check_install_button(void)
+ {
+     const char *message;
+     GtkWidget *options_status;
+     GtkWidget *button_install;
+-    char path_up[PATH_MAX], *cp;
++    char path_up[PATH_MAX];
+     struct stat st;
+   
+     /* Get the topmost valid path */
+-    strcpy(path_up, cur_info->install_path);
+-    if ( path_up[0] == '/' ) {
+-        cp = path_up+strlen(path_up);
+-        while ( access(path_up, F_OK) < 0 ) {
+-            while ( (cp > (path_up+1)) && (*cp != '/') ) {
+-                --cp;
+-            }
+-            *cp = '\0';
+-        }
+-    }
++    topmost_valid_path(path_up, cur_info->install_path);
+  
+     /* See if we can install yet */
+     message = "";
+@@ -265,6 +304,8 @@
+         message = "Install path is not a directory";
+     } else if ( access(path_up, W_OK) < 0 ) {
+         message = "No write permissions on the install directory";
++    } else if ( check_deviant_paths(cur_info->config->root->childs) ) {
++        message = "No write permissions to install a selected package";
+     } else if ( cur_info->symlinks_path[0] &&
+                (access(cur_info->symlinks_path, W_OK) < 0) ) {
+         message = "No write permissions on the binary directory";
+@@ -743,7 +787,7 @@
+     gtk_label_set_text(GTK_LABEL(widget), info->install_path);
+     widget = glade_xml_get_widget(setup_glade, "play_game_label");
+     if ( info->installed_symlink ) {
+-        sprintf(text, "Type '%s' to play the game", info->installed_symlink);
++        sprintf(text, "Type '%s' to start the program", info->installed_symlink);
+     } else {
+         strcpy(text, "");
+     }
