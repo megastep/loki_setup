@@ -356,7 +356,7 @@ CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32), const char 
     NewRes->CommandEventCallback = CommandEventCallback;
 
     // Set defaults for resource object members
-    //NewRes->IsShown = false;
+    NewRes->IsShown = false;
     NewRes->CurInstallPage = NONE_PAGE;
     NewRes->SplashImage = NULL;
     NewRes->SplashImageView = NULL;
@@ -493,11 +493,11 @@ void carbon_ShowInstallScreen(CarbonRes *Res, InstallPage NewInstallPage)
     Res->CurInstallPage = NewInstallPage;
 
     // If window is not show, then show it :-)
-    /*if(!Res->IsShown)
+    if(!Res->IsShown)
     {
         ShowWindow(Res->Window);
         Res->IsShown = true;
-    }*/
+    }
 
     // Refresh window
     DrawControls(Res->Window);
