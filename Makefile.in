@@ -9,7 +9,7 @@ libc := @LIBC@
 os   := @OS@
 
 # If you modify this version, change it's setup.xml and release a new patch.
-UNINSTALL_VERSION = \"1.0b\"
+UNINSTALL_VERSION = 1.0.3
 
 CC = @CC@
 
@@ -17,6 +17,7 @@ CC = @CC@
 SETUPDB	= @SETUPDB@
 
 IMAGE = /loki/patch-tools/setup-image
+UPDATES = /loki/updates/loki_uninstall
 CONVERT_IMAGE = /loki/patch-tools/convert-image
 
 # The supported locales so far
@@ -50,7 +51,7 @@ testxml: testxml.o
 	$(CC) -o $@ $^ $(LIBS)
 
 loki_uninstall.o: uninstall.c
-	$(CC) -c -o $@ $^ $(CFLAGS) -DUNINSTALL_UI -DVERSION=$(UNINSTALL_VERSION)
+	$(CC) -c -o $@ $^ $(CFLAGS) -DUNINSTALL_UI -DVERSION=\"$(UNINSTALL_VERSION)\"
 
 loki_uninstall: $(LOKI_UNINSTALL_OBJS) $(SETUPDB)/$(arch)/libsetupdb.a
 	$(CC) -o $@ $^ $(GUI_LIBS)
@@ -120,14 +121,30 @@ install-loki_uninstall: loki_uninstall
 	@if [ -d $(IMAGE)/loki_uninstall/bin/$(arch)/$(libc)/ ]; then \
 	    cp -v loki_uninstall $(IMAGE)/loki_uninstall/bin/$(arch)/$(libc)/; \
 	    strip $(IMAGE)/loki_uninstall/bin/$(arch)/$(libc)/loki_uninstall; \
-	    cp -v uninstall.glade $(IMAGE)/loki_uninstall/; \
-        for file in `find image/setup.data -name loki-uninstall.mo -print`; \
-        do  path="$(IMAGE)/loki_uninstall/`dirname $$file | sed 's,image/setup.data/,,'`"; \
-            mkdirhier $$path; \
-            cp -v $$file $$path; \
-        done; \
+	    cp -v README.loki_uninstall $(IMAGE)/loki_uninstall/README; \
+	    cp -v icon.xpm uninstall.glade $(IMAGE)/loki_uninstall/; \
+	    for file in `find image/setup.data -name loki-uninstall.mo -print`; \
+	    do  path="$(IMAGE)/loki_uninstall/`dirname $$file | sed 's,image/setup.data/,,'`"; \
+	        mkdirhier $$path; \
+	        cp -v $$file $$path; \
+	    done; \
 	else \
 		echo No directory to copy the binary files to.; \
+	fi
+	@if [ -d $(UPDATES) ]; then \
+	    rm -rf $(UPDATES)/bin-$(arch)-$(UNINSTALL_VERSION)/; \
+	    mkdir $(UPDATES)/bin-$(arch)-$(UNINSTALL_VERSION)/; \
+	    cp -v loki_uninstall $(UPDATES)/bin-$(arch)-$(UNINSTALL_VERSION)/; \
+	    strip $(UPDATES)/bin-$(arch)-$(UNINSTALL_VERSION)/loki_uninstall; \
+	    rm -rf $(UPDATES)/data-$(UNINSTALL_VERSION)/; \
+	    mkdir $(UPDATES)/data-$(UNINSTALL_VERSION)/; \
+	    cp -v README.loki_uninstall $(UPDATES)/data-$(UNINSTALL_VERSION)/README; \
+	    cp -v icon.xpm uninstall.glade $(UPDATES)/data-$(UNINSTALL_VERSION)/; \
+	    for file in `find image/setup.data -name loki-uninstall.mo -print`; \
+	    do  path="$(UPDATES)/data-$(UNINSTALL_VERSION)/`dirname $$file | sed 's,image/setup.data/,,'`"; \
+	        mkdirhier $$path; \
+	        cp -v $$file $$path; \
+	    done; \
 	fi
 
 po-image:
