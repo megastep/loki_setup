@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.28 2000-02-14 21:01:30 hercules Exp $ */
+/* $Id: install.c,v 1.29 2000-02-18 03:02:05 hercules Exp $ */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -625,6 +625,7 @@ static const char* redhat_app_links[] =
 
 static const char* kde_app_links[] =
 {
+    "/usr/X11R6/share/applnk/",
     "/usr/share/applnk/",
     "/opt/kde/share/applnk/",
     "~/.kde/share/applnk/",
@@ -645,6 +646,7 @@ static const char* gnome_app_links[] =
 char install_menuitems(install_info *info, desktop_type desktop)
 {
     const char **app_links;
+    const char **tmp_links;
     char buf[PATH_MAX];
     struct bin_elem *elem;
     char ret_val = 0;
@@ -689,15 +691,15 @@ char install_menuitems(install_info *info, desktop_type desktop)
             return ret_val;
     }
 
-    for( ; *app_links; app_links ++){
-        expand_home(info, *app_links, buf);
-
-        if ( access(buf, W_OK) < 0 )
-            continue;
-
-        for (elem = info->bin_list; elem; elem = elem->next ) {      
+    for (elem = info->bin_list; elem; elem = elem->next ) {      
+        for ( tmp_links = app_links; *tmp_links; ++tmp_links ) {
             FILE *fp;
             char finalbuf[PATH_MAX];
+
+            expand_home(info, *tmp_links, buf);
+
+            if ( access(buf, W_OK) < 0 )
+                continue;
 
             sprintf(finalbuf,"%s%s/", buf, (elem->menu) ? elem->menu : "Games");
             file_create_hierarchy(info, finalbuf);
@@ -748,6 +750,8 @@ char install_menuitems(install_info *info, desktop_type desktop)
             } else {
                 log_warning(info, "Unable to create desktop file '%s'", finalbuf);
             }
+            /* Created a desktop item, our job is done here */
+            break;
         }
     }
     return ret_val;
