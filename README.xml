@@ -86,6 +86,9 @@ There are several optional attributes of the install element:
  url        This is a web site which is launched after the install is
             completed.
 
+ update_url This is the location where updates for this product can be
+            fetched from.
+
  localurl   This is the local HTML file that is loaded if the network
             is down, or the web site cannot be reached.  It should be
             specified as a path relative to the setup working directory.

@@ -1,4 +1,4 @@
-/* $Id: file.h,v 1.11 2000-08-08 01:05:46 megastep Exp $ */
+/* $Id: file.h,v 1.12 2000-10-11 02:27:37 megastep Exp $ */
 
 #ifndef __LOKI_FILE_H__
 #define __LOKI_FILE_H__
@@ -12,6 +12,7 @@
 #include <zlib.h>
 
 #include "install.h"
+#include "md5.h"
 
 typedef struct {
     char *path;
@@ -19,6 +20,8 @@ typedef struct {
     size_t size;
     FILE *fp;
     gzFile zfp;
+	MD5_CONTEXT md5;
+	struct file_elem *elem;
 } stream;
 
 extern stream *file_open(install_info *info,const char *path,const char *mode);

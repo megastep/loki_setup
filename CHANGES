@@ -1,3 +1,9 @@
+1.5.0:
+Stéphane Peter - Tue Oct 10 19:18:24 PDT 2000
+ * Moved away from uninstall scripts and use the 'setupdb' API to manage
+   a database of installed products and components, managed through XML
+   files.
+ 
 1.4.0:
 Sam Lantinga - Tue Aug 22 12:32:29 PDT 2000
  * Fixed problem with arrow key actions on main entry boxes

@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.59 2000-08-11 20:25:01 megastep Exp $ */
+/* $Id: install.c,v 1.60 2000-10-11 02:27:37 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -53,6 +53,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <sys/utsname.h>
 #include <stdlib.h>
 #include <string.h>
 #include <pwd.h>
@@ -68,6 +69,7 @@
 #include "copy.h"
 #include "file.h"
 #include "network.h"
+#include "setupdb.h"
 
 extern char *rpm_root;
 extern int disable_install_path;
@@ -285,6 +287,16 @@ const char *GetAutoLaunchURL(install_info *info)
     }
     return auto_url;
 }
+const char *GetProductUpdateURL(install_info *info)
+{
+    const char *url;
+
+    url = xmlGetProp(info->config->root, "update_url");
+    if ( url == NULL ) {
+        url = "http://www.lokigames.com/updates/";
+    }
+    return url;
+}
 const char *GetPreInstall(install_info *info)
 {
     return xmlGetProp(info->config->root, "preinstall");
@@ -355,6 +367,7 @@ install_info *create_install(const char *configfile, int log_level,
     info->name = GetProductName(info);
     info->desc = GetProductDesc(info);
     info->version = GetProductVersion(info);
+    info->update_url = GetProductUpdateURL(info);
     info->arch = detect_arch();
     info->libc = detect_libc();
 
@@ -395,36 +408,71 @@ install_info *create_install(const char *configfile, int log_level,
     return(info);
 }
 
+const char *remove_root(install_info *info, const char *path)
+{
+	if(strcmp(path, info->install_path) &&
+       strstr(path, info->install_path) == path) {
+		return path + strlen(info->install_path) + 1;
+	}
+	return path;
+}
+
+struct option_elem *add_option_entry(install_info *info, const char *name)
+{
+    struct option_elem *elem;
+
+    elem = (struct option_elem *)malloc(sizeof *elem);
+    if ( elem ) {
+        elem->name = strdup(name);
+        elem->file_list = NULL;
+        elem->dir_list = NULL;
+        elem->bin_list = NULL;
+        elem->pre_script_list = elem->post_script_list = NULL;
+        elem->rpm_list = NULL;
+        elem->next = info->options_list;
+        info->options_list = elem;
+    }
+    return elem;
+}
+
 /* Add a file entry to the list of files installed */
-void add_file_entry(install_info *info, const char *path)
+struct file_elem *add_file_entry(install_info *info, struct option_elem *comp,
+                                 const char *path, const char *symlink)
 {
     struct file_elem *elem;
 
     elem = (struct file_elem *)malloc(sizeof *elem);
     if ( elem ) {
-        elem->path = strdup(path);
+        elem->path = strdup(remove_root(info, path));
         if ( elem->path ) {
-            elem->next = info->file_list;
-            info->file_list = elem;
+            elem->next = comp->file_list;
+			if ( symlink ) {
+				elem->symlink = strdup(symlink);
+			} else {
+				elem->symlink = NULL;
+			}
+            comp->file_list = elem;
         }
     } else {
         log_fatal(info, _("Out of memory"));
     }
+	return elem;
 }
 
-void add_rpm_entry(install_info *info, const char *name, const char *version, 
-		   const char *release, const int autoremove)
+void add_rpm_entry(install_info *info, struct option_elem *comp,
+                   const char *name, const char *version, 
+                   int release, const int autoremove)
 {
     struct rpm_elem *elem;
-
+    
     elem = (struct rpm_elem *)malloc(sizeof *elem);
     if ( elem ) {
         elem->name = strdup(name);
         elem->version = strdup(version);
-        elem->release = strdup(release);
-        if ( elem->name && elem->version && elem->release) {
-            elem->next = info->rpm_list;
-            info->rpm_list = elem;
+        elem->release = release;
+        if ( elem->name && elem->version) {
+            elem->next = comp->rpm_list;
+            comp->rpm_list = elem;
         }
 		elem->autoremove = autoremove;
     } else {
@@ -432,7 +480,8 @@ void add_rpm_entry(install_info *info, const char *name, const char *version,
     }
 }
 
-void add_script_entry(install_info *info, const char *script, int post)
+void add_script_entry(install_info *info, struct option_elem *comp,
+                      const char *script, int post)
 {
     struct script_elem *elem;
 
@@ -441,11 +490,11 @@ void add_script_entry(install_info *info, const char *script, int post)
         elem->script = strdup(script);
         if ( elem->script ) {
             if(post){
-              elem->next = info->post_script_list;
-              info->post_script_list = elem;
+              elem->next = comp->post_script_list;
+              comp->post_script_list = elem;
             }else{
-              elem->next = info->pre_script_list;
-              info->pre_script_list = elem;
+              elem->next = comp->pre_script_list;
+              comp->pre_script_list = elem;
             }
         }
     } else {
@@ -454,16 +503,20 @@ void add_script_entry(install_info *info, const char *script, int post)
 }
 
 /* Add a directory entry to the list of directories installed */
-void add_dir_entry(install_info *info, const char *path)
+void add_dir_entry(install_info *info, struct option_elem *comp,
+                   const char *path)
 {
     struct dir_elem *elem;
 
+    if ( !strcmp(path, info->install_path) )
+        return; /* Do not add an entry for the installation directory */
+
     elem = (struct dir_elem *)malloc(sizeof *elem);
     if ( elem ) {
-        elem->path = strdup(path);
+        elem->path = strdup(remove_root(info, path));
         if ( elem->path ) {
-            elem->next = info->dir_list;
-            info->dir_list = elem;
+            elem->next = comp->dir_list;
+            comp->dir_list = elem;
         }
     } else {
         log_fatal(info, _("Out of memory"));
@@ -471,7 +524,7 @@ void add_dir_entry(install_info *info, const char *path)
 }
 
 /* Add a binary entry to the list of binaries installed */
-void add_bin_entry(install_info *info, const char *path,
+void add_bin_entry(install_info *info, struct option_elem *comp, const char *path,
                    const char *symlink, const char *desc, const char *menu,
                    const char *name, const char *icon, const char *play)
 {
@@ -486,8 +539,8 @@ void add_bin_entry(install_info *info, const char *path,
             elem->menu = menu;
             elem->name = name;
             elem->icon = icon;
-            elem->next = info->bin_list;
-            info->bin_list = elem;
+            elem->next = comp->bin_list;
+            comp->bin_list = elem;
         }
         if ( play ) {
 			if ( !strcmp(play, "yes") ) {
@@ -553,13 +606,13 @@ void expand_home(install_info *info, const char *path, char *buffer)
 /* Function to set the install path string, expanding home directories */
 void set_installpath(install_info *info, const char *path)
 {
-  expand_home(info, path, info->install_path);
+    expand_home(info, path, info->install_path);
 }
 
 /* Function to set the symlink path string, expanding home directories */
 void set_symlinkspath(install_info *info, const char *path)
 {
-  expand_home(info, path, info->symlinks_path);
+    expand_home(info, path, info->symlinks_path);
 }
 
 /* Mark/unmark an option node for install, optionally recursing */
@@ -658,29 +711,35 @@ const char *get_option_help(install_info *info, xmlNodePtr node)
 /* Free the install information structure */
 void delete_install(install_info *info)
 {
-    while ( info->file_list ) {
-        struct file_elem *elem;
+    struct option_elem *opt = info->options_list, *old;
+    while ( opt ) {
+        while ( opt->file_list ) {
+            struct file_elem *elem;
  
-        elem = info->file_list;
-        info->file_list = elem->next;
-        free(elem->path);
-        free(elem);
-    }
-    while ( info->dir_list ) {
-        struct dir_elem *elem;
+            elem = opt->file_list;
+            opt->file_list = elem->next;
+            free(elem->path);
+            free(elem);
+        }
+        while ( opt->dir_list ) {
+            struct dir_elem *elem;
  
-        elem = info->dir_list;
-        info->dir_list = elem->next;
-        free(elem->path);
-        free(elem);
-    }
-    while ( info->bin_list ) {
-        struct bin_elem *elem;
+            elem = opt->dir_list;
+            opt->dir_list = elem->next;
+            free(elem->path);
+            free(elem);
+        }
+        while ( opt->bin_list ) {
+            struct bin_elem *elem;
  
-        elem = info->bin_list;
-        info->bin_list = elem->next;
-        free(elem->path);
-        free(elem);
+            elem = opt->bin_list;
+            opt->bin_list = elem->next;
+            free(elem->path);
+            free(elem);
+        }
+        old = opt;
+        opt = opt->next;
+        free(old);
     }
     if ( info->lookup ) {
         close_lookup(info->lookup);
@@ -741,194 +800,344 @@ install_state install(install_info *info,
 void uninstall(install_info *info)
 {
 	char path[PATH_MAX];
+    struct option_elem *opt;
 
     if (GetPreUnInstall(info)) {
         run_script(info, GetPreUnInstall(info), 0);
     }
 
-    while ( info->pre_script_list ) { /* RPM pre-uninstall */
-        struct script_elem *elem;
- 
-        elem = info->pre_script_list;
-        info->pre_script_list = elem->next;
-        run_script(info, elem->script, 0);
-        free(elem->script);
-        free(elem);
-    }
-    while ( info->file_list ) {
-        struct file_elem *elem;
- 
-        elem = info->file_list;
-        info->file_list = elem->next;
-        if ( unlink(elem->path) < 0 ) {
-            log_warning(info, _("Unable to remove '%s'"), elem->path);
-        }
-        free(elem->path);
-        free(elem);
-    }
-	/* Check for uninstall script and remove it if present */
-	snprintf(path, PATH_MAX, "%s/%s", info->install_path, GetProductUninstall(info));
-	if ( file_exists(path) && unlink(path) < 0 ) {
-		log_warning(info, _("Unable to remove '%s'"), path);
-	}
-	
-    while ( info->dir_list ) {
-        struct dir_elem *elem;
- 
-        elem = info->dir_list;
-        info->dir_list = elem->next;
-        if ( rmdir(elem->path) < 0 ) {
-            log_warning(info, _("Unable to remove '%s'"), elem->path);
-        }
-        free(elem->path);
-        free(elem);
-    }
-    while ( info->post_script_list ) { /* RPM post-uninstall */
-        struct script_elem *elem;
- 
-        elem = info->post_script_list;
-        info->post_script_list = elem->next;
-        run_script(info, elem->script, 0);
-        free(elem->script);
-        free(elem);
-    }
+	/* TODO: Check for relative paths !! */
+    chdir(info->install_path);
 
+    for ( opt = info->options_list; opt; opt = opt->next ) {
+
+        while ( opt->pre_script_list ) { /* RPM pre-uninstall */
+            struct script_elem *elem;
+ 
+            elem = opt->pre_script_list;
+            opt->pre_script_list = elem->next;
+            run_script(info, elem->script, 0);
+            free(elem->script);
+            free(elem);
+        }
+
+        while ( opt->file_list ) {
+            struct file_elem *elem;
+ 
+            elem = opt->file_list;
+            opt->file_list = elem->next;
+            if ( unlink(elem->path) < 0 ) {
+                log_warning(info, _("Unable to remove '%s'"), elem->path);
+            }
+            free(elem->path);
+            free(elem);
+        }
+
+        while ( opt->dir_list ) {
+            struct dir_elem *elem;
+ 
+            elem = opt->dir_list;
+            opt->dir_list = elem->next;
+            if ( rmdir(elem->path) < 0 ) {
+                log_warning(info, _("Unable to remove '%s'"), elem->path);
+            }
+            free(elem->path);
+            free(elem);
+        }
+        while ( opt->post_script_list ) { /* RPM post-uninstall */
+            struct script_elem *elem;
+ 
+            elem = opt->post_script_list;
+            opt->post_script_list = elem->next;
+            run_script(info, elem->script, 0);
+            free(elem->script);
+            free(elem);
+        }
+
+        while ( opt->rpm_list ) {
+            struct rpm_elem *elem;
+ 
+            elem = opt->rpm_list;
+            opt->rpm_list = elem->next;
+            log_warning(info, _("The '%s' RPM was installed or upgraded (version %s, release %d)"),
+                        elem->name, elem->version, elem->release);
+            free(elem->name);
+            free(elem->version);
+            free(elem);
+        }
+
+        free(opt->name);
+    }
+    /* Check for uninstall script and remove it if present */
+    snprintf(path, PATH_MAX, "%s/%s", info->install_path, GetProductUninstall(info));
+    if ( file_exists(path) && unlink(path) < 0 ) {
+        log_warning(info, _("Unable to remove '%s'"), path);
+    }
     if (GetPostUnInstall(info)) {
         run_script(info, GetPostUnInstall(info), 0);
-    }
-
-    while ( info->rpm_list ) {
-        struct rpm_elem *elem;
- 
-        elem = info->rpm_list;
-        info->rpm_list = elem->next;
-        log_warning(info, _("The '%s' RPM was installed or upgraded (version %s, release %s)"),
-                    elem->name, elem->version, elem->release);
-        free(elem->name);
-        free(elem->version);
-        free(elem->release);
-        free(elem);
     }
 }
 
 void generate_uninstall(install_info *info)
 {
-    FILE *fp, *script_file;
-    char script[PATH_MAX];
-    struct file_elem *felem;
-    struct dir_elem *delem;
-    struct script_elem *selem;
-    struct rpm_elem *relem;
-    char *buf = (char *) malloc(sizeof(char) * PATH_MAX);
-    size_t count = PATH_MAX;
+    product_t *product;
+    product_component_t *component;
+    product_option_t *option;
 
-    strncpy(script,info->install_path, PATH_MAX);
-    strncat(script,"/", PATH_MAX);
-	strncat(script, GetProductUninstall(info), PATH_MAX);
+	product = loki_create_product(info->name, info->install_path, info->desc,
+                                  info->update_url);
+    component = loki_create_component(product, "Default", info->version);
 
-    fp = fopen(script, "w");
-    if ( fp != NULL ) {
-        fprintf(fp,
-				"#!/bin/sh\n"
-				"# Uninstall script for %s\n", info->desc
-				);
-		fprintf(fp, /* Add environment variables to beginning of script */
-                "SETUP_PRODUCTNAME=\"%s\"\n"
-                "SETUP_PRODUCTVER=\"%s\"\n"
-                "SETUP_INSTALLPATH=\"%s\"\n"
-                "SETUP_SYMLINKSPATH=\"%s\"\n"
-                "SETUP_CDROMPATH=\"%s\"\n"
-                "export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH\n", 
-                info->name, info->version,
-                info->install_path,
-                info->symlinks_path,
-                num_cdroms > 0 ? cdroms[0] : "");
+	if ( product ) {
+		struct file_elem *felem;
+		struct dir_elem *delem;
+		struct script_elem *selem;
+		struct rpm_elem *relem;
+        struct option_elem *opt;
+		char buf[PATH_MAX];
 
-		fprintf(fp,_("echo \"Uninstalling %s, please wait...\"\n"), info->desc);
+        for ( opt = info->options_list; opt; opt = opt->next ) {
+            option = loki_create_option(component, opt->name);
+            /* Add files */
+            for ( felem = opt->file_list; felem; felem = felem->next ) {
+                if ( felem->symlink ) {
+                    loki_registerfile(option, felem->path, NULL);
+                } else {
+                    loki_registerfile(option, felem->path, get_md5(felem->md5sum));
+                }
+            }
 
-		/* If there is a preuninstall script on the <install> tag, then stream
-		   it in here */
-		if (GetPreUnInstall(info)) {
-			script_file = fopen(GetPreUnInstall(info), "r");
-			if (script_file) {
-				while (! feof(script_file)) {
-					count = fread(buf, sizeof(char), PATH_MAX, script_file);
-					fwrite(buf, sizeof(char), count, fp);
-				}
-				fclose(script_file);
-			}
-		}
+            /* Add directories */
+            for ( delem = opt->dir_list; delem; delem = delem->next ) {
+                loki_registerfile(option, delem->path, NULL);
+            }
 
-#ifdef RPM_SUPPORT
-        if(strcmp(rpm_root,"/")) /* Emulate RPM environment for scripts */
-			fprintf(fp,"RPM_INSTALL_PREFIX=%s\n", rpm_root);
-#endif
-
-        /* Merge the pre-uninstall scripts */
-        if(info->pre_script_list){
-			fprintf(fp,"function pre()\n{\n");
-			for ( selem = info->pre_script_list; selem; selem = selem->next ) {
-				fprintf(fp,"%s\n",selem->script);
-			}
-			fprintf(fp,"}\npre 0\n");
-        }
-        for ( felem = info->file_list; felem; felem = felem->next ) {
-            fprintf(fp,"rm -f \"%s\"\n", felem->path);
-        }
-        /* Don't forget to remove ourselves */
-        fprintf(fp,"rm -f \"%s\"\n", script);
-
-        for ( delem = info->dir_list; delem; delem = delem->next ) {
-            fprintf(fp,"rmdir \"%s\"\n", delem->path);
-        }
-        /* Merge the post-uninstall scripts */
-        if(info->post_script_list){
-			fprintf(fp,"function post()\n{\n");
-			for ( selem = info->post_script_list; selem; selem = selem->next ) {
-				fprintf(fp,"%s\n",selem->script);
-			}
-			fprintf(fp,"}\npost 0\n");
-        }
-
-		/* Remove any RPMs marked as autoremove */
-		if (info->rpm_list) {
-			for ( relem = info->rpm_list; relem; relem = relem->next ) {
-				if (relem->autoremove) {
-					fprintf(fp,"rpm -e \"%s-%s-%s\"\n", relem->name, 
-							relem->version, relem->release);
-				}
-			}
-		}
-	
-		/* If a post-uninstall script is defined, stream it into the file */
-		if (GetPostUnInstall(info)) {
-			script_file = fopen(GetPostUnInstall(info), "r");
-			if (script_file) {
-				while (! feof(script_file)) {
-					count = fread(buf, sizeof(char), PATH_MAX, script_file );
-					fwrite(buf, sizeof(char), count, fp);
-				}
-				fclose(script_file);
-			}
-		}
-	
-		fprintf(fp,"#### END OF UNINSTALL\n");
-		fprintf(fp,_("echo \"%s has been uninstalled.\"\n"), info->desc);
-		if(info->rpm_list){
-			fprintf(fp,_("echo\necho WARNING: The following RPM archives have been installed or upgraded\n"
-						 "echo when this software was installed. You may want to manually remove some of those:\n") );
+            /* Add RPM entries */
+            for ( relem = opt->rpm_list; relem; relem = relem->next ) {
+                loki_registerrpm(option, relem->name, relem->version, relem->release, relem->autoremove);
+            }
 		
-			for ( relem = info->rpm_list; relem; relem = relem->next ) {
-				if (! relem->autoremove) {
-					fprintf(fp,"echo \"\t%s, version %s, release %s\"\n", 
-							relem->name, relem->version, relem->release);
-				}
-			}
-		}
-		fchmod(fileno(fp),0755); /* Turn on executable bit */
-		fclose(fp);
+            /* Generate optional pre and post uninstall scripts in the 'scripts' subdirectory */
+            // TODO: The global pre-uninstall script should probably move somewhere else
+            if(opt->pre_script_list || GetPreUnInstall(info)){
+                int count = 0;
+                FILE *pre;
+                char *tmp = tmpnam(NULL);
+                
+                pre = fopen(tmp, "w");
+                if ( pre ) {
+                    fprintf(pre,
+                            "SETUP_PRODUCTNAME=\"%s\"\n"
+                            "SETUP_PRODUCTVER=\"%s\"\n"
+                            "SETUP_INSTALLPATH=\"%s\"\n"
+                            "SETUP_SYMLINKSPATH=\"%s\"\n"
+                            "SETUP_CDROMPATH=\"%s\"\n"
+                            "export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH\n",
+                            info->name, info->version,
+                            info->install_path,
+                            info->symlinks_path,
+                            num_cdroms > 0 ? cdroms[0] : "");
+#ifdef RPM_SUPPORT
+                    if(strcmp(rpm_root,"/")) /* Emulate RPM environment for scripts */
+                        fprintf(fp,"RPM_INSTALL_PREFIX=%s\n", rpm_root);
+#endif
+                    if (GetPreUnInstall(info)) {
+                        FILE *script_file = fopen(GetPreUnInstall(info), "r");
+                        if (script_file) {
+                            while (! feof(script_file)) {
+                                count = fread(buf, sizeof(char), PATH_MAX, script_file);
+                                fwrite(buf, sizeof(char), count, pre);
+                            }
+                            fclose(script_file);
+                        }
+                    }
+                    if ( opt->pre_script_list ) {
+                        fprintf(pre, "function pre()\n{\n");
+                        for ( selem = opt->pre_script_list; selem; selem = selem->next ) {
+                            fprintf(pre, "%s\n", selem->script);
+                        }
+                        fprintf(pre,"}\npre 0\n");
+                    }
+                    fchmod(fileno(pre), 0755);
+                    fclose(pre);
+                    loki_registerscript_fromfile_component(component, LOKI_SCRIPT_PREUNINSTALL, "preun", tmp);
+                    unlink(tmp);
+                } else {
+                    log_fatal(info, _("Could not write temporary pre-uninstall script in %s"), buf);
+                }
+            }
+
+            if(opt->post_script_list || GetPostUnInstall(info)){
+                int count = 0;
+                FILE *post;
+                char *tmp = tmpnam(NULL);
+
+                post = fopen(tmp, "w");
+                if ( post ) {
+                    fprintf(post,
+                            "SETUP_PRODUCTNAME=\"%s\"\n"
+                            "SETUP_PRODUCTVER=\"%s\"\n"
+                            "SETUP_INSTALLPATH=\"%s\"\n"
+                            "SETUP_SYMLINKSPATH=\"%s\"\n"
+                            "SETUP_CDROMPATH=\"%s\"\n"
+                            "export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH\n",
+                            info->name, info->version,
+                            info->install_path,
+                            info->symlinks_path,
+                            num_cdroms > 0 ? cdroms[0] : "");
+#ifdef RPM_SUPPORT
+                    if(strcmp(rpm_root,"/")) /* Emulate RPM environment for scripts */
+                        fprintf(fp,"RPM_INSTALL_PREFIX=%s\n", rpm_root);
+#endif
+                    if (GetPostUnInstall(info)) {
+                        FILE *script_file = fopen(GetPostUnInstall(info), "r");
+                        if (script_file) {
+                            while (! feof(script_file)) {
+                                count = fread(buf, sizeof(char), PATH_MAX, script_file);
+                                fwrite(buf, sizeof(char), count, post);
+                            }
+                            fclose(script_file);
+                        }
+                    }
+                    if ( opt->post_script_list ) {
+                        fprintf(post, "function post()\n{\n");
+                        for ( selem = opt->post_script_list; selem; selem = selem->next ) {
+                            fprintf(post, "%s\n", selem->script);
+                        }
+                        fprintf(post,"}\npost 0\n");
+                    }
+                    fclose(post);
+                    loki_registerscript_fromfile_component(component, LOKI_SCRIPT_POSTUNINSTALL, "postun", tmp);
+                    unlink(tmp);
+                } else {
+                    log_fatal(info, _("Could not write post-uninstall script in %s"), buf);
+                }
+            }
+        }
+		loki_closeproduct(product);
+
+        update_uninstall(info);
+
+	} else {
+		log_fatal(info, _("Could not create install log"),
+				  getenv("HOME"), info->name);
+	}
+}
+
+/* Updates the 'uninstall' binary in ~/.loki/installed/bin and creates a shell script */
+int update_uninstall(install_info *info)
+{
+    char binpath[PATH_MAX];
+    struct utsname uts;
+    int perform_upgrade = 0;
+    FILE *scr;
+
+    if ( uname(&uts) < 0)
+        perror("uname");
+
+    /* TODO: Locate global loki-uninstall and upgrade it if we have sufficient permissions */    
+
+    snprintf(binpath, sizeof(binpath), "%s/.loki/installed/bin", getenv("HOME"));
+    mkdir(binpath, 0755);
+
+    strncat(binpath, "/", sizeof(binpath));
+    strncat(binpath, uts.sysname, sizeof(binpath));
+    mkdir(binpath, 0755);
+
+    strncat(binpath, "/", sizeof(binpath));
+    strncat(binpath, detect_arch(), sizeof(binpath));
+    mkdir(binpath, 0755);
+
+    strncat(binpath, "/uninstall", sizeof(binpath));
+
+    if (file_exists(binpath)) {
+        char cmd[PATH_MAX];
+        FILE *pipe;
+        
+        snprintf(cmd, sizeof(cmd), "%s --version", binpath);
+        pipe = popen(cmd, "r");
+        if ( pipe ) {
+            int major, minor;
+            /* Try to see if we have to update it */
+            fscanf(pipe, "%d.%d", &major, &minor);
+            pclose(pipe);
+
+            if ( (major < SETUP_VERSION_MAJOR) || 
+                 ((major==SETUP_VERSION_MAJOR) && (minor < SETUP_VERSION_MINOR)) ) {
+                /* Perform the upgrade, overwrite the uninstall binary */
+                perform_upgrade = 1;
+            }
+
+        } else {
+            perror("popen");
+        }
+    } else {
+        perform_upgrade = 1;
     }
-    free(buf);
+
+    if ( perform_upgrade ) {
+        char srcpath[PATH_MAX];
+        FILE *src, *dst;
+        void *data;
+        struct stat st;
+        
+        snprintf(srcpath, sizeof(srcpath), "setup.data/bin/%s/%s/uninstall",
+                 uts.sysname, detect_arch());
+        stat(srcpath, &st);
+        src = fopen(srcpath, "rb");
+        if ( src ) {
+            dst = fopen(binpath, "wb");
+            if ( dst ) {
+                data = malloc(st.st_size);
+                fread(data, 1, st.st_size, src);
+                fwrite(data, 1, st.st_size, dst);
+                free(data);
+                fchmod(fileno(dst), 0755);
+                fclose(dst);                
+            } else {
+                log_fatal(info, _("Couldn't write to %s!"), binpath);
+            }
+            fclose(src);
+        } else {
+            log_fatal(info, _("Couldn't open %s to be copied!"), srcpath);
+        }
+    }
+
+    /* Now we create an 'uninstall' shell script in the game's installation directory */
+    snprintf(binpath, sizeof(binpath), "%s/uninstall", info->install_path);
+    scr = fopen(binpath, "w");
+    if ( scr ) {
+        fprintf(scr,
+                "#! /bin/sh\n"
+                "DetectARCH()\n"
+                "{\n"
+                "        status=1\n"
+                "        case `uname -m` in\n"
+                "                i?86)  echo \"x86\"\n"
+                "                        status=0;;\n"
+                "                *)     echo \"`uname -m`\"\n"
+                "                        status=0;;\n"
+                "        esac\n"
+                "        return $status\n"
+                "}\n\n"
+
+                "if which loki-uninstall > /dev/null 2>&1; then\n"
+                "    UNINSTALL=loki-uninstall\n"
+                "else\n"
+                "    UNINSTALL=\"$HOME/.loki/installed/bin/`uname -s`/`DetectARCH`/uninstall\"\n"
+                "    if [ ! -x \"$UNINSTALL\" ]; then\n"
+                "        echo Could not find a usable uninstall program. Aborting.\n"
+                "        exit 1\n"
+                "    fi\n"
+                "fi\n"
+                "\"$UNINSTALL\" %s",
+                info->name);
+        fchmod(fileno(scr), 0755);
+        fclose(scr);
+    } else {
+        log_fatal(info, _("Could not write uninstall script: %s"), binpath);
+    }
+    return 0;
 }
 
 /* Launch a web browser with a product information page
@@ -1032,6 +1241,7 @@ char install_menuitems(install_info *info, desktop_type desktop)
     const char **tmp_links;
     char buf[PATH_MAX];
     struct bin_elem *elem;
+    struct option_elem *opt;
     char ret_val = 0;
     const char *desk_base;
     char icon_base[PATH_MAX];
@@ -1089,25 +1299,26 @@ char install_menuitems(install_info *info, desktop_type desktop)
 		}
     }
 
-    for (elem = info->bin_list; elem; elem = elem->next ) {      
-        for ( tmp_links = app_links; *tmp_links; ++tmp_links ) {
-            FILE *fp;
-            char finalbuf[PATH_MAX];
+    for (opt = info->options_list; opt; opt = opt->next ) {
+        for (elem = opt->bin_list; elem; elem = elem->next ) {      
+            for ( tmp_links = app_links; *tmp_links; ++tmp_links ) {
+                FILE *fp;
+                char finalbuf[PATH_MAX];
 
-            expand_home(info, *tmp_links, buf);
+                expand_home(info, *tmp_links, buf);
 
-            if ( access(buf, W_OK) < 0 )
-                continue;
+                if ( access(buf, W_OK) < 0 )
+                    continue;
 
-            snprintf(finalbuf, PATH_MAX, "%s%s/", buf, (elem->menu) ? elem->menu : "Games");
-            file_create_hierarchy(info, finalbuf);
+                snprintf(finalbuf, PATH_MAX, "%s%s/", buf, (elem->menu) ? elem->menu : "Games");
+                file_create_hierarchy(info, finalbuf);
 
-            /* Presumably if there is no icon, no desktop entry */
-            if ( (elem->icon == NULL) || (elem->symlink == NULL) ) {
-                continue;
-            }
-            strncat(finalbuf, elem->symlink, PATH_MAX);
-            switch(desktop){
+                /* Presumably if there is no icon, no desktop entry */
+                if ( (elem->icon == NULL) || (elem->symlink == NULL) ) {
+                    continue;
+                }
+                strncat(finalbuf, elem->symlink, PATH_MAX);
+                switch(desktop){
                 case DESKTOP_KDE:
                     strncat(finalbuf,".kdelnk", PATH_MAX);
                     break;
@@ -1117,44 +1328,45 @@ char install_menuitems(install_info *info, desktop_type desktop)
                     break;
                 default:
                     break;
-            }
-
-            fp = fopen(finalbuf, "w");
-            if (fp) {
-                char exec[PATH_MAX*2], icon[PATH_MAX];
-
-                if (exec_command[0] != 0) {
-                    snprintf(exec, sizeof(exec), "%s", exec_command);
-                } else {
-                    snprintf(exec, sizeof(exec), "%s", elem->path);
                 }
-                snprintf(icon, PATH_MAX, "%s/%s", info->install_path, elem->icon);
-                if (desktop == DESKTOP_KDE) {
+
+                fp = fopen(finalbuf, "w");
+                if (fp) {
+                    char exec[PATH_MAX*2], icon[PATH_MAX];
+
+                    if (exec_command[0] != 0) {
+                        snprintf(exec, sizeof(exec), "%s", exec_command);
+                    } else {
+                        snprintf(exec, sizeof(exec), "%s", elem->path);
+                    }
+                    snprintf(icon, PATH_MAX, "%s/%s", info->install_path, elem->icon);
+                    if (desktop == DESKTOP_KDE) {
                         fprintf(fp, "# KDE Config File\n");
+                    }
+                    fprintf(fp, "[%sDesktop Entry]\n"
+                            "Name=%s\n"
+                            "Comment=%s\n"
+                            "Exec=%s\n"
+                            "Icon=%s\n"
+                            "Terminal=0\n"
+                            "Type=Application\n",
+                            (desktop==DESKTOP_KDE) ? "KDE " : "",
+                            elem->name ? elem->name : info->name,
+                            elem->desc ? elem->desc : info->desc,
+                            exec, icon);
+                    fclose(fp);
+                    add_file_entry(info, opt, finalbuf, NULL);
+
+                    // successful REDHAT takes care of KDE/GNOME
+                    // tell caller no need to continue others
+                    ret_val = (desktop == DESKTOP_REDHAT);
+
+                } else {
+                    log_warning(info, _("Unable to create desktop file '%s'"), finalbuf);
                 }
-                fprintf(fp, "[%sDesktop Entry]\n"
-                             "Name=%s\n"
-                             "Comment=%s\n"
-                             "Exec=%s\n"
-                             "Icon=%s\n"
-                             "Terminal=0\n"
-                             "Type=Application\n",
-                             (desktop==DESKTOP_KDE) ? "KDE " : "",
-                             elem->name ? elem->name : info->name,
-                             elem->desc ? elem->desc : info->desc,
-						     exec, icon);
-                fclose(fp);
-                add_file_entry(info, finalbuf);
-
-                // successful REDHAT takes care of KDE/GNOME
-                // tell caller no need to continue others
-                ret_val = (desktop == DESKTOP_REDHAT);
-
-            } else {
-                log_warning(info, _("Unable to create desktop file '%s'"), finalbuf);
+                /* Created a desktop item, our job is done here */
+                break;
             }
-            /* Created a desktop item, our job is done here */
-            break;
         }
     }
     return ret_val;

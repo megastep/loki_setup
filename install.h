@@ -23,6 +23,9 @@
 /* The default location of the symlinks */
 #define DEFAULT_SYMLINKS    "/usr/local/bin"
 
+#define SETUP_VERSION_MAJOR 1
+#define SETUP_VERSION_MINOR 5
+
 /* The different setup states */
 typedef enum {
     SETUP_ABORT = -1,
@@ -63,6 +66,9 @@ typedef struct {
     const char *desc;
     const char *version;
 
+    /* The update URL for the product */
+    const char *update_url;
+
     /* The product install destination */
     char install_path[PATH_MAX];
 
@@ -98,43 +104,53 @@ typedef struct {
     /* The total install size, in bytes */
     size_t install_size;
 
-    /* List of installed files and symlinks */
-    struct file_elem {
-        char *path;
-        struct file_elem *next;
-    } *file_list;
-
-    /* List of installed directories */
-    struct dir_elem {
-        char *path;
-        struct dir_elem *next;
-    } *dir_list;
-
-    /* List of installed binaries */
-    struct bin_elem {
-        char *path;
-        const char *symlink;
-        const char *desc;
-        const char *menu;
-        const char *name;
-        const char *icon;
-        struct bin_elem *next;
-    } *bin_list;
-
-    /* List of post-uninstall scripts to run (from RPM files) */
-    struct script_elem {
-        char *script;
-        struct script_elem *next;
-    } *pre_script_list, *post_script_list;
-
-    /* List of RPMs installed in the process */
-    struct rpm_elem {
+    struct option_elem {
         char *name;
-	    char *version;
-	    char *release;
+
+        /* List of installed files and symlinks */
+        struct file_elem {
+            char *path;
+            const char *option;
+            unsigned char md5sum[16];
+            char *symlink; /* If file is a symlink, what it points to */
+            struct file_elem *next;
+        } *file_list;
+
+        /* List of installed directories */
+        struct dir_elem {
+            char *path;
+            const char *option;
+            struct dir_elem *next;
+        } *dir_list;
+
+        /* List of installed binaries */
+        struct bin_elem {
+            char *path;
+            const char *symlink;
+            const char *desc;
+            const char *menu;
+            const char *name;
+            const char *icon;
+            struct bin_elem *next;
+        } *bin_list;
+
+        /* List of post-uninstall scripts to run (from RPM files) */
+        struct script_elem {
+            char *script;
+            struct script_elem *next;
+        } *pre_script_list, *post_script_list;
+
+        /* List of RPMs installed in the process */
+        struct rpm_elem {
+            char *name;
+            char *version;
+            int release;
             int autoremove;
-        struct rpm_elem *next;
-    } *rpm_list;
+            struct rpm_elem *next;
+        } *rpm_list;
+
+        struct option_elem *next;
+    } *options_list;
 
     /* Arguments to the game when launching it */
     const char *args;
@@ -165,6 +181,7 @@ extern const char *GetProductEULA(install_info *info);
 extern const char *GetProductREADME(install_info *info);
 extern const char *GetWebsiteText(install_info *info);
 extern const char *GetProductURL(install_info *info);
+extern const char *GetProductUpdateURL(install_info *info);
 extern const char *GetLocalURL(install_info *info);
 extern const char *GetAutoLaunchURL(install_info *info);
 extern const char *GetPreInstall(install_info *info);
@@ -179,22 +196,25 @@ extern install_info *create_install(const char *configfile, int log_level,
 				    const char *install_path,
 				    const char *binary_path);
 
+/* Create a new component entry, i.e. an option */
+struct option_elem *add_option_entry(install_info *info, const char *name);
+
 /* Add a file entry to the list of files installed */
-extern void add_file_entry(install_info *info, const char *path);
+extern struct file_elem *add_file_entry(install_info *info, struct option_elem *comp, const char *path, const char *symlink);
 
 /* Add a script entry for uninstallation of manually installed RPMs */
-extern void add_script_entry(install_info *info, const char *script, int post);
+extern void add_script_entry(install_info *info, struct option_elem *comp, const char *script, int post);
 
 /* Add a RPM entry to the list of RPMs installed */
-extern void add_rpm_entry(install_info *info, const char *name, 
-			  const char *version, const char *release,
+extern void add_rpm_entry(install_info *info, struct option_elem *comp, const char *name, 
+			  const char *version, int release,
 			  const int autoremove);
 
 /* Add a directory entry to the list of directories installed */
-extern void add_dir_entry(install_info *info, const char *path);
+extern void add_dir_entry(install_info *info, struct option_elem *comp, const char *path);
 
 /* Add a binary entry to the list of binaries installed */
-extern void add_bin_entry(install_info *info, const char *path,
+extern void add_bin_entry(install_info *info, struct option_elem *comp, const char *path,
                    const char *symlink, const char *desc, const char *menu,
                    const char *name, const char *icon, const char *play);
 
@@ -232,6 +252,9 @@ extern void uninstall(install_info *info);
 
 /* Generate an uninstall shell script */
 extern void generate_uninstall(install_info *info);
+
+/* Updates the 'uninstall' binary in ~/.loki/installed/bin and creates a shell script */
+extern int update_uninstall(install_info *info);
 
 /* Run pre/post install scripts */
 extern int install_preinstall(install_info *info);

@@ -1,6 +1,6 @@
 
 DISTDIR = ..
-PACKAGE = setup-1.4
+PACKAGE = setup-1.5
 
 arch := $(shell ./print_arch)
 libc := $(shell ./print_libc)
@@ -10,6 +10,9 @@ os   := $(shell uname -s)
 
 CC = gcc
 
+# This indicates where the 'setupdb' CVS module is checked out
+SETUPDB	= ../setupdb
+
 # The supported locales so far
 LOCALES = fr de es sv it nl
 
@@ -17,7 +20,7 @@ OPTIMIZE = -Wall -g -O2 -funroll-loops
 ifeq ($(arch), alpha)
     OPTIMIZE += -mcpu=ev4 -Wa,-mall
 endif
-HEADERS = -I/usr/X11R6/include -I/usr/local/include $(shell glib-config --cflags) $(shell xml-config --cflags) $(shell libglade-config --cflags)
+HEADERS = -I$(SETUPDB) -I/usr/X11R6/include -I/usr/local/include $(shell glib-config --cflags) $(shell xml-config --cflags) $(shell libglade-config --cflags)
 OPTIONS = -DSTUB_UI
 
 ifeq ($(USE_RPM),true)
@@ -29,13 +32,15 @@ endif
 
 CFLAGS += $(OPTIMIZE) $(HEADERS) $(OPTIONS)
 
-OBJS = main.o install.o detect.o copy.o file.o network.o log.o install_log.o plugins.o
+COMMON_OBJS = log.o install_log.o
+OBJS = $(COMMON_OBJS) main.o detect.o plugins.o network.o install.o copy.o file.o 
+UNINSTALL_OBJS = $(COMMON_OBJS) uninstall.o
 CONSOLE_OBJS = $(OBJS) console_ui.o
 GUI_OBJS = $(OBJS) gtk_ui.o
 
 SRCS = $(OBJS:.o=.c) $(CONSOLE_OBJS:.o=.c) $(GUI_OBJS:.o=.c)
 
-LIBS = plugins/libplugins.a `xml-config --prefix`/lib/libxml.a -lz
+LIBS = plugins/libplugins.a $(SETUPDB)/libsetupdb.a `xml-config --prefix`/lib/libxml.a -lz
 ifeq ($(os),FreeBSD)
 LIBS += -L/usr/local/lib -lintl
 endif
@@ -50,10 +55,13 @@ endif
 CONSOLE_LIBS = $(LIBS)
 GUI_LIBS = $(LIBS) -Wl,-Bdynamic $(shell gtk-config --libs || echo "-lgtk -lgdk") $(shell libglade-config --prefix)/lib/libglade.a -rdynamic
 
-all: do-plugins setup setup.gtk
+all: do-plugins setup setup.gtk uninstall
 
 testxml: testxml.o
 	$(CC) -o $@ $^ $(LIBS)
+
+uninstall: $(UNINSTALL_OBJS)
+	$(CC) -o $@ $^ $(CONSOLE_LIBS) -static
 
 setup:	$(CONSOLE_OBJS)
 	$(CC) -o $@ $^ $(CONSOLE_LIBS) -static
@@ -62,7 +70,7 @@ setup.gtk: $(GUI_OBJS)
 	$(CC) -o $@ $^ $(GUI_LIBS)
 
 do-plugins:
-	$(MAKE) -C plugins DYN_PLUGINS=$(DYN_PLUGINS) USE_RPM=$(USE_RPM) all
+	$(MAKE) -C plugins DYN_PLUGINS=$(DYN_PLUGINS) USE_RPM=$(USE_RPM) SETUPDB=$(shell pwd)/$(SETUPDB) all
 
 install.dbg: all
 ifeq ($(DYN_PLUGINS),true)
@@ -70,6 +78,7 @@ ifeq ($(DYN_PLUGINS),true)
 endif
 	@if [ -d image/setup.data/bin/$(os)/$(arch)/$(libc) ]; then \
 	    cp -v setup image/setup.data/bin/$(os)/$(arch); \
+	    cp -v uninstall image/setup.data/bin/$(os)/$(arch); \
 	    cp -v setup.gtk image/setup.data/bin/$(os)/$(arch)/$(libc); \
 	fi
 
@@ -80,6 +89,8 @@ endif
 	@if [ -d image/setup.data/bin/$(os)/$(arch)/$(libc) ]; then \
 	    cp -v setup image/setup.data/bin/$(os)/$(arch); \
 	    strip image/setup.data/bin/$(os)/$(arch)/setup; \
+	    cp -v uninstall image/setup.data/bin/$(os)/$(arch); \
+	    strip image/setup.data/bin/$(os)/$(arch)/uninstall; \
 	    cp -v setup.gtk image/setup.data/bin/$(os)/$(arch)/$(libc); \
 	    strip image/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk; \
 	fi

@@ -19,6 +19,7 @@
 
 /* Magic to detect a gzip compressed file */
 static const char gzip_magic[2] = { 0037, 0213 };
+extern struct option_elem *current_option;
 
 void file_create_hierarchy(install_info *info, const char *path)
 {
@@ -125,6 +126,7 @@ stream *file_open(install_info *info, const char *path, const char *mode)
             log_warning(info, _("Couldn't read from file: %s"), path);
             return(NULL);
         }
+		streamp->elem = NULL;
     } else {
 	    file_create_hierarchy(info, path);
 
@@ -137,7 +139,8 @@ stream *file_open(install_info *info, const char *path, const char *mode)
             log_warning(info, _("Couldn't write to file: %s"), path);
             return(NULL);
         }
-        add_file_entry(info, path);
+        streamp->elem = add_file_entry(info, current_option, path, NULL);
+		md5_init(&streamp->md5);
     }
     return(streamp);
 }
@@ -161,13 +164,14 @@ int file_read(install_info *info, void *buf, int len, stream *streamp)
 
 void file_skip(install_info *info, int len, stream *streamp)
 {
-  char buf[BUFSIZ];
-  int nread;
-  while(len){
-	nread = file_read(info, buf, (len>BUFSIZ) ? BUFSIZ : len, streamp);
-	if(!nread) break;
-	len -= nread;
-  }
+	char buf[BUFSIZ];
+	int nread;
+	while(len){
+		nread = file_read(info, buf, (len>BUFSIZ) ? BUFSIZ : len, streamp);
+		if(!nread)
+			break;
+		len -= nread;
+	}
 }
 
 void file_skip_zeroes(install_info *info, stream *streamp)
@@ -211,10 +215,13 @@ int file_write(install_info *info, void *buf, int len, stream *streamp)
         if ( streamp->zfp ) {
             nwrote = gzwrite(streamp->zfp, buf, len);
         }
+
         if ( nwrote <= 0 ) {
             log_warning(info, _("Short write on %s"), streamp->path);
-        }else
-		  streamp->size += nwrote; /* Warning: we assume that we always append data */
+        } else {
+			streamp->size += nwrote; /* Warning: we assume that we always append data */
+			md5_write(&streamp->md5, buf, nwrote);
+		}
     } else {
         log_warning(info, _("Write on read stream"));
     }
@@ -252,6 +259,10 @@ int file_close(install_info *info, stream *streamp)
                 }
             }
         }
+		if ( streamp->elem ) {
+			md5_final(&streamp->md5);
+			memcpy(streamp->elem->md5sum, streamp->md5.buf, 16);
+		}
         free(streamp->path);
         free(streamp);
     }
@@ -279,7 +290,7 @@ int file_symlink(install_info *info, const char *oldpath, const char *newpath)
     if ( retval < 0 ) {
         log_warning(info, _("Can't create %s: %s"), newpath, strerror(errno));
     } else {
-        add_file_entry(info, newpath);
+        add_file_entry(info, current_option, newpath, oldpath);
     }
     return(retval);
 }
@@ -310,7 +321,7 @@ int file_mkdir(install_info *info, const char *path, int mode)
 		  if(errno != EEXIST)
             log_warning(info, _("Can't create %s: %s"), path, strerror(errno));
         } else {
-            add_dir_entry(info, path);
+            add_dir_entry(info, current_option, path);
         }
     }
     return(retval);
@@ -318,51 +329,51 @@ int file_mkdir(install_info *info, const char *path, int mode)
 
 int file_mkfifo(install_info *info, const char *path, int mode)
 {
-  int retval;
+	int retval;
 
-  /* Log the action */
-  log_quiet(info, _("Creating FIFO: %s\n"), path);
+	/* Log the action */
+	log_quiet(info, _("Creating FIFO: %s\n"), path);
   
-  /* Do the action */
-  file_create_hierarchy(info, path);
-  retval = mkfifo(path, mode);
-  if ( retval < 0 ) {
-	if(errno != EEXIST)
-	  log_warning(info, _("Can't create %s: %s"), path, strerror(errno));
-  } else {
-	add_file_entry(info, path);
-  }
-  return(retval);
+	/* Do the action */
+	file_create_hierarchy(info, path);
+	retval = mkfifo(path, mode);
+	if ( retval < 0 ) {
+		if(errno != EEXIST)
+			log_warning(info, _("Can't create %s: %s"), path, strerror(errno));
+	} else {
+		add_file_entry(info, current_option, path, "FIFO");
+	}
+	return(retval);
 }
 
 int file_mknod(install_info *info, const char *path, int mode, dev_t dev)
 {
-  int retval;
+	int retval;
 
-  /* Log the action */
-  log_quiet(info, _("Creating device: %s\n"), path);
+	/* Log the action */
+	log_quiet(info, _("Creating device: %s\n"), path);
   
-  /* Do the action */
-  file_create_hierarchy(info, path);
-  retval = mknod(path, mode, dev);
-  if ( retval < 0 ) {
-	if(errno != EEXIST)
-	  log_warning(info, _("Can't create %s: %s"), path, strerror(errno));
-  } else {
-	add_file_entry(info, path);
-  }
-  return(retval);
+	/* Do the action */
+	file_create_hierarchy(info, path);
+	retval = mknod(path, mode, dev);
+	if ( retval < 0 ) {
+		if(errno != EEXIST)
+			log_warning(info, _("Can't create %s: %s"), path, strerror(errno));
+	} else {
+		add_file_entry(info, current_option, path, "Device");
+	}
+	return(retval);
 }
 
 int file_chmod(install_info *info, const char *path, int mode)
 {
-   int retval;
-   
-   retval = chmod(path, mode);
+	int retval;
+	
+	retval = chmod(path, mode);
     if ( retval < 0 ) {
         log_warning(info, _("Can't change permissions for %s: %s"), path, strerror(errno));
 	}
-   return retval;
+	return retval;
 }
 
 /* The uncompressed file size */

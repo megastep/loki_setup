@@ -88,8 +88,10 @@
 #include "detect.h"
 #include "plugins.h"
 #include "install_log.h"
+#include "install.h"
 
-static char current_option[200];
+char current_option_txt[200];
+struct option_elem *current_option;
 
 void getToken(const char *src, const char **end) {
     *end = 0;
@@ -197,7 +199,7 @@ size_t copy_file(install_info *info, const char *cdrom, const char *path, const 
 			buf[len] = '\0'; /* Nul-terminate the string */
 			file_symlink(info, buf, final);
 			if ( update ) {
-				update(info, final, 100, 100, current_option);
+				update(info, final, 100, 100, current_option_txt);
 			}
 		} else {
 			log_warning(info, _("Unable to create %s symlink pointing to %s"), final, buf);
@@ -214,6 +216,7 @@ size_t copy_file(install_info *info, const char *cdrom, const char *path, const 
 			file_close(info, input);
 			return(-1);
 		}
+
 		while ( (copied=file_read(info, buf, BUFSIZ, input)) > 0 ) {
 			if ( file_write(info, buf, copied, output) != copied ) {
 				break;
@@ -221,7 +224,7 @@ size_t copy_file(install_info *info, const char *cdrom, const char *path, const 
 			info->installed_bytes += copied;
 			size += copied;
 			if ( update ) {
-				update(info, final, size, input->size, current_option);
+				update(info, final, size, input->size, current_option_txt);
 			}
 		}
 		file_close(info, output);
@@ -278,7 +281,7 @@ size_t copy_path(install_info *info, const char *path, const char *dest,
         } else {
 			const SetupPlugin *plug = FindPluginForFile(path);
 			if (plug) {
-				copied = plug->Copy(info, path, dest, current_option, node, update);
+				copied = plug->Copy(info, path, dest, current_option_txt, node, update);
             } else {
                 copied = copy_file(info, cdrom, path, dest, final, strip_dirs, update);
             }
@@ -403,8 +406,8 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
 		
 			strncpy(fdest, dest, sizeof(fdest));
 
-			strncpy(current_option, final, sizeof(current_option));
-			strncat(current_option, " binary", sizeof(current_option));
+			strncpy(current_option_txt, final, sizeof(current_option_txt));
+			strncat(current_option_txt, " binary", sizeof(current_option_txt));
 			snprintf(fpat, sizeof(fpat), "bin/%s/%s/%s", arch, libc, final);
 			if ( keepdirs ) { /* Append the subdirectory to the final destination */
 				char *slash = strrchr(final, '/');
@@ -474,7 +477,7 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
                 snprintf(sym_to, sizeof(sym_to), "%s/%s", info->symlinks_path, symlink);
                 file_symlink(info, final, sym_to);
             }
-            add_bin_entry(info, final, symlink,
+            add_bin_entry(info, current_option, final, symlink,
 						  xmlGetProp(node, "desc"),
 						  xmlGetProp(node, "menu"),
 						  xmlGetProp(node, "name"),
@@ -489,7 +492,7 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
 int copy_script(install_info *info, xmlNodePtr node, const char *script, const char *dest,
 				void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
-	update(info, _("Running script"), 0, 0, current_option);
+	update(info, _("Running script"), 0, 0, current_option_txt);
     return(run_script(info, script, -1));
 }
 
@@ -498,6 +501,11 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
 {
     size_t size, copied;
     char tmppath[PATH_MAX];
+    struct option_elem *option;
+    const char *str = xmlNodeListGetString(info->config, node->childs, 1);
+    
+    parse_line(&str, tmppath, sizeof(tmppath));
+    current_option = option = add_option_entry(info, tmppath);
 
     size = 0;
     node = node->childs;
@@ -533,7 +541,7 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
         if ( strcmp(node->name, "files") == 0 && lang_matched ) {
             const char *str = xmlNodeListGetString(info->config, (node->parent)->childs, 1);
             
-            parse_line(&str, current_option, sizeof(current_option));
+            parse_line(&str, current_option_txt, sizeof(current_option_txt));
             copied = copy_list(info,
                                xmlNodeListGetString(info->config, node->childs, 1),
                                path, from_cdrom, strip_dirs, node,
