@@ -22,6 +22,41 @@ static int prompt_user(const char *prompt, char *default_answer,
     return answer[0];
 }
 
+static void parse_option(install_info *info, xmlNodePtr node)
+{
+    char *text, line[BUFSIZ];
+    char prompt[BUFSIZ];
+    const char *wanted;
+
+    /* See if the user wants this option */
+    text = xmlNodeListGetString(info->config, node->childs, 1);
+    line[0] = '\0';
+    while ( (line[0] == 0) && parse_line(&text, line, BUFSIZ) )
+        ;
+    sprintf(prompt, "Install %s?", line);
+
+    wanted = xmlGetProp(node, "install");
+    if ( wanted  && (strcmp(wanted, "true") == 0) ) {
+        prompt_user(prompt, "Y/n", line, BUFSIZ);
+    } else {
+        prompt_user(prompt, "N/y", line, BUFSIZ);
+    }
+
+    if ( toupper(line[0]) == 'Y' ) {
+        /* Mark this option for installation */
+        xmlSetProp(node, "install", "true");
+
+        /* Recurse down any other options */
+        node = node->childs;
+        while ( node ) {
+            if ( strcmp(node->name, "option") == 0 ) {
+                parse_option(info, node);
+            }
+            node = node->next;
+        }
+    }
+}
+
 static install_state console_init(install_info *info)
 {
     printf("\n");
@@ -33,6 +68,7 @@ static install_state console_init(install_info *info)
 static install_state console_setup(install_info *info)
 {
     char path[PATH_MAX];
+    xmlNodePtr node;
 
     /* Find out where to install the game */
     if ( ! prompt_user("Where would you like to install?", info->install_path,
@@ -41,6 +77,14 @@ static install_state console_setup(install_info *info)
     }
     strcpy(info->install_path, path);
 
+    /* Go through the install options */
+    node = info->config->root->childs;
+    while ( node ) {
+        if ( strcmp(node->name, "option") == 0 ) {
+            parse_option(info, node);
+        }
+        node = node->next;
+    }
     return SETUP_INSTALL;
 }
 
