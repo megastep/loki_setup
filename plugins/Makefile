@@ -1,11 +1,11 @@
 #
 # Makefile for the setup plugins
-# $Id: Makefile,v 1.1 2000-07-31 21:27:08 megastep Exp $
+# $Id: Makefile,v 1.2 2000-07-31 21:33:44 megastep Exp $
 #
 
 STATICS = cpio.c
 PLUGINS = tar.c outrage.c # sample.c
-CFLAGS  = -fPIC -Wall -g -O2 -I.. -I.
+CFLAGS  = -fPIC -Wall -g -O2 -I.. -I. $(shell xml-config --cflags)
 CC		= gcc
 
 ifeq ($(USE_RPM),true)

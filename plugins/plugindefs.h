@@ -8,7 +8,7 @@ extern SetupPlugin tar_plugin;
 #ifdef RPM_SUPPORT
 extern SetupPlugin rpm_plugin;
 #endif
-extern SetupPlugin opkg_plugin;
+/* extern SetupPlugin opkg_plugin; */
 #endif
 
 extern SetupPlugin cpio_plugin;
@@ -22,7 +22,7 @@ SetupPlugin *static_plugins[] = {
 #ifdef RPM_SUPPORT
 	&rpm_plugin,
 #endif
-	&opkg_plugin,
+/* 	&opkg_plugin, */
 #endif
 	NULL
 };
