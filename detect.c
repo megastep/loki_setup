@@ -57,7 +57,9 @@ void unmount_filesystems(install_info *info)
     struct mounted_elem *mnt = info->mounted_list, *oldmnt;
     while ( mnt ) {
         log_normal(info, _("Unmounting device %s"), mnt->device);
+#ifndef __FreeBSD__
         umount(mnt->device);
+#endif
         free(mnt->device);
         oldmnt = mnt;
         mnt = mnt->next;
