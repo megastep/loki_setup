@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.61 2000-10-11 08:57:59 megastep Exp $ */
+/* $Id: install.c,v 1.62 2000-10-11 23:47:04 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -532,7 +532,7 @@ void add_bin_entry(install_info *info, struct option_elem *comp, const char *pat
 
     elem = (struct bin_elem *)malloc(sizeof *elem);
     if ( elem ) {
-        elem->path = strdup(path);
+        elem->path = strdup(remove_root(info, path));
         if ( elem->path ) {
             elem->symlink = symlink;
             elem->desc = desc;
@@ -890,6 +890,7 @@ void generate_uninstall(install_info *info)
 
 	if ( product ) {
 		struct file_elem *felem;
+        struct bin_elem *belem;
 		struct dir_elem *delem;
 		struct script_elem *selem;
 		struct rpm_elem *relem;
@@ -905,6 +906,12 @@ void generate_uninstall(install_info *info)
                 } else {
                     loki_register_file(option, felem->path, get_md5(felem->md5sum));
                 }
+            }
+
+            /* Add binaries */
+            for ( belem = opt->bin_list; belem; belem = belem->next ) {
+                /* TODO: Find a way to get the damn MD5 that was computed while copying the file */
+                loki_register_file(option, belem->path, NULL);
             }
 
             /* Add directories */
@@ -1057,13 +1064,15 @@ int update_uninstall(install_info *info)
         snprintf(cmd, sizeof(cmd), "%s --version", binpath);
         pipe = popen(cmd, "r");
         if ( pipe ) {
-            int major, minor;
+            int major, minor, rel;
             /* Try to see if we have to update it */
-            fscanf(pipe, "%d.%d", &major, &minor);
+            fscanf(pipe, "%d.%d.%d", &major, &minor, &rel);
             pclose(pipe);
 
             if ( (major < SETUP_VERSION_MAJOR) || 
-                 ((major==SETUP_VERSION_MAJOR) && (minor < SETUP_VERSION_MINOR)) ) {
+                 ((major==SETUP_VERSION_MAJOR) && (minor < SETUP_VERSION_MINOR)) ||
+                 ((major==SETUP_VERSION_MAJOR) && (minor == SETUP_VERSION_MINOR) &&
+                  (rel < SETUP_VERSION_RELEASE )) ) {
                 /* Perform the upgrade, overwrite the uninstall binary */
                 perform_upgrade = 1;
             }
@@ -1074,6 +1083,8 @@ int update_uninstall(install_info *info)
     } else {
         perform_upgrade = 1;
     }
+
+    /* TODO: Try to install global command in the symlinks path */
 
     if ( perform_upgrade ) {
         char srcpath[PATH_MAX];

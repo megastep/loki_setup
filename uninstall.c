@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.2 2000-10-11 08:57:59 megastep Exp $ */
+/* $Id: uninstall.c,v 1.3 2000-10-11 23:47:04 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -39,7 +39,7 @@ static int perform_uninstall(product_t *prod)
             while ( file ) {
                 switch(loki_gettype_file(file)) {
                 case LOKI_FILE_DIRECTORY:
-                    printf("Removing directory: %s\n", loki_getpath_file(file));
+                    // printf("Removing directory: %s\n", loki_getpath_file(file));
                     if ( rmdir(loki_getpath_file(file)) < 0 ) {
                         perror("rmdir");
                     }
@@ -50,7 +50,7 @@ static int perform_uninstall(product_t *prod)
                     printf("Notice: the %s RPM was installed for this product.\n", loki_getpath_file(file));
                     break;
                 default:
-                    printf("Removing file: %s\n", loki_getpath_file(file));
+                    // printf("Removing file: %s\n", loki_getpath_file(file));
                     if ( unlink(loki_getpath_file(file)) < 0 )
                         perror("unlink");
                     break;
@@ -79,6 +79,7 @@ int main(int argc, char **argv)
 {
 	product_t *prod;
     product_info_t *info;
+    char desc[128];
 	int ret = 0;
 
 	/* Set the locale */
@@ -114,7 +115,7 @@ int main(int argc, char **argv)
             }
         }
     } else if ( !strcmp(argv[1], "-v") || !strcmp(argv[1], "--version") ) {
-        printf("%d.%d\n", SETUP_VERSION_MAJOR, SETUP_VERSION_MINOR);
+        printf("%d.%d.%d\n", SETUP_VERSION_MAJOR, SETUP_VERSION_MINOR, SETUP_VERSION_RELEASE);
     } else {
         prod = loki_openproduct(argv[1]);
         if ( ! prod ) {
@@ -126,6 +127,7 @@ int main(int argc, char **argv)
         /* Dump information about the program being uninstalled */
         printf(_("Product name: %s\nInstalled in %s\n"),
                info->name, info->root );
+        strncpy(desc, info->description, sizeof(desc));
         
         /* Uninstall the damn thing */
         chdir(info->root);
@@ -133,6 +135,8 @@ int main(int argc, char **argv)
             fprintf(stderr, _("An error occured during the uninstallation process.\n"));
             ret = 1;
             loki_closeproduct(prod);
+        } else {
+            printf(_("%s has been successfully uninstalled.\n"), desc);
         }
     }
 	return ret;
