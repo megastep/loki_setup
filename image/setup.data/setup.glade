@@ -397,7 +397,7 @@
 	      <widget>
 		<class>GtkEntry</class>
 		<child_name>GtkCombo:entry</child_name>
-		<name>binary_entrycop</name>
+		<name>binary_entry</name>
 		<tooltip>Symbolic links to installed binaries are placed here</tooltip>
 		<can_focus>True</can_focus>
 		<signal>
