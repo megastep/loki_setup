@@ -36,7 +36,18 @@ dnl Check for gtk12 libraries in case those are available (FreeBSD)
 AC_CHECK_LIB(gdk12, gdk_init, GTK12="12")
 
 AC_CHECK_LIB(dl, dlopen, USE_LIBDL=yes)
-AC_CHECK_LIB(bz2, BZ2_bzopen, LIBBZ2_PREFIX=yes)
+AC_CHECK_LIB(bz2, BZ2_bzopen, HAVE_BZ2_BZOPEN=yes)
+AC_CHECK_LIB(bz2, bzopen, HAVE_NORMAL_BZOPEN=yes)
+
+if test x$HAVE_BZ2_BZOPEN = xyes; then
+    LIBBZ2_PREFIX="yes"
+    HAVE_BZIP2_SUPPORT="yes"
+fi
+
+if test x$HAVE_NORMAL_BZOPEN = xyes; then
+    LIBBZ2_PREFIX="no"
+    HAVE_BZIP2_SUPPORT="yes"
+fi
 
 case "$target" in
     *i?86*)
@@ -114,6 +125,9 @@ AC_ARG_ENABLE(rpm,
 [  --enable-rpm              enable RPM archives support  [default=no]],
               , enable_rpm=no)
 if test x$enable_rpm = xyes; then
+        if test x$HAVE_BZIP2_SUPPORT != xyes; then
+             AC_MSG_ERROR([*** You need libbz2 to have RPM support.])
+        fi
         CFLAGS="$CFLAGS -DRPM_SUPPORT=3 -I/usr/include/rpm"
         PLUGINS="$PLUGINS rpm.c"
 		# This is for RPM 3.x
@@ -127,6 +141,9 @@ AC_ARG_ENABLE(rpm4,
 [  --enable-rpm4             enable RPM4 archives support  [default=no]],
               , enable_rpm=no)
 if test x$enable_rpm4 = xyes; then
+        if test x$HAVE_BZIP2_SUPPORT != xyes; then
+             AC_MSG_ERROR([*** You need libbz2 to have RPM support.])
+        fi
         CFLAGS="$CFLAGS -DRPM_SUPPORT=4 -I/usr/include/rpm"
         PLUGINS="$PLUGINS rpm.c"
 		# This is for RPM 4.x
@@ -146,8 +163,12 @@ if test ! -z "$USE_LIBINTL"; then
 	GUI_LIBS="$GUI_LIBS -lintl"
 fi
 
-if test ! -z "$LIBBZ2_PREFIX"; then
-	CFLAGS="$CFLAGS -DLIBBZ2_PREFIX"
+if test x$HAVE_BZIP2_SUPPORT = xyes; then
+  CFLAGS="$CFLAGS -DHAVE_BZIP2_SUPPORT"
+  BZ2LIB="-lbz2"
+  if test x$LIBBZ2_PREFIX = xyes; then
+    CFLAGS="$CFLAGS -DLIBBZ2_PREFIX"
+  fi
 fi
 
 GUI_LIBS="$GUI_LIBS -Wl,-Bdynamic $X_PRE_LIBS -L$x_libraries -lXi -lXext -lX11 -lm"
@@ -211,6 +232,7 @@ AC_SUBST(SETUPDB)
 AC_SUBST(PLUGINS)
 AC_SUBST(DYN_PLUGINS)
 AC_SUBST(GUI_LIBS)
+AC_SUBST(BZ2LIB)
 AC_SUBST(ARCH)
 AC_SUBST(LIBC)
 AC_SUBST(OS)

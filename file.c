@@ -17,6 +17,8 @@
 #include "file.h"
 #include "install_log.h"
 
+#ifdef HAVE_BZIP2_SUPPORT
+
 #ifdef LIBBZ2_PREFIX
 #define BZOPEN BZ2_bzopen
 #define BZDOPEN BZ2_bzdopen
@@ -31,6 +33,8 @@
 #define BZWRITE bzwrite
 #define BZERROR bzerror
 #define BZCLOSE bzclose
+#endif
+
 #endif
 
 /* Magic to detect a gzip compressed file */
@@ -132,12 +136,14 @@ stream *file_open(install_info *info, const char *path, const char *mode)
                 fclose(streamp->fp);
                 streamp->fp = NULL;
                 streamp->zfp = gzopen(path, "rb");
+            #ifdef HAVE_BZIP2_SUPPORT
             } else if ( memcmp(magic, bzip_magic, 2) == 0 ) {
 				/* TODO: Get the uncompressed size ! */
 
                 fclose(streamp->fp);
                 streamp->fp = NULL;
                 streamp->bzfp = BZOPEN(path, "rb");
+            #endif
             } else {
 			    struct stat st;
                 rewind(streamp->fp);

@@ -44,7 +44,7 @@ GUI_OBJS 			= $(OBJS) gtk_ui.o
 SRCS = $(OBJS:.o=.c) $(CONSOLE_OBJS:.o=.c) $(GUI_OBJS:.o=.c)
 
 COMMON_LIBS = plugins/libplugins.a dialog/libdialog.a \
-	      $(SETUPDB)/$(arch)/libsetupdb.a
+	      $(SETUPDB)/$(arch)/libsetupdb.a @BZ2LIB@
 LIBS =  $(COMMON_LIBS) @LIBS@ -lz -lm
 GUI_LIBS = $(COMMON_LIBS) @GUI_LIBS@ -lz
 CONSOLE_LIBS = $(LIBS) -lncurses -lgpm
