@@ -43,9 +43,7 @@
 #include "detect.h"
 
 #ifndef MNTTYPE_CDROM
-#ifdef __FreeBSD__
-#define MNTTYPE_CDROM    "cd9660"
-#elif defined(darwin)
+#if defined(__FreeBSD__) || defined(darwin)
 #define MNTTYPE_CDROM    "cd9660"
 #elif defined(hpux)
 #define MNTTYPE_CDROM    "cdfs"

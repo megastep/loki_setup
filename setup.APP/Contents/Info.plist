@@ -7,7 +7,7 @@
 	<key>CFBundleExecutable</key>
 	<string>setup.carbon</string>
         <key>CFBundleName</key>
-        <string>Unreal Tournament Setup</string>
+        <string>Loki Setup</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>
