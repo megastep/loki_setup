@@ -1,0 +1,9 @@
+
+1.1:
+SOL -	Added license file support (eula="license.txt" option for install XML)
+SOL -   Added support for <script> sections in options
+SOL -	Added preinstall and postinstall script support
+SOL -   Added web browser launch support (url="http://....")
+
+Initial Key:
+SOL - Sam Lantinga (hercules@lokigames.com)
