@@ -866,6 +866,8 @@ ssize_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
 				if (rc==0) {
 					info->installed_bytes += sz;
 					size += sz;
+				} else {
+					log_warning("Script seems to have failed with error code %d.", rc);
 				}
 				xmlFree(msg);
 			}
