@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.134 2004-06-09 18:31:26 megastep Exp $ */
+/* $Id: install.c,v 1.135 2004-06-24 01:01:01 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -792,6 +792,9 @@ install_info *create_install(const char *configfile,
         
         disable_install_path = 1;
         strncpy(info->install_path, pinfo->root, sizeof(info->install_path));
+
+		if ( GetProductReinstall(info) )
+			info->options.reinstalling = 1;
     }
 
     /* Handle component stuff */
@@ -1146,6 +1149,13 @@ void mark_option(install_info *info, xmlNodePtr node,
 {
     /* Unmark this option for installation */
     if ( !strcmp(node->name, "option") ) {
+		char name[BUFSIZ];
+		const char *text = xmlNodeListGetString(info->config, node->childs, 1);
+		*name = '\0';
+		while ( (*name == 0) && parse_line(&text, name, sizeof(name)) )
+			;
+		log_debug("Marked option '%s' to '%s'\n", name, value);
+
         xmlSetProp(node, "install", value);
     }
 

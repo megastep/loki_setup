@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.69 2004-04-14 21:44:00 megastep Exp $ */
+/* $Id: main.c,v 1.70 2004-06-24 01:01:01 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -318,9 +318,9 @@ int main(int argc, char **argv)
                    stuff that most installers do at startup. */
                 if ( GetProductRequireRoot(info) && geteuid()!=0 ) {
 #if defined(darwin)
-                carbon_AuthorizeUser();
-                state = SETUP_EXIT;
-                break;
+					carbon_AuthorizeUser();
+					state = SETUP_EXIT;
+					break;
 #else
 					UI.prompt(_("You need to run this installer as the super-user.\n"), RESPONSE_OK);
 					state = SETUP_EXIT;
@@ -333,10 +333,9 @@ int main(int argc, char **argv)
 					state = SETUP_EXIT;
 					continue;
 				}
-				if ( info->product && GetProductReinstall(info) ) {
+				if ( info->options.reinstalling ) {
 					if ( UI.prompt(_("Warning: You are about to reinstall\non top of an existing installation.\n"), 
 								   RESPONSE_YES) == RESPONSE_YES ) {
-						info->options.reinstalling = 1;
 						/* Restore the initial environment */
 						loki_put_envvars(info->product);
 					} else {
