@@ -14,6 +14,7 @@ CC = gcc
 SETUPDB	= ../setupdb
 
 IMAGE = /loki/patch-tools/setup-image
+CONVERT_IMAGE = /loki/patch-tools/convert-image
 
 # The supported locales so far
 LOCALES = fr de es sv it nl
@@ -119,8 +120,11 @@ endif
 	else \
 		echo No directory to copy the binary files to.; \
 	fi
+
+po-image:
 	for lang in $(LOCALES); do \
 		cp -f image/setup.data/locale/$$lang/LC_MESSAGES/*.mo $(IMAGE)/setup.data/locale/$$lang/LC_MESSAGES/; \
+		cp -f image/setup.data/locale/$$lang/LC_MESSAGES/loki-uninstall.mo $(CONVERT_IMAGE)/locale/$$lang/LC_MESSAGES/; \
 	done
 
 clean:
