@@ -461,6 +461,11 @@ int file_symlink(install_info *info, const char *oldpath, const char *newpath)
     int retval;
     struct stat st;
 
+	if ( !strcmp(oldpath, newpath) ) {
+		log_quiet(_("Trying to create a symbolic link on the same file: %s\n"), newpath);
+		return 0;
+	}
+
     /* Log the action */
     log_quiet(_("Creating symbolic link: %s --> %s\n"), newpath, oldpath);
 
