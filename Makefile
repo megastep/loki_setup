@@ -101,7 +101,7 @@ endif
 	    strip image/setup.data/bin/$(os)/$(arch)/uninstall; \
 	    brandelf -t $(os) image/setup.data/bin/$(os)/$(arch)/uninstall; \
 	    cp -v setup.gtk image/setup.data/bin/$(os)/$(arch)/$(libc); \
-	    strip image/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk;
+	    strip image/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk; \
 	else \
 		echo No directory to copy the binary files to.; \
 	fi

@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.40 2000-11-11 07:13:38 megastep Exp $ */
+/* $Id: main.c,v 1.41 2000-11-13 22:37:34 hercules Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -371,6 +371,7 @@ int main(int argc, char **argv)
                 break;
             case SETUP_PLAY:
                 state = launch_game(info);
+                break;
             case SETUP_ABORT:
                 abort_install();
                 break;
