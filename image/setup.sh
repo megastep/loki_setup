@@ -94,10 +94,10 @@ __EOF__
 # Try to run the setup program
 status=0
 rm -f "$setup"
-if ! try_run setup.gtk $* && ! try_run setup $* -fatal; then
+try_run setup.gtk $* || try_run setup $* -fatal || {
     echo "The setup program seems to have failed on $arch/$libc"
     echo
     echo "Please contact Loki Technical Support at support@lokigames.com"
     status=1
-fi
+}
 exit $status
