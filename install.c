@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.20 1999-11-30 21:34:43 hercules Exp $ */
+/* $Id: install.c,v 1.21 1999-12-01 01:32:33 hercules Exp $ */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -35,7 +35,7 @@ const char *GetProductEULA(install_info *info)
 }
 const char *GetProductURL(install_info *info)
 {
-    return xmlGetProp(info->config->root, "URL");
+    return xmlGetProp(info->config->root, "url");
 }
 const char *GetPreInstall(install_info *info)
 {
@@ -480,7 +480,7 @@ int launch_browser(install_info *info)
 #endif
         sprintf(command, "netscape -remote \"openURL(%s,new-window)\"", url);
         if ( system(command) != 0 ) {
-            sprintf(command, "netscape %s", url);
+            sprintf(command, "netscape %s &", url);
             if ( system(command) != 0 ) {
                 sprintf(command, "lynx %s", url);
                 if ( system(command) != 0 ) {
