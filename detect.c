@@ -557,6 +557,7 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
 				 || !strcmp(mntent->mnt_type, "cdfs")
 				 || !strcmp(mntent->mnt_type, "efs")
 #endif
+				 || !strcmp(mntent->mnt_type, "cd9660")
 				 || !strcmp(mntent->mnt_type, "auto"))
 				 && strncmp(mntent->mnt_fsname, DEVICE_FLOPPY, strlen(DEVICE_FLOPPY)) ) {
                 char *fsname = strdup(mntent->mnt_fsname);
@@ -617,6 +618,8 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
                 continue;
             }
             if ( strcmp(mnt_type, MNTTYPE_CDROM) == 0 ) {
+                path[num_cdroms ++] = strdup(mntent->mnt_dir);
+            } else if ( strcmp(mnt_type, "cd9660") == 0 ) {
                 path[num_cdroms ++] = strdup(mntent->mnt_dir);
             } else if ( strcmp(mnt_type, "auto") == 0 &&
                 strncmp(mntdev, DEVICE_FLOPPY, strlen(DEVICE_FLOPPY))) {
