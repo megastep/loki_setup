@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.19 1999-11-30 05:30:53 hercules Exp $ */
+/* $Id: install.c,v 1.20 1999-11-30 21:34:43 hercules Exp $ */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -190,6 +190,9 @@ void add_bin_entry(install_info *info, const char *path,
             elem->icon = icon;
             elem->next = info->bin_list;
             info->bin_list = elem;
+        }
+        if ( symlink && !info->installed_symlink ) {
+            info->installed_symlink = symlink;
         }
     } else {
         log_fatal(info, "Out of memory");
@@ -522,10 +525,10 @@ install_state launch_game(install_info *info)
 {
     char cmd[PATH_MAX];
 
-    if ( info->bin_list ) {
-        sprintf(cmd, "%s %s %s &", info->bin_list->path,info->name,info->args);
+    if ( info->installed_symlink ) {
+        sprintf(cmd, "%s %s &", info->installed_symlink, info->args);
+        system(cmd);
     }
-    system(cmd);
     return SETUP_EXIT;
 }
 
@@ -571,7 +574,7 @@ void install_menuitems(install_info *info, desktop_type desktop)
             FILE *fp;
 
             /* Presumably if there is no icon, no desktop entry */
-            if ( elem->icon == NULL ) {
+            if ( (elem->icon == NULL) || (elem->symlink == NULL) ) {
                 continue;
             }
             strncat(buf, elem->symlink, PATH_MAX);

@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.17 1999-11-30 05:30:53 hercules Exp $
+   $Id: gtk_ui.c,v 1.18 1999-11-30 21:34:43 hercules Exp $
 */
 
 #include <limits.h>
@@ -21,7 +21,7 @@
 #define SETUP_GLADE SETUP_BASE "setup.glade"
 
 #define LICENSE_FONT            \
-        "-adobe-helvetica-medium-r-normal-*-*-80-*-*-p-*-iso8859-1"
+        "-misc-fixed-medium-r-semicondensed-*-*-120-*-*-c-*-iso8859-8"
 
 /* Globals */
 
@@ -44,8 +44,7 @@ typedef enum
     COPY_PAGE,
     DONE_PAGE,
     ABORT_PAGE,
-    WARNING_PAGE,
-    LICENSE_PAGE
+    WARNING_PAGE
 } InstallPages;
 
 typedef struct {
@@ -57,6 +56,7 @@ static GladeXML *setup_glade;
 static int cur_state;
 static install_info *cur_info;
 static int diskspace;
+static int license_okay;
 
 /******** Local prototypes **********/
 static void check_install_button(void);
@@ -158,10 +158,13 @@ void setup_button_view_readme_slot( GtkWidget* w, gpointer data )
 
 void setup_button_license_agree_slot( GtkWidget* widget, gpointer func_data )
 {
-    GtkWidget *notebook;
+    GtkWidget *license;
 
-    notebook = glade_xml_get_widget(setup_glade, "setup_notebook");
-    gtk_notebook_set_page(GTK_NOTEBOOK(notebook), OPTION_PAGE);
+    license = glade_xml_get_widget(setup_glade, "license_dialog");
+    gtk_widget_hide(license);
+    license_okay = 1;
+    check_install_button();
+
     cur_state = SETUP_OPTIONS;
 }
 
@@ -250,7 +253,9 @@ static void check_install_button(void)
  
     /* See if we can install yet */
     message = "";
-    if ( ! *cur_info->install_path ) {
+    if ( ! license_okay ) {
+        message = "Please respond to the license dialog";
+    } else if ( ! *cur_info->install_path ) {
         message = "No destination directory selected";
     } else if ( cur_info->install_size <= 0 ) {
         message = "Please select at least one option";
@@ -595,22 +600,16 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
     sprintf(title, "%s Setup", info->desc);
     gtk_window_set_title(GTK_WINDOW(window), title);
 
-    /* Set the initial notebook page */
+    /* Set the initial state */
     notebook = glade_xml_get_widget(setup_glade, "setup_notebook");
     if ( GetProductEULA(info) ) {
-        widget = glade_xml_get_widget(setup_glade, "license_area");
-        if ( widget ) {
-            GdkFont *font;
-
-            font = gdk_font_load(LICENSE_FONT);
-            load_file(GTK_TEXT(widget), font, GetProductEULA(info));
-        }
-    	gtk_notebook_set_page(GTK_NOTEBOOK(notebook), LICENSE_PAGE);
+        license_okay = 0;
         cur_state = SETUP_LICENSE;
     } else {
-    	gtk_notebook_set_page(GTK_NOTEBOOK(notebook), OPTION_PAGE);
+        license_okay = 1;
         cur_state = SETUP_OPTIONS;
     }
+	gtk_notebook_set_page(GTK_NOTEBOOK(notebook), OPTION_PAGE);
 
     /* Go through the install options */
     options = glade_xml_get_widget(setup_glade, "option_vbox");
@@ -652,7 +651,25 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
 
 static install_state gtkui_license(install_info *info)
 {
-    return iterate_for_state();
+    GtkWidget *license;
+    GtkWidget *widget;
+
+    license = glade_xml_get_widget(setup_glade, "license_dialog");
+    widget = glade_xml_get_widget(setup_glade, "license_area");
+    if ( license && widget ) {
+        GdkFont *font;
+
+        font = gdk_font_load(LICENSE_FONT);
+        gtk_widget_hide(license);
+        load_file(GTK_TEXT(widget), font, GetProductEULA(info));
+        gtk_widget_show(license);
+        gtk_window_set_modal(GTK_WINDOW(license), TRUE);
+
+        iterate_for_state();
+    } else {
+        cur_state = SETUP_OPTIONS;
+    }
+    return cur_state;
 }
 
 static install_state gtkui_setup(install_info *info)
@@ -725,8 +742,8 @@ static install_state gtkui_complete(install_info *info)
     widget = glade_xml_get_widget(setup_glade, "install_directory_label");
     gtk_label_set_text(GTK_LABEL(widget), info->install_path);
     widget = glade_xml_get_widget(setup_glade, "play_game_label");
-    if ( info->bin_list ) {
-        sprintf(text, "Type '%s' to play the game", info->bin_list->symlink);
+    if ( info->installed_symlink ) {
+        sprintf(text, "Type '%s' to play the game", info->installed_symlink);
     } else {
         strcpy(text, "");
     }

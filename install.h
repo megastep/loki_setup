@@ -56,6 +56,7 @@ typedef struct {
 
     /* The product symlinks destination */
     char symlinks_path[PATH_MAX];
+    const char *installed_symlink;
 
     /* The XML installation config */
     xmlDocPtr config;

@@ -1342,132 +1342,6 @@
 	<xpad>0</xpad>
 	<ypad>0</ypad>
       </widget>
-
-      <widget>
-	<class>GtkTable</class>
-	<name>table18</name>
-	<rows>2</rows>
-	<columns>1</columns>
-	<homogeneous>False</homogeneous>
-	<row_spacing>5</row_spacing>
-	<column_spacing>5</column_spacing>
-
-	<widget>
-	  <class>GtkFrame</class>
-	  <name>frame17</name>
-	  <label>License</label>
-	  <label_xalign>0</label_xalign>
-	  <shadow_type>GTK_SHADOW_ETCHED_IN</shadow_type>
-	  <child>
-	    <left_attach>0</left_attach>
-	    <right_attach>1</right_attach>
-	    <top_attach>0</top_attach>
-	    <bottom_attach>1</bottom_attach>
-	    <xpad>0</xpad>
-	    <ypad>0</ypad>
-	    <xexpand>False</xexpand>
-	    <yexpand>True</yexpand>
-	    <xshrink>False</xshrink>
-	    <yshrink>False</yshrink>
-	    <xfill>True</xfill>
-	    <yfill>True</yfill>
-	  </child>
-
-	  <widget>
-	    <class>GtkVBox</class>
-	    <name>vbox18</name>
-	    <border_width>5</border_width>
-	    <homogeneous>False</homogeneous>
-	    <spacing>0</spacing>
-
-	    <widget>
-	      <class>GtkScrolledWindow</class>
-	      <name>scrolledwindow2</name>
-	      <hscrollbar_policy>GTK_POLICY_AUTOMATIC</hscrollbar_policy>
-	      <vscrollbar_policy>GTK_POLICY_AUTOMATIC</vscrollbar_policy>
-	      <hupdate_policy>GTK_UPDATE_CONTINUOUS</hupdate_policy>
-	      <vupdate_policy>GTK_UPDATE_CONTINUOUS</vupdate_policy>
-	      <child>
-		<padding>0</padding>
-		<expand>True</expand>
-		<fill>True</fill>
-	      </child>
-
-	      <widget>
-		<class>GtkText</class>
-		<name>license_area</name>
-		<can_focus>True</can_focus>
-		<editable>False</editable>
-		<text></text>
-	      </widget>
-	    </widget>
-	  </widget>
-	</widget>
-
-	<widget>
-	  <class>GtkHButtonBox</class>
-	  <name>hbuttonbox8</name>
-	  <layout_style>GTK_BUTTONBOX_DEFAULT_STYLE</layout_style>
-	  <spacing>5</spacing>
-	  <child_min_width>60</child_min_width>
-	  <child_min_height>27</child_min_height>
-	  <child_ipad_x>7</child_ipad_x>
-	  <child_ipad_y>0</child_ipad_y>
-	  <child>
-	    <left_attach>0</left_attach>
-	    <right_attach>1</right_attach>
-	    <top_attach>1</top_attach>
-	    <bottom_attach>2</bottom_attach>
-	    <xpad>0</xpad>
-	    <ypad>0</ypad>
-	    <xexpand>True</xexpand>
-	    <yexpand>False</yexpand>
-	    <xshrink>False</xshrink>
-	    <yshrink>False</yshrink>
-	    <xfill>True</xfill>
-	    <yfill>True</yfill>
-	  </child>
-
-	  <widget>
-	    <class>GtkButton</class>
-	    <name>button24</name>
-	    <can_default>True</can_default>
-	    <can_focus>True</can_focus>
-	    <signal>
-	      <name>clicked</name>
-	      <handler>setup_button_exit_slot</handler>
-	      <last_modification_time>Tue, 14 Sep 1999 22:58:10 GMT</last_modification_time>
-	    </signal>
-	    <label>Cancel</label>
-	  </widget>
-
-	  <widget>
-	    <class>GtkButton</class>
-	    <name>button26</name>
-	    <can_default>True</can_default>
-	    <can_focus>True</can_focus>
-	    <signal>
-	      <name>clicked</name>
-	      <handler>setup_button_license_agree_slot</handler>
-	      <last_modification_time>Tue, 30 Nov 1999 01:28:20 GMT</last_modification_time>
-	    </signal>
-	    <label>I Agree</label>
-	  </widget>
-	</widget>
-      </widget>
-
-      <widget>
-	<class>GtkLabel</class>
-	<child_name>Notebook:tab</child_name>
-	<name>setup_license</name>
-	<label></label>
-	<justify>GTK_JUSTIFY_CENTER</justify>
-	<wrap>False</wrap>
-	<xalign>0.5</xalign>
-	<yalign>0.5</yalign>
-	<xpad>0</xpad>
-	<ypad>0</ypad>
-      </widget>
     </widget>
   </widget>
 </widget>
@@ -1545,6 +1419,108 @@
 	  <expand>False</expand>
 	  <fill>True</fill>
 	</child>
+      </widget>
+    </widget>
+  </widget>
+</widget>
+
+<widget>
+  <class>GtkDialog</class>
+  <name>license_dialog</name>
+  <width>480</width>
+  <height>360</height>
+  <visible>False</visible>
+  <title>License Agreement</title>
+  <type>GTK_WINDOW_TOPLEVEL</type>
+  <position>GTK_WIN_POS_CENTER</position>
+  <modal>True</modal>
+  <allow_shrink>True</allow_shrink>
+  <allow_grow>True</allow_grow>
+  <auto_shrink>False</auto_shrink>
+
+  <widget>
+    <class>GtkVBox</class>
+    <child_name>Dialog:vbox</child_name>
+    <name>vbox19</name>
+    <homogeneous>False</homogeneous>
+    <spacing>0</spacing>
+
+    <widget>
+      <class>GtkScrolledWindow</class>
+      <name>scrolledwindow3</name>
+      <hscrollbar_policy>GTK_POLICY_AUTOMATIC</hscrollbar_policy>
+      <vscrollbar_policy>GTK_POLICY_AUTOMATIC</vscrollbar_policy>
+      <hupdate_policy>GTK_UPDATE_CONTINUOUS</hupdate_policy>
+      <vupdate_policy>GTK_UPDATE_CONTINUOUS</vupdate_policy>
+      <child>
+	<padding>0</padding>
+	<expand>True</expand>
+	<fill>True</fill>
+      </child>
+
+      <widget>
+	<class>GtkText</class>
+	<name>license_area</name>
+	<can_focus>True</can_focus>
+	<editable>False</editable>
+	<text></text>
+      </widget>
+    </widget>
+
+    <widget>
+      <class>GtkHBox</class>
+      <child_name>Dialog:action_area</child_name>
+      <name>hbox2</name>
+      <border_width>10</border_width>
+      <homogeneous>True</homogeneous>
+      <spacing>0</spacing>
+      <child>
+	<padding>0</padding>
+	<expand>False</expand>
+	<fill>True</fill>
+	<pack>GTK_PACK_END</pack>
+      </child>
+
+      <widget>
+	<class>GtkHButtonBox</class>
+	<name>hbuttonbox9</name>
+	<layout_style>GTK_BUTTONBOX_DEFAULT_STYLE</layout_style>
+	<spacing>5</spacing>
+	<child_min_width>60</child_min_width>
+	<child_min_height>27</child_min_height>
+	<child_ipad_x>7</child_ipad_x>
+	<child_ipad_y>0</child_ipad_y>
+	<child>
+	  <padding>0</padding>
+	  <expand>False</expand>
+	  <fill>True</fill>
+	</child>
+
+	<widget>
+	  <class>GtkButton</class>
+	  <name>button28</name>
+	  <can_default>True</can_default>
+	  <can_focus>True</can_focus>
+	  <signal>
+	    <name>clicked</name>
+	    <handler>setup_button_exit_slot</handler>
+	    <last_modification_time>Tue, 14 Sep 1999 22:58:10 GMT</last_modification_time>
+	  </signal>
+	  <label>Cancel</label>
+	</widget>
+
+	<widget>
+	  <class>GtkButton</class>
+	  <name>button29</name>
+	  <can_default>True</can_default>
+	  <can_focus>True</can_focus>
+	  <signal>
+	    <name>clicked</name>
+	    <handler>setup_button_license_agree_slot</handler>
+	    <last_modification_time>Tue, 30 Nov 1999 01:28:20 GMT</last_modification_time>
+	  </signal>
+	  <label>I Agree</label>
+	</widget>
       </widget>
     </widget>
   </widget>
