@@ -513,8 +513,8 @@ AC_ARG_WITH(image,
 IMAGE="$with_image"
 
 AC_ARG_WITH(brand,
-[  --with-brand              specifiy the brand prefix  [default=codehost]], 
-	,   with_brand=codehost)
+[  --with-brand              specifiy the brand prefix  [default=loki]], 
+	,   with_brand=loki)
 BRAND="$with_brand"
 
 #dnl enable the Outrage plugin (proprietary)
