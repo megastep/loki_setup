@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.61 2003-05-20 04:53:36 zeph Exp $ */
+/* $Id: main.c,v 1.62 2003-06-19 01:01:46 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -82,7 +82,7 @@ void signal_abort(int sig)
         UI.abort(info);
 	if ( info && ! info->install_complete )
 		uninstall(info);
-    exit_setup(3);
+    exit_setup(2);
 }
 
 /* Abort a running installation (to be called from the update function) */

@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.111 2003-05-21 22:29:15 zeph Exp $ */
+/* $Id: install.c,v 1.112 2003-06-19 01:01:46 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1729,6 +1729,7 @@ void generate_uninstall(install_info *info)
 			/* Add a call to the post-uninstall scripts */
 			loki_registerscript_component(component, LOKI_SCRIPT_POSTUNINSTALL,
 										  "update-menus", 
+										  "exec 1>&-\nexec 2>&-\n"
 										  "if which update-menus 2> /dev/null > /dev/null || type -p update-menus 2> /dev/null >/dev/null; then update-menus 2> /dev/null; fi\n"
 										  "if which kbuildsycoca 2> /dev/null > /dev/null || type -p kbuildsycoca 2> /dev/null >/dev/null; then kbuildsycoca 2>/dev/null; fi\n"
 										  "if which dtaction 2> /dev/null > /dev/null || type -p dtaction 2> /dev/null > /dev/null; then dtaction RestorePanel 2>/dev/null; fi\n"

@@ -124,7 +124,7 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
     char prompt[BUFSIZ];
     const char *wanted, *warn;
 	int retval = 1;
-    yesno_answer response = RESPONSE_INVALID, default_response;
+    yesno_answer response = RESPONSE_INVALID, default_response = RESPONSE_INVALID;
 
 	/* Check if we are on a valid tag */
 	if ( strcmp(node->name, "option") && strcmp(node->name, "exclusive") ) {
@@ -218,10 +218,13 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
 				}
 			}
 
-			warn = get_option_warn(info, node);
-			if ( warn ) { /* Display a warning message to the user */
-				console_prompt(warn, RESPONSE_OK);
+			if ( default_response != RESPONSE_YES ) {
+				warn = get_option_warn(info, node);
+				if ( warn ) { /* Display a warning message to the user */
+					console_prompt(warn, RESPONSE_OK);
+				}
 			}
+
             /* Mark this option for installation */
             mark_option(info, node, "true", 0);
 
