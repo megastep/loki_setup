@@ -166,7 +166,7 @@ case "$target" in
 	BSTATIC=""
 	BDYNAMIC=""
 	REENTRANT=""
-	CFLAGS="$CFLAGS -I/sw/include -Ddarwin -DMACOS"
+	CFLAGS="$CFLAGS -I/sw/include -Ddarwin"
 	ARCH=ppc ;;
     *ppc* | *powerpc*)
         ARCH=ppc ;;
