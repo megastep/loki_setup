@@ -10,8 +10,16 @@
   <option install="true" required="true">
     Base Install
     <lang lang="fr">Installation de base</lang>
-    <help>Required for play</help>
-    <help lang="fr">Requis pour jouer</help>
+    <lang lang="es">Instalación base</lang>
+    <lang lang="it">Installazione base</lang>
+    <lang lang="de">Minimale Installation</lang>
+
+    <help          >Required for play</help>
+    <help lang="fr">Requise pour jouer</help>
+    <help lang="es">Se necesita para jugar</help>
+    <help lang="it">È necessaria per giocare</help>
+    <help lang="de">Zum Spielen benötigt</help>
+
     <binary arch="any" libc="any" symlink="rt2" icon="icon.xpm" play="yes">
       rt2
     </binary>
