@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.8 2000-10-14 03:29:05 megastep Exp $ */
+/* $Id: uninstall.c,v 1.9 2000-10-17 05:08:27 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -63,7 +63,7 @@ static int perform_uninstall(product_t *prod, product_info_t *info)
                         printf("Notice: the %s RPM was installed for this product.\n", loki_getpath_file(file));
                         break;
                     default:
-                        printf("Removing file: %s\n", loki_getpath_file(file));
+                        // printf("Removing file: %s\n", loki_getpath_file(file));
                         if ( unlink(loki_getpath_file(file)) < 0 ) {
                             log_file(loki_getpath_file(file), strerror(errno));  
                         }
@@ -79,7 +79,7 @@ static int perform_uninstall(product_t *prod, product_info_t *info)
             file = loki_getfirst_file(opt);
             while ( file ) {
                 if ( loki_gettype_file(file) == LOKI_FILE_DIRECTORY ) {
-                    printf("Removing directory: %s\n", loki_getpath_file(file));
+                    // printf("Removing directory: %s\n", loki_getpath_file(file));
                     if ( rmdir(loki_getpath_file(file)) < 0 ) {
                         log_file(loki_getpath_file(file), strerror(errno));  
                     }
@@ -157,7 +157,7 @@ int main(int argc, char **argv)
         /* Dump information about the program being uninstalled */
         printf(_("Product name: %s\nInstalled in %s\n"),
                info->name, info->root );
-        strncpy(desc, info->description, sizeof(desc));
+        strncpy(desc, *info->description ? info->description : info->name, sizeof(desc));
         
         if ( access(info->root, W_OK) < 0 ) {
             fprintf(stderr, _("No write access to the installation directory.\nAborting.\n"));
