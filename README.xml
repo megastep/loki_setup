@@ -357,6 +357,8 @@ This element takes some optional attributes :
   command   A shell commands whose return value will determine whether to display the message.
             A return value of 0 must be returned for the message to be displayed.
 
+  nogui     If set to 'true', then the message will not be displayed in a GUI environment (X11, Mac)
+
 The REMOVE_MSG element :
 
 This element is used to prompt the user in the Uninstaller tool with a message upon uninstalling

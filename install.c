@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.123 2003-09-24 04:02:47 megastep Exp $ */
+/* $Id: install.c,v 1.124 2003-09-27 01:52:38 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -421,6 +421,12 @@ const char *GetProductPostInstallMsg(install_info *info)
 	for(node = info->config->root->childs; node; node = node->next) {
 		if(! strcmp(node->name, "post_install_msg") ) {
 			const char *prop;
+			if ( UI.is_gui ) {
+				prop = xmlGetProp(node, "nogui");
+				if ( prop && !strcmp(prop, "true") ){
+					continue;
+				}
+			}
 			prop = xmlGetProp(node, "command");
 			if ( prop ) { /* Run the command */
 				if ( run_script(info, prop, 0, 1) != 0 ) /* Failed, skip */
