@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.112 2003-06-19 01:01:46 megastep Exp $ */
+/* $Id: install.c,v 1.113 2003-07-10 23:08:54 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1927,7 +1927,7 @@ int install_menuitems(install_info *info, desktop_type desktop)
 		break;
 	case DESKTOP_GNOME:
 		app_links[i++] = "/usr/share/applications/";
-		fp = popen("if which gnome-config 2>/dev/null > /dev/null || type -p gnome-config 2>/dev/null > /dev/null; then gnome-config --prefix 2>/dev/null; fi", "r");
+		fp = popen("exec 2>&-; if which gnome-config > /dev/null || type -p gnome-config > /dev/null; then gnome-config --prefix; fi", "r");
 		if (fp) {
 			if ( fscanf(fp, "%s", icon_base) ) {
 				strcat(icon_base, "/share/gnome/apps/");
