@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.1 1999-09-09 04:02:07 megastep Exp $
+   $Id: gtk_ui.c,v 1.2 1999-09-09 18:19:23 megastep Exp $
 */
 
 #include <limits.h>
@@ -302,6 +302,7 @@ static void slot_abortFromInstall( GtkWidget* gtklist, gpointer func_data )
 static void slot_beginInstall( GtkWidget* gtklist, gpointer func_data )
 {
   gtk_notebook_set_page( _notebook, COPY_PAGE );
+  gtk_window_set_position( GTK_WINDOW(_window), GTK_WIN_POS_NONE);
 
   _copyTotalAdj->value = 0;
   _copyTotalAdj->lower = 0;
