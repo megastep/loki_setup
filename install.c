@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.101 2003-03-26 05:03:03 megastep Exp $ */
+/* $Id: install.c,v 1.102 2003-03-27 04:16:26 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1630,10 +1630,11 @@ void generate_uninstall(install_info *info)
 	if ( install_updatemenus_script ) {
 	    /* Add a call to the post-uninstall scripts */
 	    loki_registerscript_component(component, LOKI_SCRIPT_POSTUNINSTALL,
-					  "update-menus", 
-					  "if which update-menus 2> /dev/null > /dev/null || type -p update-menus 2> /dev/null >/dev/null; then update-menus 2> /dev/null; fi\n"
-					  "if which kbuildsycoca 2> /dev/null > /dev/null || type -p kbuildsycoca 2> /dev/null >/dev/null; then kbuildsycoca 2>/dev/null; fi\n"
-					  "if which dtaction 2> /dev/null > /dev/null || type -p dtaction 2> /dev/null > /dev/null; then dtaction RestorePanel 2>/dev/null; fi\n");
+									  "update-menus", 
+									  "if which update-menus 2> /dev/null > /dev/null || type -p update-menus 2> /dev/null >/dev/null; then update-menus 2> /dev/null; fi\n"
+									  "if which kbuildsycoca 2> /dev/null > /dev/null || type -p kbuildsycoca 2> /dev/null >/dev/null; then kbuildsycoca 2>/dev/null; fi\n"
+									  "if which dtaction 2> /dev/null > /dev/null || type -p dtaction 2> /dev/null > /dev/null; then dtaction RestorePanel 2>/dev/null; fi\n"
+									  "true\n");
 	}
 
         /* Register the pre and post uninstall scripts with the default component */
