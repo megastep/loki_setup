@@ -1,6 +1,11 @@
 
+1.2:  Third public release
+SOL -   Set the umask for the installer to: 022 
+SOL -   Added "arch" and "libc" attributes to the option element
+SOL -   Added SETUP_ARCH and SETUP_LIBC environment overrides
+
 1.1:  Second public release
-SOL -	Added license file support (eula="license.txt" option for install XML)
+SOL -   Added license file support (eula="license.txt" option for install XML)
 SOL -   Added support for <script> elements in options
 SOL -	Added preinstall and postinstall script support
 SOL -   Added web browser launch support (url="http://....")

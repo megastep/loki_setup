@@ -106,6 +106,18 @@ static void parse_option(install_info *info, xmlNodePtr node)
     const char *wanted;
     yesno_answer response, default_response;
 
+    /* See if this node matches the current architecture */
+    wanted = xmlGetProp(node, "arch");
+    if ( wanted && ((strcmp(wanted, "any") != 0) &&
+                    (strcmp(wanted, info->arch) != 0)) ) {
+        return;
+    }
+    wanted = xmlGetProp(node, "libc");
+    if ( wanted && ((strcmp(wanted, "any") != 0) &&
+                    (strcmp(wanted, info->libc) != 0)) ) {
+        return;
+    }
+
     /* See if the user wants this option */
     sprintf(prompt, "Install %s?", get_option_name(info, node, line, BUFSIZ));
 

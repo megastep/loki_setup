@@ -1,4 +1,5 @@
 
+#include <stdlib.h>
 #include <limits.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -9,35 +10,50 @@
 /* Function to detect the current architecture */
 const char *detect_arch(void)
 {
+    const char *arch;
+
+    /* See if there is an environment override */
+    arch = getenv("SETUP_ARCH");
+    if ( arch == NULL ) {
 #ifdef __i386
-  return "x86";
+        arch = "x86";
 #elif defined(powerpc)
-  return "ppc";
+        arch = "ppc";
 #elif defined(__alpha__)
-  return "alpha";
+        arch = "alpha";
 #elif defined(__sparc__)
-  return "sparc64";
+        arch = "sparc64";
 #else
-  return "unknown";
+        arch = "unknown";
 #endif
+    }
+    return arch;
 }
 
 /* Function to detect the current version of libc */
 const char *detect_libc(void)
 {
-	static const char *libclist[] = {
-		"/lib/libc.so.6",
-		"/lib/libc.so.6.1",
-		NULL
-	};
-	int i;
+    static const char *libclist[] = {
+        "/lib/libc.so.6",
+        "/lib/libc.so.6.1",
+        NULL
+    };
+    int i;
+    const char *libc;
     const char *libcfile;
 
-	for ( i=0; libclist[i]; ++i ) {
-    	if ( access(libclist[i], F_OK) == 0 ) {
-			break;
-		}
-	}
+    /* See if there is an environment override */
+    libc = getenv("SETUP_LIBC");
+    if ( libc != NULL ) {
+        return(libc);
+    }
+
+    /* Look for the highest version of libc */
+    for ( i=0; libclist[i]; ++i ) {
+        if ( access(libclist[i], F_OK) == 0 ) {
+            break;
+        }
+    }
     libcfile = libclist[i];
 
     if ( libcfile ) {
@@ -66,9 +82,9 @@ const char *detect_libc(void)
                         cp += 8;
                         n = sscanf( cp, "%d.%d.%d", &a, &b, &c );
                         if( n == 3 ) {
-						  static char buf[20];
-						  sprintf(buf,"glibc-%d.%d",a,b);
-						  return buf;
+                          static char buf[20];
+                          sprintf(buf,"glibc-%d.%d",a,b);
+                          return buf;
                         }
                         break;
                     }
@@ -79,7 +95,7 @@ const char *detect_libc(void)
         }
     }
     /* Default to version 5 */
-	return "libc5";
+    return "libc5";
 }
 
 
@@ -109,7 +125,7 @@ int detect_diskspace(const char *path)
             df = popen(cmd, "r");
             if ( df ) {
                 fgets(buf, (sizeof buf)-1, df);
-		        fscanf(df, "%*s %*d %*d %d %*s %*s", &space);
+                fscanf(df, "%*s %*d %*d %d %*s %*s", &space);
             }
         }
     }

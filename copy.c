@@ -30,6 +30,12 @@
 #define RPM_EXTENSION   ".rpm"
 
 #define device(ma, mi) (((ma) << 8) | (mi))
+#ifndef major
+#define major(dev) ((int)(((dev) >> 8) & 0xff))
+#endif
+#ifndef minor
+#define minor(dev) ((int)((dev) & 0xff))
+#endif
 
 static char current_option[200];
 extern char *rpm_root;

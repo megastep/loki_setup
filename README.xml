@@ -80,13 +80,21 @@ body of that option:
 Nested options will not be available unless the top-level option is
 selected.
 
-There are several optional attributes of the install element:
+There are several optional attributes of the option element:
 
  install    If this attribute is set to "true", then the option will
             be installed by default.  It may be deselected by the user.
 
  help       This attribute is a help string which is displayed to the
             user if the user requests more information about the option.
+
+ arch       This option is only available on the specified architecture.
+            The architecture can be one of:
+               x86, ppc, alpha, sparc64, etc.
+
+ libc       This option is only available with the specified version of libC.
+            The version can be one of:
+               libc5, glibc-2.0, glibc-2.1, etc.
 
 
 The BINARY element:

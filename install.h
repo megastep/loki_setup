@@ -12,6 +12,9 @@
 /* The prefix for all our setup data files */
 #define SETUP_BASE          "setup.data/"
 
+/* The default permissions mask for creating files */
+#define DEFAULT_UMASK       022
+
 /* The default location of the product */
 #define DEFAULT_PATH        "/usr/local/games"
 

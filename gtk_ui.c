@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.19 1999-12-01 22:30:51 hercules Exp $
+   $Id: gtk_ui.c,v 1.20 1999-12-09 23:33:10 hercules Exp $
 */
 
 #include <limits.h>
@@ -488,6 +488,18 @@ static void parse_option(install_info *info, xmlNodePtr node, GtkWidget *window,
     int i;
     GtkWidget *button;
     option_data *dat;
+
+    /* See if this node matches the current architecture */
+    wanted = xmlGetProp(node, "arch");
+    if ( wanted && ((strcmp(wanted, "any") != 0) &&
+                    (strcmp(wanted, info->arch) != 0)) ) {
+        return;
+    }
+    wanted = xmlGetProp(node, "libc");
+    if ( wanted && ((strcmp(wanted, "any") != 0) &&
+                    (strcmp(wanted, info->libc) != 0)) ) {
+        return;
+    }
 
     /* See if the user wants this option */
     line = get_option_name(info, node, NULL, 0);
