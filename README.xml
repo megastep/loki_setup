@@ -130,7 +130,7 @@ There are several optional attributes of the option element:
 The option element support the LANG sub-element, which is used to specify
 translated strings for the option name. The only attribute of this element
 is 'lang', which should be the name of the locale to be matched against
-the current locale (i.e. "fr", "de", "it", etc...). See 'About locallization'
+the current locale (i.e. "fr", "de", "it", etc...). See 'About localization'
 below for more details about locale matching.
 
 If you don't specify translations for alternate locales, then the same

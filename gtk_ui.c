@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.32 2000-05-02 00:25:47 megastep Exp $
+   $Id: gtk_ui.c,v 1.33 2000-05-02 00:37:25 hercules Exp $
 */
 
 #include <limits.h>
@@ -364,7 +364,7 @@ static void update_size(void)
 
     widget = glade_xml_get_widget(setup_glade, "label_install_size");
     if ( widget ) {
-        sprintf(text, "%d MB", BYTES2MB(cur_info->install_size));
+        sprintf(text, _("%d MB"), BYTES2MB(cur_info->install_size));
         gtk_label_set_text(GTK_LABEL(widget), text);
         check_install_button();
     }
@@ -378,7 +378,7 @@ static void update_space(void)
     widget = glade_xml_get_widget(setup_glade, "label_free_space");
     if ( widget ) {
         diskspace = detect_diskspace(cur_info->install_path);
-        sprintf(text, "%d MB", diskspace);
+        sprintf(text, _("%d MB"), diskspace);
         gtk_label_set_text(GTK_LABEL(widget), text);
         check_install_button();
     }
