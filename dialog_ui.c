@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.1 2002-01-28 01:13:30 megastep Exp $
+ * $Id: dialog_ui.c,v 1.2 2002-03-12 15:46:18 icculus Exp $
  */
 
 #include <limits.h>
@@ -60,6 +60,9 @@ install_state dialog_init(install_info *info,int argc, char **argv,
 		snprintf(title, sizeof(title),
 				 _("%s Installation"), info->desc);
     }
+	
+	dialog_vars.cr_wrap = TRUE;
+	dialog_vars.tab_correct = FALSE;
 
 	dialog_vars.backtitle = title;
 

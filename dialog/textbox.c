@@ -1,5 +1,5 @@
 /*
- *  $Id: textbox.c,v 1.1 2002-01-28 01:13:31 megastep Exp $
+ *  $Id: textbox.c,v 1.2 2002-03-12 15:46:18 icculus Exp $
  *
  *  textbox.c -- implements the text box
  *
@@ -79,6 +79,8 @@ xalloc(long size)
 
 /*
  * read_high() substitutes read() for tab->spaces conversion
+ * or does line wrapping conversion
+ * TTim oNOTE: doesn't do both, it could with more changes
  *
  * buffer_len, fd_bytes_read, bytes_read are modified
  * buf is allocated
@@ -99,8 +101,10 @@ read_high(MY_OBJ * obj, size_t size_read)
 
 	buftab[obj->fd_bytes_read] = '\0';	/* mark end of valid data */
 
-	if (dialog_vars.tab_correct) {
+		if (dialog_vars.tab_correct && dialog_vars.cr_wrap)
+			exiterr("can't have tab_correct and cr_wrap at the same time in textbox.c read_high");
 
+		if (dialog_vars.tab_correct) {
 	    /* calculate bytes_read by buftab and fd_bytes_read */
 	    obj->bytes_read = begin_line = 0;
 	    for (j = 0; j < obj->fd_bytes_read; j++)
@@ -127,7 +131,37 @@ read_high(MY_OBJ * obj, size_t size_read)
 		obj->buf = xalloc(obj->buffer_len + 1);
 	    }
 
-	} else {
+		} else if (dialog_vars.cr_wrap)
+		{
+			/* proceed using the same strategy as above */
+			obj->bytes_read = begin_line = 0;
+			for (j = 0; j < obj->fd_bytes_read; j++)
+			{
+				if (buftab[j] == '\n') {
+					obj->bytes_read++;
+					begin_line = obj->bytes_read;
+				} else if (obj->bytes_read-begin_line > dialog_vars.wrap_width) {
+					/* will insert a \n */
+					obj->bytes_read += 2;
+					begin_line = obj->bytes_read;
+				} else
+					obj->bytes_read++;
+			}
+	
+			if (obj->bytes_read > obj->buffer_len) {
+				if (obj->buffer_first)
+					obj->buffer_first = FALSE;	/* disp = 0 */
+				else {
+					free(obj->buf);
+				}
+					
+				obj->buffer_len = obj->bytes_read;
+					
+				/* Allocate space for read buffer */
+				obj->buf = xalloc(obj->buffer_len + 1);
+			}
+		}
+		else {
 	    if (obj->buffer_first) {
 		obj->buffer_first = FALSE;
 
@@ -142,19 +176,22 @@ read_high(MY_OBJ * obj, size_t size_read)
 	begin_line = 0;
 	while (j < obj->fd_bytes_read)
 	    if (((ch = buftab[j++]) == TAB) && (dialog_vars.tab_correct != 0)) {
-		tmpint = dialog_vars.tab_len
-		    - ((i - begin_line) % dialog_vars.tab_len);
+				tmpint = dialog_vars.tab_len - ((i - begin_line) % dialog_vars.tab_len);
 		for (n = 0; n < tmpint; n++)
 		    obj->buf[i++] = ' ';
 	    } else {
 		if (ch == '\n')
 		    begin_line = i + 1;
+				else if (dialog_vars.cr_wrap && (i-begin_line>dialog_vars.wrap_width))
+				{
+					obj->buf[i++] = '\n'; /* insert a CR */
+					begin_line = i + 1; /* that character we read will start the new line */
+				}
 		obj->buf[i++] = ch;
 	    }
-
 	obj->buf[i] = '\0';	/* mark end of valid data */
-
     }
+	
     if (obj->bytes_read == -1)
 	exiterr("Error reading file");
 }
@@ -481,6 +518,8 @@ dialog_textbox(const char *title, const char *file, int height, int width)
     /* Restore file pointer to beginning of file after getting file size */
     lseek_obj(&obj, 0, SEEK_SET);
 
+	/* dialog window has borders, keep a safe margin */
+	dialog_vars.wrap_width = width - 6;
     read_high(&obj, BUF_SIZE);
 
     x = box_x_ordinate(width);

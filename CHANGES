@@ -8,6 +8,9 @@ Ryan C. Gordon
  * Required CD-ROM detection works now.
  * VERY preliminary BeOS support.
 
+TTimo:
+ * EULA can now word wrap with text-based setup.
+
 1.6.0:
 Stephane Peter (Codehost) - Tue Aug 21 20:22:10 PDT 2001
  * Added distribution detection: "distro" attribute, SETUP_DISTRO environment
