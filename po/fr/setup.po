@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: setup 1.0\n"
-"POT-Creation-Date: 2000-05-01 16:54-0700\n"
+"POT-Creation-Date: 2000-05-01 17:38-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Stéphane Peter <megastep@lokigames.com>\n"
 "Language-Team: French <LI@li.org>\n"
@@ -196,7 +196,7 @@ msgstr "[produit]"
 msgid "[warning text]"
 msgstr "[texte d'avertissement]"
 
-#: main.c:69
+#: main.c:71
 #, c-format
 msgid ""
 "Usage: %s [options]\n"
@@ -224,25 +224,25 @@ msgstr ""
 "            0: Debug 1: Tranquille 2: Normal 3: Avertissements 4: Fatal\n"
 "   -V       Affiche la version de setup et sort\n"
 
-#: main.c:125
+#: main.c:127
 msgid "Out of range value, setting verbosity level to normal.\n"
 msgstr "Valeur invalide, le niveau de verbosité est normal.\n"
 
-#: main.c:144
+#: main.c:146
 #, c-format
 msgid "Couldn't load '%s'\n"
 msgstr "Ne peut pas charger '%s'\n"
 
-#: main.c:148
+#: main.c:150
 #, c-format
 msgid "Detected locale is %s"
 msgstr "La localisation détectée est %s"
 
-#: main.c:162
+#: main.c:164
 msgid "No UI drivers available\n"
 msgstr "Aucun pilote d'interface disponible\n"
 
-#: main.c:194
+#: main.c:196
 #, c-format
 msgid ""
 "\n"
@@ -613,6 +613,11 @@ msgstr "Pas d'accès en écriture sur le répertoire des binaires"
 #: gtk_ui.c:354
 msgid "Ready to install!"
 msgstr "Prêt à installer!"
+
+#: gtk_ui.c:367 gtk_ui.c:381
+#, fuzzy, c-format
+msgid "%d MB"
+msgstr "%d Mo"
 
 #: gtk_ui.c:478
 msgid "Yes"

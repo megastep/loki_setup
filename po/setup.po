@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-05-01 16:54-0700\n"
+"POT-Creation-Date: 2000-05-01 17:38-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -194,7 +194,7 @@ msgstr ""
 msgid "[warning text]"
 msgstr ""
 
-#: main.c:69
+#: main.c:71
 #, c-format
 msgid ""
 "Usage: %s [options]\n"
@@ -210,25 +210,25 @@ msgid ""
 "   -V       Print the version of the setup program and exit\n"
 msgstr ""
 
-#: main.c:125
+#: main.c:127
 msgid "Out of range value, setting verbosity level to normal.\n"
 msgstr ""
 
-#: main.c:144
+#: main.c:146
 #, c-format
 msgid "Couldn't load '%s'\n"
 msgstr ""
 
-#: main.c:148
+#: main.c:150
 #, c-format
 msgid "Detected locale is %s"
 msgstr ""
 
-#: main.c:162
+#: main.c:164
 msgid "No UI drivers available\n"
 msgstr ""
 
-#: main.c:194
+#: main.c:196
 #, c-format
 msgid ""
 "\n"
@@ -581,6 +581,11 @@ msgstr ""
 
 #: gtk_ui.c:354
 msgid "Ready to install!"
+msgstr ""
+
+#: gtk_ui.c:367 gtk_ui.c:381
+#, c-format
+msgid "%d MB"
 msgstr ""
 
 #: gtk_ui.c:478

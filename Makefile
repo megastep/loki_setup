@@ -65,11 +65,11 @@ dist: clean
 	(cd $(DISTDIR) && tar zcvf $(PACKAGE).tar.gz $(PACKAGE))
 	rm -rf $(DISTDIR)/$(PACKAGE)
 
-po/setup.po:
+po/setup.po: $(SRCS)
 	libglade-xgettext image/setup.data/setup.glade > po/setup.po
 	xgettext -p po -j -d setup --keyword=_ $(SRCS)
 
-gettext: po/setup.po $(SRCS)
+gettext: po/setup.po
 	for lang in $(LOCALES); do \
 		msgfmt po/$$lang/setup.po -o image/setup.data/locale/$$lang/LC_MESSAGES/setup.mo; \
 	done
