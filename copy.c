@@ -1220,6 +1220,8 @@ unsigned long long size_tree(install_info *info, xmlNodePtr node)
             }
 		} else if ( !strcmp(node->name, "readme") || !strcmp(node->name, "eula") ) {
 			size += size_readme(info, node);
+		} else if ( !strcmp(node->name, "script") ) {
+			size += size_node(info, node);
 		}
         node = node->next;
     }
