@@ -1176,6 +1176,7 @@ static int carbonui_update(install_info *info, const char *path, size_t progress
 
         if (this_decimal != last_decimal)
         {
+            int percent;
             static char buf[1024];
             char *filename = strrchr(path, '/');
             if(filename == NULL)
@@ -1184,7 +1185,9 @@ static int carbonui_update(install_info *info, const char *path, size_t progress
                 filename++;     // Increment just after '/' to get filename
 
             last_decimal = this_decimal;
-            snprintf(buf, sizeof (buf), "Installing %s : %d%%", filename, (int) (new_update * 100.0f));
+            percent = ((int) (new_update * 100.0f));
+            percent -= percent % 10;
+            snprintf(buf, sizeof (buf), "Installing %s : %d%%", filename, percent);
             carbon_SetLabelText(MyRes, COPY_CURRENT_FILE_LABEL_ID, buf);
         }
 
