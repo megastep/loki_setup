@@ -1,4 +1,6 @@
 Current:
+Ryan C. Gordon (icculus.org) - Mon Apr 14 00:26:11 EDT 2003
+ * Fixed DNS lookups and some other stuff in network.c.
 Stephane Peter (Codehost) - Thu Apr  3 19:31:16 PST 2003
  * Ported to Solaris 8 on Intel.
 Stephane Peter (Codehost) - Mon Mar 31 19:26:17 PST 2003
@@ -7,6 +9,8 @@ Stephane Peter (Codehost) - Mon Mar 31 19:26:17 PST 2003
 Stephane Peter (Codehost) - Tue Feb 11 20:33:32 PST 2003
  * Added the 'environment' tag to store the values of
    environment variables.
+Ryan C. Gordon (icculus.org) - Tue Jan 14 23:46:31 EST 2003
+ * Committed initial MacOS X patches to CVS on behalf of Jon C.
 Stephane Peter (Codehost) - Fri Dec  6 16:31:27 PST 2002
  * Do not display the main GTK dialog until we're done with the EULAs.
  * Various fixes for menu items
@@ -32,10 +36,6 @@ Stephane Peter (Codehost) - Mon Nov 11 16:05:01 PST 2002
    can be explicitly specified.
 John Quigley -  Tue, 19 Nov 2002 19:15:01 -0800
  * Various fixes for Redhat 8.0 menu items.
-Ryan C. Gordon (icculus.org) - Tue Jan 14 23:46:31 EST 2003
- * Committed initial MacOS X patches to CVS on behalf of Jon C.
-Ryan C. Gordon (icculus.org) - Mon Apr 14 00:26:11 EDT 2003
- * Fixed DNS lookups and some other stuff in network.c.
 
 
 1.6.1:
