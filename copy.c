@@ -76,6 +76,7 @@
 
 #include <limits.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -93,7 +94,7 @@
 #include "detect.h"
 #include "plugins.h"
 #include "install_log.h"
-#include "install.h"
+#include "install_ui.h"
 
 char current_option_txt[200];
 struct option_elem *current_option = NULL;
@@ -896,7 +897,19 @@ ssize_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
 				if ( product ) {
 					if ( GetProductIsMeta(info) ) {
 						extern const char *argv0; // Set in main.c
+                        extern Install_UI UI;
+                        if (UI.shutdown) UI.shutdown(info);
 						// We spawn a new setup for this product
+#if defined(darwin)
+                        if (fork()) 
+                            if (UI.is_gui) {
+                                exit(0);
+                            } else {
+                                int status;
+                                wait(&status);
+                                exit(WIFEXITED(status) ? WEXITSTATUS(status) : 1);
+                            }
+#endif
 						execlp(argv0, argv0, "-f", product, NULL);
 						perror("execlp");
 					} else {

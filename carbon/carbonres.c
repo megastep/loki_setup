@@ -32,7 +32,7 @@
 #define UNINSTALL_START_COUNT   8
 
 #define CARBON_MAX_APP_PATH 1024
-#define ASCENT_COUNT       4       // Number of directories to ascend to for app path
+#define ASCENT_COUNT       6       // Number of directories to ascend to for app path
 
 static volatile int PromptResponse = 0;
 static volatile int PromptResponseValid = 0;
@@ -674,10 +674,15 @@ CantGetNibRef:
     return NULL;
 }
 
-void carbon_UnloadCarbonRes(CarbonRes *CarbonResToUnload)
+void carbon_UnloadCarbonRes(CarbonRes *Res)
 {
     //!!!TODO - Add unload code here
-    carbon_debug("carbon_UnloadCarbonRes() not implemented.\n");
+    carbon_debug("carbon_UnloadCarbonRes()\n");
+    DisposeWindow(Res->MediaWindow);
+    DisposeWindow(Res->ReadmeWindow);
+    DisposeWindow(Res->PromptWindow);
+    DisposeWindow(Res->Window);
+    DisposeMenu(Res->Menu);
 }
 
 int carbon_IterateForState(CarbonRes *Res, int *StateFlag)
