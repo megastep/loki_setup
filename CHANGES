@@ -12,6 +12,7 @@ Stéphane Peter - Mon Jul  3 16:30:24 PDT 2000
  * Added support for exclusive options (new encompassing 'exclusive' element).
 Stéphane Peter - Wed Jul  5 14:16:47 PDT 2000
  * Enabled the 'desc' attribute for the binary elements.
+ * Changed the 'play' attribute for binary files to default to 'yes'.
 
 1.3.0:
 Sam Lantinga - Mon Jun 12 16:48:16 PDT 2000
