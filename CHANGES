@@ -1,4 +1,10 @@
 Current:
+Ryan C. Gordon (Epic Games) - Thu Apr  8 17:57:37 EDT 2004
+ * Mac version deals with the default install path ("/Applications") not
+   existing. Used to crash in this case.
+ * Several fixes to Mac version to treat strings as Latin1, which lets us
+   localize European languages that use high-ascii chars. Long way to go to
+   support full Unicode, though.
 Ryan C. Gordon (Epic Games) - Fri Apr  2 00:00:51 EST 2004
  * Check for "cd9660" file systems so FreeBSD with binary compat layer works.
 Ryan C. Gordon (Epic Games) - Wed Mar 31 11:30:47 EST 2004
