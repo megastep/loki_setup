@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-05-19 18:18-0700\n"
+"POT-Creation-Date: 2000-05-24 17:09-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -253,53 +253,61 @@ msgstr ""
 "Bitte mounten Sie die %s CDROM.\n"
 "Wählen Sie Ja um es nochmal zu versuche, Nein um abzubrechen"
 
-#: install.c:231 install.c:239
+#: install.c:241 install.c:249
 msgid "Out of memory\n"
 msgstr "Nicht genügend Arbeitsspeicher\n"
 
-#: file.c:49 file.c:69 file.c:76 install.c:296 install.c:314 install.c:335
-#: install.c:352 install.c:379
+#: file.c:49 file.c:69 file.c:76 install.c:306 install.c:324 install.c:345
+#: install.c:362 install.c:395
 msgid "Out of memory"
 msgstr "Nicht genügend Arbeitsspeicher"
 
-#: install.c:397
+#: install.c:387
+msgid "You must use a 'symlink' attribute with 'play'"
+msgstr ""
+
+#: install.c:391
+msgid "There can be only one binary with a 'play' attribute"
+msgstr ""
+
+#: install.c:413
 msgid "Couldn't find your home directory"
 msgstr "Konnte Heimatverzeichnis nicht finden"
 
-#: install.c:415
+#: install.c:431
 #, c-format
 msgid "Couldn't find home directory for %s"
 msgstr "Konnte Heimatverzeichnis von %s nicht finden"
 
-#: install.c:475
+#: install.c:491
 msgid "XML: 'lang' tag does not have a mandatory 'lang' attribute"
 msgstr ""
 
-#: install.c:483
+#: install.c:499
 #, c-format
 msgid "XML: option listed without translated description for locale '%s'"
 msgstr "XML: Option aufgelistet ohne übersetzte Beschreibung für '%s'"
 
-#: install.c:490
+#: install.c:506
 msgid "XML: option listed without description"
 msgstr "XML: Option aufgelistet ohne Beschreibung"
 
-#: install.c:623 install.c:634
+#: install.c:639 install.c:650
 #, c-format
 msgid "Unable to remove '%s'"
 msgstr "Löschen von '%s' fehlgeschlagen"
 
-#: install.c:653
+#: install.c:669
 #, c-format
 msgid "The '%s' RPM was installed or upgraded (version %s, release %s)"
 msgstr "Das '%s' RPM wurde installiert oder erneuert (Version %s, Release %s)"
 
-#: install.c:709
+#: install.c:726
 #, c-format
 msgid "echo \"%s has been uninstalled.\"\n"
 msgstr "echo \"s wurde deinstalliert.\"\n"
 
-#: install.c:711
+#: install.c:728
 msgid ""
 "echo\n"
 "echo WARNING: The following RPM archives have been installed or upgraded\n"
@@ -311,12 +319,12 @@ msgstr ""
 "echo RPM Archive installiert oder erneuert. Sie möchten vielleicht einige "
 "der folgenden Packete manuel entfernen:\n"
 
-#: install.c:745
+#: install.c:762
 #, c-format
 msgid "Please visit %s"
 msgstr "Bitte besuchen Sie %s"
 
-#: install.c:942
+#: install.c:959
 #, c-format
 msgid "Unable to create desktop file '%s'"
 msgstr "Konnte Desktop Datei '%s' nicht erzeugen"
@@ -356,7 +364,7 @@ msgstr "Konnte Datei '%s' nicht finden"
 msgid "Unable to find file '%s' on any of the CDROM drives"
 msgstr "Konnte Datei '%s' auf keinem der vorhandenen CDROM Laufwerke finden"
 
-#: copy.c:946
+#: copy.c:948
 #, c-format
 msgid "Suspect size value for option %s\n"
 msgstr ""

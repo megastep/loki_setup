@@ -4,7 +4,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Setup\n"
-"POT-Creation-Date: 2000-05-19 18:18-0700\n"
+"POT-Creation-Date: 2000-05-24 17:09-0700\n"
 "PO-Revision-Date: 2000-05-04 17:48-07:00\n"
 "Last-Translator: David Hedbor <david@hedbor.org>\n"
 "Language-Team: Swedish\n"
@@ -248,53 +248,61 @@ msgstr ""
 "Var snäll montera cd-romskivan %s.\n"
 "Välj Ja för att försöka igen, Nej för att abryta."
 
-#: install.c:231 install.c:239
+#: install.c:241 install.c:249
 msgid "Out of memory\n"
 msgstr "Slut på minne\n"
 
-#: file.c:49 file.c:69 file.c:76 install.c:296 install.c:314 install.c:335
-#: install.c:352 install.c:379
+#: file.c:49 file.c:69 file.c:76 install.c:306 install.c:324 install.c:345
+#: install.c:362 install.c:395
 msgid "Out of memory"
 msgstr "Slut på minne"
 
-#: install.c:397
+#: install.c:387
+msgid "You must use a 'symlink' attribute with 'play'"
+msgstr ""
+
+#: install.c:391
+msgid "There can be only one binary with a 'play' attribute"
+msgstr ""
+
+#: install.c:413
 msgid "Couldn't find your home directory"
 msgstr "Kunde inte hitta ditt hembibliotek"
 
-#: install.c:415
+#: install.c:431
 #, c-format
 msgid "Couldn't find home directory for %s"
 msgstr "Kunde inte hitta hembiblioteket för %s"
 
-#: install.c:475
+#: install.c:491
 msgid "XML: 'lang' tag does not have a mandatory 'lang' attribute"
 msgstr "XML: 'lang'-taggen saknar det obligatoriska 'lang'-attibutet"
 
-#: install.c:483
+#: install.c:499
 #, c-format
 msgid "XML: option listed without translated description for locale '%s'"
 msgstr "XML: valmöjligheten saknar översatt beskrivning för '%s'"
 
-#: install.c:490
+#: install.c:506
 msgid "XML: option listed without description"
 msgstr "XML: valmöjlighet utan beskrivning"
 
-#: install.c:623 install.c:634
+#: install.c:639 install.c:650
 #, c-format
 msgid "Unable to remove '%s'"
 msgstr "Kan inte ta bort '%s'"
 
-#: install.c:653
+#: install.c:669
 #, c-format
 msgid "The '%s' RPM was installed or upgraded (version %s, release %s)"
 msgstr "'%s'-RPMen installerades eller uppgraderas (version %s, release %s)"
 
-#: install.c:709
+#: install.c:726
 #, c-format
 msgid "echo \"%s has been uninstalled.\"\n"
 msgstr "echo \"%s har avinstallerats.\"\n"
 
-#: install.c:711
+#: install.c:728
 msgid ""
 "echo\n"
 "echo WARNING: The following RPM archives have been installed or upgraded\n"
@@ -307,12 +315,12 @@ msgstr ""
 "echo mjukvaran installerades. Du kanske vill ta bort några av dessa "
 "manuellt:\n"
 
-#: install.c:745
+#: install.c:762
 #, c-format
 msgid "Please visit %s"
 msgstr "Var snäll besök %s"
 
-#: install.c:942
+#: install.c:959
 #, c-format
 msgid "Unable to create desktop file '%s'"
 msgstr "Kan inte skapa skrivbordsfilen '%s'"
@@ -352,7 +360,7 @@ msgstr "Kan inte hitta filen '%s'"
 msgid "Unable to find file '%s' on any of the CDROM drives"
 msgstr "Kan inte hitta filen '%s' i någon av cd-romspelarna"
 
-#: copy.c:946
+#: copy.c:948
 #, c-format
 msgid "Suspect size value for option %s\n"
 msgstr ""

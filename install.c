@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.45 2000-05-23 23:00:22 megastep Exp $ */
+/* $Id: install.c,v 1.46 2000-05-25 00:11:19 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
    04/12/2000: Modifed run_script function to put the full pathname of the
@@ -366,7 +366,7 @@ void add_dir_entry(install_info *info, const char *path)
 /* Add a binary entry to the list of binaries installed */
 void add_bin_entry(install_info *info, const char *path,
                    const char *symlink, const char *desc, const char *menu,
-                   const char *name, const char *icon)
+                   const char *name, const char *icon, const char *play)
 {
     struct bin_elem *elem;
 
@@ -382,8 +382,14 @@ void add_bin_entry(install_info *info, const char *path,
             elem->next = info->bin_list;
             info->bin_list = elem;
         }
-        if ( symlink && !info->installed_symlink ) {
-            info->installed_symlink = symlink;
+        if ( play && !strcmp(play, "yes")) {
+			if ( !symlink ) {
+				log_fatal(info, _("You must use a 'symlink' attribute with 'play'"));
+			} else if ( !info->installed_symlink ) {
+				info->installed_symlink = symlink;
+			} else {
+				log_fatal(info, _("There can be only one binary with a 'play' attribute"));
+			}
         }
     } else {
         log_fatal(info, _("Out of memory"));
@@ -794,7 +800,7 @@ install_state launch_game(install_info *info)
 
     if ( info->installed_symlink ) {
         sprintf(cmd, "%s/%s %s &", info->symlinks_path, info->installed_symlink, info->args);
-	system(cmd);
+		system(cmd);
     }
     return SETUP_EXIT;
 }
@@ -881,12 +887,12 @@ char install_menuitems(install_info *info, desktop_type desktop)
     exec_command[0] = 0;
     exec_script_name = GetDesktopInstall(info);
     if( exec_script_name ) {
-    snprintf( exec_script, PATH_MAX*2, "%s %s", exec_script_name, info->install_path );
-    fp = popen(exec_script, "r");
-    if( fp ) {
-        fgets(exec_command, PATH_MAX*2, fp);
-        pclose(fp);
-    }
+		snprintf( exec_script, PATH_MAX*2, "%s %s", exec_script_name, info->install_path );
+		fp = popen(exec_script, "r");
+		if( fp ) {
+			fgets(exec_command, PATH_MAX*2, fp);
+			pclose(fp);
+		}
     }
 
     for (elem = info->bin_list; elem; elem = elem->next ) {      

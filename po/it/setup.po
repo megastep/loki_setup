@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-05-19 18:18-0700\n"
+"POT-Creation-Date: 2000-05-24 17:09-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Michel 'Ziobudda' Morelli <michel@enter.it>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -305,64 +305,72 @@ msgstr ""
 "Scegliere Yes per riprovare, No per cancellare"
 
 # install.c:220 install.c:228
-#: install.c:231 install.c:239
+#: install.c:241 install.c:249
 msgid "Out of memory\n"
 msgstr "Memoria esaurita\n"
 
 # file.c:49 file.c:69 file.c:76 install.c:279 install.c:297 install.c:318
 # install.c:335 install.c:362
-#: file.c:49 file.c:69 file.c:76 install.c:296 install.c:314 install.c:335
-#: install.c:352 install.c:379
+#: file.c:49 file.c:69 file.c:76 install.c:306 install.c:324 install.c:345
+#: install.c:362 install.c:395
 msgid "Out of memory"
 msgstr "Memoria esaurita"
 
+#: install.c:387
+msgid "You must use a 'symlink' attribute with 'play'"
+msgstr ""
+
+#: install.c:391
+msgid "There can be only one binary with a 'play' attribute"
+msgstr ""
+
 # install.c:380
-#: install.c:397
+#: install.c:413
 msgid "Couldn't find your home directory"
 msgstr "Non posso trovare la tua home directory"
 
 # install.c:398
-#: install.c:415
+#: install.c:431
 #, c-format
 msgid "Couldn't find home directory for %s"
 msgstr "Non posso trovare la home directory dell'utente %s"
 
 # install.c:458
-#: install.c:475
+#: install.c:491
 msgid "XML: 'lang' tag does not have a mandatory 'lang' attribute"
 msgstr "XML: il tag 'lang' non ha un mandatory 'lang' attribute"
 
 # install.c:466
-#: install.c:483
+#: install.c:499
 #, c-format
 msgid "XML: option listed without translated description for locale '%s'"
 msgstr "XML: opzione mostrata senza la descrizione tradotta per il locale '%s'"
 
 # install.c:473
-#: install.c:490
+#: install.c:506
 msgid "XML: option listed without description"
 msgstr "XML: opzione mostrata senza descrizione"
 
 # install.c:606 install.c:617
-#: install.c:623 install.c:634
+#: install.c:639 install.c:650
 #, c-format
 msgid "Unable to remove '%s'"
 msgstr "Non posso rimuovere '%s'"
 
 # install.c:636
-#: install.c:653
+#: install.c:669
 #, c-format
 msgid "The '%s' RPM was installed or upgraded (version %s, release %s)"
 msgstr "L'RPM '%s' era installato o upgradato (versione %s, release %s)"
 
 # install.c:692
-#: install.c:709
+#: install.c:726
 #, c-format
 msgid "echo \"%s has been uninstalled.\"\n"
 msgstr "echo \"%s e' stato disinstallato.\"\n"
 
 # install.c:694
-#: install.c:711
+#: install.c:728
 msgid ""
 "echo\n"
 "echo WARNING: The following RPM archives have been installed or upgraded\n"
@@ -374,13 +382,13 @@ msgstr ""
 "echo Poui manualmente rimuovere alcuni di essi se vuoi:\n"
 
 # install.c:728
-#: install.c:745
+#: install.c:762
 #, c-format
 msgid "Please visit %s"
 msgstr "Per favore visita %s"
 
 # install.c:925
-#: install.c:942
+#: install.c:959
 #, c-format
 msgid "Unable to create desktop file '%s'"
 msgstr "Non riesco a creare il desktop file '%s'"
@@ -427,7 +435,7 @@ msgstr "Non riesco a trovare il file '%s'"
 msgid "Unable to find file '%s' on any of the CDROM drives"
 msgstr "Non riesco a trovare il file '%s' su nessun CDROM"
 
-#: copy.c:946
+#: copy.c:948
 #, c-format
 msgid "Suspect size value for option %s\n"
 msgstr ""

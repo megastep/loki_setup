@@ -11,7 +11,7 @@
     <lang lang="fr">Installation de base</lang>
     <help>Required for play</help>
     <help lang="fr">Requis pour jouer</help>
-    <binary arch="any" libc="any" symlink="rt2" icon="icon.xpm">
+    <binary arch="any" libc="any" symlink="rt2" icon="icon.xpm" play="yes">
       rt2
     </binary>
     <files>

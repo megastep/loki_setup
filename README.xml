@@ -220,6 +220,11 @@ There are several optional attributes of the binary element:
  symlink    This is a symbolic link that is installed in the system path
             and points to the installed binary.
 
+ play       If this attribute has the 'yes' value, then this is the binary
+            that will be used to optionally launch the game after the
+            installation program terminates. There can be only one 'binary'
+            element with this attribute in the whole XML file.
+
  icon       This is an optional icon file that you should install into
             the top level of the install directory.  If both a symlink
             and an icon are specified for a binary, it will also have a

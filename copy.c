@@ -716,7 +716,9 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
                                        xmlGetProp(node, "desc"),
                                        xmlGetProp(node, "menu"),
                                        xmlGetProp(node, "name"),
-                                       xmlGetProp(node, "icon"));
+                                       xmlGetProp(node, "icon"),
+                                       xmlGetProp(node, "play")
+						  );
         }
     }
     return size;

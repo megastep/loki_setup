@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.35 2000-05-09 19:50:10 megastep Exp $
+   $Id: gtk_ui.c,v 1.36 2000-05-25 00:11:19 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -231,13 +231,13 @@ void setup_button_view_readme_slot( GtkWidget* w, gpointer data )
         gtk_widget_hide(readme);
         load_file(GTK_TEXT(widget), NULL, file);
         gtk_widget_show(readme);
-	// there are 3 'view readme' buttons...disable all of them
-	widget = glade_xml_get_widget(setup_glade, "button_readme");
-	gtk_widget_set_sensitive(widget, 0);
-	widget = glade_xml_get_widget(setup_glade, "button13");
-	gtk_widget_set_sensitive(widget, 0);
-	widget = glade_xml_get_widget(setup_glade, "button16");
-	gtk_widget_set_sensitive(widget, 0);
+		// there are 3 'view readme' buttons...disable all of them
+		widget = glade_xml_get_widget(setup_glade, "button_readme");
+		gtk_widget_set_sensitive(widget, 0);
+		widget = glade_xml_get_widget(setup_glade, "button13");
+		gtk_widget_set_sensitive(widget, 0);
+		widget = glade_xml_get_widget(setup_glade, "button16");
+		gtk_widget_set_sensitive(widget, 0);
     }
 }
 

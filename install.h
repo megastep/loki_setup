@@ -179,7 +179,7 @@ extern void add_dir_entry(install_info *info, const char *path);
 /* Add a binary entry to the list of binaries installed */
 extern void add_bin_entry(install_info *info, const char *path,
                    const char *symlink, const char *desc, const char *menu,
-                   const char *name, const char *icon);
+                   const char *name, const char *icon, const char *play);
 
 /* Expand a path with home directories into the provided buffer */
 extern void expand_home(install_info *info, const char *path, char *buffer);

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-05-19 18:18-0700\n"
+"POT-Creation-Date: 2000-05-24 17:09-0700\n"
 "PO-Revision-Date: 2000-05-10 01:11+1\n"
 "Last-Translator: MARTIJN DE MEULDER <MARTIJN@NL.LINUX.ORG>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -252,53 +252,61 @@ msgstr ""
 "Mount de %s CDROM.\n"
 "Kies Ja om opnieuw te proberen, Nee om af te breken"
 
-#: install.c:231 install.c:239
+#: install.c:241 install.c:249
 msgid "Out of memory\n"
 msgstr "Te weinig geheugen\n"
 
-#: file.c:49 file.c:69 file.c:76 install.c:296 install.c:314 install.c:335
-#: install.c:352 install.c:379
+#: file.c:49 file.c:69 file.c:76 install.c:306 install.c:324 install.c:345
+#: install.c:362 install.c:395
 msgid "Out of memory"
 msgstr "Te weinig geheugen"
 
-#: install.c:397
+#: install.c:387
+msgid "You must use a 'symlink' attribute with 'play'"
+msgstr ""
+
+#: install.c:391
+msgid "There can be only one binary with a 'play' attribute"
+msgstr ""
+
+#: install.c:413
 msgid "Couldn't find your home directory"
 msgstr "Uw home directory is onvindbaar"
 
-#: install.c:415
+#: install.c:431
 #, c-format
 msgid "Couldn't find home directory for %s"
 msgstr "De home directory van %s is onvindbaar"
 
-#: install.c:475
+#: install.c:491
 msgid "XML: 'lang' tag does not have a mandatory 'lang' attribute"
 msgstr "XML: de 'lang' tag heeft geen goed 'lang' attribuut"
 
-#: install.c:483
+#: install.c:499
 #, c-format
 msgid "XML: option listed without translated description for locale '%s'"
 msgstr "XML: optie weergegeven zonder vertaalde beschrijving voor locale '%s'"
 
-#: install.c:490
+#: install.c:506
 msgid "XML: option listed without description"
 msgstr "XML: optie weergegeven zonder beschrijving"
 
-#: install.c:623 install.c:634
+#: install.c:639 install.c:650
 #, c-format
 msgid "Unable to remove '%s'"
 msgstr "Niet in staat om '%s' te verwijderen"
 
-#: install.c:653
+#: install.c:669
 #, c-format
 msgid "The '%s' RPM was installed or upgraded (version %s, release %s)"
 msgstr "De '%s'-RPM is geïnstalleerd of bijgewerkt (versie %s, release %s)"
 
-#: install.c:709
+#: install.c:726
 #, c-format
 msgid "echo \"%s has been uninstalled.\"\n"
 msgstr "echo \"%s is verwijderd.\"\n"
 
-#: install.c:711
+#: install.c:728
 msgid ""
 "echo\n"
 "echo WARNING: The following RPM archives have been installed or upgraded\n"
@@ -311,12 +319,12 @@ msgstr ""
 "echo terwijl deze software werd geïnstalleerd. Misschien wilt u sommige "
 "ervan met de hand verwijderen:\n"
 
-#: install.c:745
+#: install.c:762
 #, c-format
 msgid "Please visit %s"
 msgstr "Bezoek alstublieft %s"
 
-#: install.c:942
+#: install.c:959
 #, c-format
 msgid "Unable to create desktop file '%s'"
 msgstr "Kan het desktopbestand '%s' niet aanmaken"
@@ -356,7 +364,7 @@ msgstr "Bestand '%s' is onvindbaar"
 msgid "Unable to find file '%s' on any of the CDROM drives"
 msgstr "Bestand '%s' is niet op een CD-Rom-drive te vinden"
 
-#: copy.c:946
+#: copy.c:948
 #, c-format
 msgid "Suspect size value for option %s\n"
 msgstr ""
