@@ -49,6 +49,63 @@ int parse_line(const char **srcpp, char *buf, int maxlen)
     return strlen(buf);
 }
 
+const char *detect_arch(void)
+{
+#ifdef __i386
+  return "x86";
+#elif defined(powerpc)
+  return "ppc";
+#elif defined(alpha) // TODO: Is that right ?
+  return "alpha";
+#else
+  return "unknown";
+#endif
+}
+
+const char *detect_libc(void)
+{
+    if( access( "/lib/libc.so.6", F_OK ) == 0 ) {
+        FILE* fp;
+        char buf[ 128 ];
+        int n;
+
+        // Search for the version in the ouput of /lib/libc.so.6.
+        // The first line should look something like this:
+        // GNU C Library stable release version 2.1.1, by Roland McGrath et al.
+
+        fp = popen( "/lib/libc.so.6", "r" );
+        if( fp ) {
+            n = fread( buf, 1, 128, fp );
+            pclose( fp );
+
+            if( n == 128 ) {
+                char* cp;
+                char* end;
+                int a, b, c;
+
+                cp = buf;
+                end = &cp[ n ];
+                for( ; cp < end; cp++ ) {
+                    if( strncasecmp( "version ", cp, 8 ) == 0 ) {
+                        cp += 8;
+                        n = sscanf( cp, "%d.%d.%d", &a, &b, &c );
+                        if( n == 3 ) {
+						  static char buf[20];
+						  sprintf(buf,"glibc-%d.%d",a,b);
+						  return buf;
+                        }
+                        break;
+                    }
+                }
+            }
+        } else {
+            perror( "libcVersion" );
+        }
+    }
+    // Default to version 5.
+	return "libc5";
+}
+
 
 size_t copy_tarball(install_info *info, const char *path, const char *dest,
                 void (*update)(install_info *info, const char *path, size_t progress, size_t size))
@@ -131,7 +188,7 @@ size_t copy_tarball(install_info *info, const char *path, const char *dest,
     return size;
 }
 
-size_t copy_file(install_info *info, const char *path, const char *dest, char *final,
+size_t copy_file(install_info *info, const char *path, const char *dest, char *final, int binary,
                 void (*update)(install_info *info, const char *path, size_t progress, size_t size))
 {
     size_t size, copied;
@@ -139,13 +196,16 @@ size_t copy_file(install_info *info, const char *path, const char *dest, char *f
     char buf[BUFSIZ];
     stream *input, *output;
 
-    /* Get the final pathname */
-    base = strrchr(path, '/');
-    if ( base == NULL ) {
-        base = path;
-    } else {
+	if(binary){
+	  /* Get the final pathname (useful for binaries only!) */
+	  base = strrchr(path, '/');
+	  if ( base == NULL ) {
+		base = path;
+	  } else {
 	    base ++;
-    }
+	  }
+	}else
+	  base = path;
     sprintf(final, "%s/%s", dest, base);
 
     size = 0;
@@ -177,21 +237,19 @@ size_t copy_directory(install_info *info, const char *path, const char *dest,
                 void (*update)(install_info *info, const char *path, size_t progress, size_t size))
 {
     struct stat sb;
-    char dirb[BUFSIZ];
     char fpat[BUFSIZ];
     int i;
     glob_t globbed;
     size_t size, copied;
 
     size = 0;
-    sprintf(dirb, "%s/%s", dest, path);
     sprintf(fpat, "%s/*", path);
     if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
         for ( i=0; i<globbed.gl_pathc; ++i ) {
-            copied = copy_path(info, globbed.gl_pathv[i], dirb, update);
-            if ( copied > 0 ) {
-                size += copied;
-            }
+		  copied = copy_path(info, globbed.gl_pathv[i], dest, update);
+		  if ( copied > 0 ) {
+			size += copied;
+		  }
         }
         globfree(&globbed);
     } else {
@@ -215,7 +273,7 @@ size_t copy_path(install_info *info, const char *path, const char *dest,
             if ( strstr(path, TAR_EXTENSION) != NULL ) {
                 copied = copy_tarball(info, path, dest, update);
             } else {
-                copied = copy_file(info, path, dest, final, update);
+                copied = copy_file(info, path, dest, final, 0, update);
             }
         }
         if ( copied > 0 ) {
@@ -263,15 +321,17 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
 
     arch = detect_arch();
     libc = detect_libc();
+printf("Detected arch %s and %s\n", arch,libc);
     while ( filedesc && parse_line(&filedesc, final, (sizeof final)) ) {
         copied = 0;
         sprintf(fpat, "bin/%s/%s/%s", arch, libc, final);
         if ( stat(fpat, &sb) == 0 ) {
-            copied = copy_file(info, fpat, dest, final, update);
+            copied = copy_file(info, fpat, dest, final, 1, update);
         } else {
             sprintf(fpat, "bin/%s/%s", arch, final);
             if ( stat(fpat, &sb) == 0 ) {
-                copied = copy_file(info, fpat, dest, final, update);
+                copied = copy_file(info, fpat, dest, final, 1, update);
+				file_chmod(info, final, 0755);
             } else {
                 log_warning(info, "Unable to find file %s", fpat);
             }

@@ -239,6 +239,17 @@ int file_symlink(install_info *info, const char *from, const char *to)
     return(retval);
 }
 
+int file_chmod(install_info *info, const char *path, int mode)
+{
+   int retval;
+   
+   retval = chmod(path, mode);
+    if ( retval < 0 ) {
+        log_warning(info, "Can't change permissions for %s: %s", path, strerror(errno));
+	}
+   return retval;
+}
+
 int file_mkdir(install_info *info, const char *path, int mode)
 {
     struct stat sb;
