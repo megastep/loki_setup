@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.84 2000-11-11 03:14:02 megastep Exp $ */
+/* $Id: install.c,v 1.85 2000-11-11 03:53:26 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1453,14 +1453,14 @@ char install_menuitems(install_info *info, desktop_type desktop)
                     if ( (elem->icon == NULL) || (elem->symlink == NULL) ) {
                         continue;
                     }
-                    strncat(finalbuf, elem->symlink, PATH_MAX);
+                    strncat(finalbuf, elem->symlink, PATH_MAX-strlen(finalbuf));
                     switch(desktop){
                     case DESKTOP_KDE:
-                        strncat(finalbuf,".kdelnk", PATH_MAX);
+                        strncat(finalbuf,".kdelnk", PATH_MAX-strlen(finalbuf));
                         break;
                     case DESKTOP_REDHAT:
                     case DESKTOP_GNOME:
-                        strncat(finalbuf,".desktop", PATH_MAX);
+                        strncat(finalbuf,".desktop", PATH_MAX-strlen(finalbuf));
                         break;
                     default:
                         break;
@@ -1524,7 +1524,7 @@ int run_script(install_info *info, const char *script, int arg)
     working_dir[0] = '\0'; 
     if ( access(script, R_OK) == 0 ) {
         getcwd(working_dir, sizeof(working_dir));
-        strncat(working_dir, "/", sizeof(working_dir));
+        strncat(working_dir, "/", sizeof(working_dir)-strlen(working_dir));
     }
 
     snprintf(script_file, PATH_MAX, "%s/tmp_script_XXXXXX", info->install_path);

@@ -409,14 +409,14 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
 			strncpy(fdest, dest, sizeof(fdest));
 
 			strncpy(current_option_txt, final, sizeof(current_option_txt));
-			strncat(current_option_txt, " binary", sizeof(current_option_txt));
+			strncat(current_option_txt, " binary", sizeof(current_option_txt)-strlen(current_option_txt));
 			snprintf(fpat, sizeof(fpat), "bin/%s/%s/%s", arch, libc, final);
 			if ( keepdirs ) { /* Append the subdirectory to the final destination */
 				char *slash = strrchr(final, '/');
 				if(slash) {
 					*slash = '\0';
-					strncat(fdest, "/", sizeof(fdest));
-					strncat(fdest, final, sizeof(fdest));
+					strncat(fdest, "/", sizeof(fdest)-strlen(fdest));
+					strncat(fdest, final, sizeof(fdest)-strlen(fdest));
 				}
 			}
 			if ( from_cdrom ) {
