@@ -1,5 +1,5 @@
 /* UnrealEngine2-compressed files (.uz2) plugin for setup */
-/* $Id: uz2.c,v 1.2 2004-02-28 15:44:01 icculus Exp $ */
+/* $Id: uz2.c,v 1.3 2004-03-02 03:49:18 icculus Exp $ */
 
 #include <stdlib.h>
 #include <string.h>
@@ -108,25 +108,32 @@ static size_t UZ2Copy(install_info *info, const char *path, const char *dest, co
     stream *out;
 	unsigned int user_mode = 0;
 
-	log_debug("UZ2: Copy %s -> %s", path, dest);
-
     /* Optional MD5 sum can be specified in the XML file */
     const char *md5 = xmlGetProp(node, "md5sum");
     const char *mut = xmlGetProp(node, "mutable");
     const char *mode_str = xmlGetProp(node, "mode");
+    const char *dstrename = xmlGetProp(node, "uz2rename");
+
+    if (dstrename)
+        path = dstrename;
+
+	log_debug("UZ2: Copy %s -> %s", path, dest);
 
 	if ( mode_str ) {
 		user_mode = (unsigned int) strtol(mode_str, NULL, 8);
 	}
 
-    if (strlen(path) < 4)
-        return 0; /* just in case. */
+    if (!dstrename)
+    {
+        if (strlen(path) < 4)
+            return 0; /* just in case. */
 
-    if (strcasecmp(path + (strlen(path) - 4), ".uz2") != 0)
-        return 0; /* just in case. */
+        if (strcasecmp(path + (strlen(path) - 4), ".uz2") != 0)
+            return 0; /* just in case. */
 
-    snprintf(final, sizeof(final), "%s/%s", dest, path);
-    final[strlen(final) - 4] = '\0'; /* chop off ".uz2" */
+        snprintf(final, sizeof(final), "%s/%s", dest, path);
+        final[strlen(final) - 4] = '\0'; /* chop off ".uz2" */
+    }
 
     if ((in = file_open(info, path, "rb")) == NULL)
         return 0;
