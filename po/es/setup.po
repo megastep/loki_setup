@@ -50,7 +50,7 @@ msgstr "Iconos de Escritorio (KDE/Gnome)"
 
 #: image/setup.data/setup.glade:440
 msgid "Estimated size:"
-msgstr "Tamaño Estimado"
+msgstr "Tamaño Estimado""
 
 #: image/setup.data/setup.glade:912 image/setup.data/setup.glade:1148
 #: image/setup.data/setup.glade:1394
@@ -59,7 +59,7 @@ msgstr "Salir"
 
 #: image/setup.data/setup.glade:414
 msgid "Free space:"
-msgstr "Espacio Libre"
+msgstr "Espacio Libre:"
 
 #: image/setup.data/setup.glade:95
 msgid "Global Options"
@@ -95,7 +95,7 @@ msgstr "Directorio para la instalación"
 
 #: image/setup.data/setup.glade:1608
 msgid "Launch Browser"
-msgstr "Lanzar Navegador"
+msgstr "Abrir Navegador"
 
 #: image/setup.data/setup.glade:1569
 msgid "Launching browser, please wait..."
@@ -108,7 +108,7 @@ msgstr "Acuerdo De Licencia"
 #: image/setup.data/setup.glade:193
 #, fuzzy
 msgid "Link path:"
-msgstr "Directorio para los enlaces"
+msgstr "Directorio para los enlaces:"
 
 #: image/setup.data/setup.glade:938
 msgid "Play!"
@@ -128,7 +128,7 @@ msgstr "Website del Producto"
 
 #: image/setup.data/setup.glade:1641
 msgid "Readme File"
-msgstr "Archivo Léame"
+msgstr "Archivo Léame(README)"
 
 #: image/setup.data/setup.glade:244
 msgid "Symbolic links to installed binaries are placed here"
@@ -163,7 +163,7 @@ msgstr "Teclee '[game]' para iniciar el juego."
 #: image/setup.data/setup.glade:559 image/setup.data/setup.glade:851
 #: image/setup.data/setup.glade:925 image/setup.data/setup.glade:1407
 msgid "View Readme"
-msgstr "Ver el Léame"
+msgstr "Ver el Léame(README)"
 
 #: image/setup.data/setup.glade:1293
 msgid "Warning"
@@ -312,7 +312,7 @@ msgstr "Ningun controlador UI disponible\n"
 msgid ""
 "\n"
 "Illegal installation: do not mix components with a component installation.\n"
-msgstr ""
+msgstr "\nInstalacion ilegal: no mescle componentes con componentes de instalacion.\n"
 
 #: main.c:339
 #, c-format
@@ -320,7 +320,7 @@ msgid ""
 "\n"
 "The %s component is already installed.\n"
 "Please uninstall it beforehand.\n"
-msgstr ""
+msgstr "\nComponente %s esta instalado.\n Por favor quite la aplicacion primero.\n"
 
 #: main.c:346
 #, c-format
@@ -328,12 +328,12 @@ msgid ""
 "\n"
 "You must install %s before running this\n"
 "installation program.\n"
-msgstr ""
+msgstr "\nTienes que instalar %s antes de usar\n este programa de instalacion.\n"
 
 #: main.c:359
 msgid ""
 "The 'cdromfile' attribute is now mandatory when using the 'cdrom' attribute."
-msgstr ""
+msgstr "El 'cdromfile' atributo es un requisito si quieres usar 'cdrom' atributo."
 
 #: detect.c:73
 #, fuzzy, c-format
@@ -343,12 +343,12 @@ msgstr "Creando dispositivo %s"
 #: detect.c:75
 #, c-format
 msgid "Failed to unmount device %s mounted on %s"
-msgstr ""
+msgstr "Hubo error desmontando dispositivo %s montado en %s"
 
 #: detect.c:167 detect.c:209
 #, c-format
 msgid "Mounted device %s"
-msgstr ""
+msgstr "Dispositivo montado en %s"
 
 #: plugins.c:96
 msgid ""
@@ -519,11 +519,11 @@ msgstr "Ejecutando archivo de órdenes"
 
 #: copy.c:627
 msgid "Component element needs to have a name"
-msgstr ""
+msgstr "Componente necessita un nombre"
 
 #: copy.c:630
 msgid "Component element needs to have a version"
-msgstr ""
+msgstr "Componente necessita un numero de version"
 
 #: copy.c:782
 #, c-format
@@ -621,7 +621,7 @@ msgstr "N/s"
 #: console_ui.c:65
 #, c-format
 msgid "%s [Press Enter] "
-msgstr ""
+msgstr "%s [Presione Enter] "
 
 #: console_ui.c:69 console_ui.c:95
 #, c-format
@@ -709,8 +709,7 @@ msgstr "Quieres instalar enlaces dinámicos a un directorio en tu path?"
 #: console_ui.c:411
 #, fuzzy
 msgid "Please enter the path in which to create the symbolic links"
-msgstr ""
-"Por favor ingresa la trayectorio donde se crearán los enlaces simbólico"
+msgstr "Por favor ingresa la trayectorio donde se crearán los enlaces simbólico"
 
 #: console_ui.c:416
 #, c-format
@@ -731,7 +730,7 @@ msgid ""
 "\n"
 "%s component\n"
 "\n"
-msgstr ""
+msgstr "\n%s componente\n\n"
 
 #: console_ui.c:469
 msgid "Do you want to install desktop items?"
@@ -871,8 +870,7 @@ msgstr "Error: se ha excedido el máximo de %d install_paths\n"
 
 #: gtk_ui.c:933
 msgid "Warning: No writable targets in path... You may want to be root.\n"
-msgstr ""
-"Advertencia: no hay objetos escribibles en la ruta... Inténtalo como root.\n"
+msgstr "Advertencia: no hay objetos escribibles en la ruta... Inténtalo como root.\n"
 
 #: gtk_ui.c:952
 msgid "Unable to locate 'setup_menuitems_checkbox'"
