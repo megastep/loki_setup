@@ -13,6 +13,8 @@ CC = gcc
 # This indicates where the 'setupdb' CVS module is checked out
 SETUPDB	= ../setupdb
 
+IMAGE = /loki/patch-tools/setup-image
+
 # The supported locales so far
 LOCALES = fr de es sv it nl
 
@@ -96,7 +98,30 @@ endif
 	    cp -v setup.gtk image/setup.data/bin/$(os)/$(arch)/$(libc); \
 	    strip image/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk; \
 	    brandelf -t $(os) image/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk; \
+	else \
+		echo No directory to copy the binary files to.; \
 	fi
+
+install-image: all
+ifeq ($(DYN_PLUGINS),true)
+	$(MAKE) -C plugins DYN_PLUGINS=true USE_RPM=$(USE_RPM) install
+endif
+	@if [ -d $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc) ]; then \
+	    cp -v setup $(IMAGE)/setup.data/bin/$(os)/$(arch); \
+	    strip $(IMAGE)/setup.data/bin/$(os)/$(arch)/setup; \
+	    brandelf -t $(os) $(IMAGE)/setup.data/bin/$(os)/$(arch)/setup; \
+	    cp -v uninstall $(IMAGE)/setup.data/bin/$(os)/$(arch); \
+	    strip $(IMAGE)/setup.data/bin/$(os)/$(arch)/uninstall; \
+	    brandelf -t $(os) $(IMAGE)/setup.data/bin/$(os)/$(arch)/uninstall; \
+	    cp -v setup.gtk $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc); \
+	    strip $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk; \
+	    brandelf -t $(os) $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk; \
+	else \
+		echo No directory to copy the binary files to.; \
+	fi
+	for lang in $(LOCALES); do \
+		cp -f image/setup.data/locale/$$lang/LC_MESSAGES/*.mo $(IMAGE)/setup.data/locale/$$lang/LC_MESSAGES/; \
+	done
 
 clean:
 	$(MAKE) -C plugins clean
