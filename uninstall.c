@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.60 2004-09-25 00:47:31 megastep Exp $ */
+/* $Id: uninstall.c,v 1.61 2005-02-08 20:41:56 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -153,7 +153,7 @@ int uninstall_component(product_component_t *comp, product_info_t *info)
             const char *fname = loki_getpath_file(file);
             file_type_t t = loki_gettype_file(file);
 
-            if ( t == LOKI_FILE_DIRECTORY && strncmp(fname, info->root, strlen(fname))!=0 ) {
+            if ( t == LOKI_FILE_DIRECTORY /* && strncmp(fname, info->root, strlen(fname))!=0 */ ) {
                 list = add_directory_entry(file, list);
                 file = loki_getnext_file(file);
             } else {
@@ -162,12 +162,12 @@ int uninstall_component(product_component_t *comp, product_info_t *info)
                     break;
                 case LOKI_FILE_RPM:
                     printf(_("Notice: the %s RPM was installed for this product.\n"),
-                           loki_getpath_file(file));
+                           fname);
                     break;
                 default:
                     // printf("Removing file: %s\n", loki_getpath_file(file));
-                    if ( unlink(loki_getpath_file(file)) < 0 ) {
-                        log_file(loki_getpath_file(file), strerror(errno));
+                    if ( unlink(fname) < 0 ) {
+                        log_file(fname, strerror(errno));
                     }
                     break;
                 }
