@@ -1,9 +1,10 @@
 
 /* Functions to perform install logging */
 
-#include <stdarg.h>
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <stdarg.h>
+#include <string.h>
 
 #include "install_log.h"
 #include "log.h"
