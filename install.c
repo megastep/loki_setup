@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.150 2005-01-25 03:00:57 megastep Exp $ */
+/* $Id: install.c,v 1.151 2005-02-02 04:20:51 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -2172,7 +2172,7 @@ void generate_uninstall(install_info *info)
 										  "exec 1>&-\nexec 2>&-\n"
 										  "if which update-menus 2> /dev/null > /dev/null || type -p update-menus 2> /dev/null >/dev/null; then update-menus 2> /dev/null; fi\n"
 										  "if which kbuildsycoca 2> /dev/null > /dev/null || type -p kbuildsycoca 2> /dev/null >/dev/null; then kbuildsycoca 2>/dev/null; fi\n"
-										  "if which dtaction 2> /dev/null > /dev/null || type -p dtaction 2> /dev/null > /dev/null; then dtaction RestorePanel 2>/dev/null; fi\n"
+										  "if which dtaction 2> /dev/null > /dev/null || type -p dtaction 2> /dev/null > /dev/null; then dtaction ReloadActions 2>/dev/null; dtaction RestorePanel 2>/dev/null; fi\n"
 										  "true\n");
 		}
 
@@ -2605,19 +2605,19 @@ int install_menuitems(install_info *info, desktop_type desktop)
 										"  TYPE icon\n", elem->symlink);
 								if ( num_items == 0 ) {
 									fprintf(fp,
-											"  CONTAINER_NAME	Top\n"
-											"  CONTAINER_TYPE	BOX\n");
+											"  CONTAINER_NAME   Top\n"
+											"  CONTAINER_TYPE   BOX\n");
 								} else {
 									fprintf(fp,
-											"  CONTAINER_NAME	%s_Panel\n"
-											"  CONTAINER_TYPE	SUBPANEL\n", info->name
+											"  CONTAINER_NAME   %s_Panel\n"
+											"  CONTAINER_TYPE   SUBPANEL\n", info->name
 											);
 								}
 								fprintf(fp,
-										"  ICON				%s\n"
-										"  PUSH_ACTION		%s\n"
-										"  DROP_ACTION		%s\n"
-										"  LABEL			%s\n"
+										"  ICON             %s\n"
+										"  PUSH_ACTION      %s\n"
+										"  DROP_ACTION      %s\n"
+										"  LABEL            %s\n"
 										"}\n\n",
 										icon, elem->symlink, elem->symlink, elem->name
 										);
@@ -2701,8 +2701,10 @@ int install_menuitems(install_info *info, desktop_type desktop)
 			break;
 		case DESKTOP_CDE:
 			/* Run dtaction */
-            if ( loki_valid_program("dtaction") )
+            if ( loki_valid_program("dtaction") ) {
+				run_command(info, "dtaction", "ReloadActions", 0);
 				run_command(info, "dtaction", "RestorePanel", 0);
+			}
 			install_updatemenus_script = 1;
 			break;
 		default:
@@ -2714,7 +2716,7 @@ int install_menuitems(install_info *info, desktop_type desktop)
     return ret_val;
 }
 
-/* Run some shell script commands */
+x/* Run some shell script commands */
 int run_script(install_info *info, const char *script, int arg, int include_tags)
 {
     char script_file[PATH_MAX];
