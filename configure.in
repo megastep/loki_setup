@@ -183,10 +183,12 @@ case "$target" in
         ARCH=`uname -p 2> /dev/null || uname -m` ;;
 esac
 
+GTK_STATIC=$BSTATIC
 case "$target" in
 	*linux*)
 # Newer glibc's require to depend at least on them
 		STATIC=""
+		GTK_STATIC="\$(BDYNAMIC)" ;;
 esac
 
 CFLAGS="$CFLAGS $REENTRANT"
@@ -225,8 +227,8 @@ fi
 
 CFLAGS="$CFLAGS -I$SETUPDB"
 
-GUI_LIBS=
-GTK_LIBS=
+GUI_LIBS=$GTK_STATIC
+GTK_LIBS=$GTK_STATIC
 #!!!TODO - Add carbon libs as necessary
 CARBON_LIBS=
 
