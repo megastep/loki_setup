@@ -1,7 +1,13 @@
 
-The Loki Setup Installer 1.3.0
+The Loki Setup Installer 1.4.0
 Written by Sam Lantinga and Stephane Peter
 ------------------------------------------
+
+New since 1.3:
+ * Added support for multiple operating systems (i.e. FreeBSD)
+ * Archive extracting subsystem now uses plugin architecture
+ * Improved RPM support
+ * Lots of other miscellaneous enhancements and fixes
 
 New since 1.2:
  * Added internationalization support
