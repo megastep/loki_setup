@@ -156,12 +156,30 @@ static install_state console_setup(install_info *info)
         }
         set_installpath(info, path);
 
+        /* Check permissions on the install path */
+        strcpy(path, info->install_path);
+        if ( access(path, F_OK) < 0 ) {
+            if ( (strcmp(path, "/") != 0) && strrchr(path, '/') ) {
+                *(strrchr(path, '/')+1) = '\0';
+            }
+        }
+        if ( access(path, W_OK) < 0 ) {
+            printf("No write permission to %s\n", path);
+            continue;
+        }
+
         /* Find out where to install the binary symlinks */
         if ( ! prompt_user("Please enter the path for binary installation",
                         info->symlinks_path, path, sizeof(path)) ) {
             return SETUP_ABORT;
         }
         set_symlinkspath(info, path);
+
+        /* Check permissions on the symlinks path */
+        if ( access(info->symlinks_path, W_OK) < 0 ) {
+            printf("No write permission to %s\n", info->symlinks_path);
+            continue;
+        }
 
         /* Go through the install options */
         info->install_size = 0;

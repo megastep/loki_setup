@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.21 1999-12-01 01:32:33 hercules Exp $ */
+/* $Id: install.c,v 1.22 1999-12-01 15:57:26 hercules Exp $ */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -28,6 +28,16 @@ const char *GetProductDesc(install_info *info)
 const char *GetProductVersion(install_info *info)
 {
     return xmlGetProp(info->config->root, "version");
+}
+const char *GetDefaultPath(install_info *info)
+{
+    const char *path;
+
+    path = xmlGetProp(info->config->root, "path");
+    if ( path == NULL ) {
+        path = DEFAULT_PATH;
+    }
+    return path;
 }
 const char *GetProductEULA(install_info *info)
 {
@@ -95,7 +105,8 @@ install_info *create_install(const char *configfile, int log_level)
     info->args = GetRuntimeArgs(info);
 
     /* Add the default install path */
-    sprintf(info->install_path, "%s/%s", DEFAULT_PATH, GetProductName(info));
+    sprintf(info->install_path, "%s/%s", GetDefaultPath(info),
+                                         GetProductName(info));
     strcpy(info->symlinks_path, DEFAULT_SYMLINKS);
     
     /* That was easy.. :) */
@@ -281,8 +292,12 @@ char *get_option_name(install_info *info, xmlNodePtr node, char *name, int len)
     }
     text = xmlNodeListGetString(info->config, node->childs, 1);
     *name = '\0';
-    while ( (*name == 0) && parse_line(&text, name, len) )
-        ;
+    if ( text ) {
+        while ( (*name == 0) && parse_line(&text, name, len) )
+            ;
+    } else {
+        log_warning(info, "XML: option listed without description");
+    }
     return name;
 }
 

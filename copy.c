@@ -29,7 +29,7 @@
 #define CPIO_EXTENSION  ".cpio"
 #define RPM_EXTENSION   ".rpm"
 
-#define makedev(ma, mi) (((ma) << 8) | (mi))
+#define device(ma, mi) (((ma) << 8) | (mi))
 
 static char current_option[200];
 extern char *rpm_root;
@@ -127,10 +127,10 @@ size_t copy_cpio_stream(install_info *info, stream *input, const char *dest,
         file_mkfifo(info, file_hdr.c_name, file_hdr.c_mode & C_MODE);
       }else if(S_ISBLK(file_hdr.c_mode)){
         file_mknod(info, file_hdr.c_name, S_IFBLK|(file_hdr.c_mode & C_MODE), 
-                   makedev(file_hdr.c_rdev_maj,file_hdr.c_rdev_min));
+                   device(file_hdr.c_rdev_maj,file_hdr.c_rdev_min));
       }else if(S_ISCHR(file_hdr.c_mode)){
         file_mknod(info, file_hdr.c_name, S_IFCHR|(file_hdr.c_mode & C_MODE), 
-                   makedev(file_hdr.c_rdev_maj,file_hdr.c_rdev_min));
+                   device(file_hdr.c_rdev_maj,file_hdr.c_rdev_min));
       }else if(S_ISSOCK(file_hdr.c_mode)){
         // TODO: create Unix socket
       }else if(S_ISLNK(file_hdr.c_mode)){

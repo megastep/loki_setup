@@ -9,7 +9,8 @@ and provides both a console and a GTk front-end to install it.
 The installer requires libxml 1.4.0 to parse the XML configuration,
 and libglade 1.7 to dynamically load the GTk user interface definition.
 Source archives for these libraries can be found in ./libs, and newer
-versions may also work.
+versions may also work.  You should only install static versions of
+these libraries, so they will not be required on the user systems.
 
 Building the installer:
 Type 'make; make install'
@@ -39,6 +40,7 @@ win32/
 --
 You should edit the setup.data/setup.xml file to match your product,
 and add a new splash.xpm which will be displayed during the install.
+There is documentation for the XML setup specification in README.xml
 
 The binaries for your product are expected to be in bin/<arch>/<libc>/
 on the CD.  The appropriate binary for the current architecture will
@@ -53,7 +55,7 @@ The install process creates an uninstall script in the install directory
 which can be run when the user wants to uninstall the product.
 
 Make sure you have included installers for the supported architectures
-on your CD!  We have included x86, ppc, alpha, and sparc binaries for
+on your CD!  We have included x86, ppc, alpha, and sparc64 binaries for
 this version of the installer.
 
 Play with it, and enjoy!
