@@ -1,6 +1,8 @@
 current:
 Ryan C. Gordon (icculus.org) - Fri Jul 12 05:57:29 EDT 2002
  * configure script should detect libs more correctly.
+Ryan C. Gordon (icculus.org) - Fri Aug 23 19:46:21 CEST 2002
+ * Added PkZip/Info-ZIP/WinZip compatible archive plugin.
 
 1.6.0:
 Stephane Peter (Codehost) - Tue Aug 21 20:22:10 PDT 2001
