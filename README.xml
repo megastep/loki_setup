@@ -130,9 +130,13 @@ it on the install disk as bin/ppc/glibc-2.1/foo.
 
 There are several required attributes of the binary element:
 
- arch       This attribute is currently unused.  It should be set to "any"
+ arch       "any" is synonymous with the current architecture. You can also
+            use this attribute to force a precise architecture, for example
+            "ppc" or "sparc64".
 
- libc       This attribute is currently unused.  It should be set to "any"
+ libc       "any" is synonymous with the current libc version. This can
+            also be used to force a libc version for the binary, i.e
+            "glibc-2.0" or "glibc-2.1".
 
 There are several optional attributes of the binary element:
 

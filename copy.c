@@ -629,14 +629,24 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
 {
     struct stat sb;
     char fpat[PATH_MAX], bin[PATH_MAX], final[PATH_MAX];
+	const char *arch, *libc;
     size_t size, copied;
+
+	arch = xmlGetProp(node, "arch");
+	if ( !arch || !strcasecmp(arch,"any") ) {
+		arch = info->arch;
+	}
+	libc = xmlGetProp(node, "libc");
+	if ( !libc || !strcasecmp(libc,"any") ) {
+		libc = info->libc;
+	}
 
     size = 0;
     while ( filedesc && parse_line(&filedesc, final, (sizeof final)) ) {
         copied = 0;
         strncpy(current_option, final, sizeof(current_option));
         strncat(current_option, " binary", sizeof(current_option));
-        sprintf(fpat, "bin/%s/%s/%s", info->arch, info->libc, final);
+        sprintf(fpat, "bin/%s/%s/%s", arch, libc, final);
 		if ( from_cdrom ) {
 			int d;
 			char fullpath[PATH_MAX];
@@ -648,9 +658,9 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
 					copied = copy_file(info, cdroms[d], bin, dest, final, 1, update);
 					break;
 				} else {
-					sprintf(fullpath, "%s/bin/%s/%s", cdroms[d], info->arch, final);
+					sprintf(fullpath, "%s/bin/%s/%s", cdroms[d], arch, final);
 					if ( stat(fullpath, &sb) == 0 ) {
-						sprintf(fullpath, "bin/%s/%s", info->arch, final);
+						sprintf(fullpath, "bin/%s/%s", arch, final);
 						check_dynamic(fullpath, bin, cdroms[d]);
 						copied = copy_file(info, cdroms[d], bin, dest, final, 1, update);
 						break;
@@ -665,7 +675,7 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
 				check_dynamic(fpat, bin, NULL);
 				copied = copy_file(info, NULL, bin, dest, final, 1, update);
 			} else {
-				sprintf(fpat, "bin/%s/%s", info->arch, final);
+				sprintf(fpat, "bin/%s/%s", arch, final);
 				if ( stat(fpat, &sb) == 0 ) {
 					check_dynamic(fpat, bin, NULL);
 					copied = copy_file(info, NULL, bin, dest, final, 1, update);
