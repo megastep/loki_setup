@@ -31,7 +31,8 @@ HEADERS = -I/usr/X11R6/include -I/usr/local/include
 OPTIONS = -DSTUB_UI -DSETUP_VERSION_MAJOR=@SETUP_VERSION_MAJOR@ \
 		  -DSETUP_VERSION_MINOR=@SETUP_VERSION_MINOR@ \
 		  -DSETUP_VERSION_RELEASE=@SETUP_VERSION_RELEASE@ \
-		  -DSETUP_VERSION=\"$(SETUP_VERSION)\" -DSU_PATH=\"@SU_PATH@\"
+		  -DSETUP_VERSION=\"$(SETUP_VERSION)\" -DSU_PATH=\"@SU_PATH@\" \
+		  -DMOUNT_PATH=\"@MOUNT_PATH@\" -DUMOUNT_PATH=\"@UMOUNT_PATH@\"
 
 CFLAGS += $(OPTIMIZE) $(HEADERS) $(OPTIONS)
 
@@ -45,7 +46,7 @@ CONSOLE_OBJS 		= $(OBJS) console_ui.o @CONSOLE_OBJS@
 GUI_OBJS 			= $(OBJS) gtk_ui.o
 XSU_OBJS			= xsu.o pseudo.o
 
-SRCS = $(OBJS:.o=.c) $(CONSOLE_OBJS:.o=.c) $(GUI_OBJS:.o=.c) $(XSU_OBJS:.o=.c)
+SRCS = $(OBJS:.o=.c) $(CONSOLE_OBJS:.o=.c) $(GUI_OBJS:.o=.c) $(XSU_OBJS:.o=.c) testcd.c
 
 COMMON_LIBS = plugins/libplugins.a @COMMON_LIBS@ \
 	      $(SETUPDB)/$(arch)/libsetupdb.a
@@ -69,6 +70,9 @@ uninstall: $(UNINSTALL_OBJS) $(COMMON_LIBS)
 
 check: $(CHECK_OBJS)  $(COMMON_LIBS)
 	$(CC) $(LDFLAGS) -o $@ $^ $(GUI_LIBS)
+
+testcd: testcd.o $(CORE_OBJS) $(COMMON_OBJS) $(COMMON_LIBS)
+	$(CC) $(LDFLAGS) -o $@ $^ @LIBS@ @CONSOLE_LIBS@ @STATIC@
 
 setup:	$(CONSOLE_OBJS) $(COMMON_LIBS)
 	$(CC) $(LDFLAGS) -o $@ $^ $(CONSOLE_LIBS) @STATIC@
