@@ -2,7 +2,7 @@
  * Check and Rescue Tool for Loki Setup packages. Verifies the consistency of the files,
  * and optionally restores them from the original installation medium.
  *
- * $Id: check.c,v 1.1 2002-01-28 01:13:30 megastep Exp $
+ * $Id: check.c,v 1.2 2002-02-23 21:29:43 icculus Exp $
  */
 
 #include <stdlib.h>
@@ -86,7 +86,10 @@ static void goto_installpath(char *argv0)
 
             /* See if it exists, and update path */
             if ( access(temppath, X_OK) == 0 ) {
-                ++found;
+                /* make sure it's not a directory... */
+                struct stat s;
+                if ((stat(temppath, &s) == 0) && (S_ISREG(s.st_mode)))
+                    ++found;
             }
             path = last+1;
 
