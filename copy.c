@@ -60,7 +60,7 @@ size_t copy_tarball(install_info *info, const char *path, const char *dest,
     size_t size, copied;
     size_t this_size;
     unsigned int mode;
-    unsigned int blocks, left, length;
+    int blocks, left, length;
 
     size = 0;
     input = file_open(info, path, "rb");
@@ -184,7 +184,7 @@ size_t copy_directory(install_info *info, const char *path, const char *dest,
     sprintf(dirb, "%s/%s", dest, path);
     sprintf(fpat, "%s/*", path);
     if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
-        for ( i=0; globbed.gl_pathc; ++i ) {
+        for ( i=0; i<globbed.gl_pathc; ++i ) {
             copied = copy_path(info, globbed.gl_pathv[i], dirb, update);
             if ( copied > 0 ) {
                 size += copied;
@@ -234,7 +234,7 @@ size_t copy_list(install_info *info, const char *filedesc, const char *dest,
     size = 0;
     while ( filedesc && parse_line(&filedesc, fpat, (sizeof fpat)) ) {
         if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
-            for ( i=0; globbed.gl_pathc; ++i ) {
+            for ( i=0; i<globbed.gl_pathc; ++i ) {
                 copied = copy_path(info, globbed.gl_pathv[i], dest, update);
                 if ( copied > 0 ) {
                     size += copied;

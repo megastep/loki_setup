@@ -11,6 +11,7 @@
 typedef struct {
     char *path;
     char mode;
+    size_t size;
     FILE *fp;
     gzFile zfp;
 } stream;

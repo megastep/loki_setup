@@ -9,6 +9,8 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
+#include <byteswap.h>
+#include <endian.h>
 
 #include <zlib.h>
 
@@ -93,11 +95,24 @@ stream *file_open(install_info *info, const char *path, const char *mode)
         streamp->fp = fopen(path, "rb");
         if ( fread(magic, 1, 2, streamp->fp) == 2 ) {
             if ( memcmp(magic, gzip_magic, 2) == 0 ) {
+			    unsigned int tmp;
+			    fseek(streamp->fp, (off_t)(-4), SEEK_END);
+				fread(&tmp, 4,1, streamp->fp);
+#if __BYTE_ORDER == __BIG_ENDIAN
+				tmp = bswap_32(tmp);
+#endif
+				streamp->size = tmp;
+
+				fprintf(stderr,"Uncompressed size for %s: %d bytes\n", path, streamp->size);
+
                 fclose(streamp->fp);
                 streamp->fp = NULL;
                 streamp->zfp = gzopen(path, "rb");
             } else {
+			    struct stat st;
                 rewind(streamp->fp);
+				fstat(fileno(streamp->fp), &st);
+				streamp->size = st.st_size;
             }
         }
         if ( (streamp->fp == NULL) && (streamp->zfp == NULL) ) {
@@ -123,6 +138,7 @@ stream *file_open(install_info *info, const char *path, const char *mode)
         log_quiet(info, "Installing file %s", path);
         streamp->fp = fopen(path, "wb");
         if ( streamp->fp == NULL ) {
+		    streamp->size = 0;
             file_close(info, streamp);
             log_warning(info, "Couldn't write to file: %s", path);
             return(NULL);
@@ -156,7 +172,7 @@ int file_read(install_info *info, void *buf, int len, stream *streamp)
 int file_write(install_info *info, void *buf, int len, stream *streamp)
 {
     int nwrote;
-
+	// TODO: Update the size
     nwrote = 0;
     if ( streamp->mode == 'w' ) {
         if ( streamp->fp ) {
@@ -241,6 +257,7 @@ int file_mkdir(install_info *info, const char *path, int mode)
         /* Do the action */
         retval = mkdir(path, mode);
         if ( retval < 0 ) {
+		  if(errno != EEXIST)
             log_warning(info, "Can't create %s: %s\n", path, strerror(errno));
         } else {
             add_dir_entry(info, path);
