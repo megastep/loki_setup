@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Setup\n"
 "POT-Creation-Date: 2000-12-01 14:33-0800\n"
-"PO-Revision-Date: 2000-06-23 15:05-07:00\n"
+"PO-Revision-Date: 2000-12-01 17:21-08:00\n"
 "Last-Translator: David Hedbor <david@hedbor.org>\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -85,7 +85,7 @@ msgstr "Installation pågår..."
 
 #: image/setup.data/setup.glade:269
 msgid "Install a symbolic link into the path"
-msgstr ""
+msgstr "Installera en symbolisk länk i biblioteket"
 
 #: image/setup.data/setup.glade:126
 msgid "Install path:"
@@ -104,9 +104,8 @@ msgid "License Agreement"
 msgstr "Licensavtal"
 
 #: image/setup.data/setup.glade:193
-#, fuzzy
 msgid "Link path:"
-msgstr "Installationsbibliotek:"
+msgstr "Länkbibliotek:"
 
 #: image/setup.data/setup.glade:938
 msgid "Play!"
@@ -141,9 +140,8 @@ msgid "The installation was successfully completed!"
 msgstr "Installationen lyckades!"
 
 #: image/setup.data/setup.glade:1024
-#, fuzzy
 msgid "The product was installed in:"
-msgstr "Spelet installerades i:"
+msgstr "Produkten installerades i:"
 
 #: image/setup.data/setup.glade:1183
 msgid "This installation has been aborted."
@@ -199,7 +197,7 @@ msgid "[warning text]"
 msgstr "[warning text]"
 
 #: main.c:114
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Usage: %s [options]\n"
 "\n"
@@ -220,9 +218,12 @@ msgstr ""
 "Användning: %s [argument]\n"
 "\n"
 "Argument kan vara ett eller flera av dessa:\n"
+"   -b path  Sätt binärbibliotek till <path>\n"
 "   -h       Visa detta meddelande\n"
+"   -i path  Sätt installationsbibliotek till <path>\n"
 "   -c cwd   Använd ett alternativt cwd för installationen\n"
 "   -f file  Använd en alternativ XML-fil (förval är %s)\n"
+"   -m       Använd manual uppacking av RPM-paket. Updatera inte RPM-databasen\n"
 "   -n       Använd textgränssnittet\n"
 "   -r root  Sätt root-biblioteket för RPM-uppackning (förval är /)\n"
 "   -v n     Sätt verbosity level till n. Godkända värden:\n"
@@ -230,7 +231,7 @@ msgstr ""
 "   -V       Skriv ut versionsnummber av setup-programmet och avsluta\n"
 
 #: main.c:128
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Usage: %s [options]\n"
 "\n"
@@ -248,24 +249,25 @@ msgstr ""
 "Användning: %s [argument]\n"
 "\n"
 "Argument kan vara ett eller flera av dessa:\n"
+"   -b path  Sätt binärbibliotek till <path>\n"
 "   -h       Visa detta meddelande\n"
+"   -i path  Sätt installationsbibliotek till <path>\n"
 "   -c cwd   Använd ett alternativt cwd för installationen\n"
 "   -f file  Använd en alternativ XML-fil (förval är %s)\n"
 "   -n       Använd textgränssnittet\n"
-"   -r root  Sätt root-biblioteket för RPM-uppackning (förval är /)\n"
 "   -v n     Sätt verbosity level till n. Godkända värden:\n"
 "            0: Debug  1: Tyst  2: Normalt 3: Varningar 4: Fatala\n"
 "   -V       Skriv ut versionsnummber av setup-programmet och avsluta\n"
 
 #: main.c:166
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "\n"
 "Please insert the %s CDROM.\n"
 "Choose Yes to retry, No to cancel"
 msgstr ""
 "\n"
-"Var snäll montera cd-romskivan %s.\n"
+"Var snäll att ladda cd-romskivan %s.\n"
 "Välj Ja för att försöka igen, Nej för att abryta."
 
 #: main.c:169
@@ -301,7 +303,7 @@ msgstr "Hittade inga lämpliga UI-drivrutiner!\n"
 msgid ""
 "\n"
 "Illegal installation: do not mix components with a component installation.\n"
-msgstr ""
+msgstr "\nFelaktig instruktion: blanda inte komponenter med en komponent-installation.\n"
 
 #: main.c:339
 #, c-format
@@ -310,6 +312,9 @@ msgid ""
 "The %s component is already installed.\n"
 "Please uninstall it beforehand.\n"
 msgstr ""
+"\n"
+"Komponenten %s är redan installerad.\n"
+"Var god att avinstalla den först.\n"
 
 #: main.c:346
 #, c-format
@@ -318,32 +323,35 @@ msgid ""
 "You must install %s before running this\n"
 "installation program.\n"
 msgstr ""
+"\n"
+"Du måste installera %s innan du kör\n"
+"installationsprogrammet.\n"
 
 #: main.c:359
 msgid ""
 "The 'cdromfile' attribute is now mandatory when using the 'cdrom' attribute."
-msgstr ""
+msgstr "'cdromfile'-attributet krävs nu vid användning av  'cdrom'-attributet."
 
 #: detect.c:73
-#, fuzzy, c-format
+#, c-format
 msgid "Unmounting device %s"
-msgstr "Skapar enhet %s"
+msgstr "Avmonterar enhet %s"
 
 #: detect.c:75
 #, c-format
 msgid "Failed to unmount device %s mounted on %s"
-msgstr ""
+msgstr "Kunde ej avmontera enheten %s monterad på %s"
 
 #: detect.c:167 detect.c:209
 #, c-format
 msgid "Mounted device %s"
-msgstr ""
+msgstr "Monterade enhet %s"
 
 #: plugins.c:96
 msgid ""
 "Registered plugins :\n"
 "\n"
-msgstr ""
+msgstr "Registrerade plugins :\n\n"
 
 #: plugins.c:98
 #, c-format
@@ -352,30 +360,33 @@ msgid ""
 "\tVersion: %s\n"
 "\tAuthor: %s\n"
 msgstr ""
+"\tBeskrivning: %s\n"
+"\tVersion: %s\n"
+"\tFörfattare: %s\n"
 
 #: plugins.c:101
 msgid "\tPlugin is statically linked.\n"
-msgstr ""
+msgstr "\tPluginen är statiskt länkad.\n"
 
 #: plugins.c:103
 #, c-format
 msgid "\tRecognizes %d extensions: "
-msgstr ""
+msgstr "\tKänner igen %d utökningar: "
 
 #: plugins.c:148
 #, c-format
 msgid "Error registering %s plugin: %s\n"
-msgstr ""
+msgstr "Fel uppstod vid registrering av pluginen %s: %s\n"
 
 #: plugins.c:151
 #, c-format
 msgid "Error initializing %s plugin"
-msgstr ""
+msgstr "Kunde ej starta pluginen %s"
 
 #: plugins.c:155
 #, c-format
 msgid "Error trying to load %s plugin: %s\n"
-msgstr ""
+msgstr "Fel vid laddning av pluginen %s: %s\n"
 
 #: network.c:142
 msgid "Out of memory, no network check"
@@ -397,7 +408,7 @@ msgstr "Slut på minne\n"
 msgid ""
 "Could not find default component. Make sure to define components for all "
 "entries."
-msgstr ""
+msgstr "Kunde ej hitta de förvalda komponenterna. Du måste definiera komponenter för alla poster. "
 
 #: file.c:66 file.c:86 file.c:93 install.c:599 install.c:621 install.c:643
 #: install.c:664 install.c:703
@@ -406,15 +417,15 @@ msgstr "Slut på minne"
 
 #: install.c:688
 msgid "You must use a 'symlink' attribute with 'play'"
-msgstr ""
+msgstr "Du måste använda ett 'symlink'-attribut med 'play'"
 
 #: install.c:693
 msgid "There can be only one binary with a 'play' attribute"
-msgstr ""
+msgstr "Det får bara finnas en binär med ett 'play'-attribut"
 
 #: install.c:696
 msgid "The only valid values for the 'play' attribute are yes and no"
-msgstr ""
+msgstr "De enda rätta värderna för 'play'-attributet är 'yes' och 'no'"
 
 #: install.c:721
 msgid "Couldn't find your home directory"
@@ -444,28 +455,28 @@ msgid "Unable to remove '%s'"
 msgstr "Kan inte ta bort '%s'"
 
 #: install.c:1037
-#, fuzzy, c-format
+#, c-format
 msgid "The '%s' RPM was installed or upgraded (version %s, release %d)"
-msgstr "'%s'-RPMen installerades eller uppgraderas (version %s, release %s)"
+msgstr "RPM-filen '%s' installerades eller uppgraderas (version %s, release %d)"
 
 #: install.c:1148
-#, fuzzy, c-format
+#, c-format
 msgid "Could not register binary: %s"
-msgstr "Kunde inte skriva till fil: %s"
+msgstr "Kunde inte registrera binärfil: %s"
 
 #: install.c:1186
 #, c-format
 msgid "Could not write temporary pre-uninstall script in %s"
-msgstr ""
+msgstr "Kunde inte skriva ett temporärt pre-uninstall skript i %s"
 
 #: install.c:1207
 #, c-format
 msgid "Could not write post-uninstall script in %s"
-msgstr ""
+msgstr "Kunde inte skriva ett post-uninstall skript i %s"
 
 #: install.c:1271
 msgid "Could not create install log"
-msgstr ""
+msgstr "Kunde inte skapa installationslogg"
 
 #: install.c:1298
 #, c-format
@@ -478,9 +489,9 @@ msgid "Unable to create desktop file '%s'"
 msgstr "Kan inte skapa skrivbordsfilen '%s'"
 
 #: copy.c:207
-#, fuzzy, c-format
+#, c-format
 msgid "Unable to create %s symlink pointing to %s"
-msgstr "Kan inte skapa skrivbordsfilen '%s'"
+msgstr "Kunde inte skapa symlänken %s som pekar på %s"
 
 #: copy.c:269
 #, c-format
@@ -499,15 +510,15 @@ msgstr "Kan inte hitta filen '%s' i någon av cd-romspelarna"
 
 #: copy.c:497
 msgid "Running script"
-msgstr ""
+msgstr "Kör skript"
 
 #: copy.c:627
 msgid "Component element needs to have a name"
-msgstr ""
+msgstr "Komponentelementet måste ha ett namn"
 
 #: copy.c:630
 msgid "Component element needs to have a version"
-msgstr ""
+msgstr "Komponentelementet måste ha ett versionnummer"
 
 #: copy.c:782
 #, c-format
@@ -605,7 +616,7 @@ msgstr "N/j"
 #: console_ui.c:65
 #, c-format
 msgid "%s [Press Enter] "
-msgstr ""
+msgstr "%s [Tryck Enter] "
 
 #: console_ui.c:69 console_ui.c:95
 #, c-format
@@ -625,9 +636,9 @@ msgid "Continue?"
 msgstr "Fortsätt?"
 
 #: console_ui.c:168
-#, fuzzy, c-format
+#, c-format
 msgid "'%s' option will be installed.\n"
-msgstr "%d MB tillgänligt, %d MB kommer att installeras.\n"
+msgstr "'%s' valmöjligheter kommer att installeras.\n"
 
 #: console_ui.c:174
 #, c-format
@@ -635,14 +646,13 @@ msgid "Install %s?"
 msgstr "Installera %s?"
 
 #: console_ui.c:217
-#, fuzzy
 msgid "No help available\n"
-msgstr "Hittade inga lämpliga UI-drivrutiner!\n"
+msgstr "Hjälp saknas.\n"
 
 #: console_ui.c:235
-#, fuzzy, c-format
+#, c-format
 msgid "----====== %s / %s installation program ======----\n"
-msgstr "----====== %s installationsprogram ======----\n"
+msgstr "----====== %s / %s installationsprogram ======----\n"
 
 #: console_ui.c:238
 #, c-format
@@ -669,16 +679,16 @@ msgstr "Vill du läsa filen %s?"
 
 #: console_ui.c:328
 msgid "Please choose the product to install, or Q to quit. "
-msgstr ""
+msgstr "Välj produkten du vill installera eller Q för att avsluta. "
 
 #: console_ui.c:358
 msgid "Please enter the installation path"
 msgstr "Ange installationsbibliotek"
 
 #: console_ui.c:363
-#, fuzzy, c-format
+#, c-format
 msgid "Install path set to: %s\n"
-msgstr "Installationsbibliotek: %s\n"
+msgstr "Installationsbibliotek satt till: %s\n"
 
 #: console_ui.c:378 console_ui.c:432
 #, c-format
@@ -686,19 +696,17 @@ msgid "No write permission to %s\n"
 msgstr "Inga skrivrättigheter i %s\n"
 
 #: console_ui.c:404
-#, fuzzy
 msgid "Do you want to install symbolic links to a directory in your path?"
-msgstr "Vill du installera skrivbordsfiler?"
+msgstr "Vill du installera symboliska länkar i ett bibliotek i din sökväg?"
 
 #: console_ui.c:411
-#, fuzzy
 msgid "Please enter the path in which to create the symbolic links"
-msgstr "Ange biblioteket för programfilerna"
+msgstr "Ange ett biblioteket för de symboliska länkarna "
 
 #: console_ui.c:416
 #, c-format
 msgid "Binary path set to: %s\n"
-msgstr ""
+msgstr "Binärbibliotek satt till: %s\n"
 
 #: console_ui.c:423
 msgid ""
@@ -714,7 +722,7 @@ msgid ""
 "\n"
 "%s component\n"
 "\n"
-msgstr ""
+msgstr "\n%s komponent\n\n"
 
 #: console_ui.c:469
 msgid "Do you want to install desktop items?"
@@ -748,7 +756,6 @@ msgid "Installation complete.\n"
 msgstr "Installationen färdig.\n"
 
 #: console_ui.c:516
-#, fuzzy
 msgid "Would you like to launch the game now?"
 msgstr "Vill du starta spelet nu?"
 
@@ -778,13 +785,12 @@ msgid "Standard input is not a terminal!\n"
 msgstr "Standard input är inte en terminal!\n"
 
 #: gtk_ui.c:409
-#, fuzzy
 msgid ""
 "If you run this as root, the preferences will be stored in\n"
 "root's home directory instead of your user account directory."
 msgstr ""
-"On du kör spelet som root så kommer inställningarna sparas i root's\n"
-"hembibliotek istället för i ditt hembibliotekt."
+"On du kör spelet som root så kommer inställningarna sparas i\n"
+"root's hembibliotek istället för i ditt eget."
 
 #: gtk_ui.c:523
 msgid "Please respond to the license dialog"
@@ -844,27 +850,26 @@ msgid "Setup"
 msgstr "Setup"
 
 #: gtk_ui.c:808
-#, fuzzy
 msgid "Fatal error:  out of memory\n"
-msgstr "Slut på minne\n"
+msgstr "Fatalt fel:  slut på minne\n"
 
 #: gtk_ui.c:815
 #, c-format
 msgid "Error: maximum of %d install_path entries exceeded\n"
-msgstr ""
+msgstr "Fel: För många install_path poster (max är %d)\n"
 
 #: gtk_ui.c:933
 msgid "Warning: No writable targets in path... You may want to be root.\n"
-msgstr ""
+msgstr "Varning: Inga skrivbara bibliotek i din sökväg... Du kanske vill köra som root.\n"
 
 #: gtk_ui.c:952
 msgid "Unable to locate 'setup_menuitems_checkbox'"
 msgstr "Kan inte hitta 'setup_menuitems_checkbox'"
 
 #: gtk_ui.c:1166
-#, fuzzy, c-format
+#, c-format
 msgid "%s / %s Setup"
-msgstr "Installation av %s"
+msgstr "Installation av %s / %s"
 
 #: gtk_ui.c:1168
 #, c-format
@@ -887,33 +892,33 @@ msgid "Bad checksum for file '%s'"
 msgstr "Felaktig checksumma för filen '%s'"
 
 #: plugins/outrage.c:66
-#, fuzzy, c-format
+#, c-format
 msgid "OPKG: Unable to open package file %s"
-msgstr "Kan inte hitta filen '%s'"
+msgstr "OPKG: Kan inte öppna paketfilen %s"
 
 #: plugins/outrage.c:73
 msgid "OPKG: Invalid package header"
-msgstr ""
+msgstr "OPKG: Felaktigt pakethuvud"
 
 #: plugins/outrage.c:98
 msgid "OPKG: malloc() failed!"
-msgstr ""
+msgstr "OPKG: malloc() misslyckades!"
 
 #: plugins/outrage.c:116
 msgid "realloc() failed!"
-msgstr ""
+msgstr "realloc() misslyckades!"
 
 #: plugins/outrage.c:137
 msgid "read() failure accessing file size!"
-msgstr ""
+msgstr "read() av filestorlek misslyckades!"
 
 #: plugins/outrage.c:156
 msgid "OPKG: read() failure accessing timestamp!"
-msgstr ""
+msgstr "OPKG: read() av timestamp misslyckades!"
 
 #: plugins/outrage.c:226
 msgid "read() failed!"
-msgstr ""
+msgstr "read() misslyckades()"
 
 #: plugins/rpm.c:64 plugins/rpm.c:97
 #, c-format
