@@ -422,7 +422,7 @@ static void OnCommandReadme(void)
     carbon_debug("OnCommandReadme()\n");
 
     // Load readme file (if it exists)
-    const char *filename = GetProductREADME(cur_info);
+    const char *filename = GetProductREADME(cur_info, NULL);
     char buffer[MAX_README_SIZE];
 
     if(filename)
@@ -552,7 +552,7 @@ int OnOptionClickEvent(OptionsButton *ButtonWithEventClick)
 		{
 			if (!strcmp(child->name, "eula"))
 			{
-				const char* name = GetProductEULANode(cur_info, data_node);
+				const char* name = GetProductEULANode(cur_info, data_node, NULL);
 				if(name)
 				{
                     char buffer[MAX_README_SIZE];
@@ -862,7 +862,7 @@ static install_state carbonui_init(install_info *info, int argc, char **argv, in
         carbon_ShowInstallScreen(MyRes, OPTION_PAGE);
 
     // Disable the "View Readme" button if no README available
-    if(!GetProductREADME(cur_info))
+    if(!GetProductREADME(cur_info, NULL))
     {
         carbon_HideControl(MyRes, CLASS_README_BUTTON_ID);
         carbon_HideControl(MyRes, COPY_README_BUTTON_ID);
@@ -942,7 +942,7 @@ static install_state carbonui_init(install_info *info, int argc, char **argv, in
         carbon_SetInstallClass(MyRes, false);
 
     // If product has an end user license, show it
-    if(GetProductEULA(info))
+    if(GetProductEULA(info, NULL))
     {
         //license_okay = 0;
         cur_state = SETUP_LICENSE;
@@ -965,7 +965,7 @@ static install_state carbonui_license(install_info *info)
     carbon_debug("***carbonui_license()\n");
     // If license is accepted
     char buffer[MAX_README_SIZE];
-    load_file(GetProductEULA(info), buffer, MAX_README_SIZE);
+    load_file(GetProductEULA(info, NULL), buffer, MAX_README_SIZE);
     if(carbon_ReadmeOrLicense(MyRes, false, buffer))
         cur_state = SETUP_README;
     else
@@ -1362,7 +1362,7 @@ static install_state carbonui_complete(install_info *info)
         carbon_HideControl(MyRes, DONE_START_BUTTON_ID);
 
     // Hide the 'View Readme' button if we have no readme...
-    if(!GetProductREADME(info))
+    if(!GetProductREADME(info, NULL))
         carbon_HideControl(MyRes, DONE_README_BUTTON_ID);
 
     return carbon_IterateForState(MyRes, &cur_state);
