@@ -164,7 +164,9 @@ void file_skip_zeroes(install_info *info, stream *streamp)
 		c = fgetc(streamp->fp);
 	  }else if ( streamp->zfp ) {
 		c = gzgetc(streamp->zfp);
-	  }
+	  } else {
+        c = EOF;
+      }
 	  if(c==EOF)
 		break;
 	  if(c!='\0'){

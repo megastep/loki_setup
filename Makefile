@@ -1,12 +1,12 @@
 
 arch := $(shell ./print_arch)
 libc := $(shell ./print_libc)
-USE_RPM	= true
+#USE_RPM = true
 
 CC = gcc
 
-#OPTIMIZE = -Wall -g -O2 -funroll-loops
-OPTIMIZE = -Wall -g
+OPTIMIZE = -Wall -g -O2 -funroll-loops
+#OPTIMIZE = -Wall -g
 HEADERS = -I/usr/lib/glib/include -I/usr/X11R6/include
 OPTIONS = -DSTUB_UI
 

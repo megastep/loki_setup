@@ -82,6 +82,7 @@ size_t copy_cpio_stream(install_info *info, stream *input, const char *dest,
 
 	memset(&file_hdr, 0, sizeof(file_hdr));
     while ( ! file_eof(info, input) ) {
+      has_crc = 0;
 	  file_read(info, magic, 6, input);
 	  if(!strncmp(magic,"070701",6) || !strncmp(magic,"070702",6)){ /* New format */
 		has_crc = (magic[5] == '2');
@@ -190,40 +191,44 @@ static int rpm_access = 0;
 
 int check_for_rpm(void)
 {
-  char location[PATH_MAX];
-  if(strcmp(rpm_root, "/"))
-	sprintf(location,"%s/var/lib/rpm/packages.rpm", rpm_root);
-  else
-	strcpy(location,"/var/lib/rpm/packages.rpm");
-  /* Try to get write access to the RPM database */
-  if(!access(location, W_OK)){
-	rpm_access = 1;
-  }
-  return rpm_access;
+    char location[PATH_MAX];
+
+    if(strcmp(rpm_root, "/")) {
+        sprintf(location,"%s/var/lib/rpm/packages.rpm", rpm_root);
+    } else {
+        strcpy(location,"/var/lib/rpm/packages.rpm");
+    }
+
+    /* Try to get write access to the RPM database */
+    if(!access(location, W_OK)){
+        rpm_access = 1;
+    }
+    return rpm_access;
 }
 
 size_t copy_rpm(install_info *info, const char *path,
                 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
-  FD_t fdi;
-  Header hd;
-  size_t size;
-  int_32 type, c;
-  int rc, isSource;
-  void *p;
+    FD_t fdi;
+    Header hd;
+    size_t size;
+    int_32 type, c;
+    int rc, isSource;
+    void *p;
 
-  fdi = fdOpen(path, O_RDONLY, 0644);
-  rc = rpmReadPackageHeader(fdi, &hd, &isSource, NULL, NULL);
-  if(rc){
+    fdi = fdOpen(path, O_RDONLY, 0644);
+    rc = rpmReadPackageHeader(fdi, &hd, &isSource, NULL, NULL);
+    if(rc){
 	log_warning(info,"RPM error: %s", rpmErrorString());
 	return 0;
-  }
+    }
 
-  if(rpm_access){ /* We can call RPM directly */
+    size = 0;
+    if(rpm_access){ /* We can call RPM directly */
 	char cmd[300];
 	FILE *fp;
 	float percent = 0.0;
-	char *name, *version, *release;
+	char *name = "", *version = "", *release = "";
 
 	headerGetEntry(hd, RPMTAG_SIZE, &type, &p, &c);
 	if(type==RPM_INT32_TYPE){
@@ -265,7 +270,7 @@ size_t copy_rpm(install_info *info, const char *path,
 	/* Log the RPM installation */
 	add_rpm_entry(info, name, version, release);
 
-  }else{ /* Manually install the RPM file */
+    }else{ /* Manually install the RPM file */
 	FD_t gzdi;
 	stream *cpio;
 	
@@ -296,8 +301,8 @@ size_t copy_rpm(install_info *info, const char *path,
 	  if(type==RPM_STRING_TYPE)
 		add_script_entry(info, (char*)p, 1);
 	}
-  }
-  return size;
+    }
+    return size;
 }
 #endif
 
@@ -467,10 +472,10 @@ size_t copy_path(install_info *info, const char *path, const char *dest,
         } else {
             if ( strstr(path, TAR_EXTENSION) != NULL ) {
                 copied = copy_tarball(info, path, dest, update);
-			} else if ( strstr(path, CPIO_EXTENSION) != NULL ) {
+            } else if ( strstr(path, CPIO_EXTENSION) != NULL ) {
                 copied = copy_cpio(info, path, dest, update);
 #ifdef RPM_SUPPORT
-			} else if ( strstr(path, RPM_EXTENSION) != NULL ) {
+            } else if ( strstr(path, RPM_EXTENSION) != NULL ) {
                 copied = copy_rpm(info, path, update);
 #endif
             } else {
@@ -511,24 +516,48 @@ size_t copy_list(install_info *info, const char *filedesc, const char *dest,
     return size;
 }
 
+static void check_dynamic(const char *fpat, char *bin)
+{
+    int use_dynamic;
+    char test[PATH_MAX], testcmd[PATH_MAX];
+
+    use_dynamic = 0;
+    sprintf(test, "%s.check-dynamic.sh", fpat);
+    if ( access(test, R_OK) == 0 ) {
+        sprintf(testcmd, "sh %s 2>/dev/null", test);
+        if ( system(testcmd) == 0 ) {
+            sprintf(bin, "%s.dynamic", fpat);
+            if ( access(bin, R_OK) == 0 ) {
+                use_dynamic = 1;
+            }
+        }
+    }
+    if ( ! use_dynamic ) {
+        strcpy(bin, fpat);
+    }
+}
+
 size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, const char *dest,
                 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     struct stat sb;
-    char fpat[BUFSIZ], final[BUFSIZ];
+    char fpat[PATH_MAX], bin[PATH_MAX], final[PATH_MAX];
     size_t size, copied;
 
+    size = 0;
     while ( filedesc && parse_line(&filedesc, final, (sizeof final)) ) {
         copied = 0;
         strncpy(current_option, final, sizeof(current_option));
         strncat(current_option, " binary", sizeof(current_option));
         sprintf(fpat, "bin/%s/%s/%s", info->arch, info->libc, final);
         if ( stat(fpat, &sb) == 0 ) {
-            copied = copy_file(info, fpat, dest, final, 1, update);
+            check_dynamic(fpat, bin);
+            copied = copy_file(info, bin, dest, final, 1, update);
         } else {
             sprintf(fpat, "bin/%s/%s", info->arch, final);
             if ( stat(fpat, &sb) == 0 ) {
-                copied = copy_file(info, fpat, dest, final, 1, update);
+                check_dynamic(fpat, bin);
+                copied = copy_file(info, bin, dest, final, 1, update);
             } else {
                 log_warning(info, "Unable to find file '%s'", fpat);
             }

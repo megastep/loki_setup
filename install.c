@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.15 1999-09-25 03:42:57 megastep Exp $ */
+/* $Id: install.c,v 1.16 1999-09-28 09:36:23 hercules Exp $ */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -14,7 +14,6 @@
 #include "log.h"
 #include "copy.h"
 
-static int aborted = 0;
 extern char *rpm_root;
 
 /* Functions to retrieve attribution information from the XML tree */
@@ -111,8 +110,8 @@ void add_rpm_entry(install_info *info, const char *name, const char *version, co
     elem = (struct rpm_elem *)malloc(sizeof *elem);
     if ( elem ) {
         elem->name = strdup(name);
-		elem->version = strdup(version);
-		elem->release = strdup(release);
+        elem->version = strdup(version);
+        elem->release = strdup(release);
         if ( elem->name && elem->version && elem->release) {
             elem->next = info->rpm_list;
             info->rpm_list = elem;
@@ -482,6 +481,7 @@ void install_menuitems(install_info *info, desktop_type d)
     app_links = gnome_app_links;
     break;
   default:
+    return;
   }
   for( ; *app_links; app_links ++){
     expand_home(info, *app_links, buf);
@@ -508,6 +508,9 @@ void install_menuitems(install_info *info, desktop_type d)
 
         sprintf(exec, "%s", elem->path);
         sprintf(icon, "%s/%s", info->install_path, elem->icon);
+        if (d == DESKTOP_KDE) {
+            fprintf(fp, "# KDE Config File\n");
+        }
         fprintf(fp,
                 "[%sDesktop Entry]\n"
                 "Name=%s\n"

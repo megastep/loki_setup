@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.14 1999-09-25 03:42:57 megastep Exp $
+   $Id: gtk_ui.c,v 1.15 1999-09-28 09:36:23 hercules Exp $
 */
 
 #include <limits.h>
@@ -53,11 +53,6 @@ static int iterate_for_state(void)
 
   /*  fprintf(stderr,"New state: %d\n", cur_state); */
   return cur_state;
-}
-
-static const char *GetProductSplash(install_info *info)
-{
-    return xmlGetProp(cur_info->config->root, "splash");
 }
 
 /*********** GTK slots *************/
