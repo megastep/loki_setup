@@ -52,6 +52,9 @@ There are several optional attributes of the install element:
             the web site in a new netscape window, then falls back to
             using lynx if that fails for some reason.
 
+ localurl   This is the local HTML file that is loaded if the network
+            is down, or the web site cannot be reached.
+
 
 The OPTION element:
 

@@ -19,7 +19,7 @@ endif
 
 CFLAGS += $(OPTIMIZE) $(HEADERS) $(OPTIONS)
 
-OBJS = main.o install.o detect.o copy.o file.o log.o install_log.o
+OBJS = main.o install.o detect.o copy.o file.o network.o log.o install_log.o
 CONSOLE_OBJS = $(OBJS) console_ui.o
 GUI_OBJS = $(OBJS) gtk_ui.o
 

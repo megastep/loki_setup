@@ -4,6 +4,7 @@ SOL -	Added license file support (eula="license.txt" option for install XML)
 SOL -   Added support for <script> elements in options
 SOL -	Added preinstall and postinstall script support
 SOL -   Added web browser launch support (url="http://....")
+SOL -   Added network check for URL, and (localurl="...")
 SOL -   Added -c command line option to change working directory
 SOL -   Added the "path" attribute to the install element
 SOL -   The console ui now checks for write permissions on install path

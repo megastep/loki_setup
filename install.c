@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.22 1999-12-01 15:57:26 hercules Exp $ */
+/* $Id: install.c,v 1.23 1999-12-01 20:40:25 hercules Exp $ */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -13,6 +13,7 @@
 #include "detect.h"
 #include "log.h"
 #include "copy.h"
+#include "network.h"
 
 extern char *rpm_root;
 
@@ -46,6 +47,10 @@ const char *GetProductEULA(install_info *info)
 const char *GetProductURL(install_info *info)
 {
     return xmlGetProp(info->config->root, "url");
+}
+const char *GetLocalURL(install_info *info)
+{
+    return xmlGetProp(info->config->root, "localurl");
 }
 const char *GetPreInstall(install_info *info)
 {
@@ -109,6 +114,13 @@ install_info *create_install(const char *configfile, int log_level)
                                          GetProductName(info));
     strcpy(info->symlinks_path, DEFAULT_SYMLINKS);
     
+    /* Start a network lookup for any URL */
+    if ( GetProductURL(info) ) {
+        info->lookup = open_lookup(info, GetProductURL(info));
+    } else {
+        info->lookup = NULL;
+    }
+
     /* That was easy.. :) */
     return(info);
 }
@@ -328,6 +340,9 @@ void delete_install(install_info *info)
         free(elem->path);
         free(elem);
     }
+    if ( info->lookup ) {
+        close_lookup(info->lookup);
+    }
     if ( info->log ) {
         destroy_log(info->log);
     }
@@ -483,7 +498,14 @@ int launch_browser(install_info *info)
     const char *url;
     int retval;
 
-    url = GetProductURL(info);
+    url = NULL;
+    if ( info->lookup ) {
+        if ( poll_lookup(info->lookup) ) {
+            url = GetProductURL(info);
+        } else {
+            url = GetLocalURL(info);
+        }
+    }
     retval = 0;
     if ( url ) {
         char command[4096];

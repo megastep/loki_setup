@@ -5,6 +5,7 @@
 #include <limits.h>
 #include <gnome-xml/parser.h>
 
+
 /* Conversion macro for bytes to megabytes */
 #define BYTES2MB(bytes) ((bytes/(1024*1024))+1)
 
@@ -39,6 +40,9 @@ typedef enum {
 
 /* Forward declaration (used by UI) */
 struct UI_data;
+
+/* Forward declaration */
+typedef struct _URLlookup URLlookup;
 
 /* Forward declaration */
 typedef struct _install_log install_log;
@@ -118,6 +122,9 @@ typedef struct {
     /* Arguments to the game when launching it */
     const char *args;
 
+    /* URL lookup handle */
+    URLlookup *lookup;
+
     /* Unspecified UI data */
     struct UI_data *uidata;
 
@@ -130,6 +137,7 @@ extern const char *GetProductDesc(install_info *info);
 extern const char *GetProductVersion(install_info *info);
 extern const char *GetProductEULA(install_info *info);
 extern const char *GetProductURL(install_info *info);
+extern const char *GetLocalURL(install_info *info);
 extern const char *GetPreInstall(install_info *info);
 extern const char *GetPostInstall(install_info *info);
 extern const char *GetRuntimeArgs(install_info *info);
