@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-11-15 19:04-0800\n"
+"POT-Creation-Date: 2000-11-16 15:36-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -105,71 +105,71 @@ msgid ""
 "Aborting.\n"
 msgstr ""
 
-#: uninstall.c:356
+#: uninstall.c:348
 msgid "Installed products:\n"
 msgstr ""
 
-#: uninstall.c:362
+#: uninstall.c:354
 #, c-format
 msgid "installed in %s\n"
 msgstr ""
 
-#: uninstall.c:365
+#: uninstall.c:357
 msgid " Error while accessing product info\n"
 msgstr ""
 
-#: uninstall.c:373
+#: uninstall.c:369
 #, c-format
 msgid "Could not open product information for %s\n"
 msgstr ""
 
-#: uninstall.c:379
+#: uninstall.c:375
 #, c-format
 msgid ""
 "Product: %s\n"
 "Installed in %s\n"
 msgstr ""
 
-#: uninstall.c:386
+#: uninstall.c:382
 msgid "Components:\n"
 msgstr ""
 
-#: uninstall.c:399
+#: uninstall.c:395
 #, c-format
 msgid "Unable to find component %s\n"
 msgstr ""
 
-#: uninstall.c:407
+#: uninstall.c:403
 msgid "An error occured during the uninstallation process.\n"
 msgstr ""
 
-#: uninstall.c:411
+#: uninstall.c:407
 #, c-format
 msgid "%s has been successfully uninstalled.\n"
 msgstr ""
 
-#: uninstall_ui.c:143
+#: uninstall_ui.c:169
 #, c-format
 msgid "%d MB"
 msgstr ""
 
-#: uninstall_ui.c:287
+#: uninstall_ui.c:314
 msgid "Uninstall cancelled"
 msgstr ""
 
-#: uninstall_ui.c:289
+#: uninstall_ui.c:316
 msgid "Uninstall complete"
 msgstr ""
 
-#: uninstall_ui.c:375
+#: uninstall_ui.c:407
 msgid "No uninstall_vbox in glade file!\n"
 msgstr ""
 
-#: uninstall_ui.c:410
+#: uninstall_ui.c:439
 msgid "Complete uninstall"
 msgstr ""
 
-#: uninstall_ui.c:448
+#: uninstall_ui.c:476
 msgid ""
 "No products found.\n"
 "Are you the one that installed the software?"
