@@ -9,7 +9,7 @@ libc := $(shell ./print_libc)
 CC = gcc
 
 # The supported locales so far
-LOCALES = fr de es sv
+LOCALES = fr de es sv it
 
 OPTIMIZE = -Wall -g -O2 -funroll-loops
 ifeq ($(arch), alpha)
