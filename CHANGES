@@ -1,4 +1,7 @@
 Current:
+Ryan C. Gordon (Epic Games) - Sat Nov 30 12:09:47 EST 2002
+ * Significant reduction in bandwidth for console_ui...makes this usable
+   on terminals over dialup.
 Ryan C. Gordon (Epic Games) - Sun Nov 10 19:55:35 EST 2002
  * Corrected typo in configure.in (thanks, zakk!)
 Ryan C. Gordon (Epic Games) - Thu Sep 19 17:05:48 EDT 2002
