@@ -450,33 +450,33 @@ msgstr "Выберите по крайней мере одну опцию"
 
 # gtk_ui.c:530
 #: install.c:366
-msgid "Not enough free space for the selected options"
-msgstr "Недостаточно свободного пространства для выбранных опций"
+msgid "Not enough free space for the selected options."
+msgstr "Недостаточно свободного пространства для выбранных опций."
 
 # gtk_ui.c:532
 #: install.c:368
-msgid "Install path is not a directory"
-msgstr "Путь установки не каталог"
+msgid "Install path is not a directory."
+msgstr "Путь установки не каталог."
 
 # gtk_ui.c:534
 #: install.c:370
-msgid "No write permissions on the install directory"
-msgstr "Нет прав на запись в каталог установки"
+msgid "No write permissions on the install directory."
+msgstr "Нет прав на запись в каталог установки."
 
 # gtk_ui.c:536
 #: install.c:372
-msgid "Binary path and install path must be different"
-msgstr "Путь программных файлов и установки должны быть различны"
+msgid "Binary path and install path must be different."
+msgstr "Путь программных файлов и установки должны быть различны."
 
 # gtk_ui.c:538
 #: install.c:374
-msgid "No write permissions to install a selected package"
-msgstr "Нет прав на запись для установки выбранного компонента"
+msgid "No write permissions to install a selected package."
+msgstr "Нет прав на запись для установки выбранного компонента."
 
 # gtk_ui.c:541
 #: install.c:377
-msgid "No write permissions on the binary directory"
-msgstr "Нет прав на запись в каталоге прогрпммных файлов"
+msgid "No write permissions on the binary directory."
+msgstr "Нет прав на запись в каталоге прогрпммных файлов."
 
 #: install.c:736
 #, c-format

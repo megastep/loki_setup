@@ -366,28 +366,28 @@ msgid "Please select at least one option"
 msgstr "Välj minst ett paket"
 
 #: install.c:387
-msgid "Not enough free space for the selected options"
-msgstr "Otillräckligt diskutrymme för de valda paketen"
+msgid "Not enough free space for the selected options."
+msgstr "Otillräckligt diskutrymme för de valda paketen."
 
 #: install.c:389
-msgid "Install path is not a directory"
-msgstr "Installationsbiblioteket är inte ett bibliotek"
+msgid "Install path is not a directory."
+msgstr "Installationsbiblioteket är inte ett bibliotek."
 
 #: install.c:391
-msgid "No write permissions on the install directory"
-msgstr "Inga skrivrättigheter i installationsbiblioteket"
+msgid "No write permissions on the install directory."
+msgstr "Inga skrivrättigheter i installationsbiblioteket."
 
 #: install.c:393
-msgid "Binary path and install path must be different"
+msgid "Binary path and install path must be different."
 msgstr "Programbibliotek och installationsbiblioteken måste vara olika."
 
 #: install.c:395
-msgid "No write permissions to install a selected package"
-msgstr "Inga skrivrättigheter för installation av ett valt paket"
+msgid "No write permissions to install a selected package."
+msgstr "Inga skrivrättigheter för installation av ett valt paket."
 
 #: install.c:398
-msgid "No write permissions on the binary directory"
-msgstr "Inga skrivrättigheter i programbiblioteket"
+msgid "No write permissions on the binary directory."
+msgstr "Inga skrivrättigheter i programbiblioteket."
 
 #: install.c:757
 #, c-format

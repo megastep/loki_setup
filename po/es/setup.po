@@ -365,28 +365,28 @@ msgid "Please select at least one option"
 msgstr "Seleccionar al menos una opción"
 
 #: install.c:366
-msgid "Not enough free space for the selected options"
-msgstr "No hay suficiente espacio libre para las opciones seleccionadas"
+msgid "Not enough free space for the selected options."
+msgstr "No hay suficiente espacio libre para las opciones seleccionadas."
 
 #: install.c:368
-msgid "Install path is not a directory"
-msgstr "La ruta de instalación no es un directorio"
+msgid "Install path is not a directory."
+msgstr "La ruta de instalación no es un directorio."
 
 #: install.c:370
-msgid "No write permissions on the install directory"
-msgstr "No posee permisos de escritura en el directorio de instalación"
+msgid "No write permissions on the install directory."
+msgstr "No posee permisos de escritura en el directorio de instalación."
 
 #: install.c:372
-msgid "Binary path and install path must be different"
-msgstr "La ruta binaria y la ruta de instalación deben ser diferentes"
+msgid "Binary path and install path must be different."
+msgstr "La ruta binaria y la ruta de instalación deben ser diferentes."
 
 #: install.c:374
-msgid "No write permissions to install a selected package"
-msgstr "No posee permisos de escritura para instalar un paquete seleccionado"
+msgid "No write permissions to install a selected package."
+msgstr "No posee permisos de escritura para instalar un paquete seleccionado."
 
 #: install.c:377
-msgid "No write permissions on the binary directory"
-msgstr "No posee permisos de escritura en el directorio binario"
+msgid "No write permissions on the binary directory."
+msgstr "No posee permisos de escritura en el directorio binario."
 
 #: install.c:736
 #, c-format

@@ -372,28 +372,28 @@ msgid "Please select at least one option"
 msgstr "Selecteer minstens een optie"
 
 #: install.c:366
-msgid "Not enough free space for the selected options"
-msgstr "Niet genoeg vrije schijfruimte voor de geselecteerde opties"
+msgid "Not enough free space for the selected options."
+msgstr "Niet genoeg vrije schijfruimte voor de geselecteerde opties."
 
 #: install.c:368
-msgid "Install path is not a directory"
-msgstr "Installatiepad is geen directory"
+msgid "Install path is not a directory."
+msgstr "Installatiepad is geen directory."
 
 #: install.c:370
-msgid "No write permissions on the install directory"
-msgstr "Geen schrijfpermissie in de installatie-directory"
+msgid "No write permissions on the install directory."
+msgstr "Geen schrijfpermissie in de installatie-directory."
 
 #: install.c:372
-msgid "Binary path and install path must be different"
+msgid "Binary path and install path must be different."
 msgstr ""
 
 #: install.c:374
-msgid "No write permissions to install a selected package"
-msgstr "Geen schrijfpermissie om een geselecteerd pakket te installeren"
+msgid "No write permissions to install a selected package."
+msgstr "Geen schrijfpermissie om een geselecteerd pakket te installeren."
 
 #: install.c:377
-msgid "No write permissions on the binary directory"
-msgstr "Geen schrijfpermissie in de programma-directory"
+msgid "No write permissions on the binary directory."
+msgstr "Geen schrijfpermissie in de programma-directory."
 
 #: install.c:736
 #, c-format
