@@ -1,4 +1,6 @@
 Current:
+Ryan C. Gordon (icculus.org) - Wed Feb 25 03:12:39 EST 2004
+ * Added an UnrealEngine2 .uz2 plugin.
 Ryan C. Gordon (icculus.org) - Tue Feb 24 23:12:54 EST 2004
  * file_skip() will seek in uncompressed files instead of reading sequentially.
 Ryan C. Gordon (icculus.org) - Tue Feb 24 21:32:31 EST 2004
