@@ -19,7 +19,9 @@
 
 /* Magic to detect a gzip compressed file */
 static const char gzip_magic[2] = { 0037, 0213 };
+
 extern struct option_elem *current_option;
+extern struct component_elem *current_component;
 
 void file_create_hierarchy(install_info *info, const char *path)
 {

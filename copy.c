@@ -92,6 +92,7 @@
 
 char current_option_txt[200];
 struct option_elem *current_option;
+struct component_elem *current_component;
 
 void getToken(const char *src, const char **end) {
     *end = 0;
@@ -511,7 +512,7 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
     if ( !strcmp(node->name, "option") ) {
         str = xmlNodeListGetString(info->config, node->childs, 1);    
         parse_line(&str, tmppath, sizeof(tmppath));
-        current_option = add_option_entry(info, tmppath);
+        current_option = add_option_entry(current_component, tmppath);
     }
 
     size = 0;
@@ -618,12 +619,27 @@ size_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
 				}
 			}
 		} else if ( ! strcmp(node->name, "exclusive" ) ) {
-			/* Recurse in the sub-options (only one should be enabled! */
+			/* Recurse in the sub-options (only one should be enabled!) */
 			copied = copy_tree(info, node->childs, dest, update);
 			if ( copied > 0 ) {
 				size += copied;
 			}
-		}
+		} else if ( ! strcmp(node->name, "component" ) ) {
+            const char *name, *version;
+            name = xmlGetProp(node, "name");
+            if ( !name )
+                log_fatal(info, _("Component element needs to have a name"));
+            version = xmlGetProp(node, "version");
+            if ( !version )
+                log_fatal(info, _("Component element needs to have a version"));
+            current_component = add_component_entry(info, name, version, 
+                                                    xmlGetProp(node, "default") != NULL);
+			/* Recurse in the sub-options */
+			copied = copy_tree(info, node->childs, dest, update);
+			if ( copied > 0 ) {
+				size += copied;
+			}
+        }
         node = node->next;
     }
     return size;
@@ -810,7 +826,7 @@ size_t size_tree(install_info *info, xmlNodePtr node)
 				size += size_node(info, node);
 				size += size_tree(info, node->childs);
 			}
-		} else if ( !strcmp(node->name, "exclusive") ) {
+		} else if ( !strcmp(node->name, "exclusive") || !strcmp(node->name, "component") ) {
 			size += size_tree(info, node->childs);
 		} else if ( !strcmp(node->name, "readme") || !strcmp(node->name, "eula") ) {
 			size += size_readme(info, node);

@@ -107,54 +107,62 @@ typedef struct {
     /* The total install size, in bytes */
     size_t install_size;
 
-    struct option_elem {
+    struct component_elem {
         char *name;
+        char *version;
+        int   is_default;
 
-        /* List of installed files and symlinks */
-        struct file_elem {
-            char *path;
-            const char *option;
-            unsigned char md5sum[16];
-            char *symlink; /* If file is a symlink, what it points to */
-            struct file_elem *next;
-        } *file_list;
-
-        /* List of installed directories */
-        struct dir_elem {
-            char *path;
-            const char *option;
-            struct dir_elem *next;
-        } *dir_list;
-
-        /* List of installed binaries */
-        struct bin_elem {
-            struct file_elem *file; /* Holds the file information */
-            const char *symlink;
-            const char *desc;
-            const char *menu;
-            const char *name;
-            const char *icon;
-            struct bin_elem *next;
-        } *bin_list;
-
-        /* List of post-uninstall scripts to run (from RPM files) */
-        struct script_elem {
-            char *script;
-            struct script_elem *next;
-        } *pre_script_list, *post_script_list;
-
-        /* List of RPMs installed in the process */
-        struct rpm_elem {
+        struct option_elem {
             char *name;
-            char *version;
-            int release;
-            int autoremove;
-            struct rpm_elem *next;
-        } *rpm_list;
 
-        struct option_elem *next;
+            /* List of installed files and symlinks */
+            struct file_elem {
+                char *path;
+                const char *option;
+                unsigned char md5sum[16];
+                char *symlink; /* If file is a symlink, what it points to */
+                struct file_elem *next;
+            } *file_list;
 
-    } *options_list;
+            /* List of installed directories */
+            struct dir_elem {
+                char *path;
+                const char *option;
+                struct dir_elem *next;
+            } *dir_list;
+
+            /* List of installed binaries */
+            struct bin_elem {
+                struct file_elem *file; /* Holds the file information */
+                const char *symlink;
+                const char *desc;
+                const char *menu;
+                const char *name;
+                const char *icon;
+                struct bin_elem *next;
+            } *bin_list;
+
+            /* List of post-uninstall scripts to run (from RPM files) */
+            struct script_elem {
+                char *script;
+                struct script_elem *next;
+            } *pre_script_list, *post_script_list;
+
+            /* List of RPMs installed in the process */
+            struct rpm_elem {
+                char *name;
+                char *version;
+                int release;
+                int autoremove;
+                struct rpm_elem *next;
+            } *rpm_list;
+
+            struct option_elem *next;
+
+        } *options_list;
+
+        struct component_elem *next;
+    } *components_list;
 
     /* Product and component DB information */
     product_t *product;
@@ -199,14 +207,18 @@ extern const char *GetRuntimeArgs(install_info *info);
 extern const char *GetInstallOption(install_info *info, const char *option);
 extern const char *GetPreUnInstall(install_info *info);
 extern const char *GetPostUnInstall(install_info *info);
+extern int         GetProductNumComponents(install_info *info);
 
 /* Create the initial installation information */
 extern install_info *create_install(const char *configfile, int log_level,
-				    const char *install_path,
-				    const char *binary_path);
+                                    const char *install_path,
+                                    const char *binary_path);
 
-/* Create a new component entry, i.e. an option */
-struct option_elem *add_option_entry(install_info *info, const char *name);
+/* Create a new component entry */
+struct component_elem *add_component_entry(install_info *info, const char *name, const char *version, int def);
+
+/* Create a new option entry */
+struct option_elem *add_option_entry(struct component_elem *comp, const char *name);
 
 /* Add a file entry to the list of files installed */
 extern struct file_elem *add_file_entry(install_info *info, struct option_elem *comp, const char *path, const char *symlink);

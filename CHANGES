@@ -11,6 +11,8 @@ Stéphane Peter - Tue Oct 10 19:18:24 PDT 2000
 Stéphane Peter - Mon Oct 30 18:48:44 PST 2000
  * Added 'component' attribute to the install element to handle
    component-only installations.
+Stéphane Peter - Thu Nov  2 22:02:57 PST 2000
+ * Added the 'component' element to support multiple components.
  
 1.4.0:
 Sam Lantinga - Tue Aug 22 12:32:29 PDT 2000

@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.36 2000-10-31 02:51:57 megastep Exp $ */
+/* $Id: main.c,v 1.37 2000-11-03 07:04:36 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -269,7 +269,10 @@ int main(int argc, char **argv)
                 }
                 /* Check for the presence of the product if we install a component */
                 if ( GetProductComponent(info) ) {
-                    if ( info->product ) {
+                    if ( GetProductNumComponents(info) > 0 ) {
+                        UI.prompt(_("\nIllegal installation: do not mix components with a component installation.\n"), RESPONSE_OK);
+                        state = SETUP_EXIT;
+                    } else if ( info->product ) {
                         if ( ! info->component ) {
                             snprintf(buf, sizeof(buf), _("\nThe %s component is already installed.\n"
                                                          "Please uninstall it beforehand.\n"),

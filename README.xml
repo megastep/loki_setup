@@ -140,6 +140,24 @@ There are several optional attributes of the install element:
             such as the installation path will be used from the previous installation.
             Currently setup is not able to update an existing component, thus if the component
             is detected as already installed the installation will fail.
+            Important: This attribute can't be mixed with <component> elements.
+
+The COMPONENT element:
+
+Components are used to divide the product in independant entities. Several components can be
+installed at the same time by setup, and the user interface will reflect that. The installation
+options have to be structured as children of this element.
+
+This element takes two mandatory attributes :
+
+  name      The name of the component.
+
+  version   A string describing the version of the component.
+
+There is also an optional attribute, that actually has to be defined in one of the components:
+
+  default   If 'yes' then the component is marked as being the default component, i.e. the main
+            component for the product.
 
 The README and EULA elements:
 
