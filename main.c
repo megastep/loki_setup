@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.34 2000-09-22 21:04:09 hercules Exp $ */
+/* $Id: main.c,v 1.35 2000-09-23 01:29:51 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -279,7 +279,7 @@ int main(int argc, char **argv)
             
                         snprintf(buf, sizeof(buf), _("\nPlease mount the %s CDROM.\n"
 													 "Choose Yes to retry, No to cancel"),
-                                info->name);
+                                info->desc);
                         response = UI.prompt(buf, RESPONSE_NO);
                     }
                     if ( num_cdroms == 0 ) {
