@@ -158,6 +158,14 @@ int detect_cdrom(const char *unique_file)
 		mounted = getfsstat(mnts, mounted * sizeof(struct statfs), MNT_WAIT);
 		for ( i = 0; i < mounted && count < MAX_DRIVES; ++ i ) {
 			if ( ! strcmp(mnts[i].f_fstypename, MNTTYPE_CDROM) ) {
+				if ( unique_file ) {
+                    char file[PATH_MAX];
+					
+                    snprintf(file, sizeof(file), "%s/%s", mnts[i].f_mntonname, unique_file);
+                    if ( access(file, F_OK) < 0 ) {
+                        continue;
+                    }
+				}
 				cdroms[count ++] = strdup(mnts[i].f_mntonname);
 			}
 		}
