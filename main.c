@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.8 1999-11-25 01:47:22 hercules Exp $ */
+/* $Id: main.c,v 1.9 1999-11-30 05:30:53 hercules Exp $ */
 
 #include <stdio.h>
 #include <setjmp.h>
@@ -137,11 +137,16 @@ int main(int argc, char **argv)
                     exit_status = 1;
                 }
                 break;
+            case SETUP_LICENSE:
+                state = UI.license(info);
+                break;
             case SETUP_OPTIONS:
                 state = UI.setup(info);
                 break;
             case SETUP_INSTALL:
+                install_preinstall(info);
                 state = install(info, UI.update);
+                install_postinstall(info);
                 break;
             case SETUP_ABORT:
                 signal(SIGINT, SIG_IGN);

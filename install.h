@@ -21,6 +21,7 @@
 typedef enum {
     SETUP_ABORT = -1,
     SETUP_INIT,
+    SETUP_LICENSE,
     SETUP_OPTIONS,
     SETUP_INSTALL,
     SETUP_COMPLETE,
@@ -101,7 +102,7 @@ typedef struct {
 
     /* List of post-uninstall scripts to run (from RPM files) */
     struct script_elem {
-	    char *script;
+        char *script;
         struct script_elem *next;
     } *pre_script_list, *post_script_list;
 
@@ -126,6 +127,10 @@ typedef struct {
 extern const char *GetProductName(install_info *info);
 extern const char *GetProductDesc(install_info *info);
 extern const char *GetProductVersion(install_info *info);
+extern const char *GetProductEULA(install_info *info);
+extern const char *GetProductURL(install_info *info);
+extern const char *GetPreInstall(install_info *info);
+extern const char *GetPostInstall(install_info *info);
 extern const char *GetRuntimeArgs(install_info *info);
 
 /* Create the initial installation information */
@@ -179,17 +184,24 @@ extern void uninstall(install_info *info);
 /* Generate an uninstall shell script */
 extern void generate_uninstall(install_info *info);
 
-/* Install the desktop menu items */
-extern void install_menuitems(install_info *info, desktop_type d);
+/* Run pre/post install scripts */
+extern int install_preinstall(install_info *info);
+extern int install_postinstall(install_info *info);
 
-/* Run shell script commands from a string */
-extern void run_script(const char *script, int arg);
+/* Launch the game using the information in the install info */
+extern install_state launch_game(install_info *info);
 
 /* Launch a web browser with the URL specified in the XML file */
 extern int launch_browser(install_info *info);
 
-/* Launch the game using the information in the install info */
-extern install_state launch_game(install_info *info);
+/* Install the desktop menu items */
+extern void install_menuitems(install_info *info, desktop_type d);
+
+/* Run shell script commands from a string
+   If 'arg' is >= 0, it is passed to the script as a numeric argument,
+   otherwise the install path is passed as a command line argument.
+ */
+extern int run_script(install_info *info, const char *script, int arg);
 
 #ifdef RPM_SUPPORT
 extern int check_for_rpm(void);

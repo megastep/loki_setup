@@ -109,12 +109,36 @@ static void parse_option(install_info *info, xmlNodePtr node)
 
 static install_state console_init(install_info *info, int argc, char **argv)
 {
+    install_state state;
+
     printf("----====== %s installation program ======----\n", info->desc);
     printf("\n");
     printf("You are running a %s machine with %s\n", info->arch, info->libc);
     printf("Hit Control-C anytime to cancel this installation program.\n");
     printf("\n");
-    return SETUP_OPTIONS;
+    if ( GetProductEULA(info) ) {
+        state = SETUP_LICENSE;
+    } else {
+        state = SETUP_OPTIONS;
+    }
+    return state;
+}
+
+static install_state console_license(install_info *info)
+{
+    install_state state;
+    char command[512];
+
+    sleep(1);
+    sprintf(command, "less %s", GetProductEULA(info));
+    system(command);
+    if ( prompt_yesno("Do you agree with the license?", RESPONSE_YES) ==
+                                                        RESPONSE_YES ) {
+        state = SETUP_OPTIONS;
+    } else {
+        state = SETUP_EXIT;
+    }
+    return state;
 }
 
 static install_state console_setup(install_info *info)
@@ -227,6 +251,7 @@ int console_okay(Install_UI *UI)
     }
     /* Set up the driver */
     UI->init = console_init;
+    UI->license = console_license;
     UI->setup = console_setup;
     UI->update = console_update;
     UI->abort = console_abort;

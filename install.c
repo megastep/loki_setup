@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.18 1999-11-25 01:32:30 hercules Exp $ */
+/* $Id: install.c,v 1.19 1999-11-30 05:30:53 hercules Exp $ */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -29,9 +29,21 @@ const char *GetProductVersion(install_info *info)
 {
     return xmlGetProp(info->config->root, "version");
 }
+const char *GetProductEULA(install_info *info)
+{
+    return xmlGetProp(info->config->root, "eula");
+}
 const char *GetProductURL(install_info *info)
 {
     return xmlGetProp(info->config->root, "URL");
+}
+const char *GetPreInstall(install_info *info)
+{
+    return xmlGetProp(info->config->root, "preinstall");
+}
+const char *GetPostInstall(install_info *info)
+{
+    return xmlGetProp(info->config->root, "postinstall");
 }
 const char *GetRuntimeArgs(install_info *info)
 {
@@ -133,13 +145,13 @@ void add_script_entry(install_info *info, const char *script, int post)
     if ( elem ) {
         elem->script = strdup(script);
         if ( elem->script ) {
-			if(post){
-			  elem->next = info->post_script_list;
-			  info->post_script_list = elem;
-			}else{
-			  elem->next = info->pre_script_list;
-			  info->pre_script_list = elem;
-			}
+            if(post){
+              elem->next = info->post_script_list;
+              info->post_script_list = elem;
+            }else{
+              elem->next = info->pre_script_list;
+              info->pre_script_list = elem;
+            }
         }
     } else {
         log_fatal(info, "Out of memory");
@@ -327,12 +339,12 @@ install_state install(install_info *info,
 /* Remove a partially installed product */
 void uninstall(install_info *info)
 {
-    while ( info->pre_script_list ) {
+    while ( info->pre_script_list ) { /* RPM pre-uninstall */
         struct script_elem *elem;
  
         elem = info->pre_script_list;
         info->pre_script_list = elem->next;
-		run_script(elem->script,0);
+        run_script(info, elem->script, 0);
         free(elem->script);
         free(elem);
     }
@@ -358,12 +370,12 @@ void uninstall(install_info *info)
         free(elem->path);
         free(elem);
     }
-    while ( info->post_script_list ) {
+    while ( info->post_script_list ) { /* RPM post-uninstall */
         struct script_elem *elem;
  
         elem = info->post_script_list;
         info->post_script_list = elem->next;
-		run_script(elem->script,0);
+        run_script(info, elem->script, 0);
         free(elem->script);
         free(elem);
     }
@@ -372,8 +384,8 @@ void uninstall(install_info *info)
  
         elem = info->rpm_list;
         info->rpm_list = elem->next;
-		log_warning(info, "The '%s' RPM was installed or upgraded (version %s, release %s)",
-					elem->name, elem->version, elem->release);
+        log_warning(info, "The '%s' RPM was installed or upgraded (version %s, release %s)",
+                    elem->name, elem->version, elem->release);
         free(elem->name);
         free(elem->version);
         free(elem->release);
@@ -388,8 +400,8 @@ void generate_uninstall(install_info *info)
     char script[PATH_MAX];
     struct file_elem *felem;
     struct dir_elem *delem;
-	struct script_elem *selem;
-	struct rpm_elem *relem;
+    struct script_elem *selem;
+    struct rpm_elem *relem;
 
     strncpy(script,info->install_path, PATH_MAX);
     strncat(script,"/uninstall", PATH_MAX);
@@ -400,18 +412,18 @@ void generate_uninstall(install_info *info)
             "#!/bin/sh\n"
             "# Uninstall script for %s\n", info->desc
             );
-		if(strcmp(rpm_root,"/")) /* Emulate RPM environment for scripts */
-		  fprintf(fp,"RPM_INSTALL_PREFIX=%s\n", rpm_root);
+        if(strcmp(rpm_root,"/")) /* Emulate RPM environment for scripts */
+          fprintf(fp,"RPM_INSTALL_PREFIX=%s\n", rpm_root);
 
-		/* Merge the pre-uninstall scripts */
-		if(info->pre_script_list){
-		  fprintf(fp,"function pre()\n{\n");
-		  for ( selem = info->pre_script_list; selem; selem = selem->next ) {
-		    fprintf(fp,"%s\n",selem->script);
-		  }
-		  fprintf(fp,"}\npre 0\n");
-		}
-		for ( felem = info->file_list; felem; felem = felem->next ) {
+        /* Merge the pre-uninstall scripts */
+        if(info->pre_script_list){
+          fprintf(fp,"function pre()\n{\n");
+          for ( selem = info->pre_script_list; selem; selem = selem->next ) {
+            fprintf(fp,"%s\n",selem->script);
+          }
+          fprintf(fp,"}\npre 0\n");
+        }
+        for ( felem = info->file_list; felem; felem = felem->next ) {
             fprintf(fp,"rm -f \"%s\"\n", felem->path);
         }
         /* Don't forget to remove ourselves */
@@ -420,23 +432,24 @@ void generate_uninstall(install_info *info)
         for ( delem = info->dir_list; delem; delem = delem->next ) {
             fprintf(fp,"rmdir \"%s\"\n", delem->path);
         }
-		/* Merge the post-uninstall scripts */
-		if(info->post_script_list){
-		  fprintf(fp,"function post()\n{\n");
-		  for ( selem = info->post_script_list; selem; selem = selem->next ) {
-		    fprintf(fp,"%s\n",selem->script);
-		  }
-		  fprintf(fp,"}\npost 0\n");
-		}
+        /* Merge the post-uninstall scripts */
+        if(info->post_script_list){
+          fprintf(fp,"function post()\n{\n");
+          for ( selem = info->post_script_list; selem; selem = selem->next ) {
+            fprintf(fp,"%s\n",selem->script);
+          }
+          fprintf(fp,"}\npost 0\n");
+        }
+        fprintf(fp,"#### END OF UNINSTALL\n");
         fprintf(fp,"echo \"%s has been uninstalled.\"\n", info->desc);
-		if(info->rpm_list){
-		  fprintf(fp,"echo\necho WARNING: The following RPM archives have been installed or upgraded\n"
-				  "echo when this software was installed. You may want to manually remove some of those:\n");
+        if(info->rpm_list){
+          fprintf(fp,"echo\necho WARNING: The following RPM archives have been installed or upgraded\n"
+                  "echo when this software was installed. You may want to manually remove some of those:\n");
 
-		  for ( relem = info->rpm_list; relem; relem = relem->next ) {
-			fprintf(fp,"echo \"\t%s, version %s, release %s\"\n", relem->name, relem->version, relem->release);
-		  }
-		}
+          for ( relem = info->rpm_list; relem; relem = relem->next ) {
+            fprintf(fp,"echo \"\t%s, version %s, release %s\"\n", relem->name, relem->version, relem->release);
+          }
+        }
         fchmod(fileno(fp),0755); /* Turn on executable bit */
         fclose(fp);
     }
@@ -476,13 +489,41 @@ int launch_browser(install_info *info)
     return retval;
 }
 
+/* Run pre/post install scripts */
+int install_preinstall(install_info *info)
+{
+    const char *script;
+    int exitval;
+
+    script = GetPreInstall(info);
+    if ( script ) {
+        exitval = run_script(info, script, -1);
+    } else {
+        exitval = 0;
+    }
+    return exitval;
+}
+int install_postinstall(install_info *info)
+{
+    const char *script;
+    int exitval;
+
+    script = GetPostInstall(info);
+    if ( script ) {
+        exitval = run_script(info, script, -1);
+    } else {
+        exitval = 0;
+    }
+    return exitval;
+}
+
 /* Launch the game using the information in the install info */
 install_state launch_game(install_info *info)
 {
     char cmd[PATH_MAX];
 
     if ( info->bin_list ) {
-        sprintf(cmd, "%s %s %s &", info->bin_list->path, info->name, info->args);
+        sprintf(cmd, "%s %s %s &", info->bin_list->path,info->name,info->args);
     }
     system(cmd);
     return SETUP_EXIT;
@@ -505,83 +546,102 @@ static const char* gnome_app_links[] =
 };
 
 /* Install the desktop menu items */
-void install_menuitems(install_info *info, desktop_type d)
+void install_menuitems(install_info *info, desktop_type desktop)
 {
-  const char **app_links;
-  char buf[PATH_MAX];
-  struct bin_elem *elem;
+    const char **app_links;
+    char buf[PATH_MAX];
+    struct bin_elem *elem;
 
-  switch(d){
-  case DESKTOP_KDE:
-    app_links = kde_app_links;
-    break;
-  case DESKTOP_GNOME:
-    app_links = gnome_app_links;
-    break;
-  default:
-    return;
-  }
-  for( ; *app_links; app_links ++){
-    expand_home(info, *app_links, buf);
-    if(access(buf, W_OK))
-      continue;
-
-    for(elem = info->bin_list; elem; elem = elem->next ) {      
-      FILE *fp;
-
-      strncat(buf, elem->symlink, PATH_MAX);
-      switch(d){
-      case DESKTOP_KDE:
-        strncat(buf,".kdelnk", PATH_MAX);
-        break;
-      case DESKTOP_GNOME:
-        strncat(buf,".desktop", PATH_MAX);
-        break;
-	  default:
-      }
-
-      fp = fopen(buf, "w");
-      if(fp){
-        char exec[PATH_MAX], icon[PATH_MAX];
-
-        sprintf(exec, "%s", elem->path);
-        sprintf(icon, "%s/%s", info->install_path, elem->icon);
-        if (d == DESKTOP_KDE) {
-            fprintf(fp, "# KDE Config File\n");
-        }
-        fprintf(fp,
-                "[%sDesktop Entry]\n"
-                "Name=%s\n"
-                "Comment=%s\n"
-                "Exec=%s\n"
-                "Icon=%s\n"
-                "Terminal=0\n"
-                "Type=Application\n",
-                (d==DESKTOP_KDE) ? "KDE " : "",
-                info->name, info->desc,
-                exec, icon
-                );
-
-        fclose(fp);
-        add_file_entry(info, buf);
-      }else
-        log_warning(info, "Unable to create desktop file '%s'", buf);
+    switch (desktop) {
+        case DESKTOP_KDE:
+            app_links = kde_app_links;
+            break;
+        case DESKTOP_GNOME:
+            app_links = gnome_app_links;
+            break;
+        default:
+            return;
     }
-  }
+    for( ; *app_links; app_links ++){
+        expand_home(info, *app_links, buf);
+        if ( access(buf, W_OK) < 0 )
+            continue;
+
+        for (elem = info->bin_list; elem; elem = elem->next ) {      
+            FILE *fp;
+
+            /* Presumably if there is no icon, no desktop entry */
+            if ( elem->icon == NULL ) {
+                continue;
+            }
+            strncat(buf, elem->symlink, PATH_MAX);
+            switch(desktop){
+                case DESKTOP_KDE:
+                    strncat(buf,".kdelnk", PATH_MAX);
+                    break;
+                case DESKTOP_GNOME:
+                    strncat(buf,".desktop", PATH_MAX);
+                    break;
+                default:
+                    break;
+            }
+
+            fp = fopen(buf, "w");
+            if (fp) {
+                char exec[PATH_MAX], icon[PATH_MAX];
+
+                sprintf(exec, "%s", elem->path);
+                sprintf(icon, "%s/%s", info->install_path, elem->icon);
+                if (desktop == DESKTOP_KDE) {
+                        fprintf(fp, "# KDE Config File\n");
+                }
+                fprintf(fp, "[%sDesktop Entry]\n"
+                             "Name=%s\n"
+                             "Comment=%s\n"
+                             "Exec=%s\n"
+                             "Icon=%s\n"
+                             "Terminal=0\n"
+                             "Type=Application\n",
+                             (desktop==DESKTOP_KDE) ? "KDE " : "",
+                             info->name, info->desc,
+                             exec, icon
+                             );
+                fclose(fp);
+                add_file_entry(info, buf);
+            } else {
+                log_warning(info, "Unable to create desktop file '%s'", buf);
+            }
+        }
+    }
 }
 
 /* Run some shell script commands */
-void run_script(const char *script, int arg)
+int run_script(install_info *info, const char *script, int arg)
 {
-  const char *name = tmpnam(NULL);
-  FILE *tmp = fopen(name, "wb");
-  if(tmp){
-	char cmd[256];
-	fprintf(tmp,"#!/bin/sh\n%s\n", script);
-	fclose(tmp);
-	chmod(name, 0755);
-	sprintf(cmd,"%s %d", name, arg);
-	system(cmd);
-	unlink(name);
-  }
+    char template[PATH_MAX];
+    char *script_file;
+    FILE *fp;
+    int exitval;
+
+    sprintf(template, "%s/tmp_script_XXXXXX", info->install_path);
+    script_file = mktemp(template);
+
+    fp = fopen(script_file, "wb");
+    if (fp) {
+        char cmd[4*PATH_MAX];
+
+        fprintf(fp,"#!/bin/sh\n%s\n", script);
+        fchmod(fileno(fp),0755); /* Turn on executable bit */
+        fclose(fp);
+        if ( arg >= 0 ) {
+            sprintf(cmd, "%s %d", script_file, arg);
+        } else {
+            sprintf(cmd, "%s %s", script_file, info->install_path);
+        }
+        exitval = system(cmd);
+        unlink(script_file);
+    } else {
+        exitval = -1;
+    }
+    return(exitval);
 }

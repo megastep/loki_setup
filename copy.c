@@ -68,113 +68,113 @@ int parse_line(const char **srcpp, char *buf, int maxlen)
 }
 
 size_t copy_cpio_stream(install_info *info, stream *input, const char *dest,
-						void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+                        void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     stream *output;
-	char magic[6];
-	char ascii_header[112];
-	struct new_cpio_header file_hdr;
-	int has_crc;
-	int dir_len = strlen(dest) + 1;
-	size_t nread, left, copied;
-	size_t size = 0;
-	char buf[BUFSIZ];
+    char magic[6];
+    char ascii_header[112];
+    struct new_cpio_header file_hdr;
+    int has_crc;
+    int dir_len = strlen(dest) + 1;
+    size_t nread, left, copied;
+    size_t size = 0;
+    char buf[BUFSIZ];
 
-	memset(&file_hdr, 0, sizeof(file_hdr));
+    memset(&file_hdr, 0, sizeof(file_hdr));
     while ( ! file_eof(info, input) ) {
       has_crc = 0;
-	  file_read(info, magic, 6, input);
-	  if(!strncmp(magic,"070701",6) || !strncmp(magic,"070702",6)){ /* New format */
-		has_crc = (magic[5] == '2');
-		file_read(info, ascii_header, 104, input);
-		ascii_header[104] = '\0';
-		sscanf (ascii_header,
-				"%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx",
-				&file_hdr.c_ino, &file_hdr.c_mode, &file_hdr.c_uid,
-				&file_hdr.c_gid, &file_hdr.c_nlink, &file_hdr.c_mtime,
-				&file_hdr.c_filesize, &file_hdr.c_dev_maj, &file_hdr.c_dev_min,
-				&file_hdr.c_rdev_maj, &file_hdr.c_rdev_min, &file_hdr.c_namesize,
-				&file_hdr.c_chksum);
-	  }else if(!strncmp(magic,"070707",6)){ /* Old format */
-		unsigned long dev, rdev;
-		file_read(info, ascii_header, 70, input);
-		ascii_header[70] = '\0';
-		sscanf (ascii_header,
-				"%6lo%6lo%6lo%6lo%6lo%6lo%6lo%11lo%6lo%11lo",
-				&dev, &file_hdr.c_ino,
-				&file_hdr.c_mode, &file_hdr.c_uid, &file_hdr.c_gid,
-				&file_hdr.c_nlink, &rdev, &file_hdr.c_mtime,
-				&file_hdr.c_namesize, &file_hdr.c_filesize);
-		file_hdr.c_dev_maj = major (dev);
-		file_hdr.c_dev_min = minor (dev);
-		file_hdr.c_rdev_maj = major (rdev);
-		file_hdr.c_rdev_min = minor (rdev);
-	  }
-	  if(file_hdr.c_name != NULL)
-		free(file_hdr.c_name);
-	  file_hdr.c_name = (char *) malloc(file_hdr.c_namesize + dir_len);
-	  strcpy(file_hdr.c_name, dest);
-	  strcat(file_hdr.c_name, "/");
-	  file_read(info, file_hdr.c_name + dir_len, file_hdr.c_namesize, input);
-	  if(!strncmp(file_hdr.c_name + dir_len,"TRAILER!!!",10)) /* End of archive marker */
-		break;
-	  /* Skip padding zeros after the file name */
-	  file_skip_zeroes(info, input);
-	  if(S_ISDIR(file_hdr.c_mode)){
-		file_create_hierarchy(info, file_hdr.c_name);
-		file_mkdir(info, file_hdr.c_name, file_hdr.c_mode & C_MODE);
-	  }else if(S_ISFIFO(file_hdr.c_mode)){
-		file_mkfifo(info, file_hdr.c_name, file_hdr.c_mode & C_MODE);
-	  }else if(S_ISBLK(file_hdr.c_mode)){
-		file_mknod(info, file_hdr.c_name, S_IFBLK|(file_hdr.c_mode & C_MODE), 
-				   makedev(file_hdr.c_rdev_maj,file_hdr.c_rdev_min));
-	  }else if(S_ISCHR(file_hdr.c_mode)){
-		file_mknod(info, file_hdr.c_name, S_IFCHR|(file_hdr.c_mode & C_MODE), 
-				   makedev(file_hdr.c_rdev_maj,file_hdr.c_rdev_min));
-	  }else if(S_ISSOCK(file_hdr.c_mode)){
-		// TODO: create Unix socket
-	  }else if(S_ISLNK(file_hdr.c_mode)){
-		char *lnk = (char *)malloc(file_hdr.c_filesize+1);
-		file_read(info, lnk, file_hdr.c_filesize, input);
-		lnk[file_hdr.c_filesize] = '\0';
-		file_symlink(info, lnk, file_hdr.c_name);
-		free(lnk);
-	  }else{
-		unsigned long chk = 0;
-		/* Open the file for output */
-		output = file_open(info, file_hdr.c_name, "wb");
-		if(output){
-		  left = file_hdr.c_filesize;
-		  while(left && (nread=file_read(info, buf, (left >= BUFSIZ) ? BUFSIZ : left, input))){
-			copied = file_write(info, buf, nread, output);
-			left -= nread;
-			if(has_crc && file_hdr.c_chksum){
-			  int i;
-			  for(i=0; i<BUFSIZ; i++)
-				chk += buf[i];
-			}
-		  
-			info->installed_bytes += copied;
-			if(update){
-			  update(info, file_hdr.c_name, file_hdr.c_filesize-left, file_hdr.c_filesize, current_option);
-			}
-		  }
-		  if(has_crc && file_hdr.c_chksum && file_hdr.c_chksum != chk)
-			log_warning(info,"Bad checksum for file '%s'", file_hdr.c_name);
-		  size += file_hdr.c_filesize;
-		  file_close(info, output);
-		  chmod(file_hdr.c_name, file_hdr.c_mode & C_MODE);
-		}else /* Skip the file data */
-		  file_skip(info, file_hdr.c_filesize, input);
-	  }
-	  /* More padding zeroes after the data */
-	  file_skip_zeroes(info, input);
-	}
+      file_read(info, magic, 6, input);
+      if(!strncmp(magic,"070701",6) || !strncmp(magic,"070702",6)){ /* New format */
+        has_crc = (magic[5] == '2');
+        file_read(info, ascii_header, 104, input);
+        ascii_header[104] = '\0';
+        sscanf (ascii_header,
+                "%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx",
+                &file_hdr.c_ino, &file_hdr.c_mode, &file_hdr.c_uid,
+                &file_hdr.c_gid, &file_hdr.c_nlink, &file_hdr.c_mtime,
+                &file_hdr.c_filesize, &file_hdr.c_dev_maj, &file_hdr.c_dev_min,
+                &file_hdr.c_rdev_maj, &file_hdr.c_rdev_min, &file_hdr.c_namesize,
+                &file_hdr.c_chksum);
+      }else if(!strncmp(magic,"070707",6)){ /* Old format */
+        unsigned long dev, rdev;
+        file_read(info, ascii_header, 70, input);
+        ascii_header[70] = '\0';
+        sscanf (ascii_header,
+                "%6lo%6lo%6lo%6lo%6lo%6lo%6lo%11lo%6lo%11lo",
+                &dev, &file_hdr.c_ino,
+                &file_hdr.c_mode, &file_hdr.c_uid, &file_hdr.c_gid,
+                &file_hdr.c_nlink, &rdev, &file_hdr.c_mtime,
+                &file_hdr.c_namesize, &file_hdr.c_filesize);
+        file_hdr.c_dev_maj = major (dev);
+        file_hdr.c_dev_min = minor (dev);
+        file_hdr.c_rdev_maj = major (rdev);
+        file_hdr.c_rdev_min = minor (rdev);
+      }
+      if(file_hdr.c_name != NULL)
+        free(file_hdr.c_name);
+      file_hdr.c_name = (char *) malloc(file_hdr.c_namesize + dir_len);
+      strcpy(file_hdr.c_name, dest);
+      strcat(file_hdr.c_name, "/");
+      file_read(info, file_hdr.c_name + dir_len, file_hdr.c_namesize, input);
+      if(!strncmp(file_hdr.c_name + dir_len,"TRAILER!!!",10)) /* End of archive marker */
+        break;
+      /* Skip padding zeros after the file name */
+      file_skip_zeroes(info, input);
+      if(S_ISDIR(file_hdr.c_mode)){
+        file_create_hierarchy(info, file_hdr.c_name);
+        file_mkdir(info, file_hdr.c_name, file_hdr.c_mode & C_MODE);
+      }else if(S_ISFIFO(file_hdr.c_mode)){
+        file_mkfifo(info, file_hdr.c_name, file_hdr.c_mode & C_MODE);
+      }else if(S_ISBLK(file_hdr.c_mode)){
+        file_mknod(info, file_hdr.c_name, S_IFBLK|(file_hdr.c_mode & C_MODE), 
+                   makedev(file_hdr.c_rdev_maj,file_hdr.c_rdev_min));
+      }else if(S_ISCHR(file_hdr.c_mode)){
+        file_mknod(info, file_hdr.c_name, S_IFCHR|(file_hdr.c_mode & C_MODE), 
+                   makedev(file_hdr.c_rdev_maj,file_hdr.c_rdev_min));
+      }else if(S_ISSOCK(file_hdr.c_mode)){
+        // TODO: create Unix socket
+      }else if(S_ISLNK(file_hdr.c_mode)){
+        char *lnk = (char *)malloc(file_hdr.c_filesize+1);
+        file_read(info, lnk, file_hdr.c_filesize, input);
+        lnk[file_hdr.c_filesize] = '\0';
+        file_symlink(info, lnk, file_hdr.c_name);
+        free(lnk);
+      }else{
+        unsigned long chk = 0;
+        /* Open the file for output */
+        output = file_open(info, file_hdr.c_name, "wb");
+        if(output){
+          left = file_hdr.c_filesize;
+          while(left && (nread=file_read(info, buf, (left >= BUFSIZ) ? BUFSIZ : left, input))){
+            copied = file_write(info, buf, nread, output);
+            left -= nread;
+            if(has_crc && file_hdr.c_chksum){
+              int i;
+              for(i=0; i<BUFSIZ; i++)
+                chk += buf[i];
+            }
+          
+            info->installed_bytes += copied;
+            if(update){
+              update(info, file_hdr.c_name, file_hdr.c_filesize-left, file_hdr.c_filesize, current_option);
+            }
+          }
+          if(has_crc && file_hdr.c_chksum && file_hdr.c_chksum != chk)
+            log_warning(info,"Bad checksum for file '%s'", file_hdr.c_name);
+          size += file_hdr.c_filesize;
+          file_close(info, output);
+          chmod(file_hdr.c_name, file_hdr.c_mode & C_MODE);
+        }else /* Skip the file data */
+          file_skip(info, file_hdr.c_filesize, input);
+      }
+      /* More padding zeroes after the data */
+      file_skip_zeroes(info, input);
+    }
     file_close(info, input);  
-	if(file_hdr.c_name != NULL)
-	  free(file_hdr.c_name);
+    if(file_hdr.c_name != NULL)
+      free(file_hdr.c_name);
 
-	return size;
+    return size;
 }
 
 size_t copy_cpio(install_info *info, const char *path, const char *dest,
@@ -182,7 +182,7 @@ size_t copy_cpio(install_info *info, const char *path, const char *dest,
 {
   stream *input = file_open(info, path, "rb");
   if(input)
-	return copy_cpio_stream(info, input, dest, update);
+    return copy_cpio_stream(info, input, dest, update);
   return 0;
 }
 
@@ -218,89 +218,89 @@ size_t copy_rpm(install_info *info, const char *path,
 
     fdi = fdOpen(path, O_RDONLY, 0644);
     rc = rpmReadPackageHeader(fdi, &hd, &isSource, NULL, NULL);
-    if(rc){
-	log_warning(info,"RPM error: %s", rpmErrorString());
-	return 0;
+    if ( rc ) {
+        log_warning(info,"RPM error: %s", rpmErrorString());
+        return 0;
     }
 
     size = 0;
-    if(rpm_access){ /* We can call RPM directly */
-	char cmd[300];
-	FILE *fp;
-	float percent = 0.0;
-	char *name = "", *version = "", *release = "";
+    if ( rpm_access ) { /* We can call RPM directly */
+        char cmd[300];
+        FILE *fp;
+        float percent = 0.0;
+        char *name = "", *version = "", *release = "";
 
-	headerGetEntry(hd, RPMTAG_SIZE, &type, &p, &c);
-	if(type==RPM_INT32_TYPE){
-	  size = *(int_32*) p;
-	}
-	headerGetEntry(hd, RPMTAG_RELEASE, &type, &p, &c);
-	if(type==RPM_STRING_TYPE){
-	  release = (char *) p;
-	}
-	headerGetEntry(hd, RPMTAG_NAME, &type, &p, &c);
-	if(type==RPM_STRING_TYPE){
-	  name = (char*)p;
-	}
-	headerGetEntry(hd, RPMTAG_VERSION, &type, &p, &c);
-	if(type==RPM_STRING_TYPE){
-	  version = (char*)p;
-	}
-	fdClose(fdi);
+        headerGetEntry(hd, RPMTAG_SIZE, &type, &p, &c);
+        if(type==RPM_INT32_TYPE){
+          size = *(int_32*) p;
+        }
+        headerGetEntry(hd, RPMTAG_RELEASE, &type, &p, &c);
+        if(type==RPM_STRING_TYPE){
+          release = (char *) p;
+        }
+        headerGetEntry(hd, RPMTAG_NAME, &type, &p, &c);
+        if(type==RPM_STRING_TYPE){
+          name = (char*)p;
+        }
+        headerGetEntry(hd, RPMTAG_VERSION, &type, &p, &c);
+        if(type==RPM_STRING_TYPE){
+          version = (char*)p;
+        }
+        fdClose(fdi);
 
-	sprintf(cmd,"rpm -U --percent --root %s %s", rpm_root, path);
-	fp = popen(cmd, "r");
-	while(percent<100.0){
-	  if(!fp || feof(fp)){
-		pclose(fp);
-		log_warning(info,"Unable to install RPM file: '%s'", path);
-		return 0;
-	  }
-	  fscanf(fp,"%s", cmd);
-	  if(strcmp(cmd,"%%")){
-		pclose(fp);
-		log_warning(info,"Unable to install RPM file: '%s'", path);
-		return 0;
-	  }
-	  fscanf(fp,"%f", &percent);
-	  update(info, path, (percent/100.0)*size, size, current_option);
-	}
-	pclose(fp);
+        sprintf(cmd,"rpm -U --percent --root %s %s", rpm_root, path);
+        fp = popen(cmd, "r");
+        while(percent<100.0){
+          if(!fp || feof(fp)){
+            pclose(fp);
+            log_warning(info,"Unable to install RPM file: '%s'", path);
+            return 0;
+          }
+          fscanf(fp,"%s", cmd);
+          if(strcmp(cmd,"%%")){
+            pclose(fp);
+            log_warning(info,"Unable to install RPM file: '%s'", path);
+            return 0;
+          }
+          fscanf(fp,"%f", &percent);
+          update(info, path, (percent/100.0)*size, size, current_option);
+        }
+        pclose(fp);
 
-	/* Log the RPM installation */
-	add_rpm_entry(info, name, version, release);
+        /* Log the RPM installation */
+        add_rpm_entry(info, name, version, release);
 
-    }else{ /* Manually install the RPM file */
-	FD_t gzdi;
-	stream *cpio;
-	
-	if(headerIsEntry(hd, RPMTAG_PREIN)){	  
-	  headerGetEntry(hd, RPMTAG_PREIN, &type, &p, &c);
-	  if(type==RPM_STRING_TYPE)
-		run_script((char*)p, 1);
-	}
-	gzdi = gzdFdopen(fdi, "r");	/* XXX gzdi == fdi */
-	
-	cpio = file_fdopen(info, path, NULL, (gzFile*)gzdi->fd_gzd, "r");
-	size = copy_cpio_stream(info, cpio, rpm_root, update);
+    } else { /* Manually install the RPM file */
+        FD_t gzdi;
+        stream *cpio;
+    
+        if(headerIsEntry(hd, RPMTAG_PREIN)){      
+          headerGetEntry(hd, RPMTAG_PREIN, &type, &p, &c);
+          if(type==RPM_STRING_TYPE)
+            run_script(info, (char*)p, 1);
+        }
+        gzdi = gzdFdopen(fdi, "r");    /* XXX gzdi == fdi */
+    
+        cpio = file_fdopen(info, path, NULL, (gzFile*)gzdi->fd_gzd, "r");
+        size = copy_cpio_stream(info, cpio, rpm_root, update);
 
-	if(headerIsEntry(hd, RPMTAG_POSTIN)){	  
-	  headerGetEntry(hd, RPMTAG_POSTIN, &type, &p, &c);
-	  if(type==RPM_STRING_TYPE)
-		run_script((char*)p, 1);
-	}
+        if(headerIsEntry(hd, RPMTAG_POSTIN)){      
+          headerGetEntry(hd, RPMTAG_POSTIN, &type, &p, &c);
+          if(type==RPM_STRING_TYPE)
+            run_script(info, (char*)p, 1);
+        }
 
-	/* Append the uninstall scripts to the uninstall */
-	if(headerIsEntry(hd, RPMTAG_PREUN)){	  
-	  headerGetEntry(hd, RPMTAG_PREUN, &type, &p, &c);
-	  if(type==RPM_STRING_TYPE)
-		add_script_entry(info, (char*)p, 0);
-	}
-	if(headerIsEntry(hd, RPMTAG_POSTUN)){	  
-	  headerGetEntry(hd, RPMTAG_POSTUN, &type, &p, &c);
-	  if(type==RPM_STRING_TYPE)
-		add_script_entry(info, (char*)p, 1);
-	}
+        /* Append the uninstall scripts to the uninstall */
+        if(headerIsEntry(hd, RPMTAG_PREUN)){      
+          headerGetEntry(hd, RPMTAG_PREUN, &type, &p, &c);
+          if(type==RPM_STRING_TYPE)
+            add_script_entry(info, (char*)p, 0);
+        }
+        if(headerIsEntry(hd, RPMTAG_POSTUN)){      
+          headerGetEntry(hd, RPMTAG_POSTUN, &type, &p, &c);
+          if(type==RPM_STRING_TYPE)
+            add_script_entry(info, (char*)p, 1);
+        }
     }
     return size;
 }
@@ -396,16 +396,17 @@ size_t copy_file(install_info *info, const char *path, const char *dest, char *f
     char buf[BUFSIZ];
     stream *input, *output;
 
-    if(binary){
-      /* Get the final pathname (useful for binaries only!) */
-      base = strrchr(path, '/');
-      if ( base == NULL ) {
+    if ( binary ) {
+        /* Get the final pathname (useful for binaries only!) */
+        base = strrchr(path, '/');
+        if ( base == NULL ) {
+            base = path;
+        } else {
+            base ++;
+        }
+    } else {
         base = path;
-      } else {
-        base ++;
-      }
-    }else
-      base = path;
+    }
     sprintf(final, "%s/%s", dest, base);
 
     size = 0;
@@ -581,6 +582,11 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
     return size;
 }
 
+int copy_script(install_info *info, xmlNodePtr node, const char *script, const char *dest)
+{
+    return(run_script(info, script, -1));
+}
+
 size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
                 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
@@ -601,13 +607,17 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
             }
         }
         if ( strcmp(node->name, "binary") == 0 ) {
-/* printf("Installing binary\n"); */
             copied = copy_binary(info, node,
                                xmlNodeListGetString(info->config, node->childs, 1),
                                dest, update);
             if ( copied > 0 ) {
                 size += copied;
             }
+        }
+        if ( strcmp(node->name, "script") == 0 ) {
+            copy_script(info, node,
+                        xmlNodeListGetString(info->config, node->childs, 1),
+                        dest);
         }
         node = node->next;
     }

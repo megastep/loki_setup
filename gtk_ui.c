@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.16 1999-09-30 00:58:32 hercules Exp $
+   $Id: gtk_ui.c,v 1.17 1999-11-30 05:30:53 hercules Exp $
 */
 
 #include <limits.h>
@@ -19,6 +19,9 @@
 #include "copy.h"
 
 #define SETUP_GLADE SETUP_BASE "setup.glade"
+
+#define LICENSE_FONT            \
+        "-adobe-helvetica-medium-r-normal-*-*-80-*-*-p-*-iso8859-1"
 
 /* Globals */
 
@@ -41,7 +44,8 @@ typedef enum
     COPY_PAGE,
     DONE_PAGE,
     ABORT_PAGE,
-    WARNING_PAGE
+    WARNING_PAGE,
+    LICENSE_PAGE
 } InstallPages;
 
 typedef struct {
@@ -110,22 +114,22 @@ void setup_entry_binarypath_slot( GtkWidget* widget, gpointer func_data )
 /*
    Returns 0 if fails.
 */
-static gboolean load_file( GtkEditable* widget, const char* file )
+static gboolean load_file( GtkText *widget, GdkFont *font, const char *file )
 {
     FILE *fp;
     int pos;
     
-    gtk_editable_delete_text(widget, 0, -1);
+    gtk_editable_delete_text(GTK_EDITABLE(widget), 0, -1);
     fp = fopen(file, "r");
     if ( fp ) {
         char line[BUFSIZ];
         pos = 0;
         while ( fgets(line, BUFSIZ-1, fp) ) {
-            gtk_editable_insert_text(widget, line, strlen(line), &pos);
+            gtk_text_insert(widget, font, NULL, NULL, line, strlen(line));
         }
         fclose(fp);
     }
-    gtk_editable_set_position(widget, 0);
+    gtk_editable_set_position(GTK_EDITABLE(widget), 0);
 
     return (fp != NULL);
 }
@@ -147,9 +151,18 @@ void setup_button_view_readme_slot( GtkWidget* w, gpointer data )
     widget = glade_xml_get_widget(setup_glade, "readme_area");
     if ( readme && widget ) {
         gtk_widget_hide(readme);
-        load_file(GTK_EDITABLE(widget), "README");
+        load_file(GTK_TEXT(widget), NULL, "README");
         gtk_widget_show(readme);
     }
+}
+
+void setup_button_license_agree_slot( GtkWidget* widget, gpointer func_data )
+{
+    GtkWidget *notebook;
+
+    notebook = glade_xml_get_widget(setup_glade, "setup_notebook");
+    gtk_notebook_set_page(GTK_NOTEBOOK(notebook), OPTION_PAGE);
+    cur_state = SETUP_OPTIONS;
 }
 
 void setup_button_warning_continue_slot( GtkWidget* widget, gpointer func_data )
@@ -554,6 +567,7 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
 {
     FILE *opened;
     GtkWidget *window;
+    GtkWidget *notebook;
     GtkWidget *options;
     GtkWidget *widget;
     char title[1024];
@@ -580,6 +594,23 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
     window = glade_xml_get_widget(setup_glade, "setup_window");
     sprintf(title, "%s Setup", info->desc);
     gtk_window_set_title(GTK_WINDOW(window), title);
+
+    /* Set the initial notebook page */
+    notebook = glade_xml_get_widget(setup_glade, "setup_notebook");
+    if ( GetProductEULA(info) ) {
+        widget = glade_xml_get_widget(setup_glade, "license_area");
+        if ( widget ) {
+            GdkFont *font;
+
+            font = gdk_font_load(LICENSE_FONT);
+            load_file(GTK_TEXT(widget), font, GetProductEULA(info));
+        }
+    	gtk_notebook_set_page(GTK_NOTEBOOK(notebook), LICENSE_PAGE);
+        cur_state = SETUP_LICENSE;
+    } else {
+    	gtk_notebook_set_page(GTK_NOTEBOOK(notebook), OPTION_PAGE);
+        cur_state = SETUP_OPTIONS;
+    }
 
     /* Go through the install options */
     options = glade_xml_get_widget(setup_glade, "option_vbox");
@@ -616,13 +647,17 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
     gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
     gtk_widget_show(window);
 
+    return cur_state;
+}
+
+static install_state gtkui_license(install_info *info)
+{
     return iterate_for_state();
 }
 
 static install_state gtkui_setup(install_info *info)
 {
-  
-  return iterate_for_state();
+    return iterate_for_state();
 }
 
 static void gtkui_update(install_info *info, const char *path, size_t progress, size_t size, const char *current)
@@ -713,6 +748,7 @@ int gtkui_okay(Install_UI *UI)
         if( dpy ) {
             /* Set up the driver */
             UI->init = gtkui_init;
+            UI->license = gtkui_license;
             UI->setup = gtkui_setup;
             UI->update = gtkui_update;
             UI->abort = gtkui_abort;
