@@ -330,7 +330,6 @@ GtkWidget* create_gtk_xsu_window (void)
   gtk_xsu_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_widget_set_name (gtk_xsu_window, "gtk_xsu_window");
   gtk_object_set_data (GTK_OBJECT (gtk_xsu_window), "gtk_xsu_window", gtk_xsu_window);
-  gtk_tooltips_set_tip (tooltips, gtk_xsu_window, _(NAME " " VERSION " by " AUTHOR), NULL);
   if (title_in)
 	gtk_window_set_title (GTK_WINDOW (gtk_xsu_window), arg_title);
   else 
