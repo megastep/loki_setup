@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.10 2003-06-18 01:40:12 megastep Exp $
+ * $Id: dialog_ui.c,v 1.11 2003-06-19 01:33:56 megastep Exp $
  */
 
 #include <limits.h>
@@ -101,7 +101,7 @@ install_state dialog_license(install_info *info)
 	                  RESPONSE_YES ) {
         return SETUP_README;
     } else {
-        return SETUP_ABORT;
+        return SETUP_EXIT;
     }
 }
 
