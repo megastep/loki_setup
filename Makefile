@@ -56,8 +56,10 @@ install.dbg: all
 
 install: all
 	@if [ -d image/setup.data/bin/$(arch)/$(libc) ]; then \
-	    install -s --verbose setup image/setup.data/bin/$(arch); \
-	    install -s --verbose setup.gtk image/setup.data/bin/$(arch)/$(libc); \
+	    cp -v setup image/setup.data/bin/$(arch); \
+	    strip image/setup.data/bin/$(arch)/setup; \
+	    cp -v setup.gtk image/setup.data/bin/$(arch)/$(libc); \
+	    strip image/setup.data/bin/$(arch)/$(libc)/setup.gtk; \
 	fi
 
 clean:
