@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.16 1999-09-28 09:36:23 hercules Exp $ */
+/* $Id: install.c,v 1.17 1999-09-30 00:58:32 hercules Exp $ */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -17,19 +17,19 @@
 extern char *rpm_root;
 
 /* Functions to retrieve attribution information from the XML tree */
-static const char *GetProductName(install_info *info)
+const char *GetProductName(install_info *info)
 {
     return xmlGetProp(info->config->root, "product");
 }
-static const char *GetProductDesc(install_info *info)
+const char *GetProductDesc(install_info *info)
 {
     return xmlGetProp(info->config->root, "desc");
 }
-static const char *GetProductVersion(install_info *info)
+const char *GetProductVersion(install_info *info)
 {
     return xmlGetProp(info->config->root, "version");
 }
-static const char *GetRuntimeArgs(install_info *info)
+const char *GetRuntimeArgs(install_info *info)
 {
     const char *args;
 

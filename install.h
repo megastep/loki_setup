@@ -122,6 +122,12 @@ typedef struct {
 } install_info;
 
 
+/* Functions to retrieve attribution information from the XML tree */
+extern const char *GetProductName(install_info *info);
+extern const char *GetProductDesc(install_info *info);
+extern const char *GetProductVersion(install_info *info);
+extern const char *GetRuntimeArgs(install_info *info);
+
 /* Create the initial installation information */
 extern install_info *create_install(const char *configfile, int log_level);
 

@@ -524,7 +524,7 @@ static void check_dynamic(const char *fpat, char *bin)
     use_dynamic = 0;
     sprintf(test, "%s.check-dynamic.sh", fpat);
     if ( access(test, R_OK) == 0 ) {
-        sprintf(testcmd, "sh %s 2>/dev/null", test);
+        sprintf(testcmd, "sh %s >/dev/null 2>&1", test);
         if ( system(testcmd) == 0 ) {
             sprintf(bin, "%s.dynamic", fpat);
             if ( access(bin, R_OK) == 0 ) {

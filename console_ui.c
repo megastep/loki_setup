@@ -64,6 +64,12 @@ static yesno_answer prompt_yesno(const char *prompt, yesno_answer suggest)
     }
 }
 
+static yesno_answer prompt_warning(const char *warning)
+{
+        printf("%s\n", warning);
+        return (prompt_yesno("Continue?", RESPONSE_NO));
+}
+
 static void parse_option(install_info *info, xmlNodePtr node)
 {
     char line[BUFSIZ];
@@ -183,6 +189,7 @@ static void console_abort(install_info *info)
 static install_state console_complete(install_info *info)
 {
     char readme[PATH_MAX], command[12+PATH_MAX];
+    install_state new_state;
 
     sprintf(readme, "%s/README", info->install_path);
     if ( access(readme, R_OK) == 0 ) {
@@ -194,10 +201,22 @@ static install_state console_complete(install_info *info)
     }
     printf("\n");
     printf("Installation complete.\n");
-	if ( prompt_yesno("Would you like launch the game now?", RESPONSE_YES)
-		 == RESPONSE_YES )
-	  return SETUP_PLAY;
-	return SETUP_EXIT;
+
+    new_state = SETUP_EXIT;
+    if ( prompt_yesno("Would you like launch the game now?", RESPONSE_YES)
+		 == RESPONSE_YES ) {
+        new_state = SETUP_PLAY;
+        if ( getuid() == 0 ) {
+            const char *warning_text = 
+"If you run a game as root, the preferences will be stored in\n"
+"root's home directory instead of your user account directory.";
+
+            if ( prompt_warning(warning_text) != RESPONSE_YES ) {
+                new_state = SETUP_EXIT;
+            }
+        }
+    }
+    return new_state;
 }
 
 int console_okay(Install_UI *UI)

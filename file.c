@@ -157,7 +157,7 @@ void file_skip(install_info *info, int len, stream *streamp)
 
 void file_skip_zeroes(install_info *info, stream *streamp)
 {
-  char c;
+  int c;
   if ( streamp->mode == 'r' ) {
 	for(;;){
 	  if ( streamp->fp ) {

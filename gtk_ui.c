@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.15 1999-09-28 09:36:23 hercules Exp $
+   $Id: gtk_ui.c,v 1.16 1999-09-30 00:58:32 hercules Exp $
 */
 
 #include <limits.h>
@@ -22,12 +22,26 @@
 
 /* Globals */
 
+static char *install_paths[] = {
+    "/usr/local/games",
+    "/opt/games",
+    "/usr/games",
+    NULL
+};
+
+/* Various warning dialogs */
+static enum {
+    WARNING_NONE,
+    WARNING_ROOT
+} warning_dialog;
+
 typedef enum
 {
     OPTION_PAGE,
     COPY_PAGE,
     DONE_PAGE,
-    ABORT_PAGE
+    ABORT_PAGE,
+    WARNING_PAGE
 } InstallPages;
 
 typedef struct {
@@ -138,9 +152,46 @@ void setup_button_view_readme_slot( GtkWidget* w, gpointer data )
     }
 }
 
-void setup_button_play_slot( GtkWidget* widget, gpointer func_data )
+void setup_button_warning_continue_slot( GtkWidget* widget, gpointer func_data )
 {
-    cur_state = SETUP_PLAY;
+    switch (warning_dialog) {
+        case WARNING_NONE:
+            break;
+        case WARNING_ROOT:
+            cur_state = SETUP_PLAY;
+            break;
+    }
+    warning_dialog = WARNING_NONE;
+}
+void setup_button_warning_cancel_slot( GtkWidget* widget, gpointer func_data )
+{
+    switch (warning_dialog) {
+        case WARNING_NONE:
+            break;
+        case WARNING_ROOT:
+            cur_state = SETUP_EXIT;
+            break;
+    }
+    warning_dialog = WARNING_NONE;
+}
+
+void setup_button_play_slot( GtkWidget* _widget, gpointer func_data )
+{
+    GtkWidget *widget;
+
+    if ( getuid() == 0 ) {
+	const char *warning_text =
+"If you run a game as root, the preferences will be stored in\n"
+"root's home directory instead of your user account directory.";
+
+        warning_dialog = WARNING_ROOT;
+    	widget = glade_xml_get_widget(setup_glade, "setup_notebook");
+    	gtk_notebook_set_page(GTK_NOTEBOOK(widget), WARNING_PAGE);
+    	widget = glade_xml_get_widget(setup_glade, "warning_label");
+        gtk_label_set_text(GTK_LABEL(widget), warning_text);
+    } else {
+        cur_state = SETUP_PLAY;
+    }
 }
 
 void setup_button_exit_slot( GtkWidget* gtklist, gpointer func_data )
@@ -315,11 +366,21 @@ static void init_install_path(void)
 {
     GtkWidget* widget;
     GList* list;
+    int i;
+    char path[PATH_MAX];
 
     widget = glade_xml_get_widget(setup_glade, "install_path");
 
     list = 0;
     list = g_list_append( list, cur_info->install_path);
+    for ( i=0; install_paths[i]; ++i ) {
+        sprintf(path, "%s/%s", install_paths[i], GetProductName(cur_info));
+        if ( strcmp(path, cur_info->install_path) != 0 ) {
+            if ( access(install_paths[i], R_OK) == 0 ) {
+                list = g_list_append( list, strdup(path));
+            }
+        }
+    }
     gtk_combo_set_popdown_strings( GTK_COMBO(widget), list );
     
     gtk_entry_set_text( GTK_ENTRY(GTK_COMBO(widget)->entry), cur_info->install_path );
@@ -620,10 +681,22 @@ static void gtkui_abort(install_info *info)
 
 static install_state gtkui_complete(install_info *info)
 {
-    GtkWidget *notebook;
+    GtkWidget *widget;
+    char text[1024];
 
-    notebook = glade_xml_get_widget(setup_glade, "setup_notebook");
-    gtk_notebook_set_page(GTK_NOTEBOOK(notebook), DONE_PAGE);
+    widget = glade_xml_get_widget(setup_glade, "setup_notebook");
+    gtk_notebook_set_page(GTK_NOTEBOOK(widget), DONE_PAGE);
+
+    widget = glade_xml_get_widget(setup_glade, "install_directory_label");
+    gtk_label_set_text(GTK_LABEL(widget), info->install_path);
+    widget = glade_xml_get_widget(setup_glade, "play_game_label");
+    if ( info->bin_list ) {
+        sprintf(text, "Type '%s' to play the game", info->bin_list->symlink);
+    } else {
+        strcpy(text, "");
+    }
+    gtk_label_set_text(GTK_LABEL(widget), text);
+
     /* TODO: Lots of cleanups here (free() mostly) */
     return iterate_for_state();
 }
