@@ -11,18 +11,20 @@
 #define GROUP_LEFT      6
 
 // Option related sizes
-#define BUTTON_MARGIN       5
-#define BUTTON_TOP_MARGIN   15
-#define BUTTON_WIDTH        310
-#define BUTTON_HEIGHT       20
-#define BOX_START_COUNT     3       // Number of buttons box can hold without resize
+#define BUTTON_MARGIN           5
+#define BUTTON_TOP_MARGIN       15
+#define BUTTON_WIDTH            310
+#define BUTTON_HEIGHT           20
+//#define BOX_START_COUNT     3       // Number of buttons box can hold without resize
+#define OPTIONS_START_COUNT     3
+#define UNINSTALL_START_COUNT   8
 
 #define CARBON_MAX_APP_PATH 1024
 #define ASCENT_COUNT       4       // Number of directories to ascend to for app path
 
 static int PromptResponse;
 static int PromptResponseValid;
-//static Rect DefaultBounds = {BUTTON_MARGIN, BUTTON_MARGIN, BUTTON_HEIGHT, BUTTON_WIDTH};
+static Rect DefaultBounds = {BUTTON_MARGIN, BUTTON_MARGIN, BUTTON_HEIGHT, BUTTON_WIDTH};
 
 static void MoveImage(CarbonRes *Res)
 {
@@ -54,7 +56,7 @@ static void HResize(OptionsBox *Box, int ID, int Offset)
 
 static void HMove(OptionsBox *Box, int ID, int Offset)
 {
-    printf("HResize() - Offset = %d\n", Offset);
+    printf("HMove() - Offset = %d\n", Offset);
 
     ControlID IDStruct = {LOKI_SETUP_SIG, ID};
     ControlRef TempControl;
@@ -271,6 +273,8 @@ static void LoadGroupControlRefs(CarbonRes *Res)
     GroupControlIDs[ABORT_PAGE].signature = LOKI_SETUP_SIG; GroupControlIDs[ABORT_PAGE].id = ABORT_GROUP_ID;
     GroupControlIDs[WARNING_PAGE].signature = LOKI_SETUP_SIG; GroupControlIDs[WARNING_PAGE].id = WARNING_GROUP_ID;
     GroupControlIDs[WEBSITE_PAGE].signature = LOKI_SETUP_SIG; GroupControlIDs[WEBSITE_PAGE].id = WEBSITE_GROUP_ID;
+    GroupControlIDs[UNINSTALL_PAGE].signature = LOKI_SETUP_SIG; GroupControlIDs[UNINSTALL_PAGE].id = UNINSTALL_GROUP_ID;
+    GroupControlIDs[UNINSTALL_STATUS_PAGE].signature = LOKI_SETUP_SIG; GroupControlIDs[UNINSTALL_STATUS_PAGE].id = UNINSTALL_STATUS_GROUP_ID;
 
     // Get references for group controls via the ID
     for(i = 0; i < PAGE_COUNT; i++)
@@ -287,12 +291,18 @@ static void AddOptionsButton(OptionsBox *Box, OptionsButton *Button)
     carbon_debug("AddOptionsButton()\n");
     printf("AddOptionsButton() - BoxPtr == %ld\n", Box);
 
+    // Create singlely linked-list with buttons
+    if(Box->ButtonCount > 0)
+        Box->Buttons[Box->ButtonCount - 1]->NextButton = Button;
+
     // Add the button to the list of other buttons
     Box->Buttons[Box->ButtonCount] = Button;
     // Increment the number of buttons...yeah.
     Box->ButtonCount++;
     // Set button parent to the box
     Button->Box = (void *)Box;
+    // No next button yet,
+    Button->NextButton = NULL;
 
     // Install click event handler for new button
     EventTypeSpec commSpec = {kEventClassControl, kEventControlHit};    
@@ -332,7 +342,7 @@ static void ApplyOffsetToControl(OptionsBox *Box, int ID, int Offset, int GrowNo
     }
 }
 
-CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32), const char *InstallName)
+CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32))
 {
     IBNibRef 		nibRef;
     OSStatus		err;
@@ -675,7 +685,7 @@ void carbon_HandlePendingEvents(CarbonRes *Res)
     EventRef theEvent;
     EventTargetRef theTarget;
 
-    carbon_debug("carbon_HandlePendingEvents()\n");
+    //carbon_debug("carbon_HandlePendingEvents()\n");
 
     theTarget = GetEventDispatcherTarget();
     // Delay for the minimum amount of time.  If we got a timeout, that means no
@@ -719,6 +729,8 @@ void carbon_GetLabelText(CarbonRes *Res, int LabelID, char *Buffer, int BufferSi
     // Get control reference
     GetControlByID(Res->Window, &IDStruct, &Ref);
     GetControlData(Ref, kControlEditTextPart, kControlStaticTextTextTag, BufferSize, Buffer, &DummySize);
+    // Add null terminator to end of string
+    Buffer[DummySize] = 0x00;
 }
 
 void carbon_SetProgress(CarbonRes *Res, int ProgressID, float Value)
@@ -772,7 +784,7 @@ void carbon_GetEntryText(CarbonRes *Res, int EntryID, char *Buffer, int BufferLe
     carbon_GetLabelText(Res, EntryID, Buffer, BufferLength);
 }
 
-int carbon_Prompt(CarbonRes *Res, int YesNoNotOK, const char *Message)
+int carbon_Prompt(CarbonRes *Res, PromptType Type, const char *Message)
 {
     ControlRef YesButton;
     ControlRef NoButton;
@@ -798,8 +810,20 @@ int carbon_Prompt(CarbonRes *Res, int YesNoNotOK, const char *Message)
     SetControlData(MessageLabel, kControlEditTextPart, kControlStaticTextTextTag, strlen(Message), Message);
 
     // If Yes/No prompt requested
-    if(YesNoNotOK)
+    if(Type == PromptType_YesNo)
     {
+        SetControlTitleWithCFString(YesButton, CFSTR("Yes"));
+        SetControlTitleWithCFString(NoButton, CFSTR("No"));
+
+        ShowControl(YesButton);
+        ShowControl(NoButton);
+        HideControl(OKButton);
+    }
+    else if(Type == PromptType_OKAbort)
+    {
+        SetControlTitleWithCFString(YesButton, CFSTR("OK"));
+        SetControlTitleWithCFString(NoButton, CFSTR("Abort"));
+
         ShowControl(YesButton);
         ShowControl(NoButton);
         HideControl(OKButton);
@@ -933,12 +957,12 @@ OptionsButton *carbon_OptionsNewLabel(OptionsBox *Box, const char *Name)
     // Create our option button
     OptionsButton *Button = malloc(sizeof(OptionsButton));
     // Create the physical button in the window
-    //CFStringRef CFName = CFStringCreateWithCString(NULL, Name, kCFStringEncodingMacRoman);
+    CFStringRef CFName = CFStringCreateWithCString(NULL, Name, kCFStringEncodingMacRoman);
     // Create the static text control
-    //CreateStaticTextControl(Box->Res->Window, &DefaultBounds, CFName, NULL, &Button->Control);
-    //CFRelease(CFName);
-    ControlID ID = {LOKI_SETUP_SIG, Box->CurLabelID++};
-    GetControlByID(Box->Res->Window, &ID, &Button->Control);
+    CreateStaticTextControl(Box->Res->Window, &DefaultBounds, CFName, NULL, &Button->Control);
+    CFRelease(CFName);
+    //ControlID ID = {LOKI_SETUP_SIG, Box->CurLabelID++};
+    //GetControlByID(Box->Res->Window, &ID, &Button->Control);
     SetControlData(Button->Control, kControlEditTextPart, kControlStaticTextTextTag, strlen(Name), Name);
     // Add button to options box
     AddOptionsButton(Box, Button);
@@ -957,10 +981,10 @@ OptionsButton *carbon_OptionsNewCheckButton(OptionsBox *Box, const char *Name)
     // Create the physical button in the window
     CFStringRef CFName = CFStringCreateWithCString(NULL, Name, kCFStringEncodingMacRoman);
     // Create the static text control
-    //CreateCheckBoxControl(Box->Res->Window, &DefaultBounds, CFName, false, false, &Button->Control);
-    ControlID ID = {LOKI_SETUP_SIG, Box->CurCheckID++};
-    GetControlByID(Box->Res->Window, &ID, &Button->Control);
-    SetControlTitleWithCFString(Button->Control, CFName);
+    CreateCheckBoxControl(Box->Res->Window, &DefaultBounds, CFName, false, true, &Button->Control);
+    //ControlID ID = {LOKI_SETUP_SIG, Box->CurCheckID++};
+    //GetControlByID(Box->Res->Window, &ID, &Button->Control);
+    //SetControlTitleWithCFString(Button->Control, CFName);
     CFRelease(Name);
     // Add button to options box
     AddOptionsButton(Box, Button);
@@ -977,9 +1001,9 @@ OptionsButton *carbon_OptionsNewSeparator(OptionsBox *Box)
     // Create our option button
     OptionsButton *Button = malloc(sizeof(OptionsButton));
     // Create the static text control
-    //CreateSeparatorControl(Box->Res->Window, &DefaultBounds, &Button->Control);
-    ControlID ID = {LOKI_SETUP_SIG, Box->CurSepID++};
-    GetControlByID(Box->Res->Window, &ID, &Button->Control);
+    CreateSeparatorControl(Box->Res->Window, &DefaultBounds, &Button->Control);
+    //ControlID ID = {LOKI_SETUP_SIG, Box->CurSepID++};
+    //GetControlByID(Box->Res->Window, &ID, &Button->Control);
     // Add control to options box
     AddOptionsButton(Box, Button);
     // Set button type accordingly
@@ -997,10 +1021,10 @@ OptionsButton *carbon_OptionsNewRadioButton(OptionsBox *Box, const char *Name, R
     // Create the physical button in the window
     CFStringRef CFName = CFStringCreateWithCString(NULL, Name, kCFStringEncodingMacRoman);
     // Create the static text control
-    //CreateRadioButtonControl(Box->Res->Window, &DefaultBounds, CFName, false, false, &Button->Control);
-    ControlID ID = {LOKI_SETUP_SIG, Box->CurRadioID++};
-    GetControlByID(Box->Res->Window, &ID, &Button->Control);
-    SetControlTitleWithCFString(Button->Control, CFName);
+    CreateRadioButtonControl(Box->Res->Window, &DefaultBounds, CFName, false, true, &Button->Control);
+    //ControlID ID = {LOKI_SETUP_SIG, Box->CurRadioID++};
+    //GetControlByID(Box->Res->Window, &ID, &Button->Control);
+    //SetControlTitleWithCFString(Button->Control, CFName);
     CFRelease(CFName);
     // Add button to options box
     AddOptionsButton(Box, Button);
@@ -1022,7 +1046,7 @@ OptionsButton *carbon_OptionsNewRadioButton(OptionsBox *Box, const char *Name, R
     return Button;
 }
 
-OptionsBox *carbon_OptionsNewBox(CarbonRes *Res, int (*OptionClickCallback)(OptionsButton *Button))
+OptionsBox *carbon_OptionsNewBox(CarbonRes *Res, int OptionsNotUninstall, int (*OptionClickCallback)(OptionsButton *Button))
 {
     carbon_debug("carbon_OptionsNewBox()\n");
     OptionsBox *Box = malloc(sizeof(OptionsBox));
@@ -1033,17 +1057,30 @@ OptionsBox *carbon_OptionsNewBox(CarbonRes *Res, int (*OptionClickCallback)(Opti
     Box->OptionClickCallback = OptionClickCallback;
 
     // Set starting IDs for "dynamic" controls
-    Box->CurLabelID = START_LABEL_ID;
+    /*Box->CurLabelID = START_LABEL_ID;
     Box->CurRadioID = START_RADIO_ID;
     Box->CurSepID = START_SEP_ID;
-    Box->CurCheckID = START_CHECK_ID;
+    Box->CurCheckID = START_CHECK_ID;*/
 
+    if(OptionsNotUninstall)
+    {
+        ControlID ID = {LOKI_SETUP_SIG, OPTION_OPTIONS_GROUP_ID};
+        GetControlByID(Box->Res->Window, &ID, &Box->BoxControlRef);
+        Box->BoxStartCount = OPTIONS_START_COUNT;
+        Box->GroupID = OPTION_GROUP_ID;
+    }
+    else
+    {
+        ControlID ID = {LOKI_SETUP_SIG, UNINSTALL_OPTIONS_GROUP_ID};
+        GetControlByID(Box->Res->Window, &ID, &Box->BoxControlRef);
+        Box->BoxStartCount = UNINSTALL_START_COUNT;
+        Box->GroupID = UNINSTALL_GROUP_ID;
+    }
     return Box;
 }
 
 void carbon_OptionsShowBox(OptionsBox *Box)
 {
-    ControlRef BoxControlRef;
     Rect ButtonRect = {0, 0, BUTTON_HEIGHT, BUTTON_WIDTH};
     int Offset;     // Offset to move or resize controls to accomodate options
     int i;
@@ -1052,10 +1089,10 @@ void carbon_OptionsShowBox(OptionsBox *Box)
     carbon_debug("carbon_OptionsShowBox()\n");
 
     // Only resize stuff if options box is not big enough
-    if(Box->ButtonCount > BOX_START_COUNT)
+    if(Box->GroupID == OPTION_GROUP_ID && Box->ButtonCount > Box->BoxStartCount)
     {
         // Calculate offset for all controls based on number of options
-        Offset = (Box->ButtonCount - BOX_START_COUNT) * BUTTON_HEIGHT;
+        Offset = (Box->ButtonCount - Box->BoxStartCount) * BUTTON_HEIGHT;
         // Adjust the height of the following controls
         //ApplyOffsetToControl(Box, OPTION_INNER_OPTIONS_GROUP_ID, Offset, true);
         ApplyOffsetToControl(Box, OPTION_OPTIONS_GROUP_ID, Offset, true);
@@ -1070,13 +1107,27 @@ void carbon_OptionsShowBox(OptionsBox *Box)
         ApplyOffsetToControl(Box, OPTION_ESTSIZE_LABEL_ID, Offset, false);
         ApplyOffsetToControl(Box, OPTION_ESTSIZE_VALUE_LABEL_ID, Offset, false);
     }
+    else if(Box->GroupID == UNINSTALL_GROUP_ID && Box->ButtonCount > Box->BoxStartCount)
+    {
+        // Calculate offset for all controls based on number of options
+        Offset = (Box->ButtonCount - Box->BoxStartCount) * BUTTON_HEIGHT;
+        // Adjust the height of the following controls
+        //ApplyOffsetToControl(Box, OPTION_INNER_OPTIONS_GROUP_ID, Offset, true);
+        ApplyOffsetToControl(Box, UNINSTALL_OPTIONS_GROUP_ID, Offset, true);
+        ApplyOffsetToControl(Box, UNINSTALL_GROUP_ID, Offset, true);
+        // Adjust the top of the following controls
+        ApplyOffsetToControl(Box, UNINSTALL_UNINSTALL_BUTTON_ID, Offset, false);
+        ApplyOffsetToControl(Box, UNINSTALL_SPACE_VALUE_LABEL_ID, Offset, false);
+        ApplyOffsetToControl(Box, UNINSTALL_EXIT_BUTTON_ID, Offset, false);
+        ApplyOffsetToControl(Box, UNINSTALL_SPACE_LABEL_ID, Offset, false);
+    }
 
     // Get reference to box control
-    ControlID ID = {LOKI_SETUP_SIG, OPTION_OPTIONS_GROUP_ID};
-    GetControlByID(Box->Res->Window, &ID, &BoxControlRef);
+    //ControlID ID = {LOKI_SETUP_SIG, OPTION_OPTIONS_GROUP_ID};
+    //GetControlByID(Box->Res->Window, &ID, &BoxControlRef);
 
     Rect BoxControlBounds;
-    GetControlBounds(BoxControlRef, &BoxControlBounds);
+    GetControlBounds(Box->BoxControlRef, &BoxControlBounds);
 
     // No max button yet
     Box->MaxButtonWidth = 0;
@@ -1094,7 +1145,7 @@ void carbon_OptionsShowBox(OptionsBox *Box)
             Box->MaxButtonWidth = ButtonRect.right;
         printf("carbon_OptionsShowBox() - Button width = %d\n", ButtonRect.right);
 
-        //printf("EmbedControl returned: %d\n", EmbedControl(Box->Buttons[i]->Control, BoxControlRef));
+        printf("EmbedControl returned: %d\n", EmbedControl(Box->Buttons[i]->Control, Box->BoxControlRef));
         //!!!TODO - Might have to change height for separators (always be 1)
         SetControlBounds(Box->Buttons[i]->Control, &ButtonRect);
         MoveControl(Box->Buttons[i]->Control, BoxControlBounds.left + BUTTON_MARGIN, BoxControlBounds.top + BUTTON_TOP_MARGIN + i * BUTTON_HEIGHT);
@@ -1102,7 +1153,7 @@ void carbon_OptionsShowBox(OptionsBox *Box)
     }
 
     // Apply horizontal changes to controls as necessary
-    if(Box->MaxButtonWidth > BUTTON_WIDTH)
+    if(Box->GroupID == OPTION_GROUP_ID && Box->MaxButtonWidth > BUTTON_WIDTH)
     {
         // How much to we have to offset stuff
         int HOffset = Box->MaxButtonWidth - BUTTON_WIDTH;
@@ -1120,6 +1171,16 @@ void carbon_OptionsShowBox(OptionsBox *Box)
         HMove(Box, OPTION_ESTSIZE_VALUE_LABEL_ID, HOffset);
         HMove(Box, OPTION_LINK_PATH_BUTTON_ID, HOffset);
         HMove(Box, OPTION_INSTALL_PATH_BUTTON_ID, HOffset);
+    }
+    else if(Box->GroupID == UNINSTALL_GROUP_ID && Box->MaxButtonWidth > BUTTON_WIDTH)
+    {
+        // How much to we have to offset stuff
+        int HOffset = Box->MaxButtonWidth - BUTTON_WIDTH;
+
+        HResize(Box, UNINSTALL_GROUP_ID, HOffset);
+        HResize(Box, UNINSTALL_OPTIONS_GROUP_ID, HOffset);
+
+        HMove(Box, UNINSTALL_UNINSTALL_BUTTON_ID, HOffset);
     }
 
     // Refresh all of the controls
@@ -1167,8 +1228,8 @@ void carbon_SetProperWindowSize(OptionsBox *Box, int OptionsNotOther)
 
     // If true (and there are more options than can fit in default size,
     // then set window size based on OPTIONS screen
-    if(OptionsNotOther && Box->ButtonCount > BOX_START_COUNT)
-        NewHeight = WINDOW_HEIGHT + (Box->ButtonCount - BOX_START_COUNT) * BUTTON_HEIGHT;
+    if(OptionsNotOther && Box->ButtonCount > Box->BoxStartCount)
+        NewHeight = WINDOW_HEIGHT + (Box->ButtonCount - Box->BoxStartCount) * BUTTON_HEIGHT;
     // Otherwise, set to standard window size
     else
         NewHeight = WINDOW_HEIGHT;
@@ -1187,6 +1248,41 @@ void carbon_SetProperWindowSize(OptionsBox *Box, int OptionsNotOther)
 
     // Move the image to accomodate new window size
     MoveImage(Box->Res);
+
+    // Redraw it
+    DrawControls(Box->Res->Window);
+
+    // Show window in new state
+    ShowWindow(Box->Res->Window);
+}
+
+void carbon_SetUninstallWindowSize(OptionsBox *Box)
+{
+    int NewHeight;
+    int NewWidth;
+
+    // Hide window while we're making changes to it
+    HideWindow(Box->Res->Window);
+
+    // If true (and there are more options than can fit in default size,
+    // then set window size based on OPTIONS screen
+    if(Box->ButtonCount > Box->BoxStartCount)
+        NewHeight = WINDOW_HEIGHT + (Box->ButtonCount - Box->BoxStartCount) * BUTTON_HEIGHT;
+    // Otherwise, set to standard window size
+    else
+        NewHeight = WINDOW_HEIGHT;
+
+    if(Box->MaxButtonWidth > BUTTON_WIDTH)
+        NewWidth = WINDOW_WIDTH + (Box->MaxButtonWidth - BUTTON_WIDTH);
+    else
+        NewWidth = WINDOW_WIDTH;
+
+    // Resize window
+    printf("carbon_SetUninstallWindowSize - Box->MaxButtonWidth = %d", Box->MaxButtonWidth);
+    SizeWindow(Box->Res->Window, NewWidth, NewHeight, true);
+
+    // When size changes, we have to reposition it to the center
+    RepositionWindow(Box->Res->Window, NULL, kWindowCenterOnMainScreen);
 
     // Redraw it
     DrawControls(Box->Res->Window);
@@ -1369,66 +1465,3 @@ void carbon_AddDesktopAlias(const char *Path)
     else
         carbon_debug("carbon_AddDesktopAlias() - Could not create FSRef for path\n");
 }
-
-/*void carbon_AddDesktopAlias(const char *Path)
-{
- AliasHandle hArticle;
- OSErr  err;
- FInfo  fndrInfo;
- FSSpec  articleSpec;
- short  refNum;
- FSSpec  newsFolderFS;
-
- // Create minimal alias for the original article.
- newsFolderFS.vRefNum = gSpoolFolder->fldrVRefNum;
- newsFolderFS.parID = gSpoolFolder->fldrDirID;
- newsFolderFS.name[0] = '\0';
-);
-
- err = NewAlias( &newsFolderFS, theSpec, &hArticle );
- if ( !hArticle || err != noErr ) {
-  LogError( "Could not allocate alias for article!" );
-  return;
- }
-
-  // Setup the article file, initialize it and specify where it is
-  // supposed to be put. If it exists, then delete it.
-
- FSMakeFSSpec( gSpoolFolder->fldrVRefNum, entry->dirID, 
-  (StringPtr) articleNumber, &articleSpec );
- FSpCreateResFile( &articleSpec, 'fndr', 'alis', 0 );
- err = ResError();
- if ( err == dupFNErr ) {
-  err = FSpDelete( &articleSpec );
-  FSpCreateResFile( &articleSpec, 'fndr', 'alis', 0 );
-  err = ResError();
- }
- if ( err != noErr ) {
-  LogError( "Couldn't create alias file!" );
-  return;
- }
- 
-  // Create the resource file and open it for writing.
-
- refNum = FSpOpenResFile( &articleSpec, fsWrPerm ); 
- if ( refNum == -1 || ResError() != noErr ) {
-  LogError( "Couldn't open an alias file!" );
-  return;
- }
- 
-  // Write alias resource to file.
-
- AddResource( (Handle) hArticle, 'alis', 0, "\p" );
- ChangedResource( (Handle) hArticle );
- if ( ResError() == noErr ) {
-  WriteResource( (Handle) hArticle );
-  HPurge( (Handle) hArticle );
- }
-
- CloseResFile( refNum );
- 
-  // Now set the "alias" finder bit.
- 
- FSpGetFInfo( &articleSpec, &fndrInfo );
- fndrInfo.fdFlags |= (1L << 15);
- FSpSetFInfo( &articleSpec, &fndrInfo );*/

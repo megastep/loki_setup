@@ -5,13 +5,15 @@
 #include <CoreServices/CoreServices.h>
 
 // Constants used to identify Carbon resources
-#define OPTION_GROUP_ID         128
-#define CLASS_GROUP_ID          129
-#define COPY_GROUP_ID           130
-#define DONE_GROUP_ID           131
-#define ABORT_GROUP_ID          132
-#define WARNING_GROUP_ID        133
-#define WEBSITE_GROUP_ID        134
+#define OPTION_GROUP_ID             128
+#define CLASS_GROUP_ID              129
+#define COPY_GROUP_ID               130
+#define DONE_GROUP_ID               131
+#define ABORT_GROUP_ID              132
+#define WARNING_GROUP_ID            133
+#define WEBSITE_GROUP_ID            134
+#define UNINSTALL_GROUP_ID          135
+#define UNINSTALL_STATUS_GROUP_ID   136
 
 // OPTION_GROUP_ID controls
 #define OPTION_INSTALL_PATH_LABEL_ID        200
@@ -76,6 +78,19 @@
 #define WEBSITE_README_BUTTON_ID            806
 #define WEBSITE_CONTINUE_BUTTON_ID          807
 
+// UNINSTALL_GROUP_ID controls
+#define UNINSTALL_OPTIONS_GROUP_ID          901
+#define UNINSTALL_EXIT_BUTTON_ID            904
+#define UNINSTALL_UNINSTALL_BUTTON_ID       905
+#define UNINSTALL_SPACE_VALUE_LABEL_ID      903
+#define UNINSTALL_SPACE_LABEL_ID            902
+
+// UNINSTALL_STATUS_GROUP_ID controls
+#define UNINSTALL_STATUS_OPTION_LABEL_ID    1000
+#define UNINSTALL_STATUS_PROGRESS_ID        1001
+#define UNINSTALL_STATUS_CANCEL_BUTTON_ID   1002
+#define UNINSTALL_STATUS_FINISHED_BUTTON_ID 1003
+
 #define LOKI_SETUP_SIG      'loki'
 
 // Possible command events that are raised
@@ -91,6 +106,8 @@
 #define COMMAND_RECOMMENDED     'recc'
 #define COMMAND_EXPERT          'expr'
 #define COMMAND_WEBSITE         'webb'
+#define COMMAND_FINISHED        'fini'
+#define COMMAND_UNINSTALL       'unin'
 
 #define COMMAND_PROMPT_YES      'yes '
 #define COMMAND_PROMPT_NO       'no  '
@@ -124,10 +141,19 @@ typedef enum
     DONE_PAGE = 3,
     ABORT_PAGE = 4,
     WARNING_PAGE = 5,
-    WEBSITE_PAGE = 6
+    WEBSITE_PAGE = 6,
+    UNINSTALL_PAGE = 7,
+    UNINSTALL_STATUS_PAGE = 8,
 } InstallPage;
 // Number of pages that exist
-#define PAGE_COUNT   7
+#define PAGE_COUNT   9
+
+typedef enum
+{
+    PromptType_YesNo,
+    PromptType_OK,
+    PromptType_OKAbort,
+}PromptType;
 
 typedef struct
 {
@@ -151,7 +177,7 @@ typedef struct
 } CarbonRes;
 
 // Function declarations
-CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32), const char *);
+CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32));
 void carbon_UnloadCarbonRes(CarbonRes *);
 int carbon_IterateForState(CarbonRes *, int *);
 void carbon_ShowInstallScreen(CarbonRes *, InstallPage);
@@ -170,8 +196,12 @@ void carbon_GetEntryText(CarbonRes *, int, char *, int);
 void carbon_SetProgress(CarbonRes *, int, float);
 void carbon_SetCheckbox(CarbonRes *, int, int);
 int carbon_GetCheckbox(CarbonRes *, int);
-int carbon_Prompt(CarbonRes *, int, const char *);
+int carbon_Prompt(CarbonRes *, PromptType, const char *);
 int carbon_ReadmeOrLicense(CarbonRes *, int, const char *);
+int carbon_LaunchURL(const char *);
+void carbon_GetAppPath(char *, int);
+int carbon_PromptForPath(char *, int);
+void carbon_AddDesktopAlias(const char *);
 
 // Options related functions and data types
 typedef enum
@@ -184,10 +214,11 @@ typedef enum
 
 #define MAX_OPTIONS         32
 #define MAX_BUTTON_NAME     512
-typedef struct
+typedef struct OptionsButtonStruct
 {
     ControlRef Control;
     ButtonType Type;
+    struct OptionsButtonStruct *NextButton;
     void *Data;
     // This should be cast to an OptionsBox when used.  It had
     // to be "void *" to avoid a circular reference.  This is
@@ -207,10 +238,10 @@ typedef struct
 }RadioGroup;
 
 // Starting ID's for "dynamic" controls
-#define START_LABEL_ID  1040
+/*#define START_LABEL_ID  1040
 #define START_CHECK_ID  1000
 #define START_RADIO_ID  1020
-#define START_SEP_ID    1060
+#define START_SEP_ID    1060*/
 typedef struct
 {
     CarbonRes *Res;
@@ -223,30 +254,33 @@ typedef struct
     // Callback for application to handle command events (buttons)
     int (*OptionClickCallback)(OptionsButton *Button);
 
+    // Control reference to box that controls are in
+    ControlRef BoxControlRef;
+    // Number of buttons that can fit in the box without resizing
+    int BoxStartCount;
+    // What display is the box on (used for resizing other controls
+    int GroupID;
     // These variables are used to keep track of the current resource ID
     // of controls (since we're not creating controls dynamically right now
     // and need to keep track of the next available control in the resource
     // file.
-    int CurLabelID;
+    /*int CurLabelID;
     int CurRadioID;
     int CurSepID;
-    int CurCheckID;
+    int CurCheckID;*/
 }OptionsBox;
 
 OptionsButton *carbon_OptionsNewLabel(OptionsBox *, const char *);
 OptionsButton *carbon_OptionsNewCheckButton(OptionsBox *, const char *);
 OptionsButton *carbon_OptionsNewSeparator(OptionsBox *);
 OptionsButton *carbon_OptionsNewRadioButton(OptionsBox *, const char *, RadioGroup **);
-OptionsBox *carbon_OptionsNewBox(CarbonRes *, int (*OptionClickCallback)(OptionsButton *Button));
+OptionsBox *carbon_OptionsNewBox(CarbonRes *, int, int (*OptionClickCallback)(OptionsButton *Button));
 void carbon_OptionsSetTooltip(OptionsButton *, const char *);
 void carbon_OptionsSetValue(OptionsButton *, int);
 int carbon_OptionsGetValue(OptionsButton *);
 void carbon_OptionsShowBox(OptionsBox *);
 void carbon_SetProperWindowSize(OptionsBox *, int);
+void carbon_SetUninstallWindowSize(OptionsBox *);
 OptionsButton *carbon_GetButtonByName(OptionsBox *, const char *);
-int carbon_LaunchURL(const char *);
-void carbon_GetAppPath(char *, int);
-int carbon_PromptForPath(char *, int);
-void carbon_AddDesktopAlias(const char *);
 
 #endif

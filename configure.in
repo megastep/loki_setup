@@ -168,7 +168,7 @@ case "$target" in
 	REENTRANT=""
 	CFLAGS="$CFLAGS -I/sw/include -Ddarwin"
 	LDFLAGS="$LDFLAGS -framework Carbon"
-	COMMON_LIBS="carbon/carbonres.o carbon/carbondebug.o carbon/STUPControl.c"
+	COMMON_LIBS="carbon/carbonres.o carbon/carbondebug.o carbon/STUPControl.o"
 	ARCH=ppc ;;
     *ppc* | *powerpc*)
         ARCH=ppc ;;

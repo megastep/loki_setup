@@ -40,6 +40,7 @@ COMMON_OBJS = log.o install_log.o
 CORE_OBJS   = detect.o plugins.o network.o install.o copy.o file.o loki_launchurl.o
 OBJS 		= $(COMMON_OBJS) $(CORE_OBJS) main.o 
 LOKI_UNINSTALL_OBJS = loki_uninstall.o uninstall_ui.o
+CARBON_UNINSTALL_OBJS = carbon_uninstall.o uninstall_carbonui.o
 UNINSTALL_OBJS 		= uninstall.o
 CHECK_OBJS			= $(COMMON_OBJS) $(CORE_OBJS) check.o
 CONSOLE_OBJS 		= $(OBJS) console_ui.o @CONSOLE_OBJS@
@@ -67,6 +68,16 @@ loki_uninstall.o: uninstall.c
 loki_uninstall: $(LOKI_UNINSTALL_OBJS) $(SETUPDB)/$(arch)/libsetupdb.a
 	$(CC) $(LDFLAGS) -o $@ $(LOKI_UNINSTALL_OBJS) $(GUI_LIBS)
 
+carbon_uninstall.o: uninstall.c
+	$(CC) $(LDFLAGS) -c -o $@ $^ $(CFLAGS) -DUNINSTALL_CARBONUI -DUNINSTALL_UI -DVERSION=\"$(UNINSTALL_VERSION)\"
+
+carbon_uninstall: $(CARBON_UNINSTALL_OBJS) $(SETUPDB)/$(arch)/libsetupdb.a
+	$(CC) $(LDFLAGS) -o $@ $(CARBON_UNINSTALL_OBJS) $(CARBON_LIBS)
+	rm -f -R ./uninstall.APP
+	cp -R ./setup.APP ./uninstall.APP
+	cp ./carbon/Info.plist.uninstall ./uninstall.APP/Contents/Info.plist
+	rm -f ./uninstall.APP/Contents/MacOS/setup.carbon
+	cp ./carbon_uninstall ./uninstall.APP/Contents/MacOS
 uninstall: $(UNINSTALL_OBJS) $(COMMON_LIBS)
 	$(CC) $(LDFLAGS) -o $@ $(UNINSTALL_OBJS) $(CONSOLE_LIBS) @STATIC@
 

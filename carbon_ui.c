@@ -477,12 +477,12 @@ int OnOptionClickEvent(OptionsButton *ButtonWithEventClick)
 		{
 			if (!strcmp(child->name, "eula"))
 			{
-                carbon_debug("EULA not supported yet!\n");
-                //!!!TODO - Support EULA
 				const char* name = GetProductEULANode(cur_info, data_node);
 				if(name)
 				{
-                    if(!carbon_ReadmeOrLicense(MyRes, false, name))
+                    char buffer[MAX_README_SIZE];
+                    load_file(name, buffer, MAX_README_SIZE);
+                    if(!carbon_ReadmeOrLicense(MyRes, false, buffer))
                     {
                         carbon_OptionsSetValue(ButtonWithEventClick, false);
 					    return true;
@@ -652,7 +652,7 @@ static yesno_answer carbonui_prompt(const char *txt, yesno_answer suggest)
     if(suggest != RESPONSE_OK)
     {
         // YES/NO dialog
-        if(carbon_Prompt(MyRes, true, txt))
+        if(carbon_Prompt(MyRes, PromptType_YesNo, txt))
             PromptResponse = RESPONSE_YES;
         else
             PromptResponse = RESPONSE_NO;
@@ -660,7 +660,7 @@ static yesno_answer carbonui_prompt(const char *txt, yesno_answer suggest)
     else
     {
         // OK dialog
-        if(carbon_Prompt(MyRes, false, txt))
+        if(carbon_Prompt(MyRes, PromptType_OK, txt))
             PromptResponse = RESPONSE_OK;
         else
         {
@@ -679,7 +679,7 @@ static install_state carbonui_init(install_info *info, int argc, char **argv, in
     carbon_debug("***carbonui_init()\n");
 
     // Load the resources related to our carbon interface
-    MyRes = carbon_LoadCarbonRes(OnCommandEvent, GetProductDesc(info));
+    MyRes = carbon_LoadCarbonRes(OnCommandEvent);
     // Couldn't allocate resources...exit setup.
     if(MyRes == NULL)
     {
@@ -804,7 +804,9 @@ static install_state carbonui_license(install_info *info)
 {
     carbon_debug("***carbonui_license()\n");
     // If license is accepted
-    if(carbon_ReadmeOrLicense(MyRes, false, GetProductEULA(info)))
+    char buffer[MAX_README_SIZE];
+    load_file(GetProductEULA(info), buffer, MAX_README_SIZE);
+    if(carbon_ReadmeOrLicense(MyRes, false, buffer))
         cur_state = SETUP_README;
     else
         cur_state = SETUP_EXIT;
@@ -861,7 +863,7 @@ static install_state carbonui_setup(install_info *info)
     // Else, let the user select appropriate options
     //options = glade_xml_get_widget(setup_glade, "option_vbox");
     //gtk_container_foreach(GTK_CONTAINER(options), empty_container, options);
-    options = carbon_OptionsNewBox(MyRes, OnOptionClickEvent);
+    options = carbon_OptionsNewBox(MyRes, true, OnOptionClickEvent);
     info->install_size = 0;
     node = info->config->root->childs;
     radio_list = NULL;
@@ -939,7 +941,7 @@ static int carbonui_update(install_info *info, const char *path, size_t progress
     char LastText[1024] = "";
     char LastCurrent[1024] = "";
 
-    carbon_debug("***carbonui_update()\n");
+    //carbon_debug("***carbonui_update()\n");
  
     // Abort immediately if current state is SETUP_ABORT
     if(cur_state == SETUP_ABORT)
