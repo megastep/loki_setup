@@ -1,4 +1,8 @@
 Current:
+Ryan C. Gordon (icculus.org) - Tue Feb 24 21:32:31 EST 2004
+ * Fixed wrong file path in "uncompress" path.
+Ryan C. Gordon (icculus.org) - Tue Feb 24 21:32:31 EST 2004
+ * Added --nomd5 and --nocrc options to makeself.sh
 Stephane Peter (Codehost) - Tue Feb 17 19:54:25 PST 2004
  * Preliminary support for installing man pages (<manpage> tag).
 Ryan C. Gordon (icculus.org) - Sat Feb 14 20:28:17 EST 2004
