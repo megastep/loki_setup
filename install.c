@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.109 2003-05-17 17:18:05 zeph Exp $ */
+/* $Id: install.c,v 1.110 2003-05-20 04:53:36 zeph Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -594,8 +594,17 @@ install_info *create_install(const char *configfile,
     info->args = GetRuntimeArgs(info);
 
     /* Add the default install path */
-    snprintf(info->install_path, PATH_MAX, "%s/%s", GetDefaultPath(info),
-			 GetProductName(info));
+    if(GetProductIsAppBundle(info))
+    {
+        // If appbundle attribute set, the destination directory is
+        // chosen differently that with a regular product installation.
+        snprintf(info->install_path, PATH_MAX, "%s", GetDefaultPath(info));
+    }
+    else
+    {
+        snprintf(info->install_path, PATH_MAX, "%s/%s", GetDefaultPath(info),
+			    GetProductName(info));
+    }
     strcpy(info->symlinks_path, DEFAULT_SYMLINKS);
 
 	*info->play_binary = '\0';

@@ -161,6 +161,10 @@ There are several optional attributes of the install element:
  superuser  If set to 'yes', then the installer will refuse to start if not run as
             the super-user (root).
 
+            (CARBON ONLY) This option causes the installer to prompt the user for
+            appropriate credentials.  This is a standard thing for Mac and should
+            typically be done instead of "running as root".
+
  express    If set to 'yes', then the user will have the choice between "Recommended" and
             "Expert" classes of installation. "Expert" is the normal mode, when the user has to confirm
             all steps of the installation. "Recommended" uses the defaults values and proceeds to the
@@ -172,9 +176,12 @@ There are several optional attributes of the install element:
  reinstall  If set to 'yes', the install will allow the product to be reinstalled. The default behavior
             is not to let the user install product options twice.
 
- appbundle  (CARBON ONLY) If this is "yes", then the destination folder is assumed to be a Mac OS
-            application bundle.  Therefore, the ".app" extension is automatically appended to the
-            selected target directory.
+ appbundle  (CARBON ONLY) If this is "yes", the destination folder does not include the product
+            name as part of the path.  An application bundle is typically installed much like
+            a single file would be...and so is treated as such.
+            
+            The app bundle path usually specified in the "path" attribute of the "files" element,
+            or it is specified in the archives directly.
 
  category   Indicates the product category, used to specify the menu entry on some systems. Defaults
             to "Games"

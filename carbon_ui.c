@@ -12,6 +12,7 @@
 #include "loki_launchurl.h"
 
 static int CDKeyOK;
+static char CDKeyString[1024];
 static int cur_state;
 static install_info *cur_info;
 static int diskspace;
@@ -466,7 +467,7 @@ void OnCommandBeginInstall()
 
     carbon_GetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, string, 1024);
 
-    // Create path with ".app" at the end
+    /*// Create path with ".app" at the end
     strcpy(appstring, string);
     strcat(appstring, ".app");
     // If product is an application bundle
@@ -480,7 +481,7 @@ void OnCommandBeginInstall()
         }
     }
     // Set our original string to the new app bundle string
-    strcpy(string, appstring);
+    strcpy(string, appstring);*/
 
     set_installpath(cur_info, string);
     // Only set binary path if symbolic link checkbox is set
@@ -629,12 +630,22 @@ static void OnCommandCDKeyContinue()
     carbon_GetEntryText(MyRes, CDKEY_ENTRY_ID, CDKey, 1024);
     carbon_GetEntryText(MyRes, CDKEY_CONFIRM_ENTRY_ID, CDConfirmKey, 1024);
 
-    if(strcmp(CDKey, CDConfirmKey) != 0)
+    if(strcasecmp(CDKey, CDConfirmKey) != 0)
         carbon_Prompt(MyRes, PromptType_OK, "CD keys do not match.  Please try again.", NULL, 0);
-    else if(strcmp(CDKey, "") == 0)
+    else if(strcasecmp(CDKey, "") == 0)
         carbon_Prompt(MyRes, PromptType_OK, "Please specify a CD key!", NULL, 0);
     else
+    {
+        char *p;
         CDKeyOK = true;
+        p = CDKey;
+        while(*p != 0x00)
+        {
+            *p = toupper(*p);
+            p++;
+        }
+        strcpy(CDKeyString, CDKey);
+    }
 }
 
 static void OnCommandSymbolicCheck()
@@ -1267,6 +1278,22 @@ static install_state carbonui_complete(install_info *info)
     //if(carbon_GetCheckbox(MyRes, OPTION_CREATE_DESKTOP_ALIAS_BUTTON_ID))
     //    carbon_AddDesktopAlias(info->install_path);
 
+    // If CDKey attribute was specified, run the specified script
+    if(GetProductCDKey(info))
+    {
+        char cmd[1024];
+        //sprintf(cmd, "echo \"%s\" > \"%s/%s\"", CDKeyString, info->install_path, GetProductCDKey(info)); 
+        sprintf(cmd, "%s/%s", info->install_path, GetProductCDKey(info)); 
+        FILE *cdfile = fopen(cmd, "wt");
+        if(cdfile == NULL)
+            printf("CDKey file '%s' could not be opened.\n", cmd);
+        else
+        {
+            printf("CDKey file opened\n");
+            fwrite(GetProductCDKey(info), sizeof(char), strlen(GetProductCDKey(info)), cdfile);
+        }
+        //run_script(info, cmd, 0);
+    }
     // Show the install complete page
     carbon_ShowInstallScreen(MyRes, DONE_PAGE);
     // Set the install directory label accordingly

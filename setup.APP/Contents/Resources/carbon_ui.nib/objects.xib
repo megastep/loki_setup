@@ -772,6 +772,7 @@
             <int name="controlID">200</int>
             <boolean name="small">TRUE</boolean>
             <string name="title">StaticText</string>
+            <int name="justification">1</int>
           </object>
           <object class="IBCarbonButton" id="340">
             <string name="bounds">130 58 150 128 </string>

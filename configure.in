@@ -167,7 +167,7 @@ case "$target" in
 	BDYNAMIC=""
 	REENTRANT=""
 	CFLAGS="$CFLAGS -I/sw/include -Ddarwin"
-	LDFLAGS="$LDFLAGS -framework Carbon"
+	LDFLAGS="$LDFLAGS -framework Carbon -framework Security"
 	COMMON_LIBS="carbon/carbonres.o carbon/carbondebug.o carbon/STUPControl.o carbon/YASTControl.o"
 	ARCH=ppc ;;
     *ppc* | *powerpc*)

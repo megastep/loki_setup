@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.60 2003-04-14 04:17:21 zeph Exp $ */
+/* $Id: main.c,v 1.61 2003-05-20 04:53:36 zeph Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -308,12 +308,20 @@ int main(int argc, char **argv)
 					continue;
 				}
                 
-				/* Check if we should be root */
-				if ( GetProductRequireRoot(info) && geteuid()!=0 ) {
+				/* Check if we should be root.  Under the Mac, we'll do the standard authorization
+                   stuff that most installers do at startup. */
+                if ( GetProductRequireRoot(info) && geteuid()!=0 ) {
+#if defined(darwin)
+                carbon_AuthorizeUser();
+                state = SETUP_EXIT;
+                break;
+#else
 					UI.prompt(_("You need to run this installer as the super-user.\n"), RESPONSE_OK);
 					state = SETUP_EXIT;
 					continue;
-				}
+#endif
+                }
+
 				if ( info->product && GetProductInstallOnce(info) ) {
 					UI.prompt(_("\nThis product is already installed.\nUninstall it before running this program again.\n"), RESPONSE_OK);
 					state = SETUP_EXIT;

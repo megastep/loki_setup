@@ -1,3 +1,6 @@
+#include <Security/Authorization.h>
+#include <Security/AuthorizationTags.h>
+
 #include "carbonres.h"
 //#include "STUPControl.h"
 #include "YASTControl.h"
@@ -33,6 +36,28 @@
 static int PromptResponse;
 static int PromptResponseValid;
 static Rect DefaultBounds = {BUTTON_MARGIN, BUTTON_MARGIN, BUTTON_HEIGHT, BUTTON_WIDTH};
+static char EXEPath[CARBON_MAX_APP_PATH];
+
+static const char *GetEXEPath()
+{
+    CFURLRef url;
+    CFStringRef CFExePath;
+    CFBundleRef Bundle;
+
+    // Get URL of executable path
+    Bundle = CFBundleGetMainBundle();
+    url = CFBundleCopyExecutableURL(Bundle);
+    // Get EXE path as a CFString
+    CFExePath = CFURLCopyPath(url);
+    // Convert it to a char *
+    CFStringGetCString(CFExePath, EXEPath, CARBON_MAX_APP_PATH, kCFStringEncodingASCII);
+    printf("carbon_GetAppPath() - Executable path = '%s'\n", EXEPath);
+
+    CFRelease(url);
+    CFRelease(CFExePath);
+
+    return EXEPath;
+}
 
 static void MoveImage(CarbonRes *Res)
 {
@@ -1616,33 +1641,19 @@ int carbon_LaunchURL(const char *url)
  */
 void carbon_GetAppPath(char *Dest, int Length)
 {
-    CFURLRef url;
-    CFStringRef CFExePath;
-    char EXEPath[CARBON_MAX_APP_PATH];
     char *p;
     char TempStr[CARBON_MAX_APP_PATH];
-    CFBundleRef Bundle;
+    char TempEXEPath[CARBON_MAX_APP_PATH];
     int i;
 
     // Clear destination string
     strcpy(Dest, "");
-
-    // Get URL of executable path
-    Bundle = CFBundleGetMainBundle();
-    url = CFBundleCopyExecutableURL(Bundle);
-    // Get EXE path as a CFString
-    CFExePath = CFURLCopyPath(url);
-    // Convert it to a char *
-    CFStringGetCString(CFExePath, EXEPath, CARBON_MAX_APP_PATH, kCFStringEncodingASCII);
-    printf("carbon_GetAppPath() - Executable path = '%s'\n", EXEPath);
-
-    CFRelease(url);
-    CFRelease(CFExePath);
+    strcpy(TempEXEPath, GetEXEPath());
 
     for(i = 1; i <= ASCENT_COUNT; i ++)
     {
         // Search for next path separator
-        p = strrchr(EXEPath, '/');
+        p = strrchr(TempEXEPath, '/');
         if(p == NULL)
         {
             carbon_debug("carbon_GetAppPath() - Couldn't parse path!!!!\n");
@@ -1653,8 +1664,8 @@ void carbon_GetAppPath(char *Dest, int Length)
             // Reposition end of path just after the current '/'
             *(p + 1) = 0x00;
             // Check for existence of setup.data folder
-            printf("carbon_GetAppPath() - Checking for existence of '%s'\n", EXEPath);
-            strcpy(TempStr, EXEPath);
+            printf("carbon_GetAppPath() - Checking for existence of '%s'\n", TempEXEPath);
+            strcpy(TempStr, TempEXEPath);
             strcat(TempStr, "setup.data");
             // If setup.data found
             if(access(TempStr, F_OK) == 0)
@@ -1671,8 +1682,8 @@ void carbon_GetAppPath(char *Dest, int Length)
         }
     }
 
-    printf("carbon_GetAppPath() - AppPath = '%s'\n", EXEPath);
-    strcpy(Dest, EXEPath);
+    printf("carbon_GetAppPath() - AppPath = '%s'\n", TempEXEPath);
+    strcpy(Dest, TempEXEPath);
 }
 
 int carbon_PromptForPath(char *Path, int PathLength)
@@ -1812,4 +1823,63 @@ void carbon_RefreshOptions(OptionsBox *Box)
    
     for(i = 0; i < Box->ButtonCount; i++)
         Box->OptionClickCallback(Box->Buttons[i]);
+}
+
+// Authorizes user so they have Admin privileges.  If they do not, then it prompts
+//  for appropriate authorization and spawns setup again with admin privs if
+//  authorization was successful.
+void carbon_AuthorizeUser()
+{
+    /* This code is taken from Apple's developer documentation with some minor mods */
+    OSStatus myStatus;
+    AuthorizationFlags myFlags = kAuthorizationFlagDefaults;		//1
+    AuthorizationRef myAuthorizationRef;		//2
+
+    myStatus = AuthorizationCreate(NULL, kAuthorizationEmptyEnvironment,		//3
+                myFlags, &myAuthorizationRef);		//4
+    if (myStatus != errAuthorizationSuccess)
+        return; //myStatus;
+
+    do 
+    {
+        {
+            AuthorizationItem myItems = {kAuthorizationRightExecute, 0,		//5
+                    NULL, 0};		//6
+            AuthorizationRights myRights = {1, &myItems};		//7
+
+            myFlags = kAuthorizationFlagDefaults |		//8
+                    kAuthorizationFlagInteractionAllowed |		//9
+                    kAuthorizationFlagPreAuthorize |		//10
+                    kAuthorizationFlagExtendRights;		//11
+            myStatus = AuthorizationCopyRights (myAuthorizationRef, &myRights, NULL, myFlags, NULL );		//12
+        }
+		
+        if (myStatus != errAuthorizationSuccess) break;
+		
+        {
+            const char *myToolPath = GetEXEPath();
+            char *myArguments[] = { NULL };
+            //FILE *myCommunicationsPipe = NULL;
+            //char myReadBuffer[128];
+
+            myFlags = kAuthorizationFlagDefaults;		//13
+            myStatus = AuthorizationExecuteWithPrivileges		//14
+                    (myAuthorizationRef, myToolPath, myFlags, myArguments,		//15
+                    NULL);		//16
+
+            /*if (myStatus == errAuthorizationSuccess)
+                for(;;)
+                {
+                    int bytesRead = read (fileno (myCommunicationsPipe),
+                            myReadBuffer, sizeof (myReadBuffer));
+                    if (bytesRead < 1) break;
+                write (fileno (stdout), myReadBuffer, bytesRead);
+                }*/
+        }
+    } while (0);
+
+    AuthorizationFree (myAuthorizationRef, kAuthorizationFlagDefaults);		//17
+
+    if (myStatus) printf("Status: %i\n", myStatus);
+    //return myStatus;
 }
