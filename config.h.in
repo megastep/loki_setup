@@ -27,11 +27,11 @@
 /* Define if you have the waitpid function.  */
 #undef HAVE_WAITPID
 
-/* Define if you have the <dirent.h> header file.  */
-#undef HAVE_DIRENT_H
-
 /* Define if you have the <dir.h> header file.  */
 #undef HAVE_DIR_H
+
+/* Define if you have the <dirent.h> header file.  */
+#undef HAVE_DIRENT_H
 
 /* Define if you have the <fstab.h> header file.  */
 #undef HAVE_FSTAB_H
@@ -39,17 +39,20 @@
 /* Define if you have the <gtk.h> header file.  */
 #undef HAVE_GTK_H
 
+/* Define if you have the <libgen.h> header file.  */
+#undef HAVE_LIBGEN_H
+
 /* Define if you have the <libutil.h> header file.  */
 #undef HAVE_LIBUTIL_H
 
 /* Define if you have the <mntent.h> header file.  */
 #undef HAVE_MNTENT_H
 
-/* Define if you have the <ncurses/curses.h> header file.  */
-#undef HAVE_NCURSES_CURSES_H
-
 /* Define if you have the <ncurses.h> header file.  */
 #undef HAVE_NCURSES_H
+
+/* Define if you have the <ncurses/curses.h> header file.  */
+#undef HAVE_NCURSES_CURSES_H
 
 /* Define if you have the <ncurses/term.h> header file.  */
 #undef HAVE_NCURSES_TERM_H
@@ -66,11 +69,11 @@
 /* Define if you have the <strings.h> header file.  */
 #undef HAVE_STRINGS_H
 
-/* Define if you have the <sys/dirent.h> header file.  */
-#undef HAVE_SYS_DIRENT_H
-
 /* Define if you have the <sys/dir.h> header file.  */
 #undef HAVE_SYS_DIR_H
+
+/* Define if you have the <sys/dirent.h> header file.  */
+#undef HAVE_SYS_DIRENT_H
 
 /* Define if you have the <sys/mnttab.h> header file.  */
 #undef HAVE_SYS_MNTTAB_H
