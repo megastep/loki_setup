@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.54 2004-08-13 01:08:25 megastep Exp $ */
+/* $Id: uninstall.c,v 1.55 2004-08-14 01:25:38 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -560,7 +560,7 @@ int main(int argc, char *argv[])
 	memset(&UI, 0, sizeof(UI));
 
 #ifdef UNINSTALL_UI
-    if ( ! argv[optind] ) {
+    if ( ! argv[optind] && ! is_listing ) {
         return uninstall_ui(argc, argv);
     }
 #endif
