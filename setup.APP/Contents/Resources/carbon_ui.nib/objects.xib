@@ -4,9 +4,9 @@
   <object name="rootObject" class="NSCustomObject" id="1">
     <string name="customClass">NSApplication</string>
   </object>
-  <array count="109" name="allObjects">
+  <array count="107" name="allObjects">
     <object class="IBCarbonWindow" id="166">
-      <string name="windowRect">161 -1344 716 744 </string>
+      <string name="windowRect">179 -204 734 1884 </string>
       <string name="title">Window</string>
       <object name="rootControl" class="IBCarbonRootControl" id="167">
         <string name="bounds">0 0 555 2088 </string>
@@ -19,6 +19,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">206</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">options_status</string>
                 <int name="justification">1</int>
               </object>
@@ -27,6 +28,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">212</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Begin Install</string>
                 <ostype name="command">begn</ostype>
               </object>
@@ -35,6 +37,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">211</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">View Readme</string>
                 <ostype name="command">read</ostype>
               </object>
@@ -43,6 +46,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">210</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Cancel</string>
                 <ostype name="command">cncl</ostype>
               </object>
@@ -55,6 +59,7 @@
                     <int name="controlID">203</int>
                     <boolean name="enabled">FALSE</boolean>
                     <boolean name="small">TRUE</boolean>
+                    <int name="controlSize">1</int>
                     <string name="title">Link path:</string>
                     <int name="justification">-1</int>
                   </object>
@@ -63,6 +68,7 @@
                     <ostype name="controlSignature">loki</ostype>
                     <int name="controlID">202</int>
                     <boolean name="small">TRUE</boolean>
+                    <int name="controlSize">1</int>
                     <string name="title">Install a symbolic link into the path</string>
                     <ostype name="command">symb</ostype>
                   </object>
@@ -71,6 +77,7 @@
                     <ostype name="controlSignature">loki</ostype>
                     <int name="controlID">200</int>
                     <boolean name="small">TRUE</boolean>
+                    <int name="controlSize">1</int>
                     <string name="title">Install path:</string>
                     <int name="justification">-1</int>
                   </object>
@@ -102,6 +109,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">209</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Global Options</string>
               </object>
               <object class="IBCarbonGroupBox" id="189">
@@ -112,6 +120,7 @@
                     <ostype name="controlSignature">loki</ostype>
                     <int name="controlID">216</int>
                     <boolean name="small">TRUE</boolean>
+                    <int name="controlSize">1</int>
                     <string name="title">0 MB</string>
                   </object>
                   <object class="IBCarbonStaticText" id="319">
@@ -119,6 +128,7 @@
                     <ostype name="controlSignature">loki</ostype>
                     <int name="controlID">215</int>
                     <boolean name="small">TRUE</boolean>
+                    <int name="controlSize">1</int>
                     <string name="title">Estimated Size</string>
                     <int name="justification">-1</int>
                   </object>
@@ -127,6 +137,7 @@
                     <ostype name="controlSignature">loki</ostype>
                     <int name="controlID">213</int>
                     <boolean name="small">TRUE</boolean>
+                    <int name="controlSize">1</int>
                     <string name="title">Free space</string>
                     <int name="justification">-1</int>
                   </object>
@@ -135,12 +146,14 @@
                     <ostype name="controlSignature">loki</ostype>
                     <int name="controlID">214</int>
                     <boolean name="small">TRUE</boolean>
+                    <int name="controlSize">1</int>
                     <string name="title">0 MB</string>
                   </object>
                 </array>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">205</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Options</string>
               </object>
             </array>
@@ -148,6 +161,7 @@
             <int name="controlID">128</int>
             <boolean name="hidden">TRUE</boolean>
             <boolean name="small">TRUE</boolean>
+            <int name="controlSize">1</int>
           </object>
           <object class="IBCarbonGroupBox" id="203">
             <string name="bounds">276 6 548 345 </string>
@@ -157,6 +171,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">306</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Continue</string>
                 <ostype name="command">cont</ostype>
               </object>
@@ -165,6 +180,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">305</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">View Readme</string>
                 <ostype name="command">read</ostype>
               </object>
@@ -173,6 +189,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">304</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Cancel</string>
                 <ostype name="command">cncl</ostype>
               </object>
@@ -181,6 +198,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">301</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Please choose the class of installation.</string>
                 <int name="justification">1</int>
               </object>
@@ -204,6 +222,7 @@
             <int name="controlID">129</int>
             <boolean name="hidden">TRUE</boolean>
             <boolean name="small">TRUE</boolean>
+            <int name="controlSize">1</int>
             <string name="title">Installation Class</string>
           </object>
           <object class="IBCarbonGroupBox" id="212">
@@ -214,6 +233,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">404</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">View Readme</string>
                 <ostype name="command">read</ostype>
               </object>
@@ -222,41 +242,46 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">403</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Cancel</string>
                 <ostype name="command">cncl</ostype>
               </object>
               <object class="IBCarbonStaticText" id="209">
-                <string name="bounds">35 360 51 686 </string>
+                <string name="bounds">44 360 60 686 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">400</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">current_option</string>
                 <int name="justification">-2</int>
               </object>
               <object class="IBCarbonStaticText" id="217">
-                <string name="bounds">80 360 96 686 </string>
+                <string name="bounds">146 360 162 686 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">401</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">current_file</string>
                 <int name="justification">-2</int>
               </object>
               <object class="IBCarbonStaticText" id="218">
-                <string name="bounds">151 360 167 686 </string>
+                <string name="bounds">107 360 123 686 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">402</int>
                 <boolean name="small">TRUE</boolean>
-                <string name="title">Total Install</string>
+                <int name="controlSize">1</int>
+                <string name="title"> </string>
                 <int name="justification">-2</int>
               </object>
               <object class="IBCarbonProgressBar" id="219">
-                <string name="bounds">96 359 115 681 </string>
+                <string name="bounds">162 359 181 681 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">405</int>
+                <boolean name="hidden">TRUE</boolean>
                 <boolean name="indeterminate">FALSE</boolean>
               </object>
               <object class="IBCarbonProgressBar" id="220">
-                <string name="bounds">165 359 184 681 </string>
+                <string name="bounds">121 359 140 681 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">406</int>
                 <boolean name="indeterminate">FALSE</boolean>
@@ -266,6 +291,7 @@
             <int name="controlID">130</int>
             <boolean name="hidden">TRUE</boolean>
             <boolean name="small">TRUE</boolean>
+            <int name="controlSize">1</int>
             <string name="title">Install Progress</string>
           </object>
           <object class="IBCarbonGroupBox" id="225">
@@ -276,6 +302,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">507</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Start</string>
                 <ostype name="command">strt</ostype>
               </object>
@@ -284,6 +311,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">506</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">View Readme</string>
                 <ostype name="command">read</ostype>
               </object>
@@ -292,6 +320,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">505</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Exit</string>
                 <ostype name="command">exit</ostype>
               </object>
@@ -300,6 +329,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">500</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Congratulations</string>
                 <int name="justification">1</int>
               </object>
@@ -308,6 +338,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">501</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">The installation was successfully completed!</string>
                 <int name="justification">1</int>
               </object>
@@ -316,6 +347,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">502</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">The product was installed in:</string>
                 <int name="justification">-2</int>
               </object>
@@ -324,6 +356,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">503</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">[install directory]</string>
                 <int name="justification">-2</int>
               </object>
@@ -332,6 +365,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">504</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Type &apos;[game]&apos; to start.</string>
                 <int name="justification">-2</int>
               </object>
@@ -340,6 +374,7 @@
             <int name="controlID">131</int>
             <boolean name="hidden">TRUE</boolean>
             <boolean name="small">TRUE</boolean>
+            <int name="controlSize">1</int>
             <string name="title">Install Complete</string>
           </object>
           <object class="IBCarbonGroupBox" id="237">
@@ -350,6 +385,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">602</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Exit</string>
                 <ostype name="command">exit</ostype>
               </object>
@@ -358,6 +394,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">600</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">The installation has been aborted.</string>
                 <int name="justification">1</int>
               </object>
@@ -366,6 +403,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">601</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Press &apos;Exit&apos; to clean up temporary files</string>
                 <int name="justification">1</int>
               </object>
@@ -374,6 +412,7 @@
             <int name="controlID">132</int>
             <boolean name="hidden">TRUE</boolean>
             <boolean name="small">TRUE</boolean>
+            <int name="controlSize">1</int>
             <string name="title">Install Aborted</string>
           </object>
           <object class="IBCarbonGroupBox" id="239">
@@ -384,6 +423,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">700</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">[warning text]</string>
                 <int name="justification">-2</int>
               </object>
@@ -392,6 +432,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">701</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Cancel</string>
                 <ostype name="command">cncl</ostype>
               </object>
@@ -400,6 +441,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">702</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Continue</string>
                 <ostype name="command">wcon</ostype>
               </object>
@@ -408,6 +450,7 @@
             <int name="controlID">133</int>
             <boolean name="hidden">TRUE</boolean>
             <boolean name="small">TRUE</boolean>
+            <int name="controlSize">1</int>
             <string name="title">Warning</string>
           </object>
           <object class="IBCarbonGroupBox" id="250">
@@ -418,6 +461,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">807</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Continue</string>
                 <ostype name="command">con1</ostype>
               </object>
@@ -426,6 +470,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">806</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">View Readme</string>
                 <ostype name="command">read</ostype>
               </object>
@@ -434,6 +479,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">805</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Cancel</string>
                 <ostype name="command">cncl</ostype>
               </object>
@@ -442,6 +488,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">800</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Thank you for installing</string>
                 <int name="justification">-2</int>
               </object>
@@ -450,6 +497,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">802</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Please visit our website for updates and support.</string>
                 <int name="justification">-2</int>
               </object>
@@ -458,6 +506,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">803</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Launching browser, please wait...</string>
                 <int name="justification">-2</int>
               </object>
@@ -473,6 +522,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">801</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">[product]</string>
                 <int name="justification">-2</int>
               </object>
@@ -481,6 +531,7 @@
             <int name="controlID">134</int>
             <boolean name="hidden">TRUE</boolean>
             <boolean name="small">TRUE</boolean>
+            <int name="controlSize">1</int>
             <string name="title">Product Website</string>
           </object>
           <object class="IBCarbonGroupBox" id="417">
@@ -491,6 +542,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">905</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Uninstall</string>
                 <ostype name="command">unin</ostype>
               </object>
@@ -499,6 +551,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">904</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Exit</string>
                 <ostype name="command">exit</ostype>
               </object>
@@ -507,6 +560,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">900</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Please select the packages you would like to uninstall:</string>
                 <int name="justification">-2</int>
               </object>
@@ -520,6 +574,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">902</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Recovered space:</string>
                 <int name="justification">-2</int>
               </object>
@@ -528,6 +583,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">903</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">0 MB</string>
                 <int name="justification">-2</int>
               </object>
@@ -536,6 +592,7 @@
             <int name="controlID">135</int>
             <boolean name="hidden">TRUE</boolean>
             <boolean name="small">TRUE</boolean>
+            <int name="controlSize">1</int>
           </object>
           <object class="IBCarbonGroupBox" id="436">
             <string name="bounds">-1 1387 271 1726 </string>
@@ -545,6 +602,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">1002</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Cancel</string>
                 <ostype name="command">cncl</ostype>
               </object>
@@ -553,6 +611,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">1000</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">current_option</string>
                 <int name="justification">-2</int>
               </object>
@@ -567,6 +626,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">1003</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Finished</string>
                 <ostype name="command">fini</ostype>
               </object>
@@ -575,6 +635,7 @@
             <int name="controlID">136</int>
             <boolean name="hidden">TRUE</boolean>
             <boolean name="small">TRUE</boolean>
+            <int name="controlSize">1</int>
             <string name="title">Performing Uninstall</string>
           </object>
           <object class="IBCarbonGroupBox" id="443">
@@ -585,6 +646,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">1102</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Dismiss</string>
                 <ostype name="command">exit</ostype>
               </object>
@@ -593,6 +655,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">1101</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">...</string>
                 <int name="justification">1</int>
               </object>
@@ -601,6 +664,7 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">1103</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Rescue</string>
                 <ostype name="command">resc</ostype>
               </object>
@@ -609,16 +673,18 @@
             <int name="controlID">137</int>
             <boolean name="hidden">TRUE</boolean>
             <boolean name="small">TRUE</boolean>
+            <int name="controlSize">1</int>
             <string name="title">Checking installed files</string>
           </object>
           <object class="IBCarbonGroupBox" id="465">
             <string name="bounds">-1 1739 271 2078 </string>
-            <array count="7" name="subviews">
+            <array count="5" name="subviews">
               <object class="IBCarbonButton" id="461">
                 <string name="bounds">239 1755 256 1834 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">1205</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Cancel</string>
                 <ostype name="command">cdcn</ostype>
               </object>
@@ -627,36 +693,25 @@
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">1206</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Continue</string>
                 <ostype name="command">cdco</ostype>
               </object>
               <object class="IBCarbonStaticText" id="466">
-                <string name="bounds">76 1741 92 1857 </string>
+                <string name="bounds">118 1741 134 1857 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">1201</int>
                 <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
                 <string name="title">Enter CD Key</string>
                 <int name="justification">-1</int>
               </object>
-              <object class="IBCarbonStaticText" id="467">
-                <string name="bounds">161 1741 177 1857 </string>
-                <ostype name="controlSignature">loki</ostype>
-                <int name="controlID">1203</int>
-                <boolean name="small">TRUE</boolean>
-                <string name="title">Confirm CD Key</string>
-                <int name="justification">-1</int>
-              </object>
               <object class="IBCarbonEditText" id="468">
-                <string name="bounds">78 1864 94 2065 </string>
+                <string name="bounds">118 1864 134 2065 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">1202</int>
                 <boolean name="small">TRUE</boolean>
-              </object>
-              <object class="IBCarbonEditText" id="469">
-                <string name="bounds">161 1864 177 2065 </string>
-                <ostype name="controlSignature">loki</ostype>
-                <int name="controlID">1204</int>
-                <boolean name="small">TRUE</boolean>
+                <int name="controlSize">1</int>
               </object>
               <object class="IBCarbonStaticText" id="470">
                 <string name="bounds">25 1755 41 2068 </string>
@@ -669,6 +724,7 @@
             <int name="controlID">138</int>
             <boolean name="hidden">TRUE</boolean>
             <boolean name="small">TRUE</boolean>
+            <int name="controlSize">1</int>
             <string name="title">CD Key Entry</string>
           </object>
         </array>
@@ -771,6 +827,7 @@
             <ostype name="controlSignature">prmt</ostype>
             <int name="controlID">200</int>
             <boolean name="small">TRUE</boolean>
+            <int name="controlSize">1</int>
             <string name="title">StaticText</string>
             <int name="justification">1</int>
           </object>
@@ -937,12 +994,10 @@
     <reference idRef="464"/>
     <reference idRef="465"/>
     <reference idRef="466"/>
-    <reference idRef="467"/>
     <reference idRef="468"/>
-    <reference idRef="469"/>
     <reference idRef="470"/>
   </array>
-  <array count="109" name="allParents">
+  <array count="107" name="allParents">
     <reference idRef="1"/>
     <reference idRef="166"/>
     <reference idRef="167"/>
@@ -1047,8 +1102,6 @@
     <reference idRef="465"/>
     <reference idRef="465"/>
     <reference idRef="167"/>
-    <reference idRef="465"/>
-    <reference idRef="465"/>
     <reference idRef="465"/>
     <reference idRef="465"/>
     <reference idRef="465"/>
