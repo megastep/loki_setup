@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.98 2004-06-09 18:54:26 megastep Exp $
+   $Id: gtk_ui.c,v 1.99 2004-06-09 21:13:24 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1120,7 +1120,7 @@ static void init_man_path(void)
 
 static void init_binary_path(void)
 {
-    char pathCopy[ 4069 ];
+    char pathCopy[4096], resolved[PATH_MAX];
     GtkWidget* widget;
     GList* list;
     char* path;
@@ -1167,7 +1167,7 @@ static void init_binary_path(void)
 
             if( len && ((sc=strcmp( pc0, cur_info->symlinks_path)) != 0) && (*pc0 != '.') ) {
 				if ((!str_in_g_list(pc0, list)) && (access(pc0, W_OK) == 0)) {
-					list = g_list_append( list, pc0 );
+					list = g_list_append( list, g_strdup(realpath(pc0, resolved)) );
 				}
             }
 
@@ -1177,10 +1177,9 @@ static void init_binary_path(void)
     }
 
     path = (char *)getenv( "HOME" );
-    if( path )
-    {
+    if( path ) {
 	    if ((!str_in_g_list(path, list)) && (access(path, W_OK) == 0)) {
-		    list = g_list_append( list, path );
+		    list = g_list_append( list, g_strdup(realpath(path, resolved)) );
 		}
     }
 
