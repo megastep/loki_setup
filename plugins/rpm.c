@@ -1,5 +1,5 @@
 /* RPM plugin for setup */
-/* $Id: rpm.c,v 1.1 2000-07-31 21:27:08 megastep Exp $ */
+/* $Id: rpm.c,v 1.2 2000-11-29 02:01:20 megastep Exp $ */
 
 #include "plugins.h"
 #include "file.h"
@@ -20,6 +20,7 @@
 
 extern char *rpm_root;
 extern int force_manual;
+extern struct option_elem *current_option;
 
 static int rpm_access = 0;
 
@@ -74,7 +75,7 @@ static size_t RPMSize(install_info *info, const char *path)
 }
 
 /* Extract the file */
-static size_t RPMCopy(install_info *info, const char *path, const char *dest, const char *current_option, xmlNodePtr node,
+static size_t RPMCopy(install_info *info, const char *path, const char *dest, const char *current_option_name, xmlNodePtr node,
 			void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     FD_t fdi;
@@ -155,12 +156,12 @@ static size_t RPMCopy(install_info *info, const char *path, const char *dest, co
 			bytes_copied = (percent/100.0)*size - previous_bytes;
 			previous_bytes += bytes_copied;
 			info->installed_bytes += bytes_copied;
-			update(info, path, (percent/100.0)*size, size, current_option);
+			update(info, path, (percent/100.0)*size, size, current_option_name);
 		}
 		pclose(fp);
 		free (options);
 		/* Log the RPM installation */
-		add_rpm_entry(info, name, version, release, autoremove);
+		add_rpm_entry(info, current_option, name, version, atoi(release), autoremove);
     } else { /* Manually install the RPM file */
         FD_t gzdi;
         stream *cpio;
@@ -176,9 +177,9 @@ static size_t RPMCopy(install_info *info, const char *path, const char *dest, co
 
         /* if relocate="true", copy the files into dest instead of rpm_root */
 		if (relocate) {
-			size = copy_cpio_stream(info, cpio, dest, current_option, update);
+			size = copy_cpio_stream(info, cpio, dest, current_option_name, update);
 		} else {
-			size = copy_cpio_stream(info, cpio, rpm_root, current_option, update);
+			size = copy_cpio_stream(info, cpio, rpm_root, current_option_name, update);
 		}
 
         if(headerIsEntry(hd, RPMTAG_POSTIN)){      
@@ -191,12 +192,12 @@ static size_t RPMCopy(install_info *info, const char *path, const char *dest, co
         if(headerIsEntry(hd, RPMTAG_PREUN)){      
 			headerGetEntry(hd, RPMTAG_PREUN, &type, &p, &c);
 			if(type==RPM_STRING_TYPE)
-				add_script_entry(info, (char*)p, 0);
+				add_script_entry(info, current_option, (char*)p, 0);
         }
         if(headerIsEntry(hd, RPMTAG_POSTUN)){      
 			headerGetEntry(hd, RPMTAG_POSTUN, &type, &p, &c);
 			if(type==RPM_STRING_TYPE)
-				add_script_entry(info, (char*)p, 1);
+				add_script_entry(info, current_option, (char*)p, 1);
         }
     }
     return size;
