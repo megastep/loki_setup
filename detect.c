@@ -15,6 +15,8 @@ const char *detect_arch(void)
   return "ppc";
 #elif defined(__alpha__)
   return "alpha";
+#elif defined(__sparc__)
+  return "sparc64";
 #else
   return "unknown";
 #endif
