@@ -17,51 +17,51 @@ msgstr ""
 # SOME DESCRIPTIVE TITLE
 #: uninstall.glade:298
 msgid "%P %%"
-msgstr ""
+msgstr "%P %%"
 
 #: uninstall.glade:94
 msgid "... LOADING PRODUCT LIST ..."
-msgstr ""
+msgstr "... CREANDO LISTA DE PRODUCTOS ..."
 
 #: uninstall.glade:142
 msgid "0 MB"
-msgstr ""
+msgstr "0 MB"
 
 #: uninstall.glade:357
 msgid "Cancel"
-msgstr ""
+msgstr "Cancellar"
 
 #: uninstall.glade:188
 msgid "Exit"
-msgstr ""
+msgstr "Salir"
 
 #: uninstall.glade:370
 msgid "Finished"
-msgstr ""
+msgstr "Fin"
 
 #: uninstall.glade:23
 msgid "Loki Uninstall Tool"
-msgstr ""
+msgstr "Loki Uninstall Tool"
 
 #: uninstall.glade:229
 msgid "Performing uninstall:"
-msgstr ""
+msgstr "Haciendo desinstalacion:"
 
 #: uninstall.glade:51
 msgid "Please select the packages you would like to uninstall:"
-msgstr ""
+msgstr "Por favor escoja los archivos que quieres desinstalar:"
 
 #: uninstall.glade:125
 msgid "Recovered space: "
-msgstr ""
+msgstr "Espacio ganado: "
 
 #: uninstall.glade:201
 msgid "Uninstall"
-msgstr ""
+msgstr "Desinstalacion"
 
 #: uninstall.glade:263
 msgid "[current component]"
-msgstr ""
+msgstr "[componente actual]"
 
 #: uninstall.c:30
 #, c-format
@@ -71,32 +71,39 @@ msgid ""
 "       %s product -l        to list all components\n"
 "       %s product component to uninstall a single component\n"
 msgstr ""
+"Usage: % producto	para deinstalar el producto\n"
+"	%s -l	   	para ver la lista de todos los productos\n"
+"	%s producto -l		para ver la lista de todos los componentes\n"
+"	%s producto componente	para deinstalar solo un componente\n"
 
 #: uninstall.c:108
 #, c-format
 msgid "Signal %d caught. Aborting.\n"
-msgstr ""
+msgstr "Signal %d caught. Saliend.\n"
 
 #: uninstall.c:122
 #, c-format
 msgid "Could not change to directory: %s\n"
-msgstr ""
+msgstr "No pude cambiar al directorio: %s\n""
 
 #: uninstall.c:144
 #, c-format
 msgid "Notice: the %s RPM was installed for this product.\n"
-msgstr ""
+msgstr "Advertencia: el % RPM fue instalado para este producto.\n"
 
 #: uninstall.c:179
 #, c-format
 msgid "Component %s has been successfully uninstalled.\n"
-msgstr ""
+msgstr "El %s componente fue deinstalado sin problemas.\n"
 
 #: uninstall.c:217
 msgid ""
 "No write access to the installation directory.\n"
 "Aborting.\n"
 msgstr ""
+"No puedes escribir al directorio de instalacion.\n"
+"Saliendo.\n"
+
 
 #: uninstall.c:225
 #, c-format
@@ -104,24 +111,26 @@ msgid ""
 "No write access to the registry file: %s.\n"
 "Aborting.\n"
 msgstr ""
+"No puedes escribir al registry: %s.\n"
+"Saliendo.\n"
 
 #: uninstall.c:347
 msgid "Installed products:\n"
-msgstr ""
+msgstr "Productos Instalados:"
 
 #: uninstall.c:353
 #, c-format
 msgid "installed in %s\n"
-msgstr ""
+msgstr "instalado en %s\n"
 
 #: uninstall.c:356
 msgid " Error while accessing product info\n"
-msgstr ""
+msgstr "Error tratando de leer informacion del producto\n"
 
 #: uninstall.c:368
 #, c-format
 msgid "Could not open product information for %s\n"
-msgstr ""
+msgstr "No pude abrir la informacion para el producto %s\n"
 
 #: uninstall.c:374
 #, c-format
@@ -129,52 +138,56 @@ msgid ""
 "Product: %s\n"
 "Installed in %s\n"
 msgstr ""
+"Producto: %s\n"
+"Instalado en %s\n"
 
 #: uninstall.c:381
 msgid "Components:\n"
-msgstr ""
+msgstr "Componentes:\n"
 
 #: uninstall.c:394
 #, c-format
 msgid "Unable to find component %s\n"
-msgstr ""
+msgstr "No pude encontrar componente %s\n"
 
 #: uninstall.c:398
 msgid "Too many arguments for the command\n"
-msgstr ""
+msgstr "Muchos argementos para el programa\n"
 
 #: uninstall.c:405
 msgid "An error occured during the uninstallation process.\n"
-msgstr ""
+msgstr "Hubo error durante la deinstalacion.\n"
 
 #: uninstall.c:409
 #, c-format
 msgid "%s has been successfully uninstalled.\n"
-msgstr ""
+msgstr "%s ha sido deinstalado sin problemas.\n"
 
 #: uninstall_ui.c:169
 #, c-format
 msgid "%d MB"
-msgstr ""
+msgstr "%d MB"
 
 #: uninstall_ui.c:314
 msgid "Uninstall cancelled"
-msgstr ""
+msgstr "Deinstalacion fue cancelada"
 
 #: uninstall_ui.c:316
 msgid "Uninstall complete"
-msgstr ""
+msgstr "Deinstalacion completa"
 
 #: uninstall_ui.c:407
 msgid "No uninstall_vbox in glade file!\n"
-msgstr ""
+msgstr "No uninstall_vbox en glade file!\n"
 
 #: uninstall_ui.c:439
 msgid "Complete uninstall"
-msgstr ""
+msgstr "Deinstalacion completa"
 
 #: uninstall_ui.c:476
 msgid ""
 "No products found.\n"
 "Are you the one that installed the software?"
 msgstr ""
+"No pude encontrar productos.\n"
+"Estas segura/segura que algun producto esta instalado?"
