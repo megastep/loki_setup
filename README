@@ -1,0 +1,14 @@
+
+This installer uses an XML description file to describe a package,
+and provides both a console and a GTk front-end to install it.
+
+CD-ROM install file layout:
+
+setup	(A shell script to call the correct installer - setup.sh)
+setup.data/
+   setup.xml
+   bin/
+   bin/<arch>/setup		(Statically linked console version)
+   bin/<arch>/<libc>/setup.gtk	(Dynamically linked GTk version)
+win32/
+

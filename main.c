@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.3 1999-09-10 13:08:59 hercules Exp $ */
+/* $Id: main.c,v 1.4 1999-09-11 02:15:38 hercules Exp $ */
 
 #include <stdio.h>
 #include <setjmp.h>
@@ -101,7 +101,11 @@ int main(int argc, char **argv)
         if ( GUI_okay[i](&UI) ) {
             break;
         }
-    } 
+    }
+    if ( ! GUI_okay[i] ) {
+        fprintf(stderr, "No UI drivers available\n");
+        exit(1);
+    }
 
     /* Setup the interrupt handlers */
     if ( setjmp(abort_jmpbuf) == 0 ) {
