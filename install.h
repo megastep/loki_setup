@@ -147,7 +147,8 @@ typedef struct _install_info {
                 const char *option;
                 unsigned char md5sum[16];
                 char *symlink; /* If file is a symlink, what it points to */
-				int mutable;
+				char *desktop; /* If file is a desktop item, what binary it is associated with */
+				unsigned mutable : 1;
                 struct file_elem *next;
             } *file_list;
 

@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.152 2005-02-03 01:47:53 megastep Exp $ */
+/* $Id: install.c,v 1.153 2005-02-05 01:52:58 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1564,6 +1564,7 @@ void delete_install(install_info *info)
                 elem = opt->file_list;
                 opt->file_list = elem->next;
                 free(elem->symlink);
+				free(elem->desktop);
                 free(elem->path);
                 free(elem);
             }
@@ -2078,11 +2079,16 @@ void generate_uninstall(install_info *info)
                 }
                 /* Add files */
                 for ( felem = opt->file_list; felem; felem = felem->next ) {
+					product_file_t *f;
+
                     if ( felem->symlink || *(int *)felem->md5sum == 0 ) {
-                        loki_register_file(option, felem->path, NULL);
+                        f = loki_register_file(option, felem->path, NULL);
                     } else {
-                        loki_register_file(option, felem->path, get_md5(felem->md5sum));
+                        f = loki_register_file(option, felem->path, get_md5(felem->md5sum));
                     }
+					if ( felem->desktop ) {
+						loki_setdesktop_file(f, felem->desktop);
+					}
                 }
 
                 /* Add binaries */
@@ -2463,6 +2469,7 @@ int install_menuitems(install_info *info, desktop_type desktop)
                     FILE *fp;
                     char finalbuf[PATH_MAX];
 					char exec[PATH_MAX*2], icon[PATH_MAX];
+					struct file_elem *fe;
 
                     expand_home(info, *tmp_links, buf);
 
@@ -2505,7 +2512,9 @@ int install_menuitems(install_info *info, desktop_type desktop)
 									elem->desc ? elem->desc : info->desc,
 									exec, icon);
 							fclose(fp);
-							add_file_entry(info, opt, finalbuf, NULL, 0);
+							fe = add_file_entry(info, opt, finalbuf, NULL, 0);
+							if ( fe )
+								fe->desktop = strdup(loki_basename(elem->file->path));
 							++ num_items;
 							ret_val = 1; /* No need to install anything else */
 						} else {
@@ -2550,7 +2559,10 @@ int install_menuitems(install_info *info, desktop_type desktop)
 									elem->desc ? elem->desc : info->desc,
 									exec, icon, info->category);
 							fclose(fp);
-							add_file_entry(info, opt, finalbuf, NULL, 0);
+							fe = add_file_entry(info, opt, finalbuf, NULL, 0);
+							if ( fe )
+								fe->desktop = strdup(loki_basename(elem->file->path));
+
 							++ num_items;
 							if (desktop == DESKTOP_REDHAT && info->distro==DISTRO_REDHAT && info->distro_maj >= 8) {
 								/* try to create a symlink for redhat 8.0 symlink
@@ -2594,8 +2606,10 @@ int install_menuitems(install_info *info, desktop_type desktop)
 									elem->name, exec, icon, elem->desc
 									);
 							fclose(fp);
-							add_file_entry(info, opt, finalbuf, NULL, 0);
-				
+							fe = add_file_entry(info, opt, finalbuf, NULL, 0);
+							if ( fe )
+								fe->desktop = strdup(loki_basename(elem->file->path));
+
 							snprintf(finalbuf, PATH_MAX, "%s%s.fp", buf, elem->symlink);
 							fp = fopen(finalbuf, "w");
 							if ( fp ) {
@@ -2631,7 +2645,9 @@ int install_menuitems(install_info *info, desktop_type desktop)
 											);
 								}
 								fclose(fp);
-								add_file_entry(info, opt, finalbuf, NULL, 0);
+								fe = add_file_entry(info, opt, finalbuf, NULL, 0);
+								if ( fe )
+									fe->desktop = strdup(loki_basename(elem->file->path));
 								++ num_items;
 								ret_val = 1;
 							} else {
@@ -2668,7 +2684,9 @@ int install_menuitems(install_info *info, desktop_type desktop)
 									elem->name ? elem->name : info->name, exec
 									);
 							fclose(fp);
-							add_file_entry(info, opt, finalbuf, NULL, 0);
+							fe = add_file_entry(info, opt, finalbuf, NULL, 0);
+							if ( fe )
+								fe->desktop = strdup(loki_basename(elem->file->path));
 							++ num_items;
 							ret_val = 1;
 						} else {
