@@ -1,3 +1,7 @@
+1.5.8:
+Stéphane Peter, Sam Lantinga - Tue Jan 16 18:20:02 PST 2001
+ * First public release with setupdb support
+
 1.5.0:
 Stéphane Peter - Thu Dec 14 14:53:47 PST 2000
  * Added 'binpath' attribute for binary elements.

@@ -1,6 +1,6 @@
 
 DISTDIR = ..
-SETUP_VERSION = @SETUP_VERSION_MAJOR@.@SETUP_VERSION_MINOR@
+SETUP_VERSION = @SETUP_VERSION_MAJOR@.@SETUP_VERSION_MINOR@.@SETUP_VERSION_RELEASE@
 PACKAGE = setup-$(SETUP_VERSION)
 
 @SET_MAKE@
@@ -155,9 +155,13 @@ po-image:
 
 clean:
 	$(MAKE) -C plugins clean
-	rm -f setup setup.gtk testxml foo.xml *.o
+	rm -f foo.xml core tags *.o
 
-dist: clean
+distclean: clean
+	rm -f Makefile config.cache config.status config.log
+	rm -f setup setup.gtk uninstall loki_uninstall testxml
+
+dist: distclean
 	cp -r . $(DISTDIR)/$(PACKAGE)
 	(cd $(DISTDIR)/$(PACKAGE) && rm -r `find . -name CVS`)
 	(cd $(DISTDIR) && tar zcvf $(PACKAGE).tar.gz $(PACKAGE))
