@@ -49,63 +49,6 @@ int parse_line(const char **srcpp, char *buf, int maxlen)
     return strlen(buf);
 }
 
-const char *detect_arch(void)
-{
-#ifdef __i386
-  return "x86";
-#elif defined(powerpc)
-  return "ppc";
-#elif defined(alpha) // TODO: Is that right ?
-  return "alpha";
-#else
-  return "unknown";
-#endif
-}
-
-const char *detect_libc(void)
-{
-    if( access( "/lib/libc.so.6", F_OK ) == 0 ) {
-        FILE* fp;
-        char buf[ 128 ];
-        int n;
-
-        // Search for the version in the ouput of /lib/libc.so.6.
-        // The first line should look something like this:
-        // GNU C Library stable release version 2.1.1, by Roland McGrath et al.
-
-        fp = popen( "/lib/libc.so.6", "r" );
-        if( fp ) {
-            n = fread( buf, 1, 128, fp );
-            pclose( fp );
-
-            if( n == 128 ) {
-                char* cp;
-                char* end;
-                int a, b, c;
-
-                cp = buf;
-                end = &cp[ n ];
-                for( ; cp < end; cp++ ) {
-                    if( strncasecmp( "version ", cp, 8 ) == 0 ) {
-                        cp += 8;
-                        n = sscanf( cp, "%d.%d.%d", &a, &b, &c );
-                        if( n == 3 ) {
-						  static char buf[20];
-						  sprintf(buf,"glibc-%d.%d",a,b);
-						  return buf;
-                        }
-                        break;
-                    }
-                }
-            }
-        } else {
-            perror( "libcVersion" );
-        }
-    }
-    // Default to version 5.
-	return "libc5";
-}
-
 
 size_t copy_tarball(install_info *info, const char *path, const char *dest,
                 void (*update)(install_info *info, const char *path, size_t progress, size_t size))
@@ -313,22 +256,17 @@ size_t copy_list(install_info *info, const char *filedesc, const char *dest,
 size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, const char *dest,
                 void (*update)(install_info *info, const char *path, size_t progress, size_t size))
 {
-    const char *arch;
-    const char *libc;
     struct stat sb;
     char fpat[BUFSIZ], final[BUFSIZ];
     size_t size, copied;
 
-    arch = detect_arch();
-    libc = detect_libc();
-printf("Detected arch %s and %s\n", arch,libc);
     while ( filedesc && parse_line(&filedesc, final, (sizeof final)) ) {
         copied = 0;
-        sprintf(fpat, "bin/%s/%s/%s", arch, libc, final);
+        sprintf(fpat, "bin/%s/%s/%s", info->arch, info->libc, final);
         if ( stat(fpat, &sb) == 0 ) {
             copied = copy_file(info, fpat, dest, final, 1, update);
         } else {
-            sprintf(fpat, "bin/%s/%s", arch, final);
+            sprintf(fpat, "bin/%s/%s", info->arch, final);
             if ( stat(fpat, &sb) == 0 ) {
                 copied = copy_file(info, fpat, dest, final, 1, update);
 				file_chmod(info, final, 0755);

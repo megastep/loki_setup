@@ -3,13 +3,19 @@
 #include <string.h>
 
 #include "install.h"
+#include "detect.h"
 
 
 /* Functions to retrieve attribution information from the XML tree */
-const char *GetProductName(install_info *info)
+static const char *GetProductName(install_info *info)
 {
     return xmlGetProp(info->config->root, "product");
 }
+static const char *GetProductDesc(install_info *info)
+{
+    return xmlGetProp(info->config->root, "desc");
+}
+
 
 /* Create the initial installation information */
 install_info *create_install(const char *configfile)
@@ -38,6 +44,12 @@ install_info *create_install(const char *configfile)
         delete_install(info);
         return(NULL);
     }
+
+    /* Add information about install */
+    info->name = GetProductName(info);
+    info->desc = GetProductDesc(info);
+    info->arch = detect_arch();
+    info->libc = detect_libc();
 
     /* Add the default install path */
     sprintf(info->install_path, "%s/%s", DEFAULT_PATH, GetProductName(info));

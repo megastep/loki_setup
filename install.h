@@ -27,11 +27,19 @@ struct UI_data;
 /* The main installation information structure */
 typedef struct {
 
-    /* The game install destination */
+    /* The product name and description */
+    const char *name;
+    const char *desc;
+
+    /* The product install destination */
     char install_path[PATH_MAX];
 
     /* The XML installation config */
     xmlDocPtr config;
+
+    /* Autodetected environment */
+    const char *arch;
+    const char *libc;
 
     /* Bitfields of install options */
     struct {
@@ -41,6 +49,9 @@ typedef struct {
 
     /* Log of actions taken */
     install_log *log;
+
+    /* The final installed size in MB */
+    int install_size;
 
     /* List of installed files and symlinks */
     struct file_elem {

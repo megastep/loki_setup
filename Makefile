@@ -1,6 +1,6 @@
 
 CFLAGS = -g
-OBJS = main.o console_ui.o install.o copy.o file.o log.o
+OBJS = main.o console_ui.o install.o detect.o copy.o file.o log.o
 LIBS = -lxml -lz
 
 all: testxml setup
