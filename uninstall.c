@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.33 2003-04-19 04:10:12 zeph Exp $ */
+/* $Id: uninstall.c,v 1.34 2003-04-23 16:44:01 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -17,6 +17,7 @@
 #include "arch.h"
 #include "setupdb.h"
 #include "install.h"
+#include "install_ui.h"
 #ifdef UNINSTALL_UICARBON
 #include "uninstall_uicarbon.h"
 #elif UNINSTALL_UI
@@ -30,6 +31,12 @@
 #define PACKAGE "loki-uninstall"
 
 product_t *prod = NULL;
+Install_UI UI;
+
+void abort_install(void)
+{
+	exit(3);
+}
 
 /* List the valid command-line options */
 
@@ -433,6 +440,7 @@ int main(int argc, char *argv[])
 
 	/* Set the locale */
     init_locale();
+	memset(&UI, 0, sizeof(UI));
 
 #ifdef UNINSTALL_UI
     if ( argc < 2 ) {
