@@ -2,7 +2,7 @@
  * Check and Rescue Tool for Loki Setup packages. Verifies the consistency of the files,
  * and optionally restores them from the original installation medium.
  *
- * $Id: check_carbon.c,v 1.4 2004-04-08 21:56:12 icculus Exp $
+ * $Id: check_carbon.c,v 1.5 2004-07-23 01:45:14 megastep Exp $
  */
 
 #include <stdlib.h>
@@ -147,7 +147,7 @@ static void add_message(const char *str, ...)
     strcat(CurMessage, buf);
     strcat(CurMessage, "\r");
     printf("add_message() - CurMessage = '%s'\n", CurMessage);
-    printf("add_message() - Length = %d\n", strlen(CurMessage));
+    printf("add_message() - Length = %u\n", strlen(CurMessage));
     //STUPSetText(Res->InstalledFilesLabel, CurMessage, strlen(CurMessage));
     CFStringRef CFMessage = CFStringCreateWithCString(NULL, CurMessage, kCFStringEncodingISOLatin1);
     SetControlData(Res->InstalledFilesLabel, kControlEntireControl, kYASTControlAllUnicodeTextTag, sizeof(CFMessage), &CFMessage);
@@ -244,11 +244,11 @@ void DoMediaCheck(const char *Dir)
 		/* Install the optional README and EULA files
 		   Warning: those are always installed in the root of the installation directory!
 		*/
-		f = GetProductREADME(install);
+		f = GetProductREADME(install, NULL);
 		if ( f && ! GetProductIsMeta(install) ) {
 			copy_path(install, f, install->install_path, NULL, 1, NULL, NULL);
 		}
-		f = GetProductEULA(install);
+		f = GetProductEULA(install, NULL);
 		if ( f && ! GetProductIsMeta(install) ) {
 			copy_path(install, f, install->install_path, NULL, 1, NULL, NULL);
 		}
