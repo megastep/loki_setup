@@ -37,6 +37,8 @@ const char *detect_arch(void)
         arch = "alpha";
 #elif defined(__sparc__)
         arch = "sparc64";
+#elif defined(__arm__)
+        arch = "arm";
 #else
         arch = "unknown";
 #endif
