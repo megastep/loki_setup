@@ -177,6 +177,8 @@ int is_fs_mounted(const char *dev)
 		}
 		fclose(mtab);
 	}
+#elif defined(darwin)
+        /* FIXME: *mntent not available on darwin */
 #else
     struct mntent *mnt;
     FILE *mtab = setmntent(MOUNTS_FILE, "r" );
@@ -404,6 +406,7 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
 	}
     
 #else
+#ifndef darwin
     char mntdevpath[PATH_MAX];
     FILE *mountfp;
     struct mntent *mntent;
@@ -481,6 +484,7 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
         }
         endmntent( mountfp );
     }
+#endif
 #endif
 	return num_cdroms;
 }

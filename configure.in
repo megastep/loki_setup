@@ -67,6 +67,11 @@ if test -d /usr/codehost/lib; then
 	LIBS="-L/usr/codehost/lib"
 elif test -d /opt/codehost/lib; then
 	LIBS="-L/opt/codehost/lib"
+elif test -d /sw/lib; then
+	case "$target" in
+	    powerpc-apple-darwin*)
+		LIBS="-L/sw/lib" ;;
+	esac
 else
 	LIBS="$LIBS -L/usr/local/lib"
 fi
@@ -149,6 +154,13 @@ case "$target" in
 	RDYNAMIC="-Wl,-export-dynamic"
 	LIBDL=""
 	ARCH=`uname -p` ;;
+    powerpc-apple-darwin*)
+	STATIC=""
+	RDYNAMIC=""
+	BSTATIC=""
+	BDYNAMIC=""
+	CFLAGS="$CFLAGS -I/sw/include -Ddarwin"
+	ARCH=ppc ;;
     *ppc* | *powerpc*)
         CFLAGS="$CFLAGS -Wa,-mall"
         ARCH=ppc ;;
@@ -287,8 +299,13 @@ if test ! -z "$HAVEXML"; then
     XML_PREFIX=`$HAVEXML --prefix`
 
     CFLAGS="$CFLAGS $XML_CFLAGS"
-    LIBS="$LIBS $XML_PREFIX/lib$LIBSUFFIX/libxml.a"
-    GUI_LIBS="$GUI_LIBS $XML_PREFIX/lib$LIBSUFFIX/libxml.a"
+    if test "$STATIC" = ""; then
+        LIBS="$LIBS -lxml"
+        GUI_LIBS="$GUI_LIBS -lxml"
+    else
+        LIBS="$LIBS $XML_PREFIX/lib$LIBSUFFIX/libxml.a"
+        GUI_LIBS="$GUI_LIBS $XML_PREFIX/lib$LIBSUFFIX/libxml.a"
+    fi
 else
     AC_MSG_ERROR([*** xml-config not found. You need a working libxml installation.])
 fi

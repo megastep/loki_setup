@@ -24,6 +24,9 @@ Stephane Peter (Codehost) - Mon Nov 11 16:05:01 PST 2002
    can be explicitly specified.
 John Quigley -  Tue, 19 Nov 2002 19:15:01 -0800
  * Various fixes for Redhat 8.0 menu items.
+Ryan C. Gordon (icculus.org) - Tue Jan 14 23:46:31 EST 2003
+ * Committed initial MacOS X patches to CVS on behalf of Jon C.
+
 
 1.6.1:
 Stephane Peter (Codehost) - Sun Mar 31 22:46:57 PST 2002
