@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.5 1999-09-10 11:26:30 hercules Exp $
+   $Id: gtk_ui.c,v 1.6 1999-09-11 00:55:40 hercules Exp $
 */
 
 #include <limits.h>
@@ -12,7 +12,6 @@
 #include "install.h"
 #include "install_ui.h"
 #include "detect.h"
-#include "loki_logo.xpm"
 
 /* Globals */
 
@@ -907,7 +906,7 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
     _window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 	sprintf(tmpbuf,"%s Setup", info->desc);
     gtk_window_set_title( GTK_WINDOW(_window), tmpbuf);
-    gtk_window_set_policy( GTK_WINDOW(_window), 0, 0, 1 );
+    gtk_window_set_policy( GTK_WINDOW(_window), TRUE, TRUE, TRUE );
     gtk_container_set_border_width( GTK_CONTAINER(_window), 20 );
     gtk_signal_connect( GTK_OBJECT(_window), "destroy",
                         GTK_SIGNAL_FUNC(slot_abortInstall), NULL );
@@ -1008,3 +1007,10 @@ int gtkui_okay(Install_UI *UI)
 		return(0);
 	}
 }
+
+#ifdef STUB_UI
+int console_okay(Install_UI *UI)
+{
+    return(0);
+}
+#endif

@@ -1,0 +1,3 @@
+[autorun]
+open = win32\autorun.exe
+icon = icon.bmp

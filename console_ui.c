@@ -207,3 +207,10 @@ int console_okay(Install_UI *UI)
 
     return(1);
 }
+
+#ifdef STUB_UI
+int gtkui_okay(Install_UI *UI)
+{
+    return(0);
+}
+#endif

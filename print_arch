@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# Return the appropriate architecture string
+function DetectARCH {
+	status=1
+	case `uname -m` in
+		i?86)  echo "x86"
+			status=0;;
+		ppc)   echo "ppc"
+			status=0;;
+		alpha) echo "alpha"
+			status=0;;
+		*)     echo "unknown";;
+	esac
+	return $status
+}
+
+# Detect the Linux environment
+DetectARCH

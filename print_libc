@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# Return the appropriate version string
+function DetectLIBC {
+      status=1
+      if [ -f /lib/libc.so.6 ]; then
+	      if fgrep GLIBC_2.1 /lib/libc.so.6 2>&1 >/dev/null; then
+	              echo "glibc-2.1"
+	              status=0
+	      else    
+	              echo "glibc-2.0"
+	              status=0
+	      fi        
+      elif [ -f /lib/libc.so.5 ]; then
+	      echo "libc5"
+	      status=0
+      else
+	      echo "unknown"
+      fi
+      return $status
+}
+
+# Detect the Linux environment
+DetectLIBC
