@@ -206,7 +206,7 @@ size_t copy_cpio_stream(install_info *info, stream *input, const char *dest,
             }
           }
           if(has_crc && file_hdr.c_chksum && file_hdr.c_chksum != chk)
-            log_warning(info,"Bad checksum for file '%s'", file_hdr.c_name);
+            log_warning(info,_("Bad checksum for file '%s'"), file_hdr.c_name);
           size += file_hdr.c_filesize;
           file_close(info, output);
           chmod(file_hdr.c_name, file_hdr.c_mode & C_MODE);
@@ -265,7 +265,7 @@ size_t copy_rpm(install_info *info, const char *path,
     fdi = fdOpen(path, O_RDONLY, 0644);
     rc = rpmReadPackageHeader(fdi, &hd, &isSource, NULL, NULL);
     if ( rc ) {
-        log_warning(info,"RPM error: %s", rpmErrorString());
+        log_warning(info,_("RPM error: %s"), rpmErrorString());
         return 0;
     }
 
@@ -299,13 +299,13 @@ size_t copy_rpm(install_info *info, const char *path,
         while(percent<100.0){
           if(!fp || feof(fp)){
             pclose(fp);
-            log_warning(info,"Unable to install RPM file: '%s'", path);
+            log_warning(info,_("Unable to install RPM file: '%s'"), path);
             return 0;
           }
           fscanf(fp,"%s", cmd);
           if(strcmp(cmd,"%%")){
             pclose(fp);
-            log_warning(info,"Unable to install RPM file: '%s'", path);
+            log_warning(info,_("Unable to install RPM file: '%s'"), path);
             return 0;
           }
           fscanf(fp,"%f", &percent);
@@ -420,7 +420,7 @@ size_t copy_tarball(install_info *info, const char *path, const char *dest,
                 file_mkdir(info, final, mode);
                 break;
             default:
-                log_warning(info, "Tar: '%s' is unknown file type: %c",
+                log_warning(info, _("Tar: '%s' is unknown file type: %c"),
                             record.hdr.name, record.hdr.typeflag);
                 break;
         }
@@ -506,7 +506,7 @@ size_t copy_directory(install_info *info, const char *path, const char *dest, co
         }
         globfree(&globbed);
     } else {
-        log_warning(info, "Unable to copy directory '%s'", path);
+        log_warning(info, _("Unable to copy directory '%s'"), path);
     }
     return size;
 }
@@ -539,7 +539,7 @@ size_t copy_path(install_info *info, const char *path, const char *dest, const c
             size += copied;
         }
     } else {
-        log_warning(info, "Unable to find file '%s'", path);
+        log_warning(info, _("Unable to find file '%s'"), path);
     }
     return size;
 }
@@ -576,7 +576,7 @@ size_t copy_list(install_info *info, const char *filedesc, const char *dest, int
             }
             chdir(curdir);
             if ( d == num_cdroms ) {
-                log_warning(info, "Unable to find file '%s' on any of the CDROM drives", fpat);
+                log_warning(info, _("Unable to find file '%s' on any of the CDROM drives"), fpat);
             }
         } else {
             if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
@@ -588,7 +588,7 @@ size_t copy_list(install_info *info, const char *filedesc, const char *dest, int
                 }
                 globfree(&globbed);
             } else {
-                log_warning(info, "Unable to find file '%s'", fpat);
+                log_warning(info, _("Unable to find file '%s'"), fpat);
             }
         }
     }
@@ -668,7 +668,7 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
                 }
             }
             if ( d == num_cdroms ) {
-                log_warning(info, "Unable to find file '%s'", fpat);
+                log_warning(info, _("Unable to find file '%s'"), fpat);
             }
         } else {
             if ( stat(fpat, &sb) == 0 ) {
@@ -680,7 +680,7 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
                     check_dynamic(fpat, bin, NULL);
                     copied = copy_file(info, NULL, bin, dest, final, 1, update);
                 } else {
-                    log_warning(info, "Unable to find file '%s'", fpat);
+                    log_warning(info, _("Unable to find file '%s'"), fpat);
                 }
             }
         }

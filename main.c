@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.22 2000-04-20 23:57:33 hercules Exp $ */
+/* $Id: main.c,v 1.23 2000-05-01 20:40:21 hercules Exp $ */
 
 #include <stdio.h>
 #include <setjmp.h>
@@ -49,7 +49,7 @@ static int (*GUI_okay[])(Install_UI *UI) = {
 static void print_usage(const char *argv0)
 {
     printf(
-"Usage: %s [options]\n\n"
+_("Usage: %s [options]\n\n"
 "Options can be one or more of the following:\n"
 "   -h       Display this help message\n"
 "   -c cwd   Use an alternate current directory for the install\n"
@@ -58,7 +58,7 @@ static void print_usage(const char *argv0)
 "   -r root  Set the root directory for extracting RPM files (default is /)\n"
 "   -v n     Set verbosity level to n. Available values :\n"
 "            0: Debug  1: Quiet  2: Normal 3: Warnings 4: Fatal\n"
-"   -V       Print the version of the setup program and exit\n",
+"   -V       Print the version of the setup program and exit\n"),
      argv0);
 }
 
@@ -99,7 +99,7 @@ int main(int argc, char **argv)
                     log_level = atoi(optarg);
                     if ( (log_level < LOG_DEBUG) || (log_level > LOG_FATAL) ){
                         fprintf(stderr,
-                    "Out of range value, setting verbosity level to normal.\n");
+                _("Out of range value, setting verbosity level to normal.\n"));
                         log_level = LOG_NORMAL;
                     }
                 } else {
@@ -118,7 +118,7 @@ int main(int argc, char **argv)
     /* Initialize the XML setup configuration */
     info = create_install(xml_file, log_level);
     if ( info == NULL ) {
-        fprintf(stderr, "Couldn't load '%s'\n", xml_file);
+        fprintf(stderr, _("Couldn't load '%s'\n"), xml_file);
         exit(1);
     }
 
@@ -134,7 +134,7 @@ int main(int argc, char **argv)
         }
     }
     if ( ! GUI_okay[i] ) {
-        fprintf(stderr, "No UI drivers available\n");
+        fprintf(stderr, _("No UI drivers available\n"));
         exit(1);
     }
 
@@ -166,8 +166,8 @@ int main(int argc, char **argv)
                     while ( !detect_cdrom(tag) && (response == RESPONSE_YES) ) {
                         char buf[1024];
             
-                        sprintf(buf,"\nPlease mount the %s CDROM.\n"
-                                "Choose Yes to retry, No to cancel",
+                        sprintf(buf,_("\nPlease mount the %s CDROM.\n"
+                                "Choose Yes to retry, No to cancel"),
                                 info->name);
                         response = UI.prompt(buf, RESPONSE_NO);
                     }

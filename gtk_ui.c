@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.30 2000-04-10 21:51:36 hercules Exp $
+   $Id: gtk_ui.c,v 1.31 2000-05-01 20:40:20 hercules Exp $
 */
 
 #include <limits.h>
@@ -221,8 +221,8 @@ void setup_button_play_slot( GtkWidget* _widget, gpointer func_data )
 
     if ( getuid() == 0 ) {
     const char *warning_text =
-"If you run a game as root, the preferences will be stored in\n"
-"root's home directory instead of your user account directory.";
+_("If you run a game as root, the preferences will be stored in\n")
+_("root's home directory instead of your user account directory.");
 
         warning_dialog = WARNING_ROOT;
         widget = glade_xml_get_widget(setup_glade, "setup_notebook");
@@ -327,22 +327,22 @@ static void check_install_button(void)
     /* See if we can install yet */
     message = "";
     if ( ! license_okay ) {
-        message = "Please respond to the license dialog";
+        message = _("Please respond to the license dialog");
     } else if ( ! *cur_info->install_path ) {
-        message = "No destination directory selected";
+        message = _("No destination directory selected");
     } else if ( cur_info->install_size <= 0 ) {
-        message = "Please select at least one option";
+        message = _("Please select at least one option");
     } else if ( BYTES2MB(cur_info->install_size) > diskspace ) {
-        message = "Not enough free space for the selected options";
+        message = _("Not enough free space for the selected options");
     } else if ( (stat(path_up, &st) == 0) && !S_ISDIR(st.st_mode) ) {
-        message = "Install path is not a directory";
+        message = _("Install path is not a directory");
     } else if ( access(path_up, W_OK) < 0 ) {
-        message = "No write permissions on the install directory";
+        message = _("No write permissions on the install directory");
     } else if ( check_deviant_paths(cur_info->config->root->childs) ) {
-        message = "No write permissions to install a selected package";
+        message = _("No write permissions to install a selected package");
     } else if ( cur_info->symlinks_path[0] &&
                (access(cur_info->symlinks_path, W_OK) < 0) ) {
-        message = "No write permissions on the binary directory";
+        message = _("No write permissions on the binary directory");
     }
 
     /* Get the appropriate widgets and set the new state */
@@ -351,7 +351,7 @@ static void check_install_button(void)
     if ( *message ) {
         gtk_widget_set_sensitive(button_install, 0);
     } else {
-        message = "Ready to install!";
+        message = _("Ready to install!");
         gtk_widget_set_sensitive(button_install, 1);
     }
     gtk_label_set_text(GTK_LABEL(options_status), message);
@@ -475,8 +475,8 @@ static yesno_answer gtkui_prompt(const char *txt, yesno_answer suggest)
     
     dialog = gtk_dialog_new();
     label = gtk_label_new (txt);
-    yes_button = gtk_button_new_with_label("Yes");
-    no_button = gtk_button_new_with_label("No");
+    yes_button = gtk_button_new_with_label(_("Yes"));
+    no_button = gtk_button_new_with_label(_("No"));
 
     prompt_response = RESPONSE_INVALID;
     
@@ -495,7 +495,7 @@ static yesno_answer gtkui_prompt(const char *txt, yesno_answer suggest)
     
     gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->vbox),
                        label);
-    gtk_window_set_title(GTK_WINDOW(dialog), "Setup");
+    gtk_window_set_title(GTK_WINDOW(dialog), _("Setup"));
     gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
     gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
     gtk_widget_show_all (dialog);
@@ -607,7 +607,7 @@ static void init_menuitems_option(install_info *info, xmlNodePtr node)
             gtk_widget_hide(widget);
         }
     } else {
-        log_warning(cur_info, "Unable to locate 'setup_menuitems_checkbox'");
+        log_warning(cur_info, _("Unable to locate 'setup_menuitems_checkbox'"));
     }
 }
 
@@ -758,7 +758,7 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
 
     /* Set up the window title */
     window = glade_xml_get_widget(setup_glade, "setup_window");
-    sprintf(title, "%s Setup", info->desc);
+    sprintf(title, _("%s Setup"), info->desc);
     gtk_window_set_title(GTK_WINDOW(window), title);
 
     /* Set the initial state */
@@ -911,7 +911,7 @@ static void gtkui_abort(install_info *info)
         gtk_notebook_set_page(GTK_NOTEBOOK(notebook), ABORT_PAGE);
         iterate_for_state();
     } else {
-        fprintf(stderr, "Unable to open %s, aborting!\n", SETUP_GLADE);
+        fprintf(stderr, _("Unable to open %s, aborting!\n"), SETUP_GLADE);
     }
 }
 
@@ -967,7 +967,7 @@ static install_state gtkui_complete(install_info *info)
     gtk_label_set_text(GTK_LABEL(widget), info->install_path);
     widget = glade_xml_get_widget(setup_glade, "play_game_label");
     if ( info->installed_symlink ) {
-        sprintf(text, "Type '%s' to start the program", info->installed_symlink);
+        sprintf(text, _("Type '%s' to start the program"), info->installed_symlink);
     } else {
         strcpy(text, "");
     }

@@ -46,7 +46,7 @@ stream *file_fdopen(install_info *info, const char *path, FILE *fd, gzFile zfd, 
     /* Allocate a file stream */
     streamp = (stream *)malloc(sizeof *streamp);
     if ( streamp == NULL ) {
-        log_warning(info, "Out of memory");
+        log_warning(info, _("Out of memory"));
         return(NULL);
     }
     memset(streamp, 0, (sizeof *streamp));
@@ -66,14 +66,14 @@ stream *file_open(install_info *info, const char *path, const char *mode)
     /* Allocate a file stream */
     streamp = (stream *)malloc(sizeof *streamp);
     if ( streamp == NULL ) {
-        log_warning(info, "Out of memory");
+        log_warning(info, _("Out of memory"));
         return(NULL);
     }
     memset(streamp, 0, (sizeof *streamp));
     streamp->path = (char *)malloc(strlen(path)+1);
     if ( streamp->path == NULL ) {
         file_close(info, streamp);
-        log_warning(info, "Out of memory");
+        log_warning(info, _("Out of memory"));
         return(NULL);
     }
     strcpy(streamp->path, path);
@@ -107,19 +107,19 @@ stream *file_open(install_info *info, const char *path, const char *mode)
         }
         if ( (streamp->fp == NULL) && (streamp->zfp == NULL) ) {
             file_close(info, streamp);
-            log_warning(info, "Couldn't read from file: %s", path);
+            log_warning(info, _("Couldn't read from file: %s"), path);
             return(NULL);
         }
     } else {
 	    file_create_hierarchy(info, path);
 
         /* Open the file for writing */
-        log_quiet(info, "Installing file %s", path);
+        log_quiet(info, _("Installing file %s"), path);
         streamp->fp = fopen(path, "wb");
         if ( streamp->fp == NULL ) {
 		    streamp->size = 0;
             file_close(info, streamp);
-            log_warning(info, "Couldn't write to file: %s", path);
+            log_warning(info, _("Couldn't write to file: %s"), path);
             return(NULL);
         }
         add_file_entry(info, path);
@@ -139,7 +139,7 @@ int file_read(install_info *info, void *buf, int len, stream *streamp)
             nread = gzread(streamp->zfp, buf, len);
         }
     } else {
-        log_warning(info, "Read on write stream");
+        log_warning(info, _("Read on write stream"));
     }
     return nread;
 }
@@ -180,7 +180,7 @@ void file_skip_zeroes(install_info *info, stream *streamp)
 	  }
 	}
   } else {
-	log_warning(info, "Skip zeroes on write stream");
+	log_warning(info, _("Skip zeroes on write stream"));
   }
 }
 
@@ -196,11 +196,11 @@ int file_write(install_info *info, void *buf, int len, stream *streamp)
             nwrote = gzwrite(streamp->zfp, buf, len);
         }
         if ( nwrote <= 0 ) {
-            log_warning(info, "Short write on %s", streamp->path);
+            log_warning(info, _("Short write on %s"), streamp->path);
         }else
 		  streamp->size += nwrote; /* Warning: we assume that we always append data */
     } else {
-        log_warning(info, "Write on read stream");
+        log_warning(info, _("Write on read stream"));
     }
     return nwrote;
 }
@@ -225,14 +225,14 @@ int file_close(install_info *info, stream *streamp)
         if ( streamp->fp ) {
             if ( fclose(streamp->fp) != 0 ) {
                 if ( streamp->mode == 'w' ) {
-                    log_warning(info, "Short write on %s", streamp->path);
+                    log_warning(info, _("Short write on %s"), streamp->path);
                 }
             }
         }
         if ( streamp->zfp ) {
             if ( gzclose(streamp->zfp) != 0 ) {
                 if ( streamp->mode == 'w' ) {
-                    log_warning(info, "Short write on %s", streamp->path);
+                    log_warning(info, _("Short write on %s"), streamp->path);
                 }
             }
         }
@@ -248,7 +248,7 @@ int file_symlink(install_info *info, const char *oldpath, const char *newpath)
     struct stat st;
 
     /* Log the action */
-    log_quiet(info, "Creating symbolic link: %s --> %s\n", newpath, oldpath);
+    log_quiet(info, _("Creating symbolic link: %s --> %s\n"), newpath, oldpath);
 
     /* Do the action */
 	file_create_hierarchy(info,newpath);
@@ -257,11 +257,11 @@ int file_symlink(install_info *info, const char *oldpath, const char *newpath)
     if( lstat(newpath, &st)==0 && S_ISLNK(st.st_mode) )
     {
         if( unlink(newpath) < 0 )
-            log_warning(info, "Can't remove existing symlink %s: %s", newpath, strerror(errno));
+            log_warning(info, _("Can't remove existing symlink %s: %s"), newpath, strerror(errno));
     }
     retval = symlink(oldpath, newpath);
     if ( retval < 0 ) {
-        log_warning(info, "Can't create %s: %s", newpath, strerror(errno));
+        log_warning(info, _("Can't create %s: %s"), newpath, strerror(errno));
     } else {
         add_file_entry(info, newpath);
     }
@@ -277,13 +277,13 @@ int file_mkdir(install_info *info, const char *path, int mode)
     retval = 0;
     if ( (stat(path, &sb) != 0) || !S_ISDIR(sb.st_mode) ) {
         /* Log the action */
-        log_quiet(info, "Creating directory: %s\n", path);
+        log_quiet(info, _("Creating directory: %s\n"), path);
 
         /* Do the action */
         retval = mkdir(path, mode);
         if ( retval < 0 ) {
 		  if(errno != EEXIST)
-            log_warning(info, "Can't create %s: %s", path, strerror(errno));
+            log_warning(info, _("Can't create %s: %s"), path, strerror(errno));
         } else {
             add_dir_entry(info, path);
         }
@@ -296,14 +296,14 @@ int file_mkfifo(install_info *info, const char *path, int mode)
   int retval;
 
   /* Log the action */
-  log_quiet(info, "Creating FIFO: %s\n", path);
+  log_quiet(info, _("Creating FIFO: %s\n"), path);
   
   /* Do the action */
   file_create_hierarchy(info, path);
   retval = mkfifo(path, mode);
   if ( retval < 0 ) {
 	if(errno != EEXIST)
-	  log_warning(info, "Can't create %s: %s", path, strerror(errno));
+	  log_warning(info, _("Can't create %s: %s"), path, strerror(errno));
   } else {
 	add_file_entry(info, path);
   }
@@ -315,14 +315,14 @@ int file_mknod(install_info *info, const char *path, int mode, dev_t dev)
   int retval;
 
   /* Log the action */
-  log_quiet(info, "Creating device: %s\n", path);
+  log_quiet(info, _("Creating device: %s\n"), path);
   
   /* Do the action */
   file_create_hierarchy(info, path);
   retval = mknod(path, mode, dev);
   if ( retval < 0 ) {
 	if(errno != EEXIST)
-	  log_warning(info, "Can't create %s: %s", path, strerror(errno));
+	  log_warning(info, _("Can't create %s: %s"), path, strerror(errno));
   } else {
 	add_file_entry(info, path);
   }
@@ -335,7 +335,7 @@ int file_chmod(install_info *info, const char *path, int mode)
    
    retval = chmod(path, mode);
     if ( retval < 0 ) {
-        log_warning(info, "Can't change permissions for %s: %s", path, strerror(errno));
+        log_warning(info, _("Can't change permissions for %s: %s"), path, strerror(errno));
 	}
    return retval;
 }
@@ -369,7 +369,7 @@ size_t file_size(install_info *info, const char *path)
                 }
                 closedir(dir);
             } else {
-                log_quiet(info, "Unable to read %s", path);
+                log_quiet(info, _("Unable to read %s"), path);
             }
         } else {
             fp = fopen(path, "rb");
@@ -391,7 +391,7 @@ size_t file_size(install_info *info, const char *path)
                 }
                 fclose(fp);
             } else {
-                log_quiet(info, "Unable to read %s", path);
+                log_quiet(info, _("Unable to read %s"), path);
             }
         }
     }

@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.39 2000-04-20 23:57:33 hercules Exp $ */
+/* $Id: install.c,v 1.40 2000-05-01 20:40:21 hercules Exp $ */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -153,7 +153,7 @@ install_info *create_install(const char *configfile, int log_level)
     /* Allocate the installation info block */
     info = (install_info *)malloc(sizeof *info);
     if ( info == NULL ) {
-        fprintf(stderr, "Out of memory\n");
+        fprintf(stderr, _("Out of memory\n"));
         return(NULL);
     }
     memset(info, 0, (sizeof *info));
@@ -161,7 +161,7 @@ install_info *create_install(const char *configfile, int log_level)
     /* Create the log file */
     info->log = create_log(LOG_NORMAL);
     if ( info->log == NULL ) {
-        fprintf(stderr, "Out of memory\n");
+        fprintf(stderr, _("Out of memory\n"));
         delete_install(info);
         return(NULL);
     }
@@ -212,7 +212,7 @@ void add_file_entry(install_info *info, const char *path)
             info->file_list = elem;
         }
     } else {
-        log_fatal(info, "Out of memory");
+        log_fatal(info, _("Out of memory"));
     }
 }
 
@@ -230,7 +230,7 @@ void add_rpm_entry(install_info *info, const char *name, const char *version, co
             info->rpm_list = elem;
         }
     } else {
-        log_fatal(info, "Out of memory");
+        log_fatal(info, _("Out of memory"));
     }
 }
 
@@ -251,7 +251,7 @@ void add_script_entry(install_info *info, const char *script, int post)
             }
         }
     } else {
-        log_fatal(info, "Out of memory");
+        log_fatal(info, _("Out of memory"));
     }
 }
 
@@ -268,7 +268,7 @@ void add_dir_entry(install_info *info, const char *path)
             info->dir_list = elem;
         }
     } else {
-        log_fatal(info, "Out of memory");
+        log_fatal(info, _("Out of memory"));
     }
 }
 
@@ -295,7 +295,7 @@ void add_bin_entry(install_info *info, const char *path,
             info->installed_symlink = symlink;
         }
     } else {
-        log_fatal(info, "Out of memory");
+        log_fatal(info, _("Out of memory"));
     }
 }
 
@@ -313,7 +313,7 @@ void expand_home(install_info *info, const char *path, char *buffer)
             if ( home ) {
                 strcpy(buffer, home);
             } else {
-                log_warning(info, "Couldn't find your home directory");
+                log_warning(info, _("Couldn't find your home directory"));
             }
         } else {
             char user[PATH_MAX];
@@ -331,7 +331,7 @@ void expand_home(install_info *info, const char *path, char *buffer)
             if ( pwent ) {
                 strcpy(buffer, pwent->pw_dir);
             } else {
-                log_warning(info, "Couldn't find home directory for %s", user);
+                log_warning(info, _("Couldn't find home directory for %s"), user);
             }
         }
     }
@@ -385,7 +385,7 @@ char *get_option_name(install_info *info, xmlNodePtr node, char *name, int len)
         while ( (*name == 0) && parse_line(&text, name, len) )
             ;
     } else {
-        log_warning(info, "XML: option listed without description");
+        log_warning(info, _("XML: option listed without description"));
     }
     return name;
 }
@@ -476,7 +476,7 @@ void uninstall(install_info *info)
         elem = info->file_list;
         info->file_list = elem->next;
         if ( unlink(elem->path) < 0 ) {
-            log_warning(info, "Unable to remove '%s'", elem->path);
+            log_warning(info, _("Unable to remove '%s'"), elem->path);
         }
         free(elem->path);
         free(elem);
@@ -487,7 +487,7 @@ void uninstall(install_info *info)
         elem = info->dir_list;
         info->dir_list = elem->next;
         if ( rmdir(elem->path) < 0 ) {
-            log_warning(info, "Unable to remove '%s'", elem->path);
+            log_warning(info, _("Unable to remove '%s'"), elem->path);
         }
         free(elem->path);
         free(elem);
@@ -506,7 +506,7 @@ void uninstall(install_info *info)
  
         elem = info->rpm_list;
         info->rpm_list = elem->next;
-        log_warning(info, "The '%s' RPM was installed or upgraded (version %s, release %s)",
+        log_warning(info, _("The '%s' RPM was installed or upgraded (version %s, release %s)"),
                     elem->name, elem->version, elem->release);
         free(elem->name);
         free(elem->version);
@@ -562,7 +562,7 @@ void generate_uninstall(install_info *info)
           fprintf(fp,"}\npost 0\n");
         }
         fprintf(fp,"#### END OF UNINSTALL\n");
-        fprintf(fp,"echo \"%s has been uninstalled.\"\n", info->desc);
+        fprintf(fp,_("echo \"%s has been uninstalled.\"\n"), info->desc);
         if(info->rpm_list){
           fprintf(fp,"echo\necho WARNING: The following RPM archives have been installed or upgraded\n"
                   "echo when this software was installed. You may want to manually remove some of those:\n");
@@ -598,7 +598,7 @@ int launch_browser(install_info *info, int (*launcher)(const char *url))
     if ( url ) {
         retval = launcher(url);
         if ( retval < 0 ) {
-            log_warning(info, "Please visit %s", url);
+            log_warning(info, _("Please visit %s"), url);
         }
     }
     return retval;
@@ -795,7 +795,7 @@ char install_menuitems(install_info *info, desktop_type desktop)
                 ret_val = (desktop == DESKTOP_REDHAT);
 
             } else {
-                log_warning(info, "Unable to create desktop file '%s'", finalbuf);
+                log_warning(info, _("Unable to create desktop file '%s'"), finalbuf);
             }
             /* Created a desktop item, our job is done here */
             break;

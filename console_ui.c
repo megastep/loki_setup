@@ -38,13 +38,13 @@ static yesno_answer console_prompt(const char *prompt, yesno_answer suggest)
     line[0] = '\0';
     switch (suggest) {
         case RESPONSE_YES:
-            prompt_user(prompt, "Y/n", line, (sizeof line));
+            prompt_user(prompt, _("Y/n"), line, (sizeof line));
             break;
         case RESPONSE_NO:
-            prompt_user(prompt, "N/y", line, (sizeof line));
+            prompt_user(prompt, _("N/y"), line, (sizeof line));
             break;
         default:
-            fprintf(stderr, "Warning, invalid yesno prompt: %s\n", prompt);
+            fprintf(stderr, _("Warning, invalid yesno prompt: %s\n"), prompt);
             return(RESPONSE_INVALID);
     }
     switch (toupper(line[0])) {
@@ -65,13 +65,13 @@ static yesno_answer prompt_yesnohelp(const char *prompt, yesno_answer suggest)
     line[0] = '\0';
     switch (suggest) {
         case RESPONSE_YES:
-            prompt_user(prompt, "Y/n/?", line, (sizeof line));
+            prompt_user(prompt, _("Y/n/?"), line, (sizeof line));
             break;
         case RESPONSE_NO:
-            prompt_user(prompt, "N/y/?", line, (sizeof line));
+            prompt_user(prompt, _("N/y/?"), line, (sizeof line));
             break;
         default:
-            fprintf(stderr, "Warning, invalid yesno prompt: %s\n", prompt);
+            fprintf(stderr, _("Warning, invalid yesno prompt: %s\n"), prompt);
             return(RESPONSE_INVALID);
     }
     switch (toupper(line[0])) {
@@ -89,7 +89,7 @@ static yesno_answer prompt_yesnohelp(const char *prompt, yesno_answer suggest)
 static yesno_answer prompt_warning(const char *warning)
 {
         printf("%s\n", warning);
-        return (console_prompt("Continue?", RESPONSE_NO));
+        return (console_prompt(_("Continue?"), RESPONSE_NO));
 }
 
 static void parse_option(install_info *info, xmlNodePtr node)
@@ -132,7 +132,7 @@ static void parse_option(install_info *info, xmlNodePtr node)
     }
 
     /* See if the user wants this option */
-    sprintf(prompt, "Install %s?", get_option_name(info, node, line, BUFSIZ));
+    sprintf(prompt, _("Install %s?"), get_option_name(info,node,line,BUFSIZ));
 
     wanted = xmlGetProp(node, "install");
     if ( wanted  && (strcmp(wanted, "true") == 0) ) {
@@ -185,10 +185,10 @@ static install_state console_init(install_info *info, int argc, char **argv)
 {
     install_state state;
 
-    printf("----====== %s installation program ======----\n", info->desc);
+    printf(_("----====== %s installation program ======----\n"), info->desc);
     printf("\n");
-    printf("You are running a %s machine with %s\n", info->arch, info->libc);
-    printf("Hit Control-C anytime to cancel this installation program.\n");
+    printf(_("You are running a %s machine with %s\n"), info->arch, info->libc);
+    printf(_("Hit Control-C anytime to cancel this installation program.\n"));
     printf("\n");
     if ( GetProductEULA(info) ) {
         state = SETUP_LICENSE;
@@ -206,7 +206,7 @@ static install_state console_license(install_info *info)
     sleep(1);
     sprintf(command, PAGER_COMMAND " \"%s\"", GetProductEULA(info));
     system(command);
-    if ( console_prompt("Do you agree with the license?", RESPONSE_YES) ==
+    if ( console_prompt(_("Do you agree with the license?"), RESPONSE_YES) ==
                                                         RESPONSE_YES ) {
         state = SETUP_README;
     } else {
@@ -223,7 +223,7 @@ static install_state console_readme(install_info *info)
     if ( readme && ! access(readme, R_OK) ) {
         char prompt[256];
 
-        sprintf(prompt, "Would you like to read the %s file ?", readme);
+        sprintf(prompt, _("Would you like to read the %s file ?"), readme);
         if ( console_prompt(prompt, RESPONSE_YES) == RESPONSE_YES ) {
             sprintf(prompt, PAGER_COMMAND " \"%s\"", readme);
             system(prompt);
@@ -241,7 +241,7 @@ static install_state console_setup(install_info *info)
     okay = 0;
     while ( ! okay ) {
         /* Find out where to install the game */
-        if ( ! prompt_user("Please enter the installation path",
+        if ( ! prompt_user(_("Please enter the installation path"),
                         info->install_path, path, sizeof(path)) ) {
             return SETUP_ABORT;
         }
@@ -255,12 +255,12 @@ static install_state console_setup(install_info *info)
             }
         }
         if ( access(path, W_OK) < 0 ) {
-            printf("No write permission to %s\n", path);
+            printf(_("No write permission to %s\n"), path);
             continue;
         }
 
         /* Find out where to install the binary symlinks */
-        if ( ! prompt_user("Please enter the path for binary installation",
+        if ( ! prompt_user(_("Please enter the path for binary installation"),
                         info->symlinks_path, path, sizeof(path)) ) {
             return SETUP_ABORT;
         }
@@ -268,7 +268,7 @@ static install_state console_setup(install_info *info)
 
         /* Check permissions on the symlinks path */
         if ( access(info->symlinks_path, W_OK) < 0 ) {
-            printf("No write permission to %s\n", info->symlinks_path);
+            printf(_("No write permission to %s\n"), info->symlinks_path);
             continue;
         }
 
@@ -284,17 +284,17 @@ static install_state console_setup(install_info *info)
 
         /* Ask for desktop menu items */
         if ( has_binaries(info, info->config->root->childs) &&
-             console_prompt("Do you want to install desktop items?",
+             console_prompt(_("Do you want to install desktop items?"),
                                      RESPONSE_YES) == RESPONSE_YES ) {
             info->options.install_menuitems = 1;
         }
 
         /* Confirm the install */
-        printf("Installing to %s\n", info->install_path);
-        printf("%d MB available, %d MB will be installed.\n",
+        printf(_("Installing to %s\n"), info->install_path);
+        printf(_("%d MB available, %d MB will be installed.\n"),
             detect_diskspace(info->install_path), BYTES2MB(info->install_size));
         printf("\n");
-        if ( console_prompt("Continue install?", RESPONSE_YES) == RESPONSE_YES ) {
+        if ( console_prompt(_("Continue install?"), RESPONSE_YES) == RESPONSE_YES ) {
             okay = 1;
         }
     }
@@ -307,7 +307,7 @@ static void console_update(install_info *info, const char *path, size_t progress
 
   if(strcmp(previous, current)){
     strncpy(previous,current, sizeof(previous));
-    printf("Installing %s ...\n", current);
+    printf(_("Installing %s ...\n"), current);
   }
   printf(" %3d%% - %s\r", (int) (((float)progress/(float)size)*100.0), path);
   if(progress==size)
@@ -318,7 +318,7 @@ static void console_update(install_info *info, const char *path, size_t progress
 static void console_abort(install_info *info)
 {
     printf("\n");
-    printf("Install aborted - cleaning up files\n");
+    printf(_("Install aborted - cleaning up files\n"));
 }
 
 static install_state console_complete(install_info *info)
@@ -326,17 +326,17 @@ static install_state console_complete(install_info *info)
     install_state new_state;
 
     printf("\n");
-    printf("Installation complete.\n");
+    printf(_("Installation complete.\n"));
 
     new_state = SETUP_EXIT;
     if ( info->installed_symlink &&
-         console_prompt("Would you like launch the game now?", RESPONSE_YES)
+         console_prompt(_("Would you like launch the game now?"), RESPONSE_YES)
          == RESPONSE_YES ) {
         new_state = SETUP_PLAY;
         if ( getuid() == 0 ) {
             const char *warning_text = 
-"If you run a game as root, the preferences will be stored in\n"
-"root's home directory instead of your user account directory.";
+_("If you run a game as root, the preferences will be stored in\n")
+_("root's home directory instead of your user account directory.");
 
             if ( prompt_warning(warning_text) != RESPONSE_YES ) {
                 new_state = SETUP_EXIT;
@@ -367,17 +367,17 @@ static install_state console_website(install_info *info)
 {
     const char *website_text;
 
-    printf("Thank you for installing %s!\n", GetProductDesc(info) );
+    printf(_("Thank you for installing %s!\n"), GetProductDesc(info) );
     website_text = GetWebsiteText(info);
     if ( website_text ) {
         printf("%s\n", website_text);
     } else {
-        printf("Please visit our website for updates and support.\n");
+        printf(_("Please visit our website for updates and support.\n"));
     }
     sleep(2);
 
     if ( (strcmp( GetAutoLaunchURL(info), "true" )==0)
-         || (console_prompt("Would you like to launch web browser?",RESPONSE_YES)== RESPONSE_YES ) ) {
+         || (console_prompt(_("Would you like to launch web browser?"), RESPONSE_YES) == RESPONSE_YES ) ) {
         launch_browser( info, run_lynx );
     }
     return SETUP_COMPLETE;
@@ -388,7 +388,7 @@ static install_state console_website(install_info *info)
 int console_okay(Install_UI *UI)
 {
     if(!isatty(1)){
-      fprintf(stderr,"Standard input is not a terminal!\n");
+      fprintf(stderr,_("Standard input is not a terminal!\n"));
       return(0);
     }
     /* Set up the driver */
