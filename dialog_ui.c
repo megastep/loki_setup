@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.22 2004-04-20 02:06:41 megastep Exp $
+ * $Id: dialog_ui.c,v 1.23 2004-05-12 02:14:30 megastep Exp $
  */
 
 #include <limits.h>
@@ -152,6 +152,7 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr pa
 	xmlNodePtr node = parent->childs;
 	for ( ; node && nb_choices<MAX_CHOICES; node = node->next ) {
 	    const char *set = xmlGetProp(node, "install");
+		const char *str;
 
 		if ( ! set ) {
 			/* it's also possible to use the "required" attribute */
@@ -197,18 +198,19 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr pa
 			choices[i++] = "";
 			choices[i++] = strdup(get_option_name(info, node, NULL, 0));
 			choices[i++] = (set && !strcmp(set,"true")) ? "on" : "off";
-			choices[i++] = get_option_help(info, node);
-
+			str = get_option_help(info, node);
+			choices[i++] = str ? strdup(str) : NULL;
 			nb_choices++;
 	    } else if ( ! strcmp(node->name, "exclusive") ) {
 			nodes[nb_choices] = node;
 			choices[i++] = "";
 			choices[i++] = strdup(get_option_name(info, node, NULL, 0));
 			choices[i++] = "on";
-			choices[i++] = get_option_help(info, node);
+			str = get_option_help(info, node);
+			choices[i++] = str ? strdup(str) : NULL;
 			nb_choices++;
 	    } else if ( ! strcmp(node->name, "component") ) {
-			const char *str = xmlGetProp(node, "name");
+			str = xmlGetProp(node, "name");
 			nodes[nb_choices] = node;
 			choices[i++] = _("Component");
 			if ( !str || !strcmp(str, "Default") ) { /* Show the name of the product instead */
@@ -217,7 +219,8 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr pa
 				choices[i++] = str;
 			}
 			choices[i++] = "on"; /* Components are always selected by default  */
-			choices[i++] = get_option_help(info, node);
+			str = get_option_help(info, node);
+			choices[i++] = str ? strdup(str) : NULL;
 			nb_choices++;
 	    }
 	}
@@ -297,7 +300,8 @@ options_loop:
 				mark_option(info, nodes[i], "false", 0);
 		    }
 		} else if ( !strcmp(nodes[i]->name, "exclusive") && result[i]) {
-		    ret = parse_option(info, component, nodes[i], 1, !GetReinstallNode(info, nodes[i]), get_option_name(info, nodes[i], NULL, 0));
+		    ret = parse_option(info, component, nodes[i], 1, !GetReinstallNode(info, nodes[i]),
+							   get_option_name(info, nodes[i], buf, sizeof(buf)));
 		} else if ( !strcmp(nodes[i]->name, "component") && result[i]) {
 			snprintf(buf, sizeof(buf), _("Component: %s"), xmlGetProp(nodes[i], "name"));
 		    ret = parse_option(info, xmlGetProp(nodes[i], "name"), nodes[i], 0, 0, buf);
