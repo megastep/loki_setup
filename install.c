@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.30 2000-03-02 17:36:20 hercules Exp $ */
+/* $Id: install.c,v 1.31 2000-03-02 17:52:50 briareos Exp $ */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -107,6 +107,10 @@ const char *GetPreInstall(install_info *info)
 const char *GetPostInstall(install_info *info)
 {
     return xmlGetProp(info->config->root, "postinstall");
+}
+const char *GetDesktopInstall(install_info *info)
+{
+    return xmlGetProp(info->config->root, "desktop");
 }
 const char *GetRuntimeArgs(install_info *info)
 {
@@ -653,6 +657,9 @@ char install_menuitems(install_info *info, desktop_type desktop)
     const char *desk_base;
     char icon_base[PATH_MAX];
     const char *found_links[3];
+    const char *exec_script_name = NULL;
+    char exec_script[PATH_MAX*2];
+    char exec_command[PATH_MAX*2];
     FILE *fp;
 
     switch (desktop) {
@@ -691,6 +698,18 @@ char install_menuitems(install_info *info, desktop_type desktop)
             return ret_val;
     }
 
+    /* Get the exec command we want to use. */
+    exec_command[0] = 0;
+    exec_script_name = GetDesktopInstall(info);
+    if( exec_script_name ) {
+	snprintf( exec_script, PATH_MAX*2, "%s %s", exec_script_name, info->install_path );
+	fp = popen(exec_script, "r");
+	if( fp ) {
+	    fgets(exec_command, PATH_MAX*2, fp);
+	    pclose(fp);
+	}
+    }
+
     for (elem = info->bin_list; elem; elem = elem->next ) {      
         for ( tmp_links = app_links; *tmp_links; ++tmp_links ) {
             FILE *fp;
@@ -723,9 +742,13 @@ char install_menuitems(install_info *info, desktop_type desktop)
 
             fp = fopen(finalbuf, "w");
             if (fp) {
-                char exec[PATH_MAX], icon[PATH_MAX];
+                char exec[PATH_MAX*2], icon[PATH_MAX];
 
-                sprintf(exec, "%s", elem->path);
+		if (exec_command[0] != 0) {
+		    snprintf(exec, PATH_MAX*2, "%s", exec_command);
+		} else {
+		    sprintf(exec, "%s", elem->path);
+		}
                 sprintf(icon, "%s/%s", info->install_path, elem->icon);
                 if (desktop == DESKTOP_KDE) {
                         fprintf(fp, "# KDE Config File\n");
