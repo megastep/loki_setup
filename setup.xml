@@ -1,0 +1,43 @@
+<?xml version="1.0" standalone="yes"?>
+<install>
+  <desc>Railroad Tycoon II</desc>
+  <option checked="true" size="200">
+    Base Install
+    <binary arch="any" libc="any" symlink="rt2" icon="icon.xpm">
+      rt2
+    </binary>
+    <files>
+      main.tar.gz
+      maps.tar.gz
+      Manual
+      icon.bmp
+      README
+    </files>
+  </option>
+  <option size="">
+    Classic Campaign (can run from CD)
+    <files>
+      maps/#[01]*
+    </files>
+    <option size="">
+      Classic Campaign Movies (can run from CD)
+      <files>
+        anim/cv[01]*
+        anim/cvwin.mjpg
+      </files>
+    </option>
+  </option>
+  <option size="">
+    Second Century Campaign (can run from CD)
+    <files>
+      maps/#e[01]*
+    </files>
+    <option size="">
+      Second Century Campaign Movies (can run from CD)
+      <files>
+        anim/cve[01]*
+        anim/cvewin.mjpg
+      </files>
+    </option>
+  </option>
+</install>
