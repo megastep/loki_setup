@@ -338,7 +338,7 @@ ssize_t copy_file(install_info *info, const char *cdrom, const char *path, const
 		file_close(info, input);
 
 		if ( uncompress ) {
-			char *dir = strdup(fullpath), *slash;
+			char *dir = strdup(final), *slash;
 			snprintf(buf, sizeof(buf), uncompress, fullpath, fullpath);
 
 			/* Change dir to the file path */
@@ -353,13 +353,13 @@ ssize_t copy_file(install_info *info, const char *cdrom, const char *path, const
 					char targetpath[PATH_MAX];
 					/* Substitute the original file name */
 					snprintf(targetpath, sizeof(targetpath), target, fullpath);
-					if ( strcmp(targetpath, fullpath) ) {
+					if ( strcmp(targetpath, final) ) {
 						/* Remove the original file if it is still there */
-						unlink(fullpath);
+						unlink(final);
 						/* Update the elem structure with the new name */
 						free(output_elem->path);
 						output_elem->path = strdup(remove_root(info, targetpath));
-						strncpy(fullpath, targetpath, sizeof(fullpath));
+						snprintf(fullpath, sizeof(fullpath), "%s/%s", dir, targetpath);
 					}
 					file_chmod(info, targetpath, mode);
 				} else {
