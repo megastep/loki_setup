@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.148 2004-11-18 05:15:19 megastep Exp $ */
+/* $Id: install.c,v 1.149 2004-12-12 22:39:37 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1030,17 +1030,21 @@ struct file_elem *add_file_entry(install_info *info, struct option_elem *comp,
 
     elem = (struct file_elem *)malloc(sizeof *elem);
     if ( elem ) {
-        elem->path = strdup(remove_root(info, path));
-		elem->mutable = mutable;
-        if ( elem->path ) {
-            memset(elem->md5sum, 0, 16);
-            elem->next = comp->file_list;
-			if ( symlink ) {
-				elem->symlink = strdup(symlink);
-			} else {
-				elem->symlink = NULL;
-			}
-            comp->file_list = elem;
+        //verify comp is not NULL
+        if (comp)
+        {
+            elem->path = strdup(remove_root(info, path));
+            elem->mutable = mutable;
+            if ( elem->path ) {
+                memset(elem->md5sum, 0, 16);
+                elem->next = comp->file_list;
+                if ( symlink ) {
+                    elem->symlink = strdup(symlink);
+                } else {
+                    elem->symlink = NULL;
+                }
+                comp->file_list = elem;
+            }
         }
     } else {
         log_fatal(_("Out of memory"));
@@ -1699,14 +1703,16 @@ install_state install(install_info *info, UIUpdateFunc update)
 		}
 	}
 	f = GetProductREADME(info, &keepdirs);
-	if ( f && ! GetProductIsMeta(info) ) {
+	/* added in condition: install readme only when install_size is > 0 */
+    if ( f && ! GetProductIsMeta(info) && info->install_size) {
 		if ( strstr(f, info->setup_path) == f )
 			f += strlen(info->setup_path)+1;
 		copy_path(info, f, info->install_path, NULL, !keepdirs, NULL, NULL, update);
 	}
 	keepdirs = 0;
 	f = GetProductEULA(info, &keepdirs);
-	if ( f && ! GetProductIsMeta(info) ) {
+    /* added in condition: install eula only when install_size is > 0 */
+	if ( f && ! GetProductIsMeta(info) && info->install_size) {
 		if ( strstr(f, info->setup_path) == f )
 			f += strlen(info->setup_path)+1;
 		copy_path(info, f, info->install_path, NULL, !keepdirs, NULL, NULL, update);

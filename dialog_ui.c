@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.30 2004-12-11 06:28:01 megastep Exp $
+ * $Id: dialog_ui.c,v 1.31 2004-12-12 22:39:37 megastep Exp $
  */
 
 #include <limits.h>
@@ -149,7 +149,8 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr pa
 	int result[MAX_CHOICES];
 	xmlNodePtr nodes[MAX_CHOICES];
 	int i = 0, nb_choices = 0, ret = 1;
-
+    int exc_text_index = 0; //index to keep track of the exclusive option text in choices
+   
 	xmlNodePtr node = parent->childs;
 	for ( ; node && nb_choices<MAX_CHOICES; node = node->next ) {
 	    const char *set = xmlGetProp(node, "install");
@@ -205,6 +206,7 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr pa
 	    } else if ( ! strcmp(node->name, "exclusive") ) {
 			nodes[nb_choices] = node;
 			choices[i++] = "";
+            exc_text_index=i;
 			choices[i++] = strdup(get_option_name(info, node, NULL, 0));
 			choices[i++] = "on";
 			str = get_option_help(info, node);
@@ -287,6 +289,8 @@ options_loop:
 				
 				/* Add this option size to the total */
 				info->install_size += size_node(info, nodes[i]);
+                /* Parse any child options */
+		        ret = parse_option(info, NULL, nodes[i], 0, 0, _("Choose the options"));
 		    } else if ( xmlGetProp(nodes[i], "required") ) {
 				snprintf(buf, sizeof(buf), _("Option '%s' is required.\n"), 
 						 get_option_name(info, nodes[i], NULL, 0));
@@ -297,12 +301,35 @@ options_loop:
 				
 				/* Add this option size to the total */
 				info->install_size += size_node(info, nodes[i]);
+                /* Parse any child options */
+		        ret = parse_option(info, NULL, nodes[i], 0, 0, _("Choose the options"));
+                
 		    } else { /* Unmark */
+                xmlNodePtr sub_option = nodes[i]->childs;
+                /* Unmark the childs */
 				mark_option(info, nodes[i], "false", 0);
+                while(sub_option)
+                {
+                    mark_option(info, sub_option, "false", 1); /* Recursively unmark the child options */
+                    sub_option = sub_option->next;
+                }
 		    }
-		} else if ( !strcmp(nodes[i]->name, "exclusive") && result[i]) {
-		    ret = parse_option(info, component, nodes[i], 1, GetReinstallNode(info, nodes[i]),
-							   get_option_name(info, nodes[i], buf, sizeof(buf)));
+		}
+        else if ( !strcmp(nodes[i]->name, "exclusive")) {
+            if (result[i]) {
+                /* The heading for the exclusive childs should be the name of the parent exclusive option, 
+                which is choices[exc_text_index]*/
+		        ret = parse_option(info, component, nodes[i], 1, GetReinstallNode(info, nodes[i]),
+                        choices[exc_text_index]);
+            }else{
+                /* If an exclusive option is deselected, unmark all the child options */
+                xmlNodePtr exc_childs = nodes[i]->childs;
+                while(exc_childs)
+                {
+                    mark_option(info, exc_childs, "false", 1); /* Recursively unmark the child options */
+                    exc_childs = exc_childs->next;
+                }
+            }
 		} else if ( !strcmp(nodes[i]->name, "component") && result[i]) {
 			snprintf(buf, sizeof(buf), _("Component: %s"), xmlGetProp(nodes[i], "name"));
 		    ret = parse_option(info, xmlGetProp(nodes[i], "name"), nodes[i], 0, 0, buf);

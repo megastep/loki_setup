@@ -1,5 +1,5 @@
 /*
- *  $Id: checklist.c,v 1.5 2002-12-07 00:57:32 megastep Exp $
+ *  $Id: checklist.c,v 1.6 2004-12-12 22:39:37 megastep Exp $
  *
  *  checklist.c -- implements the checklist box
  *
@@ -337,7 +337,7 @@ dialog_checklist(const char *title, const char *cprompt, int height, int width,
 								   max_choice - 1, TRUE);
 					} else
 #endif
-						{
+/*						{
 							if (i < 0) {
 								scrollamt += i;
 								choice = 0;
@@ -357,7 +357,7 @@ dialog_checklist(const char *title, const char *cprompt, int height, int width,
 									box_x + check_x + 5,
 									box_y,
 									box_y + list_height + 1);
-				} else {
+*/				} else {
 					/* De-highlight current item */
 					print_item(list,
 							   ItemData(scrollamt + choice),
