@@ -531,6 +531,7 @@ int console_okay(Install_UI *UI)
     UI->prompt = console_prompt;
     UI->website = console_website;
     UI->complete = console_complete;
+	UI->idle = NULL;
 
     return(1);
 }

@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.32 2000-07-31 21:53:39 megastep Exp $ */
+/* $Id: main.c,v 1.33 2000-08-02 22:37:47 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -55,6 +55,8 @@ char *rpm_root = "/";
 int force_manual = 0;
 #endif
 const char *argv0 = NULL;
+
+Install_UI UI;
 
 static char *current_locale = NULL;
 
@@ -135,7 +137,6 @@ int main(int argc, char **argv)
 {
     int exit_status;
     int i, c;
-    Install_UI UI;
     install_info *info;
     install_state state;
     char *xml_file = SETUP_CONFIG;

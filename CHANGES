@@ -1,4 +1,7 @@
 1.4.0:
+Stéphane Peter - Wed Aug  2 15:18:23 PDT 2000
+ * Run an idle loop while executing shell scripts, so that the installer
+   does not appear to be frozen.
 Stéphane Peter - Tue Aug  1 20:34:56 PDT 2000
  * Fixes for multiple operating systems support, and FreeBSD support.
 Stéphane Peter - Tue Jul 25 19:49:06 PDT 2000

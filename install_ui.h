@@ -23,6 +23,7 @@ typedef struct {
     install_state (*setup)(install_info *info);
     void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current);
     void (*abort)(install_info *info);
+	void (*idle)(install_info *info);
 	yesno_answer (*prompt)(const char *txt, yesno_answer suggest);
     install_state (*website)(install_info *info);
     install_state (*complete)(install_info *info);

@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.56 2000-07-31 22:25:32 megastep Exp $ */
+/* $Id: install.c,v 1.57 2000-08-02 22:37:47 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -52,6 +52,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <stdlib.h>
 #include <string.h>
 #include <pwd.h>
@@ -61,6 +62,7 @@
 
 #include "install.h"
 #include "install_log.h"
+#include "install_ui.h"
 #include "detect.h"
 #include "log.h"
 #include "copy.h"
@@ -70,6 +72,7 @@
 extern char *rpm_root;
 extern int disable_install_path;
 extern int disable_binary_path;
+extern Install_UI UI;
 
 /* Functions to retrieve attribution information from the XML tree */
 const char *GetProductName(install_info *info)
@@ -1174,10 +1177,12 @@ int run_script(install_info *info, const char *script, int arg)
     exitval = -1;
     if ( fd >= 0 ) {
         FILE *fp;
-        char cmd[4*PATH_MAX];
+        char cmd[PATH_MAX];
 
         fp = fdopen(fd, "w");
         if ( fp ) {
+			pid_t child;
+
             fprintf(fp, /* Create script file, setting environment variables */
                 "#!/bin/sh\n"
                 "SETUP_PRODUCTNAME=\"%s\"\n"
@@ -1194,12 +1199,40 @@ int run_script(install_info *info, const char *script, int arg)
                 working_dir, script);     
             fchmod(fileno(fp),0755); /* Turn on executable bit */
             fclose(fp);
-            if ( arg >= 0 ) {
-                snprintf(cmd, sizeof(cmd), "%s %d", script_file, arg);
-            } else {
-                snprintf(cmd, sizeof(cmd), "%s %s", script_file, info->install_path);
-            }
-            exitval = system(cmd);
+			if ( arg >= 0 ) {
+				snprintf(cmd, sizeof(cmd), "%d", arg);
+			} else {
+				strncpy(cmd, info->install_path, sizeof(cmd));
+			}
+
+			switch( child = fork() ) {
+			case 0: {/* Inside the child */
+				char *argv[3];
+				argv[0] = script_file;
+				argv[1] = cmd;
+				argv[2] = NULL;
+				execv(script_file, argv);
+				perror("execv");
+				break;
+			}
+			case -1: /* Error */
+				perror("fork");
+				break;
+			default: /* Parent */
+				while ( waitpid(child, &exitval, WNOHANG) == 0 ) {
+					if ( UI.idle ) {
+						UI.idle(info); /* Run an idle loop while the script is running */
+					} else {
+						usleep(10000);
+					}
+				}
+				if ( WIFEXITED(exitval) ) {
+					exitval = WEXITSTATUS(exitval);
+				} else {
+					exitval = 1;
+				}
+				break;
+			}
         }
         close(fd);
         unlink(script_file);

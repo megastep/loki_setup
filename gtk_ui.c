@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.43 2000-07-31 21:27:08 megastep Exp $
+   $Id: gtk_ui.c,v 1.44 2000-08-02 22:37:47 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1160,6 +1160,13 @@ static install_state gtkui_readme(install_info *info)
     return cur_state;
 }
 
+static void gtkui_idle(install_info *info)
+{
+    while( gtk_events_pending() ) {
+        gtk_main_iteration();
+    }
+}
+
 static install_state gtkui_setup(install_info *info)
 {
     GtkWidget *window;
@@ -1350,6 +1357,7 @@ int gtkui_okay(Install_UI *UI)
             UI->prompt = gtkui_prompt;
             UI->website = gtkui_website;
             UI->complete = gtkui_complete;
+			UI->idle = gtkui_idle;
             XCloseDisplay(dpy);
 
             okay = 1;
