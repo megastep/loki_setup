@@ -1,4 +1,8 @@
 Current:
+Ryan C. Gordon (icculus.org) - Sat Feb 14 20:28:17 EST 2004
+ * Respect new "tail" behaviour in image/setup.sh
+Ryan C. Gordon (icculus.org) - Sat Feb 14 20:28:17 EST 2004
+ * AMD64 patch in image/setup.sh
 Ludwig Nussel - Ludwig Nussel - Sat Feb  7 21:44:57 PST 2004
  * Various bugfixes
 Ludwig Nussel (ludwig.nussel@web.de) - Tue Jan 13 19:19:15 PST 2004
