@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.60 2000-10-11 02:27:37 megastep Exp $ */
+/* $Id: install.c,v 1.61 2000-10-11 08:57:59 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -901,20 +901,20 @@ void generate_uninstall(install_info *info)
             /* Add files */
             for ( felem = opt->file_list; felem; felem = felem->next ) {
                 if ( felem->symlink ) {
-                    loki_registerfile(option, felem->path, NULL);
+                    loki_register_file(option, felem->path, NULL);
                 } else {
-                    loki_registerfile(option, felem->path, get_md5(felem->md5sum));
+                    loki_register_file(option, felem->path, get_md5(felem->md5sum));
                 }
             }
 
             /* Add directories */
             for ( delem = opt->dir_list; delem; delem = delem->next ) {
-                loki_registerfile(option, delem->path, NULL);
+                loki_register_file(option, delem->path, NULL);
             }
 
             /* Add RPM entries */
             for ( relem = opt->rpm_list; relem; relem = relem->next ) {
-                loki_registerrpm(option, relem->name, relem->version, relem->release, relem->autoremove);
+                loki_register_rpm(option, relem->name, relem->version, relem->release, relem->autoremove);
             }
 		
             /* Generate optional pre and post uninstall scripts in the 'scripts' subdirectory */
