@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.86 2003-08-26 03:33:22 megastep Exp $
+   $Id: gtk_ui.c,v 1.87 2003-10-15 00:08:11 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -796,16 +796,17 @@ static yesno_answer gtkui_prompt(const char *txt, yesno_answer suggest)
                            yes_button);
         gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->action_area),
                            no_button);
+		gtk_window_set_title(GTK_WINDOW(dialog), _("Choice Requested"));
     } else {
         gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->action_area),
                            ok_button);
+		gtk_window_set_title(GTK_WINDOW(dialog), _("Message"));
     }
     
     /* Add the label, and show everything we've added to the dialog. */
     
     gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->vbox),
                        label);
-    gtk_window_set_title(GTK_WINDOW(dialog), _("Setup"));
     gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
     gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
     gtk_widget_show_all (dialog);
