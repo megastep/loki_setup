@@ -110,7 +110,7 @@ int detect_cdrom(install_info *info)
 	int mounted = getfsstat(NULL, 0, MNT_NOWAIT);
 
     /* Clear all of the mount points */
-    for( cd = info->cdroms; cd; cd = cd->next ) {
+    for( cd = info->cdroms_list; cd; cd = cd->next ) {
         set_cdrom_mounted(cd, NULL);
     }
 	if ( env ) { /* Override the CD detection */
@@ -125,6 +125,7 @@ int detect_cdrom(install_info *info)
 	}
 
 	if ( mounted > 0 ) {
+        int i;
 		struct statfs *mnts = (struct statfs *)malloc(sizeof(struct statfs) * mounted);
 
 		mounted = getfsstat(mnts, mounted * sizeof(struct statfs), MNT_WAIT);
