@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.7 1999-11-25 01:32:30 hercules Exp $ */
+/* $Id: main.c,v 1.8 1999-11-25 01:47:22 hercules Exp $ */
 
 #include <stdio.h>
 #include <setjmp.h>
@@ -158,7 +158,7 @@ int main(int argc, char **argv)
                 /* Not reached */
                 break;
         }
-        if ( state == SETUP_EXIT ) {
+        if ( state == SETUP_COMPLETE ) {
             launch_browser(info);
         }
     }
