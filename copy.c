@@ -1070,13 +1070,11 @@ ssize_t size_readme(install_info *info, xmlNodePtr node)
 }
 
 /* Get the install size of an option node, in bytes */
-ssize_t size_node(install_info *info, xmlNodePtr node)
+unsigned long long size_node(install_info *info, xmlNodePtr node)
 {
     const char *size_prop, *lang_prop;
-    ssize_t size;
+    unsigned long long size = 0;
 	int lang_matched = 1;
-
-    size = 0;
 
     /* First do it the easy way, look for a size attribute */
     size_prop = xmlGetProp(node, "size");
@@ -1140,11 +1138,10 @@ ssize_t size_node(install_info *info, xmlNodePtr node)
 }
 
 /* Get the install size of an option tree, in bytes */
-ssize_t size_tree(install_info *info, xmlNodePtr node)
+unsigned long long size_tree(install_info *info, xmlNodePtr node)
 {
-    ssize_t size;
+    unsigned long long size = 0;
 
-    size = 0;
     while ( node ) {
         const char *wanted;
 

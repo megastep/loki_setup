@@ -317,7 +317,7 @@ static void update_size(void)
 
     carbon_debug("update-size()\n");
 
-    snprintf(text, sizeof(text), _("%ld MB"), BYTES2MB(cur_info->install_size));
+    snprintf(text, sizeof(text), _("%d MB"), (int) BYTES2MB(cur_info->install_size));
     carbon_SetLabelText(MyRes, OPTION_ESTSIZE_VALUE_LABEL_ID, text);
     check_install_button();
 }
@@ -651,9 +651,10 @@ static void OnCommandCDKeyContinue()
     char CDConfirmKey[256];
 
     carbon_GetEntryText(MyRes, CDKEY_ENTRY_ID, CDKey, sizeof (CDKey));
-    carbon_GetEntryText(MyRes, CDKEY_CONFIRM_ENTRY_ID, CDConfirmKey, sizeof (CDConfirmKey));
+    //carbon_GetEntryText(MyRes, CDKEY_CONFIRM_ENTRY_ID, CDConfirmKey, sizeof (CDConfirmKey));
 
-    if(strcasecmp(CDKey, CDConfirmKey) != 0)
+    // !!! FIXME: Only show do this if vcdk fails...  --ryan.
+    if (0) //(strcasecmp(CDKey, CDConfirmKey) != 0)
         carbon_Prompt(MyRes, PromptType_OK, "CD keys do not match.  Please try again.", NULL, 0);
     else if(strcasecmp(CDKey, "") == 0)
         carbon_Prompt(MyRes, PromptType_OK, "Please specify a CD key!", NULL, 0);
@@ -1130,7 +1131,7 @@ static int carbonui_update(install_info *info, const char *path, size_t progress
     int textlen;
     char text[1024];
     char *install_path;
-    float new_update;
+    double new_update;
 
     char LastText[1024] = "";
     char LastCurrent[1024] = "";
@@ -1186,7 +1187,7 @@ static int carbonui_update(install_info *info, const char *path, size_t progress
         carbon_SetProgress(MyRes, COPY_CURRENT_FILE_PROGRESS_ID, new_update);
 
         // Update total install progress
-        new_update = (float)info->installed_bytes / (float)info->install_size;
+        new_update = (double)info->installed_bytes / (double)info->install_size;
 	    if (new_update > 1.0)
 	        new_update = 1.0;
 	    else if (new_update < 0.0)

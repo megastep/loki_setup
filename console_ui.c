@@ -533,7 +533,7 @@ static install_state console_setup(install_info *info)
 			/* Confirm the install */
 			printf(_("Installing to %s\n"), info->install_path);
 			printf(_("%d MB available, %d MB will be installed.\n"),
-				   detect_diskspace(info->install_path), BYTES2MB(info->install_size));
+				   detect_diskspace(info->install_path), (int) BYTES2MB(info->install_size));
 			printf("\n");
 			if ( console_prompt(_("Continue install?"), RESPONSE_YES) == RESPONSE_YES ) {
 				okay = 1;

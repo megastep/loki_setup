@@ -122,10 +122,10 @@ typedef struct _install_info {
     } *cdroms_list;
 
     /* The amount installed so far, in bytes */
-    size_t installed_bytes;
+    unsigned long long installed_bytes;
 
     /* The total install size, in bytes */
-    size_t install_size;
+    unsigned long long install_size;
 
 	/* Flag indicating if the installation was completed */
 	int install_complete;

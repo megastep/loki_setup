@@ -20,10 +20,10 @@ extern ssize_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
 						int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current));
 
 /* Get the install size of an option node, in bytes */
-extern ssize_t size_node(install_info *info, xmlNodePtr node);
+extern unsigned long long size_node(install_info *info, xmlNodePtr node);
 
 /* Get the install size of an option tree, in bytes */
-extern ssize_t size_tree(install_info *info, xmlNodePtr node);
+extern unsigned long long size_tree(install_info *info, xmlNodePtr node);
 
 /* See whether or not an XML file contains binary entries */
 extern int has_binaries(install_info *info, xmlNodePtr node);

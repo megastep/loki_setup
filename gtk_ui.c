@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.93 2004-02-19 22:13:25 megastep Exp $
+   $Id: gtk_ui.c,v 1.94 2004-02-28 18:38:06 icculus Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1675,7 +1675,7 @@ static int gtkui_update(install_info *info, const char *path, size_t progress, s
         }
         widget = glade_xml_get_widget(setup_glade, "current_file_progress");
         gtk_progress_bar_update(GTK_PROGRESS_BAR(widget), new_update);
-        new_update = (gfloat)info->installed_bytes / (gfloat)info->install_size;
+        new_update = (gdouble)info->installed_bytes / (gdouble)info->install_size;
 	if (new_update > 1.0) {
 	    new_update = 1.0;
 	}
