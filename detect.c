@@ -781,13 +781,12 @@ const char *get_cdrom(install_info *info, const char *id)
 
 void DetectLocale(void)
 {
-	current_locale = getenv("LC_ALL");
-	if (!current_locale)
-		current_locale = getenv("LC_MESSAGES");
-	if (!current_locale)
-		current_locale = getenv("LANG");
-	if ( current_locale )
-		log_debug(_("Detected locale is %s"), current_locale);
+	current_locale = setlocale(LC_MESSAGES, NULL);
+	if ( current_locale && (!strcmp(current_locale, "C") || !strcmp(current_locale,"POSIX")) ) {
+		current_locale = NULL;
+	}
+	if ( 0 ) /* log_debug doesn't work here as logging is initialized later */
+		fprintf(stderr, _("Detected locale is %s\n"), current_locale);
 }
 
 /* Matches a locale string against the current one */
@@ -796,10 +795,8 @@ int match_locale(const char *str)
 {
 	if ( ! str )
 		return 1;
-	if ( current_locale && ! (!strcmp(current_locale, "C") || !strcmp(current_locale,"POSIX")) ) {
-		if ( strstr(current_locale, str) == current_locale ) {
-			return 1;
-		}
+	if ( current_locale && !strncmp(current_locale, str, 2)) {
+		return 1;
 	} else if ( !strcmp(str, "none") ) {
 		return 1;
 	}

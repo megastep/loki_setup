@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.104 2004-09-02 03:19:59 megastep Exp $
+   $Id: gtk_ui.c,v 1.105 2004-09-07 22:09:00 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1229,6 +1229,7 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
     gchar *name;
     int i;
     GtkWidget *button = NULL;
+	gboolean install = FALSE;
 
 	/* Skip translation nodes */
 	if ( !strcmp(node->name, "lang") )
@@ -1309,15 +1310,15 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
 	}
 
     /* Check for required option */
-    if ( xmlGetProp(node, "required") ) {
+    if ( xmlNodePropIsTrue(node, "required") ) {
 		xmlSetProp(node, "install", "true");
 		gtk_widget_set_sensitive(GTK_WIDGET(button), FALSE);
     }
 
     /* If this is a sub-option and parent is not active, then disable option */
-    wanted = xmlGetProp(node, "install");
+    install = xmlNodePropIsTrue(node, "install");
     if( level>0 && GTK_IS_TOGGLE_BUTTON(parent) && !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(parent)) ) {
-		wanted = "false";
+		install = FALSE;
 		gtk_widget_set_sensitive(GTK_WIDGET(button), FALSE);
     }
 	if ( button ) {
@@ -1327,7 +1328,7 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
 		gtk_widget_show(button);
 	}
 
-	if ( wanted && (strcmp(wanted, "true") == 0) ) {
+	if ( install ) {
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
     } else {
         /* Unmark this option for installation */

@@ -8,7 +8,7 @@
    license.txt
   </eula>
   <component name="Default" version="1.54" default="yes">
-   <option install="true" required="true">
+   <option install="true" required="false">
     Base Install
     <lang lang="fr">Installation de base</lang>
     <lang lang="es">Instalación base</lang>

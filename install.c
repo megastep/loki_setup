@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.139 2004-09-02 03:19:59 megastep Exp $ */
+/* $Id: install.c,v 1.140 2004-09-07 22:09:00 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1302,6 +1302,7 @@ const char *get_option_help(install_info *info, xmlNodePtr node)
     const char *text;
 	char *help = xmlGetProp(node, "help");
 	xmlNodePtr n;
+	xmlNodePtr nolang = NULL;
 
 	*line = '\0';
 	if ( help ) {
@@ -1314,7 +1315,9 @@ const char *get_option_help(install_info *info, xmlNodePtr node)
 	while ( n ) {
 		if( strcmp(n->name, "help") == 0 ) {
 			char *prop = xmlGetProp(n, "lang");
-			if ( match_locale(prop) ) {
+			if(!prop) {
+				nolang = n;
+			} else if ( match_locale(prop) ) {
 				text = xmlNodeListGetString(info->config, n->childs, 1);
 				if(text) {
 					*line = '\0';
@@ -1326,6 +1329,16 @@ const char *get_option_help(install_info *info, xmlNodePtr node)
 			xmlFree(prop);
 		}
 		n = n->next;
+	}
+
+	/* no matching locale found. use if available */
+	if(!*line && nolang) {
+		text = xmlNodeListGetString(info->config, nolang->childs, 1);
+		if(text) {
+			*line = '\0';
+			while ( (*line == 0) && parse_line(&text, line, sizeof(line)) )
+				;
+		}
 	}
 	return (*line) ? line : NULL;
 }
@@ -2719,4 +2732,24 @@ void pop_curdir(void)
         if(chdir(curdirs[--curdir_index])<0)
             fprintf(stderr, "chdir(pop: %s): %s\n", curdirs[curdir_index], strerror(errno));
     }
+}
+
+int xmlNodePropIsTrue(xmlNodePtr node, const char* prop)
+{
+    const char* str = xmlGetProp(node, prop);
+
+	if(str && (!strcmp(str, "true") || !strcmp(str, "yes")))
+		return 1;
+
+	return 0;
+}
+
+int xmlNodePropIsFalse(xmlNodePtr node, const char* prop)
+{
+    const char* str = xmlGetProp(node, prop);
+
+	if(str && (!strcmp(str, "false") || !strcmp(str, "no")))
+		return 1;
+
+	return 0;
 }

@@ -411,6 +411,8 @@ extern int file_is_corrupt(const product_t *prod, const char *path);
 extern int restoring_corrupt(void);
 extern void select_corrupt_options(install_info *info);
 
+int xmlNodePropIsTrue(xmlNodePtr node, const char* prop);
+int xmlNodePropIsFalse(xmlNodePtr node, const char* prop);
 
 /*** Global variables ****/
 
@@ -420,4 +422,5 @@ extern int express_setup;
 
 
 #endif /* _install_h */
+
 
