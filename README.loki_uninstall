@@ -1,0 +1,30 @@
+
+Loki Uninstall Tool 1.0
+
+
+Introduction
+============
+This is a tool written by Loki Software, Inc., designed to remove
+products and components installed with their setup and patch tools.
+
+
+Basic Operation
+===============
+Run "loki_uninstall", and the UI will prompt you for the products and 
+components you want to uninstall.
+
+
+Source Code
+===========
+The source code will be available in an upcoming release of the Loki Setup Tool
+
+
+Contacting Loki Software, Inc.
+==============================
+Please report bugs to http://fenris.lokigames.com/
+
+
+Author
+======
+The Loki Uninstall Tool was written by Sam Lantinga at Loki Software, Inc.
+
