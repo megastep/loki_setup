@@ -60,17 +60,23 @@ all: do-plugins setup setup.gtk uninstall
 testxml: testxml.o
 	$(CC) -o $@ $^ $(LIBS)
 
-uninstall: $(UNINSTALL_OBJS) $(SETUPDB)/libsetupdb.a
+uninstall: $(SETUPDB)/brandelf $(UNINSTALL_OBJS) $(SETUPDB)/libsetupdb.a
 	$(CC) -o $@ $^ $(CONSOLE_LIBS) -static
+	$(SETUPDB)/brandelf -t $(os) $@
 
-setup:	$(CONSOLE_OBJS) $(SETUPDB)/libsetupdb.a
+setup:	$(SETUPDB)/brandelf $(CONSOLE_OBJS) $(SETUPDB)/libsetupdb.a
 	$(CC) -o $@ $^ $(CONSOLE_LIBS) -static
+	$(SETUPDB)/brandelf -t $(os) $@
 
-setup.gtk: $(GUI_OBJS) $(SETUPDB)/libsetupdb.a
+setup.gtk: $(SETUPDB)/brandelf $(GUI_OBJS) $(SETUPDB)/libsetupdb.a
 	$(CC) -o $@ $^ $(GUI_LIBS)
+	$(SETUPDB)/brandelf -t $(os) $@
 
 do-plugins:
 	$(MAKE) -C plugins DYN_PLUGINS=$(DYN_PLUGINS) USE_RPM=$(USE_RPM) SETUPDB=$(shell pwd)/$(SETUPDB) all
+
+$(SETUPDB)/brandelf:
+	$(MAKE) -C $(SETUPDB) brandelf
 
 install.dbg: all
 ifeq ($(DYN_PLUGINS),true)
