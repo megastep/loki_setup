@@ -109,12 +109,14 @@ There are several optional attributes of the install element:
             If this option is not specified, any mounted CDROM is used.
 
  nouninstall This is an optional flag which, if specified, tells setup
-             not to generate an uninstall script after it runs.
+             not to generate an uninstall script after it runs. It also
+             doesn't generate any data for product queries and auto-updating.
 
  uninstall  This attribute is used to change the name of the generated
             'uninstall' script. If not used, the script will always be
             named 'uninstall', which can be a problem if you need to
             install different products in the same directory.
+            *THIS ATTRIBUTE IS DEPRECATED AS OF SETUP 1.5.0*
 
  nobinaries When set to "yes", then setup won't prompt the user for a
             path for binaries. Set this when this installation won't
@@ -440,6 +442,8 @@ There only supported attribute for the script element is the 'lang' element:
 The following environment variables are defined while in the shell script:
     SETUP_PRODUCTNAME   : Product name from the XML file
     SETUP_PRODUCTVER    : Product version from the XML file
+    SETUP_COMPONENTNAME : Name of the product component this script belongs to
+    SETUP_COMPONENTVER  : Version of the product component
     SETUP_INSTALLPATH   : Installation path of the data files
     SETUP_SYMLINKSPATH  : Path where symbolic links for the binary files
                           will be placed.

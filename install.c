@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.71 2000-10-17 22:49:53 megastep Exp $ */
+/* $Id: install.c,v 1.72 2000-10-17 23:37:24 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -875,16 +875,19 @@ void uninstall(install_info *info)
     pop_curdir();
 }
 
-static void output_script_header(FILE *f, install_info *info)
+static void output_script_header(FILE *f, install_info *info, product_component_t *comp)
 {
     fprintf(f,
             "SETUP_PRODUCTNAME=\"%s\"\n"
             "SETUP_PRODUCTVER=\"%s\"\n"
+            "SETUP_COMPONENTNAME=\"%s\"\n"
+            "SETUP_COMPONENTVER=\"%s\"\n"
             "SETUP_INSTALLPATH=\"%s\"\n"
             "SETUP_SYMLINKSPATH=\"%s\"\n"
             "SETUP_CDROMPATH=\"%s\"\n"
             "export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH\n",
             info->name, info->version,
+            loki_getname_component(comp), loki_getversion_component(comp),
             info->install_path,
             info->symlinks_path,
             num_cdroms > 0 ? cdroms[0] : "");
@@ -920,7 +923,7 @@ void generate_uninstall(install_info *info)
             FILE *pre = fopen(tmp, "w");
             if ( pre ) {
                 FILE *script_file = fopen(GetPreUnInstall(info), "r");
-                output_script_header(pre, info);
+                output_script_header(pre, info, component);
                 if (script_file) {
                     while (! feof(script_file)) {
                         count = fread(buf, sizeof(char), PATH_MAX, script_file);
@@ -943,7 +946,7 @@ void generate_uninstall(install_info *info)
             FILE *post = fopen(tmp, "w");
             if ( post ) {
                 FILE *script_file = fopen(GetPostUnInstall(info), "r");
-                output_script_header(post, info);
+                output_script_header(post, info, component);
                 if (script_file) {
                     while (! feof(script_file)) {
                         count = fread(buf, sizeof(char), PATH_MAX, script_file);
@@ -1003,7 +1006,7 @@ void generate_uninstall(install_info *info)
                 
                 pre = fopen(tmp, "w");
                 if ( pre ) {
-                    output_script_header(pre, info);
+                    output_script_header(pre, info, component);
 
                     fprintf(pre, "function pre()\n{\n");
                     for ( selem = opt->pre_script_list; selem; selem = selem->next ) {
@@ -1027,7 +1030,7 @@ void generate_uninstall(install_info *info)
 
                 post = fopen(tmp, "w");
                 if ( post ) {
-                    output_script_header(post, info);
+                    output_script_header(post, info, component);
                     fprintf(post, "function post()\n{\n");
                     for ( selem = opt->post_script_list; selem; selem = selem->next ) {
                         fprintf(post, "%s\n", selem->script);
