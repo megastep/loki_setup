@@ -2,8 +2,6 @@
 #ifndef _detect_h
 #define _detect_h
 
-#define MAX_DRIVES 32
-
 /* Function to detect the current version of libc */
 extern const char *detect_libc(void);
 

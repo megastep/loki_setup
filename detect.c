@@ -129,7 +129,7 @@ int detect_cdrom(install_info *info)
 		struct statfs *mnts = (struct statfs *)malloc(sizeof(struct statfs) * mounted);
 
 		mounted = getfsstat(mnts, mounted * sizeof(struct statfs), MNT_WAIT);
-		for ( i = 0; i < mounted && count < MAX_DRIVES; ++ i ) {
+		for ( i = 0; i < mounted; ++ i ) {
 			if ( ! strcmp(mnts[i].f_fstypename, MNTTYPE_CDROM) ) {
                 for ( cd = info->cdroms_list; cd; cd = cd->next ) {
                     snprintf(file, sizeof(file), "%s/%s", mnts[i].f_mntonname, cd->file);
@@ -233,7 +233,7 @@ int detect_cdrom(install_info *info)
                 realpath(mntdev, mntdevpath) == NULL ) {
                 continue;
             }
-            if ( strcmp(mnt_type, MNTTYPE_CDROM) == 0 && num_cdroms < MAX_DRIVES) {
+            if ( strcmp(mnt_type, MNTTYPE_CDROM) == 0 ) {
                 for ( cd = info->cdroms_list; cd; cd = cd->next ) {
                     snprintf(file, sizeof(file), "%s/%s", mntent->mnt_dir, cd->file);
                     if ( !access(file, F_OK) ) {
