@@ -231,7 +231,8 @@ msgstr ""
 "   -m       Fuerza la extraccion manual de paquetes RPM, y no acutaliza la "
 "base de datos RPM\n"
 "   -n       Fuerza la ejecución en modo texto\n"
-"   -r root  Fija el directorio raiz para extraer los RPMs (por defecto es /)\n"
+"   -r root  Fija el directorio raiz para extraer los RPMs (por defecto es "
+"/)\n"
 "   -v n     Fija en n el nivel de mensajes (verbosity). Valores posibles :\n"
 "            0: Depuración  1: Silencio  2: Normal 3: Avisos 4: Fatal\n"
 "   -V       Muestra la version del programa setup, y devuelve el control\n"
@@ -261,7 +262,8 @@ msgstr ""
 "   -c cwd   Usa un directorio actual alternativo para instalar\n"
 "   -f arch  Use un archivo XML alternativo (por defecto es %s)\n"
 "   -n       Fuerza la ejecución en modo texto\n"
-"   -r root  Fija el directorio raiz para extraer los RPMs (por defecto es /)\n"
+"   -r root  Fija el directorio raiz para extraer los RPMs (por defecto es "
+"/)\n"
 "   -v n     Fija en n el nivel de mensajes (verbosity). Valores posibles :\n"
 "            0: Depuración  1: Silencio  2: Normal 3: Avisos 4: Fatal\n"
 "   -V       Muestra la version del programa setup, y devuelve el control\n"
@@ -630,7 +632,8 @@ msgstr "Quieres instalar enlaces dinámicos a un directorio en tu path?"
 #: console_ui.c:391
 #, fuzzy
 msgid "Please enter the path in which to create the symbolic links"
-msgstr "Por favor ingresa la trayectorio donde se crearán los enlaces simbólico"
+msgstr ""
+"Por favor ingresa la trayectorio donde se crearán los enlaces simbólico"
 
 #: console_ui.c:396
 #, c-format
@@ -774,7 +777,8 @@ msgstr "Error: se ha excedido el máximo de %d install_paths\n"
 
 #: gtk_ui.c:930
 msgid "Warning: No writable targets in path... You may want to be root.\n"
-msgstr "Advertencia: no hay objetos escribibles en la ruta... Inténtalo como root.\n"
+msgstr ""
+"Advertencia: no hay objetos escribibles en la ruta... Inténtalo como root.\n"
 
 #: gtk_ui.c:949
 msgid "Unable to locate 'setup_menuitems_checkbox'"

@@ -1,0 +1,105 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR Free Software Foundation, Inc.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Setup 1.5\n"
+"POT-Creation-Date: 2000-10-25 12:52-0700\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Stéphane Peter <megastep@lokigames.com>\n"
+"Language-Team: French <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: ENCODING\n"
+
+#: uninstall.c:27
+#, c-format
+msgid ""
+"Usage: %s product to uninstall the product\n"
+"       %s -l      to list all products\n"
+"       %s product -l        to list all components\n"
+"       %s product component to uninstall a single component\n"
+msgstr ""
+"Utilisation: %s produit    pour désinstaller le produit\n"
+"             %s -l         pour lister les produits\n"
+"             %s produit -l pour lister tous les composants\n"
+"             %s produit composant pour désinstaller un composant\n"
+
+#: uninstall.c:105
+#, c-format
+msgid "Signal %d caught. Aborting.\n"
+msgstr "Signal %d reçu. Abandon.\n"
+
+#: uninstall.c:135
+#, c-format
+msgid "Notice: the %s RPM was installed for this product.\n"
+msgstr "Attention: l'archive RPM %s a été installée pour ce produit.\n"
+
+#: uninstall.c:177
+#, c-format
+msgid "Could not change to directory: %s\n"
+msgstr "Ne peut aller dans le répertoire: %s\n"
+
+#: uninstall.c:201
+msgid ""
+"No write access to the installation directory.\n"
+"Aborting.\n"
+msgstr ""
+"Pas d'accès en écriture dans le répertoire d'installation.\n"
+"Abandon.\n"
+
+#: uninstall.c:206
+#, c-format
+msgid ""
+"No write access to the registry file: %s.\n"
+"Aborting.\n"
+msgstr ""
+"Pas d'accès en écriture pour le fichier de registre: %s.\n"
+"Abandon.\n"
+
+#: uninstall.c:245
+msgid "Installed products:\n"
+msgstr "Produits installés:\n"
+
+#: uninstall.c:251
+#, c-format
+msgid "installed in %s\n"
+msgstr "installé dans %s\n"
+
+#: uninstall.c:254
+msgid " Error while accessing product info\n"
+msgstr " Erreur lors de l'accès aux infos du produit\n"
+
+#: uninstall.c:262
+#, c-format
+msgid "Could not open product information for %s\n"
+msgstr "Impossible d'ouvrir les informations du produit pour %s\n"
+
+#: uninstall.c:268
+#, c-format
+msgid ""
+"Product name: %s\n"
+"Installed in %s\n"
+msgstr ""
+"Nom du produit: %s\n"
+"Installé dans %s\n"
+
+#: uninstall.c:275
+msgid "Components:\n"
+msgstr "Composants:\n"
+
+#: uninstall.c:288
+#, c-format
+msgid "Unable to find component %s\n"
+msgstr "Impossible de trouver le composant %s\n"
+
+#: uninstall.c:296
+msgid "An error occured during the uninstallation process.\n"
+msgstr "Une erreur est apparue durant le processus d'installation.\n"
+
+#: uninstall.c:300
+#, c-format
+msgid "%s has been successfully uninstalled.\n"
+msgstr "%s a été désinstallé avec succès.\n"
