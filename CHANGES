@@ -1,5 +1,7 @@
 
 1.2.1:
+Sam Lantinga - Mon Feb 14 13:06:46 PST 2000
+ * Added -V command line option to print the version and build date
 Troy A. Griffitts - Mon, 14 Feb 2000 12:24:32 -0700
  * Added support for the RedHat /etc/X11/applnk desktop directory
  * Added "menu" and "name" attributes to the binary element

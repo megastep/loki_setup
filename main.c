@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.14 2000-01-22 00:16:31 megastep Exp $ */
+/* $Id: main.c,v 1.15 2000-02-14 21:07:29 hercules Exp $ */
 
 #include <stdio.h>
 #include <setjmp.h>
@@ -12,6 +12,8 @@
 #include "install.h"
 #include "install_ui.h"
 #include "log.h"
+
+#define SETUP_VERSION "1.2.1"
 
 #define SETUP_CONFIG  SETUP_BASE "setup.xml"
 
@@ -54,7 +56,8 @@ static void print_usage(const char *argv0)
 "   -n       Force the text-only user interface\n"
 "   -r root  Set the root directory for extracting RPM files (default is /)\n"
 "   -v n     Set verbosity level to n. Available values :\n"
-"            0: Debug  1: Quiet  2: Normal 3: Warnings 4: Fatal\n",
+"            0: Debug  1: Quiet  2: Normal 3: Warnings 4: Fatal\n"
+"   -V       Print the version of the setup program and exit\n",
      argv0);
 }
 
@@ -73,7 +76,7 @@ int main(int argc, char **argv)
     umask(DEFAULT_UMASK);
 
     /* Parse the command-line options */
-    while ( (c=getopt(argc, argv, "hnc:f:r:v::")) != EOF ) {
+    while ( (c=getopt(argc, argv, "hnc:f:r:v::V")) != EOF ) {
         switch (c) {
             case 'c':
                 if ( chdir(optarg) < 0 ) {
@@ -102,6 +105,10 @@ int main(int argc, char **argv)
                     log_level = LOG_DEBUG;
                 }
                 break;
+            case 'V':
+                printf(
+"Loki Setup version " SETUP_VERSION ", built on "__DATE__"\n");
+                exit(0);
             default:
                 print_usage(argv[0]);
                 exit(0);
