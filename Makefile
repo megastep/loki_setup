@@ -35,7 +35,7 @@ ifeq ($(USE_RPM),true)
 LIBS += -lrpm -ldb
 endif
 CONSOLE_LIBS = $(LIBS)
-GUI_LIBS = $(LIBS) -Wl,-Bdynamic -lgtk -lgdk `libglade-config --prefix`/lib/libglade.a -rdynamic
+GUI_LIBS = $(LIBS) -Wl,-Bdynamic $(shell gtk-config --libs) $(shell libglade-config --prefix)/lib/libglade.a -rdynamic
 
 all: setup setup.gtk
 
