@@ -657,16 +657,6 @@ int carbon_ReadmeOrLicense(CarbonRes *Res, int ReadmeNotLicense, const char *Mes
     return PromptResponse;
 }
 
-/*!!!TODO - Because embedding of newly created controls is not currently working,
- we had to create the controls on the resource ahead of time (12 of each type).
- This amount should be sufficient for most/all applications.
-
- The existing code to create the controls dynamically is currently commented out.
- The code works, but embedding the controls in the inner options group is currently
- not working for an unknown reason.
-
- Instead, we are just making visible the appropriate existing controls.
- */
 OptionsButton *carbon_OptionsNewLabel(OptionsBox *Box, const char *Name)
 {
     printf("carbon_OptionsNewLabel() - %s\n", Name);
