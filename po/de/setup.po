@@ -5,10 +5,10 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: Loki Setup\n"
 "POT-Creation-Date: 2000-12-01 14:33-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Last-Translator: Stefan Gehn <sgehn@gmx.net>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
@@ -55,7 +55,7 @@ msgstr "Benötigter Speicherplatz:"
 #: image/setup.data/setup.glade:912 image/setup.data/setup.glade:1148
 #: image/setup.data/setup.glade:1394
 msgid "Exit"
-msgstr "Ende"
+msgstr "Beenden"
 
 #: image/setup.data/setup.glade:414
 msgid "Free space:"
@@ -79,19 +79,19 @@ msgstr "Installation abgeschloßen"
 
 #: image/setup.data/setup.glade:293
 msgid "Install Options"
-msgstr "Installations- Optionen"
+msgstr "Installations-Optionen"
 
 #: image/setup.data/setup.glade:628
 msgid "Install Progress"
-msgstr "Installations- Fortschritt"
+msgstr "Installations-Fortschritt"
 
 #: image/setup.data/setup.glade:269
 msgid "Install a symbolic link into the path"
-msgstr ""
+msgstr "Soll ein symbolischer Link im Pfad installiert werden?"
 
 #: image/setup.data/setup.glade:126
 msgid "Install path:"
-msgstr "Installations- Pfad"
+msgstr "Installationspfad"
 
 #: image/setup.data/setup.glade:1608
 msgid "Launch Browser"
@@ -108,7 +108,7 @@ msgstr "Lizenzabkommen"
 #: image/setup.data/setup.glade:193
 #, fuzzy
 msgid "Link path:"
-msgstr "Installations- Pfad"
+msgstr "Symlink Pfad"
 
 #: image/setup.data/setup.glade:938
 msgid "Play!"
@@ -116,15 +116,15 @@ msgstr "Spielen!"
 
 #: image/setup.data/setup.glade:1518
 msgid "Please visit our website for updates and support."
-msgstr "Bitte besuchen Sie unsere Webseite fuer Neuerungen und Support."
+msgstr "Bitte besuchen Sie unsere Webseite für Neuerungen und Support."
 
 #: image/setup.data/setup.glade:1200
 msgid "Press 'Exit' to clean up temporary files."
-msgstr "Drücken Sie 'Ende' um temporäre Dateien zu löschen."
+msgstr "Drücken Sie 'Beenden' um temporäre Dateien zu löschen."
 
 #: image/setup.data/setup.glade:1427
 msgid "Product Website"
-msgstr "Produkt- Webseite"
+msgstr "Produkt-Webseite"
 
 #: image/setup.data/setup.glade:1641
 msgid "Readme File"
@@ -149,7 +149,7 @@ msgstr "Das Spiel wurde installiert in:"
 
 #: image/setup.data/setup.glade:1183
 msgid "This installation has been aborted."
-msgstr "Diese Installation wurde abgebrochen."
+msgstr "Die Installation wurde abgebrochen."
 
 #: image/setup.data/setup.glade:767
 msgid "Total Install"
@@ -222,15 +222,19 @@ msgstr ""
 "Gebrauch: %s [options]\n"
 "\n"
 "Folgende Parameter sind erlaubt:\n"
+"   -b pfad  Pfad für binäre Dateien auf <pfad> setzen\n"
 "   -h       Diese Hilfe anzeigen\n"
-"   -c cwd   Benutze ein alternatives aktives Verzeichnis für die "
+"   -i pfad  Installationsverzeichnis auf <pfad> setzen\n"
+"   -c cwd   Benutze ein alternatives Verzeichnis für die "
 "Installation\n"
-"   -f file  Benutze eine alternative XML Datei (Standard %s)\n"
-"   -n       Erzwinge Nur- Text Benutzerinterface\n"
-"   -r root  Setze Basis Verzeichnis für die Installation von RPM Dateien "
+"   -f datei Benutze eine alternative XML Datei (Standard %s)\n"
+"   -m       Erzwinge manuelles auspacken der RPM Pakete, RPM-Datenbank "
+"nicht updaten\n"
+"   -n       Erzwinge Nur-Text Benutzerinterface\n"
+"   -r root  Setze Basis-Verzeichnis für die Installation von RPM Dateien "
 "(Standard ist /)\n"
 "   -v n     Setze Ausgabelevel n. Mögliche Werte :\n"
-"            0: Debug  1: Quiet  2: Normal 3: Warnings 4: Fatal\n"
+"            0: Debug  1: Ruhig  2: Normal 3: Warnungen 4: Fatale Fehler\n"
 "   -V       Zeigt die Version des Setup Programmes an und beendet dieses\n"
 
 #: main.c:128
@@ -252,15 +256,15 @@ msgstr ""
 "Gebrauch: %s [options]\n"
 "\n"
 "Folgende Parameter sind erlaubt:\n"
+"   -b pfad  Pfad für binäre Dateien auf <pfad> setzen\n"
 "   -h       Diese Hilfe anzeigen\n"
-"   -c cwd   Benutze ein alternatives aktives Verzeichnis für die "
+"   -i pfad  Installationsverzeichnis auf <pfad> setzen\n"
+"   -c cwd   Benutze ein alternatives Verzeichnis für die "
 "Installation\n"
 "   -f file  Benutze eine alternative XML Datei (Standard %s)\n"
-"   -n       Erzwinge Nur- Text Benutzerinterface\n"
-"   -r root  Setze Basis Verzeichnis für die Installation von RPM Dateien "
-"(Standard ist /)\n"
+"   -n       Erzwinge Nur-Text Benutzerinterface\n"
 "   -v n     Setze Ausgabelevel n. Mögliche Werte :\n"
-"            0: Debug  1: Quiet  2: Normal 3: Warnings 4: Fatal\n"
+"            0: Debug  1: Ruhig  2: Normal 3: Warnungen 4: Fatale Fehler\n"
 "   -V       Zeigt die Version des Setup Programmes an und beendet dieses\n"
 
 #: main.c:166
@@ -271,7 +275,7 @@ msgid ""
 "Choose Yes to retry, No to cancel"
 msgstr ""
 "\n"
-"Bitte mounten Sie die %s CDROM.\n"
+"Bitte legen Sie die %s CDROM ein.\n"
 "Wählen Sie Ja um es nochmal zu versuche, Nein um abzubrechen"
 
 #: main.c:169
@@ -298,7 +302,7 @@ msgstr "Laden von '%s' fehlgeschlagen\n"
 #: main.c:301
 #, c-format
 msgid "Detected locale is %s"
-msgstr ""
+msgstr "Gefundene Sprache: %s"
 
 #: main.c:310
 msgid "No UI drivers available\n"
@@ -308,7 +312,7 @@ msgstr "Keine UI Treiber vorhanden\n"
 msgid ""
 "\n"
 "Illegal installation: do not mix components with a component installation.\n"
-msgstr ""
+msgstr "\nFehlerhafte Installation: Mischen sie keine Komponenten mit einer Komponenten-Installation.\n"
 
 #: main.c:339
 #, c-format
@@ -316,7 +320,8 @@ msgid ""
 "\n"
 "The %s component is already installed.\n"
 "Please uninstall it beforehand.\n"
-msgstr ""
+msgstr "\n%s ist schon installiert.\n"
+"Bitte deinstallieren sie dieses vorher.\n"
 
 #: main.c:346
 #, c-format
@@ -324,7 +329,8 @@ msgid ""
 "\n"
 "You must install %s before running this\n"
 "installation program.\n"
-msgstr ""
+msgstr "\nSie müssen %s vor der Ausführung dieses\n"
+"Installationsprogrammes installieren.\n"
 
 #: main.c:359
 msgid ""
@@ -334,23 +340,24 @@ msgstr ""
 #: detect.c:73
 #, fuzzy, c-format
 msgid "Unmounting device %s"
-msgstr "Erzeuge Gerät %s"
+msgstr "Unmounte Gerät %s"
 
 #: detect.c:75
 #, c-format
 msgid "Failed to unmount device %s mounted on %s"
-msgstr ""
+msgstr "Konnte Gerät %s nicht unmounten, es ist auf %s gemountet"
 
 #: detect.c:167 detect.c:209
 #, c-format
 msgid "Mounted device %s"
-msgstr ""
+msgstr "Gemountetes Gerät %s"
 
 #: plugins.c:96
 msgid ""
 "Registered plugins :\n"
 "\n"
-msgstr ""
+msgstr "Registrierte Plugins :\n"
+"\n"
 
 #: plugins.c:98
 #, c-format
@@ -359,30 +366,33 @@ msgid ""
 "\tVersion: %s\n"
 "\tAuthor: %s\n"
 msgstr ""
+"\tBeschreibung: %s\n"
+"\tVersion: %s\n"
+"\tAutor: %s\n"
 
 #: plugins.c:101
 msgid "\tPlugin is statically linked.\n"
-msgstr ""
+msgstr "\tPlugin ist statisch gelinkt.\n"
 
 #: plugins.c:103
 #, c-format
 msgid "\tRecognizes %d extensions: "
-msgstr ""
+msgstr "\tÜnterstützt %d erweiterungen:"
 
 #: plugins.c:148
 #, c-format
 msgid "Error registering %s plugin: %s\n"
-msgstr ""
+msgstr "Fehler beim Registrieren des Plugins %s: %s\n"
 
 #: plugins.c:151
 #, c-format
 msgid "Error initializing %s plugin"
-msgstr ""
+msgstr "Konnte das Plugin %s nicht initialisieren"
 
 #: plugins.c:155
 #, c-format
 msgid "Error trying to load %s plugin: %s\n"
-msgstr ""
+msgstr "Fehler beim Laden von Plugin %s: %s\n"
 
 #: network.c:142
 msgid "Out of memory, no network check"
@@ -417,11 +427,11 @@ msgstr ""
 
 #: install.c:693
 msgid "There can be only one binary with a 'play' attribute"
-msgstr ""
+msgstr "Es kann nur ein Programm mit dem 'play'-Attribut geben"
 
 #: install.c:696
 msgid "The only valid values for the 'play' attribute are yes and no"
-msgstr ""
+msgstr "Die einzig erlaubten Werte für das 'play'-Attribut sind Ja und Nein"
 
 #: install.c:721
 msgid "Couldn't find your home directory"
@@ -463,16 +473,16 @@ msgstr "Konnte nicht auf Datei %s schreiben"
 #: install.c:1186
 #, c-format
 msgid "Could not write temporary pre-uninstall script in %s"
-msgstr ""
+msgstr "Erstellen des temporären pre-uninstall Skripts in %s fehlgeschlagen"
 
 #: install.c:1207
 #, c-format
 msgid "Could not write post-uninstall script in %s"
-msgstr ""
+msgstr "Erstellen des post-uninstall Skripts in %s fehlgeschlagen"
 
 #: install.c:1271
 msgid "Could not create install log"
-msgstr ""
+msgstr "Anlegen des Install-Logs fehlgeschlagen"
 
 #: install.c:1298
 #, c-format
@@ -487,7 +497,7 @@ msgstr "Konnte Desktop Datei '%s' nicht erzeugen"
 #: copy.c:207
 #, fuzzy, c-format
 msgid "Unable to create %s symlink pointing to %s"
-msgstr "Konnte Desktop Datei '%s' nicht erzeugen"
+msgstr "Konnte symbolischen Link '%s' der auf '%s' zeigen sollte nicht erzeugen"
 
 #: copy.c:269
 #, c-format
@@ -506,20 +516,20 @@ msgstr "Konnte Datei '%s' auf keinem der vorhandenen CDROM Laufwerke finden"
 
 #: copy.c:497
 msgid "Running script"
-msgstr ""
+msgstr "Führe Skript aus"
 
 #: copy.c:627
 msgid "Component element needs to have a name"
-msgstr ""
+msgstr "Komponenten-Element benötigt einen Namen"
 
 #: copy.c:630
 msgid "Component element needs to have a version"
-msgstr ""
+msgstr "Komponenten-Element benötigt eine Versionsnummer"
 
 #: copy.c:782
 #, c-format
 msgid "Suspect size value for option %s\n"
-msgstr ""
+msgstr "Ungültige Größe für Option %s\n"
 
 #: file.c:127
 #, c-format
@@ -538,11 +548,11 @@ msgstr "Konnte nicht auf Datei %s schreiben"
 
 #: file.c:161
 msgid "Read on write stream"
-msgstr "Lesenzugriff auf Schreibstream"
+msgstr "Lesezugriff auf Schreibstrom"
 
 #: file.c:204
 msgid "Skip zeroes on write stream"
-msgstr "Überspringe Nullen auf Schreibstream"
+msgstr "Überspringe Nullen auf Schreibstrom"
 
 #: file.c:221 file.c:252 file.c:259
 #, c-format
@@ -551,7 +561,7 @@ msgstr "Konnte %s nicht vollständig schreiben"
 
 #: file.c:227
 msgid "Write on read stream"
-msgstr "Schreibzugriff auf Lesestream"
+msgstr "Schreibzugriff auf Lesestrom"
 
 #: file.c:279
 #, c-format
@@ -612,7 +622,7 @@ msgstr "N/j"
 #: console_ui.c:65
 #, c-format
 msgid "%s [Press Enter] "
-msgstr ""
+msgstr "%s [Drücke Enter] "
 
 #: console_ui.c:69 console_ui.c:95
 #, c-format
@@ -677,16 +687,16 @@ msgstr "Wollen Sie die Datei %s lesen?"
 
 #: console_ui.c:328
 msgid "Please choose the product to install, or Q to quit. "
-msgstr ""
+msgstr "Bitte wählen sie das zu installierende Produkt aus oder drücken sie Q um das Setup zu beenden. "
 
 #: console_ui.c:358
 msgid "Please enter the installation path"
-msgstr "Bitte geben Sie den Installations- Pfad ein"
+msgstr "Bitte geben Sie den Installationspfad an"
 
 #: console_ui.c:363
 #, fuzzy, c-format
 msgid "Install path set to: %s\n"
-msgstr "Installations- Pfad: %s\n"
+msgstr "Installationspfad: %s\n"
 
 #: console_ui.c:378 console_ui.c:432
 #, c-format
@@ -696,23 +706,25 @@ msgstr "Keine Schreibrechte für %s\n"
 #: console_ui.c:404
 #, fuzzy
 msgid "Do you want to install symbolic links to a directory in your path?"
-msgstr "Wollen Sie Desktopicons erzeugen?"
+msgstr "Möchten Sie einen symbolischen Link im Pfad erzeugen?"
 
 #: console_ui.c:411
 #, fuzzy
 msgid "Please enter the path in which to create the symbolic links"
-msgstr "Bitte geben sie den Pfad für Binärdateien ein"
+msgstr "Bitte geben sie den Pfad für die symbolischen Links an"
 
 #: console_ui.c:416
 #, c-format
 msgid "Binary path set to: %s\n"
-msgstr ""
+msgstr "Programmpfad: %s\n"
 
 #: console_ui.c:423
 msgid ""
 "Binary path must be different than the install path.\n"
 "The binary path must be an existing directory.\n"
 msgstr ""
+"Der Programmpfad muss sich vom Installationspfad unterscheiden und\n"
+"auf ein schon vorhandenes Verzeichnis zeigen.\n"
 
 #: console_ui.c:457
 #, c-format
@@ -721,6 +733,9 @@ msgid ""
 "%s component\n"
 "\n"
 msgstr ""
+"\n"
+"%s Komponente\n"
+"\n"
 
 #: console_ui.c:469
 msgid "Do you want to install desktop items?"
@@ -738,7 +753,7 @@ msgstr "%d MB verfügbar, %d MB werden installiert.\n"
 
 #: console_ui.c:479
 msgid "Continue install?"
-msgstr "Installation fortführen?"
+msgstr "Mit Installation fortfahren?"
 
 #: console_ui.c:493
 #, c-format
@@ -763,8 +778,8 @@ msgid ""
 "If you run a game as root, the preferences will be stored in\n"
 "root's home directory instead of your user account directory."
 msgstr ""
-"Wenn Sie das Spiel als root starten werden die Einstellungen in\n"
-"dem Heimatverzeichnis von root installiert anstatt in Ihrem "
+"Wenn Sie das Spiel als root starten werden die Einstellungen im\n"
+"Heimatverzeichnis von root gespeichert anstatt in Ihrem "
 "Benutzerverzeichnis."
 
 #: console_ui.c:537
@@ -778,7 +793,7 @@ msgstr "Bitte besuchen Sie unsere Webseite für Neuerungen und Support.\n"
 
 #: console_ui.c:547
 msgid "Would you like to launch web browser?"
-msgstr "Wollen Sie einen Web Browser starten?"
+msgstr "Wollen Sie einen Web-Browser starten?"
 
 #: console_ui.c:558
 msgid "Standard input is not a terminal!\n"
@@ -790,8 +805,8 @@ msgid ""
 "If you run this as root, the preferences will be stored in\n"
 "root's home directory instead of your user account directory."
 msgstr ""
-"Wenn Sie das Spiel als root starten werden die Einstellungen in\n"
-"dem Heimatverzeichnis von root installiert anstatt in Ihrem "
+"Wenn Sie das Spiel als root starten werden die Einstellungen im\n"
+"Heimatverzeichnis von root gespeichert anstatt in Ihrem "
 "Benutzerverzeichnis."
 
 #: gtk_ui.c:523
@@ -816,11 +831,11 @@ msgstr "Installationspfad ist kein Verzeichnis"
 
 #: gtk_ui.c:535
 msgid "No write permissions on the install directory"
-msgstr "Keine Schreibrechte für das Installations- Verzeichnis"
+msgstr "Keine Schreibrechte für das Installations-Verzeichnis"
 
 #: gtk_ui.c:537
 msgid "Binary path and install path must be different"
-msgstr ""
+msgstr "Programmpfad und Installationspfad müssen unterschiedlich sein"
 
 #: gtk_ui.c:539
 msgid "No write permissions to install a selected package"
@@ -863,7 +878,7 @@ msgstr ""
 
 #: gtk_ui.c:933
 msgid "Warning: No writable targets in path... You may want to be root.\n"
-msgstr ""
+msgstr "Warnung: Kein beschreibbares Ziel im Pfad... Versuchen Sie es als 'root'.\n"
 
 #: gtk_ui.c:952
 msgid "Unable to locate 'setup_menuitems_checkbox'"
@@ -901,27 +916,27 @@ msgstr "Konnte Datei '%s' nicht finden"
 
 #: plugins/outrage.c:73
 msgid "OPKG: Invalid package header"
-msgstr ""
+msgstr "OPKG: Ungültiger Paket Header"
 
 #: plugins/outrage.c:98
 msgid "OPKG: malloc() failed!"
-msgstr ""
+msgstr "OPKG: malloc() fehlgeschlagen!"
 
 #: plugins/outrage.c:116
 msgid "realloc() failed!"
-msgstr ""
+msgstr "realloc() fehlgeschlagen!"
 
 #: plugins/outrage.c:137
 msgid "read() failure accessing file size!"
-msgstr ""
+msgstr "read() fehlgeschlagen beim Zugriff auf die Dateigröße!"
 
 #: plugins/outrage.c:156
 msgid "OPKG: read() failure accessing timestamp!"
-msgstr ""
+msgstr "OPKG: read() fehlgeschlagen beim Zugriff auf Timestamp!"
 
 #: plugins/outrage.c:226
 msgid "read() failed!"
-msgstr ""
+msgstr "read() fehlgeschlagen"
 
 #: plugins/rpm.c:64 plugins/rpm.c:97
 #, c-format
@@ -936,10 +951,10 @@ msgstr "Konnte folgende RPM Datei nicht installieren: '%s'"
 #: plugins/tar.c:105
 #, c-format
 msgid "Tar: '%s' is unknown file type: %c"
-msgstr "Tar: '%s' ist unbekannter Filetyp: %c"
+msgstr "Tar: '%s' ist ein unbekannter Dateityp: %c"
 
 #~ msgid "echo \"%s has been uninstalled.\"\n"
-#~ msgstr "echo \"s wurde deinstalliert.\"\n"
+#~ msgstr "echo \"%s wurde deinstalliert.\"\n"
 
 #~ msgid ""
 #~ "echo\n"
@@ -950,7 +965,7 @@ msgstr "Tar: '%s' ist unbekannter Filetyp: %c"
 #~ "echo\n"
 #~ "echo WARNUNG: Während der Installation dieser Software wurden die folgenden\n"
 #~ "echo RPM Archive installiert oder erneuert. Sie möchten vielleicht einige "
-#~ "der folgenden Packete manuel entfernen:\n"
+#~ "der folgenden Packete manuell entfernen:\n"
 
 #~ msgid "Binary directory:"
 #~ msgstr "Verzeichnis für Binärdateien"
