@@ -1,6 +1,8 @@
 Current:
 Ryan C. Gordon (icculus.org) - Sat Feb 28 10:44:11 EST 2004
+ * Total install size is now held in 64-bits and may now exceed 4 gigabytes.
  * uz2 and zip plugins now update total install progress properly.
+ * A couple of Mac Carbon tweaks.
 Ryan C. Gordon (icculus.org) - Wed Feb 25 03:12:39 EST 2004
  * Added an UnrealEngine2 .uz2 plugin.
 Ryan C. Gordon (icculus.org) - Tue Feb 24 23:12:54 EST 2004
