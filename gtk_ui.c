@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.11 1999-09-16 01:38:57 hercules Exp $
+   $Id: gtk_ui.c,v 1.12 1999-09-20 17:25:16 hercules Exp $
 */
 
 #include <limits.h>
@@ -549,11 +549,15 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
     update_space();
     init_menuitems_option();
 
-    /* Show the installer */
-    gtk_widget_show( window );
+    /* Realize the main window for pixmap loading */
+    gtk_widget_realize(window);
 
     /* Update the install image */
     update_image(SETUP_BASE "splash.xpm");
+
+    /* Center and show the installer */
+    gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
+    gtk_widget_show(window);
 
     return iterate_for_state();
 }
