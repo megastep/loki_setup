@@ -8,7 +8,7 @@ SOL -   Added -c command line option to change working directory
 SOL -   Added the "path" attribute to the install element
 SOL -   The console ui now checks for write permissions on install path
 SOL -   Fixed crash with nameless options
-SOL -   Wrote XML setup specification documentation
+SOL -   Wrote documentation for XML setup specification file
 
 1.0:  First public release
 

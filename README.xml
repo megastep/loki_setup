@@ -1,0 +1,212 @@
+
+The setup XML specification has the following format:
+
+-----
+<?xml version="1.0" standalone="yes"?>
+<install>
+  one or more install options
+</install>
+----
+An example product specification file is at the bottom of this document.
+
+
+The INSTALL element:
+
+The install element contains one or more OPTION elements specifying
+different install options.
+
+All attribute names are case-sensitive, and are lower-case.
+ 
+There are several required attributes of the install element:
+
+ product    This is used as the product name and as the default top-level
+            install directory name.
+
+ desc       This is used a product description string, and is used in
+            strings naming the product (title bar, icon description, etc.)
+
+ version    This is the product version string
+
+There are several optional attributes of the install element:
+
+ path       This contains the default directory which will contain the
+            product installation directory.  The installation directory
+            may be changed by the user at installation time.
+            The default is: /usr/local/games
+
+ preinstall This is a shell script which is executed before any options
+            are installed.  It is run with the installation destination
+            as a command line argument.
+
+ postinstall
+            This is a shell script which is executed after all options
+            are installed.  It is run with the installation destination
+            as a command line argument.
+
+ eula       This is a file which contains a text license agreement that
+            must be agreed to by the user before the installation will
+            proceed.
+
+ url        This is a web site which is launched after the install is
+            completed.  The current implementation first tries to open
+            the web site in a new netscape window, then falls back to
+            using lynx if that fails for some reason.
+
+
+The OPTION element:
+
+The option element contains text describing the element, along with
+zero or more option, binary, files, and script elements.
+
+There is currently no way to specify relationships of options at the
+same level;  each may be installed independently of any other.  If
+an option is dependent upon another option, it must be inside the
+body of that option:
+
+    <option>
+        Top-level option
+        <option>
+            First dependent option
+        </option>
+        <option>
+            Second dependent option
+        </option>
+    </option>
+
+Nested options will not be available unless the top-level option is
+selected.
+
+There are several optional attributes of the install element:
+
+ install    If this attribute is set to "true", then the option will
+            be installed by default.  It may be deselected by the user.
+
+ help       This attribute is a help string which is displayed to the
+            user if the user requests more information about the option.
+
+
+The BINARY element:
+
+The binary element contains a single binary file to be installed for
+this option.  The binary is installed in the top level of the install
+directory, and if the symlink attribute is set, a symbolic link is
+placed in the system executable path.
+
+The actual file that is copied resides in bin/<arch>/<libc>/, where
+"<arch>" is the current architecture string (x86, ppc, alpha, etc.)
+and "<libc>" is an optional C library version (glibc-2.0, glibc-2.1, etc.)
+
+For example, if you wanted to install an executable file named "foo"
+on a PPC system, you would need it on the install disk as bin/ppc/foo.
+If it depended upon version 2.1 of the GNU C library, you would place
+it on the install disk as bin/ppc/glibc-2.1/foo.
+
+There are several required attributes of the binary element:
+
+ arch       This attribute is currently unused.  It should be set to "any"
+
+ libc       This attribute is currently unused.  It should be set to "any"
+
+There are several optional attributes of the binary element:
+
+ symlink    This is a symbolic link that is installed in the system path
+            and points to the installed binary.
+
+ icon       This is an optional icon file that should be installed in the
+            top level of the install directory.  If both a symlink and an
+            icon are specified for a binary, it will also have a desktop
+            icon or menu item created for it, if the user wishes.
+
+
+The FILES element:
+
+The files element contains a list of files and directories, one per line,
+which are installed for this option.
+
+You may specify relative paths and shell wildcard patterns for the files.
+
+There are no attributes for the files element.
+
+
+The SCRIPT element:
+
+The script element contains shell commands which are executed when the
+option is installed.  You may interleave multiple script and files
+elements, and they will be installed/executed in the order in which
+they appear.
+
+If you call a script on the installation medium, remember that the
+medium may be mounted without executable permissions, so the script
+file should be called using the name of the script interpreter.
+
+For example:
+
+    <script>
+        sh setup.data/stage1.sh
+    </script>
+
+There are no attributes for the script element.
+
+
+-------------------------------------------------------------------------
+
+Example XML product specification:
+(Note:  There can be no comments within the file itself, so we will denote
+        comments using '# ..." notation)
+
+<?xml version="1.0" standalone="yes"?>
+<install product="foo" desc="An example product" version="1.0"
+         path="/opt"
+         preinstall="sh setup.data/foo-preinst.sh $*"
+         postinstall="sh setup.data/foo-postinst.sh $*"
+         eula="license.txt"
+         url="http://www.products.kom/foo/index.html"
+>
+  # This installs a product named "foo" in /opt/foo by default.
+  # The user may specify a different installation directory.
+  # The installer will prompt the user with the license contained in the
+  # file "license.txt", and will execute foo-preinst.sh and foo-postinst.sh
+  # before and after installing the product.  When the product is finished
+  # installing, a browser will be launched to the site:
+  #     http://www.products.kom/foo/index.html
+
+    <option install="true" help="Required for use">
+        Base Install  # Option called "Base Install" contains a binary,
+                      # some data files, and two optional editors.
+        <binary arch="any" libc="any" symlink="foo" icon="icon.xpm">
+            foo
+        </binary>
+        <files>
+            README
+            icon.xpm
+            edit.xpm
+            data/*.dat
+        </files>
+        <option help="terminal editor for foo data files">
+            Curses Editor
+            <binary arch="any" libc="any">
+                foo-edit.ncurses
+            </binary>
+        </option>
+        <option help="X windows editor for foo data files">
+            Motif Editor
+            <binary arch="any" libc="any">
+                foo-edit.motif
+            </binary>
+        </option>
+        <script>
+            # A script to finish the editor installation
+            # It would set the default editor and edit desktop menu items
+            # The first parameter to the script is the install path
+            sh setup.data/edit-postinst.sh $*
+        </script>
+    </option>
+    <option>
+        Extra Data  # Option called "Extra Data" contains extra files
+        <files>
+            extra/*.dat
+        </files>
+    </option>
+</install>
+
+-------------------------------------------------------------------------
