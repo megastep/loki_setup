@@ -12,49 +12,30 @@ static pascal OSStatus WindowEventHandler(EventHandlerCallRef HandlerRef, EventR
 {
     OSStatus err = eventNotHandledErr;	// Default is event is not handled by this function
     HICommand command;
+    CarbonRes *Res = (CarbonRes *)UserData;
 
     GetEventParameter(Event, kEventParamDirectObject, typeHICommand, NULL, sizeof(HICommand), NULL, &command);
 
-    switch(command.commandID)
-    {
-        case COMMAND_CANCEL:
-            carbon_debug("'cancel' pressed\n");
-            //QueryButtonEventHandler((MacGUI *) UserData);
-            err = noErr;
-            break;
-        case COMMAND_EXIT:
-            carbon_debug("'exit' pressed\n");
-            //QueryButtonEventHandler((MacGUI *) UserData);
-            err = noErr;
-            break;
-        case COMMAND_CONTINUE:
-            carbon_debug("'continue' pressed\n");
-            //QueryButtonEventHandler((MacGUI *) UserData);
-            err = noErr;
-            break;
-        case COMMAND_README:
-            carbon_debug("'readme' pressed\n");
-            //QueryButtonEventHandler((MacGUI *) UserData);
-            err = noErr;
-            break;
-    }
+    // If event is handled in the callback, then return "noErr"
+    if(Res->CommandEventCallback(command.commandID))
+        err = noErr;
 
     return err;
 }
 
-static void LoadControlReferences(CarbonRes *Res)
+static void LoadGroupControlRefs(CarbonRes *Res)
 {
     int i;
     ControlID GroupControlIDs[PAGE_COUNT];
 
     // Load group control IDs
-    GroupControlIDs[CLASS_PAGE].signature = GROUP_SIG; GroupControlIDs[CLASS_PAGE].id = CLASS_GROUP_ID;
-    GroupControlIDs[OPTION_PAGE].signature = GROUP_SIG; GroupControlIDs[OPTION_PAGE].id = OPTION_GROUP_ID;
-    GroupControlIDs[COPY_PAGE].signature = GROUP_SIG; GroupControlIDs[COPY_PAGE].id = COPY_GROUP_ID;
-    GroupControlIDs[DONE_PAGE].signature = GROUP_SIG; GroupControlIDs[DONE_PAGE].id = DONE_GROUP_ID;
-    GroupControlIDs[ABORT_PAGE].signature = GROUP_SIG; GroupControlIDs[ABORT_PAGE].id = ABORT_GROUP_ID;
-    GroupControlIDs[WARNING_PAGE].signature = GROUP_SIG; GroupControlIDs[WARNING_PAGE].id = WARNING_GROUP_ID;
-    GroupControlIDs[WEBSITE_PAGE].signature = GROUP_SIG; GroupControlIDs[WEBSITE_PAGE].id = WEBSITE_GROUP_ID;
+    GroupControlIDs[CLASS_PAGE].signature = LOKI_SETUP_SIG; GroupControlIDs[CLASS_PAGE].id = CLASS_GROUP_ID;
+    GroupControlIDs[OPTION_PAGE].signature = LOKI_SETUP_SIG; GroupControlIDs[OPTION_PAGE].id = OPTION_GROUP_ID;
+    GroupControlIDs[COPY_PAGE].signature = LOKI_SETUP_SIG; GroupControlIDs[COPY_PAGE].id = COPY_GROUP_ID;
+    GroupControlIDs[DONE_PAGE].signature = LOKI_SETUP_SIG; GroupControlIDs[DONE_PAGE].id = DONE_GROUP_ID;
+    GroupControlIDs[ABORT_PAGE].signature = LOKI_SETUP_SIG; GroupControlIDs[ABORT_PAGE].id = ABORT_GROUP_ID;
+    GroupControlIDs[WARNING_PAGE].signature = LOKI_SETUP_SIG; GroupControlIDs[WARNING_PAGE].id = WARNING_GROUP_ID;
+    GroupControlIDs[WEBSITE_PAGE].signature = LOKI_SETUP_SIG; GroupControlIDs[WEBSITE_PAGE].id = WEBSITE_GROUP_ID;
 
     // Get references for group controls via the ID
     for(i = 0; i < PAGE_COUNT; i++)
@@ -66,17 +47,27 @@ static void LoadControlReferences(CarbonRes *Res)
     }
 }
 
-CarbonRes *LoadCarbonRes()
+CarbonRes *carbon_LoadCarbonRes(void (*CommandEventCallback)(UInt32))
 {
     IBNibRef 		nibRef;
     OSStatus		err;
     CarbonRes       *NewRes;
+
+    // Make sure our callback isn't NULL
+    if(CommandEventCallback == NULL)
+    {
+        carbon_debug("CommandEventCallback was NULL\n");
+        return NULL;
+    }
 
     // Create a new resource object
     NewRes = malloc(sizeof(CarbonRes));
     // Memory couldn't be allocated, return error
     if(NewRes == NULL)
         return NULL;
+
+    // Save reference to the event handler
+    NewRes->CommandEventCallback = CommandEventCallback;
 
     // Set defaults for resource object members
     NewRes->IsShown = false;
@@ -107,11 +98,13 @@ CarbonRes *LoadCarbonRes()
     DisposeNibReference(nibRef);
 
     // Load references to all controls in the window
-    LoadControlReferences(NewRes);
+    LoadGroupControlRefs(NewRes);
     
     // Setup the event handler associated with the main window
     //InstallStandardEventHandler(GetWindowEventTarget(window));
-    InstallWindowEventHandler(NewRes->Window, NewEventHandlerUPP(WindowEventHandler), 1, &commSpec, (void *)NewRes, NULL);
+    InstallWindowEventHandler(NewRes->Window,
+        NewEventHandlerUPP(WindowEventHandler), 1, &commSpec, (void *)NewRes,
+        NULL);
 
     // It's all good...return the resource object
     return NewRes;
@@ -127,13 +120,13 @@ CantGetNibRef:
     return NULL;
 }
 
-void UnloadCarbonRes(CarbonRes *CarbonResToUnload)
+void carbon_UnloadCarbonRes(CarbonRes *CarbonResToUnload)
 {
     //!!!TODO - Add unload code here
 
 }
 
-int IterateForState(int *StateFlag)
+int carbon_IterateForState(int *StateFlag)
 {
     EventRef theEvent;
     EventTargetRef theTarget;
@@ -160,7 +153,7 @@ int IterateForState(int *StateFlag)
     return *StateFlag;
 }
 
-void ShowInstallScreen(CarbonRes *Res, InstallPage NewInstallPage)
+void carbon_ShowInstallScreen(CarbonRes *Res, InstallPage NewInstallPage)
 {
     // Hide the previous page if any
     if(Res->CurInstallPage != NONE_PAGE)
@@ -175,4 +168,56 @@ void ShowInstallScreen(CarbonRes *Res, InstallPage NewInstallPage)
         ShowWindow(Res->Window);
         Res->IsShown = true;
     }
+}
+
+void carbon_SetWindowTitle(CarbonRes *Res, char *Title)
+{
+    CFStringRef CFTitle;
+
+    // Convert char* to a CFString
+    CFTitle = CFStringCreateWithCString(NULL, Title, kCFStringEncodingMacRoman);
+    // Set the window title
+    SetWindowTitleWithCFString(Res->Window, CFTitle);
+    // Release the string value from memory
+    CFRelease(CFTitle);
+}
+
+void carbon_HideControl(CarbonRes *Res, int ControlID)
+{
+    //!!!TODO
+}
+
+void carbon_DisableControl(CarbonRes *Res, int ControlID)
+{
+    //!!!TODO
+}
+
+void carbon_EnableControl(CarbonRes *Res, int ControlID)
+{
+    //!!!TODO
+}
+
+void carbon_SetInstallClass(CarbonRes *Res, int RecommendedNotExpert)
+{
+    //!!!TODO
+}
+
+void carbon_UpdateImage(CarbonRes *Res, const char *Filename, const char *Path)
+{
+    //!!!TODO
+}
+
+void carbon_HandlePendingEvents()
+{
+    //!!!TODO
+}
+
+void carbon_SetLabelText(CarbonRes *Res, int LabelID, const char *Text)
+{
+    //!!!TODO
+}
+
+void carbon_SetProgress(CarbonRes *Res, int ProgressID, float Value)
+{
+    //!!!TODO
 }
