@@ -205,44 +205,6 @@ void perform_uninstall_slot(GtkWidget* w, gpointer data)
         widget = GTK_WIDGET(list->data);
         poopy = gtk_container_children(GTK_CONTAINER(widget));
         widget = GTK_WIDGET(poopy->data);
-        /* First do the add-on components */
-        clist = gtk_container_children(GTK_CONTAINER(widget));
-        while ( clist && ! uninstall_cancelled ) {
-            button = GTK_WIDGET(clist->data);
-            if ( gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)) ) {
-                component = gtk_object_get_data(GTK_OBJECT(button), "data");
-                if ( loki_isdefault_component(component->component) ) {
-                    clist = clist->next;
-                    continue;
-                }
-                /* Put up the status */
-                snprintf(text, sizeof(text), "%s: %s",
-                        component->info->description,
-                        loki_getname_component(component->component));
-                set_status_text(text);
-
-                /* See if the user wants to cancel the uninstall */
-                while( gtk_events_pending() ) {
-                    gtk_main_iteration();
-                }
-
-                /* Remove the component */
-                uninstall_component(component->component, component->info);
-
-                /* Update the progress bar */
-                if ( total && progress ) {
-                    size += component->size/1024;
-                    gtk_progress_set_percentage(GTK_PROGRESS(progress),
-                                                (float)size/total);
-                }
-
-                /* See if the user wants to cancel the uninstall */
-                while( gtk_events_pending() ) {
-                    gtk_main_iteration();
-                }
-            }
-            clist = clist->next;
-        }
         /* Now do the primary components */
         clist = gtk_container_children(GTK_CONTAINER(widget));
         while ( clist && ! uninstall_cancelled ) {
@@ -263,6 +225,7 @@ void perform_uninstall_slot(GtkWidget* w, gpointer data)
                 }
 
                 /* Remove the component */
+printf("Uninstalling product %s\n", text);
                 perform_uninstall(component->product, component->info);
                 remove_product(component->product);
 
@@ -278,6 +241,47 @@ void perform_uninstall_slot(GtkWidget* w, gpointer data)
                     gtk_main_iteration();
                 }
                 break;
+            }
+            clist = clist->next;
+        }
+        /* If product not uninstalled, check the add-on components */
+        if ( ! clist ) {
+            clist = gtk_container_children(GTK_CONTAINER(widget));
+        }
+        while ( clist && ! uninstall_cancelled ) {
+            button = GTK_WIDGET(clist->data);
+            if ( gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)) ) {
+                component = gtk_object_get_data(GTK_OBJECT(button), "data");
+                if ( loki_isdefault_component(component->component) ) {
+                    clist = clist->next;
+                    continue;
+                }
+                /* Put up the status */
+                snprintf(text, sizeof(text), "%s: %s",
+                        component->info->description,
+                        loki_getname_component(component->component));
+                set_status_text(text);
+
+                /* See if the user wants to cancel the uninstall */
+                while( gtk_events_pending() ) {
+                    gtk_main_iteration();
+                }
+
+                /* Remove the component */
+printf("Uninstalling component %s\n", text);
+                uninstall_component(component->component, component->info);
+
+                /* Update the progress bar */
+                if ( total && progress ) {
+                    size += component->size/1024;
+                    gtk_progress_set_percentage(GTK_PROGRESS(progress),
+                                                (float)size/total);
+                }
+
+                /* See if the user wants to cancel the uninstall */
+                while( gtk_events_pending() ) {
+                    gtk_main_iteration();
+                }
             }
             clist = clist->next;
         }
@@ -315,6 +319,11 @@ static void component_toggled_slot(GtkWidget* w, gpointer data)
     state = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w));
     for ( button = list->buttons; button; button = button->next ) {
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button->widget), state);
+        if ( state ) {
+            gtk_widget_set_sensitive(button->widget, FALSE);
+        } else {
+            gtk_widget_set_sensitive(button->widget, TRUE);
+        }
     }
 
     /* Calculate recovered space, and we're done */
@@ -404,11 +413,7 @@ int uninstall_ui(int argc, char *argv[])
         if ( component ) {
             component_list = create_component_list(product, product_info,
                                                    component);
-#if 0 /* These descriptions aren't very interesting or informative */
-            strncpy(text, loki_getname_component(component), sizeof(text));
-#else
             strncpy(text, _("Complete uninstall"), sizeof(text));
-#endif
             button = gtk_check_button_new_with_label(text);
             gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, FALSE, 0);
             gtk_signal_connect(GTK_OBJECT(button), "toggled",
