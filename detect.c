@@ -123,7 +123,7 @@ int detect_diskspace(const char *path)
 }
 
 /* Function to detect the CDROM drives, returns the number of drives */
-int detect_cdrom(void)
+int detect_cdrom(const char *unique_file)
 {
     char mntdevpath[PATH_MAX];
     FILE * mountfp;
@@ -165,6 +165,14 @@ int detect_cdrom(void)
                 continue;
             }
             if ( strcmp(mnt_type, MNTTYPE_CDROM) == 0 && count < MAX_DRIVES) {
+                if ( unique_file ) {
+                    char file[PATH_MAX];
+
+                    sprintf(file, "%s/%s", mntent->mnt_dir, unique_file);
+                    if ( access(file, F_OK) < 0 ) {
+                        continue;
+                    }
+                }
                 cdroms[count ++] = strdup(mntent->mnt_dir);
             }
         }

@@ -1,5 +1,7 @@
 
 1.2.1:
+Sam Lantinga - Fri Mar 10 15:45:31 PST 2000
+ * Added "cdromfile" attribute to specify a unique file on the install CDROM.
 Sam Lantinga - Fri Mar 10 14:49:11 PST 2000
  * Keep prompting the user if the do not insert the CD-ROM
 Stephane Peter - Wed Mar  8 14:27:11 PST 2000

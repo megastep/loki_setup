@@ -14,7 +14,7 @@ extern const char *detect_libc(void);
 extern int detect_diskspace(const char *path);
 
 /* Function to detect the CDROM drives, returns the number of drives */
-extern int detect_cdrom(void);
+extern int detect_cdrom(const char *unique_file);
 
 /* These global variables are initialized by detect_cdrom()
    cdroms[] contains a list of mount points for all the detected mounted CDROMs

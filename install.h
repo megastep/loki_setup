@@ -144,6 +144,7 @@ extern const char *GetProductName(install_info *info);
 extern const char *GetProductDesc(install_info *info);
 extern const char *GetProductVersion(install_info *info);
 extern int         GetProductCDROMRequired(install_info *info);
+extern const char *GetProductCDROMFile(install_info *info);
 extern const char *GetProductEULA(install_info *info);
 extern const char *GetProductREADME(install_info *info);
 extern const char *GetWebsiteText(install_info *info);

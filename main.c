@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.19 2000-03-09 23:22:19 hercules Exp $ */
+/* $Id: main.c,v 1.20 2000-03-10 01:18:47 hercules Exp $ */
 
 #include <stdio.h>
 #include <setjmp.h>
@@ -157,15 +157,17 @@ int main(int argc, char **argv)
                 }
                 /* Check for the presence of a CDROM if required */
                 if ( GetProductCDROMRequired(info) ) {
+                    const char *tag;
                     yesno_answer response;
                     
                     /* Detect the available mounted CDROMs */
                     response = RESPONSE_YES;
-                    while ( ! detect_cdrom() && (response == RESPONSE_YES) ) {
+                    tag = GetProductCDROMFile(info);
+                    while ( !detect_cdrom(tag) && (response == RESPONSE_YES) ) {
                         char buf[1024];
             
                         sprintf(buf,"\nPlease mount the %s CDROM.\n"
-                                "Choose Yes to retry, No to cancel.\n",
+                                "Choose Yes to retry, No to cancel",
                                 info->name);
                         response = UI.prompt(buf, RESPONSE_NO);
                     }

@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.34 2000-03-08 22:05:09 megastep Exp $ */
+/* $Id: install.c,v 1.35 2000-03-10 01:18:47 hercules Exp $ */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -40,11 +40,15 @@ const char *GetProductVersion(install_info *info)
 }
 int GetProductCDROMRequired(install_info *info)
 {
-	const char *str = xmlGetProp(info->config->root, "cdrom");
-	if ( str && !strcasecmp(str, "required") ) {
-		return 1;
-	}
-	return 0;
+    const char *str = xmlGetProp(info->config->root, "cdrom");
+    if ( str && !strcasecmp(str, "required") ) {
+        return 1;
+    }
+    return 0;
+}
+const char *GetProductCDROMFile(install_info *info)
+{
+    return xmlGetProp(info->config->root, "cdromfile");
 }
 const char *GetDefaultPath(install_info *info)
 {
@@ -63,14 +67,14 @@ const char *GetProductEULA(install_info *info)
 const char *GetProductREADME(install_info *info)
 {
     const char *ret = xmlGetProp(info->config->root, "readme");
-	if ( ! ret ) {
-		ret = "README";
-	}
-	if ( ! access(ret, R_OK) ) {
-		return ret;
-	} else {
-		return NULL;
-	}
+    if ( ! ret ) {
+        ret = "README";
+    }
+    if ( ! access(ret, R_OK) ) {
+        return ret;
+    } else {
+        return NULL;
+    }
 }
 const char *GetWebsiteText(install_info *info)
 {
@@ -697,7 +701,7 @@ char install_menuitems(install_info *info, desktop_type desktop)
                 found_links[1] = "~/.gnome/apps/";
                 found_links[2] = 0;
                 app_links = found_links;
-				pclose(fp);
+                pclose(fp);
             }
             else {
                 app_links = gnome_app_links;
@@ -711,12 +715,12 @@ char install_menuitems(install_info *info, desktop_type desktop)
     exec_command[0] = 0;
     exec_script_name = GetDesktopInstall(info);
     if( exec_script_name ) {
-	snprintf( exec_script, PATH_MAX*2, "%s %s", exec_script_name, info->install_path );
-	fp = popen(exec_script, "r");
-	if( fp ) {
-	    fgets(exec_command, PATH_MAX*2, fp);
-	    pclose(fp);
-	}
+    snprintf( exec_script, PATH_MAX*2, "%s %s", exec_script_name, info->install_path );
+    fp = popen(exec_script, "r");
+    if( fp ) {
+        fgets(exec_command, PATH_MAX*2, fp);
+        pclose(fp);
+    }
     }
 
     for (elem = info->bin_list; elem; elem = elem->next ) {      
@@ -753,11 +757,11 @@ char install_menuitems(install_info *info, desktop_type desktop)
             if (fp) {
                 char exec[PATH_MAX*2], icon[PATH_MAX];
 
-		if (exec_command[0] != 0) {
-		    snprintf(exec, PATH_MAX*2, "%s", exec_command);
-		} else {
-		    sprintf(exec, "%s", elem->path);
-		}
+        if (exec_command[0] != 0) {
+            snprintf(exec, PATH_MAX*2, "%s", exec_command);
+        } else {
+            sprintf(exec, "%s", elem->path);
+        }
                 sprintf(icon, "%s/%s", info->install_path, elem->icon);
                 if (desktop == DESKTOP_KDE) {
                         fprintf(fp, "# KDE Config File\n");
@@ -805,17 +809,17 @@ int run_script(install_info *info, const char *script, int arg)
         char cmd[4*PATH_MAX];
 
         fprintf(fp, /* Create the script file, setting environment variables */
-				"#! /bin/sh\n"
-				"SETUP_PRODUCTNAME=\"%s\"\n"
-				"SETUP_PRODUCTVER=\"%s\"\n"
-				"SETUP_INSTALLPATH=\"%s\"\n"
-				"SETUP_SYMLINKSPATH=\"%s\"\n"
-				"export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH\n"
-				"%s\n",
-				info->name, info->version,
-				info->install_path,
-				info->symlinks_path,
-				script);
+                "#! /bin/sh\n"
+                "SETUP_PRODUCTNAME=\"%s\"\n"
+                "SETUP_PRODUCTVER=\"%s\"\n"
+                "SETUP_INSTALLPATH=\"%s\"\n"
+                "SETUP_SYMLINKSPATH=\"%s\"\n"
+                "export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH\n"
+                "%s\n",
+                info->name, info->version,
+                info->install_path,
+                info->symlinks_path,
+                script);
         fchmod(fileno(fp),0755); /* Turn on executable bit */
         fclose(fp);
         if ( arg >= 0 ) {
