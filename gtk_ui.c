@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.53 2000-11-03 07:04:35 megastep Exp $
+   $Id: gtk_ui.c,v 1.54 2000-11-08 23:27:05 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1318,13 +1318,15 @@ static install_state gtkui_setup(install_info *info)
 				parse_option(info, child, window, options, 0, NULL, 1, &list);
 			}
 		} else if ( ! strcmp(node->name, "component") ) {
-			xmlNodePtr child;
-            GtkWidget *widget = gtk_hseparator_new();
-            gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 0);
-            gtk_widget_show(widget);
-            widget = gtk_label_new(xmlGetProp(node, "name"));
-            gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 10);
-            gtk_widget_show(widget);
+            xmlNodePtr child;
+            if ( xmlGetProp(node, "showname") ) {
+                GtkWidget *widget = gtk_hseparator_new();
+                gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 0);
+                gtk_widget_show(widget);                
+                widget = gtk_label_new(xmlGetProp(node, "name"));
+                gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 10);
+                gtk_widget_show(widget);
+            }
 			for ( child = node->childs; child; child = child->next) {
 				parse_option(info, child, window, options, 0, NULL, 0, NULL);
 			}

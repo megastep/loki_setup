@@ -154,10 +154,12 @@ This element takes two mandatory attributes :
 
   version   A string describing the version of the component.
 
-There is also an optional attribute, that actually has to be defined in one of the components:
+There are also optional attributes : 
 
   default   If 'yes' then the component is marked as being the default component, i.e. the main
-            component for the product.
+            component for the product. It has to be defined in one of the components.
+
+  showname  If 'yes' then the component name will be displayed in the user interface.
 
 The README and EULA elements:
 

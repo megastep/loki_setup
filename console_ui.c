@@ -440,7 +440,9 @@ static install_state console_setup(install_info *info)
 					}
 				} else if ( ! strcmp(node->name, "component") ) {
 					xmlNodePtr child;
-                    printf(_("\n%s component\n\n"), xmlGetProp(node, "name"));
+                    if ( xmlGetProp(node, "showname") ) {
+                        printf(_("\n%s component\n\n"), xmlGetProp(node, "name"));
+                    }
 					for ( child = node->childs; child; child = child->next) {
 						parse_option(info, child, 0);
 					}
