@@ -22,7 +22,7 @@ typedef struct {
     install_state (*license)(install_info *info);
     install_state (*readme)(install_info *info);
     install_state (*setup)(install_info *info);
-    int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current);
+    UIUpdateFunc update;
     void (*abort)(install_info *info);
 	void (*idle)(install_info *info);
 	yesno_answer (*prompt)(const char *txt, yesno_answer suggest);

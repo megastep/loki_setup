@@ -128,6 +128,6 @@ struct new_cpio_header
 /* Exported so that the RPM plugin can access it */
 size_t copy_cpio_stream(install_info *info, stream *input, const char *dest, const char *current_option,
 			xmlNodePtr node,
-                        int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current));
+                        UIUpdateFunc update);
 
 #endif /* cpio.h */

@@ -30,7 +30,7 @@ typedef struct {
 	/* Extract the file */
 	size_t (*Copy)(install_info *info, const char *path, const char *dest, const char *current_option,
 				   xmlNodePtr node,
-				   int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current));
+				   UIUpdateFunc update);
 
 } SetupPlugin;
 
@@ -42,8 +42,12 @@ typedef struct {
 typedef SetupPlugin *(*GetSetupPluginPtr)(void);
 
 
-/* Return the plugin structure associated with a file (looks through the list of registered extensions */
-const SetupPlugin *FindPluginForFile(const char *path);
+/** Find the plugin structure associated with a file (looks through the list of registered extensions
+ * @param path file name
+ * @param suffix if non-NULL assume the file has this suffix to force a certain plugin
+ * @returns pointer to plugin or NULL if none matches
+ */
+const SetupPlugin *FindPluginForFile(const char *path, const char* suffix);
 
 /* Register a plugin */
 int RegisterPlugin(const SetupPlugin *plugin, void *handle);

@@ -2,7 +2,7 @@
  * Check and Rescue Tool for Loki Setup packages. Verifies the consistency of the files,
  * and optionally restores them from the original installation medium.
  *
- * $Id: check.c,v 1.12 2003-08-16 01:03:55 megastep Exp $
+ * $Id: check.c,v 1.13 2004-11-02 03:48:57 megastep Exp $
  */
 
 #include <stdlib.h>
@@ -300,11 +300,11 @@ on_media_ok_clicked (GtkButton       *button,
 		*/
 		f = GetProductREADME(install, NULL);
 		if ( f && ! GetProductIsMeta(install) ) {
-			copy_path(install, f, install->install_path, NULL, 1, NULL, NULL);
+			copy_path(install, f, install->install_path, NULL, 1, NULL, NULL, NULL);
 		}
 		f = GetProductEULA(install, NULL);
 		if ( f && ! GetProductIsMeta(install) ) {
-			copy_path(install, f, install->install_path, NULL, 1, NULL, NULL);
+			copy_path(install, f, install->install_path, NULL, 1, NULL, NULL, NULL);
 		}
 
 	}

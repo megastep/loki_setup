@@ -1,5 +1,5 @@
 /* TAR plugin for setup */
-/* $Id: tar.c,v 1.11 2004-09-07 22:40:29 megastep Exp $ */
+/* $Id: tar.c,v 1.12 2004-11-02 03:48:57 megastep Exp $ */
 
 #include "config.h"
 #include "plugins.h"
@@ -40,7 +40,7 @@ static size_t TarSize(install_info *info, const char *path)
 /* Extract the file */
 static size_t TarCopy(install_info *info, const char *path, const char *dest, const char *current_option, 
 		      xmlNodePtr node,
-		      int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+		      UIUpdateFunc update)
 {
     static tar_record zeroes;
     tar_record record;

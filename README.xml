@@ -486,6 +486,10 @@ There are several optional attributes of the option element:
             is ignored if this is not a meta-installation, and required if it is.
             See the section 'About Meta-Installations' below for more details.
 
+ productdir Valid only together with the 'product' attribute. Specifies the
+            directory to change to before executing the installer for the new
+            product.
+
  tag        If specified, this string will be included in the SETUP_OPTIONTAGS
             environment variable that is set before calling any scripts. This allows
             scripts to know what user selections are active.
@@ -734,6 +738,10 @@ There are several optional attributes of the files element:
             mode for all files uncompressed from the archive.
             NOTE: This doesn't apply to directories, which are currently always created with
             mode 755.
+
+ suffix     An optional file extension that is forced on all files. Can be used
+	    to make loki-setup recognize e.g. SFX ZIP archives as such even if
+	    they end in .exe.
 
 The MANPAGE element:
 

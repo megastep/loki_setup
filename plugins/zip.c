@@ -1,5 +1,5 @@
 /* ZIP plugin for setup */
-/* $Id: zip.c,v 1.8 2004-09-07 22:40:29 megastep Exp $ */
+/* $Id: zip.c,v 1.9 2004-11-02 03:48:57 megastep Exp $ */
 
 #include "plugins.h"
 #include "file.h"
@@ -39,7 +39,7 @@
 
 /* legacy defines from PhysicsFS... */
 #define BAIL_MACRO(err, val) { log_debug("ZIP: %s", (err == NULL) ? "i/o error" : err); return(val); }
-#define BAIL_IF_MACRO(cond, err, val) { if (cond) { log_debug("ZIP: %s", (err == NULL) ? "i/o error" : err); return(val); } }
+#define BAIL_IF_MACRO(cond, err, val) { if (cond) { log_debug("ZIP (line %d): %s", __LINE__, (err == NULL) ? "i/o error" : err); return(val); } }
 #define ERR_CORRUPTED           "Corrupted archive"
 #define ERR_NOT_AN_ARCHIVE      "Not a ZIP archive"
 #define ERR_OUT_OF_MEMORY       "Out of memory"
@@ -521,7 +521,7 @@ static int zip_parse_end_of_central_dir(install_info *info, const char *path,
      *  If it doesn't, we're either in the wrong part of the file, or the
      *  file is corrupted, but we give up either way.
      */
-    BAIL_IF_MACRO((pos + 22 + ui16) != len, ERR_UNSUPPORTED_ARCHIVE, 0);
+    BAIL_IF_MACRO((pos + 22 + ui16) > len, ERR_UNSUPPORTED_ARCHIVE, 0);
 
     return(1);  /* made it. */
 } /* zip_parse_end_of_central_dir */
@@ -663,7 +663,7 @@ zip_zipsize_end:
 /* Extract the file */
 static size_t ZIPCopy(install_info *info, const char *path, const char *dest, const char *current_option,
 					  xmlNodePtr node,
-					  int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+					  UIUpdateFunc update)
 {
     char final[BUFSIZ];
     z_stream zstr;
@@ -712,7 +712,7 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
         if (entry->name[strlen(entry->name) - 1] == '/')
         {
             final[strlen(final) - 1] = '\0';  /* lose '/' at end. */
-            dir_create_hierarchy(info, final, S_IRWXU);
+            dir_create_hierarchy(info, final, 0755);
             continue;
         } /* if */
 
@@ -729,8 +729,11 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
         if (entry->compression_method != COMPMETH_NONE)
         {
             memset(&zstr, '\0', sizeof (z_stream));
-            if (zlib_err(inflateInit2(&zstr, -MAX_WBITS)) != Z_OK)
+            if ((rc = inflateInit2(&zstr, -MAX_WBITS)) != Z_OK)
+            {
+                zlib_err(rc);
                 continue;
+            }
             zstr.next_out = zip_buf_out;
             zstr.avail_out = ZIP_WRITEBUFSIZE;
         } /* if */
@@ -801,9 +804,12 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
                     } /* else */
                 } /* if */
 
-                rc = zlib_err(inflate(&zstr, Z_SYNC_FLUSH));
+                rc = inflate(&zstr, Z_SYNC_FLUSH);
                 if ((rc != Z_OK) && (rc != Z_STREAM_END))
+                {
+                    zlib_err(rc);
                     break;
+                }
 
                 /* if output buffer has data, dump it to disk. */
                 if (zstr.avail_out < ZIP_WRITEBUFSIZE)

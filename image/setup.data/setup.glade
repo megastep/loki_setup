@@ -387,7 +387,7 @@
 	      <widget>
 		<class>GtkLabel</class>
 		<name>binary_label</name>
-		<label>Link path:</label>
+		<label>Binary path:</label>
 		<justify>GTK_JUSTIFY_RIGHT</justify>
 		<wrap>False</wrap>
 		<xalign>1</xalign>

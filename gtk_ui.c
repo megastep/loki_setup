@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.106 2004-09-09 01:41:28 megastep Exp $
+   $Id: gtk_ui.c,v 1.107 2004-11-02 03:48:57 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -155,7 +155,7 @@ static const char* glade_file = SETUP_GLADE;
 
 /******** Local prototypes **********/
 
-static const char *check_for_installation(install_info *info);
+static const char *check_for_installation(install_info *info, char** explanation);
 static void check_install_button(void);
 static void update_space(void);
 static void update_size(void);
@@ -313,7 +313,7 @@ void on_class_continue_clicked( GtkWidget  *w, gpointer data )
 	express_setup = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 
 	if ( express_setup ) {
-		const char *msg = check_for_installation(cur_info);
+		const char *msg = check_for_installation(cur_info, NULL);
 		if ( msg ) {
 			char buf[BUFSIZ];
 			snprintf(buf, sizeof(buf),
@@ -543,8 +543,26 @@ void setup_button_cdkey_continue_slot( GtkWidget* widget, gpointer func_data )
 
 void setup_button_install_slot( GtkWidget* widget, gpointer func_data )
 {
+	const char* message;
+	char* explanation = NULL;
     GtkWidget *notebook;
     notebook = glade_xml_get_widget(setup_glade, "setup_notebook");
+
+	message = check_for_installation(cur_info, &explanation);
+
+	if(message)
+	{
+		if(explanation)
+		{
+			char* tmp = g_strconcat(message, "\n\n", explanation, NULL);
+			g_free(explanation);
+			explanation = tmp;
+		}
+
+		gtkui_prompt(explanation?explanation:message, RESPONSE_OK);
+		g_free(explanation);
+		return;
+	}
 
     /* If CDKEY attribute was specified, show the CDKEY screen */
     if(GetProductCDKey(cur_info))
@@ -575,12 +593,12 @@ void setup_button_browser_slot( GtkWidget* widget, gpointer func_data )
 }
 
 /* Returns NULL if installation can be performed */
-static const char *check_for_installation(install_info *info)
+static const char *check_for_installation(install_info *info, char** explanation)
 {
     if ( ! license_okay ) {
         return _("Please respond to the license dialog");
     }
-	return IsReadyToInstall(info);
+	return IsReadyToInstall_explain(info, explanation);
 }
 
 /* Checks if we can enable the "Begin install" button */
@@ -588,18 +606,14 @@ static void check_install_button(void)
 {
     const char *message;
     GtkWidget *options_status;
-    GtkWidget *button_install;
 
-	message = check_for_installation(cur_info);
+	message = check_for_installation(cur_info, NULL);
 
     /* Get the appropriate widgets and set the new state */
     options_status = glade_xml_get_widget(setup_glade, "options_status");
-    button_install = glade_xml_get_widget(setup_glade, "button_install");
-    if ( message ) {
-        gtk_widget_set_sensitive(button_install, 0);
-    } else {
+
+    if ( !message ) {
         message = _("Ready to install!");
-        gtk_widget_set_sensitive(button_install, 1);
     }
     gtk_label_set_text(GTK_LABEL(options_status), message);
 }
@@ -863,6 +877,7 @@ static yesno_answer gtkui_prompt(const char *txt, yesno_answer suggest)
     dialog = gtk_dialog_new();
     label = gtk_label_new (txt);
 	gtk_misc_set_padding(GTK_MISC(label), 8, 8);
+	gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
     ok_button = gtk_button_new_with_label(_("OK"));
 
     prompt_response = RESPONSE_INVALID;
@@ -1608,7 +1623,7 @@ static install_state gtkui_init(install_info *info, int argc, char **argv, int n
     license_okay = 1; /* Needed so that Expert is detected properly at this point */
     
 	/* Check if we should check "Expert" installation by default */
-	if ( check_for_installation(info) ) {
+	if ( check_for_installation(info, NULL) ) {
 		widget = glade_xml_get_widget(setup_glade, "expert_but");
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget), TRUE);
 	}

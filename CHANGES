@@ -1,4 +1,10 @@
 Current:
+Ludwig Nussel - Mon Nov  1 19:39:21 PST 2004
+ * New 'suffix' attribute to the files element to force plugins to be used.
+ * Fixes in ZIP plugin
+ * New 'productdir' attribute for meta-installers to change the directory
+   before executing the new installer.
+ * GTK UI updates for clarification
 Ludwig Nussel - Mon Sep 20 18:09:29 PDT 2004
  * Added feature attribute for 'require' tags.
  * No longer write log to /tmp/uninstall.log when uninstalling.

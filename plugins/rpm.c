@@ -1,5 +1,5 @@
 /* RPM plugin for setup */
-/* $Id: rpm.c,v 1.10 2003-09-04 02:29:04 megastep Exp $ */
+/* $Id: rpm.c,v 1.11 2004-11-02 03:48:57 megastep Exp $ */
 
 #include "plugins.h"
 #include "file.h"
@@ -86,7 +86,7 @@ static size_t RPMSize(install_info *info, const char *path)
 /* Extract the file */
 static size_t RPMCopy(install_info *info, const char *path, const char *dest, const char *current_option_name, 
 		      xmlNodePtr node,
-		      int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+		      UIUpdateFunc update)
 {
     FD_t fdi;
     Header hd;

@@ -1,5 +1,5 @@
 /* Sample plugin for setup */
-/* $Id: sample.c,v 1.8 2002-12-07 00:57:32 megastep Exp $ */
+/* $Id: sample.c,v 1.9 2004-11-02 03:48:57 megastep Exp $ */
 
 #include "plugins.h"
 #include "file.h"
@@ -34,7 +34,7 @@ static size_t Size(install_info *info, const char *path)
 /* Extract the file */
 static size_t Copy(install_info *info, const char *path, const char *dest, const char *current_option, 
 				   xmlNodePtr node,
-				   int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+				   UIUpdateFunc update)
 {
 	/* TODO: Extract the files, calling the update function as often as possible. 
 	   Also check for optional MD5 sum, mode and mutable flag */

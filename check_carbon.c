@@ -2,7 +2,7 @@
  * Check and Rescue Tool for Loki Setup packages. Verifies the consistency of the files,
  * and optionally restores them from the original installation medium.
  *
- * $Id: check_carbon.c,v 1.5 2004-07-23 01:45:14 megastep Exp $
+ * $Id: check_carbon.c,v 1.6 2004-11-02 03:48:57 megastep Exp $
  */
 
 #include <stdlib.h>
@@ -246,11 +246,11 @@ void DoMediaCheck(const char *Dir)
 		*/
 		f = GetProductREADME(install, NULL);
 		if ( f && ! GetProductIsMeta(install) ) {
-			copy_path(install, f, install->install_path, NULL, 1, NULL, NULL);
+			copy_path(install, f, install->install_path, NULL, 1, NULL, NULL, NULL);
 		}
 		f = GetProductEULA(install, NULL);
 		if ( f && ! GetProductIsMeta(install) ) {
-			copy_path(install, f, install->install_path, NULL, 1, NULL, NULL);
+			copy_path(install, f, install->install_path, NULL, 1, NULL, NULL, NULL);
 		}
 
 	}

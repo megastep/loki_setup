@@ -1,5 +1,5 @@
 /* UnrealEngine2-compressed files (.uz2) plugin for setup */
-/* $Id: uz2.c,v 1.5 2004-09-07 22:40:29 megastep Exp $ */
+/* $Id: uz2.c,v 1.6 2004-11-02 03:48:57 megastep Exp $ */
 
 #include <stdlib.h>
 #include <string.h>
@@ -95,7 +95,7 @@ static size_t UZ2Size(install_info *info, const char *path)
 /* Extract the file */
 static size_t UZ2Copy(install_info *info, const char *path, const char *dest, const char *current_option,
 		      xmlNodePtr node,
-		      int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+		      UIUpdateFunc update)
 {
     static uint8 cbuf[MAXCOMPSIZE];
     static uint8 ubuf[MAXUNCOMPSIZE];

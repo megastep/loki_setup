@@ -225,6 +225,9 @@ typedef struct _install_info {
 
 } install_info;
 
+/** callback for progress bar updates in the UI */
+typedef int (*UIUpdateFunc)(install_info *info, const char *path, size_t progress, size_t size, const char *current);
+
 /* Functions to retrieve attribution information from the XML tree */
 extern const char *GetProductName(install_info *info);
 extern const char *GetProductDesc(install_info *info);
@@ -267,7 +270,16 @@ extern const char *GetProductPostInstallMsg(install_info *info);
 /** whether the user should be prompted when files already exist */
 extern int GetProductPromptOverwrite(install_info *info);
 
+/** check if product can be installed. Returns NULL if product can be
+ * installed, otherwise reason why not. */
 extern const char *IsReadyToInstall(install_info *info);
+
+/** same as IsReadyToInstall but may additionally return a more verbose
+ * explanation of what went wrong in the variable explanation. This string must
+ * be freed manually if set.
+ */
+extern const char *IsReadyToInstall_explain(install_info *info, char** explanation);
+
 extern int         CheckRequirements(install_info *info);
 
 /* Create the initial installation information */
@@ -353,8 +365,7 @@ extern void delete_install(install_info *info);
 extern void delete_cdrom_install(install_info *info);
 
 /* Actually install the selected filesets */
-extern install_state install(install_info *info,
-							 int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current));
+extern install_state install(install_info *info, UIUpdateFunc update);
 
 /* Abort a running installation (to be called from the update function) */
 extern void abort_install(void);
@@ -393,9 +404,6 @@ extern int install_menuitems(install_info *info, desktop_type d);
    'include_tags' indicates if the SETUP_OPTIONTAGS should be set in the script header.
  */
 extern int run_script(install_info *info, const char *script, int arg, int include_tags);
-
-/* returns true if any deviant paths are not writable */
-char check_deviant_paths(xmlNodePtr node, install_info *info);
 
 /* Convenience functions to quickly change back and forth between current directories */
 

@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.143 2004-09-21 01:52:42 megastep Exp $ */
+/* $Id: install.c,v 1.144 2004-11-02 03:48:57 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -352,16 +352,16 @@ int GetProductPromptOverwrite(install_info *info)
     return ret;
 }
 
-/* returns true if any deviant paths are not writable */
-char check_deviant_paths(xmlNodePtr node, install_info *info)
+/* returns true if any deviant paths are not writable. If path_ret is non-NULL
+ * it must point to a buffer of at least PATH_MAX characters. The first not
+ * writeable path is stored there if return value is true
+ */
+static char check_deviant_paths(xmlNodePtr node, install_info *info, char* path_ret)
 {
-    char path_up[PATH_MAX];
-
     while ( node ) {
         char *wanted;
         char *orig_dpath;
 		const char *dpath;
-        char deviant_path[PATH_MAX];
 
         wanted = xmlGetProp(node, "install");
         if ( wanted  && (strcmp(wanted, "true") == 0) ) {
@@ -369,22 +369,29 @@ char check_deviant_paths(xmlNodePtr node, install_info *info)
             while ( elements ) {
                 dpath = orig_dpath = xmlGetProp(elements, "path");
                 if ( dpath ) {
+					char path_up[PATH_MAX];
+					char deviant_path[PATH_MAX];
 					parse_line(&dpath, deviant_path, PATH_MAX);
                     topmost_valid_path(path_up, deviant_path);
 					if ( path_up[0] != '/' ) { /* Not an absolute path */
 						char buf[PATH_MAX];
 						snprintf(buf, PATH_MAX, "%s/%s", info->install_path, path_up);
 						xmlFree(orig_dpath);
-						return ! dir_is_accessible(buf);
+						if (!dir_is_accessible(buf))
+						{
+							if(path_ret) strcpy(path_ret, buf);
+							return 1;
+						}
 					} else if ( ! dir_is_accessible(path_up) ) {
 						xmlFree(orig_dpath);
-                        return 1;
+						if(path_ret) strcpy(path_ret, path_up);
+						return 1;
 					}
 					xmlFree(orig_dpath);
                 }
                 elements = elements->next;
             }
-            if (check_deviant_paths(node->childs, info))
+            if (check_deviant_paths(node->childs, info, path_ret))
                 return 1;
         }
 		xmlFree(wanted);
@@ -393,7 +400,31 @@ char check_deviant_paths(xmlNodePtr node, install_info *info)
     return 0;
 }
 
-const char *IsReadyToInstall(install_info *info)
+/** check path and return a string that explains who owns the directory. string
+ * must be freed manually */
+static char* explain_nowritepermission(const char* path)
+{
+    struct stat st;
+	char* buf = NULL;
+	// translator: directory, user name, user name
+	const char* msg = _("%s is owned by %s."
+	"You may need to run this installer as user %s or choose another directory.");
+
+	if(stat(path, &st) == 0) {
+		struct passwd* pw = getpwuid(st.st_uid);
+		if(pw) {
+			size_t buflen = strlen(msg)+strlen(path)+strlen(pw->pw_name)*2+1;
+			buf = malloc(buflen);
+			snprintf(buf, buflen, msg, path, pw->pw_name, pw->pw_name);
+		}
+	}
+
+	return buf;
+}
+
+/** explanation must be freed manually */
+static const char *_IsReadyToInstall(install_info *info, char** explanation)
+
 {
 	const char *message = NULL;
 	char path_up[PATH_MAX];
@@ -410,21 +441,45 @@ const char *IsReadyToInstall(install_info *info)
 			message = _("Please select at least one option");
 		}
     } else if ( BYTES2MB(info->install_size) > detect_diskspace(info->install_path) ) {
-        message = _("Not enough free space for the selected options");
+        message = _("Not enough free space for the selected options.");
     } else if ( (stat(path_up, &st) == 0) && !S_ISDIR(st.st_mode) ) {
-        message = _("Install path is not a directory");
+        message = _("Install path is not a directory.");
+		if(explanation) *explanation = strdup(_("Please choose an existing directory."));
     } else if ( access(path_up, W_OK) < 0 ) {
-        message = _("No write permissions on the install directory");
+        message = _("No write permissions on the install directory.");
+		if(explanation) *explanation = explain_nowritepermission(path_up);
 	} else if (strcmp(info->symlinks_path, info->install_path) == 0) {
-		message = _("Binary path and install path must be different");
-	} else if ( check_deviant_paths(info->config->root->childs, info) ) {
-        message = _("No write permissions to install a selected package");
-    } else if ( info->symlinks_path[0] &&
-				(access(info->symlinks_path, W_OK) < 0) ) {
-        message = _("No write permissions on the binary directory");
+		message = _("Binary path and install path must be different.");
+	} else if ( check_deviant_paths(info->config->root->childs, info, path_up) ) {
+        message = _("No write permissions to install a selected package.");
+		if(explanation) *explanation = explain_nowritepermission(path_up);
+    } else if ( info->symlinks_path[0]) {
+		if (stat(info->symlinks_path, &st) == 0) {
+			if(!S_ISDIR(st.st_mode)) {
+				message = _("Binary path is not a directory.");
+			}
+			else if (access(info->symlinks_path, W_OK) < 0) {
+				message = _("No write permissions on the binary directory.");
+				if(explanation) *explanation = explain_nowritepermission(info->symlinks_path);
+			}
+		}
+		else {
+			message = _("Binary directory does not exist.");
+			if(explanation) *explanation = strdup(_("Please choose an existing directory."));
+		}
     }
 
 	return message;
+}
+
+const char *IsReadyToInstall(install_info *info)
+{
+	return _IsReadyToInstall(info, NULL);
+}
+
+const char *IsReadyToInstall_explain(install_info *info, char** explanation)
+{
+	return _IsReadyToInstall(info, explanation);
 }
 
 const char *GetProductCDROMFile(install_info *info)
@@ -1589,9 +1644,7 @@ void delete_install(install_info *info)
 char gCDKeyString[128];
 
 /* Actually install the selected filesets */
-install_state install(install_info *info,
-					  int (*update)(install_info *info, const char *path, 
-									size_t progress, size_t size, const char *current))
+install_state install(install_info *info, UIUpdateFunc update)
 {
     xmlNodePtr node;
     install_state state;
@@ -1652,14 +1705,14 @@ install_state install(install_info *info,
 	if ( f && ! GetProductIsMeta(info) ) {
 		if ( strstr(f, info->setup_path) == f )
 			f += strlen(info->setup_path)+1;
-		copy_path(info, f, info->install_path, NULL, !keepdirs, NULL, update);
+		copy_path(info, f, info->install_path, NULL, !keepdirs, NULL, NULL, update);
 	}
 	keepdirs = 0;
 	f = GetProductEULA(info, &keepdirs);
 	if ( f && ! GetProductIsMeta(info) ) {
 		if ( strstr(f, info->setup_path) == f )
 			f += strlen(info->setup_path)+1;
-		copy_path(info, f, info->install_path, NULL, !keepdirs, NULL, update);
+		copy_path(info, f, info->install_path, NULL, !keepdirs, NULL, NULL, update);
 	}
     if(info->options.install_menuitems){
 		int i;

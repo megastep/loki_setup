@@ -245,7 +245,7 @@ int parse_line(const char **srcpp, char *buf, int maxlen)
 
 ssize_t copy_file(install_info *info, const char *cdrom, const char *path, const char *dest, char *final, 
 				  int binary, int strip_dirs, xmlNodePtr node,
-				  int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current),
+				  UIUpdateFunc update,
 				  struct file_elem **elem)
 {
     ssize_t size = 0;
@@ -390,9 +390,9 @@ ssize_t copy_file(install_info *info, const char *cdrom, const char *path, const
     return size;
 }
 
-size_t copy_directory(install_info *info, const char *path, const char *dest, 
-					  const char *cdrom, xmlNodePtr node,
-					  int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+static size_t copy_directory(install_info *info, const char *path, const char *dest, 
+					  const char *cdrom, const char* suffix, xmlNodePtr node,
+					  UIUpdateFunc update)
 {
     char fpat[PATH_MAX];
     int i, err;
@@ -413,7 +413,7 @@ size_t copy_directory(install_info *info, const char *path, const char *dest,
 		} else {
 			for ( i=0; i<globbed.gl_pathc; ++i ) {
 				copied = copy_path(info, globbed.gl_pathv[i], dest, cdrom, 0,
-								   node, update);
+								   suffix, node, update);
 				if ( copied > 0 ) {
 					size += copied;
 				}
@@ -427,8 +427,8 @@ size_t copy_directory(install_info *info, const char *path, const char *dest,
 }
 
 ssize_t copy_path(install_info *info, const char *path, const char *dest, 
-		  const char *cdrom, int strip_dirs, xmlNodePtr node,
-		  int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+		  const char *cdrom, int strip_dirs, const char* suffix, xmlNodePtr node,
+		  UIUpdateFunc update)
 {
     char final[PATH_MAX];
     struct stat sb;
@@ -440,9 +440,9 @@ ssize_t copy_path(install_info *info, const char *path, const char *dest,
 
     if ( ! stat(path, &sb) ) {
         if ( S_ISDIR(sb.st_mode) ) {
-            copied = copy_directory(info, path, dest, cdrom, node, update);
+            copied = copy_directory(info, path, dest, cdrom, suffix, node, update);
         } else {
-			const SetupPlugin *plug = FindPluginForFile(path);
+			const SetupPlugin *plug = FindPluginForFile(path, suffix);
 			if (plug) {
 				copied = plug->Copy(info, path, dest, current_option_txt, node, update);
 			} else {
@@ -463,9 +463,11 @@ ssize_t copy_path(install_info *info, const char *path, const char *dest,
     return size;
 }
 
-ssize_t copy_list(install_info *info, const char *filedesc, const char *dest, 
-		  const char *from_cdrom, const char *srcpath, int strip_dirs, xmlNodePtr node,
-		  int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+static ssize_t copy_list(install_info *info, const char *filedesc, const char *dest, 
+		  const char *from_cdrom, const char *srcpath, int strip_dirs,
+		  const char* suffix,
+		  xmlNodePtr node,
+		  UIUpdateFunc update)
 {
     char fpat[BUFSIZ];
     int i;
@@ -492,7 +494,7 @@ ssize_t copy_list(install_info *info, const char *filedesc, const char *dest,
             if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
                 for ( i=0; i<globbed.gl_pathc; ++i ) {
                     copied = copy_path(info, globbed.gl_pathv[i], dest, 
-                                       full_cdpath, strip_dirs, node, update);
+                                       full_cdpath, strip_dirs, suffix, node, update);
                     if ( copied > 0 ) {
                         size += copied;
                     }
@@ -507,7 +509,7 @@ ssize_t copy_list(install_info *info, const char *filedesc, const char *dest,
             if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
                 for ( i=0; i<globbed.gl_pathc; ++i ) {
                     copied = copy_path(info, globbed.gl_pathv[i], dest, NULL,
-                                       strip_dirs, node, update);
+                                       strip_dirs, suffix, node, update);
                     if ( copied > 0 ) {
                         size += copied;
                     }
@@ -550,7 +552,7 @@ static void check_dynamic(const char *fpat, char *bin)
 
 ssize_t copy_manpage(install_info *info, xmlNodePtr node, const char *dest,
 		    const char *from_cdrom,
-		    int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+		    UIUpdateFunc update)
 {
     ssize_t copied = 0;
 	char fpat[PATH_MAX], final[PATH_MAX];
@@ -587,7 +589,7 @@ ssize_t copy_manpage(install_info *info, xmlNodePtr node, const char *dest,
 
 ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, const char *dest, 
 		    const char *from_cdrom,
-		    int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+		    UIUpdateFunc update)
 {
     struct stat sb;
     char fpat[PATH_MAX], bin[PATH_MAX], final[PATH_MAX], fdest[PATH_MAX];
@@ -741,7 +743,7 @@ ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, c
 }
 
 static int copy_script(install_info *info, xmlNodePtr node, const char *script, const char *dest, size_t size,
-				int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current), const char *from_cdrom, const char *msg)
+				UIUpdateFunc update, const char *from_cdrom, const char *msg)
 {
     struct cdrom_elem *cdrom;
     struct cdrom_elem *cdrom_start;
@@ -774,7 +776,7 @@ static int copy_script(install_info *info, xmlNodePtr node, const char *script, 
 }
 
 ssize_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
-                int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+                UIUpdateFunc update)
 {
     ssize_t size, copied;
     char tmppath[PATH_MAX], *tmp;
@@ -832,16 +834,18 @@ ssize_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
 
 
 			if ( strcmp(node->name, "files") == 0 ) {
+				char* suffix = xmlGetProp(node, "suffix");
 				const char *str = xmlNodeListGetString(info->config, (node->parent)->childs, 1);
             
 				parse_line(&str, current_option_txt, sizeof(current_option_txt));
 				copied = copy_list(info,
 						   xmlNodeListGetString(info->config, node->childs, 1),
-						   path, from_cdrom, srcpath, strip_dirs, node,
-						   update);
+						   path, from_cdrom, srcpath, strip_dirs, suffix,
+						   node, update);
 				if ( copied > 0 ) {
 					size += copied;
 				}
+				xmlFree(suffix);
 			} else if ( strcmp(node->name, "binary") == 0 ) {
 				copied = copy_binary(info, node,
 						     xmlNodeListGetString(info->config, node->childs, 1),
@@ -879,48 +883,53 @@ ssize_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
 }
 
 ssize_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
-				  int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+				  UIUpdateFunc update)
 {
     ssize_t size, copied;
     char tmppath[PATH_MAX];
 
     size = 0;
     while ( node ) {
-        const char *wanted;
-
 		if ( ! strcmp(node->name, "option") ) {
-			wanted = xmlGetProp(node, "install");
-			if ( wanted  && (strcmp(wanted, "true") == 0) ) {
-				const char *product = xmlGetProp(node, "product");
+			if ( xmlNodePropIsTrue(node, "install") ) {
+				char *product = xmlGetProp(node, "product");
 				if ( product ) {
 					if ( GetProductIsMeta(info) ) {
+						char *dir = xmlGetProp(node, "productdir");
+						// XXX sucks
 						extern const char *argv0; // Set in main.c
-                        if (UI.shutdown) UI.shutdown(info);
-						// We spawn a new setup for this product
+						if (UI.shutdown) UI.shutdown(info);
+						// We spawn a new setup for this product (#1868)
 #if defined(darwin)
-                        if (fork()) {
-                            if (UI.is_gui) {
-                                exit(0);
-                            } else {
-                                int status;
-                                wait(&status);
-                                exit(WIFEXITED(status) ? WEXITSTATUS(status) : 1);
-                            }
-			}
+						if (fork()) {
+							if (UI.is_gui) {
+								exit(0);
+							} else {
+								int status;
+								wait(&status);
+								exit(WIFEXITED(status) ? WEXITSTATUS(status) : 1);
+							}
+						}
 #endif
+						log_warning("directory: %s", dir);
+						if(dir && chdir(dir) == -1)
+							log_fatal("Could not change directory to %s: %s", dir, strerror(errno));
 						execlp(argv0, argv0, "-f", product, NULL);
-						perror("execlp");
+						log_fatal("Could not run new installer for selected product: %s", strerror(errno));
 					} else {
 						log_fatal("'product' attributes can only be used in files with the 'meta' attribute.");
 					}
 				} else {
-					const char *deviant_path = xmlGetProp(node, "path");
-					if (!deviant_path) {
+					const char* deviant_path = NULL;
+					char *prop = xmlGetProp(node, "path");
+					if (!prop) {
 						deviant_path = info->install_path;
 					} else {
+						deviant_path = prop;
 						parse_line(&deviant_path, tmppath, PATH_MAX);
 						deviant_path = tmppath;
 					}
+					xmlFree(prop);
 					copied = copy_node(info, node, deviant_path, update);
 					if ( copied > 0 ) {
 						size += copied;
@@ -1069,7 +1078,8 @@ ssize_t size_binary(install_info *info, const char *from_cdrom, const char *file
 }
 
 /* Returns the install size of a list of files, in bytes */
-ssize_t size_list(install_info *info, const char *from_cdrom, const char *srcpath, const char *filedesc)
+static ssize_t size_list(install_info *info, const char *from_cdrom, const char *srcpath,
+		const char *filedesc, const char* suffix)
 {
     char fpat[PATH_MAX];
     char fullpath[PATH_MAX];
@@ -1088,7 +1098,7 @@ ssize_t size_list(install_info *info, const char *from_cdrom, const char *srcpat
             snprintf(fullpath, sizeof(fullpath), "%s/%s/%s", cdpath, srcpath, fpat);
             if ( glob(fullpath, GLOB_ERR, NULL, &globbed) == 0 ) {
                 for ( i=0; i<globbed.gl_pathc; ++i ) {
-                    const SetupPlugin *plug = FindPluginForFile(globbed.gl_pathv[i]);
+                    const SetupPlugin *plug = FindPluginForFile(globbed.gl_pathv[i], suffix);
                     if (plug) {
                         count = plug->Size(info, globbed.gl_pathv[i]);
                     } else {
@@ -1108,7 +1118,7 @@ ssize_t size_list(install_info *info, const char *from_cdrom, const char *srcpat
             snprintf(fullpath, sizeof(fullpath), "%s/%s", srcpath, fpat);
             if ( glob(fullpath, GLOB_ERR, NULL, &globbed) == 0 ) {
                 for ( i=0; i<globbed.gl_pathc; ++i ) {
-					const SetupPlugin *plug = FindPluginForFile(globbed.gl_pathv[i]);
+					const SetupPlugin *plug = FindPluginForFile(globbed.gl_pathv[i], suffix);
 					if (plug) {
 						count = plug->Size(info, globbed.gl_pathv[i]);
 					} else {
@@ -1133,7 +1143,7 @@ ssize_t size_readme(install_info *info, xmlNodePtr node)
 
     lang_prop = xmlGetProp(node, "lang");
 	if (lang_prop && match_locale(lang_prop) ) {
-		ret = size_list(info, 0, ".", xmlNodeListGetString(info->config, node->childs, 1));
+		ret = size_list(info, 0, ".", xmlNodeListGetString(info->config, node->childs, 1), NULL);
 	}
 	xmlFree(lang_prop);
 	return ret;
@@ -1194,8 +1204,10 @@ unsigned long long size_node(install_info *info, xmlNodePtr node)
 				 match_libc(info, xmlGetProp(node, "libc")) &&
 				 match_distro(info, xmlGetProp(node, "distro"))) {
 				if ( strcmp(node->name, "files") == 0 ) {
+					char* suffix = xmlGetProp(node, "suffix");
 					size += size_list(info, from_cdrom, srcpath,
-									  xmlNodeListGetString(info->config, node->childs, 1));
+									  xmlNodeListGetString(info->config, node->childs, 1), suffix);
+					xmlFree(suffix);
 				} else if ( strcmp(node->name, "binary") == 0 ) {
 					size += size_binary(info, from_cdrom,
 									xmlNodeListGetString(info->config, node->childs, 1));

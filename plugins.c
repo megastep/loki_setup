@@ -19,33 +19,32 @@ struct plugin_list {
 /* The list of registered plugins */
 static struct plugin_list *plugins = NULL;
 
-/* Return the plugin structure associated with a file (looks through the list of registered extensions */
-const SetupPlugin *FindPluginForFile(const char *path)
+/** Find the plugin structure associated with a file (looks through the list of registered extensions
+ * @param path file name
+ * @param suffix if non-NULL assume the file has this suffix to force a certain plugin
+ * @returns pointer to plugin or NULL if none matches
+ */
+const SetupPlugin *FindPluginForFile(const char *path, const char* suffix)
 {
-	const char *ext;
+	const char* p = suffix?suffix:path;
+	unsigned plen = strlen(p);
+	unsigned i;
 	struct plugin_list *plug = plugins;
 
-	/* Isolate the extension */
-	ext = strrchr(path, '/');
-	if ( ! ext ) {
-		ext = path;
-	}
-	ext = strchr(ext, '.');
-	if ( ! ext ) { /* File doesn't have an extension */
-		return NULL;
+	for(plug = plugins; plug; plug = plug->next)
+	{
+		for ( i = 0; i < plug->plugin->num_extensions; ++i ) {
+			const char* ext = plug->plugin->extensions[i];
+			unsigned len = strlen(ext);
+			
+			if(plen < len)
+				continue;
+
+			if(!strcmp(p+plen-len, ext))
+				return plug->plugin;
+		}
 	}
 
-	while ( plug ) {
-		int i;
-		for ( i = 0; i < plug->plugin->num_extensions; ++i ) {
-			const char *str = strstr(path, plug->plugin->extensions[i]);
-			/* The lenght of the strings should match if the extension is at the end */
-			if( str && strlen(str) == strlen(plug->plugin->extensions[i])) {
-				return plug->plugin;
-			}
-		}
-		plug = plug->next;
-	}
 	return NULL;
 }
 

@@ -55,7 +55,7 @@ static size_t CPIOSize(install_info *info, const char *path)
 /* Exported so that the RPM plugin can access it */
 size_t copy_cpio_stream(install_info *info, stream *input, const char *dest, const char *current_option,
 			xmlNodePtr node,
-                        int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+                        UIUpdateFunc update)
 {
     stream *output;
     char magic[6];
@@ -201,7 +201,7 @@ size_t copy_cpio_stream(install_info *info, stream *input, const char *dest, con
 /* Extract the file */
 static size_t CPIOCopy(install_info *info, const char *path, const char *dest, const char *current_option, 
 					   xmlNodePtr node,
-					   int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+					   UIUpdateFunc update)
 {
 	stream *input = file_open(info, path, "rb");
 	if(input)
