@@ -1,4 +1,10 @@
 Current:
+Stephane Peter (Codehost) - Mon Jul 28 19:55:15 PDT 2003
+ * Added the "reinstall" attribute for options, as well as a warning
+   to the user when reinstalling. Also export SETUP_REINSTALL in scripts.
+Stephane Peter (Codehost) - Mon Jul 28 19:55:15 PDT 2003
+ * Added the "reinstall" attribute for options, as well as a warning
+   to the user when reinstalling.
 Stephane Peter (Codehost) - Mon May 12 15:24:32 PDT 2003
  * Added the "category" attribute for the root install element, to
    specify the menu category on newer systems (Gnome 2.0)
