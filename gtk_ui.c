@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.65 2002-01-28 01:13:30 megastep Exp $
+   $Id: gtk_ui.c,v 1.66 2002-02-24 02:35:16 icculus Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -152,7 +152,7 @@ static int cur_state;
 static install_info *cur_info;
 static int diskspace;
 static int license_okay;
-static GSList *radio_list = NULL; // Group for the radio buttons
+static GSList *radio_list = NULL; /* Group for the radio buttons */
 
 /******** Local prototypes **********/
 
@@ -347,8 +347,10 @@ void setup_destroy_view_readme_slot( GtkWidget* w, gpointer data )
         gtk_widget_hide(widget);
         gtk_object_unref(GTK_OBJECT(setup_glade_readme));
         setup_glade_readme = NULL;
-        // re-enable the 'view readme buttons...all 3 of them since we don't
-        // know where we are
+        /*
+         * re-enable the 'view readme buttons...all 3 of them since we don't
+         * know where we are
+         */
         widget = glade_xml_get_widget(setup_glade, "button_readme");
         gtk_widget_set_sensitive(widget, TRUE);
         widget = glade_xml_get_widget(setup_glade, "view_readme_progress_button");
@@ -373,7 +375,7 @@ void setup_button_view_readme_slot( GtkWidget* w, gpointer data )
         gtk_widget_hide(readme);
         load_file(GTK_TEXT(widget), NULL, file);
         gtk_widget_show(readme);
-		// there are 3 'view readme' buttons...disable all of them
+		/* there are 3 'view readme' buttons...disable all of them */
 		widget = glade_xml_get_widget(setup_glade, "button_readme");
 		gtk_widget_set_sensitive(widget, 0);
 		widget = glade_xml_get_widget(setup_glade, "view_readme_progress_button");
@@ -734,6 +736,20 @@ static yesno_answer gtkui_prompt(const char *txt, yesno_answer suggest)
     return prompt_response;
 }
 
+static inline int str_in_g_list(const char *str, GList *list)
+{
+    /* See if the item is already in our list */
+    int i;
+    char *path_elem;
+    for ( i=0; (path_elem= (char *) g_list_nth_data(list, i)) != NULL; ++i ) {
+        if ( strcmp(path_elem, str) == 0 ) {
+            return 1;  /* it's in the list. */
+        }
+    }
+
+    return 0;  /* not in the list. */
+}
+
 static void init_install_path(void)
 {
     GtkWidget* widget;
@@ -741,6 +757,7 @@ static void init_install_path(void)
     int i;
     char path[PATH_MAX];
     xmlNodePtr node;
+    char *homedir = getenv("HOME");
 
     widget = glade_xml_get_widget(setup_glade, "install_path");
     
@@ -749,8 +766,9 @@ static void init_install_path(void)
 		return;
     }
 
-    list = 0;
-    list = g_list_append( list, cur_info->install_path);
+    list = NULL;
+    if (access(cur_info->install_path, R_OK) == 0)
+        list = g_list_append( list, cur_info->install_path);
 
     /*----------------------------------------------------------------------
     **  Retrieve the list of install paths from the config file, if we can
@@ -798,6 +816,13 @@ static void init_install_path(void)
             install_paths[i] = default_install_paths[i];
 		}
 	}
+
+    /*----------------------------------------------------------------------
+    **  Add in the home directory, as a last-resort.
+    **--------------------------------------------------------------------*/
+    if (homedir != NULL)
+        install_paths[i++] = homedir;
+
     /*----------------------------------------------------------------------
     **  Terminate the array
     **--------------------------------------------------------------------*/
@@ -809,17 +834,22 @@ static void init_install_path(void)
     **--------------------------------------------------------------------*/
     for ( i=0; install_paths[i]; ++i ) {
         snprintf(path, sizeof(path), "%s/%s", install_paths[i], GetProductName(cur_info));
-        if ( strcmp(path, cur_info->install_path) != 0 ) {
-            if ( access(install_paths[i], R_OK) == 0 ) {
-                list = g_list_append( list, strdup(path));
-            }
+        if ((!str_in_g_list(path, list)) && (access(install_paths[i], W_OK) == 0)) {
+            list = g_list_append( list, strdup(path));
         }
     }
     gtk_combo_set_popdown_strings( GTK_COMBO(widget), list );
+    /* !!! FIXME: Should we g_list_free ( list ) or not? */
     
-    gtk_entry_set_text( GTK_ENTRY(GTK_COMBO(widget)->entry), cur_info->install_path );
+    /*gtk_entry_set_text( GTK_ENTRY(GTK_COMBO(widget)->entry), cur_info->install_path );*/
+    gtk_entry_set_text( GTK_ENTRY(GTK_COMBO(widget)->entry), list->data );
+
+    /* cheat. Make the first entry the default for IsReadyToInstall(). */
+    strncpy(cur_info->install_path, list->data, sizeof (cur_info->install_path));
+
     gtk_combo_set_use_arrows( GTK_COMBO(widget), 0);
 }
+
 
 static void init_binary_path(void)
 {
@@ -853,7 +883,8 @@ static void init_binary_path(void)
         int end = 0;
 
         pc = pathCopy;
-        strcpy( pathCopy, path );
+        strncpy( pathCopy, path, sizeof (pathCopy) - 1 );
+        pathCopy[sizeof (pathCopy) - 1] = '\0';  /* just in case. */
 
         while( *pc != ':' && *pc != '\0' ) {
             pc0 = pc;
@@ -868,15 +899,7 @@ static void init_binary_path(void)
                 *pc = '\0';
 
             if( len && ((sc=strcmp( pc0, cur_info->symlinks_path)) != 0) && (*pc0 != '.') ) {
-                /* See if the item is already in our list */
-                int i, not_in_list = 1;
-                char *path_elem;
-                for ( i=0; not_in_list && (path_elem=g_list_nth_data(list, i));
-                      ++i ) {
-                    if ( strcmp(path_elem, pc0) == 0 )
-                        not_in_list = 0;
-                }
-				if (not_in_list && !access(pc0, W_OK)) {
+				if ((!str_in_g_list(pc0, list)) && (access(pc0, W_OK) == 0)) {
 					list = g_list_append( list, pc0 );
 				}
             }
@@ -884,6 +907,14 @@ static void init_binary_path(void)
             if( ! end )
                 pc++;
         }
+    }
+
+    path = (char *)getenv( "HOME" );
+    if( path )
+    {
+	    if ((!str_in_g_list(path, list)) && (access(path, W_OK) == 0)) {
+		    list = g_list_append( list, path );
+		}
     }
 
     if ( list ) {
@@ -898,6 +929,7 @@ static void init_binary_path(void)
         log_warning(_("Warning: No writable targets in path... You may want to be root.\n"));
         /* FIXME */
     }
+    /* !!! FIXME: Should we g_list_free ( list ) or not? */
     gtk_entry_set_text( GTK_ENTRY(GTK_COMBO(widget)->entry), cur_info->symlinks_path );
     gtk_combo_set_use_arrows( GTK_COMBO(widget), 0);
 }
@@ -1148,7 +1180,7 @@ static install_state gtkui_init(install_info *info, int argc, char **argv, int n
     symlink_checkbox = glade_xml_get_widget(setup_glade, "symlink_checkbox");
     gtk_signal_connect(GTK_OBJECT(symlink_checkbox), "toggled",
 			   GTK_SIGNAL_FUNC(on_use_binary_toggled), NULL);
-#endif //0
+#endif /*0*/
 
     /* Set up the window title */
     window = glade_xml_get_widget(setup_glade, "setup_window");
