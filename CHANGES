@@ -1,4 +1,16 @@
 1.5.0:
+Stéphane Peter - Fri Nov 10 14:31:29 PDT 2000
+ * Do not overwrite the product XML file if it already exists; just update it.
+Stéphane Peter - Thu Nov  9 16:14:03 PDT 2000
+ * Added the 'cdrom' element and support for multiple CDROM installations.
+ * The 'cdromfile' attribute is now mandatory if the CDROM is required.
+ * Automatic mounting/unmounting of CDROM devices if proper permissions
+   are available.
+Stéphane Peter - Thu Nov  2 22:02:57 PDT 2000
+ * Added the 'component' element to support multiple components.
+Stéphane Peter - Mon Oct 30 18:48:44 PDT 2000
+ * Added 'component' attribute to the install element to handle
+   component-only installations.
 Sam Lantinga - Wed Oct 18 17:26:28 PDT 2000
  * The image frame is hidden if there is no splash image
  * Changed the "game installed" message to "product installed"
@@ -8,17 +20,6 @@ Stéphane Peter - Tue Oct 10 19:18:24 PDT 2000
  * Moved away from uninstall scripts and use the 'setupdb' API to manage
    a database of installed products and components, managed through XML
    files.
-Stéphane Peter - Mon Oct 30 18:48:44 PDT 2000
- * Added 'component' attribute to the install element to handle
-   component-only installations.
-Stéphane Peter - Thu Nov  2 22:02:57 PDT 2000
- * Added the 'component' element to support multiple components.
-Stéphane Peter - Thu Nov  9 16:14:03 PDT 2000
- * Added the 'cdrom' element and support for multiple CDROM installations.
- * The 'cdromfile' attribute is now mandatory if the CDROM is required.
- * Automatic mounting/unmounting of CDROM devices if proper permissions are available.
-Stéphane Peter - Fri Nov 10 14:31:29 PDT 2000
- * Do not overwrite the product XML file if it already exists; just update it.
  
 1.4.0:
 Sam Lantinga - Tue Aug 22 12:32:29 PDT 2000
