@@ -15,7 +15,7 @@ OPTIMIZE = -Wall -g -O2 -funroll-loops
 ifeq ($(arch), alpha)
     OPTIMIZE += -mcpu=ev4 -Wa,-mall
 endif
-HEADERS = -I/usr/lib/glib/include -I/usr/X11R6/include -I/usr/local/include
+HEADERS = -I/usr/X11R6/include -I/usr/local/include $(shell glib-config --cflags)
 OPTIONS = -DSTUB_UI
 
 ifeq ($(USE_RPM),true)
