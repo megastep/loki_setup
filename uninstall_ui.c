@@ -273,6 +273,17 @@ void perform_uninstall_slot(GtkWidget* w, gpointer data)
     char text[1024];
 	const char *message;
 
+	/* Set through environment to hide questions, and assume Yes */
+	int show_messages;
+	const char *env;
+
+	show_messages = 1;
+
+	env = getenv("SETUP_NO_PROMPT");
+	if ( env && atoi(env) )
+		show_messages = 0;
+
+
     /* First switch to the next notebook page */
     notebook = glade_xml_get_widget(uninstall_glade, "uninstall_notebook");
     gtk_notebook_set_page(GTK_NOTEBOOK(notebook), 1);
@@ -314,7 +325,7 @@ void perform_uninstall_slot(GtkWidget* w, gpointer data)
 				
 				/* Display an optional message to the user */
 				message = loki_getmessage_component(component->component);
-				if ( message && !display_message(message, BUTTON_OK|BUTTON_ABORT) ) {
+				if (show_messages && message && !display_message(message, BUTTON_OK|BUTTON_ABORT) ) {
                     clist = clist->next;
 					uninstall_cancelled = 1;
 					break;
