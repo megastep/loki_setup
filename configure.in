@@ -167,6 +167,8 @@ case "$target" in
 	BDYNAMIC=""
 	REENTRANT=""
 	CFLAGS="$CFLAGS -I/sw/include -Ddarwin"
+	LDFLAGS="$LDFLAGS -framework Carbon"
+	COMMON_LIBS="carbon/carbonres.o carbon/carbondebug.o"
 	ARCH=ppc ;;
     *ppc* | *powerpc*)
         ARCH=ppc ;;
@@ -367,7 +369,7 @@ AC_ARG_ENABLE(dialog,
               , enable_dialog=yes)
 if test x$enable_dialog = xyes; then
 	CFLAGS="$CFLAGS -DENABLE_DIALOG"
-	COMMON_LIBS="dialog/libdialog.a"
+	COMMON_LIBS="$COMMON_LIBS dialog/libdialog.a"
 	CONSOLE_OBJS="dialog_ui.o"
 	DO_DIALOG="do-dialog"
 fi

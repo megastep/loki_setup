@@ -44,7 +44,7 @@ UNINSTALL_OBJS 		= uninstall.o
 CHECK_OBJS			= $(COMMON_OBJS) $(CORE_OBJS) check.o
 CONSOLE_OBJS 		= $(OBJS) console_ui.o @CONSOLE_OBJS@
 GUI_OBJS 			= $(OBJS) gtk_ui.o
-CARBON_OBJS          = $(OBJS) carbon_ui.o carbon/carbonres.o carbon/carbondebug.o
+CARBON_OBJS          = $(OBJS) carbon_ui.o
 XSU_OBJS			= xsu.o pseudo.o
 
 SRCS = $(OBJS:.o=.c) $(CONSOLE_OBJS:.o=.c) $(GUI_OBJS:.o=.c) $(CARBON_OBJS:.o=.c) $(XSU_OBJS:.o=.c) testcd.c
@@ -65,28 +65,28 @@ loki_uninstall.o: uninstall.c
 	$(CC) $(LDFLAGS) -c -o $@ $^ $(CFLAGS) -DUNINSTALL_UI -DVERSION=\"$(UNINSTALL_VERSION)\"
 
 loki_uninstall: $(LOKI_UNINSTALL_OBJS) $(SETUPDB)/$(arch)/libsetupdb.a
-	$(CC) $(LDFLAGS) -o $@ $^ $(GUI_LIBS)
+	$(CC) $(LDFLAGS) -o $@ $(LOKI_UNINSTALL_OBJS) $(GUI_LIBS)
 
 uninstall: $(UNINSTALL_OBJS) $(COMMON_LIBS)
-	$(CC) $(LDFLAGS) -o $@ $^ $(CONSOLE_LIBS) @STATIC@
+	$(CC) $(LDFLAGS) -o $@ $(UNINSTALL_OBJS) $(CONSOLE_LIBS) @STATIC@
 
 check: $(CHECK_OBJS)  $(COMMON_LIBS)
-	$(CC) $(LDFLAGS) -o $@ $^ $(GUI_LIBS)
+	$(CC) $(LDFLAGS) -o $@ $(CHECK_OBJS) $(GUI_LIBS)
 
 testcd: testcd.o $(CORE_OBJS) $(COMMON_OBJS) $(COMMON_LIBS)
 	$(CC) $(LDFLAGS) -o $@ $^ @LIBS@ @CONSOLE_LIBS@ @STATIC@
 
 setup:	$(CONSOLE_OBJS) $(COMMON_LIBS)
-	$(CC) $(LDFLAGS) -o $@ $^ $(CONSOLE_LIBS) @STATIC@
+	$(CC) $(LDFLAGS) -o $@ $(CONSOLE_OBJS) $(CONSOLE_LIBS) @STATIC@
 
 setup.gtk: $(GUI_OBJS) $(COMMON_LIBS)
-	$(CC) $(LDFLAGS) -o $@ $^ $(GUI_LIBS)
+	$(CC) $(LDFLAGS) -o $@ $(GUI_OBJS) $(GUI_LIBS)
 
 #!!!TODO - Take dependency of dialog libs out of carbon	
 #!!!TODO - Should we include setup.carbon as part of "all", "install", etc...?
 # Carbon needs to be a target all its own
-setup.carbon: do-plugins @DO_DIALOG@ $(CARBON_OBJS) $(COMMON_LIBS)
-	$(CC) $(LDFLAGS) -o $@ $(CARBON_OBJS) $(COMMON_LIBS) $(CARBON_LIBS) -framework Carbon
+setup.carbon: do-plugins @DO_DIALOG@ $(CARBON_OBJS) $(CARBON_LIBS)
+	$(CC) $(LDFLAGS) -o $@ $(CARBON_OBJS) $(CARBON_LIBS) 
 	cp setup.carbon setup.APP/Contents/MacOS
 
 xsu: $(XSU_OBJS)
