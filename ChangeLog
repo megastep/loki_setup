@@ -1,0 +1,5 @@
+1999-12-10  Bernd Kreimeier  <bk@lokigames.com>
+
+	* detect.c (detect_diskspace): removed Karl's libc detection
+	code (which failed on glibc-2.0 on our testbox) with new one.
+
