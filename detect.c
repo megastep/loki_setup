@@ -148,6 +148,14 @@ int detect_cdrom(const char *unique_file)
 	}
 
 	if ( env ) { /* Override the CD detection */
+		if ( unique_file ) {
+			char file[PATH_MAX];
+			
+			snprintf(file, sizeof(file), "%s/%s", env, unique_file);
+			if ( access(file, F_OK) < 0 ) {
+				return num_cdroms = 0;
+			}
+		}
 		cdroms[0] = env;
 		return num_cdroms = 1;
 	}
@@ -186,6 +194,14 @@ int detect_cdrom(const char *unique_file)
     }
 
 	if ( env ) { /* Override the CD detection */
+		if ( unique_file ) {
+			char file[PATH_MAX];
+			
+			snprintf(file, sizeof(file), "%s/%s", env, unique_file);
+			if ( access(file, F_OK) < 0 ) {
+				return num_cdroms = 0;
+			}
+		}
 		cdroms[0] = env;
 		return num_cdroms = 1;
 	}
