@@ -17,6 +17,32 @@
 static GladeXML *uninstall_glade;
 static int uninstall_cancelled = 0;
 
+/* GTk utility function */
+void gtk_button_set_sensitive(GtkWidget *button, gboolean sensitive)
+{
+    gtk_widget_set_sensitive(button, sensitive);
+
+    /* Simulate a mouse crossing event, to enable button */
+    if ( sensitive ) {
+        int x, y;
+        gboolean retval;
+        GdkEventCrossing crossing;
+
+        gtk_widget_get_pointer(button, &x, &y);
+        if ( (x >= 0) && (y >= 0) &&
+             (x <= button->allocation.width) &&
+             (y <= button->allocation.height) ) {
+                memset(&crossing, 0, sizeof(crossing));
+                crossing.type = GDK_ENTER_NOTIFY;
+                crossing.window = button->window;
+                crossing.detail = GDK_NOTIFY_VIRTUAL;
+                gtk_signal_emit_by_name(GTK_OBJECT(button),
+                                        "enter_notify_event",
+                                        &crossing, &retval);
+        }
+    }
+}
+
 /* List of open products that need closing */
 struct product_list {
     product_t *product;
@@ -145,7 +171,7 @@ static size_t calculate_recovered_space(void)
     }
     widget = glade_xml_get_widget(uninstall_glade, "uninstall_button");
     if ( widget ) {
-        gtk_widget_set_sensitive(widget, ready);
+        gtk_button_set_sensitive(widget, ready);
     }
     return(size);
 }
@@ -192,7 +218,7 @@ void perform_uninstall_slot(GtkWidget* w, gpointer data)
     gtk_notebook_set_page(GTK_NOTEBOOK(notebook), 1);
     widget = glade_xml_get_widget(uninstall_glade, "finished_button");
     if ( widget ) {
-        gtk_widget_set_sensitive(widget, FALSE);
+        gtk_button_set_sensitive(widget, FALSE);
     }
 
     /* Now uninstall all the selected components */
@@ -291,11 +317,11 @@ void perform_uninstall_slot(GtkWidget* w, gpointer data)
     }
     widget = glade_xml_get_widget(uninstall_glade, "cancel_button");
     if ( widget ) {
-        gtk_widget_set_sensitive(widget, FALSE);
+        gtk_button_set_sensitive(widget, FALSE);
     }
     widget = glade_xml_get_widget(uninstall_glade, "finished_button");
     if ( widget ) {
-        gtk_widget_set_sensitive(widget, TRUE);
+        gtk_button_set_sensitive(widget, TRUE);
     }
 }
 
@@ -361,7 +387,7 @@ int uninstall_ui(int argc, char *argv[])
     /* Make sure the window is visible */
     widget = glade_xml_get_widget(uninstall_glade, "uninstall_button");
     if ( widget ) {
-        gtk_widget_set_sensitive(widget, FALSE);
+        gtk_button_set_sensitive(widget, FALSE);
     }
     window = glade_xml_get_widget(uninstall_glade, "loki_uninstall");
     gtk_widget_realize(window);
