@@ -166,7 +166,7 @@ int parse_line(const char **srcpp, char *buf, int maxlen)
 size_t copy_file(install_info *info, const char *cdrom, const char *path, const char *dest, char *final, int binary,
 				 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
-    size_t size, copied;
+	size_t size = 0;
     const char *base;
     char buf[BUFSIZ], fullpath[PATH_MAX];
     stream *input, *output;
@@ -190,29 +190,43 @@ size_t copy_file(install_info *info, const char *cdrom, const char *path, const 
         strcpy(fullpath, path);
     }
 
-    size = 0;
-    input = file_open(info, fullpath, "r");
-    if ( input == NULL ) {
-        return(-1);
-    }
-    output = file_open(info, final, "w");
-    if ( output == NULL ) {
-        file_close(info, input);
-        return(-1);
-    }
-    while ( (copied=file_read(info, buf, BUFSIZ, input)) > 0 ) {
-        if ( file_write(info, buf, copied, output) != copied ) {
-            break;
-        }
-        info->installed_bytes += copied;
-        size += copied;
-        if ( update ) {
-            update(info, final, size, input->size, current_option);
-        }
-    }
-    file_close(info, output);
-    file_close(info, input);
+	if ( file_issymlink(info, fullpath) ) {
+		/* Copy the symlink */
+		int len = readlink(fullpath, buf, sizeof(buf)-1);
+		if ( len >= 0 ) {
+			buf[len] = '\0'; /* Nul-terminate the string */
+			file_symlink(info, buf, final);
+			if ( update ) {
+				update(info, final, 100, 100, current_option);
+			}
+		} else {
+			log_warning(info, _("Unable to create %s symlink pointing to %s"), final, buf);
+		}
+	} else {
+		size_t copied;
 
+		input = file_open(info, fullpath, "r");
+		if ( input == NULL ) {
+			return(-1);
+		}
+		output = file_open(info, final, "w");
+		if ( output == NULL ) {
+			file_close(info, input);
+			return(-1);
+		}
+		while ( (copied=file_read(info, buf, BUFSIZ, input)) > 0 ) {
+			if ( file_write(info, buf, copied, output) != copied ) {
+				break;
+			}
+			info->installed_bytes += copied;
+			size += copied;
+			if ( update ) {
+				update(info, final, size, input->size, current_option);
+			}
+		}
+		file_close(info, output);
+		file_close(info, input);
+	}
     return size;
 }
 
@@ -227,20 +241,22 @@ size_t copy_directory(install_info *info, const char *path, const char *dest,
 
     size = 0;
     snprintf(fpat, sizeof(fpat), "%s/*", path);
-	err = glob(fpat, GLOB_ERR, NULL, &globbed);
+	err = glob(fpat, GLOB_NOSORT | GLOB_NOCHECK, NULL, &globbed);
     if ( err == 0 ) {
-        for ( i=0; i<globbed.gl_pathc; ++i ) {
-	    copied = copy_path(info, globbed.gl_pathv[i], dest, cdrom, 0, 
-			       node, update);
-          if ( copied > 0 ) {
-            size += copied;
-          }
-        }
+		if ( globbed.gl_pathc==1 && !strcmp(globbed.gl_pathv[0], fpat) ) { /* No match, empty directory */
+			snprintf(fpat, sizeof(fpat), "%s/%s", dest, path);
+			file_create_hierarchy(info, fpat);
+			file_mkdir(info, fpat, 0755);			
+		} else {
+			for ( i=0; i<globbed.gl_pathc; ++i ) {
+				copied = copy_path(info, globbed.gl_pathv[i], dest, cdrom, 0, 
+								   node, update);
+				if ( copied > 0 ) {
+					size += copied;
+				}
+			}
+		}
         globfree(&globbed);
-	} else if ( err < 0 && globbed.gl_pathc == 0 ) { /* Empty directory */
-		snprintf(fpat, sizeof(fpat), "%s/%s", dest, path);
-		file_create_hierarchy(info, fpat);
-		file_mkdir(info, fpat, 0755);
     } else {
         log_warning(info, _("Unable to copy directory '%s'"), path);
     }

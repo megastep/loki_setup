@@ -1,4 +1,7 @@
 1.4.0:
+Stéphane Peter - Mon Aug  7 17:50:41 PDT 2000
+ * Symlinks are now copied as symlinks instead of the files that they
+   point to.
 Jeremy White <jwhite@codeweavers.com> - Fri Aug  4 19:36:26 PDT 2000
  * Added an ability to change the default drop down list for installation
    target paths. A new <install_drop_list> element handles this.

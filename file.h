@@ -1,4 +1,4 @@
-/* $Id: file.h,v 1.10 2000-06-28 01:37:53 megastep Exp $ */
+/* $Id: file.h,v 1.11 2000-08-08 01:05:46 megastep Exp $ */
 
 #ifndef __LOKI_FILE_H__
 #define __LOKI_FILE_H__
@@ -30,6 +30,7 @@ extern int file_write(install_info *info, void *buf, int len, stream *streamp);
 extern int file_eof(install_info *info, stream *streamp);
 extern int file_close(install_info *info, stream *streamp);
 extern int file_symlink(install_info *info, const char *oldpath, const char *newpath);
+extern int file_issymlink(install_info *info, const char *path);
 extern int file_mkdir(install_info *info, const char *path, int mode);
 extern int file_mkfifo(install_info *info, const char *path, int mode);
 extern int file_mknod(install_info *info, const char *path, int mode, dev_t dev);

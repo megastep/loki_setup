@@ -284,6 +284,15 @@ int file_symlink(install_info *info, const char *oldpath, const char *newpath)
     return(retval);
 }
 
+int file_issymlink(install_info *info, const char *path)
+{
+	struct stat st;
+	if ( !lstat(path, &st) && S_ISLNK(st.st_mode)) {
+		return 1;
+	}
+	return 0;
+}
+
 int file_mkdir(install_info *info, const char *path, int mode)
 {
     struct stat sb;
@@ -365,7 +374,7 @@ size_t file_size(install_info *info, const char *path)
     size_t size, count;
 
     size = -1;
-    if ( stat(path, &st) == 0 ) {
+    if ( lstat(path, &st) == 0 ) {
         if ( S_ISDIR(st.st_mode) ) {
             char newpath[PATH_MAX];
             DIR *dir;
@@ -387,6 +396,8 @@ size_t file_size(install_info *info, const char *path)
             } else {
                 log_quiet(info, _("Unable to read %s"), path);
             }
+		} else if ( S_ISLNK(st.st_mode) ) {
+			size = st.st_size;
         } else {
             fp = fopen(path, "rb");
             if ( fp ) {
