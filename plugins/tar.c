@@ -1,5 +1,5 @@
 /* TAR plugin for setup */
-/* $Id: tar.c,v 1.9 2004-03-09 11:43:32 icculus Exp $ */
+/* $Id: tar.c,v 1.10 2004-03-09 15:17:53 icculus Exp $ */
 
 #include "config.h"
 #include "plugins.h"
@@ -135,8 +135,9 @@ static size_t TarCopy(install_info *info, const char *path, const char *dest, co
 				}
                 break;
             default:
-                log_fatal(_("Tar: '%s' is unknown file type: %c"),
+                log_warning(_("Tar: '%s' is unknown file type: %c"),
                             record.hdr.name, record.hdr.typeflag);
+                log_fatal(_("Unexpected data in installation file!"));
                 break;
         }
         while ( blocks-- > 0 ) {
