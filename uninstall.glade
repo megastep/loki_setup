@@ -48,7 +48,7 @@
       <widget>
 	<class>GtkLabel</class>
 	<name>label4</name>
-	<label>Installed products:</label>
+	<label>Please select the packages you would like to uninstall:</label>
 	<justify>GTK_JUSTIFY_CENTER</justify>
 	<wrap>False</wrap>
 	<xalign>0</xalign>
