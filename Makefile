@@ -4,6 +4,7 @@ PACKAGE = setup-1.4
 
 arch := $(shell ./print_arch)
 libc := $(shell ./print_libc)
+os   := $(shell uname -s)
 # USE_RPM = true
 # DYN_PLUGINS = true
 
@@ -64,20 +65,20 @@ install.dbg: all
 ifeq ($(DYN_PLUGINS),true)
 	$(MAKE) -C plugins DYN_PLUGINS=true USE_RPM=$(USE_RPM) install.dbg
 endif
-	@if [ -d image/setup.data/bin/$(arch)/$(libc) ]; then \
-	    cp -v setup image/setup.data/bin/$(arch); \
-	    cp -v setup.gtk image/setup.data/bin/$(arch)/$(libc); \
+	@if [ -d image/setup.data/bin/$(os)/$(arch)/$(libc) ]; then \
+	    cp -v setup image/setup.data/bin/$(os)/$(arch); \
+	    cp -v setup.gtk image/setup.data/bin/$(os)/$(arch)/$(libc); \
 	fi
 
 install: all
 ifeq ($(DYN_PLUGINS),true)
 	$(MAKE) -C plugins DYN_PLUGINS=true USE_RPM=$(USE_RPM) install
 endif
-	@if [ -d image/setup.data/bin/$(arch)/$(libc) ]; then \
-	    cp -v setup image/setup.data/bin/$(arch); \
-	    strip image/setup.data/bin/$(arch)/setup; \
-	    cp -v setup.gtk image/setup.data/bin/$(arch)/$(libc); \
-	    strip image/setup.data/bin/$(arch)/$(libc)/setup.gtk; \
+	@if [ -d image/setup.data/bin/$(os)/$(arch)/$(libc) ]; then \
+	    cp -v setup image/setup.data/bin/$(os)/$(arch); \
+	    strip image/setup.data/bin/$(os)/$(arch)/setup; \
+	    cp -v setup.gtk image/setup.data/bin/$(os)/$(arch)/$(libc); \
+	    strip image/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk; \
 	fi
 
 clean:

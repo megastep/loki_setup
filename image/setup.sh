@@ -42,6 +42,7 @@ DetectLIBC()
 # Detect the Linux environment
 arch=`DetectARCH`
 libc=`DetectLIBC`
+os=`uname -s`
 
 # Find the installation program
 try_run()
@@ -55,9 +56,9 @@ try_run()
 
     # First find the binary we want to run
     failed=0
-    setup_bin="setup.data/bin/$arch/$libc/$setup"
+    setup_bin="setup.data/bin/$os/$arch/$libc/$setup"
     if [ ! -f "$setup_bin" ]; then
-        setup_bin="setup.data/bin/$arch/$setup"
+        setup_bin="setup.data/bin/$os/$arch/$setup"
         if [ ! -f "$setup_bin" ]; then
             failed=1
         fi
@@ -65,7 +66,7 @@ try_run()
     if [ "$failed" -eq 1 ]; then
         if [ "$fatal" != "" ]; then
             cat <<__EOF__
-This installation doesn't support $libc on $arch
+This installation doesn't support $libc on $os / $arch
 
 Please contact Loki Technical Support at support@lokigames.com
 __EOF__
