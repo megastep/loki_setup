@@ -44,6 +44,7 @@ int print_log(install_log *log, log_level level, const char *fmt, ...)
     if ( log ) {
         /* Print it out if appropriate */
         if ( level >= log->verbosity ) {
+            fputs(_("loki_setup: "), stdout);
             fputs(text, stdout);
             fflush(stdout);
         }
