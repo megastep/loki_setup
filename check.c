@@ -2,7 +2,7 @@
  * Check and Rescue Tool for Loki Setup packages. Verifies the consistency of the files,
  * and optionally restores them from the original installation medium.
  *
- * $Id: check.c,v 1.7 2002-12-07 00:57:31 megastep Exp $
+ * $Id: check.c,v 1.8 2003-01-07 22:05:05 megastep Exp $
  */
 
 #include <stdlib.h>
@@ -272,6 +272,8 @@ on_media_ok_clicked (GtkButton       *button,
 	/* Fetch the files to be refreshed, i.e install with a restricted set of files  */
 	install = create_install(path, info->root, NULL, info->prefix);
 	if ( install ) {
+		const char *f;
+
 		if ( chdir(root) < 0 ) {
 			fprintf(stderr, _("Unable to change to directory %s\n"), root);
 		}
@@ -283,6 +285,21 @@ on_media_ok_clicked (GtkButton       *button,
 		/* Enable the relevant options */
 		select_corrupt_options(install);
 		copy_tree(install, install->config->root->childs, install->install_path, NULL);
+
+		/* Menu items are currently not being restored - maybe they should be tagged in setupdb ? */
+
+		/* Install the optional README and EULA files
+		   Warning: those are always installed in the root of the installation directory!
+		*/
+		f = GetProductREADME(install);
+		if ( f && ! GetProductIsMeta(install) ) {
+			copy_path(install, f, install->install_path, NULL, 1, NULL, NULL);
+		}
+		f = GetProductEULA(install);
+		if ( f && ! GetProductIsMeta(install) ) {
+			copy_path(install, f, install->install_path, NULL, 1, NULL, NULL);
+		}
+
 	}
 
 	/* Print end message and disable the "Rescue" button */
