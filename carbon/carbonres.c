@@ -36,7 +36,7 @@
 
 static volatile int PromptResponse = 0;
 static volatile int PromptResponseValid = 0;
-static volatile int ReadmeWindowOpen = 0;
+static volatile WindowRef PromptingWindow = NULL;
 
 static Rect DefaultBounds = {BUTTON_MARGIN, BUTTON_MARGIN, BUTTON_HEIGHT, BUTTON_WIDTH};
 static char EXEPath[CARBON_MAX_APP_PATH];
@@ -682,27 +682,15 @@ void carbon_UnloadCarbonRes(CarbonRes *CarbonResToUnload)
 
 int carbon_IterateForState(CarbonRes *Res, int *StateFlag)
 {
-    EventRef theEvent;
-    EventTargetRef theTarget;
-    OSStatus err;
-
     carbon_debug("carbon_IterateForState()\n");
 
     // Save the current state of passed flag
     int Start = *StateFlag;
 
-    theTarget = GetEventDispatcherTarget();
     // Loop until the state flag has changed by some outside code or an error occurs
     while(*StateFlag == Start)
     {
-        if((err = ReceiveNextEvent(0, NULL, kEventDurationForever, true, &theEvent)) != noErr)
-        {
-            //printf("ReceiveNextEvent returned error: %ld", err);
-            break;
-        }
-
-        SendEventToEventTarget (theEvent, theTarget);
-        ReleaseEvent(theEvent);
+        carbon_HandlePendingEvents(Res);
 
         // Update any thing on the window display that needs to be updated.
         //QDFlushPortBuffer(GetWindowPort(Res->Window), NULL);
@@ -987,11 +975,12 @@ void carbon_HandlePendingEvents(CarbonRes *Res)
     }
 
     // readme/eula window was opened non-blocking. Handle.
-    if ((ReadmeWindowOpen) && (PromptResponseValid))
+    if ((PromptingWindow != NULL) && (PromptResponseValid))
     {
         Cursor arrow;
-        ReadmeWindowOpen = false;
-        HideWindow(Res->ReadmeWindow);
+        WindowRef ref = PromptingWindow;
+        PromptingWindow = NULL;
+        HideWindow(ref);
         SetCursor(GetQDGlobalsArrow(&arrow));
     }
 }
@@ -1104,8 +1093,6 @@ int carbon_Prompt(CarbonRes *Res, PromptType Type, const char *Message, char *In
     ControlRef InputEntry;
 
     ControlID IDStruct;
-    EventRef theEvent;
-    EventTargetRef theTarget;
 
     carbon_debug("carbon_Prompt()\n");
 
@@ -1174,24 +1161,14 @@ int carbon_Prompt(CarbonRes *Res, PromptType Type, const char *Message, char *In
 
     // Prompt response hasn't been gotten yet...so it's invalid
     PromptResponseValid = false;
+    PromptingWindow = Res->PromptWindow;
 
     // Wait for the prompt window to close
-    theTarget = GetEventDispatcherTarget();
     // Wait for events until the prompt window has been responded to
     while(!PromptResponseValid)
-    {
-        if(ReceiveNextEvent(0, NULL, kEventDurationForever, true, &theEvent) != noErr)
-        {
-            carbon_debug("carbon_Prompt() - ReceiveNextEvent error");
-            break;
-        }
+        carbon_HandlePendingEvents(Res);
 
-        SendEventToEventTarget(theEvent, theTarget);
-        ReleaseEvent(theEvent);
-    }
-
-    // We're done with the prompt window...be gone!!!  Thus sayeth me.
-    HideWindow(Res->PromptWindow);
+    // HandlePendingEvents will hide window.
 
     if(InputText != NULL)
     {
@@ -1215,8 +1192,6 @@ int carbon_ReadmeOrLicense(CarbonRes *Res, int ReadmeNotLicense, char *Message, 
     ControlRef AgreeButton;
 
     ControlID IDStruct;
-    EventRef theEvent;
-    EventTargetRef theTarget;
 
     carbon_debug("carbon_ReadmeOrLicense()\n");
 
@@ -1282,32 +1257,17 @@ int carbon_ReadmeOrLicense(CarbonRes *Res, int ReadmeNotLicense, char *Message, 
 
     // Prompt response hasn't been gotten yet...so it's invalid
     PromptResponseValid = false;
-    ReadmeWindowOpen = true;
+    PromptingWindow = Res->ReadmeWindow;
 
     if (dontblock)
         return 0;
 
     // Wait for the prompt window to close
-    theTarget = GetEventDispatcherTarget();
     // Wait for events until the prompt window has been responded to
     while(!PromptResponseValid)
-    {
-        if(ReceiveNextEvent(0, NULL, kEventDurationForever, true, &theEvent) != noErr)
-        {
-            carbon_debug("carbon_Prompt() - ReceiveNextEvent error");
-            break;
-        }
+        carbon_HandlePendingEvents(Res);
 
-        SendEventToEventTarget(theEvent, theTarget);
-        ReleaseEvent(theEvent);
-    }
-
-    // We're done with the prompt window...be gone!!!  Thus sayeth me.
-    HideWindow(Res->ReadmeWindow);
-    ReadmeWindowOpen = false;
-
-    Cursor arrow;
-    SetCursor(GetQDGlobalsArrow(&arrow));
+    // HandlePendingEvents will hide the window. What a mess.  --ryan.
 
     // Return the prompt response...duh.
     return PromptResponse;
@@ -1851,8 +1811,6 @@ int carbon_MediaPrompt(CarbonRes *Res, int *CDRomNotDir, char *Dir, int DirLengt
     ControlRef CDRadioControl;
 
     ControlID IDStruct;
-    EventRef theEvent;
-    EventTargetRef theTarget;
 
     carbon_debug("carbon_MediaPrompt()\n");
 
@@ -1867,24 +1825,14 @@ int carbon_MediaPrompt(CarbonRes *Res, int *CDRomNotDir, char *Dir, int DirLengt
 
     // Prompt response hasn't been gotten yet...so it's invalid
     PromptResponseValid = false;
+    PromptingWindow = Res->MediaWindow;
 
     // Wait for the prompt window to close
-    theTarget = GetEventDispatcherTarget();
     // Wait for events until the prompt window has been responded to
     while(!PromptResponseValid)
-    {
-        if(ReceiveNextEvent(0, NULL, kEventDurationForever, true, &theEvent) != noErr)
-        {
-            carbon_debug("carbon_MediaPrompt() - ReceiveNextEvent error");
-            break;
-        }
+        carbon_HandlePendingEvents(Res);
 
-        SendEventToEventTarget(theEvent, theTarget);
-        ReleaseEvent(theEvent);
-    }
-
-    // We're done with the prompt window...be gone!!!  Thus sayeth me.
-    HideWindow(Res->MediaWindow);
+    // HandlePendingEvents will hide window.
 
     if(PromptResponse)
     {
