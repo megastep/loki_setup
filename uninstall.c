@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.34 2003-04-23 16:44:01 megastep Exp $ */
+/* $Id: uninstall.c,v 1.35 2003-05-02 22:54:49 zeph Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -339,6 +339,26 @@ int main(int argc, char *argv[])
 {
     product_info_t *info;
     char desc[128];
+
+printf("Your command line:\n");
+{ int i; for (i = 0; i < argc; i++) { printf("argv[%d] == \"%s\"\n", i, argv[i]); } } 
+printf("\n\n");
+
+// If running from an APP bundle in Carbon, it passed -p*** as the first argument
+// This code effectively cuts out argv[1] as though it wasn't specified
+if(argc > 1 && argv[1][0] == '-' && argv[1][1] == 'p')
+{
+    // Move the first argument to overwite the second 
+    argv[1] = argv[0];
+    // Set our arguments starting point to the second argumement
+    argv++;
+    argc--;
+}
+
+printf("Your NEW command line:\n");
+{ int i; for (i = 0; i < argc; i++) { printf("argv[%d] == \"%s\"\n", i, argv[i]); } }
+printf("\n\n");
+
 #ifdef UNINSTALL_UI
 	const char *p;
 #endif

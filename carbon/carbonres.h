@@ -116,6 +116,7 @@
 #define COMMAND_FINISHED        'fini'
 #define COMMAND_UNINSTALL       'unin'
 #define COMMAND_RESCUE          'resc'
+#define COMMAND_SYMBOLIC_CHECK	'symb'
 
 #define COMMAND_PROMPT_YES      'yes '
 #define COMMAND_PROMPT_NO       'no  '
@@ -148,10 +149,11 @@
 #define PROMPT_SIGNATURE            'prmt'
 
 // Readme/License resource IDs
-#define README_TEXT_ENTRY_ID        300
+//#define README_TEXT_ENTRY_ID        300
 #define README_CANCEL_BUTTON_ID     200
 #define README_CLOSE_BUTTON_ID      201
 #define README_AGREE_BUTTON_ID      202
+#define README_USERPANE_ID			203
 #define README_SIGNATURE            'read'
 
 // Different screens that we can display
@@ -195,6 +197,7 @@ typedef struct
     InstallPage CurInstallPage;
     // Callback for application to handle command events (buttons)
     int (*CommandEventCallback)(UInt32);
+    void (*KeyboardEventCallback)();
 
     CGImageRef SplashImage;
     ControlRef SplashImageView;
@@ -203,7 +206,7 @@ typedef struct
 } CarbonRes;
 
 // Function declarations
-CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32));
+CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32), void (*KeyboardEventCallback)());
 void carbon_UnloadCarbonRes(CarbonRes *);
 int carbon_IterateForState(CarbonRes *, int *);
 void carbon_ShowInstallScreen(CarbonRes *, InstallPage);
@@ -223,11 +226,11 @@ void carbon_SetProgress(CarbonRes *, int, float);
 void carbon_SetCheckbox(CarbonRes *, int, int);
 int carbon_GetCheckbox(CarbonRes *, int);
 int carbon_Prompt(CarbonRes *, PromptType, const char *);
-int carbon_ReadmeOrLicense(CarbonRes *, int, const char *);
+int carbon_ReadmeOrLicense(CarbonRes *, int, char *);
 int carbon_LaunchURL(const char *);
 void carbon_GetAppPath(char *, int);
 int carbon_PromptForPath(char *, int);
-void carbon_AddDesktopAlias(const char *);
+//void carbon_AddDesktopAlias(const char *);
 int carbon_MediaPrompt(CarbonRes *, int *, char *, int);
 
 // Options related functions and data types
@@ -309,5 +312,6 @@ void carbon_OptionsShowBox(OptionsBox *);
 void carbon_SetProperWindowSize(OptionsBox *, int);
 void carbon_SetUninstallWindowSize(OptionsBox *);
 OptionsButton *carbon_GetButtonByName(OptionsBox *, const char *);
+void carbon_RefreshOptions(OptionsBox *);
 
 #endif

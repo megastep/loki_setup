@@ -299,7 +299,7 @@ static void update_space(void)
     carbon_debug("update-space()\n");
 
     diskspace = detect_diskspace(cur_info->install_path);
-    snprintf(text, sizeof(text), _("%ld MB"), diskspace);
+    snprintf(text, sizeof(text), _("%d MB"), diskspace);
     carbon_SetLabelText(MyRes, OPTION_FREESPACE_VALUE_LABEL_ID, text);
     check_install_button();
 }
@@ -330,6 +330,24 @@ static void init_menuitems_option(install_info *info)
 }
 
 /********** EVENT HANDLERS **********/
+void OnKeyboardEvent()
+{
+    carbon_debug("OnKeyboardEvent()\n");
+
+    // Set install and binary paths accordingly
+    char string[1024];
+    carbon_GetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, string, 1024);
+    set_installpath(cur_info, string);
+    // Only set binary path if symbolic link checkbox is set
+    if(carbon_GetCheckbox(MyRes, OPTION_SYMBOLIC_LINK_CHECK_ID))
+    {
+        carbon_debug("OnCommandBeginInstall() - Setting binary path\n");
+        carbon_GetEntryText(MyRes, OPTION_LINK_PATH_ENTRY_ID, string, 1024);
+        set_symlinkspath(cur_info, string);
+    }
+    check_install_button();
+}
+
 static void OnCommandContinue()
 {
     carbon_debug("OnCommandContinue()\n");
@@ -444,9 +462,14 @@ void OnCommandBeginInstall()
         carbon_GetEntryText(MyRes, OPTION_LINK_PATH_ENTRY_ID, string, 1024);
         set_symlinkspath(cur_info, string);
     }
-    
-    carbon_ShowInstallScreen(MyRes, COPY_PAGE);
-    cur_state = SETUP_INSTALL;
+    check_install_button();
+
+    // If we're ready to install, then do it
+    if(check_for_installation(cur_info) == NULL)
+    {
+        carbon_ShowInstallScreen(MyRes, COPY_PAGE);
+        cur_state = SETUP_INSTALL;
+    }
 }
 
 //void setup_checkbox_option_slot( GtkWidget* widget, gpointer func_data)
@@ -570,6 +593,31 @@ static void OnCommandWebsite()
     launch_browser(cur_info, carbon_LaunchURL);
 }
 
+static void OnCommandSymbolicCheck()
+{
+    char path[1024];
+    
+    if(carbon_GetCheckbox(MyRes, OPTION_SYMBOLIC_LINK_CHECK_ID))
+    {
+        carbon_debug("OnCommandSymbolicCheck() - Symbolic Link enabled\n");
+        carbon_EnableControl(MyRes, OPTION_LINK_PATH_BUTTON_ID);
+        carbon_EnableControl(MyRes, OPTION_LINK_PATH_ENTRY_ID);
+        carbon_EnableControl(MyRes, OPTION_LINK_PATH_LABEL_ID);
+        carbon_GetEntryText(MyRes, OPTION_LINK_PATH_ENTRY_ID, path, 1024);
+        set_symlinkspath(cur_info, path);
+        check_install_button();
+    }
+    else
+    {
+        carbon_debug("OnCommandSymbolicCheck() - Symbolic Link disabled\n");
+        carbon_DisableControl(MyRes, OPTION_LINK_PATH_BUTTON_ID);
+        carbon_DisableControl(MyRes, OPTION_LINK_PATH_ENTRY_ID);
+        carbon_DisableControl(MyRes, OPTION_LINK_PATH_LABEL_ID);
+        set_symlinkspath(cur_info, "");
+        check_install_button();
+    }
+}
+
 int OnCommandEvent(UInt32 CommandID)
 {
     int ReturnValue = false;
@@ -625,14 +673,20 @@ int OnCommandEvent(UInt32 CommandID)
             //!!!TODO - This is kind of a hack, but sure made it easy to toggle
             // the two radio buttons.  Surely there's a better way.
             carbon_SetInstallClass(MyRes, true);
+            ReturnValue = true;
             break;
         case COMMAND_EXPERT:
             //!!!TODO - This is kind of a hack, but sure made it easy to toggle
             // the two radio buttons.  Surely there's a better way.
             carbon_SetInstallClass(MyRes, false);
+            ReturnValue = true;
             break;
         case COMMAND_WEBSITE:
             OnCommandWebsite();
+            ReturnValue = true;
+            break;
+        case COMMAND_SYMBOLIC_CHECK:
+            OnCommandSymbolicCheck();
             ReturnValue = true;
             break;
         default:
@@ -679,7 +733,7 @@ static install_state carbonui_init(install_info *info, int argc, char **argv, in
     carbon_debug("***carbonui_init()\n");
 
     // Load the resources related to our carbon interface
-    MyRes = carbon_LoadCarbonRes(OnCommandEvent);
+    MyRes = carbon_LoadCarbonRes(OnCommandEvent, OnKeyboardEvent);
     // Couldn't allocate resources...exit setup.
     if(MyRes == NULL)
     {
@@ -744,7 +798,7 @@ static install_state carbonui_init(install_info *info, int argc, char **argv, in
     }
 
     // Disable dock option if not requested in dockoption attribute
-    const char *DesktopOptionString = xmlGetProp(cur_info->config->root, "desktopicon");
+    /*const char *DesktopOptionString = xmlGetProp(cur_info->config->root, "desktopicon");
     if(DesktopOptionString != NULL)
     {
         printf("carbonui_init() - desktopicon = %s\n", DesktopOptionString);
@@ -756,7 +810,7 @@ static install_state carbonui_init(install_info *info, int argc, char **argv, in
     {
         printf("carbonui_init() - desktopicon = NULL\n");
         carbon_HideControl(MyRes, OPTION_CREATE_DESKTOP_ALIAS_BUTTON_ID);
-    }
+    }*/
 
     // If product has no binary, don't provide them with option to set
     // link location.
@@ -912,6 +966,8 @@ static install_state carbonui_setup(install_info *info)
 
     // Render and display options in window
     carbon_OptionsShowBox(options);
+    // Refresh the enable/disable status of buttons
+    carbon_RefreshOptions(options);
     // Resize the window if there are too many options to fit
     carbon_SetProperWindowSize(options, true);
 
@@ -924,8 +980,11 @@ static install_state carbonui_setup(install_info *info)
     in_setup = FALSE;
 
     int TempState = carbon_IterateForState(MyRes, &cur_state);
-    // Return the window back to default size, if necessary
-    carbon_SetProperWindowSize(options, false);
+    // Return the window back to default size, if necessary except
+    //  if we're exiting (so we don't redisplay the window after it
+    //  has been hidden
+    if(cur_state != SETUP_EXIT)
+        carbon_SetProperWindowSize(options, false);
     // Return the next state as appopriate
     return TempState;
 }
@@ -1061,8 +1120,8 @@ static install_state carbonui_complete(install_info *info)
     carbon_debug("***carbonui_complete()\n");
 
     // If desktop alias option is checked, add the desktop alias
-    if(carbon_GetCheckbox(MyRes, OPTION_CREATE_DESKTOP_ALIAS_BUTTON_ID))
-        carbon_AddDesktopAlias(info->install_path);
+    //if(carbon_GetCheckbox(MyRes, OPTION_CREATE_DESKTOP_ALIAS_BUTTON_ID))
+    //    carbon_AddDesktopAlias(info->install_path);
 
     // Show the install complete page
     carbon_ShowInstallScreen(MyRes, DONE_PAGE);

@@ -1,14 +1,22 @@
 #include "carbonres.h"
-#include "STUPControl.h"
+//#include "STUPControl.h"
+#include "YASTControl.h"
 #include "carbondebug.h"
 #include <stdlib.h>
 #include <unistd.h>
 
 // Size and position constants
-#define WINDOW_WIDTH    350
-#define WINDOW_HEIGHT   280
-#define GROUP_TOP       0
-#define GROUP_LEFT      6
+#define WINDOW_WIDTH    		350
+#define WINDOW_HEIGHT   		280
+#define GROUP_TOP       		0
+#define GROUP_LEFT      		6
+#define README_WINDOW_WIDTH		440
+#define README_WINDOW_HEIGHT	386
+#define README_WIDTH			434
+#define README_HEIGHT			314
+#define README_MARGIN			20
+#define README_BOTTOM_MARGIN	30
+#define README_BUTTON_HEIGHT	25
 
 // Option related sizes
 #define BUTTON_MARGIN           5
@@ -258,6 +266,51 @@ static pascal OSStatus ReadmeWindowEventHandler(EventHandlerCallRef HandlerRef, 
     return err;
 }
 
+static pascal OSStatus ReadmeWindowResizeEventHandler(EventHandlerCallRef HandlerRef, EventRef Event, void *UserData)
+{
+    CarbonRes *Res = (CarbonRes *)UserData;
+    Rect WindowRect;
+    Rect ControlRect;
+    
+    ControlRef CancelButton, CloseButton, AcceptButton;
+
+    ControlID ID = {README_SIGNATURE, README_CANCEL_BUTTON_ID};
+    GetControlByID(Res->ReadmeWindow, &ID, &CancelButton);
+    ID.id = README_CLOSE_BUTTON_ID;
+    GetControlByID(Res->ReadmeWindow, &ID, &CloseButton);
+    ID.id = README_AGREE_BUTTON_ID;
+    GetControlByID(Res->ReadmeWindow, &ID, &AcceptButton);
+    
+    GetWindowBounds(Res->ReadmeWindow, kWindowContentRgn, &ControlRect);
+    //GetControlBounds(Res->MessageLabel, &ControlRect);
+
+    ControlRect.bottom = ControlRect.bottom - README_BOTTOM_MARGIN;
+    SetControlBounds(Res->MessageLabel, &ControlRect);
+    MoveControl(Res->MessageLabel, 0, 0);
+    Draw1Control(Res->MessageLabel);
+
+    GetWindowBounds(Res->ReadmeWindow, kWindowContentRgn, &WindowRect);
+    //GetControlBounds(CancelButton, &ControlRect);
+    MoveControl(CancelButton, README_MARGIN, WindowRect.bottom - WindowRect.top - README_BUTTON_HEIGHT);
+    GetControlBounds(CloseButton, &ControlRect);
+    MoveControl(CloseButton, (WindowRect.right - WindowRect.left) - (ControlRect.right - ControlRect.left) - README_MARGIN,
+        WindowRect.bottom - WindowRect.top - README_BUTTON_HEIGHT);
+    GetControlBounds(CancelButton, &ControlRect);
+    MoveControl(AcceptButton, (WindowRect.right - WindowRect.left) - (ControlRect.right - ControlRect.left) - README_MARGIN,
+        WindowRect.bottom - WindowRect.top - README_BUTTON_HEIGHT);
+    
+    DrawControls(Res->ReadmeWindow);
+
+    return eventNotHandledErr;
+};
+
+
+static pascal OSStatus KeyboardEventHandler(EventHandlerCallRef HandlerRef, EventRef Event, void *UserData)
+{
+    ((CarbonRes *)UserData)->KeyboardEventCallback();
+    return eventNotHandledErr;
+}
+
 static pascal OSStatus MediaWindowEventHandler(EventHandlerCallRef HandlerRef, EventRef Event, void *UserData)
 {
     OSStatus err = eventNotHandledErr;	// Default is event is not handled by this function
@@ -358,7 +411,7 @@ static void LoadGroupControlRefs(CarbonRes *Res)
 static void AddOptionsButton(OptionsBox *Box, OptionsButton *Button)
 {
     carbon_debug("AddOptionsButton()\n");
-    printf("AddOptionsButton() - BoxPtr == %ld\n", Box);
+    printf("AddOptionsButton() - BoxPtr == %p\n", Box);
 
     // Create singlely linked-list with buttons
     if(Box->ButtonCount > 0)
@@ -411,7 +464,7 @@ static void ApplyOffsetToControl(OptionsBox *Box, int ID, int Offset, int GrowNo
     }
 }
 
-CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32))
+CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32), void (*KeyboardEventCallback)())
 {
     IBNibRef 		nibRef;
     OSStatus		err;
@@ -433,6 +486,7 @@ CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32))
 
     // Save reference to the event handler
     NewRes->CommandEventCallback = CommandEventCallback;
+    NewRes->KeyboardEventCallback = KeyboardEventCallback;
 
     // Set defaults for resource object members
     NewRes->IsShown = false;
@@ -442,6 +496,7 @@ CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32))
     NewRes->ImageWidth = 0;
     NewRes->ImageHeight = 0;
 
+    TXNInitTextension(NULL,  0, 0);
     // Defines the kind of event handler we will be installing later on
     EventTypeSpec commSpec = {kEventClassCommand, kEventProcessCommand};
 
@@ -484,10 +539,17 @@ CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32))
     LoadGroupControlRefs(NewRes);
 
     // Create scrolling text for readme window
-    Rect boundsRect = {3,3,314,434};
+    Rect boundsRect = {README_MARGIN, README_MARGIN, README_HEIGHT, README_WIDTH};
     //CreateScrollingTextBoxControl(NewRes->ReadmeWindow, &boundsRect, README_TEXT_ENTRY_ID, false, 0, 0, 0, &NewRes->MessageLabel);
-    STUPCreateControl(NewRes->ReadmeWindow, &boundsRect, &NewRes->MessageLabel);
+    //STUPCreateControl(NewRes->ReadmeWindow, &boundsRect, &NewRes->MessageLabel);
+    //ControlID ControlID = {README_SIGNATURE, README_USERPANE_ID};
+    //if(GetControlByID(NewRes->ReadmeWindow, &ControlID, &NewRes->MessageLabel) == noErr)
+    CreateYASTControl(NewRes->ReadmeWindow, &boundsRect, &NewRes->MessageLabel);
+        //YASTControlAttachToExistingControl(NewRes->MessageLabel);
+    //else
+        //carbon_debug("Error creating YAST control.\n");
     ShowControl(NewRes->MessageLabel);
+    ReadmeWindowResizeEventHandler(NULL, NULL, NewRes);
     //EnableControl(DummyControlRef);
 
     // Install default event handler for window since we're not calling
@@ -509,10 +571,21 @@ CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32))
     InstallWindowEventHandler(NewRes->ReadmeWindow,
         NewEventHandlerUPP(ReadmeWindowEventHandler), 1, &commSpec, (void *)NewRes,
         NULL);
+    EventTypeSpec commReadmeResizeSpec = {kEventClassWindow, kEventWindowBoundsChanged};
+    InstallWindowEventHandler(NewRes->ReadmeWindow,
+                              NewEventHandlerUPP(ReadmeWindowResizeEventHandler), 1, &commReadmeResizeSpec, (void *)NewRes,
+                              NULL);
     // Setup the event handler associated with the readme window
     InstallWindowEventHandler(NewRes->MediaWindow,
         NewEventHandlerUPP(MediaWindowEventHandler), 1, &commSpec, (void *)NewRes,
         NULL);
+    // Install mouse-down click event for detecting menu clicks
+    if(KeyboardEventHandler != NULL)
+    {
+       EventTypeSpec commKeyboardSpec = {kEventClassKeyboard, kEventRawKeyUp};
+       InstallApplicationEventHandler(NewEventHandlerUPP(KeyboardEventHandler),
+                                   1, &commKeyboardSpec, (void *)NewRes, NULL);
+    }
     // It's all good...return the resource object
     return NewRes;
 
@@ -586,14 +659,21 @@ void carbon_ShowInstallScreen(CarbonRes *Res, InstallPage NewInstallPage)
         ControlID ID = {LOKI_SETUP_SIG, CHECK_GROUP_ID};
         GetControlByID(Res->Window, &ID, &TempControlRef);
         Rect boundsRect2 = {20,20,199,320};
-        STUPCreateControl(Res->Window, &boundsRect2, &Res->InstalledFilesLabel);
+        //STUPCreateControl(Res->Window, &boundsRect2, &Res->InstalledFilesLabel);
+        CreateYASTControl(Res->Window, &boundsRect2, &Res->InstalledFilesLabel);
+        ShowControl(Res->InstalledFilesLabel);
+        printf("Rock\n");
+        //Boolean readonly = true;
+        //SetControlData(Res->InstalledFilesLabel, kControlEntireControl, kYASTControlReadOnlyTag, sizeof(Boolean), &readonly);
         EmbedControl(Res->InstalledFilesLabel, TempControlRef);
+         printf("Rock2\n");
         //SetControlBounds(TempControlRef, &boundsRect2);
         //MoveControl(TempControlRef, boundsRect2.left, boundsRect2.top);
     }
 
-    // If window is not show, then show it :-)
-    if(!Res->IsShown)
+    // If window is not show, then show it :-).  Option page doesn't get shown in
+    //  here because it is resized and drawn in the carbon_SetProperWindowSize()
+    if(!Res->IsShown && NewInstallPage != OPTION_PAGE)
     {
         ShowWindow(Res->Window);
         Res->IsShown = true;
@@ -954,7 +1034,7 @@ int carbon_Prompt(CarbonRes *Res, PromptType Type, const char *Message)
     return PromptResponse;
 }
 
-int carbon_ReadmeOrLicense(CarbonRes *Res, int ReadmeNotLicense, const char *Message)
+int carbon_ReadmeOrLicense(CarbonRes *Res, int ReadmeNotLicense, char *Message)
 {
     ControlRef CancelButton;
     ControlRef CloseButton;
@@ -984,13 +1064,17 @@ int carbon_ReadmeOrLicense(CarbonRes *Res, int ReadmeNotLicense, const char *Mes
     IDStruct.signature = README_SIGNATURE; IDStruct.id = README_AGREE_BUTTON_ID;
     GetControlByID(Res->ReadmeWindow, &IDStruct, &AgreeButton);
 
-    /*SetControlData(Res->MessageLabel,  kControlLabelPart, kControlStaticTextTextTag, strlen(Message), Message);
-    //CFStringRef CFMessage = CFStringCreateWithCString(NULL, Message, kCFStringEncodingMacRoman);
+    SetControlData(Res->MessageLabel,  kControlLabelPart, kControlStaticTextTextTag, strlen(Message), Message);
+    CFStringRef CFMessage = CFStringCreateWithCString(NULL, Message, kCFStringEncodingMacRoman);
+    SetControlData(Res->MessageLabel, kControlEntireControl, kYASTControlAllUnicodeTextTag, sizeof(CFMessage), &CFMessage);
+    Boolean readonly = true;
+    SetControlData(Res->MessageLabel, kControlEntireControl, kYASTControlReadOnlyTag, sizeof(Boolean), &readonly);
+
     //SetControlTitleWithCFString(Res->MessageLabel, CFMessage);
-    HideControl(Res->MessageLabel);
-    ShowControl(Res->MessageLabel);
-    //CFRelease(CFMessage);*/
-    STUPSetText(Res->MessageLabel, Message, strlen(Message));
+    //HideControl(Res->MessageLabel);
+    //ShowControl(Res->MessageLabel);
+    CFRelease(CFMessage);
+    //STUPSetText(Res->MessageLabel, Message, strlen(Message));
     Draw1Control(Res->MessageLabel);
 
     // If Yes/No prompt requested
@@ -1277,9 +1361,22 @@ void carbon_OptionsShowBox(OptionsBox *Box)
     DrawControls(Box->Res->Window);
 }
 
-void carbon_OptionsSetTooltip(OptionsButton *Box, const char *Name)
+void carbon_OptionsSetTooltip(OptionsButton *Button, const char *Name)
 {
     printf("carbon_OptionsSetTooltip() - %s\n", Name);
+
+    HMHelpContentRec Tooltip;
+    CFStringRef CFName = CFStringCreateWithCString(NULL, Name, kCFStringEncodingMacRoman);
+    
+    Tooltip.version = kMacHelpVersion;
+    Tooltip.tagSide = kHMDefaultSide;
+    SetRect(&Tooltip.absHotRect, 0, 0, 0, 0);
+    Tooltip.content[kHMMinimumContentIndex].contentType = kHMCFStringLocalizedContent;
+    Tooltip.content[kHMMinimumContentIndex].u.tagCFString = CFName;
+    Tooltip.content[kHMMaximumContentIndex].contentType = kHMNoContent;
+   
+    HMSetControlHelpContent(Button->Control, &Tooltip);
+    CFRelease(CFName);
 }
 
 void carbon_OptionsSetValue(OptionsButton *Button, int Value)
@@ -1531,7 +1628,7 @@ int carbon_PromptForPath(char *Path, int PathLength)
     return ReturnValue;
 }
 
-void carbon_AddDesktopAlias(const char *Path)
+/*void carbon_AddDesktopAlias(const char *Path)
 {
     AliasHandle AliasHandle;
     FSRef FSPath;
@@ -1554,7 +1651,7 @@ void carbon_AddDesktopAlias(const char *Path)
     }
     else
         carbon_debug("carbon_AddDesktopAlias() - Could not create FSRef for path\n");
-}
+}*/
 
 int carbon_MediaPrompt(CarbonRes *Res, int *CDRomNotDir, char *Dir, int DirLength)
 {
@@ -1612,4 +1709,15 @@ int carbon_MediaPrompt(CarbonRes *Res, int *CDRomNotDir, char *Dir, int DirLengt
     }
     // Return the prompt response...duh.
     return PromptResponse;
+}
+
+// This function is a workaround for the options not updating correctly initially.
+//  Basically, it just forces an update of each option by raising the toggle event.
+//  without changing the value of the option.
+void carbon_RefreshOptions(OptionsBox *Box)
+{
+    int i;
+   
+    for(i = 0; i < Box->ButtonCount; i++)
+        Box->OptionClickCallback(Box->Buttons[i]);
 }

@@ -439,7 +439,7 @@ int OnOptionClickEvent(OptionsButton *w)
     in_component_toggled_slot = 0;
 
     return true;
-}
+}  
 
 // Run a GUI to select and uninstall products
 int uninstall_ui(int argc, char *argv[])
@@ -455,7 +455,7 @@ int uninstall_ui(int argc, char *argv[])
     char text[1024];
 
     // Load resource data
-    Res = carbon_LoadCarbonRes(OnCommandEvent);
+    Res = carbon_LoadCarbonRes(OnCommandEvent, NULL);
     Box = carbon_OptionsNewBox(Res, false, OnOptionClickEvent);
 
     // Add emergency signal handlers

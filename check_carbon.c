@@ -2,7 +2,7 @@
  * Check and Rescue Tool for Loki Setup packages. Verifies the consistency of the files,
  * and optionally restores them from the original installation medium.
  *
- * $Id: check_carbon.c,v 1.1 2003-04-19 09:36:39 zeph Exp $
+ * $Id: check_carbon.c,v 1.2 2003-05-02 22:54:49 zeph Exp $
  */
 
 #include <stdlib.h>
@@ -19,7 +19,8 @@
 
 #include "carbon/carbonres.h"
 #include "carbon/carbondebug.h"
-#include "carbon/STUPControl.h"
+//#include "carbon/STUPControl.h"
+#include "carbon/YASTControl.h"
 #include "arch.h"
 #include "setupdb.h"
 #include "install.h"
@@ -147,7 +148,10 @@ static void add_message(const char *str, ...)
     strcat(CurMessage, "\r");
     printf("add_message() - CurMessage = '%s'\n", CurMessage);
     printf("add_message() - Length = %d\n", strlen(CurMessage));
-    STUPSetText(Res->InstalledFilesLabel, CurMessage, strlen(CurMessage));
+    //STUPSetText(Res->InstalledFilesLabel, CurMessage, strlen(CurMessage));
+    CFStringRef CFMessage = CFStringCreateWithCString(NULL, CurMessage, kCFStringEncodingMacRoman);
+    SetControlData(Res->InstalledFilesLabel, kControlEntireControl, kYASTControlAllUnicodeTextTag, sizeof(CFMessage), &CFMessage);
+    CFRelease(CFMessage);
 }
 
 int check_xml_setup(const char *file, const char *product)
@@ -314,7 +318,18 @@ int main(int argc, char *argv[])
 	product_option_t *option;
 	product_file_t *file;
 	int removed = 0, modified = 0;
-	
+
+    // If running from an APP bundle in Carbon, it passed -p*** as the first argument
+    // This code effectively cuts out argv[1] as though it wasn't specified
+    if(argc > 1 && argv[1][0] == '-' && argv[1][1] == 'p')
+    {
+        // Move the first argument to overwite the second
+        argv[1] = argv[0];
+        // Set our arguments starting point to the second argumement
+        argv++;
+        argc--;
+    }
+    
     goto_installpath(argv[0]);
 
 	// Set the locale
@@ -327,7 +342,7 @@ int main(int argc, char *argv[])
 
     //gtk_init(&argc,&argv);
     // Load resource data
-    Res = carbon_LoadCarbonRes(OnCommandEvent);
+    Res = carbon_LoadCarbonRes(OnCommandEvent, NULL);
     // Show the uninstall screen
     carbon_ShowInstallScreen(Res, CHECK_PAGE);
 
@@ -349,9 +364,7 @@ int main(int argc, char *argv[])
 		  component;
 		  component = loki_getnext_component(component) ) {
 
-        carbon_debug("Rock out\n");
         add_message(_("---> Checking component '%s'..."), loki_getname_component(component));
-        carbon_debug("with your rock out\n");
 
 		for ( option = loki_getfirst_option(component);
 			  option;
