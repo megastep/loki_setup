@@ -149,7 +149,11 @@ if test x$enable_outrage = xyes; then
         AC_DEFINE(ENABLE_OUTRAGE)
 fi
 
-SETUPDB="`pwd`/../setupdb"
+SETUPDB_VERSION=1.0.0
+SETUPDB="`pwd`/../setupdb-$SETUPDB_VERSION"
+if test ! -d "$SETUPDB"; then
+    SETUPDB="`pwd`/../setupdb"
+fi
 
 AC_ARG_WITH(setupdb,
 [  --with-setupdb            with setupdb library at      [default=../setupdb]],
