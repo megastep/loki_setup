@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.65 2000-10-12 03:13:49 megastep Exp $ */
+/* $Id: install.c,v 1.66 2000-10-12 03:40:33 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1150,7 +1150,7 @@ int update_uninstall(install_info *info, product_t *product)
                 "        exit 1\n"
                 "    fi\n"
                 "fi\n"
-                "\"$UNINSTALL\" %s",
+                "\"$UNINSTALL\" \"%s\"",
                 SETUP_VERSION_MAJOR, SETUP_VERSION_MINOR, SETUP_VERSION_RELEASE,
                 pinfo->registry_path);
         fchmod(fileno(scr), 0755);
