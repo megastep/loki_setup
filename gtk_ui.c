@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.47 2000-08-22 19:47:13 hercules Exp $
+   $Id: gtk_ui.c,v 1.48 2000-09-03 02:36:01 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -647,6 +647,7 @@ void on_use_binary_toggled ( GtkWidget* widget, gpointer func_data)
         string = NULL;
 	}
     set_symlinkspath(cur_info, string ? string : "");
+    check_install_button();
 }
 
 
