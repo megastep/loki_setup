@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 #include "loki_launchurl.h"
@@ -66,7 +67,10 @@ static int valid_program(const char *program)
 
         /* See if it exists, and update path */
         if ( access(temppath, X_OK) == 0 ) {
-            ++found;
+            /* make sure it's not a directory... */
+            struct stat s;
+            if ((stat(temppath, &s) == 0) && (S_ISREG(s.st_mode)))
+                ++found;
         }
         path = last+1;
 
@@ -106,6 +110,9 @@ int loki_launchURL(const char *url)
           "opera",
           "opera -newwindow %s &" },
         { RUNNING_X11,
+          "NetPositive",  /* this is BeOS's default browser. */
+          "NetPositive %s &" },
+        { RUNNING_X11,
           "konqueror",
           "konqueror %s &" },
         { RUNNING_X11,
@@ -124,17 +131,21 @@ int loki_launchURL(const char *url)
           "lynx",
           "lynx %s" }
     };
-    environment running;
-    int i, status;
+    environment running = RUNNING_X11;  /* default for BeOS */
+    int i;
+    int status = -1;
     char *command;
     char command_string[4*PATH_MAX];
 
     /* Check for DISPLAY environment variable - assume X11 if exists */
+/* BeOS will default to "X11", which is a little white lie. */
+#if (!defined __BEOS__)
     if ( getenv("DISPLAY") ) {
         running = RUNNING_X11;
     } else {
         running = RUNNING_TEXT;
     }
+#endif
 
     /* See what web browser is available */
     command = getenv("LOKI_BROWSER");
@@ -150,8 +161,6 @@ int loki_launchURL(const char *url)
     if ( command ) {
         sprintf(command_string, command, url, url);
         status = system(command_string);
-    } else {
-        status = -1;
     }
     return status;
 }
