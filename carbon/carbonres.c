@@ -1227,6 +1227,9 @@ int carbon_ReadmeOrLicense(CarbonRes *Res, int ReadmeNotLicense, char *Message)
     // We're done with the prompt window...be gone!!!  Thus sayeth me.
     HideWindow(Res->ReadmeWindow);
 
+    Cursor arrow;
+    SetCursor(GetQDGlobalsArrow(&arrow));
+
     // Return the prompt response...duh.
     return PromptResponse;
 }
