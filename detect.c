@@ -37,6 +37,10 @@
 #include <sys/statvfs.h>
 #endif
 
+#ifdef HAVE_LANGINFO_H
+#include <langinfo.h>
+#endif
+
 /* From libxml */
 #include <encoding.h>
 
@@ -810,6 +814,9 @@ void DetectLocale(void)
 		current_locale = NULL;
 	}
 
+#ifdef HAVE_NL_LANGINFO
+	current_encoding = nl_langinfo(_NL_CTYPE_CODESET_NAME);
+#else
 	if ( current_locale ) { /* Try to extract an encoding */
 		char *ptr = strchr(current_locale, '.');
 		if ( ptr ) {
@@ -821,6 +828,8 @@ void DetectLocale(void)
 			current_encoding = "ISO-8859-1"; /* Assume Latin-1 */
 		}
 	}
+#endif
+
 #if 0
 	/* log_debug doesn't work here as logging is initialized later */
 	if ( current_locale ) 

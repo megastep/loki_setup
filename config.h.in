@@ -12,6 +12,9 @@
 /* Define if you have the getopt_long function.  */
 #undef HAVE_GETOPT_LONG
 
+/* Define if you have the nl_langinfo function.  */
+#undef HAVE_NL_LANGINFO
+
 /* Define if you have the openpty function.  */
 #undef HAVE_OPENPTY
 
@@ -50,6 +53,9 @@
 
 /* Define if you have the <gtk.h> header file.  */
 #undef HAVE_GTK_H
+
+/* Define if you have the <langinfo.h> header file.  */
+#undef HAVE_LANGINFO_H
 
 /* Define if you have the <libgen.h> header file.  */
 #undef HAVE_LIBGEN_H
