@@ -1341,11 +1341,11 @@ msgstr "OK"
 
 #: gtk_ui.c:876
 msgid "Yes"
-msgstr "Yes"
+msgstr "Ja"
 
 #: gtk_ui.c:877
 msgid "No"
-msgstr "No"
+msgstr "Nein"
 
 #: gtk_ui.c:888
 msgid "Choice Requested"
