@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.50 2000-10-19 00:29:02 hercules Exp $
+   $Id: gtk_ui.c,v 1.51 2000-10-31 02:32:01 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -742,12 +742,12 @@ static yesno_answer gtkui_prompt(const char *txt, yesno_answer suggest)
                                GTK_SIGNAL_FUNC (prompt_okbutton_slot), GTK_OBJECT(dialog));
     if (suggest != RESPONSE_OK) {
         gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->action_area),
-			   yes_button);
-	gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->action_area),
-			   no_button);
+                           yes_button);
+        gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->action_area),
+                           no_button);
     } else {
         gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->action_area),
-			   ok_button);
+                           ok_button);
     }
     
     /* Add the label, and show everything we've added to the dialog. */

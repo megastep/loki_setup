@@ -55,15 +55,19 @@ static yesno_answer console_prompt(const char *prompt, yesno_answer suggest)
 
     line[0] = '\0';
     switch (suggest) {
-        case RESPONSE_YES:
-            prompt_user(prompt, _("Y/n"), line, (sizeof line));
-            break;
-        case RESPONSE_NO:
-            prompt_user(prompt, _("N/y"), line, (sizeof line));
-            break;
-        default:
-            fprintf(stderr, _("Warning, invalid yesno prompt: %s\n"), prompt);
-            return(RESPONSE_INVALID);
+    case RESPONSE_YES:
+        prompt_user(prompt, _("Y/n"), line, (sizeof line));
+        break;
+    case RESPONSE_NO:
+        prompt_user(prompt, _("N/y"), line, (sizeof line));
+        break;
+    case RESPONSE_OK:
+        printf(_("%s [Press Enter] "), prompt);
+        getchar();
+        return RESPONSE_OK;
+    default:
+        fprintf(stderr, _("Warning, invalid yesno prompt: %s\n"), prompt);
+        return(RESPONSE_INVALID);
     }
 	if(!strncasecmp(line, gettext (yes_letter), 1)) {
 		return RESPONSE_YES;
