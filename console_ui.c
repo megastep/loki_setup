@@ -39,6 +39,7 @@ typedef enum {
     RESPONSE_HELP
 } yesno_answer;
 
+
 static yesno_answer prompt_yesno(const char *prompt, yesno_answer suggest)
 {
     char line[BUFSIZ];
@@ -64,6 +65,8 @@ static yesno_answer prompt_yesno(const char *prompt, yesno_answer suggest)
             return RESPONSE_INVALID;
     }
 }
+
+
 static yesno_answer prompt_yesnohelp(const char *prompt, yesno_answer suggest)
 {
     char line[BUFSIZ];
@@ -322,6 +325,7 @@ static install_state console_complete(install_info *info)
     return new_state;
 }
 
+
 static int run_lynx(const char *url)
 {
     char command[2*PATH_MAX];
@@ -334,6 +338,24 @@ static int run_lynx(const char *url)
     }
     return retval;
 }
+
+
+
+
+static  install_state console_website( install_info *info ) {
+  printf("Thank you for installing %s!\n", GetProductDesc(info) );
+  printf("Please register at our website.\n");
+  
+  if ( (strcmp( GetAutoLaunch(info), "true" )==0)
+       || (prompt_yesno("Would you like to launch lynx?", RESPONSE_YES)== RESPONSE_YES ) )
+
+  {
+    launch_browser( info, run_lynx );
+  }
+  return SETUP_COMPLETE;
+}
+
+
  
 int console_okay(Install_UI *UI)
 {
@@ -347,8 +369,10 @@ int console_okay(Install_UI *UI)
     UI->setup = console_setup;
     UI->update = console_update;
     UI->abort = console_abort;
+    UI->website = console_website;
     UI->complete = console_complete;
-    UI->browser = run_lynx;
+  
+   
 
     return(1);
 }
@@ -359,3 +383,5 @@ int gtkui_okay(Install_UI *UI)
     return(0);
 }
 #endif
+
+
