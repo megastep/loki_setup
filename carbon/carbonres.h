@@ -146,6 +146,7 @@
 #define PROMPT_YES_BUTTON_ID        201
 #define PROMPT_NO_BUTTON_ID         203
 #define PROMPT_OK_BUTTON_ID         202
+#define PROMPT_INPUT_ENTRY_ID		204
 #define PROMPT_SIGNATURE            'prmt'
 
 // Readme/License resource IDs
@@ -212,6 +213,7 @@ int carbon_IterateForState(CarbonRes *, int *);
 void carbon_ShowInstallScreen(CarbonRes *, InstallPage);
 void carbon_SetWindowTitle(CarbonRes *, char *);
 void carbon_HideControl(CarbonRes *, int);
+void carbon_ShowControl(CarbonRes *, int);
 void carbon_DisableControl(CarbonRes *, int);
 void carbon_EnableControl(CarbonRes *, int);
 void carbon_SetInstallClass(CarbonRes *, int);
@@ -225,7 +227,7 @@ void carbon_GetEntryText(CarbonRes *, int, char *, int);
 void carbon_SetProgress(CarbonRes *, int, float);
 void carbon_SetCheckbox(CarbonRes *, int, int);
 int carbon_GetCheckbox(CarbonRes *, int);
-int carbon_Prompt(CarbonRes *, PromptType, const char *);
+int carbon_Prompt(CarbonRes *, PromptType, const char *, char *, int);
 int carbon_ReadmeOrLicense(CarbonRes *, int, char *);
 int carbon_LaunchURL(const char *);
 void carbon_GetAppPath(char *, int);

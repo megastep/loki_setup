@@ -706,7 +706,7 @@ static yesno_answer carbonui_prompt(const char *txt, yesno_answer suggest)
     if(suggest != RESPONSE_OK)
     {
         // YES/NO dialog
-        if(carbon_Prompt(MyRes, PromptType_YesNo, txt))
+        if(carbon_Prompt(MyRes, PromptType_YesNo, txt, NULL, 0))
             PromptResponse = RESPONSE_YES;
         else
             PromptResponse = RESPONSE_NO;
@@ -714,7 +714,7 @@ static yesno_answer carbonui_prompt(const char *txt, yesno_answer suggest)
     else
     {
         // OK dialog
-        if(carbon_Prompt(MyRes, PromptType_OK, txt))
+        if(carbon_Prompt(MyRes, PromptType_OK, txt, NULL, 0))
             PromptResponse = RESPONSE_OK;
         else
         {

@@ -265,7 +265,7 @@ void OnCommandUninstall()
     			
 			    // Display an optional message to the user
 			    message = loki_getmessage_component(component->component);
-                if(message && !carbon_Prompt(Res, PromptType_OKAbort, message))
+                if(message && !carbon_Prompt(Res, PromptType_OKAbort, message, NULL, 0))
                 {
                     //clist = clist->next;
 				    uninstall_cancelled = 1;
@@ -279,7 +279,7 @@ void OnCommandUninstall()
 				    snprintf(text, sizeof(text),
                         "Uninstallation of component %s has failed!  The whole uninstallation may be incomplete.",
 				        loki_getname_component(component->component));
-				    carbon_Prompt(Res, PromptType_OK, text);
+				    carbon_Prompt(Res, PromptType_OK, text, NULL, 0);
 				    break;
 			    }
 
@@ -320,7 +320,7 @@ void OnCommandUninstall()
     			
 			    // Display an optional message to the user
 			    message = loki_getmessage_component(component->component);
-                if(message && !carbon_Prompt(Res, PromptType_OKAbort, message))
+                if(message && !carbon_Prompt(Res, PromptType_OKAbort, message, NULL, 0))
                 {
                     //clist = clist->next;
 				    uninstall_cancelled = 1;
@@ -335,7 +335,7 @@ void OnCommandUninstall()
                         "Uninstallation of product %s has failed!  Aborting the rest of the uninstallation.",
  						component->info->description);
 
-				    carbon_Prompt(Res, PromptType_OK, text);
+				    carbon_Prompt(Res, PromptType_OK, text, NULL, 0);
 				    break;
 			    }
 
@@ -520,7 +520,7 @@ int uninstall_ui(int argc, char *argv[])
 
     // Check to make sure there's something to uninstall
     if(!product_list)
-        carbon_Prompt(Res, PromptType_OK, "No products were installed by this user.  You may need to run this tool as an administrator.");
+        carbon_Prompt(Res, PromptType_OK, "No products were installed by this user.  You may need to run this tool as an administrator.", NULL, 0);
     else
     {
         // Render and display options in window

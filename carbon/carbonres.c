@@ -644,7 +644,20 @@ void carbon_ShowInstallScreen(CarbonRes *Res, InstallPage NewInstallPage)
 
     // Hide the previous page if any
     if(Res->CurInstallPage != NONE_PAGE)
+    {
+        // Cursor on entry controls blinks even when the container is not visible.
+        //  This is probably some bug in Carbon, so for now we'll just hide the
+        //  controls when they're not being used
+        if(NewInstallPage == COPY_PAGE)
+        {
+            carbon_DisableControl(Res, OPTION_INSTALL_PATH_ENTRY_ID);
+            carbon_DisableControl(Res, OPTION_LINK_PATH_ENTRY_ID);
+        }
+        // Refresh window
+        DrawControls(Res->Window);
+
         HideControl(Res->PageHandles[Res->CurInstallPage]);
+    }
     // Show the new page
     ShowControl(Res->PageHandles[NewInstallPage]);
     // Set the new one as our current page
@@ -706,6 +719,17 @@ void carbon_HideControl(CarbonRes *Res, int ID)
 
     GetControlByID(Res->Window, &IDStruct, &Ref);
     HideControl(Ref);
+}
+
+void carbon_ShowControl(CarbonRes *Res, int ID)
+{
+    ControlRef Ref;
+    ControlID IDStruct = {LOKI_SETUP_SIG, ID};
+
+    carbon_debug("carbon_ShowControl()\n");
+
+    GetControlByID(Res->Window, &IDStruct, &Ref);
+    ShowControl(Ref);
 }
 
 void carbon_DisableControl(CarbonRes *Res, int ID)
@@ -954,12 +978,13 @@ void carbon_GetEntryText(CarbonRes *Res, int EntryID, char *Buffer, int BufferLe
     carbon_GetLabelText(Res, EntryID, Buffer, BufferLength);
 }
 
-int carbon_Prompt(CarbonRes *Res, PromptType Type, const char *Message)
+int carbon_Prompt(CarbonRes *Res, PromptType Type, const char *Message, char *InputText, int InputTextLen)
 {
     ControlRef YesButton;
     ControlRef NoButton;
     ControlRef OKButton;
     ControlRef MessageLabel;
+    ControlRef InputEntry;
 
     ControlID IDStruct;
     EventRef theEvent;
@@ -976,6 +1001,8 @@ int carbon_Prompt(CarbonRes *Res, PromptType Type, const char *Message)
     GetControlByID(Res->PromptWindow, &IDStruct, &OKButton);
     IDStruct.signature = PROMPT_SIGNATURE; IDStruct.id = PROMPT_MESSAGE_LABEL_ID;
     GetControlByID(Res->PromptWindow, &IDStruct, &MessageLabel);
+    IDStruct.signature = PROMPT_SIGNATURE; IDStruct.id = PROMPT_INPUT_ENTRY_ID;
+    GetControlByID(Res->PromptWindow, &IDStruct, &InputEntry);
 
     SetControlData(MessageLabel, kControlEditTextPart, kControlStaticTextTextTag, strlen(Message), Message);
 
@@ -988,6 +1015,7 @@ int carbon_Prompt(CarbonRes *Res, PromptType Type, const char *Message)
         ShowControl(YesButton);
         ShowControl(NoButton);
         HideControl(OKButton);
+        HideControl(InputEntry);
     }
     else if(Type == PromptType_OKAbort)
     {
@@ -997,6 +1025,7 @@ int carbon_Prompt(CarbonRes *Res, PromptType Type, const char *Message)
         ShowControl(YesButton);
         ShowControl(NoButton);
         HideControl(OKButton);
+        HideControl(InputEntry);
     }
     // If OK prompt requested
     else
@@ -1004,6 +1033,11 @@ int carbon_Prompt(CarbonRes *Res, PromptType Type, const char *Message)
         ShowControl(OKButton);
         HideControl(YesButton);
         HideControl(NoButton);
+
+        if(InputText != NULL)
+            ShowControl(InputEntry);
+        else
+            HideControl(InputEntry);
     }
 
     // Show the prompt window...make it happen!!!
@@ -1030,6 +1064,15 @@ int carbon_Prompt(CarbonRes *Res, PromptType Type, const char *Message)
     // We're done with the prompt window...be gone!!!  Thus sayeth me.
     HideWindow(Res->PromptWindow);
 
+    if(InputText != NULL)
+    {
+        Size DummySize;
+
+        // Get control reference
+        GetControlData(InputEntry, kControlEditTextPart, kControlStaticTextTextTag, InputTextLen, InputText, &DummySize);
+        // Add null terminator to end of string
+        InputText[DummySize] = 0x00;
+    }
     // Return the prompt response...duh.
     return PromptResponse;
 }

@@ -4,9 +4,9 @@
   <object name="rootObject" class="NSCustomObject" id="1">
     <string name="customClass">NSApplication</string>
   </object>
-  <array count="100" name="allObjects">
+  <array count="101" name="allObjects">
     <object class="IBCarbonWindow" id="166">
-      <string name="windowRect">69 -1043 632 776 </string>
+      <string name="windowRect">260 -622 823 1197 </string>
       <string name="title">Window</string>
       <object name="rootControl" class="IBCarbonRootControl" id="167">
         <string name="bounds">0 0 563 1819 </string>
@@ -613,7 +613,10 @@
           </object>
         </array>
       </object>
+      <boolean name="hasCloseBox">FALSE</boolean>
+      <boolean name="hasHorizontalZoom">FALSE</boolean>
       <boolean name="isResizable">FALSE</boolean>
+      <boolean name="hasVerticalZoom">FALSE</boolean>
       <int name="themeBrush">1</int>
       <int name="windowPosition">1</int>
     </object>
@@ -698,11 +701,11 @@
     <reference idRef="328"/>
     <reference idRef="329"/>
     <object class="IBCarbonWindow" id="337">
-      <string name="windowRect">377 29 524 409 </string>
+      <string name="windowRect">324 415 486 795 </string>
       <string name="title">Window</string>
       <object name="rootControl" class="IBCarbonRootControl" id="338">
-        <string name="bounds">0 0 147 380 </string>
-        <array count="4" name="subviews">
+        <string name="bounds">0 0 162 380 </string>
+        <array count="5" name="subviews">
           <object class="IBCarbonStaticText" id="339">
             <string name="bounds">20 20 87 360 </string>
             <ostype name="controlSignature">prmt</ostype>
@@ -711,7 +714,7 @@
             <string name="title">StaticText</string>
           </object>
           <object class="IBCarbonButton" id="340">
-            <string name="bounds">107 60 127 130 </string>
+            <string name="bounds">130 58 150 128 </string>
             <ostype name="controlSignature">prmt</ostype>
             <int name="controlID">201</int>
             <boolean name="hidden">TRUE</boolean>
@@ -719,7 +722,7 @@
             <ostype name="command">yes </ostype>
           </object>
           <object class="IBCarbonButton" id="341">
-            <string name="bounds">107 260 127 330 </string>
+            <string name="bounds">130 261 150 331 </string>
             <ostype name="controlSignature">prmt</ostype>
             <int name="controlID">203</int>
             <boolean name="hidden">TRUE</boolean>
@@ -727,12 +730,18 @@
             <ostype name="command">no  </ostype>
           </object>
           <object class="IBCarbonButton" id="342">
-            <string name="bounds">107 159 127 229 </string>
+            <string name="bounds">130 160 150 230 </string>
             <ostype name="controlSignature">prmt</ostype>
             <int name="controlID">202</int>
             <boolean name="hidden">TRUE</boolean>
             <string name="title">OK</string>
             <ostype name="command">ok  </ostype>
+          </object>
+          <object class="IBCarbonEditText" id="460">
+            <string name="bounds">98 23 114 357 </string>
+            <ostype name="controlSignature">prmt</ostype>
+            <int name="controlID">204</int>
+            <boolean name="hidden">TRUE</boolean>
           </object>
         </array>
       </object>
@@ -746,7 +755,7 @@
     <reference idRef="341"/>
     <reference idRef="342"/>
     <object class="IBCarbonWindow" id="343">
-      <string name="windowRect">178 218 632 754 </string>
+      <string name="windowRect">238 417 692 953 </string>
       <string name="title">Readme</string>
       <object name="rootControl" class="IBCarbonRootControl" id="344">
         <string name="bounds">0 0 454 536 </string>
@@ -862,8 +871,9 @@
     <reference idRef="454"/>
     <reference idRef="455"/>
     <reference idRef="456"/>
+    <reference idRef="460"/>
   </array>
-  <array count="100" name="allParents">
+  <array count="101" name="allParents">
     <reference idRef="1"/>
     <reference idRef="166"/>
     <reference idRef="167"/>
@@ -964,6 +974,7 @@
     <reference idRef="451"/>
     <reference idRef="451"/>
     <reference idRef="451"/>
+    <reference idRef="338"/>
   </array>
   <dictionary count="8" name="nameTable">
     <string>File&apos;s Owner</string>
@@ -983,5 +994,5 @@
     <string>readme</string>
     <reference idRef="343"/>
   </dictionary>
-  <unsigned_int name="nextObjectID">460</unsigned_int>
+  <unsigned_int name="nextObjectID">461</unsigned_int>
 </object>

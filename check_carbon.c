@@ -2,7 +2,7 @@
  * Check and Rescue Tool for Loki Setup packages. Verifies the consistency of the files,
  * and optionally restores them from the original installation medium.
  *
- * $Id: check_carbon.c,v 1.2 2003-05-02 22:54:49 zeph Exp $
+ * $Id: check_carbon.c,v 1.3 2003-05-12 22:32:20 zeph Exp $
  */
 
 #include <stdlib.h>
@@ -259,7 +259,7 @@ void DoMediaCheck(const char *Dir)
     carbon_SetLabelText(Res, CHECK_STATUS_LABEL_ID, _("Files successfully restored !"));
     carbon_DisableControl(Res, CHECK_RESCUE_BUTTON_ID);
 
-	carbon_Prompt(Res, PromptType_OK, _("Files successfully restored !"));
+	carbon_Prompt(Res, PromptType_OK, _("Files successfully restored !"), NULL, 0);
 
 	/* Unmount filesystems that may have been mounted */
 	unmount_filesystems();
@@ -299,6 +299,7 @@ int OnCommandEvent(UInt32 CommandID)
             ReturnValue = true;
             break;
         case COMMAND_EXIT:
+        case 'quit':
             OnCommandExit();
             ReturnValue = true;
             break;
@@ -310,6 +311,10 @@ int OnCommandEvent(UInt32 CommandID)
     return ReturnValue;
 }
 
+void OnKeyboardEvent()
+{
+}
+
 int main(int argc, char *argv[])
 {
 	//GtkWidget *window, *ok_but, *fix_but, *diag, *list, *scroll;
@@ -318,6 +323,9 @@ int main(int argc, char *argv[])
 	product_option_t *option;
 	product_file_t *file;
 	int removed = 0, modified = 0;
+    char productname[1024];
+    
+    Res = carbon_LoadCarbonRes(OnCommandEvent, OnKeyboardEvent);
 
     // If running from an APP bundle in Carbon, it passed -p*** as the first argument
     // This code effectively cuts out argv[1] as though it wasn't specified
@@ -327,9 +335,15 @@ int main(int argc, char *argv[])
         argv[1] = argv[0];
         // Set our arguments starting point to the second argumement
         argv++;
-        argc--;
+        argv[1] = productname;
+        //argc--;
+        
+        carbon_Prompt(Res, PromptType_OK, "Please enter product name you wish to check: ", productname, 1024);
+        fprintf(stderr, "product = '%s'\n", productname);
+        fprintf(stderr, "argv[0] = '%s'\n", argv[0]);
+        fprintf(stderr, "argv[1] = '%s'\n", argv[1]);
     }
-    
+        
     goto_installpath(argv[0]);
 
 	// Set the locale
@@ -342,7 +356,6 @@ int main(int argc, char *argv[])
 
     //gtk_init(&argc,&argv);
     // Load resource data
-    Res = carbon_LoadCarbonRes(OnCommandEvent, NULL);
     // Show the uninstall screen
     carbon_ShowInstallScreen(Res, CHECK_PAGE);
 
@@ -350,7 +363,7 @@ int main(int argc, char *argv[])
 
 	product = loki_openproduct(argv[1]);
 	if ( ! product ) {
-	  carbon_Prompt(Res, PromptType_OK, _("Impossible to locate the product information.\nMaybe another user installed it?"));
+	  carbon_Prompt(Res, PromptType_OK, _("Impossible to locate the product information.\nMaybe another user installed it?"), NULL, 0);
 		return 1;
 	}
 
