@@ -1,7 +1,8 @@
 
+#include <limits.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <limits.h>
+#include <string.h>
 
 #include "detect.h"
 
@@ -22,7 +23,22 @@ const char *detect_arch(void)
 /* Function to detect the current version of libc */
 const char *detect_libc(void)
 {
-    if( access( "/lib/libc.so.6", F_OK ) == 0 ) {
+	static const char *libclist[] = {
+		"/lib/libc.so.6",
+		"/lib/libc.so.6.1",
+		NULL
+	};
+	int i;
+    const char *libcfile;
+
+	for ( i=0; libclist[i]; ++i ) {
+    	if ( access(libclist[i], F_OK) == 0 ) {
+			break;
+		}
+	}
+    libcfile = libclist[i];
+
+    if ( libcfile ) {
         FILE* fp;
         char buf[ 128 ];
         int n;
@@ -31,7 +47,7 @@ const char *detect_libc(void)
          * The first line should look something like this:
          * GNU C Library stable release version 2.1.1, by Roland McGrath et al.
          */
-        fp = popen( "/lib/libc.so.6", "r" );
+        fp = popen( libcfile, "r" );
         if( fp ) {
             n = fread( buf, 1, 128, fp );
             pclose( fp );

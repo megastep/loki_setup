@@ -2,6 +2,7 @@
 #include <limits.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "install.h"
 #include "install_ui.h"

@@ -23,8 +23,8 @@ function DetectARCH {
 # Return the appropriate version string
 function DetectLIBC {
       status=1
-      if [ -f /lib/libc.so.6 ]; then
-	      if fgrep GLIBC_2.1 /lib/libc.so.6 2>&1 >/dev/null; then
+      if [ -f `echo /lib/libc.so.6* | tail -1` ]; then
+	      if fgrep GLIBC_2.1 /lib/libc.so.6* 2>&1 >/dev/null; then
 	              echo "glibc-2.1"
 	              status=0
 	      else    

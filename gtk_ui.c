@@ -1,10 +1,12 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.6 1999-09-11 00:55:40 hercules Exp $
+   $Id: gtk_ui.c,v 1.7 1999-09-11 02:55:05 hercules Exp $
 */
 
 #include <limits.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <gtk/gtk.h>
 #include <X11/Xlib.h>
