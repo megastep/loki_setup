@@ -126,10 +126,11 @@ int detect_diskspace(const char *path)
 				perror("statfs");
 				return 0;
 			}
-			avail = fs.f_bsize * fs.f_bavail;
+			avail = fs.f_bsize;
+			avail *= fs.f_bavail;
 		}
 	}
-	return avail / (1024*1024);
+	return avail / (1024*1024LL);
 }
 
 /* Function to detect the CDROM drives, returns the number of drives */
