@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.95 2004-03-02 03:50:01 icculus Exp $
+   $Id: gtk_ui.c,v 1.96 2004-03-02 04:31:08 icculus Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -502,23 +502,23 @@ void setup_cdkey_entry_changed_slot(GtkEntry *entry, gpointer user_data)
 
 void setup_button_cdkey_continue_slot( GtkWidget* widget, gpointer func_data )
 {
+    /* HACK: Use external cd key validation program, if it exists. --ryan. */
+    #define CDKEYCHECK_PROGRAM "./vcdk"
+    char cmd[sizeof (gCDKeyString) + sizeof (CDKEYCHECK_PROGRAM) + 64];
     GtkWidget *entry = glade_xml_get_widget(setup_glade, "setup_cdkey_entry");
     char *CDKey = (char *) gtk_entry_get_text( GTK_ENTRY(entry) );
     char *p;
 
-    /* HACK: Use external cd key validation program, if it exists. --ryan. */
-    #define CDKEYCHECK_PROGRAM "./vcdk"
-    if (access(CDKEYCHECK_PROGRAM, X_OK) != 0)
+    snprintf(cmd, sizeof (cmd), "%s-%s", CDKEYCHECK_PROGRAM, cur_info->arch);
+    if (access(cmd, X_OK) != 0)
     {
         message_dialog(_("ERROR: vcdk is missing. Installation aborted.\n"), _("Problem"));
         cur_state = SETUP_ABORT;
+        return;
     }
     else
     {
-        char cmd[sizeof (CDKey) + sizeof (CDKEYCHECK_PROGRAM) + 1];
-        strcpy(cmd, CDKEYCHECK_PROGRAM);
-        strcat(cmd, " ");
-        strcat(cmd, CDKey);
+        snprintf(cmd, sizeof (cmd), "%s-%s %s", CDKEYCHECK_PROGRAM, cur_info->arch, CDKey);
         if (system(cmd) == 0)  /* binary ran and reported key invalid? */
         {
             message_dialog(_("CD key is invalid!\nPlease double check your key and enter it again."), _("Problem"));

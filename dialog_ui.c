@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.20 2004-03-02 03:50:01 icculus Exp $
+ * $Id: dialog_ui.c,v 1.21 2004-03-02 04:31:08 icculus Exp $
  */
 
 #include <limits.h>
@@ -495,6 +495,8 @@ install_state dialog_setup(install_info *info)
     /* HACK: Use external cd key validation program, if it exists. --ryan. */
     if(GetProductCDKey(info))
     {
+        #define CDKEYCHECK_PROGRAM "./vcdk"
+        char cmd[sizeof (gCDKeyString) + sizeof (CDKEYCHECK_PROGRAM) + 64];
         char *p;
         int cdkey_is_okay = 0;
         while (!cdkey_is_okay)
@@ -511,18 +513,15 @@ install_state dialog_setup(install_info *info)
             strncpy(gCDKeyString, dialog_vars.input_result, sizeof(gCDKeyString));
             gCDKeyString[sizeof (gCDKeyString) - 1] = '\0';
 
-            #define CDKEYCHECK_PROGRAM "./vcdk"
-            if (access(CDKEYCHECK_PROGRAM, X_OK) != 0)
+            snprintf(cmd, sizeof (cmd), "%s-%s", CDKEYCHECK_PROGRAM, info->arch);
+            if (access(cmd, X_OK) != 0)
             {
     		    dialog_msgbox(_("Error"), _("vcdk is missing. Installation aborted.\n"), 10, 40, 1);
 	    	    return SETUP_ABORT;
             }
             else
             {
-                char cmd[sizeof (gCDKeyString) + sizeof (CDKEYCHECK_PROGRAM) + 1];
-                strcpy(cmd, CDKEYCHECK_PROGRAM);
-                strcat(cmd, " ");
-                strcat(cmd, gCDKeyString);
+                snprintf(cmd, sizeof (cmd), "%s-%s %s", CDKEYCHECK_PROGRAM, info->arch, gCDKeyString);
                 if (system(cmd) == 0)  /* binary ran and reported key invalid? */
     			    dialog_msgbox(_("Problem"), _("CD key is invalid!\nPlease double check your key and enter it again.\n"), 10, 40, 1);
                 else
