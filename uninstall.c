@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.15 2000-10-31 02:52:33 megastep Exp $ */
+/* $Id: uninstall.c,v 1.16 2000-11-11 03:38:28 hercules Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -183,8 +183,14 @@ static int perform_uninstall(product_t *prod, product_info_t *info)
     comp = loki_getfirst_component(prod);
     while ( comp ) {
         next = loki_getnext_component(comp);
-        uninstall_component(comp, info);
+        if ( ! loki_isdefault_component(comp) ) {
+            uninstall_component(comp, info);
+        }
         comp = next;
+    }
+    comp = loki_getdefault_component(prod);
+    if ( comp ) {
+        uninstall_component(comp, info);
     }
 
 	/* Remove all product-related files from the manifest, i.e. the XML file and associated scripts
