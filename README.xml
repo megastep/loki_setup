@@ -47,6 +47,25 @@ There are several optional attributes of the install element:
             some default environment variables set. Look at the 'SCRIPT'
             section below for a detailed list.
 
+ preuninstall 
+            This is a shell script which is executed at the very beginning
+            of the uninstall process. It will be run before any RPM uninstall
+            scripts. This file is not installed, but is added to the
+            beginning of uninstall script.
+
+ postuninstall 
+            This is a shell script which is executed at the very end of the 
+            uninstall process. It will be run after any RPM uninstall
+            scripts. This file is not installed, but is added to the
+            end of the uninstall script.
+
+            Both the preuninstall and postuninstall scripts will have access
+            to the default environment variables. See the 'SCRIPT' section
+            for details. 
+
+            Also, these scripts will be run at the very beginning and very 
+            end of the install cleanup if the install is aborted.
+
  eula       This is a file which contains a text license agreement that
             must be agreed to by the user before the installation will
             proceed.
@@ -298,6 +317,22 @@ There are several optional attributes of the binary element:
             string of this attribute. See 'About localization' below for
             more details.
 
+ inrpm      If inrpm="true" then setup will not attempt to copy the file, but 
+            it will assume that it was successfully installed by an RPM
+            package. Setup will set up the symlink and menu items for it. 
+            For this to work, the value inside the <binary> tag should be the 
+            installed location of the binary file. If the RPM is being 
+            relocated to the install directory (see 'FILES' below for details) 
+            you can use a macro $INSTALLDIR which will be expanded at runtime.
+            So, if you have a file that the RPM installs into [installdir]/bin
+            the XML would look like this:
+              <binary inrpm="true" symlink="app">
+                  $INSTALLDIR/bin/app
+              </binary>
+            Note that the <files> section which contains the RPM pacakge must
+            appear before the <binary> tag to ensure that the file exists
+            before the symlink and menu items are created.
+
 The FILES element:
 
 The files element contains a list of files and directories, one per line,
@@ -319,6 +354,26 @@ There are several optional attributes of the files element:
  lang       The files are only installed if the current locale matches the
             string of this attribute. See 'About localization' below for
             more details.
+
+ relocate   If relocate="true" and an RPM package file is listed, the install
+            will force the RPM to be installed into the user-selected install 
+            directory. This is equivalent to installing the RPM like this: 
+              rpm -U --relocate /=INSTALLDIR --badreloc [rpmfile]
+            This will apply to all RPM files within this <files> tag.
+
+ nodeps     If nodeps="true" and an RPM package file is listed,then the
+            --nodeps option will be added to the RPM command when the files 
+            are installed. This will force RPM to install the package, even if
+            its dependencies are not met. This will apply to all RPM files
+            within this <files> tag.
+ 
+ autoremove If autoremove="true" and an RPM package file is listed in the 
+            files section, then that RPM package will be automatically removed
+            ("rpm -e package") when the uninstall script is run. If the 
+            autoremove option is not set, then the uninstall script will list 
+            the package name at the end of the uninstall, but it will not 
+            remove it. This will apply to all RPM files within this <files> 
+            tag.
 
 The SCRIPT element:
 

@@ -1,13 +1,53 @@
-/* $Id: install.c,v 1.52 2000-07-06 02:12:21 megastep Exp $ */
+/* $Id: install.c,v 1.53 2000-07-11 21:11:51 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
+    04/10/2000: Added code to expand ~ in a default path immediately after 
+                XML is loaded 
+ 
    04/12/2000: Modifed run_script function to put the full pathname of the
                script into the temp script file. In some cases, setup was
-	       having trouble finding the script.
+			   having trouble finding the script.
 
    04/21/2000: Setup could not launch the game if the bin dir isn't in the
                user's path. Changed launch_game so it references the full
-	       pathname for the symlink.
+			   pathname for the symlink.
+
+   05/17/2000: Modified create_install function to allow two new parameters:
+               install_path and binary_path. These may have been passed in
+			   using the -i and -b command line parameters. If so, then the
+			   info->install_path or info->symlinks_path will be set using
+			   the values from the command line.
+
+   05/20/2000: Modified generate_uninstall so that it will add "rpm -e ..." 
+               to the uninstall script for any RPM files that have their
+			   autoremove flag set. Modified the rpm_elem structure to include
+			   an new element for the autoremove flag. This is set on the
+			   "files" tag, similar to the "relocate" flag. See copy.c for
+			   details.
+
+   05/24/2000: Modified generate_uninstall and uninstall functions to support
+               two new options on the <install> tag:
+			   <install preuninstall="script_filename"
+			   postuninstall="script_filename" ... >
+			   This allows extra cleanup to be done before and after the files
+			   are removed. The contents of the script specified by the 
+			   preuninstall option is added to the beginning of the uninstall 
+			   script, before the file list and before any RPM uninstall 
+			   scripts. The contents of the script specified by the
+			   postuninstall option is added to the end of the uninstall script
+			   after any RPM uninstall scripts. Note that the pre- and post-
+			   uninstall scripts are not installed. Their contents are streamed
+			   into the uninstall script. Also note that these scripts should
+			   be executable as stand-alone scripts (they should have the
+			   #!/bin/sh at the beginning) because in the event the install is 
+			   aborted, these scripts will be run individually at the beginning
+			   and end of the cleanup process.
+
+			   Modified generate_uninstall to add environment settings to the
+			   very beginning of the uninstall script. This allows the
+			   uninstall script to use these variables: $SETUP_PRODUCTNAME, 
+			   $SETUP_PRODUCTVER, $SETUP_INSTALLPATH, $SETUP_SYMLINKSPATH,
+			   and $SETUP_CDROMPATH
 */
 
 #include <sys/types.h>
@@ -28,6 +68,8 @@
 #include "network.h"
 
 extern char *rpm_root;
+extern int disable_install_path;
+extern int disable_binary_path;
 
 /* Functions to retrieve attribution information from the XML tree */
 const char *GetProductName(install_info *info)
@@ -224,9 +266,17 @@ const char *GetPreInstall(install_info *info)
 {
     return xmlGetProp(info->config->root, "preinstall");
 }
+const char *GetPreUnInstall(install_info *info)
+{
+    return xmlGetProp(info->config->root, "preuninstall");
+}
 const char *GetPostInstall(install_info *info)
 {
     return xmlGetProp(info->config->root, "postinstall");
+}
+const char *GetPostUnInstall(install_info *info)
+{
+    return xmlGetProp(info->config->root, "postuninstall");
 }
 const char *GetDesktopInstall(install_info *info)
 {
@@ -248,7 +298,9 @@ const char *GetInstallOption(install_info *info, const char *option)
 }
 
 /* Create the initial installation information */
-install_info *create_install(const char *configfile, int log_level)
+install_info *create_install(const char *configfile, int log_level,
+			     const char *install_path,
+			     const char *binary_path)
 {
     install_info *info;
 	char *temppath;
@@ -298,6 +350,14 @@ install_info *create_install(const char *configfile, int log_level)
     temppath = strdup(info->install_path);
     expand_home(info, temppath, info->install_path);
     free(temppath);
+
+    /* if paths wre passed in as command line args, set them here */
+    if (disable_install_path) {
+        strcpy(info->install_path, install_path);
+    }
+    if (disable_binary_path) {
+        strcpy(info->symlinks_path, binary_path);
+    }
     
     /* Start a network lookup for any URL */
     if ( GetProductURL(info) ) {
@@ -327,7 +387,8 @@ void add_file_entry(install_info *info, const char *path)
     }
 }
 
-void add_rpm_entry(install_info *info, const char *name, const char *version, const char *release)
+void add_rpm_entry(install_info *info, const char *name, const char *version, 
+		   const char *release, const int autoremove)
 {
     struct rpm_elem *elem;
 
@@ -340,6 +401,7 @@ void add_rpm_entry(install_info *info, const char *name, const char *version, co
             elem->next = info->rpm_list;
             info->rpm_list = elem;
         }
+	elem->autoremove = autoremove;
     } else {
         log_fatal(info, _("Out of memory"));
     }
@@ -607,7 +669,8 @@ void delete_install(install_info *info)
 
 /* Actually install the selected filesets */
 install_state install(install_info *info,
-            void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+            void (*update)(install_info *info, const char *path, 
+			   size_t progress, size_t size, const char *current))
 {
     xmlNodePtr node;
     install_state state;
@@ -624,16 +687,16 @@ install_state install(install_info *info,
           break;
         }
     }
-	/* Install the optional README and EULA files 
+	/* Install the optional README and EULA files
 	   Warning: those are always installed in the root of the installation directory!
 	 */
 	f = GetProductREADME(info);
 	if ( f && ! GetProductIsMeta(info) ) {
-		copy_path(info, f, info->install_path, NULL, 1, update);
+		copy_path(info, f, info->install_path, NULL, 1, 0, 0, 0, update);
 	}
 	f = GetProductEULA(info);
 	if ( f && ! GetProductIsMeta(info) ) {
-		copy_path(info, f, info->install_path, NULL, 1, update);
+		copy_path(info, f, info->install_path, NULL, 1, 0, 0, 0, update);
 	}
 
     if ( ! GetInstallOption(info, "nouninstall") ) {
@@ -652,6 +715,11 @@ install_state install(install_info *info,
 /* Remove a partially installed product */
 void uninstall(install_info *info)
 {
+
+    if (GetPreUnInstall(info)) {
+        run_script(info, GetPreUnInstall(info), 0);
+    }
+
     while ( info->pre_script_list ) { /* RPM pre-uninstall */
         struct script_elem *elem;
  
@@ -692,6 +760,11 @@ void uninstall(install_info *info)
         free(elem->script);
         free(elem);
     }
+
+    if (GetPostUnInstall(info)) {
+        run_script(info, GetPostUnInstall(info), 0);
+    }
+
     while ( info->rpm_list ) {
         struct rpm_elem *elem;
  
@@ -708,12 +781,14 @@ void uninstall(install_info *info)
 
 void generate_uninstall(install_info *info)
 {
-    FILE *fp;
+    FILE *fp, *script_file;
     char script[PATH_MAX];
     struct file_elem *felem;
     struct dir_elem *delem;
     struct script_elem *selem;
     struct rpm_elem *relem;
+    char *buf = (char *) malloc(sizeof(char) * PATH_MAX);
+    size_t count = PATH_MAX;
 
     strncpy(script,info->install_path, PATH_MAX);
     strncat(script,"/", PATH_MAX);
@@ -725,6 +800,31 @@ void generate_uninstall(install_info *info)
             "#!/bin/sh\n"
             "# Uninstall script for %s\n", info->desc
             );
+	fprintf(fp, /* Add environment variables to beginning of script */
+                "SETUP_PRODUCTNAME=\"%s\"\n"
+                "SETUP_PRODUCTVER=\"%s\"\n"
+                "SETUP_INSTALLPATH=\"%s\"\n"
+                "SETUP_SYMLINKSPATH=\"%s\"\n"
+                "SETUP_CDROMPATH=\"%s\"\n"
+                "export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH\n", 
+                info->name, info->version,
+                info->install_path,
+                info->symlinks_path,
+                num_cdroms > 0 ? cdroms[0] : "");
+
+	/* If there is a preuninstall script on the <install> tag, then stream
+	   it in here */
+	if (GetPreUnInstall(info)) {
+	    script_file = fopen(GetPreUnInstall(info), "r");
+	    if (script_file) {
+	        while (! feof(script_file)) {
+		    count = fread(buf, sizeof(char), PATH_MAX, script_file);
+		    fwrite(buf, sizeof(char), count, fp);
+	        }
+	        fclose(script_file);
+	    }
+	}
+
         if(strcmp(rpm_root,"/")) /* Emulate RPM environment for scripts */
           fprintf(fp,"RPM_INSTALL_PREFIX=%s\n", rpm_root);
 
@@ -753,6 +853,29 @@ void generate_uninstall(install_info *info)
           }
           fprintf(fp,"}\npost 0\n");
         }
+
+	/* Remove any RPMs marked as autoremove */
+	if (info->rpm_list) {
+	    for ( relem = info->rpm_list; relem; relem = relem->next ) {
+	        if (relem->autoremove) {
+		    fprintf(fp,"rpm -e \"%s-%s-%s\"\n", relem->name, 
+			    relem->version, relem->release);
+		}
+            }
+	}
+	
+	/* If a post-uninstall script is defined, stream it into the file */
+	if (GetPostUnInstall(info)) {
+	    script_file = fopen(GetPostUnInstall(info), "r");
+	    if (script_file) {
+	        while (! feof(script_file)) {
+		    count = fread(buf, sizeof(char), PATH_MAX, script_file );
+		    fwrite(buf, sizeof(char), count, fp);
+	        }
+	        fclose(script_file);
+	    }
+	}
+
         fprintf(fp,"#### END OF UNINSTALL\n");
         fprintf(fp,_("echo \"%s has been uninstalled.\"\n"), info->desc);
         if(info->rpm_list){
@@ -760,12 +883,16 @@ void generate_uninstall(install_info *info)
 					   "echo when this software was installed. You may want to manually remove some of those:\n") );
 
           for ( relem = info->rpm_list; relem; relem = relem->next ) {
-            fprintf(fp,"echo \"\t%s, version %s, release %s\"\n", relem->name, relem->version, relem->release);
+	      if (! relem->autoremove) {
+		  fprintf(fp,"echo \"\t%s, version %s, release %s\"\n", 
+			  relem->name, relem->version, relem->release);
+	      }
           }
         }
         fchmod(fileno(fp),0755); /* Turn on executable bit */
         fclose(fp);
     }
+    free(buf);
 }
 
 /* Launch a web browser with a product information page

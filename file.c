@@ -172,6 +172,7 @@ void file_skip(install_info *info, int len, stream *streamp)
 
 void file_skip_zeroes(install_info *info, stream *streamp)
 {
+  /* this functions has been replaced by skip_zeros in copy.c */
   int c;
   if ( streamp->mode == 'r' ) {
 	for(;;){

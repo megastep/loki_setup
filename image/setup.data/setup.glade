@@ -212,16 +212,6 @@
 		<name>entry4</name>
 		<can_focus>True</can_focus>
 		<signal>
-		  <name>enter_notify_event</name>
-		  <handler>setup_entry_gainfocus</handler>
-		  <last_modification_time>Wed, 15 Sep 1999 01:03:59 GMT</last_modification_time>
-		</signal>
-		<signal>
-		  <name>leave_notify_event</name>
-		  <handler>setup_entry_givefocus</handler>
-		  <last_modification_time>Wed, 15 Sep 1999 01:04:20 GMT</last_modification_time>
-		</signal>
-		<signal>
 		  <name>focus_out_event</name>
 		  <handler>setup_entry_installpath_slot</handler>
 		  <last_modification_time>Wed, 15 Sep 1999 01:04:39 GMT</last_modification_time>
@@ -263,16 +253,6 @@
 		<name>entry5</name>
 		<tooltip>Symbolic links to installed binaries are placed here</tooltip>
 		<can_focus>True</can_focus>
-		<signal>
-		  <name>enter_notify_event</name>
-		  <handler>setup_entry_gainfocus</handler>
-		  <last_modification_time>Wed, 15 Sep 1999 01:05:28 GMT</last_modification_time>
-		</signal>
-		<signal>
-		  <name>leave_notify_event</name>
-		  <handler>setup_entry_givefocus</handler>
-		  <last_modification_time>Wed, 15 Sep 1999 01:05:50 GMT</last_modification_time>
-		</signal>
 		<signal>
 		  <name>focus_out_event</name>
 		  <handler>setup_entry_binarypath_slot</handler>

@@ -12,7 +12,8 @@ typedef enum {
     RESPONSE_INVALID = -1,
     RESPONSE_NO,
     RESPONSE_YES,
-    RESPONSE_HELP
+    RESPONSE_HELP,
+    RESPONSE_OK
 } yesno_answer;
 
 typedef struct {

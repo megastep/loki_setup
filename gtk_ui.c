@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.40 2000-07-11 19:48:14 megastep Exp $
+   $Id: gtk_ui.c,v 1.41 2000-07-11 21:11:51 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -40,6 +40,47 @@
 
 	       Cleaned up close_view_readme_slot to avoid the duplication with
 	       destroy_view_readme. close now just calls destroy.
+
+  05/12/2000:  Changed the way the focus mechanism works for the install path
+               and binary path fields and how the Begin Install button gets
+	       enabled/disabled. There were ways in which an invalid path 
+	       could be selected from the combo boxes and the Begin Install
+	       button would not be disabled until the user clicked on it. Then,
+	       the mouse focus was on an insensitive item, making it appear 
+	       that the UI locked up. Here's the changes:
+
+	       Modified gtkui_init to add signal handlers for the keypress and
+	       mouse button release events for both the install path and binary
+	       path fields. Also added these functions to handle the signals:
+	       path_entry_keypress_slot, path_combo_change_slot,
+	       binary_path_entry_keypress_slot, binary_path_combo_change_slot.
+	       The "keypress" slots evaluate the status of the Begin Install
+	       button after every keystroke when the user is typing a pathname.
+	       The "combo_change" slots evaluate the status of the button when-
+	       ever the user makes a selection from the drop-down list.
+
+	       Modified setup.glade to remove the signal handlers that grabbed
+	       the focus when the mouse was passed over these fields.
+
+	       Modified gtkui_prompt to add a RESPONSE_OK option and modifed
+	       the yesno_answer structure to support this. This will display
+	       a dialog with a message and a single OK button. This was a 
+	       result of one of the (many) failed attempts to fix the focus 
+	       issue. It turns out that I don't use this anywhere anymore, but 
+	       I figured I'd leave it for someone who wants to display a 
+	       simple message without using the gnome libs. To use it, just 
+	       pass RESPONSE_OK as the last parameter.
+
+  05/17/2000:  Modified gtkui_init to disable the install path or binary path
+               widgets if the value was passed in as a command-line parameter
+	       (see main.c for the new -i and -b options).
+
+  06/02/2000:  Modified gtkui_update to make sure the progress bar object is
+               never sent an invalid value. If the <option size="xx"> value is
+	       not set correctly, then the calculated new_update value could
+	       sometimes be greater than 1. This generated lots of gtk error
+	       messages on the console. Added an if/else statement to make
+	       sure the calculated value never exceeds 1.
 */
 
 #include <limits.h>
@@ -75,6 +116,7 @@ static char *install_paths[] = {
     NULL
 };
 
+
 /* Various warning dialogs */
 static enum {
     WARNING_NONE,
@@ -105,11 +147,15 @@ static int diskspace;
 static int license_okay;
 static GSList *radio_list = NULL; // Group for the radio buttons
 
+extern int disable_install_path;
+extern int disable_binary_path;
+
 /******** Local prototypes **********/
 static void check_install_button(void);
 static void update_space(void);
 static void update_size(void);
 void setup_destroy_view_readme_slot(GtkWidget*, gpointer);
+static yesno_answer gtkui_prompt(const char*, yesno_answer);
 
 static int iterate_for_state(void)
 {
@@ -137,19 +183,20 @@ static int run_netscape(const char *url)
 
 /*********** GTK slots *************/
 
-void setup_entry_gainfocus( GtkWidget* widget, gpointer func_data )
+/*void setup_entry_gainfocus( GtkWidget* widget, gpointer func_data )
 {
     gtk_window_set_focus(GTK_WINDOW(gtk_widget_get_toplevel(widget)), widget);
 }
 void setup_entry_givefocus( GtkWidget* widget, gpointer func_data )
 {
     gtk_window_set_focus(GTK_WINDOW(gtk_widget_get_toplevel(widget)), NULL);
-}
+}*/
 
-void setup_entry_installpath_slot( GtkWidget* widget, gpointer func_data )
+gint path_entry_keypress_slot(GtkWidget *widget, GdkEvent *event, 
+				  gpointer data)
 {
     char* string;
-
+    
     string = gtk_entry_get_text( GTK_ENTRY(widget) );
     if ( string ) {
         set_installpath(cur_info, string);
@@ -158,6 +205,72 @@ void setup_entry_installpath_slot( GtkWidget* widget, gpointer func_data )
         }
         update_space();
     }
+    return(FALSE);
+}
+
+gint path_combo_change_slot(GtkWidget *widget, GdkEvent *event, 
+				  gpointer data)
+{
+    char* string;
+    GtkWidget *install_entry;
+    
+    install_entry = glade_xml_get_widget(setup_glade, "entry4");
+    string = gtk_entry_get_text( GTK_ENTRY(install_entry) );
+    if ( string ) {
+        set_installpath(cur_info, string);
+        if ( strcmp(string, cur_info->install_path) != 0 ) {
+            gtk_entry_set_text(GTK_ENTRY(install_entry), cur_info->install_path);
+        }
+        update_space();
+    }
+    return(FALSE);
+}
+
+void setup_entry_installpath_slot( GtkWidget* widget, gpointer func_data )
+{
+    char* string;
+    string = gtk_entry_get_text( GTK_ENTRY(widget) );
+    if ( string ) {
+        set_installpath(cur_info, string);
+        if ( strcmp(string, cur_info->install_path) != 0 ) {
+            gtk_entry_set_text(GTK_ENTRY(widget), cur_info->install_path);
+        }
+        update_space();
+    }
+}
+
+gint binary_path_entry_keypress_slot(GtkWidget *widget, GdkEvent *event, 
+				  gpointer data)
+{
+    char* string;
+    
+    string = gtk_entry_get_text( GTK_ENTRY(widget) );
+    if ( string ) {
+        set_symlinkspath(cur_info, string);
+        if ( strcmp(string, cur_info->symlinks_path) != 0 ) {
+            gtk_entry_set_text(GTK_ENTRY(widget), cur_info->symlinks_path);
+        }
+        check_install_button();
+    }    
+    return(FALSE);
+}
+
+gint binary_path_combo_change_slot(GtkWidget *widget, GdkEvent *event, 
+				  gpointer data)
+{
+    char* string;
+    GtkWidget *binary_entry;
+    
+    binary_entry = glade_xml_get_widget(setup_glade, "entry5");
+    string = gtk_entry_get_text( GTK_ENTRY(binary_entry) );
+    if ( string ) {
+        set_symlinkspath(cur_info, string);
+        if ( strcmp(string, cur_info->symlinks_path) != 0 ) {
+            gtk_entry_set_text(GTK_ENTRY(widget), cur_info->symlinks_path);
+        }
+        check_install_button();
+    }    
+    return(FALSE);
 }
 
 void setup_entry_binarypath_slot( GtkWidget* widget, gpointer func_data )
@@ -412,14 +525,14 @@ static void check_install_button(void)
     } else if ( ! *cur_info->install_path ) {
         message = _("No destination directory selected");
     } else if ( cur_info->install_size <= 0 ) {
-		if ( !GetProductIsMeta(cur_info) ) {
-			message = _("Please select at least one option");
-		}
+          if ( !GetProductIsMeta(cur_info) ) {
+	      message = _("Please select at least one option");
+	  }
     } else if ( BYTES2MB(cur_info->install_size) > diskspace ) {
         message = _("Not enough free space for the selected options");
     } else if ( (stat(path_up, &st) == 0) && !S_ISDIR(st.st_mode) ) {
         message = _("Install path is not a directory");
-    } else if ( ! dir_is_accessible(path_up) ) {
+    } else if ( access(path_up, W_OK) < 0 ) {
         message = _("No write permissions on the install directory");
 	} else if (strcmp(cur_info->symlinks_path, cur_info->install_path) == 0) {
 		message = _("Binary path and install path must be different");
@@ -564,9 +677,14 @@ static void prompt_nobutton_slot( GtkWidget* widget, gpointer func_data)
     prompt_response = RESPONSE_NO;
 }
 
+static void prompt_okbutton_slot( GtkWidget* widget, gpointer func_data)
+{
+    prompt_response = RESPONSE_OK;
+}
+
 static yesno_answer gtkui_prompt(const char *txt, yesno_answer suggest)
 {
-    GtkWidget *dialog, *label, *yes_button, *no_button;
+    GtkWidget *dialog, *label, *yes_button, *no_button, *ok_button;
        
     /* Create the widgets */
     
@@ -574,6 +692,7 @@ static yesno_answer gtkui_prompt(const char *txt, yesno_answer suggest)
     label = gtk_label_new (txt);
     yes_button = gtk_button_new_with_label(_("Yes"));
     no_button = gtk_button_new_with_label(_("No"));
+    ok_button = gtk_button_new_with_label("OK");
 
     prompt_response = RESPONSE_INVALID;
     
@@ -583,10 +702,17 @@ static yesno_answer gtkui_prompt(const char *txt, yesno_answer suggest)
                                GTK_SIGNAL_FUNC (prompt_yesbutton_slot), GTK_OBJECT(dialog));
     gtk_signal_connect_object (GTK_OBJECT (no_button), "clicked",
                                GTK_SIGNAL_FUNC (prompt_nobutton_slot), GTK_OBJECT(dialog));
-    gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->action_area),
-                       yes_button);
-    gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->action_area),
-                       no_button);
+    gtk_signal_connect_object (GTK_OBJECT (ok_button), "clicked",
+                               GTK_SIGNAL_FUNC (prompt_okbutton_slot), GTK_OBJECT(dialog));
+    if (suggest != RESPONSE_OK) {
+        gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->action_area),
+			   yes_button);
+	gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->action_area),
+			   no_button);
+    } else {
+        gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->action_area),
+			   ok_button);
+    }
     
     /* Add the label, and show everything we've added to the dialog. */
     
@@ -612,11 +738,11 @@ static void init_install_path(void)
     char path[PATH_MAX];
 
     widget = glade_xml_get_widget(setup_glade, "install_path");
-
-	if ( GetProductIsMeta(cur_info) ) {
+    
+    if ( GetProductIsMeta(cur_info) ) {
 		gtk_widget_hide(widget);
 		return;
-	}
+    }
 
     list = 0;
     list = g_list_append( list, cur_info->install_path);
@@ -643,10 +769,10 @@ static void init_binary_path(void)
 
     widget = glade_xml_get_widget(setup_glade, "binary_path");
 
-	if ( GetProductIsMeta(cur_info) ) {
+    if ( GetProductIsMeta(cur_info) ) {
 		gtk_widget_hide(widget);
 		return;
-	}
+    }
 
     list = 0;
 
@@ -765,7 +891,7 @@ static void parse_option(install_info *info, xmlNodePtr node, GtkWidget *window,
     text[i] = '\0';
     strncat(text, line, sizeof(text));
 
-	if ( GetProductIsMeta(info) ) {
+        if ( GetProductIsMeta(info) ) {
 		button = gtk_radio_button_new_with_label(radio_list, text);
 		radio_list = gtk_radio_button_group(GTK_RADIO_BUTTON(button));
 	} else if ( exclusive ) {
@@ -861,6 +987,7 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
     GtkWidget *notebook;
     GtkWidget *widget;
     GtkWidget *button;
+    GtkWidget *install_path, *install_entry, *binary_path, *binary_entry;
     char title[1024];
 
     cur_state = SETUP_INIT;
@@ -876,8 +1003,34 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
     }
     fclose(opened);
 
-    setup_glade = glade_xml_new(SETUP_GLADE, "setup_window"); //2nd param was NULL
+    setup_glade = glade_xml_new(SETUP_GLADE, "setup_window"); 
 
+    /* add signal handlers to manage enabling/disabling the Install button */
+    install_path = glade_xml_get_widget(setup_glade, "install_path");
+    install_path = GTK_COMBO(install_path)->list;
+    install_entry = glade_xml_get_widget(setup_glade, "entry4");
+    gtk_signal_connect_after(GTK_OBJECT (install_path),
+			     "button_release_event",
+			     GTK_SIGNAL_FUNC (path_combo_change_slot),
+			     NULL);
+    gtk_signal_connect_after(GTK_OBJECT (install_entry),
+			     "key_press_event",
+			     GTK_SIGNAL_FUNC (path_entry_keypress_slot),
+			     NULL);
+
+    binary_path = glade_xml_get_widget(setup_glade, "binary_path");
+    binary_path = GTK_COMBO(binary_path)->list;
+    binary_entry = glade_xml_get_widget(setup_glade, "entry5");
+    gtk_signal_connect_after(GTK_OBJECT (binary_path),
+			     "button_release_event",
+			     GTK_SIGNAL_FUNC (binary_path_combo_change_slot),
+			     NULL);
+    gtk_signal_connect_after(GTK_OBJECT (binary_entry),
+			     "key_press_event",
+			     GTK_SIGNAL_FUNC (binary_path_entry_keypress_slot),
+			     NULL);
+
+    /* add all the other signal handlers defined in setup.glade */
     glade_xml_signal_autoconnect(setup_glade);
 
     /* Set up the window title */
@@ -940,11 +1093,22 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
 		}
 	}
 
+    /* Disable the path fields if they were provided via command line args */
+    if (disable_install_path) {
+        widget = glade_xml_get_widget(setup_glade, "install_path");
+	gtk_widget_set_sensitive(widget, FALSE);
+    }
+    if (disable_binary_path) {
+        widget = glade_xml_get_widget(setup_glade, "binary_path");
+	gtk_widget_set_sensitive(widget, FALSE);
+    }
+
     /* Realize the main window for pixmap loading */
     gtk_widget_realize(window);
 
     /* Update the install image */
     update_image(GetProductSplash(info));
+    //update_image(SETUP_BASE "splash.xpm");
 
     return cur_state;
 }
@@ -992,7 +1156,7 @@ static install_state gtkui_setup(install_info *info)
     gtk_container_foreach(GTK_CONTAINER(options), empty_container, options);
     info->install_size = 0;
     node = info->config->root->childs;
-	radio_list = NULL;
+    radio_list = NULL;
     while ( node ) {
 		if ( ! strcmp(node->name, "option") ) {
 			parse_option(info, node, window, options, 0, NULL, 0, NULL);
@@ -1055,6 +1219,12 @@ static void gtkui_update(install_info *info, const char *path, size_t progress, 
         widget = glade_xml_get_widget(setup_glade, "current_file_progress");
         gtk_progress_bar_update(GTK_PROGRESS_BAR(widget), new_update);
         new_update = (gfloat)info->installed_bytes / (gfloat)info->install_size;
+	if (new_update > 1.0) {
+	    new_update = 1.0;
+	}
+	else if (new_update < 0.0) {
+	    new_update = 0.0;
+	}
         widget = glade_xml_get_widget(setup_glade, "total_file_progress");
         gtk_progress_bar_update(GTK_PROGRESS_BAR(widget), new_update);
     }

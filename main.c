@@ -1,9 +1,26 @@
-/* $Id: main.c,v 1.28 2000-06-28 01:37:53 megastep Exp $ */
+/* $Id: main.c,v 1.29 2000-07-11 21:11:51 megastep Exp $ */
 
-/* Modifications by Borland/Inprise Corp.
-   04/10/2000: Added code to expand ~ in a default path immediately after 
-               XML is loaded 
-*/
+/*
+Modifications by Borland/Inprise Corp.:
+    05/17/2000: Added support for two new command-line arguments: 
+                -i path: used to specify the install directory. 
+		-b path: used to specify the binary directory.
+		If either of these parameters are specified on the command
+		line, the user will not be asked for them. Two global flags
+		were added for this purpose: disable_install_path and 
+		disable_binary_path. Additional changes were made to install.c
+		gtk_ui.c and console_ui.c were made to support this change.
+
+   06/02/2000:  Added support for a new command-line parameter:
+                -m: used to force RPM packages to be manually extracted and to
+		    prevent the RPM database from being updated.
+		Some distributions (Corel) include RPM support, but the RPM 
+		database is empty. This causes almost every attempt to install
+		an RPM to fail because of missing dependencies. Using the -m
+		parameter allows users to get around this by forcing setup to
+		work as if RPM was not present.
+
+ */
 #include <stdio.h>
 #include <setjmp.h>
 #include <signal.h>
@@ -30,10 +47,13 @@
 /* Global options */
 
 int force_console = 0;
+int disable_install_path = 0;
+int disable_binary_path = 0;
 char *rpm_root = "/";
 const char *argv0 = NULL;
 
 static char *current_locale = NULL;
+int force_manual = 0;
 
 /* A way to jump to the abort handling code */
 jmp_buf abort_jmpbuf;
@@ -79,9 +99,12 @@ static void print_usage(const char *argv0)
     printf(
 _("Usage: %s [options]\n\n"
 "Options can be one or more of the following:\n"
+"   -b path  Set the binary path to <path>\n"
 "   -h       Display this help message\n"
+"   -i path  Set the install path to <path>\n"
 "   -c cwd   Use an alternate current directory for the install\n"
 "   -f file  Use an alternative XML file (default %s)\n"
+"   -m       Force manual extraction of RPM packages, do not update RPM database\n"
 "   -n       Force the text-only user interface\n"
 "   -r root  Set the root directory for extracting RPM files (default is /)\n"
 "   -v n     Set verbosity level to n. Available values :\n"
@@ -100,6 +123,11 @@ int main(int argc, char **argv)
     install_state state;
     char *xml_file = SETUP_CONFIG;
     int log_level = LOG_NORMAL;
+    char install_path[PATH_MAX];
+    char binary_path[PATH_MAX];
+
+    install_path[0] = '\0';
+    binary_path[0] = '\0';
 
     /* Set a good default umask value (022) */
     umask(DEFAULT_UMASK);
@@ -118,7 +146,7 @@ int main(int argc, char **argv)
 	}
 
     /* Parse the command-line options */
-    while ( (c=getopt(argc, argv, "hnc:f:r:v::V")) != EOF ) {
+    while ( (c=getopt(argc, argv, "hnc:f:r:v::Vi:b:m")) != EOF ) {
         switch (c) {
             case 'c':
                 if ( chdir(optarg) < 0 ) {
@@ -150,21 +178,25 @@ int main(int argc, char **argv)
             case 'V':
                 printf("Loki Setup version " SETUP_VERSION ", built on "__DATE__"\n");
                 exit(0);
+	    case 'i':
+	        strcpy(install_path, optarg);
+		disable_install_path = 1;
+		break;
+	    case 'b':
+	        strcpy(binary_path, optarg);
+		disable_binary_path = 1;
+		break;
+	    case 'm':
+	        force_manual = 1;
+		break;
             default:
                 print_usage(argv[0]);
                 exit(0);
         }
     }
 
-	argv0 = argv[0];
-
-	if ( ! file_exists(xml_file) ) {
-		char curdir[1024];
-		fprintf(stderr, _("XML file does not exist: '%s' (pwd is %s)\n"), xml_file, getcwd(curdir, sizeof(curdir)));
-	}
-
     /* Initialize the XML setup configuration */
-    info = create_install(xml_file, log_level);
+    info = create_install(xml_file, log_level, install_path, binary_path);
     if ( info == NULL ) {
         fprintf(stderr, _("Couldn't load '%s'\n"), xml_file);
         exit(1);

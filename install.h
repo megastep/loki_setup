@@ -129,6 +129,7 @@ typedef struct {
         char *name;
 	    char *version;
 	    char *release;
+            int autoremove;
         struct rpm_elem *next;
     } *rpm_list;
 
@@ -165,9 +166,13 @@ extern const char *GetPreInstall(install_info *info);
 extern const char *GetPostInstall(install_info *info);
 extern const char *GetRuntimeArgs(install_info *info);
 extern const char *GetInstallOption(install_info *info, const char *option);
+extern const char *GetPreUnInstall(install_info *info);
+extern const char *GetPostUnInstall(install_info *info);
 
 /* Create the initial installation information */
-extern install_info *create_install(const char *configfile, int log_level);
+extern install_info *create_install(const char *configfile, int log_level,
+				    const char *install_path,
+				    const char *binary_path);
 
 /* Add a file entry to the list of files installed */
 extern void add_file_entry(install_info *info, const char *path);
@@ -176,7 +181,9 @@ extern void add_file_entry(install_info *info, const char *path);
 extern void add_script_entry(install_info *info, const char *script, int post);
 
 /* Add a RPM entry to the list of RPMs installed */
-extern void add_rpm_entry(install_info *info, const char *name, const char *version, const char *release);
+extern void add_rpm_entry(install_info *info, const char *name, 
+			  const char *version, const char *release,
+			  const int autoremove);
 
 /* Add a directory entry to the list of directories installed */
 extern void add_dir_entry(install_info *info, const char *path);
@@ -245,3 +252,4 @@ extern int check_for_rpm(void);
 #endif
 
 #endif /* _install_h */
+

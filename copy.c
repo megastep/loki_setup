@@ -1,5 +1,76 @@
 
 /* Functions for unpacking and copying files with status bar update */
+/* Modifications by Borland/Inprise Corp.:
+   05/03/2000: Modifed copy_node and copy_rpm to support a new "relocate" 
+               option on the <files> tag. If relocate="true" and an RPM is 
+	       listed in the files section, the install will force the RPM to 
+	       be installed into the INSTALLDIR location. This is equivalent
+	       to installing the RPM like this: 
+	       rpm -U --relocate /=INSTALLDIR --badreloc <rpmfile>
+	       If relocate="true" but the RPM database is not accessible, 
+	       the manual RPM copy mechanism will use INSTALLDIR instead of
+	       rpm_root. 
+
+	       The relocate flag is passed from copy_node to copy_list, 
+	       copy_path and copy_directory, so those functions were also 
+	       modifed to pass the flag along. The "relocate" option will have
+	       no affect on non-RPM files listed within the <files> tag.
+
+	       Modifed copy_rpm to update info->installed_bytes so the 
+	       gtkui overall progress bar is properly updated when installing
+	       RPMs. For this to work correctly, the "size" option on the 
+	       <option> tag must be set to the total non-compressed size of the
+	       option. 
+
+   05/04/2000: Modifed copy_binary to support a new "inrpm" option on the
+               <binary> tag. If inrpm="true" then copy_binary will not attempt
+	       to copy the file, but it will set up the symlink and menu items
+	       for it. If inrpm="true", it means that the file was (or should 
+	       have been) installed by the RPM. For this to work, the value 
+	       inside the <binary> tag should be the installed location of 
+	       the binary file. If the RPM is being relocated to the install 
+	       directory, you can use a macro $INSTALLDIR which will be 
+	       expanded at runtime. So, if you have a file that the RPM 
+	       installs into <installdir>/bin, the XML would look like this:
+	       <binary inrpm="true" symlink="app">
+	           $INSTALLDIR/bin/app
+	       </binary>
+	       The other options on the binary tag will work exactly as if 
+	       the install had copied the file itself.
+
+   05/09/2000: Modifed copy_cpio_stream to use a new function skip_zeros to
+               skip past the padding after the filename and after the file 
+	       data when manually extracting an RPM file. This gives a huge
+	       speed boost to the process. skip_zeros uses a calculation that
+	       I found in the RPM source code (lib/cpio.c) for determining the
+	       size of the padding. For this calculation to work, it has to 
+	       know its current location within the archive. Added a count 
+	       variable to keep track of this. Any time a file_read is done,
+	       the count must be updated with the number of bytes read.
+
+   05/20/2000: Modified copy_node and copy_rpm to support a new "autoremove"
+               option on the <files> tag. If autoremove="true" and an RPM
+	       is listed in the files section, then that RPM package will be
+	       automatically removed ("rpm -e package") when the uninstall 
+	       script is run. If the autoremove option is not set, then the
+	       uninstall script will list the package name at the end of the
+	       uninstall, but it will not remove it. The autoremove flag is
+	       passed through all the same functions as "relocate" described
+	       above.
+
+   06/02/2000: Modifed copy_rpm to recognize the force_manual flag that is set
+               with the -m command line parameter. See main.c for more info on
+	       this parameter. This forces the RPM packages to be manually
+	       extracted.
+
+   06/05/2000: Modified copy_node and copy_rpm to support a new "nodeps" option
+               on the <files> tag. If nodeps="true" and an RPM is listed in the
+	       files section, then the --nodeps option will be added to the RPM
+	       command when the files are installed. This will apply to all
+	       RPM files within the <files> tag. The nodeps flag is passed to
+	       copy_list, copy_path, copy_directory and copy_rpm. Those 
+	       functions were changed to pass the value along.
+*/
 
 #include <limits.h>
 #include <sys/types.h>
@@ -40,6 +111,7 @@
 
 static char current_option[200];
 extern char *rpm_root;
+extern int force_manual;
 
 void getToken(const char *src, const char **end) {
     *end = 0;
@@ -113,6 +185,18 @@ int parse_line(const char **srcpp, char *buf, int maxlen)
     return strlen(buf);
 }
 
+/* calculates and skips the zeros after the filename and after the file data
+   when reading from a cpio archive. */
+void skip_zeros(install_info *info, stream *input, int *count, int modulo)
+{
+    int buf[10];
+    int amount;
+    
+    amount = (modulo - *count % modulo) % modulo;
+    file_read(info, buf, amount, input);
+    *count += amount;
+}
+
 size_t copy_cpio_stream(install_info *info, stream *input, const char *dest,
                         void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
@@ -125,14 +209,17 @@ size_t copy_cpio_stream(install_info *info, stream *input, const char *dest,
     size_t nread, left, copied;
     size_t size = 0;
     char buf[BUFSIZ];
+    int count = 0;
 
     memset(&file_hdr, 0, sizeof(file_hdr));
     while ( ! file_eof(info, input) ) {
       has_crc = 0;
       file_read(info, magic, 6, input);
+      count += 6;
       if(!strncmp(magic,"070701",6) || !strncmp(magic,"070702",6)){ /* New format */
         has_crc = (magic[5] == '2');
         file_read(info, ascii_header, 104, input);
+	count += 104;
         ascii_header[104] = '\0';
         sscanf (ascii_header,
                 "%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx",
@@ -144,6 +231,7 @@ size_t copy_cpio_stream(install_info *info, stream *input, const char *dest,
       }else if(!strncmp(magic,"070707",6)){ /* Old format */
         unsigned long dev, rdev;
         file_read(info, ascii_header, 70, input);
+	count += 70;
         ascii_header[70] = '\0';
         sscanf (ascii_header,
                 "%6lo%6lo%6lo%6lo%6lo%6lo%6lo%11lo%6lo%11lo",
@@ -162,10 +250,11 @@ size_t copy_cpio_stream(install_info *info, stream *input, const char *dest,
       strcpy(file_hdr.c_name, dest);
       strcat(file_hdr.c_name, "/");
       file_read(info, file_hdr.c_name + dir_len, file_hdr.c_namesize, input);
+      count += file_hdr.c_namesize;
       if(!strncmp(file_hdr.c_name + dir_len,"TRAILER!!!",10)) /* End of archive marker */
         break;
       /* Skip padding zeros after the file name */
-      file_skip_zeroes(info, input);
+      skip_zeros(info, input, &count, 4);     
       if(S_ISDIR(file_hdr.c_mode)){
         file_create_hierarchy(info, file_hdr.c_name);
         file_mkdir(info, file_hdr.c_name, file_hdr.c_mode & C_MODE);
@@ -182,6 +271,7 @@ size_t copy_cpio_stream(install_info *info, stream *input, const char *dest,
       }else if(S_ISLNK(file_hdr.c_mode)){
         char *lnk = (char *)malloc(file_hdr.c_filesize+1);
         file_read(info, lnk, file_hdr.c_filesize, input);
+	count += file_hdr.c_filesize;
         lnk[file_hdr.c_filesize] = '\0';
         file_symlink(info, lnk, file_hdr.c_name);
         free(lnk);
@@ -192,6 +282,7 @@ size_t copy_cpio_stream(install_info *info, stream *input, const char *dest,
         if(output){
           left = file_hdr.c_filesize;
           while(left && (nread=file_read(info, buf, (left >= BUFSIZ) ? BUFSIZ : left, input))){
+	    count += nread;
             copied = file_write(info, buf, nread, output);
             left -= nread;
             if(has_crc && file_hdr.c_chksum){
@@ -210,11 +301,13 @@ size_t copy_cpio_stream(install_info *info, stream *input, const char *dest,
           size += file_hdr.c_filesize;
           file_close(info, output);
           chmod(file_hdr.c_name, file_hdr.c_mode & C_MODE);
-        }else /* Skip the file data */
+        }else { /* Skip the file data */
           file_skip(info, file_hdr.c_filesize, input);
+  	  count += file_hdr.c_filesize;
+	}
       }
       /* More padding zeroes after the data */
-      file_skip_zeroes(info, input);
+      skip_zeros(info, input, &count, 4);
     }
     file_close(info, input);  
     if(file_hdr.c_name != NULL)
@@ -252,7 +345,8 @@ int check_for_rpm(void)
     return rpm_access;
 }
 
-size_t copy_rpm(install_info *info, const char *path,
+size_t copy_rpm(install_info *info, const char *path, const char *dest,
+		int relocate, int autoremove, int nodeps, 
                 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     FD_t fdi;
@@ -270,11 +364,15 @@ size_t copy_rpm(install_info *info, const char *path,
     }
 
     size = 0;
-    if ( rpm_access ) { /* We can call RPM directly */
+    if ( rpm_access && ! force_manual ) { /* We can call RPM directly */
         char cmd[300];
         FILE *fp;
         float percent = 0.0;
+	double bytes_copied = 0.0;
+	double previous_bytes = 0.0;
         char *name = "", *version = "", *release = "";
+	char *options = (char *) malloc(PATH_MAX);
+	options[0] = '\0';
 
         headerGetEntry(hd, RPMTAG_SIZE, &type, &p, &c);
         if(type==RPM_INT32_TYPE){
@@ -294,7 +392,17 @@ size_t copy_rpm(install_info *info, const char *path,
         }
         fdClose(fdi);
 
-        snprintf(cmd,sizeof(cmd),"rpm -U --percent --root %s %s", rpm_root, path);
+	if (relocate) { /* force relocating RPM to install directory */
+	  sprintf(options, " --relocate /=%s --badreloc ", dest);
+	}
+
+	if (nodeps) {
+	  strcat(options, " --nodeps ");
+	}
+
+	snprintf(cmd,sizeof(cmd),"rpm -U --percent --root %s %s %s", rpm_root,
+		 options, path);
+
         fp = popen(cmd, "r");
         while(percent<100.0){
           if(!fp || feof(fp)){
@@ -309,13 +417,16 @@ size_t copy_rpm(install_info *info, const char *path,
             return 0;
           }
           fscanf(fp,"%f", &percent);
+	  /* calculate the bytes installed in this pass of the loop */
+	  bytes_copied = (percent/100.0)*size - previous_bytes;
+	  previous_bytes += bytes_copied;
+	  info->installed_bytes += bytes_copied;
           update(info, path, (percent/100.0)*size, size, current_option);
         }
         pclose(fp);
-
+	free (options);
         /* Log the RPM installation */
-        add_rpm_entry(info, name, version, release);
-
+        add_rpm_entry(info, name, version, release, autoremove);
     } else { /* Manually install the RPM file */
         FD_t gzdi;
         stream *cpio;
@@ -328,7 +439,13 @@ size_t copy_rpm(install_info *info, const char *path,
         gzdi = gzdFdopen(fdi, "r");    /* XXX gzdi == fdi */
     
         cpio = file_fdopen(info, path, NULL, (gzFile*)gzdi->fd_gzd, "r");
-        size = copy_cpio_stream(info, cpio, rpm_root, update);
+
+        /* if relocate="true", copy the files into dest instead of rpm_root */
+	if (relocate) {
+	  size = copy_cpio_stream(info, cpio, dest, update);
+	} else {
+	  size = copy_cpio_stream(info, cpio, rpm_root, update);
+	}
 
         if(headerIsEntry(hd, RPMTAG_POSTIN)){      
           headerGetEntry(hd, RPMTAG_POSTIN, &type, &p, &c);
@@ -487,7 +604,9 @@ size_t copy_file(install_info *info, const char *cdrom, const char *path, const 
     return size;
 }
 
-size_t copy_directory(install_info *info, const char *path, const char *dest, const char *cdrom,
+size_t copy_directory(install_info *info, const char *path, const char *dest, 
+		      const char *cdrom, int relocate, int autoremove, 
+		      int nodeps, 
                 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     char fpat[PATH_MAX];
@@ -500,7 +619,8 @@ size_t copy_directory(install_info *info, const char *path, const char *dest, co
 	err = glob(fpat, GLOB_ERR, NULL, &globbed);
     if ( err == 0 ) {
         for ( i=0; i<globbed.gl_pathc; ++i ) {
-          copied = copy_path(info, globbed.gl_pathv[i], dest, cdrom, 0, update);
+	    copied = copy_path(info, globbed.gl_pathv[i], dest, cdrom, 0, 
+			       relocate, autoremove, nodeps, update);
           if ( copied > 0 ) {
             size += copied;
           }
@@ -516,7 +636,9 @@ size_t copy_directory(install_info *info, const char *path, const char *dest, co
     return size;
 }
 
-size_t copy_path(install_info *info, const char *path, const char *dest, const char *cdrom, int strip_dirs,
+size_t copy_path(install_info *info, const char *path, const char *dest, 
+		 const char *cdrom, int strip_dirs, int relocate, 
+		 int autoremove, int nodeps,  
                 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     char final[PATH_MAX];
@@ -526,7 +648,8 @@ size_t copy_path(install_info *info, const char *path, const char *dest, const c
     size = 0;
     if ( stat(path, &sb) == 0 ) {
         if ( S_ISDIR(sb.st_mode) ) {
-            copied = copy_directory(info, path, dest, cdrom, update);
+            copied = copy_directory(info, path, dest, cdrom, relocate,
+				    autoremove, nodeps, update);
         } else {
             if ( strstr(path, TAR_EXTENSION) != NULL ) {
                 copied = copy_tarball(info, path, dest, update);
@@ -534,7 +657,8 @@ size_t copy_path(install_info *info, const char *path, const char *dest, const c
                 copied = copy_cpio(info, path, dest, update);
 #ifdef RPM_SUPPORT
             } else if ( strstr(path, RPM_EXTENSION) != NULL ) {
-                copied = copy_rpm(info, path, update);
+                copied = copy_rpm(info, path, dest, relocate, 
+				  autoremove, nodeps, update);
 #endif
             } else {
                 copied = copy_file(info, cdrom, path, dest, final, strip_dirs, update);
@@ -549,8 +673,10 @@ size_t copy_path(install_info *info, const char *path, const char *dest, const c
     return size;
 }
 
-size_t copy_list(install_info *info, const char *filedesc, const char *dest, int from_cdrom, int strip_dirs,
-                void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+size_t copy_list(install_info *info, const char *filedesc, const char *dest, 
+		 int from_cdrom, int strip_dirs, int relocate, int autoremove, 
+		 int nodeps, 
+		 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     char fpat[BUFSIZ];
     int i;
@@ -570,7 +696,9 @@ size_t copy_list(install_info *info, const char *filedesc, const char *dest, int
                 chdir(cdroms[d]);
                 if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
                     for ( i=0; i<globbed.gl_pathc; ++i ) {
-                        copied = copy_path(info, globbed.gl_pathv[i], dest, cdroms[d], strip_dirs, update);
+                        copied = copy_path(info, globbed.gl_pathv[i], dest, 
+					   cdroms[d], strip_dirs, relocate,
+					   autoremove, nodeps, update);
                         if ( copied > 0 ) {
                             size += copied;
                         }
@@ -586,7 +714,9 @@ size_t copy_list(install_info *info, const char *filedesc, const char *dest, int
         } else {
             if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
                 for ( i=0; i<globbed.gl_pathc; ++i ) {
-                    copied = copy_path(info, globbed.gl_pathv[i], dest, NULL, strip_dirs, update);
+                    copied = copy_path(info, globbed.gl_pathv[i], dest, NULL, 
+				       strip_dirs, relocate, autoremove, nodeps,
+				       update);
                     if ( copied > 0 ) {
                         size += copied;
                     }
@@ -636,6 +766,9 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
     char fpat[PATH_MAX], bin[PATH_MAX], final[PATH_MAX], fdest[PATH_MAX];
     const char *arch, *libc, *keepdirs;
     size_t size, copied;
+    const char *inrpm = xmlGetProp(node, "inrpm");
+    int in_rpm = (inrpm && !strcasecmp(inrpm, "true"));
+    int count, i;
 
     arch = xmlGetProp(node, "arch");
     if ( !arch || !strcasecmp(arch,"any") ) {
@@ -646,9 +779,10 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
         libc = info->libc;
     }
 	keepdirs = xmlGetProp(node,"keepdirs");
-
+    copied = 0;
     size = 0;
     while ( filedesc && parse_line(&filedesc, final, (sizeof final)) ) {
+      if (! in_rpm) {
         copied = 0;
 		
 		strncpy(fdest, dest, sizeof(fdest));
@@ -701,7 +835,19 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
                 }
             }
         }
-        if ( copied > 0 ) {
+      } else {  /* if inrpm="true" */
+	  if (strncmp("$INSTALLDIR", final, 11 ) == 0) {
+	      strcpy(fpat, info->install_path);
+	      i = strlen(fpat);
+	      for (count=11; count <= strlen(final); count++) {
+		  fpat[i++] = final[count];
+	      }
+	      strcat(fpat, "\0");
+	      final[0] = '\0';
+	      strcpy(final, fpat);
+	  }
+      }
+        if ( copied > 0 || in_rpm ) {
             char *symlink = xmlGetProp(node, "symlink");
             char sym_to[PATH_MAX];
 
@@ -740,15 +886,21 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
     while ( node ) {
         const char *path = xmlGetProp(node, "path");
         const char *prop = xmlGetProp(node, "cdrom");
-		const char *lang_prop;
-        int from_cdrom = (prop && !strcasecmp(prop, "yes"));
-		int lang_matched = 1;
-		int strip_dirs = 0;
-
-		lang_prop = xmlGetProp(node, "lang");
-		if (lang_prop) {
-			lang_matched = MatchLocale(lang_prop);
-		}
+	const char *lang_prop;
+        const char *reloc = xmlGetProp(node, "relocate");
+	const char *autorm = xmlGetProp(node, "autoremove");
+	const char *depsoff = xmlGetProp(node, "nodeps");
+	int from_cdrom = (prop && !strcasecmp(prop, "yes"));
+	int lang_matched = 1;
+	int strip_dirs = 0;
+	int relocate = (reloc && !strcasecmp(reloc, "true"));
+	int autoremove = (autorm && !strcasecmp(autorm, "true"));
+	int nodeps = (depsoff && !strcasecmp(depsoff, "true"));
+	
+	lang_prop = xmlGetProp(node, "lang");
+	if (lang_prop) {
+	    lang_matched = MatchLocale(lang_prop);
+	}
 
         if (!path)
             path = dest;
@@ -772,15 +924,16 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
             parse_line(&str, current_option, sizeof(current_option));
             copied = copy_list(info,
                                xmlNodeListGetString(info->config, node->childs, 1),
-                               path, from_cdrom, strip_dirs, update);
+                               path, from_cdrom, strip_dirs, relocate, 
+			       autoremove, nodeps, update);
             if ( copied > 0 ) {
                 size += copied;
             }
         }
         if ( strcmp(node->name, "binary") == 0 && lang_matched ) {
             copied = copy_binary(info, node,
-								 xmlNodeListGetString(info->config, node->childs, 1),
-								 path, from_cdrom, update);
+				 xmlNodeListGetString(info->config, node->childs, 1),
+				 path, from_cdrom, update);
             if ( copied > 0 ) {
                 size += copied;
             }

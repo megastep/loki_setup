@@ -6,8 +6,11 @@
 	       added check in install_state to make sure install and binary
 	       paths are different. If not give an error and ask for paths
 	       again.
-*/
 
+  05/18/2000:  Modified console_setup to support the install path and binary
+               being provided as command line arguments (see main.c). If the
+	       command-line paths are invalid, install will abort.
+*/
 #include <limits.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -26,6 +29,9 @@
 
 static const char *yes_letter = gettext_noop("Y");
 static const char *no_letter  = gettext_noop("N");
+
+extern int disable_install_path;
+extern int disable_binary_path;
 
 static int prompt_user(const char *prompt, const char *default_answer,
                        char *answer, int maxlen)
@@ -321,10 +327,16 @@ static install_state console_setup(install_info *info)
 		}
 	} else {
 		while ( ! okay ) {
-			/* Find out where to install the game */
-			if ( ! prompt_user(_("Please enter the installation path"),
-							   info->install_path, path, sizeof(path)) ) {
-				return SETUP_ABORT;
+			/* Find out where to install the game, unless it was set
+			   with a command-line argument */
+			if (! disable_install_path) {
+				if ( ! prompt_user(_("Please enter the installation path"),
+								   info->install_path, path, sizeof(path)) ) {
+					return SETUP_ABORT;
+				}
+			} else {
+				printf(_("Install path set to: %s\n"), info->install_path);
+				strcpy(path, info->install_path);
 			}
 			set_installpath(info, path);
 
@@ -339,13 +351,23 @@ static install_state console_setup(install_info *info)
 
 			if ( ! dir_is_accessible(path) ) {
 				printf(_("No write permission to %s\n"), path);
-				continue;
+				if ( ! disable_install_path ) {
+					continue;
+				} else {
+					return SETUP_ABORT;
+				}
 			}
 
-			/* Find out where to install the binary symlinks */
-			if ( ! prompt_user(_("Please enter the path for binary installation"),
-							   info->symlinks_path, path, sizeof(path)) ) {
-				return SETUP_ABORT;
+			/* Find out where to install the binary symlinks, unless the binary path
+			   was provided as a command line argument */
+			if ( ! disable_binary_path ) {
+				if ( ! prompt_user(_("Please enter the path for binary installation"),
+								   info->symlinks_path, path, sizeof(path)) ) {
+					return SETUP_ABORT;
+				}
+			} else {
+				printf(_("Binary path set to: %s\n"), info->symlinks_path);
+				strcpy(path, info->symlinks_path);
 			}
 			set_symlinkspath(info, path);
 
@@ -355,10 +377,16 @@ static install_state console_setup(install_info *info)
 				continue;
 			}
 		
-			/* Check permissions on the symlinks path */
+			/* Check permissions on the symlinks path, if the path was 
+			   provided as a command-line argument and it invalid, then
+			   abort  */
 			if ( access(info->symlinks_path, W_OK) < 0 ) {
 				printf(_("No write permission to %s\n"), info->symlinks_path);
-				continue;
+				if (! disable_binary_path) {
+					continue;
+				} else {
+					return SETUP_ABORT;
+				}
 			}
 
 			/* Go through the install options */
