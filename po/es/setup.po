@@ -7,12 +7,12 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "POT-Creation-Date: 2004-06-30 16:57-0700\n"
-"PO-Revision-Date: 2000-10-11 14:07+0003\n"
-"Last-Translator: Ariel Graneros <techsupport@planetalinux.com.ar>\n"
-"Language-Team: Spanish <techsupport@planetalinux.com.ar>\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=ISO-8859-1\n"
-"Content-Transfer-Encoding: Western ISO-8859-1\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: ENCODING\n"
 
 # SOME DESCRIPTIVE TITLE
 #: image/setup.data/setup.glade:979 image/setup.data/setup.glade:1028
@@ -25,7 +25,7 @@ msgstr "0 MB"
 
 #: image/setup.data/setup.glade:2010
 msgid "CD key"
-msgstr ""
+msgstr "Clave del CD"
 
 #: image/setup.data/setup.glade:167 image/setup.data/setup.glade:775
 #: image/setup.data/setup.glade:1080 image/setup.data/setup.glade:1561
@@ -35,7 +35,7 @@ msgstr "Cancelar"
 
 #: image/setup.data/setup.glade:1245
 msgid "Congratulations!"
-msgstr "Felicitaciones!"
+msgstr "¡Felicitaciones!"
 
 #: image/setup.data/setup.glade:1581 image/setup.data/setup.glade:1729
 #: image/setup.data/setup.glade:2002
@@ -44,142 +44,135 @@ msgstr "Continuar"
 
 #: image/setup.data/setup.glade:664
 msgid "Estimated size:"
-msgstr "Tamaño Estimado"
+msgstr "Tamaño estimado:"
 
 #: dialog_ui.c:628 image/setup.data/setup.glade:129
-#, fuzzy
 msgid "Expert"
-msgstr "Salir"
+msgstr "Experto"
 
 #: image/setup.data/setup.glade:638
 msgid "Free space:"
-msgstr "Espacio Libre:"
+msgstr "Espacio libre:"
 
 #: image/setup.data/setup.glade:252
 msgid "Global Options"
-msgstr "Opciones Globales"
+msgstr "Opciones globales"
 
 #: image/setup.data/setup.glade:1438
 msgid "Install Aborted"
-msgstr "Instalación Cancelada"
+msgstr "Instalación anulada"
 
 #: image/setup.data/setup.glade:1217
 msgid "Install Complete"
-msgstr "Instalación Completa"
+msgstr "Instalación completa"
 
 #: image/setup.data/setup.glade:865
 msgid "Install Progress"
-msgstr "Progreso de la Instalación"
+msgstr "Progreso de la instalación"
 
 #: image/setup.data/setup.glade:426
 msgid "Install a symbolic link into the path"
-msgstr "Crear un enlace dinámico en la ruta"
+msgstr "Instalar un vínculo simbólico en la ruta"
 
 #: image/setup.data/setup.glade:283
 msgid "Install path:"
-msgstr "Directorio para la instalación"
+msgstr "Revisión de la instalación:"
 
 #: image/setup.data/setup.glade:1918
-#, fuzzy
 msgid "Launch _Browser"
-msgstr "Abrir Navegador"
+msgstr "Iniciar _explorador"
 
 #: image/setup.data/setup.glade:1879
 msgid "Launching browser, please wait..."
-msgstr "Cargando navegador, por favor espere..."
+msgstr "Iniciando explorador, aguarde por favor..."
 
 #: dialog_ui.c:97 dialog_ui.c:263 image/setup.data/setup.glade:2278
 msgid "License Agreement"
-msgstr "Acuerdo De Licencia"
+msgstr "Contrato de licencia"
 
 #: image/setup.data/setup.glade:350
-#, fuzzy
 msgid "Link path:"
-msgstr "Directorio para los enlaces:"
+msgstr "Revisión del vínculo:"
 
 #: image/setup.data/setup.glade:448
 msgid "Man page path:"
-msgstr ""
+msgstr "Ruta de la página principal:"
 
 #: image/setup.data/setup.glade:517
-#, fuzzy
 msgid "Options"
-msgstr "Opciones Globales"
+msgstr "Opciones"
 
 #: image/setup.data/setup.glade:92
-#, fuzzy
 msgid "Please choose the class of installation."
-msgstr "Por favor escoja un producto a instalar, o Q para salir"
+msgstr "Elija la clase de instalación."
 
 #: image/setup.data/setup.glade:2055
 msgid "Please enter your CD key."
-msgstr ""
+msgstr "Escriba la clave del CD."
 
 #: image/setup.data/setup.glade:1828
 msgid "Please visit our website for updates and support."
-msgstr "Por favor visite nuestro website para actualizaciones y ayuda."
+msgstr "Visite nuestro sitio Web para obtener actualizaciones y soporte."
 
 #: image/setup.data/setup.glade:1483
 msgid "Press 'Exit' to clean up temporary files."
-msgstr "Presione 'Salir' para eliminar los archivos temporales."
+msgstr "Presione 'Salir' para liberar archivos temporales."
 
 #: image/setup.data/setup.glade:1737
 msgid "Product Website"
-msgstr "Website del Producto"
+msgstr "Sitio Web del producto"
 
 #: image/setup.data/setup.glade:2185
 msgid "Readme File"
-msgstr "Archivo Léame(README)"
+msgstr "Archivo Léame"
 
 #: dialog_ui.c:627 image/setup.data/setup.glade:112
 msgid "Recommended"
-msgstr ""
+msgstr "Recomendado"
 
 #: image/setup.data/setup.glade:696
-#, fuzzy
 msgid "Startup menu entries (KDE/Gnome/CDE)"
-msgstr "Iconos de Escritorio (KDE/Gnome)"
+msgstr "Entradas del menú de inicio (KDE/Gnome/CDE)"
 
 #: image/setup.data/setup.glade:401
 msgid "Symbolic links to installed binaries are placed here"
-msgstr "Los enlaces simbólicos a los binarios, van aquí"
+msgstr "Aquí se colocan los vínculos simbólicos para binarios instalados"
 
 #: image/setup.data/setup.glade:1793
-#, fuzzy
 msgid "Thank you for installing "
-msgstr "Gracias por instalar"
+msgstr "Gracias por instalar el producto "
 
 #: image/setup.data/setup.glade:1262
 msgid "The installation was successfully completed!"
-msgstr "La instalación ha finalizado con exito!"
+msgstr "La instalación finalizó correctamente."
 
 #: image/setup.data/setup.glade:1296
-#, fuzzy
 msgid "The product was installed in:"
-msgstr "El juego fue instalado en:"
+msgstr "El producto se instaló en:"
 
 #: image/setup.data/setup.glade:1466
 msgid "This installation has been aborted."
-msgstr "La instalación ha sido cancelada."
+msgstr "Esta instalación se anuló."
 
 #: image/setup.data/setup.glade:127
 msgid ""
 "This will allow you to pick the installation paths and options to be "
 "installed "
 msgstr ""
+"Esto le permitirá elegir las rutas de instalación y opciones para "
+"instalar "
 
 #: image/setup.data/setup.glade:110
 msgid "This will install the product with the default options and paths"
-msgstr ""
+msgstr "De esta manera, instalará el producto con las opciones y rutas predeterminadas"
 
 #: image/setup.data/setup.glade:1004
 msgid "Total Install"
-msgstr "Instalación Total"
+msgstr "Instalación completa"
 
 #: image/setup.data/setup.glade:1347
-#, fuzzy
 msgid "Type '[game]' to start."
-msgstr "Teclee '[game]' para iniciar el juego."
+msgstr "Escriba '[juego]' para iniciar."
 
 #: image/setup.data/setup.glade:1589
 msgid "Warning"
@@ -195,7 +188,7 @@ msgstr "[opción actual]"
 
 #: image/setup.data/setup.glade:56
 msgid "[image area]"
-msgstr "[area de imágen]"
+msgstr "[área de la imagen]"
 
 #: image/setup.data/setup.glade:1313
 msgid "[install directory]"
@@ -203,11 +196,11 @@ msgstr "[directorio de instalación]"
 
 #: image/setup.data/setup.glade:816
 msgid "[options status]"
-msgstr "[estado de las opciones]"
+msgstr "[estado de opciones]"
 
 #: image/setup.data/setup.glade:620
 msgid "[packages go here]"
-msgstr "[los paquetes van aqui]"
+msgstr "[los paquetes deben colocarse aquí]"
 
 #: image/setup.data/setup.glade:1810
 msgid "[product]"
@@ -218,108 +211,101 @@ msgid "[warning text]"
 msgstr "[texto de advertencia]"
 
 #: image/setup.data/setup.glade:808
-#, fuzzy
 msgid "_Begin Install"
-msgstr "Comenzar Instalación"
+msgstr "_Comenzar la instalación"
 
 #: image/setup.data/setup.glade:1987 image/setup.data/setup.glade:2337
-#, fuzzy
 msgid "_Cancel"
-msgstr "Cancelar"
+msgstr "_Cancelar"
 
 #: image/setup.data/setup.glade:2234
-#, fuzzy
 msgid "_Close"
-msgstr "Cerrar"
+msgstr "_Cerrar"
 
 #: image/setup.data/setup.glade:216
-#, fuzzy
 msgid "_Continue"
-msgstr "Continuar"
+msgstr "_Continuar"
 
 #: image/setup.data/setup.glade:1166 image/setup.data/setup.glade:1430
 #: image/setup.data/setup.glade:1695
-#, fuzzy
 msgid "_Exit"
-msgstr "Salir"
+msgstr "_Salir"
 
 #: image/setup.data/setup.glade:2366
-#, fuzzy
 msgid "_I Agree"
-msgstr "Acepto"
+msgstr "_Acepto"
 
 #: image/setup.data/setup.glade:1209
 msgid "_Start"
-msgstr ""
+msgstr "_Iniciar"
 
 #: image/setup.data/setup.glade:191 image/setup.data/setup.glade:794
 #: image/setup.data/setup.glade:1099 image/setup.data/setup.glade:1185
 #: image/setup.data/setup.glade:1714
-#, fuzzy
 msgid "_View Readme"
-msgstr "Ver el Léame(README)"
+msgstr "_Ver Léame"
 
 #: log.c:47
 msgid "loki_setup: "
-msgstr ""
+msgstr "loki_setup: "
 
 #: install.c:714 install_log.c:19
 msgid "Out of memory\n"
-msgstr "Fuera de memoria\n"
+msgstr "Memoria insuficiente\n"
 
 #: detect.c:326
-#, fuzzy, c-format
+#, c-format
 msgid "Unmounting device %s"
-msgstr "Creando dispositivo %s"
+msgstr "Desmontando dispositivo %s"
 
 #: detect.c:328
 #, c-format
 msgid "Failed to unmount device %s mounted on %s"
-msgstr "Hubo error desmontando dispositivo %s montado en %s"
+msgstr "No se pudo desmontar el dispositivo %s montado en %s"
 
 #: detect.c:394 detect.c:486 detect.c:525 detect.c:568
 #, c-format
 msgid "Mounted device %s"
-msgstr "Dispositivo montado en %s"
+msgstr "Dispositivo montado %s"
 
 #: detect.c:759 detect.c:763
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "\n"
 "Please insert %s.\n"
 "Choose Yes to retry, No to cancel"
 msgstr ""
 "\n"
-"Por favor monte el CDROM de %s.\n"
-"Elija Si para reintentar, o No para cancelar"
+"Insertar %s.\n"
+"Elija Sí para volver a intentarlo, No para cancelar"
 
 #: detect.c:766
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "\n"
 "Please mount %s.\n"
 "Choose Yes to retry, No to cancel"
 msgstr ""
 "\n"
-"Por favor monte el CDROM de %s.\n"
-"Elija Si para reintentar, o No para cancelar"
+"Montar %s.\n"
+"Elija Sí para volver a intentarlo, No para cancelar"
 
 #: detect.c:792
 #, c-format
 msgid "Detected locale is %s"
-msgstr "Locale detectado: %s"
+msgstr "La configuración regional detectada es %s"
 
 #: detect.c:867
 #, c-format
 msgid "Invalid matching policy: %s"
-msgstr ""
+msgstr "Directiva coincidente no válida: %s"
 
 #: plugins.c:96
 msgid ""
 "Registered plugins :\n"
 "\n"
 msgstr ""
-"Plugins Registrados :\n"
+"Complementos registrados :\n"
 "\n"
 
 #: plugins.c:98
@@ -335,303 +321,302 @@ msgstr ""
 
 #: plugins.c:101
 msgid "\tPlugin is statically linked.\n"
-msgstr "\tEl plugin está vinculado estáticamente.\n"
+msgstr "\tEl complemento está vinculado estáticamente.\n"
 
 #: plugins.c:103
 #, c-format
 msgid "\tRecognizes %d extensions: "
-msgstr "\tReconoce la extension %d: "
+msgstr "\tReconoce %d extensiones: "
 
 #: plugins.c:148
 #, c-format
 msgid "Error registering %s plugin: %s\n"
-msgstr "Error al registrar el plugin %s: %s\n"
+msgstr "Se produjo un error al registrar el complemento %s: %s\n"
 
 #: plugins.c:151
 #, c-format
 msgid "Error initializing %s plugin"
-msgstr "Error al iniciar el plugin %s"
+msgstr "Se produjo un error al inicializar el complemento %s"
 
 #: plugins.c:155
 #, c-format
 msgid "Error trying to load %s plugin: %s\n"
-msgstr "Error tratando de cargar el plugin %s: %s\n"
+msgstr "Se produjo un error al cargar el complemento %s: %s\n"
 
 #: network.c:156
 msgid "Out of memory, no network check"
-msgstr "Fuera de memoria, no se revisará la red"
+msgstr "Memoria insuficiente, no se comprueba la red"
 
 #: network.c:166
 msgid "Unable to create pipe, no network check"
-msgstr "Problema creando pipe, no se hará el chequeo de red"
+msgstr "No se puede crear una canalización, no se comprueba la red"
 
 #: network.c:180
 msgid "Fork failed, no network check"
-msgstr "Fork abortado, la red no será verificada"
+msgstr "No se pudo bifurcar, no se comprueba la red"
 
 #: install.c:360
 msgid "No destination directory selected"
-msgstr "No has escogido ningun directorio"
+msgstr "No se seleccionó un directorio de destino"
 
 #: install.c:363
 msgid "Please select at least one option"
-msgstr "Por favor selecciona al menos una opción"
+msgstr "Seleccionar al menos una opción"
 
 #: install.c:366
 msgid "Not enough free space for the selected options"
-msgstr "No hay suficiente espacio para todas las opciones"
+msgstr "No hay suficiente espacio libre para las opciones seleccionadas"
 
 #: install.c:368
 msgid "Install path is not a directory"
-msgstr "El trayecto de Instalación no es un directorio"
+msgstr "La ruta de instalación no es un directorio"
 
 #: install.c:370
 msgid "No write permissions on the install directory"
-msgstr "No tienes permisos de escritura para ese directorio"
+msgstr "No posee permisos de escritura en el directorio de instalación"
 
 #: install.c:372
 msgid "Binary path and install path must be different"
-msgstr "Los directorios de Instalación y Binarios deben ser distintos"
+msgstr "La ruta binaria y la ruta de instalación deben ser diferentes"
 
 #: install.c:374
 msgid "No write permissions to install a selected package"
-msgstr "No tienes permisos para instalar alguno de los paquetes elegidos"
+msgstr "No posee permisos de escritura para instalar un paquete seleccionado"
 
 #: install.c:377
 msgid "No write permissions on the binary directory"
-msgstr "No tienes permiso de escritura para el directorio binario"
+msgstr "No posee permisos de escritura en el directorio binario"
 
 #: install.c:736
 #, c-format
 msgid "Detected distribution: %s %d.%d"
-msgstr ""
+msgstr "Distribución detectada: %s %d.%d"
 
 #: install.c:906
 msgid ""
 "Could not find default component. Make sure to define components for all "
 "entries."
 msgstr ""
+"No se pudo encontrar el componente predeterminado. Asegúrese de definir los componentes para todas las "
+"entradas."
 
 #: file.c:117 file.c:138 file.c:145 install.c:947 install.c:969 install.c:991
 #: install.c:1012 install.c:1027 install.c:1069
 msgid "Out of memory"
-msgstr "Fuera de memoria"
+msgstr "Memoria insuficiente"
 
 #: install.c:1051
 msgid "You must use a 'symlink' attribute with 'play'"
-msgstr "Se debe usar un atributo 'symlink' con 'play'"
+msgstr "Debe utilizar un atributo 'symlink' con 'play'"
 
 #: install.c:1059
 msgid "There can be only one binary with a 'play' attribute"
-msgstr "Solo puede haber un binario con atributo 'play'"
+msgstr "Sólo puede haber un binario con un atributo 'play'"
 
 #: install.c:1062
-#, fuzzy
 msgid "The only valid values for the 'play' attribute are yes, gui and no"
-msgstr "Los unicos valores posibles para el atributo 'play' son si y no"
+msgstr "Los únicos valores válidos para el atributo "play" son sí, igu y no"
 
 #: install.c:1087
 msgid "Couldn't find your home directory"
-msgstr "No pude encontrar tu directorio home"
+msgstr "No se pudo encontrar el directorio principal"
 
 #: install.c:1105
 #, c-format
 msgid "Couldn't find home directory for %s"
-msgstr "No pude encontrar el directorio para %s"
+msgstr "No se pudo encontrar el directorio principal para %s"
 
 #: install.c:1225
-#, fuzzy
 msgid "XML: 'require' tag doesn't have a mandatory 'command' attribute"
-msgstr "XML: la etiqueta 'tag' no contiene un atributo 'lang' definitorio"
+msgstr "XML: la ficha 'require' no posee un atributo 'command' obligatorio"
 
 #: install.c:1275
 msgid "XML: 'lang' tag does not have a mandatory 'lang' attribute"
-msgstr "XML: la etiqueta 'tag' no contiene un atributo 'lang' definitorio"
+msgstr "XML: la ficha 'lang' no posee un atributo 'lang' obligatorio"
 
 #: install.c:1284
 #, c-format
 msgid "XML: option listed without translated description for locale '%s'"
-msgstr "XML: la opción designada no tiene una descripción traducida en %s"
+msgstr "XML: opción en la lista sin descripción traducida para la configuración regional '%s'"
 
 #: install.c:1292
 msgid "XML: option listed without description"
-msgstr "XML: opción listada sin descripción"
+msgstr "XML: opción en la lista sin descripción"
 
 #: install.c:1535
 msgid "CDKey file could not be opened."
-msgstr ""
+msgstr "No se puede abrir el archivo CDKey."
 
 #: install.c:1640 install.c:1646 install.c:1665
 #, c-format
 msgid "Unable to remove '%s'"
-msgstr "No pude quitar '%s'"
+msgstr "No se puede quitar '%s'"
 
 #: install.c:1656
-#, fuzzy, c-format
+#, c-format
 msgid "The '%s' RPM was installed or upgraded (version %s, release %d)"
-msgstr "El '%s' RPM fue instalado o actualizado (versión %s, release %s)"
+msgstr "RPM '%s' se instaló o actualizó (versión %s, lanzamiento %d)"
 
 #: install.c:1785
 msgid "Options tag string maxed out!"
-msgstr ""
+msgstr "La cadena de la ficha opciones se alcanzó al máximo."
 
 #: install.c:1834 install.c:1978 install.c:2006
-#, fuzzy
 msgid "Could not create temporary script"
-msgstr "No pude escribir el pre-uninstall script en %s"
+msgstr "No se pudo crear una secuencia de comandos temporal"
 
 #: install.c:1955
-#, fuzzy, c-format
+#, c-format
 msgid "Could not register binary: %s"
-msgstr "No pude escribir el archivo: %s"
+msgstr "No se pudo registrar el binario: %s"
 
 #: install.c:1997
 #, c-format
 msgid "Could not write temporary pre-uninstall script in %s"
-msgstr "No pude escribir el pre-uninstall script en %s"
+msgstr "No se pudo escribir la secuencia de comandos temporal anterior a la desinstalación en %s"
 
 #: install.c:2022
 #, c-format
 msgid "Could not write post-uninstall script in %s"
-msgstr "No pude escribir el post-uninstall script en %s"
+msgstr "No se pudo escribir la secuencia de comandos posterior a la desinstalación en %s"
 
 #: install.c:2056
 msgid "Could not create install log"
-msgstr "No pude crear el install log"
+msgstr "No se pudo crear un registro de instalación"
 
 #: install.c:2083
 #, c-format
 msgid "Please visit %s"
-msgstr "Por favor visite %s"
+msgstr "Visite %s"
 
 #: install.c:2137
 msgid "Missing 'command' attribute for an option"
-msgstr ""
+msgstr "Falta un atributo 'command' para una opción"
 
 #: install.c:2368 install.c:2431
 #, c-format
 msgid "Unable to create desktop file '%s'"
-msgstr "No pude crear entrada para el escritorio '%s'"
+msgstr "No se puede crear el archivo de escritorio '%s'"
 
 #: install.c:2494 install.c:2497
-#, fuzzy, c-format
+#, c-format
 msgid "Unable to create CDE desktop file '%s'"
-msgstr "No pude crear entrada para el escritorio '%s'"
+msgstr "No se puede crear el archivo de escritorio CDE '%s'"
 
 #: install.c:2531
-#, fuzzy, c-format
+#, c-format
 msgid "Unable to create ToolChest menu file '%s'"
-msgstr "No pude crear entrada para el escritorio '%s'"
+msgstr "No se puede crear el archivo del menú ToolChest '%s'"
 
 #: copy.c:291
-#, fuzzy, c-format
+#, c-format
 msgid "Unable to create %s symlink pointing to %s"
-msgstr "No pude crear entrada para el escritorio '%s'"
+msgstr "No se puede crear %s symlink apuntando a %s"
 
 #: copy.c:372
-#, fuzzy, c-format
+#, c-format
 msgid "Failed to update check sum for %s"
-msgstr "Hubo error desmontando dispositivo %s montado en %s"
+msgstr "No se pudo actualizar la suma de comprobación para %s"
 
 #: copy.c:376
 #, c-format
 msgid "Error while running process command: %s"
-msgstr ""
+msgstr "Se produjo un error al ejecutar el comando del proceso: %s"
 
 #: copy.c:386 plugins/cpio.c:181 plugins/tar.c:120 plugins/uz2.c:203
 #: plugins/zip.c:865
 #, c-format
 msgid "File '%s' has an invalid checksum! Aborting."
-msgstr ""
+msgstr "El archivo '%s' posee una suma de comprobación no válida. Anulando."
 
 #: copy.c:426
 #, c-format
 msgid "Unable to copy directory '%s'"
-msgstr "No pude copiar el directorio '%s'"
+msgstr "No se puede copiar el directorio '%s'"
 
 #: copy.c:461
-#, fuzzy, c-format
+#, c-format
 msgid "1 Unable to find file '%s' in '%s'"
-msgstr "No pude encontrar el archivo '%s'"
+msgstr "1 No se puede encontrar el archivo '%s' en '%s'"
 
 #: copy.c:463 copy.c:524
 #, c-format
 msgid "Unable to find file '%s'"
-msgstr "No pude encontrar el archivo '%s'"
+msgstr "No se puede encontrar el archivo '%s'"
 
 #: copy.c:504
 #, c-format
 msgid "Unable to find file '%s' on any of the CDROM drives"
-msgstr "No pude encontrar el archivo '%s' en el CDROM"
+msgstr "No se puede encontrar el archivo '%s' en ninguna de las unidades de CDROM"
 
 #: copy.c:522
-#, fuzzy, c-format
+#, c-format
 msgid "2 Unable to find file '%s' in '%s'"
-msgstr "No pude encontrar el archivo '%s'"
+msgstr "2 No se puede encontrar el archivo '%s' en '%s'"
 
 #: copy.c:576 copy.c:577
-#, fuzzy, c-format
+#, c-format
 msgid "Unable to copy man page '%s'"
-msgstr "No pude encontrar el archivo '%s'"
+msgstr "No se puede copiar la página principal '%s'"
 
 #: copy.c:680
 #, c-format
 msgid "find '%s'"
-msgstr ""
+msgstr "buscar '%s'"
 
 #: copy.c:702 copy.c:703
-#, fuzzy, c-format
+#, c-format
 msgid "Unable to find file '%s' in '%s'"
-msgstr "No pude encontrar el archivo '%s'"
+msgstr "No se puede encontrar el archivo '%s' en '%s'"
 
 #: copy.c:718 copy.c:719
-#, fuzzy, c-format
+#, c-format
 msgid "Unable to copy file '%s'"
-msgstr "No pude encontrar el archivo '%s'"
+msgstr "No se puede copiar el archivo '%s'"
 
 #: copy.c:758
 msgid "Running script"
-msgstr "Ejecutando archivo de órdenes"
+msgstr "Secuencia de comandos en ejecución"
 
 #: copy.c:935
 msgid "The remove_msg element should be within a component!\n"
-msgstr ""
+msgstr "El elemento remove_msg debe estar dentro de un componente.\n"
 
 #: copy.c:938
 msgid "Only one remove_msg per component is allowed.\n"
-msgstr ""
+msgstr "Solamente se permite un remove_msg por componente.\n"
 
 #: copy.c:956
 msgid "Component element needs to have a name"
-msgstr "Componente necessita un nombre"
+msgstr "El elemento de componente debe tener un nombre"
 
 #: copy.c:959
 msgid "Component element needs to have a version"
-msgstr "Componente necessita un numero de version"
+msgstr "El elemento de componente debe tener una versión"
 
 #: copy.c:981
 msgid "Malformed 'environment' element in XML file : missing 'var' property"
-msgstr ""
+msgstr "Elemento 'environment' mal formulado en archivo XML : falta propiedad 'var'"
 
 #: copy.c:1156
 #, c-format
 msgid "Suspect size value for option %s\n"
-msgstr "Valor de tamaño sospechoso para la opción %s\n"
+msgstr "Valor del tamaño sospechoso para la opción %s\n"
 
 #: file.c:156
-#, fuzzy, c-format
+#, c-format
 msgid "Failed to open file %s"
-msgstr "No pude encontrar el archivo '%s'"
+msgstr "No se pudo abrir el archivo %s"
 
 #: file.c:186
 #, c-format
 msgid "File '%s' may be in BZIP2 format, but support was not compiled in!"
-msgstr ""
+msgstr "El archivo '%s' puede estar en el formato BZIP2, pero no se compiló la compatibilidad."
 
 #: file.c:197
 #, c-format
 msgid "Couldn't read from file: %s"
-msgstr "Problema leyendo el archivo: %s"
+msgstr "No se pudo leer desde el archivo: %s"
 
 #: file.c:205
 #, c-format
@@ -641,20 +626,20 @@ msgstr "Instalando archivo %s"
 #: file.c:210
 #, c-format
 msgid "Couldn't write to file: %s"
-msgstr "No pude escribir el archivo: %s"
+msgstr "No se pudo escribir en el archivo: %s"
 
 #: file.c:236
 msgid "Read on write stream"
-msgstr "Lectura en el flujo de escritura"
+msgstr "Leer en el flujo de escritura"
 
 #: file.c:275
 #, c-format
 msgid "Read failure on %s"
-msgstr ""
+msgstr "Leer error en %s"
 
 #: file.c:346
 msgid "Skip zeroes on write stream"
-msgstr "Saltar ceros en el flujo de escritura"
+msgstr "Omitir ceros en el flujo de escritura"
 
 #: file.c:366 file.c:432 file.c:439
 #, c-format
@@ -663,73 +648,73 @@ msgstr "Escritura breve en %s"
 
 #: file.c:372
 msgid "Write on read stream"
-msgstr "Escritura en el flujo de lectura"
+msgstr "Escribir en la secuencia de lectura"
 
 #: file.c:402
-#, fuzzy, c-format
+#, c-format
 msgid "Write failure on %s"
-msgstr "Escritura breve en %s"
+msgstr "Escribir error en %s"
 
 #: file.c:465
 #, c-format
 msgid "Creating symbolic link: %s --> %s\n"
-msgstr "Creando enlace dinámico: %s --> %s\n"
+msgstr "Cómo crear un vínculo simbólico: %s --> %s\n"
 
 #: file.c:474
 #, c-format
 msgid "Can't remove existing symlink %s: %s"
-msgstr "No pude eliminar el enlace simbólico %s: %s"
+msgstr "No se puede quitar symlink existente %s: %s"
 
 #: file.c:478 file.c:509 file.c:529 file.c:548
 #, c-format
 msgid "Can't create %s: %s"
-msgstr "Problema creando %s: %s"
+msgstr "No se puede crear %s: %s"
 
 #: file.c:503
 #, c-format
 msgid "Creating directory: %s\n"
-msgstr "Creando directorio: %s\n"
+msgstr "Cómo crear un directorio: %s\n"
 
 #: file.c:522
 #, c-format
 msgid "Creating FIFO: %s\n"
-msgstr "Creando FIFO: %s\n"
+msgstr "Cómo crear FIFO: %s\n"
 
 #: file.c:541
 #, c-format
 msgid "Creating device: %s\n"
-msgstr "Creando dispositivo: %s\n"
+msgstr "Cómo crear un dispositivo: %s\n"
 
 #: file.c:561
 #, c-format
 msgid "Can't change permissions for %s: %s"
-msgstr "No puedo cambiar los permisos para %s: %s"
+msgstr "No se pueden cambiar los permisos para %s: %s"
 
 #: file.c:595 file.c:619
 #, c-format
 msgid "Unable to read %s"
-msgstr "Problema leyendo %s"
+msgstr "No se puede leer %s"
 
 #: file.c:697
 msgid "BZ2 support not available"
-msgstr ""
+msgstr "La compatibilidad con BZ2 no está disponible"
 
 #: file.c:735
 #, c-format
 msgid "BZ2: Try open %s"
-msgstr ""
+msgstr "BZ2: Intente abrir %s"
 
 #: file.c:741
 msgid "BZ2: *** Unable to open bzip2 library. bzip2 support disabled"
-msgstr ""
+msgstr "BZ2: *** No se puede abrir la biblioteca bzip2. La compatibilidad con bzip2 está deshabilitada"
 
 #: file.c:745
 #, c-format
 msgid "BZ2: got %s"
-msgstr ""
+msgstr "BZ2: posee %s"
 
 #: main.c:115
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Usage: %s [options]\n"
 "\n"
@@ -753,23 +738,26 @@ msgid ""
 msgstr ""
 "Uso: %s [opciones]\n"
 "\n"
-"Las opciones pueden ser una o mas de las siguientes:\n"
-"   -b ruta  Los binarios se instalarán en <ruta>\n"
-"   -h       muestra este mensaje de ayuda\n"
-"   -i ruta  La ruta de instalación será <ruta>\n"
-"   -c cwd   Usa un directorio actual alternativo para instalar\n"
-"   -f arch  Use un archivo XML alternativo (por defecto es %s)\n"
-"   -m       Fuerza la extraccion manual de paquetes RPM, y no acutaliza la "
-"base de datos RPM\n"
-"   -n       Fuerza la ejecución en modo texto\n"
-"   -r root  Fija el directorio raiz para extraer los RPMs (por defecto es "
-"/)\n"
-"   -v n     Fija en n el nivel de mensajes (verbosity). Valores posibles :\n"
-"            0: Depuración  1: Silencio  2: Normal 3: Avisos 4: Fatal\n"
-"   -V       Muestra la version del programa setup, y devuelve el control\n"
+"Las opciones pueden ser una o más de las siguientes:\n"
+"   -b path  Establecer la ruta binaria a <ruta>\n"
+"   -h       Mostrar este mensaje de ayuda\n"
+"   -i path  Establecer la ruta de instalación a <ruta>\n"
+"   -c cwd   Utilizar el directorio alternativo actual para la instalación\n"
+"   -f file  Utilizar un archivo XML alternativo (predeterminado %s)\n"
+"   -m       Forzar la extracción manual de los paquetes RPM, no actualizar RPM "
+"base de datos\n"
+"   -n       Forzar la interfaz de usuario de texto solamente\n"
+"   -o opt   Habilitar la opción denominada \"opt\" del archivo XML. También habilita "
+"la\n"
+"            operación no interactiva. Puede utilizarse varias veces.\n"
+"   -p pref  Especificar un prefijo de ruta en los medios de instalación.\n"
+"   -r root  Establecer el directorio raíz para la extracción de archivos RPM (el valor predeterminado es /)\n"
+"   -v n     Establecer nivel de detalle a n. Valores disponibles:\n"
+"            0: Depurar..1: Silencioso  2: Normal 3: Advertencias 4: Grave\n"
+"   -V       Imprimir la versión del programa de instalación y salir\n"
 
 #: main.c:132
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Usage: %s [options]\n"
 "\n"
@@ -790,64 +778,69 @@ msgid ""
 msgstr ""
 "Uso: %s [opciones]\n"
 "\n"
-"Las opciones pueden ser una o mas de las siguientes:\n"
-"   -b ruta  Los binarios se instalarán en <ruta>\n"
-"   -h       muestra este mensaje de ayuda\n"
-"   -i ruta  La ruta de instalación será <ruta>\n"
-"   -c cwd   Usa un directorio actual alternativo para instalar\n"
-"   -f arch  Use un archivo XML alternativo (por defecto es %s)\n"
-"   -n       Fuerza la ejecución en modo texto\n"
-"   -r root  Fija el directorio raiz para extraer los RPMs (por defecto es "
-"/)\n"
-"   -v n     Fija en n el nivel de mensajes (verbosity). Valores posibles :\n"
-"            0: Depuración  1: Silencio  2: Normal 3: Avisos 4: Fatal\n"
-"   -V       Muestra la version del programa setup, y devuelve el control\n"
+"Las opciones pueden ser una o más de las siguientes:\n"
+"   -b path  Establecer la ruta binaria a <ruta>\n"
+"   -h       Mostrar este mensaje de ayuda\n"
+"   -i path  Establecer la ruta de instalación a <ruta>\n"
+"   -c cwd   Utilizar el directorio alternativo actual para la instalación\n"
+"   -f file  Utilizar un archivo XML alternativo (predeterminado %s)\n"
+"   -n       Forzar la interfaz de usuario de texto solamente\n"
+"   -o opt   Habilitar la opción denominada \"opt\" del archivo XML. También habilita "
+"la\n"
+"            operación no interactiva. Puede utilizarse varias veces.\n"
+"   -p pref  Especificar un prefijo de ruta en los medios de instalación.\n"
+"   -v n     Establecer nivel de detalle a n. Valores disponibles:\n"
+"            0: Depurar..1: Silencioso  2: Normal 3: Advertencias 4: Grave\n"
+"   -V       Imprimir la versión del programa de instalación y salir\n"
 
 #: main.c:215
 msgid "Out of range value, setting verbosity level to normal.\n"
-msgstr "Valor fuera de rango, nivel de mensajes fijado en normal.\n"
+msgstr "Fuera del valor de intervalos, establecer el nivel de detalle en normal.\n"
 
 #: main.c:265
 #, c-format
 msgid "Couldn't load '%s'\n"
-msgstr "No pude abrir '%s'\n"
+msgstr "No se pudo cargar '%s'\n"
 
 #: main.c:276
 msgid "No UI drivers available\n"
-msgstr "Ningun controlador UI disponible\n"
+msgstr "No existen unidades UI disponibles\n"
 
 #: main.c:299
 msgid ""
 "The 'cdromfile' attribute is now mandatory when using the 'cdrom' attribute."
 msgstr ""
-"El 'cdromfile' atributo es un requisito si quieres usar 'cdrom' atributo."
+"El atributo 'cdromfile' es ahora obligatorio al utilizar el atributo 'cdrom'."
 
 #: main.c:311
 msgid ""
 "Unable to determine the current directory.\n"
 "Please check the permissions of the parent directories.\n"
 msgstr ""
+"No se puede determinar el directorio actual.\n"
+"Compruebe los permisos de los directorios principales.\n"
 
 #: main.c:325
 msgid "You need to run this installer as the super-user.\n"
-msgstr ""
+msgstr "Debe ejecutar este instalador como super usuario.\n"
 
 #: main.c:332
-#, fuzzy
 msgid ""
 "\n"
 "This product is already installed.\n"
 "Uninstall it before running this program again.\n"
 msgstr ""
 "\n"
-"Componente %s esta instalado.\n"
-" Por favor quite la aplicacion primero.\n"
+"Este producto ya está instalado.\n"
+"Desinstálelo antes de ejecutar este programa otra vez.\n"
 
 #: main.c:337
 msgid ""
 "Warning: You are about to reinstall\n"
 "on top of an existing installation.\n"
 msgstr ""
+"Advertencia: Está a punto de volver a instalarlo\n"
+"sobre una instalación ya existente.\n"
 
 #: main.c:349
 msgid ""
@@ -855,7 +848,7 @@ msgid ""
 "Illegal installation: do not mix components with a component installation.\n"
 msgstr ""
 "\n"
-"Instalacion ilegal: no mescle componentes con componentes de instalacion.\n"
+"Instalación no permitida: no combine los componentes con una instalación de componentes.\n"
 
 #: main.c:354
 #, c-format
@@ -865,8 +858,8 @@ msgid ""
 "Please uninstall it beforehand.\n"
 msgstr ""
 "\n"
-"Componente %s esta instalado.\n"
-" Por favor quite la aplicacion primero.\n"
+"El componente %s ya se encuentra instalado.\n"
+"Desinstálelo de antemano.\n"
 
 #: main.c:362
 #, c-format
@@ -876,13 +869,13 @@ msgid ""
 "installation program.\n"
 msgstr ""
 "\n"
-"Tienes que instalar %s antes de usar\n"
-" este programa de instalacion.\n"
+"Debe instalar %s antes de ejecutar este\n"
+"programa de instalación.\n"
 
 #: main.c:389
-#, fuzzy, c-format
+#, c-format
 msgid "Could not enable option: %s"
-msgstr "No pude escribir el archivo: %s"
+msgstr "No se pudo habilitar la opción: %s"
 
 #: console_ui.c:37
 msgid "Y"
@@ -903,125 +896,119 @@ msgstr "N/s"
 #: console_ui.c:68
 #, c-format
 msgid "%s [Press Enter] "
-msgstr "%s [Presione Enter] "
+msgstr "%s [Presione Entrar] "
 
 #: console_ui.c:72 console_ui.c:98
 #, c-format
 msgid "Warning, invalid yesno prompt: %s\n"
-msgstr "Advertencia, el prompt si-no %s no es valido\n"
+msgstr "Advertencia, mensaje síno no válido: %s\n"
 
 #: console_ui.c:92
 msgid "Y/n/?"
-msgstr "S/n/?"
+msgstr "¿S/n/?"
 
 #: console_ui.c:95
 msgid "N/y/?"
-msgstr "N/s/?"
+msgstr "¿N/s?"
 
 #: console_ui.c:115
 msgid "Continue?"
-msgstr "Continuar?"
+msgstr "¿Continuar?"
 
 #: console_ui.c:166
-#, fuzzy, c-format
+#, c-format
 msgid "Previously installed option '%s' will be installed.\n"
-msgstr "se instalará la opción '%s'.\n"
+msgstr "La opción anteriormente instalada '%s' se instalará.\n"
 
 #: console_ui.c:196
-#, fuzzy, c-format
+#, c-format
 msgid "'%s' option will be installed.\n"
-msgstr "se instalará la opción '%s'.\n"
+msgstr "'%sla opción se instalará.\n"
 
 #: console_ui.c:201
 #, c-format
 msgid "'%s' :\n"
-msgstr ""
+msgstr "'%s' :\n"
 
 #: console_ui.c:209
 #, c-format
 msgid "Option: '%s' ?"
-msgstr ""
+msgstr "Opción: '%s' ?"
 
 #: console_ui.c:230 console_ui.c:319 dialog_ui.c:100 dialog_ui.c:265
 msgid "Do you agree with the license?"
-msgstr "Aceptas los términos de esta licencia?"
+msgstr "¿Acepta la licencia?"
 
 #: console_ui.c:275
-#, fuzzy
 msgid "No help available\n"
 msgstr "No hay ayuda disponible\n"
 
 #: console_ui.c:293
-#, fuzzy, c-format
+#, c-format
 msgid "----====== %s / %s installation program ======----\n"
-msgstr "----====== Programa de instalación de %s ======----\n"
+msgstr "----====== %s / %s programa de instalación ======----\n"
 
 #: console_ui.c:296
 #, c-format
 msgid "----====== %s installation program ======----\n"
-msgstr "----====== Programa de instalación de %s ======----\n"
+msgstr "----====== %s programa de instalación ======----\n"
 
 #: console_ui.c:299
 #, c-format
 msgid "You are running a %s machine with %s\n"
-msgstr "Tienes una %s con %s\n"
+msgstr "Está ejecutando un equipo %s con %s\n"
 
 #: console_ui.c:300
 msgid "Hit Control-C anytime to cancel this installation program.\n"
-msgstr "Presiona Control-C cuando quieras cancelar este instalador.\n"
+msgstr "Presione Control + C en cualquier momento para cancelar este programa de instalación.\n"
 
 #: console_ui.c:338 dialog_ui.c:126
 #, c-format
 msgid "Would you like to read the %s file ?"
-msgstr "Quieres leer el archivo %s ?"
+msgstr "¿Desea leer el archivo %s ?"
 
 #: console_ui.c:385
 msgid "Please choose the product to install, or Q to quit. "
-msgstr "Por favor escoja un producto a instalar, o Q para salir"
+msgstr "Elija el producto que desea instalar o S para salir. "
 
 #: console_ui.c:415 dialog_ui.c:362
 msgid "Please enter the installation path"
-msgstr "Por favor ingrese la ruta de instalación"
+msgstr "Escriba la ruta de instalación"
 
 #: console_ui.c:420
-#, fuzzy, c-format
+#, c-format
 msgid "Install path set to: %s\n"
-msgstr "Directorio para instalar: %s\n"
+msgstr "Se estableció la ruta de instalación en: %s\n"
 
 #: console_ui.c:435 console_ui.c:499 dialog_ui.c:382 dialog_ui.c:454
 #, c-format
 msgid "No write permission to %s\n"
-msgstr "Se negó el permiso de escritura a %s\n"
+msgstr "No posee permiso de escritura para %s\n"
 
 #: console_ui.c:461 dialog_ui.c:409
-#, fuzzy
 msgid "Do you want to install symbolic links to a directory in your path?"
-msgstr "Quieres instalar enlaces dinámicos a un directorio en tu path?"
+msgstr "¿Desea instalar vínculos simbólicos a un directorio en su ruta?"
 
 #: console_ui.c:468 dialog_ui.c:418
-#, fuzzy
 msgid "Please enter the path in which to create the symbolic links"
-msgstr ""
-"Por favor ingresa la trayectorio donde se crearán los enlaces simbólico"
+msgstr "Ingrese la ruta en la que creará los vínculos simbólicos"
 
 #: console_ui.c:473
 #, c-format
 msgid "Binary path set to: %s\n"
-msgstr "La ruta de binarios es: %s\n"
+msgstr "Se estableció la ruta binaria en: %s\n"
 
 #: console_ui.c:480
-#, fuzzy
 msgid "Please enter the path in which to install manual pages for this product"
-msgstr ""
-"Por favor ingresa la trayectorio donde se crearán los enlaces simbólico"
+msgstr "Ingrese la ruta en la que instalará las páginas manuales para este producto"
 
 #: console_ui.c:490 dialog_ui.c:445
 msgid ""
 "Binary path must be different than the install path.\n"
 "The binary path must be an existing directory.\n"
 msgstr ""
-"El directorio de binarios debe ser diferente al de instalación.\n"
-"El directorio de binarios debe haber sido creado anteriormente.\n"
+"La ruta binaria debe ser diferente de la ruta de instalación.\n"
+"La ruta binaria debe tener un directorio existente.\n"
 
 #: console_ui.c:530
 #, c-format
@@ -1035,37 +1022,38 @@ msgstr ""
 "\n"
 
 #: console_ui.c:542 dialog_ui.c:483
-#, fuzzy
 msgid "Do you want to install startup menu entries?"
-msgstr "Quieres installar los elementos de escritorio?"
+msgstr "¿Desea instalar las entradas del menú de inicio?"
 
 #: console_ui.c:548
 #, c-format
 msgid "Installing to %s\n"
-msgstr "Instalando a %s\n"
+msgstr "Instalando en %s\n"
 
 #: console_ui.c:549
 #, c-format
 msgid "%d MB available, %d MB will be installed.\n"
-msgstr "%d MB disponibles, se instalarán %d MBs.\n"
+msgstr "%d MB disponibles, %d MB se instalarán.\n"
 
 #: console_ui.c:552
 msgid "Continue install?"
-msgstr "Continuar instalación?"
+msgstr "¿Continuar la instalación?"
 
 #: console_ui.c:568 dialog_ui.c:510
 msgid "Please enter your CD key"
-msgstr ""
+msgstr "Escriba la clave del CD"
 
 #: console_ui.c:576 gtk_ui.c:515
 msgid "ERROR: vcdk is missing. Installation aborted.\n"
-msgstr ""
+msgstr "ERROR: falta vcdk. Se anuló la instalación.\n"
 
 #: console_ui.c:583 dialog_ui.c:530
 msgid ""
 "CD key is invalid!\n"
 "Please double check your key and enter it again.\n"
 msgstr ""
+"¡La clave del CD no es válida!\n"
+"Verifique nuevamente la clave y escríbala otra vez.\n"
 
 #: console_ui.c:607
 #, c-format
@@ -1074,29 +1062,27 @@ msgstr "Instalando %s ...\n"
 
 #: console_ui.c:628 dialog_ui.c:590
 msgid "Install aborted - cleaning up files\n"
-msgstr "Instalación abortada - quitando los archivos\n"
+msgstr "Se anuló la instalación - liberando archivos\n"
 
 #: console_ui.c:636
 msgid "Installation complete.\n"
 msgstr "Instalación completa.\n"
 
 #: console_ui.c:640
-#, fuzzy
 msgid "Would you like to start now?"
-msgstr "Quieres iniciar el juego ahora?"
+msgstr "¿Desea iniciar ahora?"
 
 #: console_ui.c:645
-#, fuzzy
 msgid ""
 "If you run the program as root, the preferences will be stored in\n"
 "root's home directory instead of your user account directory."
 msgstr ""
-"Si juegas como root, las preferencias se guardan en\n"
-"el directorio de root y sólo serán válidas para esa cuenta."
+"Si ejecuta el programa como raíz, las preferencias se almacenarán en\n"
+"el directorio principal de la raíz en lugar de en el directorio de la cuenta de usuario."
 
 #: console_ui.c:661
 msgid "Do you want to proceed with Recommended installation?"
-msgstr ""
+msgstr "¿Desea continuar con la instalación Recomendada?"
 
 #: carbon_ui.c:433 console_ui.c:666 dialog_ui.c:652 gtk_ui.c:318
 #, c-format
@@ -1105,232 +1091,218 @@ msgid ""
 "%s\n"
 "Try to use 'Expert' installation."
 msgstr ""
+"La instalación no pudo continuarse debido al siguiente error:\n"
+"%s\n"
+"Intente utilizar la instalación 'Experto'."
 
 #: console_ui.c:678
 #, c-format
 msgid "Thank you for installing %s!\n"
-msgstr "Gracias por instalar %s!\n"
+msgstr "¡Gracias por instalar %s!\n"
 
 #: console_ui.c:683
 msgid "Please visit our website for updates and support.\n"
-msgstr "Por favor visite neustro website para actualizaciones y ayuda.\n"
+msgstr "Visite nuestro sitio Web para obtener actualizaciones y soporte.\n"
 
 #: console_ui.c:688
 msgid "Would you like to launch web browser?"
-msgstr "Quieres abrir el navegador web?"
+msgstr "¿Desea iniciar el explorador Web?"
 
 #: console_ui.c:699
 msgid "Standard input is not a terminal!\n"
-msgstr "El dispositivo de entrada estándar no es una terminal!\n"
+msgstr "La entrada estándar no es una terminal.\n"
 
 #: dialog_ui.c:46 gtk_ui.c:892
 msgid "Message"
-msgstr ""
+msgstr "Mensaje"
 
 #: dialog_ui.c:49
 msgid "Request"
-msgstr ""
+msgstr "Solicitud"
 
 #: dialog_ui.c:64
-#, fuzzy, c-format
+#, c-format
 msgid "%s / %s Installation"
-msgstr "Opciones de Instalación"
+msgstr "%s / %s Instalación"
 
 #: dialog_ui.c:68
-#, fuzzy, c-format
+#, c-format
 msgid "%s Installation"
-msgstr "Opciones de Instalación"
+msgstr "%s Instalación"
 
 #: dialog_ui.c:77
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "You are running a %s machine with %s\n"
 "Operating System: %s %d.%d"
-msgstr "Tienes una %s con %s\n"
+msgstr ""
+"Está ejecutando un equipo %s con %s\n"
+"Sistema operativo: %s %d.%d"
 
 #: dialog_ui.c:128
 msgid "README"
-msgstr ""
+msgstr "LÉAME"
 
 #: dialog_ui.c:215
-#, fuzzy
 msgid "Component"
-msgstr ""
-"\n"
-"%s componente\n"
-"\n"
+msgstr "Componente"
 
 #: dialog_ui.c:234 dialog_ui.c:642
-#, fuzzy, c-format
+#, c-format
 msgid "Installation of %s"
-msgstr "Instalando a %s\n"
+msgstr "Instalación de %s"
 
 #: dialog_ui.c:236
-#, fuzzy
 msgid ""
 "No installation options detected. If the product is already\n"
 "installed, please uninstall it before reinstalling.\n"
 msgstr ""
-"\n"
-"Componente %s esta instalado.\n"
-" Por favor quite la aplicacion primero.\n"
+"No se detectaron opciones de instalación. Si el producto ya se encuentra\n"
+"instalado, desinstálelo antes de volver a instalarlo.\n"
 
 #: dialog_ui.c:271
 #, c-format
 msgid "Option-specific EULA not found for '%s', can't toggle\n"
-msgstr ""
+msgstr "El EULA específico de las opciones no se encontró para '%s', no se puede alternar\n"
 
 #: dialog_ui.c:272 dialog_ui.c:445 dialog_ui.c:457 dialog_ui.c:523
 msgid "Error"
-msgstr ""
+msgstr "Error"
 
 #: dialog_ui.c:290
 #, c-format
 msgid "Option '%s' is required.\n"
-msgstr ""
+msgstr "Se requiere la opción '%s'.\n"
 
 #: dialog_ui.c:306
-#, fuzzy, c-format
+#, c-format
 msgid "Component: %s"
-msgstr ""
-"\n"
-"%s componente\n"
-"\n"
+msgstr "Componente: %s"
 
 #: dialog_ui.c:346
 msgid "Choose the product"
-msgstr ""
+msgstr "Elija el producto"
 
 #: dialog_ui.c:347
-#, fuzzy
 msgid "Please pick a product to install"
-msgstr "Por favor escoja un producto a instalar, o Q para salir"
+msgstr "Elija un producto para instalar"
 
 #: dialog_ui.c:361
-#, fuzzy
 msgid "Installation path"
-msgstr "Directorio para la instalación"
+msgstr "Ruta de instalación"
 
 #: dialog_ui.c:383
-#, fuzzy
 msgid "Failed permissions"
-msgstr "Se negó el permiso de escritura a %s\n"
+msgstr "No se obtuvieron los permisos"
 
 #: dialog_ui.c:417
-#, fuzzy
 msgid "Symlink path"
-msgstr "Directorio para los enlaces:"
+msgstr "Ruta symlink"
 
 #: dialog_ui.c:433
-#, fuzzy
 msgid "Manual path"
-msgstr "Directorio para la instalación"
+msgstr "Revisión manual"
 
 #: dialog_ui.c:434
-#, fuzzy
 msgid "Please enter the path in which to install manual pages"
-msgstr ""
-"Por favor ingresa la trayectorio donde se crearán los enlaces simbólico"
+msgstr "Ingrese la ruta en la que instalará las páginas manuales"
 
 #: dialog_ui.c:470
-#, fuzzy
 msgid "Please choose the components to install"
-msgstr "Por favor escoja un producto a instalar, o Q para salir"
+msgstr "Elija los componentes para instalar"
 
 #: dialog_ui.c:472
-#, fuzzy
 msgid "Please choose the options to install"
-msgstr "Por favor escoja un producto a instalar, o Q para salir"
+msgstr "Elija las opciones para instalar"
 
 #: dialog_ui.c:509
 msgid "CD Key"
-msgstr ""
+msgstr "Clave del CD"
 
 #: dialog_ui.c:523
-#, fuzzy
 msgid "vcdk is missing. Installation aborted.\n"
-msgstr "La instalación ha sido cancelada."
+msgstr "falta vcdk. Se anuló la instalación.\n"
 
 #: dialog_ui.c:530 gtk_ui.c:515 gtk_ui.c:524
 msgid "Problem"
-msgstr ""
+msgstr "Problema"
 
 #: dialog_ui.c:572
-#, fuzzy, c-format
+#, c-format
 msgid "Installing %s ..."
-msgstr "Instalando %s ...\n"
+msgstr "Instalando %s ..."
 
 #: dialog_ui.c:573 dialog_ui.c:575
-#, fuzzy
 msgid "Installing..."
-msgstr "Instalando %s ...\n"
+msgstr "Instalando..."
 
 #: dialog_ui.c:590
 msgid "Aborting"
-msgstr ""
+msgstr "Anulando"
 
 #: dialog_ui.c:600
-#, fuzzy
 msgid "Would you like to launch a Web browser?"
-msgstr "Quieres abrir el navegador web?"
+msgstr "¿Desea iniciar el explorador Web?"
 
 #: dialog_ui.c:614
 msgid ""
 "Installation complete!\n"
 "Would you like to start now?"
 msgstr ""
+"¡Instalación completa!\n"
+"¿Desea iniciar ahora?"
 
 #: dialog_ui.c:618
 msgid "Finished"
-msgstr ""
+msgstr "Finalizado"
 
 #: dialog_ui.c:618
-#, fuzzy
 msgid "Installation complete!"
-msgstr "Instalación completa.\n"
+msgstr "¡Instalación completa!"
 
 #: dialog_ui.c:627
 msgid "Express installation using detected defaults"
-msgstr ""
+msgstr "Instalación Express con valores predeterminados detectados"
 
 #: dialog_ui.c:628
-#, fuzzy
 msgid "Full control over the installation parameters"
-msgstr "Por favor ingrese la ruta de instalación"
+msgstr "Control completo sobre los parámetros de instalación"
 
 #: dialog_ui.c:643
-#, fuzzy
 msgid "Please select the class of installation"
-msgstr "Por favor selecciona al menos una opción"
+msgstr "Seleccione la clase de instalación"
 
 #: gtk_ui.c:447
-#, fuzzy
 msgid ""
 "If you run this as root, the preferences will be stored in\n"
 "root's home directory instead of your user account directory."
 msgstr ""
-"Si juegas como root, las preferencias se guardan en\n"
-"el directorio de root y sólo serán válidas para esa cuenta."
+"Si la ejecuta como raíz, las preferencias se almacenarán en\n"
+"el directorio principal de la raíz en lugar de en el directorio de la cuenta de usuario."
 
 #: carbon_ui.c:479 gtk_ui.c:481
 msgid ""
 "Are you sure you want to abort\n"
 "this installation?"
 msgstr ""
+"¿Está seguro que desea anular\n"
+"esta instalación?"
 
 #: gtk_ui.c:524
 msgid ""
 "CD key is invalid!\n"
 "Please double check your key and enter it again."
 msgstr ""
+"¡La clave del CD no es válida!\n"
+"Verifique nuevamente la clave y escríbala otra vez."
 
 #: gtk_ui.c:578
 msgid "Please respond to the license dialog"
-msgstr "Por favor responde al dialogo de la licencia"
+msgstr "Responda al cuadro de diálogo de la licencia"
 
 #: carbon_ui.c:300 gtk_ui.c:598
 msgid "Ready to install!"
-msgstr "Listo para instalar!"
+msgstr "Listo para instalarse"
 
 #: carbon_ui.c:322 carbon_ui.c:334 gtk_ui.c:611 gtk_ui.c:625
 #, c-format
@@ -1339,11 +1311,11 @@ msgstr "%d MB"
 
 #: gtk_ui.c:863 xsu.c:453
 msgid "OK"
-msgstr ""
+msgstr "Aceptar"
 
 #: gtk_ui.c:876
 msgid "Yes"
-msgstr "Si"
+msgstr "Sí"
 
 #: gtk_ui.c:877
 msgid "No"
@@ -1351,78 +1323,76 @@ msgstr "No"
 
 #: gtk_ui.c:888
 msgid "Choice Requested"
-msgstr ""
+msgstr "Elección solicitada"
 
 #: gtk_ui.c:1002
 msgid "Fatal error:  out of memory\n"
-msgstr "Error fatal: Sin memoria\n"
+msgstr "Error grave:  memoria insuficiente\n"
 
 #: gtk_ui.c:1009
 #, c-format
 msgid "Error: maximum of %d install_path entries exceeded\n"
-msgstr "Error: se ha excedido el máximo de %d install_paths\n"
+msgstr "Error: el máximo de %d entradas install_path se excedió\n"
 
 #: gtk_ui.c:1195
 msgid "Warning: No writable targets in path... You may want to be root.\n"
-msgstr ""
-"Advertencia: no hay objetos escribibles en la ruta... Inténtalo como root.\n"
+msgstr "Advertencia: No existen destinos que se puedan escribir en la ruta... Es posible que desee ser raíz.\n"
 
 #: gtk_ui.c:1215
 msgid "Unable to locate 'setup_menuitems_checkbox'"
-msgstr "Problemas encontrando 'setup_menuitems_checkbox'"
+msgstr "No se puede ubicar 'setup_menuitems_checkbox'"
 
 #: carbon_ui.c:889 gtk_ui.c:1484
-#, fuzzy, c-format
+#, c-format
 msgid "%s / %s Setup"
-msgstr "Configuración para %s "
+msgstr "%s / %s Instalación"
 
 #: carbon_ui.c:891 gtk_ui.c:1486
 #, c-format
 msgid "%s Setup"
-msgstr "Configuración para %s "
+msgstr "%s Instalación"
 
 #: gtk_ui.c:1823
 #, c-format
 msgid "Unable to open %s, aborting!\n"
-msgstr "Problemas abriendo %s, saliendo!\n"
+msgstr "No se puede abrir %s, anulando.\n"
 
 #: carbon_ui.c:1404 gtk_ui.c:1878
 #, c-format
 msgid "Type '%s' to start the program"
-msgstr "Escriba '%s' para empezar el programa"
+msgstr "Escriba '%s' para iniciar el programa"
 
 #: carbon_ui.c:359
 msgid "Can't find default install dir!"
-msgstr ""
+msgstr "No se puede encontrar el directorio de instalación."
 
 #: carbon_ui.c:688
 msgid "CD keys do not match.  Please try again."
-msgstr ""
+msgstr "Las claves del CD no coinciden.  Inténtelo nuevamente."
 
 #: carbon_ui.c:690
 msgid "Please specify a CD key!"
-msgstr ""
+msgstr "Especifique una clave de CD."
 
 #: carbon_ui.c:708
 msgid "CD key is invalid!"
-msgstr ""
+msgstr "La clave del CD no es válida."
 
 #: carbon_ui.c:1226
-#, fuzzy
 msgid "Installing %s : %d%%"
-msgstr "Instalando %s ...\n"
+msgstr "Instalando %s : %d%%"
 
 #: xsu.c:336
 msgid "Login Prompt"
-msgstr ""
+msgstr "Mensaje de inicio de sesión"
 
 #: xsu.c:348
 msgid "Username : "
-msgstr ""
+msgstr "Nombre de usuario : "
 
 #: xsu.c:360
 msgid "Command :"
-msgstr ""
+msgstr "Comando :"
 
 #: xsu.c:375
 msgid ""
@@ -1430,50 +1400,52 @@ msgid ""
 "Please enter the correct password for it\n"
 "below and press [Return] or click OK."
 msgstr ""
+"Este instalador requiere privilegios de raíz.\n"
+"Escriba la contraseña correcta para él\n"
+"a continuación y presione [Volver] o haga clic en Aceptar."
 
 #: xsu.c:410
 msgid "Type the password here"
-msgstr ""
+msgstr "Escriba la contraseña aquí"
 
 #: xsu.c:423
 msgid "Type the username here"
-msgstr ""
+msgstr "Escriba el nombre de usuario aquí"
 
 #: xsu.c:435
 msgid "Type the command here"
-msgstr ""
+msgstr "Escriba el comando aquí"
 
 #: xsu.c:458
 msgid "Press this button when finished"
-msgstr ""
+msgstr "Presione este botón al finalizar"
 
 #: xsu.c:464
 msgid "Press this button to Cancel"
-msgstr ""
+msgstr "Presione este botón para Cancelar"
 
 #: xsu.c:466
 msgid "Password :"
-msgstr ""
+msgstr "Contraseña :"
 
 #: plugins/cpio.c:113
-#, fuzzy
 msgid "Invalid CPIO header\n"
-msgstr "OPKG: Cabecera inválida en el paquete"
+msgstr "Encabezado CPIO no válido\n"
 
 #: plugins/cpio.c:173
 #, c-format
 msgid "Bad checksum for file '%s'"
-msgstr "Checksum inválido para el archivo '%s'"
+msgstr "Suma de comprobación errónea para el archivo '%s'"
 
 #: plugins/rpm.c:73 plugins/rpm.c:107
 #, c-format
 msgid "RPM error: %s"
-msgstr "error de RPM: %s"
+msgstr "Error RPM: %s"
 
 #: plugins/rpm.c:156 plugins/rpm.c:163
 #, c-format
 msgid "Unable to install RPM file: '%s'"
-msgstr "No pude instalar el paquete RPM: '%s'"
+msgstr "No se puede instalar el archivo RPM: '%s'"
 
 #: plugins/tar.c:138
 #, c-format
@@ -1482,55 +1454,4 @@ msgstr "Tar: '%s' es un tipo de archivo desconocido: %c"
 
 #: plugins/tar.c:140
 msgid "Unexpected data in installation file!"
-msgstr ""
-
-#~ msgid "Install Options"
-#~ msgstr "Opciones de Instalación"
-
-#~ msgid "Install %s?"
-#~ msgstr "Instalar %s?"
-
-#~ msgid "Setup"
-#~ msgstr "Configuración"
-
-#~ msgid "Play!"
-#~ msgstr "Jugar!"
-
-#, fuzzy
-#~ msgid "OPKG: Unable to open package file %s"
-#~ msgstr "OPKG: No pude abrir el paquete '%s'"
-
-#~ msgid "OPKG: malloc() failed!"
-#~ msgstr "OPKG: fallo en malloc()!"
-
-#~ msgid "realloc() failed!"
-#~ msgstr "falla en realloc()!"
-
-#~ msgid "read() failure accessing file size!"
-#~ msgstr "error de read() al acceder al tamaño de fichero!"
-
-#~ msgid "OPKG: read() failure accessing timestamp!"
-#~ msgstr "OPKG: falla de read() accediendo al timestamp!"
-
-#~ msgid "read() failed!"
-#~ msgstr "falla de read()!"
-
-#~ msgid "echo \"Uninstalling %s, please wait...\"\n"
-#~ msgstr "echo \"Desinstalando %s, por favor espere...\"\n"
-
-#~ msgid "echo \"%s has been uninstalled.\"\n"
-#~ msgstr "echo \"%s ha sido desinstalado.\"\n"
-
-#~ msgid ""
-#~ "echo\n"
-#~ "echo WARNING: The following RPM archives have been installed or upgraded\n"
-#~ "echo when this software was installed. You may want to manually remove some "
-#~ "of those:\n"
-#~ msgstr ""
-#~ "echo\n"
-#~ "echo AVISO: Los siguientes paquetes RPM han sido instalados o actualizados\n"
-#~ "echo cuando este software fue instalado. Quizas quieres quitar algunos "
-#~ "manualmente:\n"
-
-#~ msgid "Binary directory:"
-#~ msgstr "Directorio de Binarios"
+msgstr "Se encontraron datos inesperados en el archivo de instalación."
