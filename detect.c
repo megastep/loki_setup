@@ -39,6 +39,11 @@
 
 #ifdef HAVE_LANGINFO_H
 #include <langinfo.h>
+
+#ifndef CODESET
+# define CODESET _NL_CTYPE_CODESET_NAME
+#endif
+
 #endif
 
 /* From libxml */
@@ -815,7 +820,7 @@ void DetectLocale(void)
 	}
 
 #ifdef HAVE_NL_LANGINFO
-	current_encoding = nl_langinfo(_NL_CTYPE_CODESET_NAME);
+	current_encoding = nl_langinfo(CODESET);
 #else
 	if ( current_locale ) { /* Try to extract an encoding */
 		char *ptr = strchr(current_locale, '.');
