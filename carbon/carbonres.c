@@ -27,7 +27,7 @@
 #define BUTTON_WIDTH            310
 #define BUTTON_HEIGHT           20
 //#define BOX_START_COUNT     3       // Number of buttons box can hold without resize
-#define OPTIONS_START_COUNT     3
+#define OPTIONS_START_COUNT     5
 #define UNINSTALL_START_COUNT   8
 
 #define CARBON_MAX_APP_PATH 1024
