@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.62 2003-06-19 01:01:46 megastep Exp $ */
+/* $Id: main.c,v 1.63 2003-07-25 19:12:26 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -88,7 +88,11 @@ void signal_abort(int sig)
 /* Abort a running installation (to be called from the update function) */
 void abort_install(void)
 {
-    signal_abort(1);
+    if ( UI.abort )
+        UI.abort(info);
+	if ( info && ! info->install_complete )
+		uninstall(info);
+    exit_setup(1);
 }
     
 /* List of UI drivers */
