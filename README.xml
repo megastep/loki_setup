@@ -117,6 +117,12 @@ There are several optional attributes of the install element:
             path for binaries. Set this when this installation won't
             actually install any binary file.
 
+ promptbinaries When set to "yes", setup will create a checkbox
+                to allow the user whether or not to create 
+                a symbolic link to the binaries.
+
+                This setting has no effect if nobinaries is "yes".
+
  meta       When this attribute is set to "yes", then setup will act as
             a meta-installer, i.e. it will allow the user to select a
             product and set-up will respawn itself for the selected
@@ -145,6 +151,29 @@ element, alongside 'file' and 'binary' elements.
 
 There is also no need to have the files designated by those tags explicitly
 installed in a FILES section, setup will take care of that for you.
+
+
+The INSTALL_DROP_LIST element:
+
+The install_drop_list element makes it possible to override the default
+installation paths supplied in the Installation target drop down box.
+
+Supply a list of drop down paths, space or new line separated.
+An example follows:
+
+    <install_drop_list>
+        /opt /usr/local
+        /var
+        ~
+    </install_drop_list>
+
+If no install_drop_list element is given, it will default to hard coded
+values (see install.c).
+
+Note:  Your paths will not be displayed if they are not valid,
+writable paths.
+
+
 
 The OPTION element:
 

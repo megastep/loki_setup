@@ -113,7 +113,7 @@
 	    <class>GtkTable</class>
 	    <name>table12</name>
 	    <border_width>5</border_width>
-	    <rows>2</rows>
+	    <rows>3</rows>
 	    <columns>2</columns>
 	    <homogeneous>False</homogeneous>
 	    <row_spacing>5</row_spacing>
@@ -134,32 +134,6 @@
 		<right_attach>1</right_attach>
 		<top_attach>0</top_attach>
 		<bottom_attach>1</bottom_attach>
-		<xpad>0</xpad>
-		<ypad>0</ypad>
-		<xexpand>False</xexpand>
-		<yexpand>False</yexpand>
-		<xshrink>False</xshrink>
-		<yshrink>False</yshrink>
-		<xfill>True</xfill>
-		<yfill>False</yfill>
-	      </child>
-	    </widget>
-
-	    <widget>
-	      <class>GtkLabel</class>
-	      <name>binary_label</name>
-	      <label>Binary directory:</label>
-	      <justify>GTK_JUSTIFY_CENTER</justify>
-	      <wrap>False</wrap>
-	      <xalign>1</xalign>
-	      <yalign>0.5</yalign>
-	      <xpad>0</xpad>
-	      <ypad>0</ypad>
-	      <child>
-		<left_attach>0</left_attach>
-		<right_attach>1</right_attach>
-		<top_attach>1</top_attach>
-		<bottom_attach>2</bottom_attach>
 		<xpad>0</xpad>
 		<ypad>0</ypad>
 		<xexpand>False</xexpand>
@@ -213,6 +187,32 @@
 	    </widget>
 
 	    <widget>
+	      <class>GtkLabel</class>
+	      <name>binary_label</name>
+	      <label>Link path:</label>
+	      <justify>GTK_JUSTIFY_RIGHT</justify>
+	      <wrap>False</wrap>
+	      <xalign>1</xalign>
+	      <yalign>0.5</yalign>
+	      <xpad>0</xpad>
+	      <ypad>0</ypad>
+	      <child>
+		<left_attach>0</left_attach>
+		<right_attach>1</right_attach>
+		<top_attach>2</top_attach>
+		<bottom_attach>3</bottom_attach>
+		<xpad>0</xpad>
+		<ypad>0</ypad>
+		<xexpand>False</xexpand>
+		<yexpand>False</yexpand>
+		<xshrink>False</xshrink>
+		<yshrink>False</yshrink>
+		<xfill>True</xfill>
+		<yfill>False</yfill>
+	      </child>
+	    </widget>
+
+	    <widget>
 	      <class>GtkCombo</class>
 	      <name>binary_path</name>
 	      <value_in_list>False</value_in_list>
@@ -224,8 +224,8 @@
 	      <child>
 		<left_attach>1</left_attach>
 		<right_attach>2</right_attach>
-		<top_attach>1</top_attach>
-		<bottom_attach>2</bottom_attach>
+		<top_attach>2</top_attach>
+		<bottom_attach>3</bottom_attach>
 		<xpad>0</xpad>
 		<ypad>0</ypad>
 		<xexpand>True</xexpand>
@@ -252,6 +252,36 @@
 		<text_max_length>0</text_max_length>
 		<text></text>
 	      </widget>
+	    </widget>
+
+	    <widget>
+	      <class>GtkCheckButton</class>
+	      <name>symlink_checkbox</name>
+	      <can_default>True</can_default>
+	      <has_default>True</has_default>
+	      <can_focus>True</can_focus>
+	      <signal>
+		<name>toggled</name>
+		<handler>on_use_binary_toggled</handler>
+		<last_modification_time>Thu, 03 Aug 2000 09:53:24 GMT</last_modification_time>
+	      </signal>
+	      <label>Install a symbolic link into the path</label>
+	      <active>True</active>
+	      <draw_indicator>True</draw_indicator>
+	      <child>
+		<left_attach>0</left_attach>
+		<right_attach>2</right_attach>
+		<top_attach>1</top_attach>
+		<bottom_attach>2</bottom_attach>
+		<xpad>0</xpad>
+		<ypad>0</ypad>
+		<xexpand>False</xexpand>
+		<yexpand>False</yexpand>
+		<xshrink>False</xshrink>
+		<yshrink>False</yshrink>
+		<xfill>True</xfill>
+		<yfill>False</yfill>
+	      </child>
 	    </widget>
 	  </widget>
 	</widget>

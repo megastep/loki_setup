@@ -1,7 +1,13 @@
 1.4.0:
+Jeremy White <jwhite@codeweavers.com> - Fri Aug  4 19:36:26 PDT 2000
+ * Added an ability to change the default drop down list for installation
+   target paths. A new <install_drop_list> element handles this.
+ * Added the ability for the user to choose whether or not
+   to create a symlink on the fly (new 'promptbinaries' attribute for the
+   'install' element).
 Stéphane Peter - Fri Aug  4 14:01:49 PDT 2000
  * Added support for the SETUP_CDROM environment variable that can be
-   used to force setup to treat a specific directory as a CDROM.
+   used to force setup to treat a specific directory as a CDROM.&
 Stéphane Peter - Wed Aug  2 15:18:23 PDT 2000
  * Run an idle loop while executing shell scripts, so that the installer
    does not appear to be frozen.

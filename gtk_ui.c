@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.44 2000-08-02 22:37:47 megastep Exp $
+   $Id: gtk_ui.c,v 1.45 2000-08-05 02:39:10 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -109,13 +109,18 @@
 
 /* Globals */
 
-static char *install_paths[] = {
+static char *default_install_paths[] = {
     "/usr/local/games",
     "/opt/games",
     "/usr/games",
     NULL
 };
 
+/* Use an arbitrary maximum; the lack of
+   flexibility shouldn't be an issue */
+#define MAX_INSTALL_PATHS       25
+ 
+static char *install_paths[MAX_INSTALL_PATHS];
 
 /* Various warning dialogs */
 static enum {
@@ -606,62 +611,101 @@ static void enable_tree(xmlNodePtr node, GtkWidget *window)
   }
 }
 
+/*-----------------------------------------------------------------------------
+**  on_use_binary_toggled
+**      Signal function to repsond to a toggle state in the
+** 'Use symbolic link' checkbox.
+**---------------------------------------------------------------------------*/
+void on_use_binary_toggled ( GtkWidget* widget, gpointer func_data)
+{
+    GtkWidget *binary_path_widget;
+    GtkWidget *binary_label_widget;
+    GtkWidget *binary_entry;
+    char *string;
+
+    /*-------------------------------------------------------------------------
+    ** Pick up widget handles
+    **-----------------------------------------------------------------------*/
+    binary_path_widget = glade_xml_get_widget(setup_glade, "binary_path");
+    binary_label_widget = glade_xml_get_widget(setup_glade, "binary_label");
+
+    /*-------------------------------------------------------------------------
+    ** Mark the appropriate widgets active or inactive
+    **-----------------------------------------------------------------------*/
+    gtk_widget_set_sensitive(binary_path_widget, GTK_TOGGLE_BUTTON(widget)->active);
+    gtk_widget_set_sensitive(binary_label_widget, GTK_TOGGLE_BUTTON(widget)->active);
+
+    /*-------------------------------------------------------------------------
+    ** Finally, set the symlinks_path.  If we've made it active
+    **      again, we have to go get the current binary entry box
+    **      value and restash it into the global symlinkspath.
+    **-----------------------------------------------------------------------*/
+    if (GTK_TOGGLE_BUTTON(widget)->active) {
+        binary_entry = glade_xml_get_widget(setup_glade, "entry5");
+        string = gtk_entry_get_text( GTK_ENTRY(binary_entry) );
+    } else {
+        string = NULL;
+	}
+    set_symlinkspath(cur_info, string ? string : "");
+}
+
+
 void setup_checkbox_option_slot( GtkWidget* widget, gpointer func_data)
 {
-  GtkWidget *window;
-  xmlNodePtr node;
-  option_data *data = gtk_object_get_data(GTK_OBJECT(widget),"data");
+	GtkWidget *window;
+	xmlNodePtr node;
+	option_data *data = gtk_object_get_data(GTK_OBJECT(widget),"data");
+	
+	if(!data)
+		return;
+	
+	window = glade_xml_get_widget(setup_glade, "setup_window");
 
-  if(!data)
-    return;
-
-  window = glade_xml_get_widget(setup_glade, "setup_window");
-
-  if ( GTK_TOGGLE_BUTTON(widget)->active ) {
-    cur_info->install_size += data->size;
-    /* Mark this option for installation */
-    mark_option(cur_info, data->node, "true", 0);
-
-    /* Recurse down any other options to re-enable grayed out options */
-    node = data->node->childs;
-    while ( node ) {
-      enable_tree(node, window);
-      node = node->next;
-    }
-  } else {
-    cur_info->install_size -= data->size;
-    /* Unmark this option for installation */
-    mark_option(cur_info, data->node, "false", 1);
-
-    /* Recurse down any other options */
-    node = data->node->childs;
-    while ( node ) {
-		if ( !strcmp(node->name, "option") ) {
-			GtkWidget *button;
-			
-			button = (GtkWidget*)gtk_object_get_data(GTK_OBJECT(window),
-													 get_option_name(cur_info, node, NULL, 0));
-			if(button){ /* This recursively calls this function */
-				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), FALSE);
-				gtk_widget_set_sensitive(button, FALSE);
-			}
-		} else if ( !strcmp(node->name, "exclusive") ) {
-			xmlNodePtr child;
-			for ( child = node->childs; child; child = child->next) {
+	if ( GTK_TOGGLE_BUTTON(widget)->active ) {
+		cur_info->install_size += data->size;
+		/* Mark this option for installation */
+		mark_option(cur_info, data->node, "true", 0);
+		
+		/* Recurse down any other options to re-enable grayed out options */
+		node = data->node->childs;
+		while ( node ) {
+			enable_tree(node, window);
+			node = node->next;
+		}
+	} else {
+		cur_info->install_size -= data->size;
+		/* Unmark this option for installation */
+		mark_option(cur_info, data->node, "false", 1);
+		
+		/* Recurse down any other options */
+		node = data->node->childs;
+		while ( node ) {
+			if ( !strcmp(node->name, "option") ) {
 				GtkWidget *button;
 				
 				button = (GtkWidget*)gtk_object_get_data(GTK_OBJECT(window),
-														 get_option_name(cur_info, child, NULL, 0));
+														 get_option_name(cur_info, node, NULL, 0));
 				if(button){ /* This recursively calls this function */
 					gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), FALSE);
 					gtk_widget_set_sensitive(button, FALSE);
 				}
+			} else if ( !strcmp(node->name, "exclusive") ) {
+				xmlNodePtr child;
+				for ( child = node->childs; child; child = child->next) {
+					GtkWidget *button;
+					
+					button = (GtkWidget*)gtk_object_get_data(GTK_OBJECT(window),
+															 get_option_name(cur_info, child, NULL, 0));
+					if(button){ /* This recursively calls this function */
+						gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), FALSE);
+						gtk_widget_set_sensitive(button, FALSE);
+					}
+				}
 			}
+			node = node->next;
 		}
-		node = node->next;
-    }
-  }
-  update_size();
+	}
+	update_size();
 }
 
 void setup_checkbox_menuitems_slot( GtkWidget* widget, gpointer func_data)
@@ -740,6 +784,7 @@ static void init_install_path(void)
     GList* list;
     int i;
     char path[PATH_MAX];
+    xmlNodePtr node;
 
     widget = glade_xml_get_widget(setup_glade, "install_path");
     
@@ -750,6 +795,62 @@ static void init_install_path(void)
 
     list = 0;
     list = g_list_append( list, cur_info->install_path);
+
+    /*----------------------------------------------------------------------
+    **  Retrieve the list of install paths from the config file, if we can
+    **--------------------------------------------------------------------*/
+    for (i = 0, node = cur_info->config->root->childs; node;  node = node->next) {
+        if (strcmp(node->name, "install_drop_list") == 0) {
+            /* Retrieve the value - note that it's up to us to free
+                the memory, which means we can use it without copying it */
+            char *content = xmlNodeGetContent(node);
+            char *p;
+            if (content) {
+                for (p = strtok(content, "\n\t \r\b"); p; 
+					 p = strtok(NULL,"\n\t \r\b" )) {
+                    /*--------------------------------------------------------
+                    **  Expand any ~s in the path
+                    **------------------------------------------------------*/
+                    char *temp_buf;
+                    temp_buf = malloc(PATH_MAX);
+                    if (! temp_buf) {
+                        fprintf(stderr, _("Fatal error:  out of memory\n"));
+                        return;
+                    }
+                    expand_home(cur_info, p, temp_buf);
+
+                    if (i > sizeof(install_paths) > sizeof(install_paths[0])) {
+                        fprintf(stderr, 
+								_("Error: maximum of %d install_path entries exceeded\n"),
+								sizeof(install_paths) > sizeof(install_paths[0]));
+                        return; 
+                    }
+
+                    install_paths[i++] = temp_buf;
+                }
+            }
+        }
+    }
+
+    
+    /*----------------------------------------------------------------------
+    **  If no installation paths were specified, use the default
+    **      values that are hard coded in.
+    **--------------------------------------------------------------------*/
+    if (i == 0) {
+        for (i = 0; default_install_paths[i]; ++i) {
+            install_paths[i] = default_install_paths[i];
+		}
+	}
+    /*----------------------------------------------------------------------
+    **  Terminate the array
+    **--------------------------------------------------------------------*/
+    install_paths[i] = NULL;
+
+    /*----------------------------------------------------------------------
+    **  Now translate the default install paths into the gtk list,
+    **      avoiding the current default value (which is already in the list)
+    **--------------------------------------------------------------------*/
     for ( i=0; install_paths[i]; ++i ) {
         snprintf(path, sizeof(path), "%s/%s", install_paths[i], GetProductName(cur_info));
         if ( strcmp(path, cur_info->install_path) != 0 ) {
@@ -797,12 +898,10 @@ static void init_binary_path(void)
         pc = pathCopy;
         strcpy( pathCopy, path );
 
-        while( *pc != ':' && *pc != '\0' )
-        {
+        while( *pc != ':' && *pc != '\0' ) {
             pc0 = pc;
             len = 0;
-            while( *pc != ':' && *pc != '\0' )
-            {
+            while( *pc != ':' && *pc != '\0' ) {
                 len++;
                 pc++;
             }
@@ -811,10 +910,10 @@ static void init_binary_path(void)
             else
                 *pc = '\0';
 
-            if( len && ((sc =strcmp( pc0, cur_info->symlinks_path)) != 0) && (*pc0 != '.') )
-            {
-              if(!access(pc0, W_OK))
-                list = g_list_append( list, pc0 );
+            if( len && ((sc =strcmp( pc0, cur_info->symlinks_path)) != 0) && (*pc0 != '.') ) {
+				if(!access(pc0, W_OK)) {
+					list = g_list_append( list, pc0 );
+				}
             }
 
             if( ! end )
@@ -825,8 +924,14 @@ static void init_binary_path(void)
     if ( list ) {
         gtk_combo_set_popdown_strings( GTK_COMBO(widget), list );
     }
-    if ( change_default && g_list_length(list) ) {
+    if ( change_default && list && g_list_length(list) ) {
         set_symlinkspath(cur_info, g_list_nth(list,0)->data);
+    }
+
+    if ((list == NULL || g_list_length(list) == 0) && change_default)
+    {
+        log_warning(cur_info, _("Warning: No writable targets in path... You may want to be root.\n"));
+        /* FIXME */
     }
     gtk_entry_set_text( GTK_ENTRY(GTK_COMBO(widget)->entry), cur_info->symlinks_path );
     return;
@@ -998,6 +1103,7 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
     GtkWidget *widget;
     GtkWidget *button;
     GtkWidget *install_path, *install_entry, *binary_path, *binary_entry;
+    GtkWidget *symlink_checkbox;
     char title[1024];
 
     cur_state = SETUP_INIT;
@@ -1042,6 +1148,14 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
 
     /* add all the other signal handlers defined in setup.glade */
     glade_xml_signal_autoconnect(setup_glade);
+
+    /*---------------------------------------------------------------------------
+    ** Connect a signal handle to control whether or not the symlink
+    **  should be installed
+    **-------------------------------------------------------------------------*/
+    symlink_checkbox = glade_xml_get_widget(setup_glade, "symlink_checkbox");
+    gtk_signal_connect(GTK_OBJECT(symlink_checkbox), "toggled",
+					   GTK_SIGNAL_FUNC(on_use_binary_toggled), NULL);
 
     /* Set up the window title */
     window = glade_xml_get_widget(setup_glade, "setup_window");
@@ -1119,12 +1233,21 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
 		if(widget) gtk_widget_hide(widget);
 	}
 
+	/*--------------------------------------------------------------------
+	**  Hide the checkbox allowing the user to pick whether or
+	**      not to install a symlink to the binaries if they
+	**      haven't asked for that feature.
+	**------------------------------------------------------------------*/
+	if (GetProductHasNoBinaries(info) || (!GetProductHasPromptBinaries(info))) {
+		widget = glade_xml_get_widget(setup_glade, "symlink_checkbox");
+		if (widget)	gtk_widget_hide(widget);
+	}
+
     /* Realize the main window for pixmap loading */
     gtk_widget_realize(window);
 
     /* Update the install image */
     update_image(GetProductSplash(info));
-    //update_image(SETUP_BASE "splash.xpm");
 
     return cur_state;
 }

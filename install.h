@@ -158,6 +158,7 @@ extern const char *GetProductVersion(install_info *info);
 extern int         GetProductCDROMRequired(install_info *info);
 extern int         GetProductIsMeta(install_info *info);
 extern int         GetProductHasNoBinaries(install_info *info);
+extern int         GetProductHasPromptBinaries(install_info *info);
 extern const char *GetProductSplash(install_info *info);
 extern const char *GetProductCDROMFile(install_info *info);
 extern const char *GetProductEULA(install_info *info);

@@ -37,9 +37,7 @@ static int prompt_user(const char *prompt, const char *default_answer,
                        char *answer, int maxlen)
 {
     printf("%s", prompt);
-    if ( default_answer && *default_answer ) {
-        printf(" [%s] ", default_answer);
-    }
+    printf(" [%s] ", default_answer && *default_answer ? default_answer : "");
     fflush(stdout);
     if ( fgets(answer, maxlen, stdin) ) {
         answer[strlen(answer)-1] = '\0';
@@ -287,6 +285,7 @@ static install_state console_setup(install_info *info)
     char path[PATH_MAX];
     xmlNodePtr node;
 
+
 	if ( GetProductIsMeta(info) ) {
 		while ( ! okay ) {
 			int index = 1, chosen;
@@ -362,16 +361,36 @@ static install_state console_setup(install_info *info)
 					return SETUP_ABORT;
 				}
 			}
+			
+			/* Default to empty */
+			path[0] = '\0';
 
 			/* Find out where to install the binary symlinks, unless the binary path
 			   was provided as a command line argument */
 			if ( ! disable_binary_path ) {
-				if ( ! GetProductHasNoBinaries(info) ) {
-					if ( ! prompt_user(_("Please enter the path for binary installation"),
+				int get_path = 1;
+
+				if (GetProductHasNoBinaries(info))
+					get_path = 0;
+
+				if (get_path) {
+                    /*----------------------------------------
+					**  Optionally, ask the user whether
+					**    they want to create a symlink
+					**    to the path or not.
+					**--------------------------------------*/
+					if (GetProductHasPromptBinaries(info)) {
+						if (console_prompt(_("Do you want to install symbolic links to a directory in your path?"), RESPONSE_YES) != RESPONSE_YES) {
+							get_path = 0;
+						}
+					}
+				}
+				
+				if (get_path)
+					if ( ! prompt_user(_("Please enter the path in which to create the symbolic links"),
 									   info->symlinks_path, path, sizeof(path)) ) {
 						return SETUP_ABORT;
 					}
-				}
 			} else {
 				printf(_("Binary path set to: %s\n"), info->symlinks_path);
 				strcpy(path, info->symlinks_path);
@@ -385,17 +404,19 @@ static install_state console_setup(install_info *info)
 			}
 		
 			/* Check permissions on the symlinks path, if the path was 
-			   provided as a command-line argument and it invalid, then
+			   provided as a command-line argument and it is invalid, then
 			   abort  */
-			if ( access(info->symlinks_path, W_OK) < 0 ) {
-				printf(_("No write permission to %s\n"), info->symlinks_path);
-				if (! disable_binary_path) {
-					continue;
-				} else {
-					return SETUP_ABORT;
+			if ( *info->symlinks_path ) {
+				if ( access(info->symlinks_path, W_OK) < 0 ) {
+					printf(_("No write permission to %s\n"), info->symlinks_path);
+					if (! disable_binary_path) {
+						continue;
+					} else {
+						return SETUP_ABORT;
+					}
 				}
 			}
-
+			
 			/* Go through the install options */
 			info->install_size = 0;
 			node = info->config->root->childs;
@@ -436,12 +457,12 @@ static void console_update(install_info *info, const char *path, size_t progress
   static char previous[200] = "";
 
   if(strcmp(previous, current)){
-    strncpy(previous,current, sizeof(previous));
-    printf(_("Installing %s ...\n"), current);
+	  strncpy(previous,current, sizeof(previous));
+	  printf(_("Installing %s ...\n"), current);
   }
   printf(" %3d%% - %s\r", (int) (((float)progress/(float)size)*100.0), path);
   if(progress==size)
-    putchar('\n');
+	  putchar('\n');
   fflush(stdout);
 }
 

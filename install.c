@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.57 2000-08-02 22:37:47 megastep Exp $ */
+/* $Id: install.c,v 1.58 2000-08-05 02:39:10 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -139,6 +139,17 @@ int GetProductHasNoBinaries(install_info *info)
 {
 	return xmlGetProp(info->config->root, "nobinaries") != NULL;
 }
+
+int GetProductHasPromptBinaries(install_info *info)
+{
+    char *p = xmlGetProp(info->config->root, "promptbinaries");
+    if (p && strstr(p, "yes")) {
+		return 1;
+	}
+    return 0;
+}
+
+
 const char *GetProductCDROMFile(install_info *info)
 {
     return xmlGetProp(info->config->root, "cdromfile");
