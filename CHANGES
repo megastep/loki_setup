@@ -1,4 +1,13 @@
 Current:
+Ryan C. Gordon (Epic Games) - Tue Mar  9 06:49:48 EST 2004
+ * log_fatal() now cleans up, shows explanation via UI.
+ * logging prepends "loki_setup: " so it makes sense when text appears in
+   system logs, etc...helpful on MacOSX.
+ * Another attempt at file i/o failure.
+ * tar plugin considers "unknown type" to be fatal, since it usually
+   represents failed i/o, file corruption, or missing bz2 support. At any
+   rate, not being fatal means a bogus install, so this makes sense.
+ * carbon_ui now sets focus to text entry field when prompting for cdkey.
 Ludwig Nussel - Sun Mar  7 18:31:37 PST 2004
  * Added dlopen()-based support for libbz2 (optional)
 Ryan C. Gordon (Epic Games) - Sun Mar  7 11:30:01 EST 2004
