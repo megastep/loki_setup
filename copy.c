@@ -471,7 +471,7 @@ ssize_t copy_list(install_info *info, const char *filedesc, const char *dest,
             if ( ! cdpath ) {
                 return 0;
             }
-            sprintf(full_cdpath, "%s/%s", cdpath, srcpath);
+            snprintf(full_cdpath, sizeof(full_cdpath), "%s/%s", cdpath, srcpath);
             cdpath = full_cdpath;
             push_curdir(cdpath);
             if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
