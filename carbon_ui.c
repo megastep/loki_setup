@@ -1164,7 +1164,7 @@ static install_state carbonui_setup(install_info *info)
 
 static int carbonui_update(install_info *info, const char *path, size_t progress, size_t size, const char *current)
 {
-    static float last_update = -1;
+    static float last_update = -1.0f;
     int textlen;
     char text[1024];
     char *install_path;
@@ -1178,18 +1178,18 @@ static int carbonui_update(install_info *info, const char *path, size_t progress
     if(cur_state == SETUP_ABORT)
         return FALSE;
 
-    if(progress && size)
+    if(size)
         new_update = (float)progress / (float)size;
     else    // "Running script"
-        new_update = 1.0;
+        new_update = 1.0f;
 
-    if((int)(new_update * 100) != (int)(last_update * 100))
+    if((int)(new_update * 100.f) != (int)(last_update * 100.f))
     {
         static int last_decimal = -10;
         int this_decimal = (int)(new_update * 10.0f);
 
-        if(new_update == 1.0)
-            last_update = 0.0;
+        if(new_update == 1.0f)
+            last_update = 0.0f;
         else
             last_update = new_update;
 
