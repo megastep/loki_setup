@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.92 2004-02-18 03:56:55 megastep Exp $
+   $Id: gtk_ui.c,v 1.93 2004-02-19 22:13:25 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -994,6 +994,7 @@ static void init_man_path(void)
         }
     } else {
 		list = g_list_append(list, "/usr/local/man");
+		list = g_list_append(list, "/usr/share/man");
 		list = g_list_append(list, "/usr/man");
 	}
 

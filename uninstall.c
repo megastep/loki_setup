@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.47 2004-02-08 06:01:21 megastep Exp $ */
+/* $Id: uninstall.c,v 1.48 2004-02-19 22:13:25 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -198,7 +198,7 @@ int uninstall_component(product_component_t *comp, product_info_t *info)
 	}
 
     if ( !loki_isdefault_component(comp) ) {
-        printf(_("Component %s has been successfully uninstalled.\n"), loki_getname_component(comp));
+        printf(_("Component %s has been successfully uninstalled.\n\n"), loki_getname_component(comp));
     }
     loki_remove_component(comp);
 
@@ -620,7 +620,7 @@ int main(int argc, char *argv[])
                 ret = 1;
                 loki_closeproduct(prod);
             } else {
-                printf(_("%s has been successfully uninstalled.\n"), desc);
+                printf(_("%s has been successfully uninstalled.\n\n"), desc);
             }
         }
     }
