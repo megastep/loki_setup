@@ -22,6 +22,10 @@ DetectARCH()
 DetectLIBC()
 {
       status=1
+	  if [ `uname -s` != Linux ]; then
+		  echo "glibc-2.1"
+		  return $status
+	  fi
       if [ -f `echo /lib/libc.so.6* | tail -1` ]; then
 	      if fgrep GLIBC_2.1 /lib/libc.so.6* 2>&1 >/dev/null; then
 	              echo "glibc-2.1"
