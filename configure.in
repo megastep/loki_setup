@@ -162,7 +162,6 @@ case "$target" in
 	CFLAGS="$CFLAGS -I/sw/include -Ddarwin"
 	ARCH=ppc ;;
     *ppc* | *powerpc*)
-        CFLAGS="$CFLAGS -Wa,-mall"
         ARCH=ppc ;;
     *)
         ARCH=`uname -p 2> /dev/null || uname -m` ;;

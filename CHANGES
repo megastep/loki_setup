@@ -1,4 +1,7 @@
 Current:
+Stephane Peter (Codehost) - Tue Feb 11 20:33:32 PST 2003
+ * Added the 'environment' tag to store the values of
+   environment variables.
 Stephane Peter (Codehost) - Fri Dec  6 16:31:27 PST 2002
  * Do not display the main GTK dialog until we're done with the EULAs.
  * Various fixes for menu items

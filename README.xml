@@ -205,6 +205,9 @@ Components are used to divide the product in independant entities. Several compo
 installed at the same time by setup, and the user interface will reflect that. The installation
 options have to be structured as children of this element.
 
+Please note that components can not be nested. Thus COMPONENT elements have to be direct children
+of an INSTALL element.
+
 This element takes two mandatory attributes :
 
   name      The name of the component.
@@ -256,6 +259,29 @@ would currently allow the licensing agreements to be bypassed by the user.
 
 There is also no need to have the files designated by those tags explicitly
 installed in a FILES section, setup will take care of that for you.
+
+The ENVIRONMENT element :
+
+This element is used to preserve some environment variables between Setup tools
+sessions. This is useful if some features of your product can be selected through
+such environment variables upon installation, and these need to be set for
+uninstallation as well.
+
+You can use this element to inform Setup that their value upon installation must
+be saved in the product database. The value will be restored in the environment
+before executing any scripts from any of the Setup tools (especially uninstall).
+
+This element should be a direct child of an INSTALL or COMPONENT element.
+Hence, there can be component-specific variables. Setup tools will first restore
+the global product variables, and then the component-specific variable.
+
+Note: the variable will be saved only if it is set to a non-empty value at the
+time of installation.
+
+This element takes one mandatory attribute :
+
+  var       The name of the environment variable to save.
+
 
 The REQUIRE element :
 

@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.30 2002-12-07 00:57:32 megastep Exp $ */
+/* $Id: uninstall.c,v 1.31 2003-02-27 06:16:01 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -128,6 +128,8 @@ void uninstall_component(product_component_t *comp, product_info_t *info)
         fprintf(stderr, _("Could not change to directory: %s\n"), info->root);
         return;
     }
+
+	loki_put_envvars_component(comp);
 
     /* Run pre-uninstall scripts */
     loki_runscripts(comp, LOKI_SCRIPT_PREUNINSTALL);

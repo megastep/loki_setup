@@ -718,8 +718,8 @@ ssize_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
 				   directory */
 				snprintf(tmpbuf, sizeof(tmpbuf), "%s/%s", info->install_path, tmppath);
 				strcpy(tmppath, tmpbuf);
-				strip_dirs = 1;
 			}
+			strip_dirs = 1;
             path = tmppath;
         }
         if (!srcpath)
@@ -826,8 +826,16 @@ ssize_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
                 if ( copied > 0 ) {
                     size += copied;
                 }
+				current_component = NULL; /* Out of the component */
             }
-        }
+        } else if ( ! strcmp(node->name, "environment") ) {
+			const char *prop = xmlGetProp(node, "var");
+			if ( prop ) {
+				add_envvar_entry(info, current_component, prop);
+			} else {
+				log_fatal(_("Malformed 'environment' element in XML file : missing 'var' property"));
+			}
+		}
         node = node->next;
     }
     return size;

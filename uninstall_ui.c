@@ -545,7 +545,8 @@ int uninstall_ui(int argc, char *argv[])
     /* Check to make sure there's something to uninstall */
     if ( ! product_list ) {
         label = gtk_label_new(
-_("No products found.\nAre you the one that installed the software?"));
+							  _("No products were installed by this user.\n"
+								"You may need to run this tool as an administrator."));
         gtk_box_pack_start(GTK_BOX(widget), label, FALSE, TRUE, 0);
         gtk_widget_show(label);
     }

@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.55 2003-01-08 20:20:31 megastep Exp $ */
+/* $Id: main.c,v 1.56 2003-02-27 06:16:01 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -261,6 +261,7 @@ int main(int argc, char **argv)
     /* Setup the interrupt handlers */
     state = SETUP_INIT;
     signal(SIGINT, signal_abort);
+    signal(SIGQUIT, signal_abort);
     signal(SIGHUP, signal_abort);
     signal(SIGTERM, signal_abort);
 

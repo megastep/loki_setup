@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.7 2002-12-07 00:57:31 megastep Exp $
+ * $Id: dialog_ui.c,v 1.8 2003-02-27 06:16:01 megastep Exp $
  */
 
 #include <limits.h>

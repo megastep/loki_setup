@@ -175,8 +175,16 @@ typedef struct _install_info {
 
         } *options_list;
 
+		struct envvar_elem {
+			char *name;
+			struct envvar_elem *next;
+		} *envvars_list;
+
         struct component_elem *next;
     } *components_list;
+
+	/* Product-global env vars */
+	struct envvar_elem *envvars_list;
 
     /* Product and component DB information */
     product_t *product;
@@ -249,6 +257,9 @@ struct component_elem *add_component_entry(install_info *info, const char *name,
 
 /* Create a new option entry */
 struct option_elem *add_option_entry(struct component_elem *comp, const char *name, const char *tag);
+
+/* Create a new environment variable entry, either global or component-specific */
+struct envvar_elem *add_envvar_entry(install_info *info, struct component_elem *comp, const char *name);
 
 /* Add a file entry to the list of files installed */
 extern struct file_elem *add_file_entry(install_info *info, struct option_elem *opt, const char *path, 

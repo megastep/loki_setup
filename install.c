@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.98 2003-01-08 20:20:31 megastep Exp $ */
+/* $Id: install.c,v 1.99 2003-02-27 06:16:01 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -579,6 +579,7 @@ install_info *create_install(const char *configfile,
     info->product = loki_openproduct(info->name);
     info->component = NULL;
     info->components_list = NULL;
+	info->envvars_list = NULL;
 
 	if ( getcwd(info->setup_path, PATH_MAX) == NULL )
 		perror("create_install: getcwd");
@@ -684,6 +685,24 @@ void set_cdrom_mounted(struct cdrom_elem *cd, const char *path)
     }
 }
 
+struct envvar_elem *add_envvar_entry(install_info *info, struct component_elem *comp, const char *name)
+{
+	struct envvar_elem *elem;
+
+	elem = (struct envvar_elem *) malloc(sizeof *elem);
+	if ( elem ) {
+		elem->name = strdup(name);
+		if ( comp ) {
+			elem->next = comp->envvars_list;
+			comp->envvars_list = elem;
+		} else { /* Product global env variable */
+			elem->next = info->envvars_list;
+			info->envvars_list = elem;
+		}
+	}
+	return elem;
+}
+
 struct component_elem *add_component_entry(install_info *info, const char *name, const char *version,
                                            int def)
 {
@@ -695,6 +714,7 @@ struct component_elem *add_component_entry(install_info *info, const char *name,
         elem->version = strdup(version);
         elem->is_default = def;
         elem->options_list = NULL;
+		elem->envvars_list = NULL;
         elem->next = info->components_list;
         info->components_list = elem;
     }
@@ -1143,6 +1163,15 @@ void delete_cdrom_install(install_info *info)
 void delete_install(install_info *info)
 {
     struct component_elem *comp;
+	struct envvar_elem *var;
+
+	while ( info->envvars_list ) {
+		var = info->envvars_list;
+		info->envvars_list = var->next;
+		free(var->name);
+		free(var);
+	}
+
     while ( info->components_list ) {
         struct option_elem *opt;
         
@@ -1205,6 +1234,14 @@ void delete_install(install_info *info)
 			free(opt->tag);
             free(opt);
         }
+
+		while ( comp->envvars_list ) {
+			var = comp->envvars_list;
+			comp->envvars_list = var->next;
+			free(var->name);
+			free(var);
+		}
+
         free(comp->name);
         free(comp->version);
         free(comp);
@@ -1450,18 +1487,22 @@ void generate_uninstall(install_info *info)
             product = loki_create_product(info->name, info->install_path, info->desc,
                                           info->update_url);
         }
-	if ( *info->prefix ) {
-	    loki_setprefix_product(product, info->prefix);
-	}
-	info->product = product;
+		if ( *info->prefix ) {
+			loki_setprefix_product(product, info->prefix);
+		}
+		info->product = product;
     }
 
     if ( product ) {
         char buf[PATH_MAX];
 		const char *msg;
         int count;
-
+		struct envvar_elem *var;
 		uninstall_generated = 1;
+
+		for(var = info->envvars_list; var; var = var->next ) {
+			loki_register_envvar(product, var->name);
+		}
 
         for ( comp = info->components_list; comp; comp = comp->next ) {
             struct file_elem *felem;
@@ -1485,6 +1526,11 @@ void generate_uninstall(install_info *info)
                     loki_setdefault_component(component);
                 }
             }
+
+			/* Store per-component env variables */
+			for(var = comp->envvars_list; var; var = var->next ) {
+				loki_register_envvar_component(component, var->name);
+			}
 
             push_curdir(info->install_path);
             for ( opt = comp->options_list; opt; opt = opt->next ) {
@@ -2041,11 +2087,10 @@ int install_menuitems(install_info *info, desktop_type desktop)
 					"  TYPE icon\n"
 					"  CONTAINER_NAME   Top\n"
 					"  CONTAINER_TYPE   BOX\n"
-					"  ICON             OWgenapp.m.pm\n"
+					"  ICON             %s\n"
 					"  POSITION_HINTS   first\n"
-					"  LABEL            \"%s\"\n"
-					"  PUSH_ACTION      %s\n"
-					"}\n\n", info->name, info->desc, info->name
+					"  LABEL            %s\n"
+					"}\n\n", info->name, icon, info->desc
 					);
 
 				fprintf(fp,
