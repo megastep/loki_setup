@@ -30,10 +30,12 @@ setup.gtk: $(GUI_OBJS)
 	$(CC) -o $@ $^ $(GUI_LIBS)
 
 install: all
-	strip setup
-	cp -v setup image/setup.data/bin/$(arch)
-	strip setup.gtk
-	cp -v setup.gtk image/setup.data/bin/$(arch)/$(libc)
+	if [ -d image/setup.data/bin/$(arch)/$(libc) ]; then \
+	    strip setup; \
+	    cp -v setup image/setup.data/bin/$(arch); \
+	    strip setup.gtk; \
+	    cp -v setup.gtk image/setup.data/bin/$(arch)/$(libc); \
+	fi
 
 clean:
 	rm -f setup setup.gtk testxml foo.xml *.o
