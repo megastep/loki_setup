@@ -107,6 +107,8 @@ extern Install_UI UI;
 #    include <IOKit/storage/IOCDMedia.h>
 #    include <IOKit/storage/IODVDMedia.h>
 
+static char darwinEjectThisCDDevice[MAXPATHLEN];
+
 static int darwinIsWholeMedia(io_service_t service)
 {
     int retval = 0;
@@ -322,23 +324,9 @@ void unmount_filesystems(void)
     struct mounted_elem *mnt = mounted_list, *oldmnt;
     while ( mnt ) {
         log_normal(_("Unmounting device %s"), mnt->device);
-
-        // !!! TODO: do this right. I just hacked this in. --ryan.
-        #if defined(darwin)
-        {
-            char cmd[128];
-            strcpy(cmd, "/usr/sbin/disktool -e ");
-            if (strncmp(mnt->device, "/dev/", 5) == 0)
-                strcat(cmd, mnt->device + 5);
-            else
-                strcat(cmd, mnt->device);
-            system(cmd);
-        }
-        #else
         if ( run_command(NULL, UMOUNT_PATH, mnt->dir, 1) ) {
             log_warning(_("Failed to unmount device %s mounted on %s"), mnt->device, mnt->dir);
         }
-        #endif
         free(mnt->device);
         free(mnt->dir);
         oldmnt = mnt;
@@ -441,8 +429,8 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
             /* darwinIsMountedDisc needs to skip "/dev/" part of string... */
             if (darwinIsMountedDisc(dev + prefixLen, masterPort))
             {
+                strcpy(darwinEjectThisCDDevice, dev + prefixLen);
                 path[num_cdroms ++] = strdup(mnt);
-                add_mounted_entry(dev, mnt);
             }
         }
     }
@@ -715,7 +703,25 @@ const char *get_cdrom(install_info *info, const char *id)
             yesno_answer response;
             char buf[1024];
             char *prompt;
+
 #if defined(darwin)
+            // !!! TODO: do this right. I just hacked this in. --ryan.
+            char *discs[SETUP_MAX_DRIVES];
+
+            // This only detects mounted discs and doesn't mount itself on OSX.
+            int discCount = detect_and_mount_cdrom(discs);
+            if (discCount > 0)
+            {
+                char cmd[128];
+                strcpy(cmd, "/usr/sbin/disktool -e ");
+                strcat(cmd, darwinEjectThisCDDevice);
+                strcat(cmd, " &");
+                system(cmd);
+                for (discCount--; discCount >= 0; discCount--)
+                    free(discs[discCount]);
+            }
+            // end ryan's hack.
+
             prompt = _("\nPlease insert the %s CDROM.\n"
                             "Choose Yes to retry, No to cancel");
 #else
