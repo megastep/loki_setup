@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.125 2003-11-28 20:34:50 megastep Exp $ */
+/* $Id: install.c,v 1.126 2004-02-06 03:03:13 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -988,12 +988,12 @@ void expand_home(install_info *info, const char *path, char *buffer)
 }
 
 /* Function to set the install path string, expanding home directories */
-void set_installpath(install_info *info, const char *path)
+void set_installpath(install_info *info, const char *path, int append_slash)
 {
     size_t len = strlen(path);
     char newpath[len + 2];      // Allocate for possible extra char and null
 
-    if(len > 0)
+    if(append_slash && len > 0)
     {
         // If last character is not a '/', then add one.  A '/' character at
         //  the end of the install path is required for later code to work

@@ -406,7 +406,7 @@ static install_state console_setup(install_info *info)
 				printf(_("Install path set to: %s\n"), info->install_path);
 				strcpy(path, info->install_path);
 			}
-			set_installpath(info, path);
+			set_installpath(info, path, 1);
 
 			/* Check permissions on the install path */
 			topmost_valid_path(path, info->install_path);

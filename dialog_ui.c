@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.17 2003-10-01 00:16:13 megastep Exp $
+ * $Id: dialog_ui.c,v 1.18 2004-02-06 03:03:13 megastep Exp $
  */
 
 #include <limits.h>
@@ -359,7 +359,7 @@ install_state dialog_setup(install_info *info)
 				} else {
 					strcpy(path, info->install_path);
 				}
-				set_installpath(info, path);
+				set_installpath(info, path, 1);
 
 				/* Check permissions on the install path */
 				topmost_valid_path(path, info->install_path);

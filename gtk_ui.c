@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.89 2004-01-14 03:27:49 megastep Exp $
+   $Id: gtk_ui.c,v 1.90 2004-02-06 03:03:13 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -190,7 +190,7 @@ gint path_entry_keypress_slot(GtkWidget *widget, GdkEvent *event,
     
     string = gtk_entry_get_text( GTK_ENTRY(widget) );
     if ( string ) {
-        set_installpath(cur_info, string);
+        set_installpath(cur_info, string, 0);
         if ( strcmp(string, cur_info->install_path) != 0 ) {
             gtk_entry_set_text(GTK_ENTRY(widget), cur_info->install_path);
         }
@@ -208,7 +208,7 @@ gint path_combo_change_slot(GtkWidget *widget, GdkEvent *event,
     install_entry = glade_xml_get_widget(setup_glade, "install_entry");
     string = gtk_entry_get_text( GTK_ENTRY(install_entry) );
     if ( string ) {
-        set_installpath(cur_info, string);
+        set_installpath(cur_info, string, 1);
         if ( strcmp(string, cur_info->install_path) != 0 ) {
             gtk_entry_set_text(GTK_ENTRY(install_entry), cur_info->install_path);
         }
@@ -222,7 +222,7 @@ void setup_entry_installpath_slot( GtkWidget* widget, gpointer func_data )
     char* string;
     string = gtk_entry_get_text( GTK_ENTRY(widget) );
     if ( string ) {
-        set_installpath(cur_info, string);
+        set_installpath(cur_info, string, 1);
         if ( strcmp(string, cur_info->install_path) != 0 ) {
             gtk_entry_set_text(GTK_ENTRY(widget), cur_info->install_path);
         }

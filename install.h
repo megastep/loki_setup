@@ -300,7 +300,7 @@ extern void add_bin_entry(install_info *info, struct option_elem *opt, struct fi
 extern void expand_home(install_info *info, const char *path, char *buffer);
 
 /* Function to set the install path string, expanding home directories */
-extern void set_installpath(install_info *info, const char *path);
+extern void set_installpath(install_info *info, const char *path, int append_slash);
 
 /* Function to set the symlink path string, expanding home directories */
 extern void set_symlinkspath(install_info *info, const char *path);

@@ -372,7 +372,7 @@ void OnKeyboardEvent()
         // Set install and binary paths accordingly
         char string[1024];
         carbon_GetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, string, 1024);
-        set_installpath(cur_info, string);
+        set_installpath(cur_info, string, 1);
         // Only set binary path if symbolic link checkbox is set
         if(carbon_GetCheckbox(MyRes, OPTION_SYMBOLIC_LINK_CHECK_ID))
         {
@@ -471,7 +471,7 @@ static void OnCommandInstallPath(void)
     if(carbon_PromptForPath(InstallPath, INSTALLFOLDER_MAX_PATH))
     {
         // If user hit OK
-        set_installpath(cur_info, InstallPath);
+        set_installpath(cur_info, InstallPath, 1);
 
         carbon_SetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, GetSpecialPathName(InstallPath));
         update_space();
@@ -504,7 +504,7 @@ void OnCommandBeginInstall()
     if(!GetProductIsAppBundle(cur_info))
     {
         carbon_GetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, string, 1024);
-        set_installpath(cur_info, string);
+        set_installpath(cur_info, string, 1);
     }
 
     // Only set binary path if symbolic link checkbox is set
