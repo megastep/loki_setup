@@ -71,7 +71,7 @@ po/setup.po: $(SRCS)
 
 gettext: po/setup.po
 	for lang in $(LOCALES); do \
-		msgfmt po/$$lang/setup.po -o image/setup.data/locale/$$lang/LC_MESSAGES/setup.mo; \
+		msgfmt -f po/$$lang/setup.po -o image/setup.data/locale/$$lang/LC_MESSAGES/setup.mo; \
 	done
 
 # This rule merges changes from the newest PO file in all the translated PO files
