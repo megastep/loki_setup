@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: setup 1.0\n"
-"POT-Creation-Date: 2000-05-09 12:45-0700\n"
+"POT-Creation-Date: 2000-05-19 18:18-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Stéphane Peter <megastep@lokigames.com>\n"
 "Language-Team: French <LI@li.org>\n"
@@ -358,6 +358,11 @@ msgstr "Incapable de trouver le fichier '%s'"
 msgid "Unable to find file '%s' on any of the CDROM drives"
 msgstr "Incapable de trouver le fichier '%s' sur aucun des lecteurs de cédérom"
 
+#: copy.c:946
+#, c-format
+msgid "Suspect size value for option %s\n"
+msgstr ""
+
 #: file.c:110
 #, c-format
 msgid "Couldn't read from file: %s"
@@ -524,7 +529,8 @@ msgid ""
 "Binary path must be different than the install path.\n"
 "The binary path must be an existing directory.\n"
 msgstr ""
-"Le répertoire des binaires doit être différent du répertoire d'installation.\n"
+"Le répertoire des binaires doit être différent du répertoire "
+"d'installation.\n"
 "Le répertoire des binaires doit exister.\n"
 
 #: console_ui.c:322

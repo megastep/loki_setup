@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-05-09 12:45-0700\n"
+"POT-Creation-Date: 2000-05-19 18:18-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -355,6 +355,11 @@ msgstr "Konnte Datei '%s' nicht finden"
 #, c-format
 msgid "Unable to find file '%s' on any of the CDROM drives"
 msgstr "Konnte Datei '%s' auf keinem der vorhandenen CDROM Laufwerke finden"
+
+#: copy.c:946
+#, c-format
+msgid "Suspect size value for option %s\n"
+msgstr ""
 
 #: file.c:110
 #, c-format

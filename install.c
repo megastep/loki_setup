@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.44 2000-05-09 19:50:11 megastep Exp $ */
+/* $Id: install.c,v 1.45 2000-05-23 23:00:22 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
    04/12/2000: Modifed run_script function to put the full pathname of the
@@ -47,6 +47,16 @@ const char *GetProductDesc(install_info *info)
     desc = xmlGetProp(info->config->root, "desc");
     if ( desc == NULL ) {
         desc = "";
+    }
+    return desc;
+}
+const char *GetProductUninstall(install_info *info)
+{
+    const char *desc;
+
+    desc = xmlGetProp(info->config->root, "uninstall");
+    if ( desc == NULL ) {
+        desc = "uninstall";
     }
     return desc;
 }
@@ -669,7 +679,8 @@ void generate_uninstall(install_info *info)
     struct rpm_elem *relem;
 
     strncpy(script,info->install_path, PATH_MAX);
-    strncat(script,"/uninstall", PATH_MAX);
+    strncat(script,"/", PATH_MAX);
+	strncat(script, GetProductUninstall(info), PATH_MAX);
 
     fp = fopen(script, "w");
     if ( fp != NULL ) {

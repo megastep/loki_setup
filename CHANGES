@@ -16,6 +16,9 @@ Stéphane Peter - Sun May 14 03:11:38 PDT 2000
  * Allow the "size" attribute for options to be specified in kilobytes, megabytes
    and gigabytes, using the 'K', 'M' and 'G' suffixes. WARNING: The default size
    for this attribute is now in bytes and no longer in MBs !
+Stéphane Peter - Tue May 23 15:59:12 PDT 2000
+ * Added the 'uninstall' attribute to the install element, to allow renaming
+   of the generated uninstall script.
 
 1.2.3:
 Sam Lantinga - Fri Apr 28 17:17:27 PDT 2000

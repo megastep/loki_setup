@@ -146,6 +146,7 @@ extern int MatchLocale(const char *str);
 /* Functions to retrieve attribution information from the XML tree */
 extern const char *GetProductName(install_info *info);
 extern const char *GetProductDesc(install_info *info);
+extern const char *GetProductUninstall(install_info *info);
 extern const char *GetProductVersion(install_info *info);
 extern int         GetProductCDROMRequired(install_info *info);
 extern const char *GetProductCDROMFile(install_info *info);

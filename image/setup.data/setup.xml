@@ -1,5 +1,5 @@
 <?xml version="1.0" standalone="yes"?>
-<install product="RT2" desc="Railroad Tycoon II" version="1.54">
+<install product="RT2" desc="Railroad Tycoon II" version="1.54" uninstall="uninst.sh">
   <readme>
     README
   </readme>
