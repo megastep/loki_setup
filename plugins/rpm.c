@@ -1,5 +1,5 @@
 /* RPM plugin for setup */
-/* $Id: rpm.c,v 1.3 2002-01-28 01:13:32 megastep Exp $ */
+/* $Id: rpm.c,v 1.4 2002-02-15 02:20:57 megastep Exp $ */
 
 #include "plugins.h"
 #include "file.h"
@@ -238,7 +238,7 @@ SetupPlugin rpm_plugin = {
 	"RedHat RPM Plugin",
 	"1.0",
 	"Stéphane Peter <megastep@megastep.org>",
-	2, {".rpm", ".rpm.gz"},
+	3, {".rpm", ".rpm.gz", "rpm.bz2"},
 	RPMInitPlugin, RPMFreePlugin,
 	RPMSize, RPMCopy
 };

@@ -191,7 +191,7 @@ SetupPlugin cpio_plugin = {
 	"Unix CPIO Plugin",
 	"1.0",
 	"Stéphane Peter <megastep@megastep.org>",
-	3, {".cpio", ".cpio.gz", ".cpio.Z"},
+	4, {".cpio", ".cpio.gz", ".cpio.Z", ".cpio.bz2"},
 	CPIOInitPlugin, CPIOFreePlugin,
 	CPIOSize, CPIOCopy
 };

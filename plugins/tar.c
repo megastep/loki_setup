@@ -1,5 +1,5 @@
 /* TAR plugin for setup */
-/* $Id: tar.c,v 1.2 2002-01-28 01:13:33 megastep Exp $ */
+/* $Id: tar.c,v 1.3 2002-02-15 02:20:57 megastep Exp $ */
 
 #include "plugins.h"
 #include "tar.h"
@@ -135,7 +135,7 @@ SetupPlugin tar_plugin = {
 	"Unix TAR Archives Plugin",
 	"1.0",
 	"Stéphane Peter <megastep@megastep.org>",
-	3, {".tar", ".tar.gz", ".tar.Z"},
+	4, {".tar", ".tar.gz", ".tar.Z", ".tar.bz2"},
 	TarInitPlugin, TarFreePlugin,
 	TarSize, TarCopy
 };
