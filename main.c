@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.46 2002-01-28 01:13:30 megastep Exp $ */
+/* $Id: main.c,v 1.47 2002-02-17 05:54:58 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -267,6 +267,8 @@ int main(int argc, char **argv)
 
         switch (state) {
             case SETUP_INIT:
+                num_cds = GetProductCDROMDescriptions(info);
+
                 state = UI.init(info,argc,argv, enabled_options != NULL);
                 if ( state == SETUP_ABORT ) {
                     exit_status = 1;
@@ -306,8 +308,6 @@ int main(int argc, char **argv)
 						continue;
                     }
                 }
-
-                num_cds = GetProductCDROMDescriptions(info);
 
                 /* Check for the presence of a CDROM if required */
                 if ( GetProductCDROMRequired(info) ) {
