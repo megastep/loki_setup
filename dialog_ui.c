@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.29 2004-10-19 00:39:50 megastep Exp $
+ * $Id: dialog_ui.c,v 1.30 2004-12-11 06:28:01 megastep Exp $
  */
 
 #include <limits.h>
@@ -360,7 +360,22 @@ install_state dialog_setup(install_info *info)
 			if ( choice < 0 ) {
 				return SETUP_ABORT;
 			} else {
-				/* TODO: Process the choice */
+				/* Process the choice */
+                int node_index=0;
+                node = info->config->root->childs;
+                while ( node ){
+                    if ( strcmp(node->name, "option") == 0 )
+                    {
+                        if ( node_index == choice)
+                        {
+						    mark_option(info, node, "true", 0);
+                        }else{
+                            mark_option(info, node, "false", 0);
+                        }
+                    }
+                    node = node->next;
+                    node_index++;
+                }
 			}
 		} else {
 			char path[PATH_MAX];

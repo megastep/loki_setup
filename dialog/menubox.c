@@ -1,5 +1,5 @@
 /*
- *  $Id: menubox.c,v 1.5 2002-12-07 00:57:32 megastep Exp $
+ *  $Id: menubox.c,v 1.6 2004-12-11 06:28:01 megastep Exp $
  *
  *  menubox.c -- implements the menu box
  *
@@ -290,7 +290,8 @@ dialog_menu(const char *title, const char *cprompt, int height, int width,
 								   max_choice - 1, TRUE);
 					} else
 #endif
-						{
+                //do nothing, if i exceeds the option number listed on the menubox, installer should sit idle
+				/*		{
 							if (i < 0) {
 								scrollamt += i;
 								choice = 0;
@@ -310,6 +311,7 @@ dialog_menu(const char *title, const char *cprompt, int height, int width,
 									box_x + tag_x + 1,
 									box_y,
 									box_y + menu_height + 1);
+                */
 				} else {
 					/* De-highlight current item */
 					print_item(menu,
