@@ -9,6 +9,7 @@
 
 #ifdef __FreeBSD__
 #include <sys/ucred.h>
+#include <fstab.h>
 #else /* Linux assumed */
 #include <mntent.h>
 #include <sys/vfs.h>
@@ -29,13 +30,26 @@
 #define MNTTYPE_SUPER    "supermount"
 #endif
 
-#define MOUNTS_FILE "/proc/mounts"
-
-#ifndef __FreeBSD__
+/* #define MOUNTS_FILE "/proc/mounts" */
+#define MOUNTS_FILE _PATH_MOUNTED
 
 int is_fs_mounted(const char *dev)
 {
     int found = 0;
+#ifdef __FreeBSD__
+    int count, i;
+    struct statfs *mntbuf;
+
+    count = getmntinfo(&mntbuf, 0);
+    if ( count > 0 ) {
+        for ( i = 0; i < count; ++i ) {
+            if ( !strcmp(mntbuf[i].f_mntfromname, dev) ) {
+                found = 1;
+                break;
+            }
+        }
+    }
+#else
     struct mntent *mnt;
     FILE *mtab = setmntent(MOUNTS_FILE, "r" );
     if( mtab != NULL ) {
@@ -47,20 +61,20 @@ int is_fs_mounted(const char *dev)
         }
         endmntent(mtab);
     }
+#endif
     return found;
 }
-
-#endif
 
 void unmount_filesystems(install_info *info)
 {
     struct mounted_elem *mnt = info->mounted_list, *oldmnt;
     while ( mnt ) {
         log_normal(info, _("Unmounting device %s"), mnt->device);
-#ifndef __FreeBSD__
-        umount(mnt->device);
-#endif
+        if ( run_command(info, "umount", mnt->dir) ) {
+            log_warning(info, _("Failed to unmount device %s mounted on %s"), mnt->device, mnt->dir);
+        }
         free(mnt->device);
+        free(mnt->dir);
         oldmnt = mnt;
         mnt = mnt->next;
         free(oldmnt);
@@ -108,6 +122,7 @@ int detect_cdrom(install_info *info)
 
 #ifdef __FreeBSD__
 	int mounted = getfsstat(NULL, 0, MNT_NOWAIT);
+    struct fstab *fstab;
 
     /* Clear all of the mount points */
     for( cd = info->cdroms_list; cd; cd = cd->next ) {
@@ -123,6 +138,20 @@ int detect_cdrom(install_info *info)
         }
 		return num_cdroms;
 	}
+
+    /* Try to mount unmounted CDROM filesystems */
+    fstab = getfsent();
+    while( fstab ){
+        if ( !strcmp(fstab->fs_vfstype, MNTTYPE_CDROM)) {
+            if ( !is_fs_mounted(fstab->fs_spec)) {
+                if ( ! run_command(info, "mount", fstab->fs_spec) ) {
+                    add_mounted_entry(info, fstab->fs_spec, fstab->fs_file);
+                    log_normal(info, _("Mounted device %s"), fstab->fs_spec);
+                }
+            }
+        }
+    }
+    endfsent();
 
 	if ( mounted > 0 ) {
         int i;
@@ -166,44 +195,26 @@ int detect_cdrom(install_info *info)
 		return num_cdroms;
 	}
     
-    /* If we're running as root, we can try to mount unmounted CDROM filesystems */
-    if ( geteuid() == 0 ) {
-        mountfp = setmntent( _PATH_MNTTAB, "r" );
-        if( mountfp != NULL ) {
-            while( (mntent = getmntent( mountfp )) != NULL ){
-                if ( !strcmp(mntent->mnt_type, MNTTYPE_CDROM)) {
-                    struct mntent copy = *mntent;
-                    copy.mnt_fsname = strdup(mntent->mnt_fsname);
-                    copy.mnt_dir = strdup(mntent->mnt_dir);
-                    copy.mnt_type = strdup(mntent->mnt_type);
-                    copy.mnt_opts = strdup(mntent->mnt_opts);
-                    if ( !is_fs_mounted(copy.mnt_fsname)) {
-                        int flags = MS_MGC_VAL|MS_RDONLY|MS_NOEXEC;
-                        if(hasmntopt(&copy,"exec"))
-                            flags &= ~MS_NOEXEC;
-                        if ( ! mount(copy.mnt_fsname, copy.mnt_dir, copy.mnt_type,
-                                     flags, NULL) ) {
-#if 0
-                            /* TODO: Find a way to _remove_ a mtab entry for this to work */
-                            /* Add a mtab entry */
-                            FILE *mtab = setmntent( _PATH_MOUNTED, "a");
-                            addmntent(mtab, &copy);
-                            endmntent(mtab);
-#endif
-                            add_mounted_entry(info, copy.mnt_fsname);
-                            log_normal(info, _("Mounted device %s"), copy.mnt_fsname);
-                        }
+    /* Try to mount unmounted CDROM filesystems */
+    mountfp = setmntent( _PATH_MNTTAB, "r" );
+    if( mountfp != NULL ) {
+        while( (mntent = getmntent( mountfp )) != NULL ){
+            if ( !strcmp(mntent->mnt_type, MNTTYPE_CDROM)) {
+                char *fsname = strdup(mntent->mnt_fsname);
+                char *dir = strdup(mntent->mnt_dir);
+                if ( !is_fs_mounted(fsname)) {
+                    if ( ! run_command(info, "mount", fsname) ) {
+                        add_mounted_entry(info, fsname, dir);
+                        log_normal(info, _("Mounted device %s"), fsname);
                     }
-                    free(copy.mnt_fsname);
-                    free(copy.mnt_dir);
-                    free(copy.mnt_type);
-                    free(copy.mnt_opts);
                 }
+                free(fsname);
+                free(dir);
             }
-            endmntent(mountfp);
         }
+        endmntent(mountfp);
     }
-
+    
     mountfp = setmntent(MOUNTS_FILE, "r" );
     if( mountfp != NULL ) {
         while( (mntent = getmntent( mountfp )) != NULL ){

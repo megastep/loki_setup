@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.80 2000-11-10 20:07:51 megastep Exp $ */
+/* $Id: install.c,v 1.81 2000-11-10 23:04:40 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -521,13 +521,14 @@ void set_cdrom_mounted(struct cdrom_elem *cd, const char *path)
     }
 }
 
-struct mounted_elem *add_mounted_entry(install_info *info, const char *device)
+struct mounted_elem *add_mounted_entry(install_info *info, const char *device, const char *dir)
 {
     struct mounted_elem *elem;
 
     elem = (struct mounted_elem *)malloc(sizeof *elem);
     if ( elem ) {
         elem->device = strdup(device);
+        elem->dir = strdup(dir);
         elem->next = info->mounted_list;
         info->mounted_list = elem;
     }
@@ -1535,8 +1536,6 @@ int run_script(install_info *info, const char *script, int arg)
 
         fp = fdopen(fd, "w");
         if ( fp ) {
-			pid_t child;
-
             fprintf(fp, /* Create script file, setting environment variables */
                 "#!/bin/sh\n"
                 "SETUP_PRODUCTNAME=\"%s\"\n"
@@ -1558,40 +1557,50 @@ int run_script(install_info *info, const char *script, int arg)
 			} else {
 				strncpy(cmd, info->install_path, sizeof(cmd));
 			}
-
-			switch( child = fork() ) {
-			case 0: {/* Inside the child */
-				char *argv[3];
-				argv[0] = script_file;
-				argv[1] = cmd;
-				argv[2] = NULL;
-				execv(script_file, argv);
-				perror("execv");
-				break;
-			}
-			case -1: /* Error */
-				perror("fork");
-				break;
-			default: /* Parent */
-				while ( waitpid(child, &exitval, WNOHANG) == 0 ) {
-					if ( UI.idle ) {
-						UI.idle(info); /* Run an idle loop while the script is running */
-					} else {
-						usleep(10000);
-					}
-				}
-				if ( WIFEXITED(exitval) ) {
-					exitval = WEXITSTATUS(exitval);
-				} else {
-					exitval = 1;
-				}
-				break;
-			}
+            
+            exitval = run_command(info, script_file, cmd);
         }
         close(fd);
         unlink(script_file);
     }
     return(exitval);
+}
+
+int run_command(install_info *info, const char *cmd, const char *arg)
+{
+    int exitval = 0;
+    pid_t child;
+
+    switch( child = fork() ) {
+    case 0: {/* Inside the child */
+        char *argv[3];
+        argv[0] = strdup(cmd);
+        argv[1] = strdup(arg);
+        argv[2] = NULL;
+        execvp(cmd, argv);
+        perror("execv");
+        free(argv[0]); free(argv[1]);
+        break;
+    }
+    case -1: /* Error */
+        perror("fork");
+        break;
+    default: /* Parent */
+        while ( waitpid(child, &exitval, WNOHANG) == 0 ) {
+            if ( UI.idle ) {
+                UI.idle(info); /* Run an idle loop while the command is running */
+            } else {
+                usleep(10000);
+            }
+        }
+        if ( WIFEXITED(exitval) ) {
+            exitval = WEXITSTATUS(exitval);
+        } else {
+            exitval = 1;
+        }
+        break;
+    }
+    return exitval;
 }
 
 /* Convenience functions to quickly change back and forth between current directories */

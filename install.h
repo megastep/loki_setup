@@ -110,6 +110,7 @@ typedef struct {
     /* The filesystems that were mounted by setup */
     struct mounted_elem {
         char *device;
+        char *dir;
         struct mounted_elem *next;
     } *mounted_list;
 
@@ -242,7 +243,7 @@ void set_cdrom_mounted(struct cdrom_elem *cd, const char *path);
 const char *get_cdrom(install_info *info, const char *id);
 
 /* Add a new mounted filesystem entry */
-struct mounted_elem *add_mounted_entry(install_info *info, const char *device);
+struct mounted_elem *add_mounted_entry(install_info *info, const char *device, const char *dir);
 
 /* Create a new component entry */
 struct component_elem *add_component_entry(install_info *info, const char *name, const char *version, int def);
@@ -331,6 +332,9 @@ extern int run_script(install_info *info, const char *script, int arg);
 extern void push_curdir(const char *path);
 
 extern void pop_curdir(void);
+
+/* Run a program in the background */
+int run_command(install_info *info, const char *cmd, const char *arg);
 
 #endif /* _install_h */
 

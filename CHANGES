@@ -16,7 +16,9 @@ Stéphane Peter - Thu Nov  2 22:02:57 PDT 2000
 Stéphane Peter - Thu Nov  9 16:14:03 PDT 2000
  * Added the 'cdrom' element and support for multiple CDROM installations.
  * The 'cdromfile' attribute is now mandatory if the CDROM is required.
- * Automatic mounting/unmounting of CDROM devices if setup is run as root.
+ * Automatic mounting/unmounting of CDROM devices if proper permissions are available.
+Stéphane Peter - Fri Nov 10 14:31:29 PDT 2000
+ * Do not overwrite the product XML file if it already exists; just update it.
  
 1.4.0:
 Sam Lantinga - Tue Aug 22 12:32:29 PDT 2000
