@@ -4,7 +4,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Setup\n"
-"POT-Creation-Date: 2000-08-04 19:32-0700\n"
+"POT-Creation-Date: 2000-10-20 14:46-0700\n"
 "PO-Revision-Date: 2000-06-23 15:05-07:00\n"
 "Last-Translator: David Hedbor <david@hedbor.org>\n"
 "Language-Team: Swedish\n"
@@ -13,191 +13,192 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 # SOME DESCRIPTIVE TITLE
-#: image/setup.data/setup.glade:741 image/setup.data/setup.glade:790
+#: image/setup.data/setup.glade:748 image/setup.data/setup.glade:797
 msgid "%P %%"
 msgstr "%P %%"
 
-#: image/setup.data/setup.glade:323 image/setup.data/setup.glade:349
+#: image/setup.data/setup.glade:330 image/setup.data/setup.glade:356
 msgid "0 MB"
 msgstr "0 MB"
 
-#: image/setup.data/setup.glade:571
+#: image/setup.data/setup.glade:578
 msgid "Begin Install"
 msgstr "Starta installationen"
 
-#: image/setup.data/setup.glade:545 image/setup.data/setup.glade:837
-#: image/setup.data/setup.glade:1272 image/setup.data/setup.glade:1776
+#: image/setup.data/setup.glade:552 image/setup.data/setup.glade:844
+#: image/setup.data/setup.glade:1279 image/setup.data/setup.glade:1805
 msgid "Cancel"
 msgstr "Avbryt"
 
-#: image/setup.data/setup.glade:1679
+#: image/setup.data/setup.glade:1708
 msgid "Close"
 msgstr "Stäng"
 
-#: image/setup.data/setup.glade:972
+#: image/setup.data/setup.glade:979
 msgid "Congratulations!"
 msgstr "Grattis!"
 
-#: image/setup.data/setup.glade:1285 image/setup.data/setup.glade:1419
+#: image/setup.data/setup.glade:1292 image/setup.data/setup.glade:1426
 msgid "Continue"
 msgstr "Fortsätt"
 
-#: image/setup.data/setup.glade:471
+#: image/setup.data/setup.glade:478
 msgid "Desktop menu items (KDE/Gnome)"
 msgstr "Filer för skrivbordsmenyer (KDE/Gnome)"
 
-#: image/setup.data/setup.glade:439
+#: image/setup.data/setup.glade:446
 msgid "Estimated size:"
 msgstr "Uppskattad storlek:"
 
-#: image/setup.data/setup.glade:911 image/setup.data/setup.glade:1147
-#: image/setup.data/setup.glade:1393
+#: image/setup.data/setup.glade:918 image/setup.data/setup.glade:1154
+#: image/setup.data/setup.glade:1400
 msgid "Exit"
 msgstr "Avsluta"
 
-#: image/setup.data/setup.glade:413
+#: image/setup.data/setup.glade:420
 msgid "Free space:"
 msgstr "Fritt utrymme:"
 
-#: image/setup.data/setup.glade:94
+#: image/setup.data/setup.glade:105
 msgid "Global Options"
 msgstr "Globala inställningar"
 
-#: image/setup.data/setup.glade:1789
+#: image/setup.data/setup.glade:1818
 msgid "I Agree"
 msgstr "Acceptera licensen"
 
-#: image/setup.data/setup.glade:1154
+#: image/setup.data/setup.glade:1161
 msgid "Install Aborted"
 msgstr "Installation avbruten"
 
-#: image/setup.data/setup.glade:944
+#: image/setup.data/setup.glade:951
 msgid "Install Complete"
 msgstr "Installation klar"
 
-#: image/setup.data/setup.glade:292
+#: image/setup.data/setup.glade:299
 msgid "Install Options"
 msgstr "Installationsinställningar"
 
-#: image/setup.data/setup.glade:627
+#: image/setup.data/setup.glade:634
 msgid "Install Progress"
 msgstr "Installation pågår..."
 
-#: image/setup.data/setup.glade:268
+#: image/setup.data/setup.glade:275
 msgid "Install a symbolic link into the path"
 msgstr ""
 
-#: image/setup.data/setup.glade:125
+#: image/setup.data/setup.glade:136
 msgid "Install path:"
 msgstr "Installationsbibliotek:"
 
-#: image/setup.data/setup.glade:1607
+#: image/setup.data/setup.glade:1614
 msgid "Launch Browser"
 msgstr "Starta webbläsare"
 
-#: image/setup.data/setup.glade:1568
+#: image/setup.data/setup.glade:1575
 msgid "Launching browser, please wait..."
 msgstr "Startar webbläsare, var god vänta..."
 
-#: image/setup.data/setup.glade:1722
+#: image/setup.data/setup.glade:1729
 msgid "License Agreement"
 msgstr "Licensavtal"
 
-#: image/setup.data/setup.glade:192
+#: image/setup.data/setup.glade:201
 #, fuzzy
 msgid "Link path:"
 msgstr "Installationsbibliotek:"
 
-#: image/setup.data/setup.glade:937
+#: image/setup.data/setup.glade:944
 msgid "Play!"
 msgstr "Spela!"
 
-#: image/setup.data/setup.glade:1517
+#: image/setup.data/setup.glade:1524
 msgid "Please visit our website for updates and support."
 msgstr "Besök vår webbplats för uppdateringar och support."
 
-#: image/setup.data/setup.glade:1199
+#: image/setup.data/setup.glade:1206
 msgid "Press 'Exit' to clean up temporary files."
 msgstr "Tryck 'Avsluta' för att ta bort temporärfiler. "
 
-#: image/setup.data/setup.glade:1426
+#: image/setup.data/setup.glade:1433
 msgid "Product Website"
 msgstr "Produktens webbplats"
 
-#: image/setup.data/setup.glade:1640
+#: image/setup.data/setup.glade:1647
 msgid "Readme File"
 msgstr "Readme-fil"
 
-#: image/setup.data/setup.glade:243
+#: image/setup.data/setup.glade:250
 msgid "Symbolic links to installed binaries are placed here"
 msgstr "Mjuka länkar till de installerade programmen skapas här "
 
-#: image/setup.data/setup.glade:1482
+#: image/setup.data/setup.glade:1489
 msgid "Thank you for installing "
 msgstr "Tack för att du installerade "
 
-#: image/setup.data/setup.glade:1023
-msgid "The game was installed in:"
-msgstr "Spelet installerades i:"
-
-#: image/setup.data/setup.glade:989
+#: image/setup.data/setup.glade:996
 msgid "The installation was successfully completed!"
 msgstr "Installationen lyckades!"
 
-#: image/setup.data/setup.glade:1182
+#: image/setup.data/setup.glade:1030
+#, fuzzy
+msgid "The product was installed in:"
+msgstr "Spelet installerades i:"
+
+#: image/setup.data/setup.glade:1189
 msgid "This installation has been aborted."
 msgstr "Den här installationen avbröts."
 
-#: image/setup.data/setup.glade:766
+#: image/setup.data/setup.glade:773
 msgid "Total Install"
 msgstr "Fullständig installation"
 
-#: image/setup.data/setup.glade:1074
+#: image/setup.data/setup.glade:1081
 msgid "Type '[game]' to play the game."
 msgstr "Skriv '[game]' för att starta spelet."
 
-#: image/setup.data/setup.glade:558 image/setup.data/setup.glade:850
-#: image/setup.data/setup.glade:924 image/setup.data/setup.glade:1406
+#: image/setup.data/setup.glade:565 image/setup.data/setup.glade:857
+#: image/setup.data/setup.glade:931 image/setup.data/setup.glade:1413
 msgid "View Readme"
 msgstr "Läs Readme"
 
-#: image/setup.data/setup.glade:1292
+#: image/setup.data/setup.glade:1299
 msgid "Warning"
 msgstr "Varning"
 
-#: image/setup.data/setup.glade:717
+#: image/setup.data/setup.glade:724
 msgid "[current file]"
 msgstr "[current file]"
 
-#: image/setup.data/setup.glade:683
+#: image/setup.data/setup.glade:690
 msgid "[current option]"
 msgstr "[current option]"
 
-#: image/setup.data/setup.glade:55
+#: image/setup.data/setup.glade:66
 msgid "[image area]"
 msgstr "[image area]"
 
-#: image/setup.data/setup.glade:1040
+#: image/setup.data/setup.glade:1047
 msgid "[install directory]"
 msgstr "[install directory]"
 
-#: image/setup.data/setup.glade:578
+#: image/setup.data/setup.glade:585
 msgid "[options status]"
 msgstr "[options status]"
 
-#: image/setup.data/setup.glade:395
+#: image/setup.data/setup.glade:402
 msgid "[packages go here]"
 msgstr "[packages go here]"
 
-#: image/setup.data/setup.glade:1499
+#: image/setup.data/setup.glade:1506
 msgid "[product]"
 msgstr "[product]"
 
-#: image/setup.data/setup.glade:1320
+#: image/setup.data/setup.glade:1327
 msgid "[warning text]"
 msgstr "[warning text]"
 
-#: main.c:106
+#: main.c:105
 #, fuzzy, c-format
 msgid ""
 "Usage: %s [options]\n"
@@ -228,7 +229,7 @@ msgstr ""
 "            0: Debug  1: Tyst  2: Normalt 3: Varningar 4: Fatala\n"
 "   -V       Skriv ut versionsnummber av setup-programmet och avsluta\n"
 
-#: main.c:120
+#: main.c:119
 #, fuzzy, c-format
 msgid ""
 "Usage: %s [options]\n"
@@ -256,25 +257,25 @@ msgstr ""
 "            0: Debug  1: Tyst  2: Normalt 3: Varningar 4: Fatala\n"
 "   -V       Skriv ut versionsnummber av setup-programmet och avsluta\n"
 
-#: main.c:197
+#: main.c:196
 msgid "Out of range value, setting verbosity level to normal.\n"
 msgstr "Felaktigt värd, sätter verbosity level till normal.\n"
 
-#: main.c:234
+#: main.c:233
 #, c-format
 msgid "Couldn't load '%s'\n"
 msgstr "Kunde inte ladda '%s'\n"
 
-#: main.c:238
+#: main.c:237
 #, c-format
 msgid "Detected locale is %s"
 msgstr "Funnen lokalitet är %s"
 
-#: main.c:247
+#: main.c:246
 msgid "No UI drivers available\n"
 msgstr "Hittade inga lämpliga UI-drivrutiner!\n"
 
-#: main.c:281
+#: main.c:280
 #, c-format
 msgid ""
 "\n"
@@ -284,200 +285,6 @@ msgstr ""
 "\n"
 "Var snäll montera cd-romskivan %s.\n"
 "Välj Ja för att försöka igen, Nej för att abryta."
-
-#: install.c:334 install.c:342
-msgid "Out of memory\n"
-msgstr "Slut på minne\n"
-
-#: file.c:64 file.c:84 file.c:91 install.c:411 install.c:431 install.c:452
-#: install.c:469 install.c:510
-msgid "Out of memory"
-msgstr "Slut på minne"
-
-#: install.c:495
-msgid "You must use a 'symlink' attribute with 'play'"
-msgstr ""
-
-#: install.c:500
-msgid "There can be only one binary with a 'play' attribute"
-msgstr ""
-
-#: install.c:503
-msgid "The only valid values for the 'play' attribute are yes and no"
-msgstr ""
-
-#: install.c:528
-msgid "Couldn't find your home directory"
-msgstr "Kunde inte hitta ditt hembibliotek"
-
-#: install.c:546
-#, c-format
-msgid "Couldn't find home directory for %s"
-msgstr "Kunde inte hitta hembiblioteket för %s"
-
-#: install.c:607
-msgid "XML: 'lang' tag does not have a mandatory 'lang' attribute"
-msgstr "XML: 'lang'-taggen saknar det obligatoriska 'lang'-attibutet"
-
-#: install.c:615
-#, c-format
-msgid "XML: option listed without translated description for locale '%s'"
-msgstr "XML: valmöjligheten saknar översatt beskrivning för '%s'"
-
-#: install.c:622
-msgid "XML: option listed without description"
-msgstr "XML: valmöjlighet utan beskrivning"
-
-#: install.c:764 install.c:772 install.c:781
-#, c-format
-msgid "Unable to remove '%s'"
-msgstr "Kan inte ta bort '%s'"
-
-#: install.c:805
-#, c-format
-msgid "The '%s' RPM was installed or upgraded (version %s, release %s)"
-msgstr "'%s'-RPMen installerades eller uppgraderas (version %s, release %s)"
-
-#: install.c:847
-#, c-format
-msgid "echo \"Uninstalling %s, please wait...\"\n"
-msgstr ""
-
-#: install.c:916
-#, c-format
-msgid "echo \"%s has been uninstalled.\"\n"
-msgstr "echo \"%s har avinstallerats.\"\n"
-
-#: install.c:918
-msgid ""
-"echo\n"
-"echo WARNING: The following RPM archives have been installed or upgraded\n"
-"echo when this software was installed. You may want to manually remove some "
-"of those:\n"
-msgstr ""
-"echo\n"
-"echo VARNING: Följande RPM-arkiv har installerats eller upgraderats när den "
-"här\n"
-"echo mjukvaran installerades. Du kanske vill ta bort några av dessa "
-"manuellt:\n"
-
-#: install.c:956
-#, c-format
-msgid "Please visit %s"
-msgstr "Var snäll besök %s"
-
-#: install.c:1154
-#, c-format
-msgid "Unable to create desktop file '%s'"
-msgstr "Kan inte skapa skrivbordsfilen '%s'"
-
-#: copy.c:245
-#, c-format
-msgid "Unable to copy directory '%s'"
-msgstr "Kan inte kopiera biblioteket '%s'"
-
-#: copy.c:274 copy.c:326 copy.c:422 copy.c:434
-#, c-format
-msgid "Unable to find file '%s'"
-msgstr "Kan inte hitta filen '%s'"
-
-#: copy.c:313
-#, c-format
-msgid "Unable to find file '%s' on any of the CDROM drives"
-msgstr "Kan inte hitta filen '%s' i någon av cd-romspelarna"
-
-#: copy.c:476
-msgid "Running script"
-msgstr ""
-
-#: copy.c:742
-#, c-format
-msgid "Suspect size value for option %s\n"
-msgstr "Konstigt storleksvärde för valmöljighet %s\n"
-
-#: file.c:125
-#, c-format
-msgid "Couldn't read from file: %s"
-msgstr "Kinde inte läsa från fil: %s "
-
-#: file.c:132
-#, c-format
-msgid "Installing file %s"
-msgstr "Installerar filen %s"
-
-#: file.c:137
-#, c-format
-msgid "Couldn't write to file: %s"
-msgstr "Kunde inte skriva till fil: %s"
-
-#: file.c:157
-msgid "Read on write stream"
-msgstr "Läsning från oläsbar dataström"
-
-#: file.c:199
-msgid "Skip zeroes on write stream"
-msgstr "Hoppa över nollor från oläsbar dataström"
-
-#: file.c:215 file.c:244 file.c:251
-#, c-format
-msgid "Short write on %s"
-msgstr "Misslyckad skrivning till %s"
-
-#: file.c:219
-msgid "Write on read stream"
-msgstr "Skrivning till läsbar dataström"
-
-#: file.c:267
-#, c-format
-msgid "Creating symbolic link: %s --> %s\n"
-msgstr "Skapar mjuk länk: %s --> %s\n"
-
-#: file.c:276
-#, c-format
-msgid "Can't remove existing symlink %s: %s"
-msgstr "Kan inte ta bort existerande mjuk länk %s: %s "
-
-#: file.c:280 file.c:302 file.c:322 file.c:341
-#, c-format
-msgid "Can't create %s: %s"
-msgstr "Kan inte skapa %s: %s"
-
-#: file.c:296
-#, c-format
-msgid "Creating directory: %s\n"
-msgstr "Skapar bibliotek: %s\n"
-
-#: file.c:315
-#, c-format
-msgid "Creating FIFO: %s\n"
-msgstr "Skapar FIFO: %s\n"
-
-#: file.c:334
-#, c-format
-msgid "Creating device: %s\n"
-msgstr "Skapar enhet: %s\n"
-
-#: file.c:354
-#, c-format
-msgid "Can't change permissions for %s: %s"
-msgstr "Kan inte byta rättigheter på %s: %s"
-
-#: file.c:388 file.c:410
-#, c-format
-msgid "Unable to read %s"
-msgstr "Kan inte läsa %s"
-
-#: network.c:142
-msgid "Out of memory, no network check"
-msgstr "Slut på minne, ingen närverkskontroll"
-
-#: network.c:152
-msgid "Unable to create pipe, no network check"
-msgstr "Kan inte skapa en pipa, ingen närverkskontroll"
-
-#: network.c:166
-msgid "Fork failed, no network check"
-msgstr "Fork misslyckades, ingen nätverkskontroll"
 
 #: plugins.c:95
 msgid ""
@@ -517,111 +324,306 @@ msgstr ""
 msgid "Error trying to load %s plugin: %s\n"
 msgstr ""
 
-#: console_ui.c:30
+#: network.c:142
+msgid "Out of memory, no network check"
+msgstr "Slut på minne, ingen närverkskontroll"
+
+#: network.c:152
+msgid "Unable to create pipe, no network check"
+msgstr "Kan inte skapa en pipa, ingen närverkskontroll"
+
+#: network.c:166
+msgid "Fork failed, no network check"
+msgstr "Fork misslyckades, ingen nätverkskontroll"
+
+#: install.c:346 install.c:354
+msgid "Out of memory\n"
+msgstr "Slut på minne\n"
+
+#: file.c:65 file.c:85 file.c:92 install.c:457 install.c:479 install.c:501
+#: install.c:522 install.c:561
+msgid "Out of memory"
+msgstr "Slut på minne"
+
+#: install.c:546
+msgid "You must use a 'symlink' attribute with 'play'"
+msgstr ""
+
+#: install.c:551
+msgid "There can be only one binary with a 'play' attribute"
+msgstr ""
+
+#: install.c:554
+msgid "The only valid values for the 'play' attribute are yes and no"
+msgstr ""
+
+#: install.c:579
+msgid "Couldn't find your home directory"
+msgstr "Kunde inte hitta ditt hembibliotek"
+
+#: install.c:597
+#, c-format
+msgid "Couldn't find home directory for %s"
+msgstr "Kunde inte hitta hembiblioteket för %s"
+
+#: install.c:658
+msgid "XML: 'lang' tag does not have a mandatory 'lang' attribute"
+msgstr "XML: 'lang'-taggen saknar det obligatoriska 'lang'-attibutet"
+
+#: install.c:666
+#, c-format
+msgid "XML: option listed without translated description for locale '%s'"
+msgstr "XML: valmöjligheten saknar översatt beskrivning för '%s'"
+
+#: install.c:673
+msgid "XML: option listed without description"
+msgstr "XML: valmöjlighet utan beskrivning"
+
+#: install.c:826 install.c:838 install.c:870
+#, c-format
+msgid "Unable to remove '%s'"
+msgstr "Kan inte ta bort '%s'"
+
+#: install.c:858
+#, fuzzy, c-format
+msgid "The '%s' RPM was installed or upgraded (version %s, release %d)"
+msgstr "'%s'-RPMen installerades eller uppgraderas (version %s, release %s)"
+
+#: install.c:993
+#, fuzzy, c-format
+msgid "Could not register binary: %s"
+msgstr "Kunde inte skriva till fil: %s"
+
+#: install.c:1030
+#, c-format
+msgid "Could not write temporary pre-uninstall script in %s"
+msgstr ""
+
+#: install.c:1051
+#, c-format
+msgid "Could not write post-uninstall script in %s"
+msgstr ""
+
+#: install.c:1061
+msgid "Could not create install log"
+msgstr ""
+
+#: install.c:1088
+#, c-format
+msgid "Please visit %s"
+msgstr "Var snäll besök %s"
+
+#: install.c:1288
+#, c-format
+msgid "Unable to create desktop file '%s'"
+msgstr "Kan inte skapa skrivbordsfilen '%s'"
+
+#: copy.c:206
+#, fuzzy, c-format
+msgid "Unable to create %s symlink pointing to %s"
+msgstr "Kan inte skapa skrivbordsfilen '%s'"
+
+#: copy.c:268
+#, c-format
+msgid "Unable to copy directory '%s'"
+msgstr "Kan inte kopiera biblioteket '%s'"
+
+#: copy.c:297 copy.c:349 copy.c:446 copy.c:458
+#, c-format
+msgid "Unable to find file '%s'"
+msgstr "Kan inte hitta filen '%s'"
+
+#: copy.c:336
+#, c-format
+msgid "Unable to find file '%s' on any of the CDROM drives"
+msgstr "Kan inte hitta filen '%s' i någon av cd-romspelarna"
+
+#: copy.c:500
+msgid "Running script"
+msgstr ""
+
+#: copy.c:767
+#, c-format
+msgid "Suspect size value for option %s\n"
+msgstr "Konstigt storleksvärde för valmöljighet %s\n"
+
+#: file.c:126
+#, c-format
+msgid "Couldn't read from file: %s"
+msgstr "Kinde inte läsa från fil: %s "
+
+#: file.c:134
+#, c-format
+msgid "Installing file %s"
+msgstr "Installerar filen %s"
+
+#: file.c:139
+#, c-format
+msgid "Couldn't write to file: %s"
+msgstr "Kunde inte skriva till fil: %s"
+
+#: file.c:160
+msgid "Read on write stream"
+msgstr "Läsning från oläsbar dataström"
+
+#: file.c:203
+msgid "Skip zeroes on write stream"
+msgstr "Hoppa över nollor från oläsbar dataström"
+
+#: file.c:220 file.c:251 file.c:258
+#, c-format
+msgid "Short write on %s"
+msgstr "Misslyckad skrivning till %s"
+
+#: file.c:226
+msgid "Write on read stream"
+msgstr "Skrivning till läsbar dataström"
+
+#: file.c:278
+#, c-format
+msgid "Creating symbolic link: %s --> %s\n"
+msgstr "Skapar mjuk länk: %s --> %s\n"
+
+#: file.c:287
+#, c-format
+msgid "Can't remove existing symlink %s: %s"
+msgstr "Kan inte ta bort existerande mjuk länk %s: %s "
+
+#: file.c:291 file.c:322 file.c:342 file.c:361
+#, c-format
+msgid "Can't create %s: %s"
+msgstr "Kan inte skapa %s: %s"
+
+#: file.c:316
+#, c-format
+msgid "Creating directory: %s\n"
+msgstr "Skapar bibliotek: %s\n"
+
+#: file.c:335
+#, c-format
+msgid "Creating FIFO: %s\n"
+msgstr "Skapar FIFO: %s\n"
+
+#: file.c:354
+#, c-format
+msgid "Creating device: %s\n"
+msgstr "Skapar enhet: %s\n"
+
+#: file.c:374
+#, c-format
+msgid "Can't change permissions for %s: %s"
+msgstr "Kan inte byta rättigheter på %s: %s"
+
+#: file.c:408 file.c:432
+#, c-format
+msgid "Unable to read %s"
+msgstr "Kan inte läsa %s"
+
+#: console_ui.c:31
 msgid "Y"
 msgstr "J"
 
-#: console_ui.c:31
+#: console_ui.c:32
 msgid "N"
 msgstr "N"
 
-#: console_ui.c:58
+#: console_ui.c:59
 msgid "Y/n"
 msgstr "J/n"
 
-#: console_ui.c:61
+#: console_ui.c:62
 msgid "N/y"
 msgstr "N/j"
 
-#: console_ui.c:64 console_ui.c:90
+#: console_ui.c:65 console_ui.c:91
 #, c-format
 msgid "Warning, invalid yesno prompt: %s\n"
 msgstr "Varning, felaktig ja/nej prompt: %s\n"
 
-#: console_ui.c:84
+#: console_ui.c:85
 msgid "Y/n/?"
 msgstr "J/n/?"
 
-#: console_ui.c:87
+#: console_ui.c:88
 msgid "N/y/?"
 msgstr "N/y/?"
 
-#: console_ui.c:107
+#: console_ui.c:108
 msgid "Continue?"
 msgstr "Fortsätt?"
 
-#: console_ui.c:154
+#: console_ui.c:155
 #, fuzzy, c-format
 msgid "'%s' option will be installed.\n"
 msgstr "%d MB tillgänligt, %d MB kommer att installeras.\n"
 
-#: console_ui.c:158
+#: console_ui.c:159
 #, c-format
 msgid "Install %s?"
 msgstr "Installera %s?"
 
-#: console_ui.c:201
+#: console_ui.c:202
 #, fuzzy
 msgid "No help available\n"
 msgstr "Hittade inga lämpliga UI-drivrutiner!\n"
 
-#: console_ui.c:218
+#: console_ui.c:219
 #, c-format
 msgid "----====== %s installation program ======----\n"
 msgstr "----====== %s installationsprogram ======----\n"
 
-#: console_ui.c:220
+#: console_ui.c:221
 #, c-format
 msgid "You are running a %s machine with %s\n"
 msgstr "Du har en %s-dator med %s\n"
 
-#: console_ui.c:221
+#: console_ui.c:222
 msgid "Hit Control-C anytime to cancel this installation program.\n"
 msgstr "Tryck Control-C närsomhelst för att avbryta installationsprocessen.\n"
 
-#: console_ui.c:239
+#: console_ui.c:240
 msgid "Do you agree with the license?"
 msgstr "Godkänner du licensavtalet?"
 
-#: console_ui.c:256
+#: console_ui.c:257
 #, c-format
 msgid "Would you like to read the %s file ?"
 msgstr "Vill du läsa filen %s?"
 
-#: console_ui.c:307
+#: console_ui.c:308
 msgid "Please choose the product to install, or Q to quit. "
 msgstr ""
 
-#: console_ui.c:337
+#: console_ui.c:338
 msgid "Please enter the installation path"
 msgstr "Ange installationsbibliotek"
 
-#: console_ui.c:342
+#: console_ui.c:343
 #, fuzzy, c-format
 msgid "Install path set to: %s\n"
 msgstr "Installationsbibliotek: %s\n"
 
-#: console_ui.c:357 console_ui.c:411
+#: console_ui.c:358 console_ui.c:412
 #, c-format
 msgid "No write permission to %s\n"
 msgstr "Inga skrivrättigheter i %s\n"
 
-#: console_ui.c:383
+#: console_ui.c:384
 #, fuzzy
 msgid "Do you want to install symbolic links to a directory in your path?"
 msgstr "Vill du installera skrivbordsfiler?"
 
-#: console_ui.c:390
+#: console_ui.c:391
 #, fuzzy
 msgid "Please enter the path in which to create the symbolic links"
 msgstr "Ange biblioteket för programfilerna"
 
-#: console_ui.c:395
+#: console_ui.c:396
 #, c-format
 msgid "Binary path set to: %s\n"
 msgstr ""
 
-#: console_ui.c:402
+#: console_ui.c:403
 msgid ""
 "Binary path must be different than the install path.\n"
 "The binary path must be an existing directory.\n"
@@ -629,42 +631,43 @@ msgstr ""
 "Programbiblioteket måste skilja sig från installations-\n"
 "biblioteket och måste vara ett existerande bibliotek.\n"
 
-#: console_ui.c:437
+#: console_ui.c:438
 msgid "Do you want to install desktop items?"
 msgstr "Vill du installera skrivbordsfiler?"
 
-#: console_ui.c:443
+#: console_ui.c:444
 #, c-format
 msgid "Installing to %s\n"
 msgstr "Installerar i %s\n"
 
-#: console_ui.c:444
+#: console_ui.c:445
 #, c-format
 msgid "%d MB available, %d MB will be installed.\n"
 msgstr "%d MB tillgänligt, %d MB kommer att installeras.\n"
 
-#: console_ui.c:447
+#: console_ui.c:448
 msgid "Continue install?"
 msgstr "Fortsätt installationen?"
 
-#: console_ui.c:461
+#: console_ui.c:462
 #, c-format
 msgid "Installing %s ...\n"
 msgstr "Installerar %s ...\n"
 
-#: console_ui.c:472
+#: console_ui.c:473
 msgid "Install aborted - cleaning up files\n"
 msgstr "Installationen avbruten - tar bort temporärfiler\n"
 
-#: console_ui.c:480
+#: console_ui.c:481
 msgid "Installation complete.\n"
 msgstr "Installationen färdig.\n"
 
-#: console_ui.c:484
-msgid "Would you like launch the game now?"
+#: console_ui.c:485
+#, fuzzy
+msgid "Would you like to launch the game now?"
 msgstr "Vill du starta spelet nu?"
 
-#: console_ui.c:489 gtk_ui.c:419
+#: console_ui.c:490 gtk_ui.c:406
 msgid ""
 "If you run a game as root, the preferences will be stored in\n"
 "root's home directory instead of your user account directory."
@@ -672,109 +675,109 @@ msgstr ""
 "On du kör spelet som root så kommer inställningarna sparas i root's\n"
 "hembibliotek istället för i ditt hembibliotekt."
 
-#: console_ui.c:521
+#: console_ui.c:506
 #, c-format
 msgid "Thank you for installing %s!\n"
 msgstr "Tack för att du installerade %s!\n"
 
-#: console_ui.c:526
+#: console_ui.c:511
 msgid "Please visit our website for updates and support.\n"
 msgstr "Besök vår webbplats för uppdateringar och support.\n"
 
-#: console_ui.c:531
+#: console_ui.c:516
 msgid "Would you like to launch web browser?"
 msgstr "Vill du starta en webbläsare?"
 
-#: console_ui.c:542
+#: console_ui.c:527
 msgid "Standard input is not a terminal!\n"
 msgstr "Standard input är inte en terminal!\n"
 
-#: gtk_ui.c:533
+#: gtk_ui.c:520
 msgid "Please respond to the license dialog"
 msgstr "Vad god att svara på licensdialogen"
 
-#: gtk_ui.c:535
+#: gtk_ui.c:522
 msgid "No destination directory selected"
 msgstr "Inget destinationsbibliotek valt "
 
-#: gtk_ui.c:538
+#: gtk_ui.c:525
 msgid "Please select at least one option"
 msgstr "Välj minst ett paket "
 
-#: gtk_ui.c:541
+#: gtk_ui.c:528
 msgid "Not enough free space for the selected options"
 msgstr "Otillräckligt diskutrymme för de valda paketen  "
 
-#: gtk_ui.c:543
+#: gtk_ui.c:530
 msgid "Install path is not a directory"
 msgstr "Installationsbiblioteket är inte ett bibliotek"
 
-#: gtk_ui.c:545
+#: gtk_ui.c:532
 msgid "No write permissions on the install directory"
 msgstr "Inga skrivrättigheter i installationsbiblioteket"
 
-#: gtk_ui.c:547
+#: gtk_ui.c:534
 msgid "Binary path and install path must be different"
 msgstr "Programbibliotek och installationsbiblioteken måste vara olika."
 
-#: gtk_ui.c:549
+#: gtk_ui.c:536
 msgid "No write permissions to install a selected package"
 msgstr "Inga skrivrättigheter för installation av ett valt paket "
 
-#: gtk_ui.c:552
+#: gtk_ui.c:539
 msgid "No write permissions on the binary directory"
 msgstr "Inga skrivrättigheter i programbiblioteket"
 
-#: gtk_ui.c:561
+#: gtk_ui.c:548
 msgid "Ready to install!"
 msgstr "Klart för installation"
 
-#: gtk_ui.c:574 gtk_ui.c:588
+#: gtk_ui.c:561 gtk_ui.c:575
 #, c-format
 msgid "%d MB"
 msgstr "%d MB"
 
-#: gtk_ui.c:741
+#: gtk_ui.c:729
 msgid "Yes"
 msgstr "Ja"
 
-#: gtk_ui.c:742
+#: gtk_ui.c:730
 msgid "No"
 msgstr "Nej"
 
-#: gtk_ui.c:769
+#: gtk_ui.c:757
 msgid "Setup"
 msgstr "Setup"
 
-#: gtk_ui.c:817
+#: gtk_ui.c:805
 #, fuzzy
 msgid "Fatal error:  out of memory\n"
 msgstr "Slut på minne\n"
 
-#: gtk_ui.c:824
+#: gtk_ui.c:812
 #, c-format
 msgid "Error: maximum of %d install_path entries exceeded\n"
 msgstr ""
 
-#: gtk_ui.c:933
+#: gtk_ui.c:930
 msgid "Warning: No writable targets in path... You may want to be root.\n"
 msgstr ""
 
-#: gtk_ui.c:952
+#: gtk_ui.c:949
 msgid "Unable to locate 'setup_menuitems_checkbox'"
 msgstr "Kan inte hitta 'setup_menuitems_checkbox'"
 
-#: gtk_ui.c:1162
+#: gtk_ui.c:1163
 #, c-format
 msgid "%s Setup"
 msgstr "Installation av %s"
 
-#: gtk_ui.c:1391
+#: gtk_ui.c:1392
 #, c-format
 msgid "Unable to open %s, aborting!\n"
 msgstr "Kan inte öppna %s, avslutar!\n"
 
-#: gtk_ui.c:1446
+#: gtk_ui.c:1447
 #, c-format
 msgid "Type '%s' to start the program"
 msgstr "Skriv '%s' för att starta programmet"
@@ -827,6 +830,21 @@ msgstr "Kan inte installera RPM-filen: '%s'"
 #, c-format
 msgid "Tar: '%s' is unknown file type: %c"
 msgstr "Tar: '%s' är av okänd filtyp: %c "
+
+#~ msgid "echo \"%s has been uninstalled.\"\n"
+#~ msgstr "echo \"%s har avinstallerats.\"\n"
+
+#~ msgid ""
+#~ "echo\n"
+#~ "echo WARNING: The following RPM archives have been installed or upgraded\n"
+#~ "echo when this software was installed. You may want to manually remove some "
+#~ "of those:\n"
+#~ msgstr ""
+#~ "echo\n"
+#~ "echo VARNING: Följande RPM-arkiv har installerats eller upgraderats när den "
+#~ "här\n"
+#~ "echo mjukvaran installerades. Du kanske vill ta bort några av dessa "
+#~ "manuellt:\n"
 
 #~ msgid "Binary directory:"
 #~ msgstr "Programbibliotek:"

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-10-11 14:49-0700\n"
+"POT-Creation-Date: 2000-10-20 14:46-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -137,12 +137,12 @@ msgstr ""
 msgid "Thank you for installing "
 msgstr ""
 
-#: image/setup.data/setup.glade:1030
-msgid "The game was installed in:"
-msgstr ""
-
 #: image/setup.data/setup.glade:996
 msgid "The installation was successfully completed!"
+msgstr ""
+
+#: image/setup.data/setup.glade:1030
+msgid "The product was installed in:"
 msgstr ""
 
 #: image/setup.data/setup.glade:1189
@@ -316,118 +316,108 @@ msgid "Out of memory\n"
 msgstr ""
 
 #: file.c:65 file.c:85 file.c:92 install.c:457 install.c:479 install.c:501
-#: install.c:522 install.c:563
+#: install.c:522 install.c:561
 msgid "Out of memory"
 msgstr ""
 
-#: install.c:548
+#: install.c:546
 msgid "You must use a 'symlink' attribute with 'play'"
 msgstr ""
 
-#: install.c:553
+#: install.c:551
 msgid "There can be only one binary with a 'play' attribute"
 msgstr ""
 
-#: install.c:556
+#: install.c:554
 msgid "The only valid values for the 'play' attribute are yes and no"
 msgstr ""
 
-#: install.c:581
+#: install.c:579
 msgid "Couldn't find your home directory"
 msgstr ""
 
-#: install.c:599
+#: install.c:597
 #, c-format
 msgid "Couldn't find home directory for %s"
 msgstr ""
 
-#: install.c:660
+#: install.c:658
 msgid "XML: 'lang' tag does not have a mandatory 'lang' attribute"
 msgstr ""
 
-#: install.c:668
+#: install.c:666
 #, c-format
 msgid "XML: option listed without translated description for locale '%s'"
 msgstr ""
 
-#: install.c:675
+#: install.c:673
 msgid "XML: option listed without description"
 msgstr ""
 
-#: install.c:830 install.c:842 install.c:874
+#: install.c:826 install.c:838 install.c:870
 #, c-format
 msgid "Unable to remove '%s'"
 msgstr ""
 
-#: install.c:862
+#: install.c:858
 #, c-format
 msgid "The '%s' RPM was installed or upgraded (version %s, release %d)"
 msgstr ""
 
-#: install.c:966
+#: install.c:993
+#, c-format
+msgid "Could not register binary: %s"
+msgstr ""
+
+#: install.c:1030
 #, c-format
 msgid "Could not write temporary pre-uninstall script in %s"
 msgstr ""
 
-#: install.c:1013
+#: install.c:1051
 #, c-format
 msgid "Could not write post-uninstall script in %s"
 msgstr ""
 
-#: install.c:1022
+#: install.c:1061
 msgid "Could not create install log"
 msgstr ""
 
-#: install.c:1098
-#, c-format
-msgid "Couldn't write to %s!"
-msgstr ""
-
-#: install.c:1102
-#, c-format
-msgid "Couldn't open %s to be copied!"
-msgstr ""
-
-#: install.c:1138
-#, c-format
-msgid "Could not write uninstall script: %s"
-msgstr ""
-
-#: install.c:1165
+#: install.c:1088
 #, c-format
 msgid "Please visit %s"
 msgstr ""
 
-#: install.c:1365
+#: install.c:1288
 #, c-format
 msgid "Unable to create desktop file '%s'"
 msgstr ""
 
-#: copy.c:205
+#: copy.c:206
 #, c-format
 msgid "Unable to create %s symlink pointing to %s"
 msgstr ""
 
-#: copy.c:264
+#: copy.c:268
 #, c-format
 msgid "Unable to copy directory '%s'"
 msgstr ""
 
-#: copy.c:293 copy.c:345 copy.c:441 copy.c:453
+#: copy.c:297 copy.c:349 copy.c:446 copy.c:458
 #, c-format
 msgid "Unable to find file '%s'"
 msgstr ""
 
-#: copy.c:332
+#: copy.c:336
 #, c-format
 msgid "Unable to find file '%s' on any of the CDROM drives"
 msgstr ""
 
-#: copy.c:495
+#: copy.c:500
 msgid "Running script"
 msgstr ""
 
-#: copy.c:766
+#: copy.c:767
 #, c-format
 msgid "Suspect size value for option %s\n"
 msgstr ""
@@ -504,256 +494,256 @@ msgstr ""
 msgid "Unable to read %s"
 msgstr ""
 
-#: console_ui.c:30
+#: console_ui.c:31
 msgid "Y"
 msgstr ""
 
-#: console_ui.c:31
+#: console_ui.c:32
 msgid "N"
 msgstr ""
 
-#: console_ui.c:58
+#: console_ui.c:59
 msgid "Y/n"
 msgstr ""
 
-#: console_ui.c:61
+#: console_ui.c:62
 msgid "N/y"
 msgstr ""
 
-#: console_ui.c:64 console_ui.c:90
+#: console_ui.c:65 console_ui.c:91
 #, c-format
 msgid "Warning, invalid yesno prompt: %s\n"
 msgstr ""
 
-#: console_ui.c:84
+#: console_ui.c:85
 msgid "Y/n/?"
 msgstr ""
 
-#: console_ui.c:87
+#: console_ui.c:88
 msgid "N/y/?"
 msgstr ""
 
-#: console_ui.c:107
+#: console_ui.c:108
 msgid "Continue?"
 msgstr ""
 
-#: console_ui.c:154
+#: console_ui.c:155
 #, c-format
 msgid "'%s' option will be installed.\n"
 msgstr ""
 
-#: console_ui.c:158
+#: console_ui.c:159
 #, c-format
 msgid "Install %s?"
 msgstr ""
 
-#: console_ui.c:201
+#: console_ui.c:202
 msgid "No help available\n"
 msgstr ""
 
-#: console_ui.c:218
+#: console_ui.c:219
 #, c-format
 msgid "----====== %s installation program ======----\n"
 msgstr ""
 
-#: console_ui.c:220
+#: console_ui.c:221
 #, c-format
 msgid "You are running a %s machine with %s\n"
 msgstr ""
 
-#: console_ui.c:221
+#: console_ui.c:222
 msgid "Hit Control-C anytime to cancel this installation program.\n"
 msgstr ""
 
-#: console_ui.c:239
+#: console_ui.c:240
 msgid "Do you agree with the license?"
 msgstr ""
 
-#: console_ui.c:256
+#: console_ui.c:257
 #, c-format
 msgid "Would you like to read the %s file ?"
 msgstr ""
 
-#: console_ui.c:307
+#: console_ui.c:308
 msgid "Please choose the product to install, or Q to quit. "
 msgstr ""
 
-#: console_ui.c:337
+#: console_ui.c:338
 msgid "Please enter the installation path"
 msgstr ""
 
-#: console_ui.c:342
+#: console_ui.c:343
 #, c-format
 msgid "Install path set to: %s\n"
 msgstr ""
 
-#: console_ui.c:357 console_ui.c:411
+#: console_ui.c:358 console_ui.c:412
 #, c-format
 msgid "No write permission to %s\n"
 msgstr ""
 
-#: console_ui.c:383
+#: console_ui.c:384
 msgid "Do you want to install symbolic links to a directory in your path?"
 msgstr ""
 
-#: console_ui.c:390
+#: console_ui.c:391
 msgid "Please enter the path in which to create the symbolic links"
 msgstr ""
 
-#: console_ui.c:395
+#: console_ui.c:396
 #, c-format
 msgid "Binary path set to: %s\n"
 msgstr ""
 
-#: console_ui.c:402
+#: console_ui.c:403
 msgid ""
 "Binary path must be different than the install path.\n"
 "The binary path must be an existing directory.\n"
 msgstr ""
 
-#: console_ui.c:437
+#: console_ui.c:438
 msgid "Do you want to install desktop items?"
-msgstr ""
-
-#: console_ui.c:443
-#, c-format
-msgid "Installing to %s\n"
 msgstr ""
 
 #: console_ui.c:444
 #, c-format
+msgid "Installing to %s\n"
+msgstr ""
+
+#: console_ui.c:445
+#, c-format
 msgid "%d MB available, %d MB will be installed.\n"
 msgstr ""
 
-#: console_ui.c:447
+#: console_ui.c:448
 msgid "Continue install?"
 msgstr ""
 
-#: console_ui.c:461
+#: console_ui.c:462
 #, c-format
 msgid "Installing %s ...\n"
 msgstr ""
 
-#: console_ui.c:472
+#: console_ui.c:473
 msgid "Install aborted - cleaning up files\n"
 msgstr ""
 
-#: console_ui.c:480
+#: console_ui.c:481
 msgid "Installation complete.\n"
 msgstr ""
 
-#: console_ui.c:484
-msgid "Would you like launch the game now?"
+#: console_ui.c:485
+msgid "Would you like to launch the game now?"
 msgstr ""
 
-#: console_ui.c:489 gtk_ui.c:419
+#: console_ui.c:490 gtk_ui.c:406
 msgid ""
 "If you run a game as root, the preferences will be stored in\n"
 "root's home directory instead of your user account directory."
 msgstr ""
 
-#: console_ui.c:521
+#: console_ui.c:506
 #, c-format
 msgid "Thank you for installing %s!\n"
 msgstr ""
 
-#: console_ui.c:526
+#: console_ui.c:511
 msgid "Please visit our website for updates and support.\n"
 msgstr ""
 
-#: console_ui.c:531
+#: console_ui.c:516
 msgid "Would you like to launch web browser?"
 msgstr ""
 
-#: console_ui.c:542
+#: console_ui.c:527
 msgid "Standard input is not a terminal!\n"
 msgstr ""
 
-#: gtk_ui.c:533
+#: gtk_ui.c:520
 msgid "Please respond to the license dialog"
 msgstr ""
 
-#: gtk_ui.c:535
+#: gtk_ui.c:522
 msgid "No destination directory selected"
 msgstr ""
 
-#: gtk_ui.c:538
+#: gtk_ui.c:525
 msgid "Please select at least one option"
 msgstr ""
 
-#: gtk_ui.c:541
+#: gtk_ui.c:528
 msgid "Not enough free space for the selected options"
 msgstr ""
 
-#: gtk_ui.c:543
+#: gtk_ui.c:530
 msgid "Install path is not a directory"
 msgstr ""
 
-#: gtk_ui.c:545
+#: gtk_ui.c:532
 msgid "No write permissions on the install directory"
 msgstr ""
 
-#: gtk_ui.c:547
+#: gtk_ui.c:534
 msgid "Binary path and install path must be different"
 msgstr ""
 
-#: gtk_ui.c:549
+#: gtk_ui.c:536
 msgid "No write permissions to install a selected package"
 msgstr ""
 
-#: gtk_ui.c:552
+#: gtk_ui.c:539
 msgid "No write permissions on the binary directory"
 msgstr ""
 
-#: gtk_ui.c:561
+#: gtk_ui.c:548
 msgid "Ready to install!"
 msgstr ""
 
-#: gtk_ui.c:574 gtk_ui.c:588
+#: gtk_ui.c:561 gtk_ui.c:575
 #, c-format
 msgid "%d MB"
 msgstr ""
 
-#: gtk_ui.c:742
+#: gtk_ui.c:729
 msgid "Yes"
 msgstr ""
 
-#: gtk_ui.c:743
+#: gtk_ui.c:730
 msgid "No"
 msgstr ""
 
-#: gtk_ui.c:770
+#: gtk_ui.c:757
 msgid "Setup"
 msgstr ""
 
-#: gtk_ui.c:818
+#: gtk_ui.c:805
 msgid "Fatal error:  out of memory\n"
 msgstr ""
 
-#: gtk_ui.c:825
+#: gtk_ui.c:812
 #, c-format
 msgid "Error: maximum of %d install_path entries exceeded\n"
 msgstr ""
 
-#: gtk_ui.c:943
+#: gtk_ui.c:930
 msgid "Warning: No writable targets in path... You may want to be root.\n"
 msgstr ""
 
-#: gtk_ui.c:962
+#: gtk_ui.c:949
 msgid "Unable to locate 'setup_menuitems_checkbox'"
 msgstr ""
 
-#: gtk_ui.c:1174
+#: gtk_ui.c:1163
 #, c-format
 msgid "%s Setup"
 msgstr ""
 
-#: gtk_ui.c:1403
+#: gtk_ui.c:1392
 #, c-format
 msgid "Unable to open %s, aborting!\n"
 msgstr ""
 
-#: gtk_ui.c:1458
+#: gtk_ui.c:1447
 #, c-format
 msgid "Type '%s' to start the program"
 msgstr ""
