@@ -11,17 +11,13 @@ extern const char *detect_libc(void);
 extern int detect_diskspace(const char *path);
 
 /* Function to detect the CDROM drives, returns the number of drives */
-extern int detect_cdrom(const char *unique_file);
+extern int detect_cdrom(install_info *info);
 
 /* Match a list of architectures or libc */
 extern int match_arch(install_info *info, const char *wanted);
 extern int match_libc(install_info *info, const char *wanted);
 
-/* These global variables are initialized by detect_cdrom()
-   cdroms[] contains a list of mount points for all the detected mounted CDROMs
- */
-extern char *cdroms[MAX_DRIVES];
-extern int  num_cdroms;
-
+/* Unmount and free all filesystems that setup may have mounted if run as root */
+void unmount_filesystems(install_info *info);
 
 #endif /* _detect_h */

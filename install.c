@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.78 2000-11-09 02:07:58 megastep Exp $ */
+/* $Id: install.c,v 1.79 2000-11-10 06:38:00 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -281,6 +281,7 @@ int GetProductCDROMDescriptions(install_info *info)
 	xmlNodePtr node;
     const char *text;
     char name[BUFSIZ];
+    struct cdrom_elem *entry;
 
 	node = info->config->root->childs;
 	while(node) {
@@ -291,8 +292,11 @@ int GetProductCDROMDescriptions(install_info *info)
                 while ( (*name == 0) && parse_line(&text, name, sizeof(name)) )
 						;
             }
-            if ( add_cdrom_entry(info, xmlGetProp(node, "id"), xmlGetProp(node, "name"), name) )
+            entry = add_cdrom_entry(info, xmlGetProp(node, "id"), xmlGetProp(node, "name"), name);
+            if ( entry ) {
+                
                 count ++;
+            }
         }
         node = node->next;
     }
@@ -341,7 +345,7 @@ const char *GetProductUpdateURL(install_info *info)
 
     url = xmlGetProp(info->config->root, "update_url");
     if ( url == NULL ) {
-        url = "http://www.lokigames.com/updates/";
+        url = "http://updates.lokigames.com/";
     }
     return url;
 }
@@ -421,6 +425,7 @@ install_info *create_install(const char *configfile, int log_level,
     info->libc = detect_libc();
 
     info->cdroms_list = NULL;
+    info->mounted_list = NULL;
 
     /* Set product DB stuff to nothing by default */
     info->product = NULL;
@@ -514,6 +519,19 @@ void set_cdrom_mounted(struct cdrom_elem *cd, const char *path)
         free(cd->mounted);
         cd->mounted = path ? strdup(path) : NULL;
     }
+}
+
+struct mounted_elem *add_mounted_entry(install_info *info, const char *device)
+{
+    struct mounted_elem *elem;
+
+    elem = (struct mounted_elem *)malloc(sizeof *elem);
+    if ( elem ) {
+        elem->device = strdup(device);
+        elem->next = info->mounted_list;
+        info->mounted_list = elem;
+    }
+    return elem;
 }
 
 struct component_elem *add_component_entry(install_info *info, const char *name, const char *version,
@@ -878,6 +896,7 @@ void delete_install(install_info *info)
         cdrom = cdrom->next;
         free(oldcd);
     }
+    unmount_filesystems(info);
     if ( info->lookup ) {
         close_lookup(info->lookup);
     }
@@ -1044,7 +1063,7 @@ static void output_script_header(FILE *f, install_info *info, product_component_
             loki_getname_component(comp), loki_getversion_component(comp),
             info->install_path,
             info->symlinks_path,
-            num_cdroms > 0 ? cdroms[0] : "");
+            info->cdroms_list ? info->cdroms_list->mounted : "");
 #ifdef RPM_SUPPORT
     if(strcmp(rpm_root,"/")) /* Emulate RPM environment for scripts */
         fprintf(f,"RPM_INSTALL_PREFIX=%s\n", rpm_root);
@@ -1520,7 +1539,7 @@ int run_script(install_info *info, const char *script, int arg)
                 info->name, info->version,
                 info->install_path,
                 info->symlinks_path,
-                num_cdroms > 0 ? cdroms[0] : "",
+                info->cdroms_list ? info->cdroms_list->mounted : "",
                 working_dir, script);     
             fchmod(fileno(fp),0755); /* Turn on executable bit */
             fclose(fp);

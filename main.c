@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.37 2000-11-03 07:04:36 megastep Exp $ */
+/* $Id: main.c,v 1.38 2000-11-10 06:38:00 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -131,6 +131,42 @@ _("Usage: %s [options]\n\n"
      argv0, SETUP_CONFIG);
 }
 
+/* Get a mount point for the specified CDROM, and return its path.
+   If the CDROM is not mounted, prompt the user to mount it */
+const char *get_cdrom(install_info *info, const char *id)
+{
+    const char *mounted = NULL, *desc = info->desc;
+    struct cdrom_elem *cd;
+
+    while ( ! mounted ) {
+        for ( cd = info->cdroms_list; cd; cd = cd->next ) {
+            if ( !strcmp(id, cd->id) ) {
+                desc = cd->name;
+                if ( cd->mounted ) {
+                    mounted = cd->mounted;
+                    break;
+                }
+            }
+        }
+        if ( ! mounted ) {
+            yesno_answer response;
+            char buf[1024];
+
+            unmount_filesystems(info);
+            snprintf(buf, sizeof(buf), _("\nPlease mount the %s CDROM.\n"
+                                         "Choose Yes to retry, No to cancel"),
+                     desc);
+            response = UI.prompt(buf, RESPONSE_NO);
+            if ( response == RESPONSE_NO ) {
+                abort_install();
+                return NULL;
+            }
+            detect_cdrom(info);
+        }
+    }
+    return mounted;
+}
+
 /* The main installer code */
 int main(int argc, char **argv)
 {
@@ -261,6 +297,8 @@ int main(int argc, char **argv)
     exit_status = 0;
     while ( state != SETUP_EXIT ) {
         char buf[1024];
+        int num_cds;
+
         switch (state) {
             case SETUP_INIT:
                 state = UI.init(info,argc,argv);
@@ -288,24 +326,23 @@ int main(int argc, char **argv)
                         state = SETUP_EXIT;
                     }
                 }
+
+                num_cds = GetProductCDROMDescriptions(info);
+
                 /* Check for the presence of a CDROM if required */
                 if ( GetProductCDROMRequired(info) ) {
-                    const char *tag;
-                    yesno_answer response;
-                    
-                    /* Detect the available mounted CDROMs */
-                    response = RESPONSE_YES;
-                    tag = GetProductCDROMFile(info);
-                    while ( !detect_cdrom(tag) && (response == RESPONSE_YES) ) {
-                        snprintf(buf, sizeof(buf), _("\nPlease mount the %s CDROM.\n"
-													 "Choose Yes to retry, No to cancel"),
-                                info->desc);
-                        response = UI.prompt(buf, RESPONSE_NO);
+                    if ( ! GetProductCDROMFile(info) ) {
+                        log_fatal(info, _("The 'cdromfile' attribute is now mandatory when using the 'cdrom' attribute."));
                     }
-                    if ( num_cdroms == 0 ) {
+                    add_cdrom_entry(info, info->name, info->desc, GetProductCDROMFile(info));
+                    detect_cdrom(info);
+
+                    if ( ! get_cdrom(info, info->name) ) {
                         state = SETUP_EXIT;
                     }
-                } 
+                } else if ( num_cds > 0) {
+                    detect_cdrom(info);
+                }
                 break;
             case SETUP_LICENSE:
                 state = UI.license(info);

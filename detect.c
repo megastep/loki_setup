@@ -5,16 +5,17 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/param.h>
+#include <sys/mount.h>
 
 #ifdef __FreeBSD__
 #include <sys/ucred.h>
-#include <sys/mount.h>
 #else /* Linux assumed */
 #include <mntent.h>
 #include <sys/vfs.h>
 #endif
 
 #include "install.h"
+#include "install_log.h"
 #include "detect.h"
 
 #ifndef MNTTYPE_CDROM
@@ -28,11 +29,42 @@
 #define MNTTYPE_SUPER    "supermount"
 #endif
 
-/* Global variables */
+#define MOUNTS_FILE "/proc/mounts"
 
-char *cdroms[MAX_DRIVES];
-int  num_cdroms = 0;
+#ifndef __FreeBSD__
 
+int is_fs_mounted(const char *dev)
+{
+    int found = 0;
+    struct mntent *mnt;
+    FILE *mtab = setmntent(MOUNTS_FILE, "r" );
+    if( mtab != NULL ) {
+        while( (mnt = getmntent( mtab )) != NULL ){
+            if ( !strcmp(mnt->mnt_fsname, dev) ) {
+                found = 1;
+                break;
+            }
+        }
+        endmntent(mtab);
+    }
+    return found;
+}
+
+#endif
+
+void unmount_filesystems(install_info *info)
+{
+    struct mounted_elem *mnt = info->mounted_list, *oldmnt;
+    while ( mnt ) {
+        log_normal(info, _("Unmounting device %s"), mnt->device);
+        umount(mnt->device);
+        free(mnt->device);
+        oldmnt = mnt;
+        mnt = mnt->next;
+        free(oldmnt);
+    }
+    info->mounted_list = NULL;
+}
 
 /* Function to detect the MB of diskspace on a path */
 int detect_diskspace(const char *path)
@@ -63,80 +95,113 @@ int detect_diskspace(const char *path)
 	return avail / (1024*1024LL);
 }
 
-/* Function to detect the CDROM drives, returns the number of drives */
-int detect_cdrom(const char *unique_file)
+/* Function to detect the CDROM drives, returns the number of drives and fills in the CDROM info */
+int detect_cdrom(install_info *info)
 {
-    int count = 0, i;
+    struct cdrom_elem *cd;
 	char *env = getenv("SETUP_CDROM");
+    int num_cdroms = 0;
+    char file[PATH_MAX];
+        
 
 #ifdef __FreeBSD__
 	int mounted = getfsstat(NULL, 0, MNT_NOWAIT);
 
-	for( i = 0; i < num_cdroms; ++ i ) {
-		if(cdroms[i])
-			free(cdroms[i]);
+    /* Clear all of the mount points */
+    for( cd = info->cdroms; cd; cd = cd->next ) {
+        set_cdrom_mounted(cd, NULL);
+    }
+	if ( env ) { /* Override the CD detection */
+        for ( cd = info->cdroms_list; cd; cd = cd->next ) {
+            snprintf(file, sizeof(file), "%s/%s", env, cd->file);
+            if ( access(file, F_OK) < 0 ) {
+                set_cdrom_mounted(cd, env);
+                num_cdroms ++;
+            }
+        }
+		return num_cdroms;
 	}
 
-	if ( env ) { /* Override the CD detection */
-		if ( unique_file ) {
-			char file[PATH_MAX];
-			
-			snprintf(file, sizeof(file), "%s/%s", env, unique_file);
-			if ( access(file, F_OK) < 0 ) {
-				return num_cdroms = 0;
-			}
-		}
-		cdroms[0] = env;
-		return num_cdroms = 1;
-	}
-	
 	if ( mounted > 0 ) {
 		struct statfs *mnts = (struct statfs *)malloc(sizeof(struct statfs) * mounted);
 
 		mounted = getfsstat(mnts, mounted * sizeof(struct statfs), MNT_WAIT);
 		for ( i = 0; i < mounted && count < MAX_DRIVES; ++ i ) {
 			if ( ! strcmp(mnts[i].f_fstypename, MNTTYPE_CDROM) ) {
-				if ( unique_file ) {
-                    char file[PATH_MAX];
-					
-                    snprintf(file, sizeof(file), "%s/%s", mnts[i].f_mntonname, unique_file);
-                    if ( access(file, F_OK) < 0 ) {
-                        continue;
+                for ( cd = info->cdroms_list; cd; cd = cd->next ) {
+                    snprintf(file, sizeof(file), "%s/%s", mnts[i].f_mntonname, cd->file);
+                    if ( !access(file, F_OK) ) {
+                        set_cdrom_mounted(cd, mnts[i].f_mntonname);
+                        num_cdroms ++;
+                        break;
                     }
-				}
-				cdroms[count ++] = strdup(mnts[i].f_mntonname);
+                }
 			}
 		}
 		
 		free(mnts);
-		return num_cdroms = count;
-	} else {
-		return num_cdroms = 0;
 	}
+    return num_cdroms;
 #else
     char mntdevpath[PATH_MAX];
     FILE * mountfp;
     struct mntent *mntent;
 
-    for( i = 0; i < num_cdroms; ++ i ) {
-        if(cdroms[i])
-            free(cdroms[i]);
+    /* Clear all of the mount points */
+    for( cd = info->cdroms_list; cd; cd = cd->next ) {
+        set_cdrom_mounted(cd, NULL);
     }
 
 	if ( env ) { /* Override the CD detection */
-		if ( unique_file ) {
-			char file[PATH_MAX];
-			
-			snprintf(file, sizeof(file), "%s/%s", env, unique_file);
-			if ( access(file, F_OK) < 0 ) {
-				return num_cdroms = 0;
-			}
-		}
-		cdroms[0] = env;
-		return num_cdroms = 1;
+        for ( cd = info->cdroms_list; cd; cd = cd->next ) {
+            snprintf(file, sizeof(file), "%s/%s", env, cd->file);
+            if ( access(file, F_OK) < 0 ) {
+                set_cdrom_mounted(cd, env);
+                num_cdroms ++;
+            }
+        }
+		return num_cdroms;
 	}
+    
+    /* If we're running as root, we can try to mount unmounted CDROM filesystems */
+    if ( geteuid() == 0 ) {
+        mountfp = setmntent( _PATH_MNTTAB, "r" );
+        if( mountfp != NULL ) {
+            while( (mntent = getmntent( mountfp )) != NULL ){
+                if ( !strcmp(mntent->mnt_type, MNTTYPE_CDROM)) {
+                    struct mntent copy = *mntent;
+                    copy.mnt_fsname = strdup(mntent->mnt_fsname);
+                    copy.mnt_dir = strdup(mntent->mnt_dir);
+                    copy.mnt_type = strdup(mntent->mnt_type);
+                    copy.mnt_opts = strdup(mntent->mnt_opts);
+                    if ( !is_fs_mounted(copy.mnt_fsname)) {
+                        int flags = MS_MGC_VAL|MS_RDONLY|MS_NOEXEC;
+                        if(hasmntopt(&copy,"exec"))
+                            flags &= ~MS_NOEXEC;
+                        if ( ! mount(copy.mnt_fsname, copy.mnt_dir, copy.mnt_type,
+                                     flags, NULL) ) {
+#if 0
+                            /* TODO: Find a way to _remove_ a mtab entry for this to work */
+                            /* Add a mtab entry */
+                            FILE *mtab = setmntent( _PATH_MOUNTED, "a");
+                            addmntent(mtab, &copy);
+                            endmntent(mtab);
+#endif
+                            add_mounted_entry(info, copy.mnt_fsname);
+                            log_normal(info, _("Mounted device %s"), copy.mnt_fsname);
+                        }
+                    }
+                    free(copy.mnt_fsname);
+                    free(copy.mnt_dir);
+                    free(copy.mnt_type);
+                    free(copy.mnt_opts);
+                }
+            }
+            endmntent(mountfp);
+        }
+    }
 
-    mountfp = setmntent( _PATH_MOUNTED, "r" );
+    mountfp = setmntent(MOUNTS_FILE, "r" );
     if( mountfp != NULL ) {
         while( (mntent = getmntent( mountfp )) != NULL ){
             char *tmp, mntdev[1024], mnt_type[32];
@@ -165,21 +230,19 @@ int detect_cdrom(const char *unique_file)
                 realpath(mntdev, mntdevpath) == NULL ) {
                 continue;
             }
-            if ( strcmp(mnt_type, MNTTYPE_CDROM) == 0 && count < MAX_DRIVES) {
-                if ( unique_file ) {
-                    char file[PATH_MAX];
-
-                    snprintf(file, sizeof(file), "%s/%s", mntent->mnt_dir, unique_file);
-                    if ( access(file, F_OK) < 0 ) {
-                        continue;
+            if ( strcmp(mnt_type, MNTTYPE_CDROM) == 0 && num_cdroms < MAX_DRIVES) {
+                for ( cd = info->cdroms_list; cd; cd = cd->next ) {
+                    snprintf(file, sizeof(file), "%s/%s", mntent->mnt_dir, cd->file);
+                    if ( !access(file, F_OK) ) {
+                        set_cdrom_mounted(cd, mntent->mnt_dir);
+                        num_cdroms ++;
+                        break;
                     }
                 }
-                cdroms[count ++] = strdup(mntent->mnt_dir);
             }
         }
         endmntent( mountfp );
     }
-    num_cdroms = count;
     return(num_cdroms);
 #endif
 }

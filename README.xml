@@ -103,10 +103,11 @@ There are several optional attributes of the install element:
 
  cdrom      If this attribute has the value "required", then setup will
             prompt the user asking them to mount the product CDROM.
+            *NEW* : The 'cdromfile' attribute must also be set.
 
- cdromfile  This is an optional unique file that is looked for on the
+ cdromfile  This is a (now mandatory) unique file that is looked for on the
             mounted CDROM to see if it is indeed the product CDROM.
-            If this option is not specified, any mounted CDROM is used.
+            This attribute must always be set if the 'cdrom' attribute is used.
 
  nouninstall This is an optional flag which, if specified, tells setup
              not to generate an uninstall script after it runs. It also
@@ -141,6 +142,31 @@ There are several optional attributes of the install element:
             Currently setup is not able to update an existing component, thus if the component
             is detected as already installed the installation will fail.
             Important: This attribute can't be mixed with <component> elements.
+
+The CDROM element:
+
+An installer can fetch the necesary data files from one or more CDROM discs. As of setup 1.5.0,
+each available CDROM must be described through a <cdrom> element, and the 'cdromid' attributes 
+of the <binary> and <files> elements.
+
+This element takes two mandatory attributes :
+
+  id        An unique identifier that will be used to reference this CDROM in other elements.
+
+  name      A string describing the CDROM, intended to be prompted to the user.
+
+The file name given in the CDROM element is the path to a unique file on the described CDROM that
+will be used to identify the media. Here is an example :
+
+ <cdrom id="cd1" name="Disc Number One">cdrom1.dat</cdrom>
+ <cdrom id="cd2" name="Disc Number Two">cdrom2.dat</cdrom>
+
+This describes two CDROMs, and the presence of one of the .dat files at the root of each CDROM will
+identify which CDROM is which.
+
+Hint: To avoid useless CD prompts to the user, when using a multiple CDROM installer you should always
+specify the size of the files in the XML file directly. This way the user won't have to swap CDs when
+the installer is trying to compute the total size of the options.
 
 The COMPONENT element:
 
@@ -382,6 +408,9 @@ There are several optional attributes of the binary element:
 
  cdrom      If this attribute has a "yes" value, then setup will look for
             the file on one of the mounted CDROMs on the system.
+            *OBSOLETE in setup 1.5.0* DO NOT USE
+
+ cdromid    Specifies a CDROM from which the file will be pulled.
 
  keepdirs   If this attribute has a "yes" value, then the directory structure
             specified in the file names for the binaries will be kept. For
@@ -426,6 +455,9 @@ There are several optional attributes of the files element:
 
  cdrom      If this attribute has a "yes" value, then setup will look for
             the files on one of the mounted CDROMs on the system.
+            *OBSOLETE: Do not use. Use 'cdromid' instead.*
+
+ cdromid    Specifies a CDROM from which the file will be pulled.
 
  lang       The files are only installed if the current locale matches the
             string of this attribute. See 'About localization' below for

@@ -107,6 +107,12 @@ typedef struct {
         struct cdrom_elem *next;
     } *cdroms_list;
 
+    /* The filesystems that were mounted by setup */
+    struct mounted_elem {
+        char *device;
+        struct mounted_elem *next;
+    } *mounted_list;
+
     /* Log of actions taken */
     install_log *log;
 
@@ -227,6 +233,16 @@ extern install_info *create_install(const char *configfile, int log_level,
 /* Create a new CDROM description entry */
 struct cdrom_elem *add_cdrom_entry(install_info *info, const char *id, const char *name,
                                    const char *file);
+
+/* Change the detected mount point for a CDROM */
+void set_cdrom_mounted(struct cdrom_elem *cd, const char *path);
+
+/* Get a mount point for the specified CDROM, and return its path.
+   If the CDROM is not mounted, prompt the user to mount it */
+const char *get_cdrom(install_info *info, const char *id);
+
+/* Add a new mounted filesystem entry */
+struct mounted_elem *add_mounted_entry(install_info *info, const char *device);
 
 /* Create a new component entry */
 struct component_elem *add_component_entry(install_info *info, const char *name, const char *version, int def);
