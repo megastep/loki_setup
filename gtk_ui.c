@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.97 2004-05-12 01:45:22 megastep Exp $
+   $Id: gtk_ui.c,v 1.98 2004-06-09 18:54:26 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1065,6 +1065,7 @@ static void init_install_path(void)
 static void init_man_path(void)
 {
     GList* list = NULL;
+	GtkWidget *widget;
     char pathCopy[ 4069 ];
     const char *path;
 
@@ -1105,17 +1106,16 @@ static void init_man_path(void)
             if( ! end )
                 pc++;
         }
-    } else {
+    } 
+	if ( ! list ) { /* At least these default values */
 		list = g_list_append(list, "/usr/local/man");
 		list = g_list_append(list, "/usr/share/man");
 		list = g_list_append(list, "/usr/man");
 	}
 
-    if ( list ) {
-		GtkWidget *widget = glade_xml_get_widget(setup_glade, "manpage_combo");
-        gtk_combo_set_popdown_strings( GTK_COMBO(widget), list );
-		set_manpath(cur_info, list->data);
-    }
+	widget = glade_xml_get_widget(setup_glade, "manpage_combo");
+	gtk_combo_set_popdown_strings( GTK_COMBO(widget), list );
+	set_manpath(cur_info, list->data);
 }
 
 static void init_binary_path(void)
