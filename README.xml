@@ -168,6 +168,12 @@ Hint: To avoid useless CD prompts to the user, when using a multiple CDROM insta
 specify the size of the files in the XML file directly. This way the user won't have to swap CDs when
 the installer is trying to compute the total size of the options.
 
+The user can define at runtime the path to CD images by using the environment variables
+SETUP_CDROM_xxx, where xxx is the upper-case ID for the CDROM, i.e. SETUP_CDROM_CD1 for the
+first CD of the above example. The SETUP_CDROM environment variable can also be used and it will
+be used to match all CDROMs, if you can have all CD images under the same directory.
+
+
 The COMPONENT element:
 
 Components are used to divide the product in independant entities. Several components can be

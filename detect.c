@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <ctype.h>
 #include <sys/param.h>
 #include <sys/mount.h>
 
@@ -115,30 +116,49 @@ int detect_diskspace(const char *path)
 int detect_cdrom(install_info *info)
 {
     struct cdrom_elem *cd;
-	char *env = getenv("SETUP_CDROM");
     int num_cdroms = 0;
     char file[PATH_MAX];
-        
-
 #ifdef __FreeBSD__
 	int mounted = getfsstat(NULL, 0, MNT_NOWAIT);
     struct fstab *fstab;
+#else
+    char mntdevpath[PATH_MAX];
+    FILE *mountfp;
+    struct mntent *mntent;
+#endif
 
     /* Clear all of the mount points */
     for( cd = info->cdroms_list; cd; cd = cd->next ) {
         set_cdrom_mounted(cd, NULL);
     }
-	if ( env ) { /* Override the CD detection */
-        for ( cd = info->cdroms_list; cd; cd = cd->next ) {
-            snprintf(file, sizeof(file), "%s/%s", env, cd->file);
-            if ( access(file, F_OK) < 0 ) {
-                set_cdrom_mounted(cd, env);
-                num_cdroms ++;
-            }
-        }
-		return num_cdroms;
-	}
 
+	/* Override the CD detection ? */
+    for ( cd = info->cdroms_list; cd; cd = cd->next ) {
+        char *env = getenv("SETUP_CDROM");
+        
+        if ( ! env ) {
+            char cdenv[256], *ptr, *pid;
+            strcpy(cdenv, "SETUP_CDROM_");
+            ptr = cdenv + strlen(cdenv);
+            for ( pid = cd->id; *pid; pid ++ ) {
+                *ptr ++ = toupper(*pid);
+            }
+            *ptr = '\0';
+
+            env = getenv(cdenv);
+            if ( !env )
+                continue;
+        }
+        snprintf(file, sizeof(file), "%s/%s", env, cd->file);
+        if ( access(file, F_OK) < 0 ) {
+            set_cdrom_mounted(cd, env);
+            num_cdroms ++;
+        }
+    }
+    if ( num_cdroms ) 
+        return num_cdroms;
+
+#ifdef __FreeBSD__
     /* Try to mount unmounted CDROM filesystems */
     while( fstab = getfsent() ){
         if ( !strcmp(fstab->fs_vfstype, MNTTYPE_CDROM)) {
@@ -173,27 +193,9 @@ int detect_cdrom(install_info *info)
 		free(mnts);
 	}
     return num_cdroms;
+
 #else
-    char mntdevpath[PATH_MAX];
-    FILE * mountfp;
-    struct mntent *mntent;
 
-    /* Clear all of the mount points */
-    for( cd = info->cdroms_list; cd; cd = cd->next ) {
-        set_cdrom_mounted(cd, NULL);
-    }
-
-	if ( env ) { /* Override the CD detection */
-        for ( cd = info->cdroms_list; cd; cd = cd->next ) {
-            snprintf(file, sizeof(file), "%s/%s", env, cd->file);
-            if ( access(file, F_OK) < 0 ) {
-                set_cdrom_mounted(cd, env);
-                num_cdroms ++;
-            }
-        }
-		return num_cdroms;
-	}
-    
     /* Try to mount unmounted CDROM filesystems */
     mountfp = setmntent( _PATH_MNTTAB, "r" );
     if( mountfp != NULL ) {

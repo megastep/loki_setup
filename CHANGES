@@ -1,4 +1,6 @@
 1.5.0:
+Stéphane Peter - Fri Nov 10 17:57:18 PST 2000
+ * Added per-CD environment variables, SETUP_CDROM_xxx.
 Sam Lantinga - Fri Nov 10 17:39:44 PST 2000
  * Don't allow the user to install options that are already installed.
 Stéphane Peter - Fri Nov 10 14:31:29 PDT 2000
