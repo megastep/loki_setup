@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.41 2000-05-02 00:25:47 megastep Exp $ */
+/* $Id: install.c,v 1.42 2000-05-02 01:06:42 megastep Exp $ */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -407,6 +407,36 @@ char *get_option_name(install_info *info, xmlNodePtr node, char *name, int len)
         log_warning(info, _("XML: option listed without description"));
     }
     return name;
+}
+
+/* Get the optional help of an option node, with localization support */
+const char *get_option_help(install_info *info, xmlNodePtr node)
+{
+	static char line[BUFSIZ];
+    const char *help = xmlGetProp(node, "help"), *text;
+	xmlNodePtr n;
+
+	*line = '\0';
+	if ( help ) {
+		strncpy(line, help, sizeof(line));
+	}
+	/* Look for translated strings */
+	n = node->childs;
+	while ( n ) {
+		if( strcmp(n->name, "help") == 0 ) {
+			const char *prop = xmlGetProp(n, "lang");
+			if ( prop && MatchLocale(prop) ) {
+				text = xmlNodeListGetString(info->config, n->childs, 1);
+				if(text) {
+					*line = '\0';
+					while ( (*line == 0) && parse_line(&text, line, sizeof(line)) )
+						;
+				}
+			}
+		}
+		n = n->next;
+	}
+	return (*line) ? line : NULL;
 }
 
 /* Free the install information structure */

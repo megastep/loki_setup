@@ -141,7 +141,7 @@ static void parse_option(install_info *info, xmlNodePtr node)
     } else {
         default_response = RESPONSE_NO;
     }
-    help = xmlGetProp(node, "help");
+    help = get_option_help(info, node);
     if ( help ) {
         response = prompt_yesnohelp(prompt, default_response);
     } else {

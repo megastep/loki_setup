@@ -196,6 +196,9 @@ extern void mark_option(install_info *info, xmlNodePtr node,
 /* Get the name of an option node */
 extern char *get_option_name(install_info *info, xmlNodePtr node, char *name, int len);
 
+/* Get the optional help of an option node, with localization support */
+const char *get_option_help(install_info *info, xmlNodePtr node);
+
 /* Free the install information structure */
 extern void delete_install(install_info *info);
 

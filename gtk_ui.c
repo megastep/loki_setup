@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.33 2000-05-02 00:37:25 hercules Exp $
+   $Id: gtk_ui.c,v 1.34 2000-05-02 01:06:42 megastep Exp $
 */
 
 #include <limits.h>
@@ -661,7 +661,7 @@ static void parse_option(install_info *info, xmlNodePtr node, GtkWidget *window,
     button = gtk_check_button_new_with_label(text);
 
     /* Add tooltip help, if available */
-    help = xmlGetProp(node, "help");
+    help = get_option_help(info, node);
     if ( help ) {
         GtkTooltipsData* group;
 

@@ -114,6 +114,8 @@ There are several optional attributes of the option element:
 
  help       This attribute is a help string which is displayed to the
             user if the user requests more information about the option.
+            This string can be translated to other languages using the 'help'
+            sub-element explained below.
 
  arch       This option is only available on the specified architectures.
             The architecture can be any of:
@@ -136,6 +138,22 @@ below for more details about locale matching.
 If you don't specify translations for alternate locales, then the same
 string will be used for all languages encountered by setup. Of course,
 you can have several 'lang' elements per 'option' element.
+
+The option element also supports the HELP sub-element, which can be used
+to provide translated strings for the 'help' attribute. This element
+only supports the 'lang' attribute to specify the locale this translation
+applies to. Here is an example to clarify all this :
+
+<option install="true" help="You really need this">
+    Basic install
+    <help lang="fr">Vous avez besoin de cela</help>
+    <help lang="es">Su necesito eso</help>
+    ...
+</option>
+
+This provides French and Spanish translations of the "You really need this"
+help message. Please forgive my very poor Spanish ;-)
+
 
 The BINARY element:
 
@@ -275,6 +293,7 @@ Example XML product specification:
     <option install="true" help="Required for use">
         Base Install  # Option called "Base Install" contains a binary,
                       # some data files, and two optional editors.
+        <help lang="fr">Requis pour utilisation</help>
         <binary arch="any" libc="any" symlink="foo" icon="icon.xpm">
             foo
         </binary>
