@@ -19,6 +19,8 @@ Borland/Inprise Corp. / Daren Kosinski - Tue Jul 11 13:56:17 PDT 2000
    RPMs. New 'relocate', 'nodeps' and 'autoremove' attributes for files.
  * Install and binary paths can now be given as command-line arguments (-i and -b).
    The user is not prompted for those in that case.
+ * New -m command line parameter to force the installer to ignore an RPM
+   database and extract the RPM packages manually.
  * Fixes in the GTK UI.
 
 1.3.0:
