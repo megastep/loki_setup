@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.9 1999-09-10 08:09:57 hercules Exp $ */
+/* $Id: install.c,v 1.10 1999-09-10 11:26:30 hercules Exp $ */
 
 #include <sys/types.h>
 #include <stdlib.h>
@@ -22,7 +22,20 @@ static const char *GetProductDesc(install_info *info)
 {
     return xmlGetProp(info->config->root, "desc");
 }
+static const char *GetProductVersion(install_info *info)
+{
+    return xmlGetProp(info->config->root, "version");
+}
+static const char *GetRuntimeArgs(install_info *info)
+{
+    const char *args;
 
+    args = xmlGetProp(info->config->root, "args");
+    if ( args == NULL ) {
+        args = "";
+    }
+    return args;
+}
 
 /* Create the initial installation information */
 install_info *create_install(const char *configfile, int log_level)
@@ -59,7 +72,7 @@ install_info *create_install(const char *configfile, int log_level)
     info->libc = detect_libc();
 
 	/* Read the optional default arguments for the game */
-	info->args = xmlGetProp(info->config->root, "args");
+	info->args = GetRuntimeArgs(info);
 
     /* Add the default install path */
     sprintf(info->install_path, "%s/%s", DEFAULT_PATH, GetProductName(info));
@@ -178,6 +191,42 @@ void set_symlinkspath(install_info *info, const char *path)
   expand_home(info, path, info->symlinks_path);
 }
 
+/* Mark/unmark an option node for install, optionally recursing */
+void mark_option(install_info *info, xmlNodePtr node,
+                 const char *value, int recurse)
+{
+    /* Unmark this option for installation */
+    xmlSetProp(node, "install", value);
+
+    /* Recurse down any other options */
+    if ( recurse ) {
+        node = node->childs;
+        while ( node ) {
+            if ( strcmp(node->name, "option") == 0 ) {
+                mark_option(info, node, value, recurse);
+            }
+            node = node->next;
+        }
+    }
+}
+
+/* Get the name of an option node */
+char *get_option_name(install_info *info, xmlNodePtr node, char *name, int len)
+{
+    static char line[BUFSIZ];
+    char *text;
+
+    if ( name == NULL ) {
+        name = line;
+        len = (sizeof line);
+    }
+    text = xmlNodeListGetString(info->config, node->childs, 1);
+    *name = '\0';
+    while ( (*name == 0) && parse_line(&text, name, len) )
+        ;
+    return name;
+}
+
 /* Free the install information structure */
 void delete_install(install_info *info)
 {
@@ -214,12 +263,13 @@ void delete_install(install_info *info)
 
 /* Actually install the selected filesets */
 install_state install(install_info *info,
-            void (*update)(install_info *info, const char *path, size_t progress, size_t size, int global_count, const char *current))
+            void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     xmlNodePtr node;
 
     /* Walk the install tree */
     node = info->config->root->childs;
+    info->install_size = size_tree(info, node);
     copy_tree(info, node, info->install_path, update);
 	if(info->options.install_menuitems){
 	  int i;
@@ -289,12 +339,15 @@ void generate_uninstall(install_info *info)
 /* Launch the game using the information in the install info */
 install_state launch_game(install_info *info)
 {
-  int status, pid;
-  char buf[PATH_MAX];
+    char cmd[PATH_MAX];
 
-  sprintf(buf,"%s/%s %s &",info->symlinks_path,info->name,info->args);
-  system(buf);
-  return SETUP_EXIT;
+    if ( *info->symlinks_path ) {
+        sprintf(cmd, "%s/%s %s &", info->symlinks_path, info->name, info->args);
+    } else {
+        sprintf(cmd, "%s/%s %s &", info->install_path, info->name, info->args);
+    }
+    system(cmd);
+    return SETUP_EXIT;
 }
 
 static const char* kde_app_links[] =
@@ -346,7 +399,7 @@ void install_menuitems(install_info *info, desktop_type d)
 		break;
 	  }
 
-	  fp = fopen(buf, "w" );
+	  fp = fopen(buf, "w");
 	  if(fp){
 		char exec[PATH_MAX], icon[PATH_MAX];
 
@@ -361,7 +414,7 @@ void install_menuitems(install_info *info, desktop_type d)
 				"Terminal=0\n"
 				"Type=Application\n",
 				(d==DESKTOP_KDE) ? "KDE " : "",
-				info->desc, info->desc,
+				info->name, info->desc,
 				exec, icon
 				);
 

@@ -1,6 +1,7 @@
 
 /* Functions to handle logging and low level file functions */
 
+#include <sys/types.h>
 #include <stdio.h>
 #include <stdarg.h>
 
@@ -24,3 +25,4 @@ extern int file_close(install_info *info, stream *streamp);
 extern int file_symlink(install_info *info, const char *oldpath, const char *newpath);
 extern int file_mkdir(install_info *info, const char *path, int mode);
 extern int file_chmod(install_info *info, const char *path, int mode);
+extern size_t file_size(install_info *info, const char *path);

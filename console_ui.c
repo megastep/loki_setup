@@ -60,37 +60,14 @@ static yesno_answer prompt_yesno(const char *prompt, yesno_answer suggest)
     }
 }
 
-static void mark_option(install_info *info, xmlNodePtr node,
-                 const char *value, int recurse)
-{
-    /* Unmark this option for installation */
-    xmlSetProp(node, "install", value);
-
-    /* Recurse down any other options */
-    if ( recurse ) {
-        node = node->childs;
-        while ( node ) {
-            if ( strcmp(node->name, "option") == 0 ) {
-                mark_option(info, node, value, recurse);
-            }
-            node = node->next;
-        }
-    }
-}
-
 static void parse_option(install_info *info, xmlNodePtr node)
 {
     char *text, line[BUFSIZ];
     char prompt[BUFSIZ];
     const char *wanted;
-    const char *sizestr;
 
     /* See if the user wants this option */
-    text = xmlNodeListGetString(info->config, node->childs, 1);
-    line[0] = '\0';
-    while ( (line[0] == 0) && parse_line(&text, line, BUFSIZ) )
-        ;
-    sprintf(prompt, "Install %s?", line);
+    sprintf(prompt, "Install %s?", get_option_name(info, node, line, BUFSIZ));
 
     wanted = xmlGetProp(node, "install");
     if ( wanted  && (strcmp(wanted, "true") == 0) ) {
@@ -104,10 +81,7 @@ static void parse_option(install_info *info, xmlNodePtr node)
         mark_option(info, node, "true", 0);
 
         /* Add this option size to the total */
-        sizestr = xmlGetProp(node, "size");
-        if ( sizestr ) {
-            info->install_size += atoi(sizestr);
-        }
+        info->install_size += size_node(info, node);
 
         /* Recurse down any other options */
         node = node->childs;
@@ -173,7 +147,7 @@ static install_state console_setup(install_info *info)
         /* Confirm the install */
         printf("Installing to %s\n", info->install_path);
         printf("%d MB available, %d MB will be installed.\n",
-            detect_diskspace(info->install_path), info->install_size);
+            detect_diskspace(info->install_path), BYTES2MB(info->install_size));
         printf("\n");
         if ( prompt_yesno("Continue install?", RESPONSE_YES) == RESPONSE_YES ) {
             okay = 1;
@@ -182,7 +156,7 @@ static install_state console_setup(install_info *info)
     return SETUP_INSTALL;
 }
 
-static void console_update(install_info *info, const char *path, size_t progress, size_t size, int global_count, const char *current)
+static void console_update(install_info *info, const char *path, size_t progress, size_t size, const char *current)
 {
   static char previous[200] = "";
 

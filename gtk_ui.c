@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.4 1999-09-10 08:09:57 hercules Exp $
+   $Id: gtk_ui.c,v 1.5 1999-09-10 11:26:30 hercules Exp $
 */
 
 #include <limits.h>
@@ -36,8 +36,6 @@ static GtkCombo* _binCombo;
 static GtkProgressBar* _copyBar;
 static GtkProgressBar* _installBar;
 static GtkWidget* _copyAbort;
-static GtkAdjustment* _copyAdj;
-static GtkAdjustment* _copyTotalAdj;
 static GtkLabel* _copyLabel, *_copyTitleLabel;
 static GtkWidget* _sizeLabel, *_spaceLabel;
 static GtkWidget* _finishButton;
@@ -131,30 +129,6 @@ static GtkWidget* VBBOX( GtkButtonBoxStyle style, gint spacing )
     return( widget );
 }
 
-GList *gtk_combo_get_popdown_strings( GtkCombo *combo )
-{
-    GList *clist;
-    GList *tlist;
-    gchar *ltext;
-
-    clist = GTK_LIST (combo->list)->children;
-    tlist = 0;
-    while ( clist && clist->data ) {
-        ltext = gtk_object_get_data(GTK_OBJECT(clist->data),
-                                    "gtk-combo-string-value");
-        if ( ltext == NULL ) {
-            GtkWidget *label = GTK_BIN(clist->data)->child;
-
-            if ( label && GTK_IS_LABEL(label) ) {
-                gtk_label_get (GTK_LABEL (label), &ltext);
-            }
-        }
-        tlist = g_list_append(tlist, ltext);
-        clist = g_list_next(clist);
-    }
-    return tlist;
-}
-
 /*********** GTK slots *************/
 
 static void slot_gainfocus_selection( GtkWidget* widget, gpointer func_data )
@@ -173,20 +147,24 @@ static void slot_installpath_selection( GtkWidget* widget, gpointer func_data )
     string = gtk_entry_get_text( GTK_ENTRY(widget) );
 	if ( string ) {
         set_installpath(cur_info, string);
+        if ( strcmp(string, cur_info->install_path) != 0 ) {
+            gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(_dataCombo)->entry), cur_info->install_path);
+        }
 	    update_space();
 	}
-    if ( strcmp(string, cur_info->install_path) != 0 ) {
-        gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(_dataCombo)->entry), cur_info->install_path);
-    }
 }
 
 static void slot_symlinkspath_selection( GtkWidget* widget, gpointer func_data )
 {
     char* string;
     string = gtk_entry_get_text( GTK_ENTRY(widget) );
-	if(string)
-	  set_symlinkspath(cur_info, string);
-    check_install_button();
+	if ( string ) {
+	    set_symlinkspath(cur_info, string);
+        if ( strcmp(string, cur_info->symlinks_path) != 0 ) {
+            gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(_binCombo)->entry), cur_info->symlinks_path);
+        }
+        check_install_button();
+	}
 }
 
 static void slot_readmeDestroy( GtkWidget* widget, gpointer data )
@@ -195,33 +173,6 @@ static void slot_readmeDestroy( GtkWidget* widget, gpointer data )
     *wp = 0;
 }
 
-static void mark_option(install_info *info, xmlNodePtr node,
-                 const char *value, int recurse)
-{
-    /* Unmark this option for installation */
-    xmlSetProp(node, "install", value);
-
-    /* Recurse down any other options */
-    if ( recurse ) {
-        node = node->childs;
-        while ( node ) {
-            if ( strcmp(node->name, "option") == 0 ) {
-                mark_option(info, node, value, recurse);
-            }
-            node = node->next;
-        }
-    }
-}
-
-static const char *get_option_name(install_info *info, xmlNodePtr node)
-{
-    char *text;
-	static char line[BUFSIZ];
-    text = xmlNodeListGetString(info->config, node->childs, 1);
-    line[0] = '\0';
-    while ( (line[0] == 0) && parse_line(&text, line, BUFSIZ) )  ;
-	return line;
-}
 
 /*
    Returns 0 if fails.
@@ -338,11 +289,6 @@ static void slot_beginInstall( GtkWidget* gtklist, gpointer func_data )
 {
   gtk_notebook_set_page( _notebook, COPY_PAGE );
   gtk_window_set_position( GTK_WINDOW(_window), GTK_WIN_POS_NONE);
-
-  _copyTotalAdj->value = 0;
-  _copyTotalAdj->lower = 0;
-  _copyTotalAdj->upper = length_install(cur_info);
-  gtk_adjustment_changed( _copyTotalAdj );
   cur_state = SETUP_INSTALL;
   //  gtk_main_quit();
 }
@@ -372,7 +318,7 @@ static void check_install_button(void)
             message = "No destination directory selected";
         } else if ( cur_info->install_size <= 0 ) {
             message = "Please select at least one option";
-        } else if ( cur_info->install_size > diskspace ) {
+        } else if ( BYTES2MB(cur_info->install_size) > diskspace ) {
             message = "Not enough free space for the selected options";
         } else if ( access(path_up, W_OK) < 0 ) {
             message = "No write permissions on the destination directory";
@@ -392,7 +338,7 @@ static void check_install_button(void)
 static void update_size(void)
 {
   if(!_sizeLabel) return;
-  sprintf(tmpbuf, "%d MB", cur_info->install_size);
+  sprintf(tmpbuf, "%d MB", BYTES2MB(cur_info->install_size));
   gtk_label_set_text(GTK_LABEL(_sizeLabel), tmpbuf);
   check_install_button();
 }
@@ -410,8 +356,7 @@ static void enable_tree(xmlNodePtr node)
 {
   if ( strcmp(node->name, "option") == 0 ) {
 	GtkWidget *but = (GtkWidget*)gtk_object_get_data(GTK_OBJECT(_window),
-													 get_option_name(cur_info,node)
-													 );
+									 get_option_name(cur_info, node, NULL, 0));
 	if(but)
 	  gtk_widget_set_sensitive(but, TRUE);
   }
@@ -451,8 +396,7 @@ static void slot_checkOption( GtkWidget* widget, gpointer func_data)
 	while ( node ) {
 	  if ( strcmp(node->name, "option") == 0 ) {
 		GtkWidget *but = (GtkWidget*)gtk_object_get_data(GTK_OBJECT(_window),
-														 get_option_name(cur_info,node)
-														 );
+									 get_option_name(cur_info, node, NULL, 0));
 		if(but){ /* This recursively calls this function */
 		  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(but), FALSE);
 		  gtk_widget_set_sensitive(but, FALSE);
@@ -659,16 +603,15 @@ static GtkWidget* makeDesktopOption(void)
 
 static void parse_option(install_info *info, xmlNodePtr node, GtkWidget *box, int level, GtkWidget *parent)
 {
-    char prompt[BUFSIZ];
+    const char *help;
     const char *wanted, *line;
-    const char *sizestr;
 	int size = 0;
 	int i;
 	GtkWidget *but;
 	option_data *dat;
 
     /* See if the user wants this option */
-	line = get_option_name(info,node);
+	line = get_option_name(info, node, NULL, 0);
 	for(i=0; i < (level*5); i++)
 	  tmpbuf[i] = ' ';
 	tmpbuf[i] = '\0';
@@ -677,14 +620,17 @@ static void parse_option(install_info *info, xmlNodePtr node, GtkWidget *box, in
     wanted = xmlGetProp(node, "install");
 
 	but = gtk_check_button_new_with_label(tmpbuf);
-	sizestr = xmlGetProp(node, "size");
-	if(sizestr)
-	  size = atoi(sizestr);
+
+    /* Add tooltip help, if available */
+    help = xmlGetProp(node, "help");
+    if ( help ) {
+        gtk_tooltips_set_tip( _tooltips, but, help, 0);
+    }
 
 	/* Set the data associated with the button */
 	dat = (option_data *)malloc(sizeof(option_data));
 	dat->node = node;
-	dat->size = size;
+	dat->size = size_node(info, node);
 	gtk_object_set_data(GTK_OBJECT(but), "data", (gpointer)dat);
 
 	/* Register the button in the window's private data */
@@ -693,7 +639,7 @@ static void parse_option(install_info *info, xmlNodePtr node, GtkWidget *box, in
 
 	/* If this is a sub-option and the parent is not active, then disable this option */
 	if(level>0 && !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(parent))){
-	  wanted = FALSE;
+	  wanted = "false";
 	  gtk_widget_set_sensitive(GTK_WIDGET(but), FALSE);
 	}
 
@@ -702,7 +648,7 @@ static void parse_option(install_info *info, xmlNodePtr node, GtkWidget *box, in
     gtk_signal_connect( GTK_OBJECT(but), "toggled",
                         GTK_SIGNAL_FUNC(slot_checkOption), (gpointer)node );
 	gtk_widget_show(but);
-    if ( wanted ) {
+    if ( wanted && (strcmp(wanted, "true") == 0) ) {
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(but), TRUE);
     } else {
         /* Unmark this option for installation */
@@ -779,6 +725,7 @@ static GtkWidget* makeOptionsPage(install_info *info)
 	  node = node->next;
 	}
 
+#warning FIXME: horizontal separator not visible!
     /* Create a separator bar */
 	PACK00( box4, ALIGN( gtk_hseparator_new(), 0, 0.5, 0, 0 ), 0 );
 
@@ -808,7 +755,6 @@ static GtkWidget* makeCopyPage()
     GtkWidget* pbar;
     GtkWidget* label;
     GtkWidget* widget;
-    GtkAdjustment* adj;
     GtkWidget* box0;
 
 
@@ -825,10 +771,7 @@ static GtkWidget* makeCopyPage()
 
     // File copy progress bar.
 
-    adj = (GtkAdjustment*) gtk_adjustment_new( 0, 0, 100, 0, 0, 0 );
-    _copyAdj = adj;
-
-    pbar = gtk_progress_bar_new_with_adjustment( adj );
+    pbar = gtk_progress_bar_new();
     _copyBar = (GtkProgressBar*) pbar;
     gtk_progress_set_show_text( GTK_PROGRESS(pbar), 1 );
     PACKC( box0, pbar );
@@ -843,10 +786,7 @@ static GtkWidget* makeCopyPage()
 
     // Install progress bar.
 
-    adj = (GtkAdjustment*) gtk_adjustment_new( 0,1,10,0,0,0 );
-    _copyTotalAdj = adj;
-
-    pbar = gtk_progress_bar_new_with_adjustment( adj );
+    pbar = gtk_progress_bar_new();
     _installBar = (GtkProgressBar*) pbar;
     gtk_progress_set_show_text( GTK_PROGRESS(pbar), 1 );
     PACKC( box0, pbar );
@@ -1011,16 +951,24 @@ static install_state gtkui_setup(install_info *info)
   return iterate_for_state();
 }
 
-static void gtkui_update(install_info *info, const char *path, size_t progress, size_t size, int global_count, const char *current)
+static void gtkui_update(install_info *info, const char *path, size_t progress, size_t size, const char *current)
 {
-  gtk_label_set_text( _copyLabel, path );
-  sprintf(tmpbuf, "Installing %s ...", current);
-  gtk_label_set_text( _copyTitleLabel, tmpbuf);
-  gtk_progress_set_value( GTK_PROGRESS(_copyBar), (int) (((float)progress/(float)size)*100.0) );
-  gtk_progress_set_value( GTK_PROGRESS(_installBar), global_count);
+    static gfloat last_update = -1;
+    gfloat new_update;
 
-  while( gtk_events_pending() )
-	gtk_main_iteration();
+    new_update = (gfloat)progress / (gfloat)size;
+    if ( (int)(new_update*100) != (int)(last_update*100) ) {
+        last_update = new_update;
+        sprintf(tmpbuf, "Installing %s ...", current);
+        gtk_label_set_text( _copyTitleLabel, tmpbuf);
+        gtk_label_set_text( _copyLabel, path );
+        gtk_progress_bar_update(GTK_PROGRESS_BAR(_copyBar), new_update);
+        new_update = (gfloat)info->installed_bytes / (gfloat)info->install_size;
+        gtk_progress_bar_update(GTK_PROGRESS_BAR(_installBar), new_update);
+    }
+    while( gtk_events_pending() ) {
+        gtk_main_iteration();
+    }
 }
 
 static void gtkui_abort(install_info *info)

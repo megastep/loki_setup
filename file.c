@@ -9,10 +9,15 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
+#include <dirent.h>
 
 #include <zlib.h>
 
 #include "file.h"
+
+/* Magic to detect a gzip compressed file */
+static const char gzip_magic[2] = { 0037, 0213 };
+
 
 stream *file_open(install_info *info, const char *path, const char *mode)
 {
@@ -35,13 +40,11 @@ stream *file_open(install_info *info, const char *path, const char *mode)
     streamp->mode = *mode;
 
     if ( streamp->mode == 'r' ) {
-        const char gzip_magic[2] = { 0037, 0213 };
         char magic[2];
 
         streamp->fp = fopen(path, "rb");
         if ( fread(magic, 1, 2, streamp->fp) == 2 ) {
             if ( memcmp(magic, gzip_magic, 2) == 0 ) {
-			    unsigned int tmp;
 			    fseek(streamp->fp, (off_t)(-4), SEEK_END);
                 /* Read little-endian value platform independently */
                 streamp->size = (((unsigned int)fgetc(streamp->fp))<<24);
@@ -195,17 +198,6 @@ int file_symlink(install_info *info, const char *oldpath, const char *newpath)
     return(retval);
 }
 
-int file_chmod(install_info *info, const char *path, int mode)
-{
-   int retval;
-   
-   retval = chmod(path, mode);
-    if ( retval < 0 ) {
-        log_warning(info, "Can't change permissions for %s: %s", path, strerror(errno));
-	}
-   return retval;
-}
-
 int file_mkdir(install_info *info, const char *path, int mode)
 {
     struct stat sb;
@@ -227,4 +219,73 @@ int file_mkdir(install_info *info, const char *path, int mode)
         }
     }
     return(retval);
+}
+
+int file_chmod(install_info *info, const char *path, int mode)
+{
+   int retval;
+   
+   retval = chmod(path, mode);
+    if ( retval < 0 ) {
+        log_warning(info, "Can't change permissions for %s: %s", path, strerror(errno));
+	}
+   return retval;
+}
+
+/* The uncompressed file size */
+size_t file_size(install_info *info, const char *path)
+{
+    struct stat st;
+    FILE *fp;
+    char magic[2];
+    size_t size, count;
+
+    size = -1;
+    if ( stat(path, &st) == 0 ) {
+        if ( S_ISDIR(st.st_mode) ) {
+            char newpath[PATH_MAX];
+            DIR *dir;
+            struct dirent *entry;
+
+            dir = opendir(path);
+            if ( dir ) {
+                size = 0;
+                while ( (entry=readdir(dir)) != NULL ) {
+                    if ( entry->d_name[0] != '.' ) {
+                        sprintf(newpath, "%s/%s", path, entry->d_name);
+                        count = file_size(info, newpath);
+                        if ( count > 0 ) {
+                            size += count;
+                        }
+                    }
+                }
+                closedir(dir);
+            } else {
+                log_quiet(info, "Unable to read %s", path);
+            }
+        } else {
+            fp = fopen(path, "rb");
+            if ( fp ) {
+                /* If it's a gzip file, read uncompressed size from end */
+                if ( (fread(magic, 1, 2, fp) == 2) &&
+                    (memcmp(magic, gzip_magic, 2) == 0) ) {
+                    fseek(fp, (off_t)(-4), SEEK_END);
+                    /* Read little-endian value platform independently */
+                    size = (((unsigned int)fgetc(fp))<<24);
+                    size >>= 8;
+                    size |= (((unsigned int)fgetc(fp))<<24);
+                    size >>= 8;
+                    size |= (((unsigned int)fgetc(fp))<<24);
+                    size >>= 8;
+                    size |= (((unsigned int)fgetc(fp))<<24);
+                } else {
+                    size = st.st_size;
+                }
+                fclose(fp);
+            } else {
+                log_quiet(info, "Unable to read %s", path);
+            }
+        }
+    }
+    return(size);
 }

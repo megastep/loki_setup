@@ -9,7 +9,7 @@
 typedef struct {
     install_state (*init)(install_info *info,int argc, char **argv);
     install_state (*setup)(install_info *info);
-    void (*update)(install_info *info, const char *path, size_t progress, size_t size, int global_count, const char *current);
+    void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current);
     void (*abort)(install_info *info);
     install_state (*complete)(install_info *info);
 } Install_UI;

@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="yes"?>
-<install product="rt2" desc="Railroad Tycoon II" args="-w" splash="rt2.xpm">
-  <option install="true" size="200">
+<install product="rt2" desc="Railroad Tycoon II" splash="rt2.xpm">
+  <option install="true">
     Base Install
     <binary arch="any" libc="any" symlink="rt2" icon="icon.xpm">
       rt2
@@ -14,12 +14,12 @@
       maps.tar.gz
     </files>
   </option>
-  <option size="30">
+  <option>
     Classic Campaign (can run from CD)
     <files>
       maps/#[01]*
     </files>
-    <option size="">
+    <option>
       Classic Campaign Movies (can run from CD)
       <files>
         anim/cv[01]*
@@ -27,12 +27,12 @@
       </files>
     </option>
   </option>
-  <option size="1200">
+  <option>
     Second Century Campaign (can run from CD)
     <files>
       maps/#e[01]*
     </files>
-    <option size="">
+    <option>
       Second Century Campaign Movies (can run from CD)
       <files>
         anim/cve[01]*

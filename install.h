@@ -5,6 +5,9 @@
 #include <limits.h>
 #include <gnome-xml/parser.h>
 
+/* Conversion macro for bytes to megabytes */
+#define BYTES2MB(bytes) ((bytes/(1024*1024))+1)
+
 /* The default location of the product */
 #define DEFAULT_PATH    "/usr/local/games"
 
@@ -65,8 +68,11 @@ typedef struct {
     /* Log of actions taken */
     install_log *log;
 
-    /* The final installed size in MB */
-    int install_size;
+    /* The amount installed so far, in bytes */
+    size_t installed_bytes;
+
+    /* The total install size, in bytes */
+    size_t install_size;
 
     /* List of installed files and symlinks */
     struct file_elem {
@@ -120,15 +126,19 @@ extern void set_installpath(install_info *info, const char *path);
 /* Function to set the symlink path string, expanding home directories */
 extern void set_symlinkspath(install_info *info, const char *path);
 
+/* Mark/unmark an option node for install, optionally recursing */
+extern void mark_option(install_info *info, xmlNodePtr node,
+                        const char *value, int recurse);
+
+/* Get the name of an option node */
+extern char *get_option_name(install_info *info, xmlNodePtr node, char *name, int len);
+
 /* Free the install information structure */
 extern void delete_install(install_info *info);
 
 /* Actually install the selected filesets */
 extern install_state install(install_info *info,
-            void (*update)(install_info *info, const char *path, size_t progress, size_t size, int global_count, const char *current));
-
-/* Get the number of steps in the install */
-extern int length_install(install_info *info);
+            void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current));
 
 /* Abort a running installation (to be called from the update function) */
 extern void abort_install(void);
