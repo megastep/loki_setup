@@ -187,7 +187,7 @@ stream *file_open(install_info *info, const char *path, const char *mode)
     return(streamp);
 }
 
-int file_read(install_info *info, void *buf, int len, stream *streamp)
+static int file_read_internal(install_info *info, void *buf, int len, stream *streamp)
 {
     int nread;
 
@@ -207,6 +207,40 @@ int file_read(install_info *info, void *buf, int len, stream *streamp)
     }
     return nread;
 }
+
+
+int file_read(install_info *info, void *buf, int len, stream *streamp)
+{
+    int retval = 0;
+    char *ptr = (char *) buf;
+    const int max_tries = 5;
+    const int sleep_time_ms = 1500;
+    int i;
+    
+    for (i = 0; (i < max_tries) && (len > 0); i++)
+    {
+        int br = file_read_internal(info, ptr, len, streamp);
+        if (br >= 0)
+        {
+            ptr += br;
+            retval += br;
+            if (br == 0) /* eof? */
+                len = 0;
+            else
+                len -= br;
+        }
+        else
+        {
+            usleep(sleep_time_ms * 1000); /* back off awhile and try again... */
+        }
+    }
+
+    if (len > 0)
+        log_fatal(_("Read failure on %s"), streamp->path);
+
+    return(retval);
+}
+
 
 void file_skip(install_info *info, int len, stream *streamp)
 {
@@ -276,7 +310,7 @@ void file_skip_zeroes(install_info *info, stream *streamp)
   }
 }
 
-int file_write(install_info *info, void *buf, int len, stream *streamp)
+static int file_write_internal(install_info *info, void *buf, int len, stream *streamp)
 {
     int nwrote;
     nwrote = 0;
@@ -301,6 +335,36 @@ int file_write(install_info *info, void *buf, int len, stream *streamp)
         log_warning(_("Write on read stream"));
     }
     return nwrote;
+}
+
+
+int file_write(install_info *info, void *buf, int len, stream *streamp)
+{
+    int retval = 0;
+    char *ptr = (char *) buf;
+    const int max_tries = 5;
+    const int sleep_time_ms = 1500;
+    int i;
+    
+    for (i = 0; (i < max_tries) && (len > 0); i++)
+    {
+        int bw = file_write_internal(info, ptr, len, streamp);
+        if (bw > 0)
+        {
+            ptr += bw;
+            len -= bw;
+            retval += bw;
+        }
+        else
+        {
+            usleep(sleep_time_ms * 1000); /* back off awhile and try again... */
+        }
+    }
+
+    if (len > 0)
+        log_fatal(_("Write failure on %s"), streamp->path);
+
+    return(retval);
 }
 
 int file_eof(install_info *info, stream *streamp)
