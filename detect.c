@@ -135,7 +135,7 @@ int detect_cdrom(void)
 			free(cdroms[i]);
 	}
 
-    mountfp = setmntent( _PATH_MNTTAB, "r" );
+    mountfp = setmntent( _PATH_MOUNTED, "r" );
     if( mountfp != NULL ) {
         while( (mntent = getmntent( mountfp )) != NULL ){
 			char *tmp, mntdev[1024], mnt_type[32];
