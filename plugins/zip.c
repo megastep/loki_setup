@@ -1,5 +1,5 @@
 /* ZIP plugin for setup */
-/* $Id: zip.c,v 1.1 2002-08-23 17:45:11 icculus Exp $ */
+/* $Id: zip.c,v 1.2 2002-09-04 18:21:13 icculus Exp $ */
 
 #include "plugins.h"
 #include "file.h"
@@ -13,6 +13,7 @@
 #include <time.h>
 #include <errno.h>
 #include <unistd.h>
+#include <assert.h>
 
 /*
  * A lot of this code was cut-and-pasted from my work on PhysicsFS:
@@ -29,8 +30,8 @@
  * Depending on your speed and memory requirements, you should tweak this
  *  value.
  */
-#define ZIP_READBUFSIZE   (16 * 1024)
-#define ZIP_WRITEBUFSIZE  (64 * 1024)
+#define ZIP_READBUFSIZE   (64 * 1024)
+#define ZIP_WRITEBUFSIZE  (512 * 1024)
 
 
 
@@ -731,7 +732,7 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
             } /* if */
         } /* if */
 
-        update(info, final, entry->uncompressed_size, 0, current_option);
+        update(info, final, 0, entry->uncompressed_size, current_option);
 
         while (bw < entry->uncompressed_size)
         {
@@ -755,27 +756,11 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
                 } /* if */
 
                 bw += w;
-                update(info, final, entry->uncompressed_size, bw, current_option);
+                update(info, final, bw, entry->uncompressed_size, current_option);
             } /* if */
 
             else  /* compressed entry. */
             {
-                /* output buffer is full; dump it to disk. */
-                if (zstr.avail_out == 0)
-                {
-                    if (symlnk)
-                        break;  /* screwed. */
-
-                    w = file_write(info, zip_buf_out, ZIP_WRITEBUFSIZE, out);
-                    if (w != ZIP_WRITEBUFSIZE)
-                        break;
-
-                    bw += ZIP_WRITEBUFSIZE;
-                    update(info, final, entry->uncompressed_size, bw, current_option);
-                    zstr.next_out = zip_buf_out;
-                    zstr.avail_out = ZIP_WRITEBUFSIZE;
-                }
-
                 /* input buffer is empty; read more from disk. */
                 if (zstr.avail_in == 0)
                 {
@@ -783,17 +768,7 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
                     br = entry->compressed_size - compressed_position;
                     if (br == 0)  /* no more compressed data? */
                     {
-                        /* dump what's left in output buffer to disk... */
-                        w = br = ZIP_WRITEBUFSIZE - zstr.avail_out;
-
-                        if (!symlnk)
-                            w = file_write(info, zip_buf_out, br, out);
-
-                        if (w == br)
-                        {
-                            bw += w;
-                            update(info, final, entry->uncompressed_size, bw, current_option);
-                        } /* if */
+                        assert(zstr.avail_out == ZIP_WRITEBUFSIZE);
                         break;
                     } /* if */
                     else
@@ -814,6 +789,27 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
                 rc = zlib_err(inflate(&zstr, Z_SYNC_FLUSH));
                 if ((rc != Z_OK) && (rc != Z_STREAM_END))
                     break;
+
+                /* if output buffer has data, dump it to disk. */
+                if (zstr.avail_out < ZIP_WRITEBUFSIZE)
+                {
+                    int bytes_to_write = ZIP_WRITEBUFSIZE - zstr.avail_out;
+                    if ((symlnk) && (zstr.avail_out == 0))
+                    {
+                        assert(0);
+	                    log_debug("ZIP: out of buffer space reading symlink.");
+                        break;  /* no buffer, can't write yet: screwed. */
+                    }
+
+                    w = file_write(info, zip_buf_out, bytes_to_write, out);
+                    if (w != bytes_to_write)
+                        break;
+
+                    bw += bytes_to_write;
+                    update(info, final, bw, entry->uncompressed_size, current_option);
+                    zstr.next_out = zip_buf_out;
+                    zstr.avail_out = ZIP_WRITEBUFSIZE;
+                } /* if */
             } /* else */
         } /* while */
 
