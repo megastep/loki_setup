@@ -570,7 +570,7 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
             size += copied;
             file_chmod(info, final, 0755); /* Fix the permissions */
             /* Create the symlink */
-            if ( *info->symlinks_path ) {
+            if ( *info->symlinks_path && symlink ) {
                 sprintf(sym_to, "%s/%s", info->symlinks_path, symlink);
                 file_symlink(info, final, sym_to);
             }
