@@ -1,6 +1,24 @@
 
+The Loki Game Installer 1.0
+Written by Sam Lantinga and Stephane Peter
+------------------------------------------
+
 This installer uses an XML description file to describe a package,
 and provides both a console and a GTk front-end to install it.
+
+The installer requires libxml 1.4.0 to parse the XML configuration,
+and libglade 1.7 to dynamically load the GTk user interface definition.
+Source archives for these libraries can be found in ./libs, and newer
+versions may also work.
+
+Building the installer:
+Type 'make; make install'
+This builds a static version of the console installer, and a dynamically
+linked version of the GUI installer, and installs them in the appropriate
+CD-image subdirectory for this architecture and version of libc.
+
+The image subdirectory contains a set of files that you can copy to your
+CD image, and modify for the game you are distributing.
 
 CD-ROM install file layout:
 
@@ -17,3 +35,27 @@ autorun.inf             (Windows CD autorun file that runs win32/autorun.exe)
 win32/
    autorun.exe          (Win32 program that starts up explorer on REAMDE.htm)
    README.htm           (An HTML README file for people running Windows)
+
+--
+You should edit the setup.data/setup.xml file to match your product,
+and add a new splash.xpm which will be displayed during the install.
+
+The binaries for your product are expected to be in bin/<arch>/<libc>/
+on the CD.  The appropriate binary for the current architecture will
+be chosen at install time.  The <libc> portion of the path is optional.
+For example, if your binary is called 'rt2', you could have both x86
+and PPC versions as:
+	bin/x86/glibc-2.1/rt2
+	bin/ppc/rt2
+and the appropriate binary would be chosen.
+
+The install process creates an uninstall script in the install directory
+which can be run when the user wants to uninstall the product.
+
+Make sure you have included installers for the supported architectures
+on your CD!  We have included x86, ppc, alpha, and sparc binaries for
+this version of the installer.
+
+Play with it, and enjoy!
+
+-- Sam Lantinga, Lead Programmer, Loki Entertainment Software
