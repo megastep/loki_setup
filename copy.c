@@ -248,21 +248,26 @@ size_t copy_list(install_info *info, const char *filedesc, const char *dest,
     return size;
 }
 
-size_t copy_node(install_info *info, xmlDocPtr doc, xmlNodePtr cur,
-        const char *dest,
+size_t copy_node(install_info *info, xmlNodePtr cur, const char *dest,
                 void (*update)(install_info *info, const char *path, size_t size))
 {
     size_t size, copied;
 
     size = 0;
+    cur = cur->childs;
     while ( cur ) {
 printf("Checking node element '%s'\n", cur->name);
         if ( strcmp(cur->name, "files") == 0 ) {
-            copied = copy_list(info, xmlNodeListGetString(doc, cur->childs, 1),
+printf("Installing file set for '%s'\n", xmlNodeListGetString(info->config, (cur->parent)->childs, 1));
+            copied = copy_list(info,
+                               xmlNodeListGetString(info->config, cur->childs, 1),
                                dest, update);
             if ( copied > 0 ) {
                 size += copied;
             }
+        }
+        if ( strcmp(cur->name, "binary") == 0 ) {
+printf("Installing binary\n");
         }
         cur = cur->next;
     }

@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="yes"?>
-<install>
+<install product="rt2">
   <desc>Railroad Tycoon II</desc>
-  <option checked="true" size="200">
+  <option install="true" size="200">
     Base Install
     <binary arch="any" libc="any" symlink="rt2" icon="icon.xpm">
       rt2

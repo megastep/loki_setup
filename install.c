@@ -5,6 +5,12 @@
 #include "install.h"
 
 
+/* Functions to retrieve attribution information from the XML tree */
+const char *GetProductName(install_info *info)
+{
+    return xmlGetProp(info->config->root, "product");
+}
+
 /* Create the initial installation information */
 install_info *create_install(const char *configfile)
 {
@@ -18,12 +24,23 @@ install_info *create_install(const char *configfile)
     }
     memset(info, 0, (sizeof *info));
 
+    /* Create the log file */
+    info->log = create_log(LOG_NORMAL);
+    if ( info->log == NULL ) {
+        fprintf(stderr, "Out of memory\n");
+        delete_install(info);
+        return(NULL);
+    }
+
     /* Load the XML configuration file */
     info->config = xmlParseFile(configfile);
     if ( info->config == NULL ) {
         delete_install(info);
         return(NULL);
     }
+
+    /* Add the default install path */
+    sprintf(info->install_path, "%s/%s", DEFAULT_PATH, GetProductName(info));
 
     /* That was easy.. :) */
     return(info);
@@ -86,6 +103,9 @@ void delete_install(install_info *info)
         free(elem->path);
         free(elem);
     }
+    if ( info->log ) {
+        destroy_log(info->log);
+    }
     free(info);
 }
 
@@ -94,6 +114,19 @@ void delete_install(install_info *info)
 install_state install(install_info *info,
             void (*update)(install_info *info, const char *path, size_t size))
 {
+    xmlNodePtr node;
+
+    /* Walk the install tree */
+    node = info->config->root->childs;
+    while ( node ) {
+        const char *wanted;
+
+        wanted = xmlGetProp(node, "install");
+        if ( wanted  && (strcmp(wanted, "true") == 0) ) {
+            copy_node(info, node, info->install_path, update);
+        }
+        node = node->next;
+    }
     return SETUP_COMPLETE;
 }
 

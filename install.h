@@ -7,6 +7,9 @@
 
 #include "log.h"
 
+/* The default location of the product */
+#define DEFAULT_PATH    "/usr/local/games"
+
 /* The different setup states */
 typedef enum {
     SETUP_ABORT = -1,
