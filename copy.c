@@ -10,11 +10,21 @@
 
 #include <glob.h>
 
+#ifdef RPM_SUPPORT
+#include <rpm/rpmlib.h>
+#endif
+
 #include "file.h"
 #include "copy.h"
 #include "tar.h"
+#include "cpio.h"
+#include "install_log.h"
 
 #define TAR_EXTENSION   ".tar"
+#define CPIO_EXTENSION  ".cpio"
+#define RPM_EXTENSION   ".rpm"
+
+#define makedev(ma, mi) (((ma) << 8) | (mi))
 
 static char current_option[200];
 
@@ -51,6 +61,124 @@ int parse_line(const char **srcpp, char *buf, int maxlen)
     return strlen(buf);
 }
 
+#ifdef RPM_SUPPORT
+size_t copy_rpm(install_info *info, const char *path, const char *dest,
+                void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+{
+
+  return 0;
+}
+#endif
+
+size_t copy_cpio(install_info *info, const char *path, const char *dest,
+                void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+{
+    stream *input, *output;
+	char magic[6];
+	char ascii_header[112];
+	struct new_cpio_header file_hdr;
+	int has_crc;
+	int dir_len = strlen(dest) + 1;
+	size_t nread, left, copied;
+	size_t size = 0;
+	char buf[BUFSIZ];
+
+	memset(&file_hdr, 0, sizeof(file_hdr));
+    input = file_open(info, path, "rb");
+    while ( ! file_eof(info, input) ) {
+	  file_read(info, magic, 6, input);
+	  if(!strncmp(magic,"070701",6) || !strncmp(magic,"070702",6)){ /* New format */
+		has_crc = (magic[5] == '2');
+		file_read(info, ascii_header, 104, input);
+		ascii_header[104] = '\0';
+		sscanf (ascii_header,
+				"%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx",
+				&file_hdr.c_ino, &file_hdr.c_mode, &file_hdr.c_uid,
+				&file_hdr.c_gid, &file_hdr.c_nlink, &file_hdr.c_mtime,
+				&file_hdr.c_filesize, &file_hdr.c_dev_maj, &file_hdr.c_dev_min,
+				&file_hdr.c_rdev_maj, &file_hdr.c_rdev_min, &file_hdr.c_namesize,
+				&file_hdr.c_chksum);
+	  }else if(!strncmp(magic,"070707",6)){ /* Old format */
+		unsigned long dev, rdev;
+		file_read(info, ascii_header, 70, input);
+		ascii_header[70] = '\0';
+		sscanf (ascii_header,
+				"%6lo%6lo%6lo%6lo%6lo%6lo%6lo%11lo%6lo%11lo",
+				&dev, &file_hdr.c_ino,
+				&file_hdr.c_mode, &file_hdr.c_uid, &file_hdr.c_gid,
+				&file_hdr.c_nlink, &rdev, &file_hdr.c_mtime,
+				&file_hdr.c_namesize, &file_hdr.c_filesize);
+		file_hdr.c_dev_maj = major (dev);
+		file_hdr.c_dev_min = minor (dev);
+		file_hdr.c_rdev_maj = major (rdev);
+		file_hdr.c_rdev_min = minor (rdev);
+	  }
+	  if(file_hdr.c_name != NULL)
+		free(file_hdr.c_name);
+	  file_hdr.c_name = (char *) malloc(file_hdr.c_namesize + dir_len);
+	  strcpy(file_hdr.c_name, dest);
+	  strcat(file_hdr.c_name, "/");
+	  file_read(info, file_hdr.c_name + dir_len, file_hdr.c_namesize, input);
+	  if(!strncmp(file_hdr.c_name + dir_len,"TRAILER!!!",10)) /* End of archive marker */
+		break;
+	  /* Skip padding zeros after the file name */
+	  file_skip_zeroes(info, input);
+	  if(S_ISDIR(file_hdr.c_mode)){
+		file_create_hierarchy(info, file_hdr.c_name);
+		file_mkdir(info, file_hdr.c_name, file_hdr.c_mode & C_MODE);
+	  }else if(S_ISFIFO(file_hdr.c_mode)){
+		file_mkfifo(info, file_hdr.c_name, file_hdr.c_mode & C_MODE);
+	  }else if(S_ISBLK(file_hdr.c_mode)){
+		file_mknod(info, file_hdr.c_name, S_IFBLK|(file_hdr.c_mode & C_MODE), 
+				   makedev(file_hdr.c_rdev_maj,file_hdr.c_rdev_min));
+	  }else if(S_ISCHR(file_hdr.c_mode)){
+		file_mknod(info, file_hdr.c_name, S_IFCHR|(file_hdr.c_mode & C_MODE), 
+				   makedev(file_hdr.c_rdev_maj,file_hdr.c_rdev_min));
+	  }else if(S_ISSOCK(file_hdr.c_mode)){
+		// TODO: create Unix socket
+	  }else if(S_ISLNK(file_hdr.c_mode)){
+		char *lnk = (char *)malloc(file_hdr.c_filesize+1);
+		file_read(info, lnk, file_hdr.c_filesize, input);
+		lnk[file_hdr.c_filesize] = '\0';
+		file_symlink(info, lnk, file_hdr.c_name);
+		free(lnk);
+	  }else{
+		unsigned long chk = 0;
+		/* Open the file for output */
+		output = file_open(info, file_hdr.c_name, "wb");
+		if(output){
+		  left = file_hdr.c_filesize;
+		  while(left && (nread=file_read(info, buf, (left >= BUFSIZ) ? BUFSIZ : left, input))){
+			copied = file_write(info, buf, nread, output);
+			left -= nread;
+			if(has_crc && file_hdr.c_chksum){
+			  int i;
+			  for(i=0; i<BUFSIZ; i++)
+				chk += buf[i];
+			}
+		  
+			info->installed_bytes += copied;
+			if(update){
+			  update(info, file_hdr.c_name, file_hdr.c_filesize-left, file_hdr.c_filesize, current_option);
+			}
+		  }
+		  if(has_crc && file_hdr.c_chksum && file_hdr.c_chksum != chk)
+			fprintf(stderr,"Warning: Bad checksum for file %s!\n", file_hdr.c_name);
+		  size += file_hdr.c_filesize;
+		  file_close(info, output);
+		  chmod(file_hdr.c_name, file_hdr.c_mode & C_MODE);
+		}else /* Skip the file data */
+		  file_skip(info, file_hdr.c_filesize, input);
+	  }
+	  /* More padding zeroes after the data */
+	  file_skip_zeroes(info, input);
+	}
+    file_close(info, input);  
+	if(file_hdr.c_name != NULL)
+	  free(file_hdr.c_name);
+
+	return size;
+}
 
 size_t copy_tarball(install_info *info, const char *path, const char *dest,
                 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
@@ -183,7 +311,6 @@ size_t copy_file(install_info *info, const char *path, const char *dest, char *f
 size_t copy_directory(install_info *info, const char *path, const char *dest,
                 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
-    struct stat sb;
     char fpat[BUFSIZ];
     int i;
     glob_t globbed;
@@ -219,6 +346,12 @@ size_t copy_path(install_info *info, const char *path, const char *dest,
         } else {
             if ( strstr(path, TAR_EXTENSION) != NULL ) {
                 copied = copy_tarball(info, path, dest, update);
+			} else if ( strstr(path, CPIO_EXTENSION) != NULL ) {
+                copied = copy_cpio(info, path, dest, update);
+#ifdef RPM_SUPPORT
+			} else if ( strstr(path, RPM_EXTENSION) != NULL ) {
+                copied = copy_rpm(info, path, dest, update);
+#endif
             } else {
                 copied = copy_file(info, path, dest, final, 0, update);
             }

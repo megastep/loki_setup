@@ -19,10 +19,15 @@ typedef struct {
 
 extern stream *file_open(install_info *info,const char *path,const char *mode);
 extern int file_read(install_info *info, void *buf, int len, stream *streamp);
+extern void file_skip_zeroes(install_info *info, stream *streamp);
+extern void file_skip(install_info *info, int len, stream *streamp);
 extern int file_write(install_info *info, void *buf, int len, stream *streamp);
 extern int file_eof(install_info *info, stream *streamp);
 extern int file_close(install_info *info, stream *streamp);
 extern int file_symlink(install_info *info, const char *oldpath, const char *newpath);
 extern int file_mkdir(install_info *info, const char *path, int mode);
+extern int file_mkfifo(install_info *info, const char *path, int mode);
+extern int file_mknod(install_info *info, const char *path, int mode, dev_t dev);
 extern int file_chmod(install_info *info, const char *path, int mode);
 extern size_t file_size(install_info *info, const char *path);
+extern void file_create_hierarchy(install_info *info, const char *path);

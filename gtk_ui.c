@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.12 1999-09-20 17:25:16 hercules Exp $
+   $Id: gtk_ui.c,v 1.13 1999-09-24 02:47:32 megastep Exp $
 */
 
 #include <limits.h>
@@ -14,6 +14,7 @@
 
 #include "install.h"
 #include "install_ui.h"
+#include "install_log.h"
 #include "detect.h"
 
 #define SETUP_GLADE SETUP_BASE "setup.glade"

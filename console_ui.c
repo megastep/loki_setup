@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <ctype.h>
+#include <stdlib.h>
 
 #include "install.h"
 #include "install_ui.h"
@@ -63,7 +65,7 @@ static yesno_answer prompt_yesno(const char *prompt, yesno_answer suggest)
 
 static void parse_option(install_info *info, xmlNodePtr node)
 {
-    char *text, line[BUFSIZ];
+    char line[BUFSIZ];
     char prompt[BUFSIZ];
     const char *wanted;
 
@@ -199,6 +201,10 @@ static install_state console_complete(install_info *info)
 
 int console_okay(Install_UI *UI)
 {
+    if(!isatty(1)){
+	  fprintf(stderr,"Standard input is not a terminal!\n");
+	  return(0);
+    }
     /* Set up the driver */
     UI->init = console_init;
     UI->setup = console_setup;

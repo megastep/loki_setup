@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
@@ -14,10 +15,27 @@
 #include <zlib.h>
 
 #include "file.h"
+#include "install_log.h"
 
 /* Magic to detect a gzip compressed file */
 static const char gzip_magic[2] = { 0037, 0213 };
 
+void file_create_hierarchy(install_info *info, const char *path)
+{
+  /* Create higher-level directories as needed */
+  char buf[PATH_MAX], *bufp;
+  
+  strncpy(buf, path, PATH_MAX);
+  buf[PATH_MAX-1] = '\0';
+  for ( bufp = &buf[1]; *bufp; ++bufp ) {
+	if ( *bufp == '/' ) {
+	  *bufp = '\0';
+	  file_mkdir(info, buf, 0755);
+	  *bufp = '/';
+	}
+  }
+
+}
 
 stream *file_open(install_info *info, const char *path, const char *mode)
 {
@@ -71,18 +89,7 @@ stream *file_open(install_info *info, const char *path, const char *mode)
             return(NULL);
         }
     } else {
-        /* Create higher-level directories as needed */
-        char buf[PATH_MAX], *bufp;
-
-        strncpy(buf, path, PATH_MAX);
-        buf[PATH_MAX-1] = '\0';
-        for ( bufp = &buf[1]; *bufp; ++bufp ) {
-            if ( *bufp == '/' ) {
-                *bufp = '\0';
-                file_mkdir(info, buf, 0755);
-                *bufp = '/';
-            }
-        }
+	    file_create_hierarchy(info, path);
 
         /* Open the file for writing */
         log_quiet(info, "Installing file %s", path);
@@ -100,20 +107,57 @@ stream *file_open(install_info *info, const char *path, const char *mode)
 
 int file_read(install_info *info, void *buf, int len, stream *streamp)
 {
-    int nread, eof;
+    int nread;
 
     nread = 0;
     if ( streamp->mode == 'r' ) {
         if ( streamp->fp ) {
             nread = fread(buf, 1, len, streamp->fp);
-        }
-        if ( streamp->zfp ) {
+        }else if ( streamp->zfp ) {
             nread = gzread(streamp->zfp, buf, len);
         }
     } else {
         log_warning(info, "Read on write stream");
     }
     return nread;
+}
+
+void file_skip(install_info *info, int len, stream *streamp)
+{
+  char buf[BUFSIZ];
+  int nread;
+  while(len){
+	nread = file_read(info, buf, (len>BUFSIZ) ? BUFSIZ : len, streamp);
+	if(!nread) break;
+	len -= nread;
+  }
+}
+
+void file_skip_zeroes(install_info *info, stream *streamp)
+{
+  int nread;
+  char c;
+  if ( streamp->mode == 'r' ) {
+	for(;;){
+	  if ( streamp->fp ) {
+		nread = fread(&c, 1, 1, streamp->fp);
+	  }else if ( streamp->zfp ) {
+		nread = gzread(streamp->zfp, &c, 1);
+	  }
+	  if(!nread) break;
+	  if(nread==1 && c!='\0'){
+		/* Go back one byte */
+		if ( streamp->fp ) {
+		  fseek(streamp->fp, -1L, SEEK_CUR);
+		}else if ( streamp->zfp ) { /* Probably slow */
+		  gzseek(streamp->zfp, -1L, SEEK_CUR);
+		}
+		break;
+	  }
+	}
+  } else {
+	log_warning(info, "Skip zeroes on write stream");
+  }
 }
 
 int file_write(install_info *info, void *buf, int len, stream *streamp)
@@ -171,6 +215,7 @@ int file_close(install_info *info, stream *streamp)
         free(streamp->path);
         free(streamp);
     }
+	return 0;
 }
 
 int file_symlink(install_info *info, const char *oldpath, const char *newpath)
@@ -182,6 +227,7 @@ int file_symlink(install_info *info, const char *oldpath, const char *newpath)
     log_quiet(info, "Creating symbolic link: %s --> %s\n", newpath, oldpath);
 
     /* Do the action */
+	file_create_hierarchy(info,newpath);
 
     /* If a symbolic link already exists, try to remove it */
     if( lstat(newpath, &st)==0 && S_ISLNK(st.st_mode) )
@@ -219,6 +265,44 @@ int file_mkdir(install_info *info, const char *path, int mode)
         }
     }
     return(retval);
+}
+
+int file_mkfifo(install_info *info, const char *path, int mode)
+{
+  int retval;
+
+  /* Log the action */
+  log_quiet(info, "Creating FIFO: %s\n", path);
+  
+  /* Do the action */
+  file_create_hierarchy(info, path);
+  retval = mkfifo(path, mode);
+  if ( retval < 0 ) {
+	if(errno != EEXIST)
+	  log_warning(info, "Can't create %s: %s", path, strerror(errno));
+  } else {
+	add_file_entry(info, path);
+  }
+  return(retval);
+}
+
+int file_mknod(install_info *info, const char *path, int mode, dev_t dev)
+{
+  int retval;
+
+  /* Log the action */
+  log_quiet(info, "Creating device: %s\n", path);
+  
+  /* Do the action */
+  file_create_hierarchy(info, path);
+  retval = mknod(path, mode, dev);
+  if ( retval < 0 ) {
+	if(errno != EEXIST)
+	  log_warning(info, "Can't create %s: %s", path, strerror(errno));
+  } else {
+	add_file_entry(info, path);
+  }
+  return(retval);
 }
 
 int file_chmod(install_info *info, const char *path, int mode)

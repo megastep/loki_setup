@@ -4,17 +4,17 @@ libc := $(shell ./print_libc)
 
 CC = gcc
 
-#OPTIMIZE = -g -O2 -funroll-loops
-OPTIMIZE = -g
+#OPTIMIZE = -Wall -g -O2 -funroll-loops
+OPTIMIZE = -Wall -g
 HEADERS = -I/usr/lib/glib/include -I/usr/X11R6/include
-OPTIONS = -DSTUB_UI
+OPTIONS = -DSTUB_UI -DRPM_SUPPORT
 CFLAGS += $(OPTIMIZE) $(HEADERS) $(OPTIONS)
 
 OBJS = main.o install.o detect.o copy.o file.o log.o install_log.o
 CONSOLE_OBJS = $(OBJS) console_ui.o
 GUI_OBJS = $(OBJS) gtk_ui.o
 
-LIBS = -Wl,-Bstatic -lxml -lz
+LIBS = -lxml -lz
 CONSOLE_LIBS = $(LIBS)
 GUI_LIBS = $(LIBS) -Wl,-Bdynamic -lgtk -lgdk -lglade -rdynamic
 
@@ -24,7 +24,7 @@ testxml: testxml.o
 	$(CC) -o $@ $^ $(LIBS)
 
 setup:	$(CONSOLE_OBJS)
-	$(CC) -o $@ $^ $(CONSOLE_LIBS) -static
+	$(CC) -o $@ $^ $(CONSOLE_LIBS)
 
 setup.gtk: $(GUI_OBJS)
 	$(CC) -o $@ $^ $(GUI_LIBS)
