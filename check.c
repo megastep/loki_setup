@@ -2,7 +2,7 @@
  * Check and Rescue Tool for Loki Setup packages. Verifies the consistency of the files,
  * and optionally restores them from the original installation medium.
  *
- * $Id: check.c,v 1.10 2003-02-27 06:16:01 megastep Exp $
+ * $Id: check.c,v 1.11 2003-04-01 04:15:09 megastep Exp $
  */
 
 #include <stdlib.h>
@@ -283,7 +283,7 @@ on_media_ok_clicked (GtkButton       *button,
 
 		/* Check if we need to create a default component entry */
 		if ( GetProductNumComponents(install) == 0 ) {
-			current_component = add_component_entry(install, "Default", install->version, 1);
+			current_component = add_component_entry(install, "Default", install->version, 1, NULL, NULL);
 		}
 
 		/* Restore any environment */

@@ -1,4 +1,7 @@
 Current:
+Stephane Peter (Codehost) - Mon Mar 31 19:26:17 PST 2003
+ * Added support for per-component uninstall scripts.
+ * Added per-component uninstall messages.
 Stephane Peter (Codehost) - Tue Feb 11 20:33:32 PST 2003
  * Added the 'environment' tag to store the values of
    environment variables.

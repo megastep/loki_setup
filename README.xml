@@ -232,6 +232,10 @@ There are also optional attributes :
   distro    This component is only available with the specified OS distribution.
             Look at the end of this file for a list of possible values.
 
+  preuninstall     The path to an optional pre-uninstall script for the component.
+
+  postuninstall    The path to an optional post-uninstall script for the component.
+
 The README and EULA elements:
 
 Those elements are used to mark special files, that are unique for

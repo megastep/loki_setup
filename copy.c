@@ -808,6 +808,28 @@ ssize_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
 			if ( copied > 0 ) {
 				size += copied;
 			}
+		} else if ( ! strcmp(node->name, "remove_msg" ) ) {
+			const char *text;
+			static char line[BUFSIZ], buf[BUFSIZ];
+			const char *prop = xmlGetProp(node, "lang");
+			if ( match_locale(prop) ) {
+				if ( ! current_component ) {
+					log_fatal(_("The remove_msg element should be within a component!\n"));
+				}
+				if ( current_component->message ) {
+					log_fatal(_("Only one remove_msg per component is allowed.\n"));
+				}
+				text = xmlNodeListGetString(info->config, node->childs, 1);
+				if (text) {
+					*buf = '\0';
+					while ( *text ) {
+						parse_line(&text, line, sizeof(line));
+						strcat(buf, line);
+						strcat(buf, "\n");
+					}
+					current_component->message = strdup(buf);
+				}
+			}
 		} else if ( ! strcmp(node->name, "component" ) ) {
             const char *name, *version;
             name = xmlGetProp(node, "name");
@@ -820,7 +842,9 @@ ssize_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
                  match_libc(info, xmlGetProp(node, "libc")) &&
 				 match_distro(info, xmlGetProp(node, "distro")) ) {
                 current_component = add_component_entry(info, name, version, 
-                                                        xmlGetProp(node, "default") != NULL);
+                                                        xmlGetProp(node, "default") != NULL,
+														xmlGetProp(node, "preuninstall"),
+														xmlGetProp(node, "postuninstall"));
                 /* Recurse in the sub-options */
                 copied = copy_tree(info, node->childs, dest, update);
                 if ( copied > 0 ) {

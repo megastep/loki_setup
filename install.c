@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.105 2003-04-01 03:04:14 megastep Exp $ */
+/* $Id: install.c,v 1.106 2003-04-01 04:15:10 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -376,34 +376,6 @@ const char *GetProductREADME(install_info *info)
 	return NULL;
 }
 
-const char *GetProductMessage(install_info *info)
-{
-	xmlNodePtr node;
-	const char *text;
-	static char line[BUFSIZ], buf[BUFSIZ];
-
-	node = info->config->root->childs;
-	while(node) {
-		if(! strcmp(node->name, "remove_msg") ) {
-			const char *prop = xmlGetProp(node, "lang");
-			if ( match_locale(prop) ) {
-				text = xmlNodeListGetString(info->config, node->childs, 1);
-				if (text) {
-					*buf = '\0';
-					while ( *text ) {
-						parse_line(&text, line, sizeof(line));
-						strcat(buf, line);
-						strcat(buf, "\n");
-					}
-					return buf;
-				}
-			}
-		}
-		node = node->next;
-	}
-	return NULL;
-}
-
 int GetProductNumComponents(install_info *info)
 {
     int count = 0;
@@ -704,7 +676,7 @@ struct envvar_elem *add_envvar_entry(install_info *info, struct component_elem *
 }
 
 struct component_elem *add_component_entry(install_info *info, const char *name, const char *version,
-                                           int def)
+                                           int def, const char *preun, const char *postun)
 {
     struct component_elem *elem;
 
@@ -715,6 +687,9 @@ struct component_elem *add_component_entry(install_info *info, const char *name,
         elem->is_default = def;
         elem->options_list = NULL;
 		elem->envvars_list = NULL;
+		elem->preun = preun ? strdup(preun) : NULL;
+		elem->postun = postun ? strdup(postun) : NULL;
+		elem->message = NULL;
         elem->next = info->components_list;
         info->components_list = elem;
     }
@@ -1244,6 +1219,9 @@ void delete_install(install_info *info)
 
         free(comp->name);
         free(comp->version);
+		free(comp->preun);
+		free(comp->postun);
+		free(comp->message);
         free(comp);
     }
 	delete_cdrom_install(info);
@@ -1267,7 +1245,7 @@ install_state install(install_info *info,
 
     /* Check if we need to create a default component entry */
     if ( GetProductNumComponents(info) == 0 ) {
-        current_component = add_component_entry(info, "Default", info->version, 1);
+        current_component = add_component_entry(info, "Default", info->version, 1, NULL, NULL);
     }
 
     /* Walk the install tree */
@@ -1486,6 +1464,38 @@ static void output_script_header(FILE *f, install_info *info, product_component_
     fseek(f, 0L, SEEK_CUR);
 }
 
+static void generate_uninst_script(install_info *info, product_component_t *component, 
+								   const char *file, const char *name, script_type_t t)
+{
+	FILE *pre;
+	int count;
+	char tmp_name[] = "/tmp/setupXXXXXX", buf[1024];
+	int tmp = mkstemp(tmp_name);
+	if ( tmp < 0 ) {
+		log_fatal(_("Could not create temporary script"));
+	}
+	
+	pre = fdopen(tmp, "w");
+	if ( pre ) {
+		int script_file = open(file, O_RDONLY);
+		output_script_header(pre, info, component);
+		if (script_file > 0) {
+			for(;;) {
+				count = read(script_file, buf, sizeof(buf));
+				if(count>0)
+					fwrite(buf, 1, count, pre);
+				else
+					break;
+			}
+			close(script_file);
+		}
+		fchmod(fileno(pre), 0755);
+		fclose(pre);
+		loki_registerscript_fromfile_component(component, t, name, tmp_name);
+		unlink(tmp_name);
+	}
+}
+
 void generate_uninstall(install_info *info)
 {
     product_t *product;
@@ -1511,8 +1521,6 @@ void generate_uninstall(install_info *info)
 
     if ( product ) {
         char buf[PATH_MAX];
-		const char *msg;
-        int count;
 		struct envvar_elem *var;
 		uninstall_generated = 1;
 
@@ -1546,6 +1554,22 @@ void generate_uninstall(install_info *info)
 			/* Store per-component env variables */
 			for(var = comp->envvars_list; var; var = var->next ) {
 				loki_register_envvar_component(component, var->name);
+			}
+
+			/* Register per-component uninstall scripts */
+			if ( comp->preun ) {
+				snprintf(buf, sizeof(buf), "%s-preun", comp->name);
+				generate_uninst_script(info, loki_find_component(product, comp->name),
+									   comp->preun, buf, LOKI_SCRIPT_PREUNINSTALL);
+			}
+			if ( comp->postun ) {
+				snprintf(buf, sizeof(buf), "%s-postun", comp->name);
+				generate_uninst_script(info, loki_find_component(product, comp->name),
+									   comp->postun, buf, LOKI_SCRIPT_POSTUNINSTALL);
+			}
+
+			if ( comp->message ) {
+				loki_setmessage_component(loki_find_component(product, comp->name), comp->message);
 			}
 
             push_curdir(info->install_path);
@@ -1643,84 +1667,25 @@ void generate_uninstall(install_info *info)
             pop_curdir();
         }
 
-	if ( install_updatemenus_script ) {
-	    /* Add a call to the post-uninstall scripts */
-	    loki_registerscript_component(component, LOKI_SCRIPT_POSTUNINSTALL,
-									  "update-menus", 
-									  "if which update-menus 2> /dev/null > /dev/null || type -p update-menus 2> /dev/null >/dev/null; then update-menus 2> /dev/null; fi\n"
-									  "if which kbuildsycoca 2> /dev/null > /dev/null || type -p kbuildsycoca 2> /dev/null >/dev/null; then kbuildsycoca 2>/dev/null; fi\n"
-									  "if which dtaction 2> /dev/null > /dev/null || type -p dtaction 2> /dev/null > /dev/null; then dtaction RestorePanel 2>/dev/null; fi\n"
-									  "true\n");
-	}
+		if ( install_updatemenus_script ) {
+			/* Add a call to the post-uninstall scripts */
+			loki_registerscript_component(component, LOKI_SCRIPT_POSTUNINSTALL,
+										  "update-menus", 
+										  "if which update-menus 2> /dev/null > /dev/null || type -p update-menus 2> /dev/null >/dev/null; then update-menus 2> /dev/null; fi\n"
+										  "if which kbuildsycoca 2> /dev/null > /dev/null || type -p kbuildsycoca 2> /dev/null >/dev/null; then kbuildsycoca 2>/dev/null; fi\n"
+										  "if which dtaction 2> /dev/null > /dev/null || type -p dtaction 2> /dev/null > /dev/null; then dtaction RestorePanel 2>/dev/null; fi\n"
+										  "true\n");
+		}
 
         /* Register the pre and post uninstall scripts with the default component */
         component = loki_getdefault_component(product);
 
-	/* And the uninstall message as well */
-	/* FIXME: Allow real per-component messages */
-	msg = GetProductMessage(info);
-	if ( msg ) {
-	    loki_setmessage_component(component, msg);
-	}
-
         if (GetPreUnInstall(info)) {
-	    FILE *pre;
-	    char tmp_name[] = "/tmp/setupXXXXXX";
-	    int tmp = mkstemp(tmp_name);
-	    if ( tmp < 0 ) {
-		log_fatal(_("Could not create temporary script"));
-	    }
-            
-            pre = fdopen(tmp, "w");
-            if ( pre ) {
-                int script_file = open(GetPreUnInstall(info), O_RDONLY);
-                output_script_header(pre, info, component);
-                if (script_file > 0) {
-                    for(;;) {
-                        count = read(script_file, buf, sizeof(buf));
-                        if(count>0)
-                            fwrite(buf, 1, count, pre);
-                        else
-                            break;
-                    }
-                    close(script_file);
-                }
-                fchmod(fileno(pre), 0755);
-                fclose(pre);
-                loki_registerscript_fromfile_component(component, LOKI_SCRIPT_PREUNINSTALL,
-                                                       "preun", tmp_name);
-                unlink(tmp_name);
-            }
+			generate_uninst_script(info, component, GetPreUnInstall(info), "preun", LOKI_SCRIPT_PREUNINSTALL);
         }
 
         if (GetPostUnInstall(info)) {
-			FILE *post;
-			char tmp_name[] = "/tmp/setupXXXXXX";
-			int tmp = mkstemp(tmp_name);
-			if ( tmp < 0 ) {
-				log_fatal(_("Could not create temporary script"));
-			}
-            
-            post = fdopen(tmp, "w");
-            if ( post ) {
-                int script_file = open(GetPostUnInstall(info), O_RDONLY);
-                output_script_header(post, info, component);
-                if (script_file > 0) {
-                    for(;;) {
-                        count = read(script_file, buf, sizeof(buf));
-                        if(count>0)
-                            fwrite(buf, 1, count, post);
-                        else
-                            break;
-                    }
-                    close(script_file);
-                }
-                fchmod(fileno(post), 0755);
-                fclose(post);
-                loki_registerscript_fromfile_component(component, LOKI_SCRIPT_POSTUNINSTALL,
-                                                       "postun", tmp_name);
-                unlink(tmp_name);
-            }
+			generate_uninst_script(info, component, GetPostUnInstall(info), "postun", LOKI_SCRIPT_POSTUNINSTALL);
         }
 
         snprintf(buf, sizeof(buf), "setup.data/bin/%s/%s/uninstall", detect_os(), detect_arch());

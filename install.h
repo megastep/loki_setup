@@ -180,6 +180,9 @@ typedef struct _install_info {
 			struct envvar_elem *next;
 		} *envvars_list;
 
+		char *postun, *preun; /* Optional per-component uninstall scripts */
+		char *message; /* Optional message */
+
         struct component_elem *next;
     } *components_list;
 
@@ -207,7 +210,6 @@ extern const char *GetProductDesc(install_info *info);
 extern const char *GetProductComponent(install_info *info);
 extern const char *GetProductUninstall(install_info *info);
 extern const char *GetProductVersion(install_info *info);
-extern const char *GetProductMessage(install_info *info);
 extern int         GetProductCDROMRequired(install_info *info);
 extern int         GetProductCDROMDescriptions(install_info *info);
 extern int         GetProductIsMeta(install_info *info);
@@ -253,7 +255,8 @@ struct cdrom_elem *add_cdrom_entry(install_info *info, const char *id, const cha
 void set_cdrom_mounted(struct cdrom_elem *cd, const char *path);
 
 /* Create a new component entry */
-struct component_elem *add_component_entry(install_info *info, const char *name, const char *version, int def);
+struct component_elem *add_component_entry(install_info *info, const char *name, const char *version, int def,
+										   const char *preun, const char *postun);
 
 /* Create a new option entry */
 struct option_elem *add_option_entry(struct component_elem *comp, const char *name, const char *tag);
