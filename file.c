@@ -142,14 +142,20 @@ stream *file_open(install_info *info, const char *path, const char *mode)
                 fclose(streamp->fp);
                 streamp->fp = NULL;
                 streamp->zfp = gzopen(path, "rb");
-            #ifdef HAVE_BZIP2_SUPPORT
             } else if ( memcmp(magic, bzip_magic, 2) == 0 ) {
+#ifdef HAVE_BZIP2_SUPPORT
 				/* TODO: Get the uncompressed size ! */
 
                 fclose(streamp->fp);
                 streamp->fp = NULL;
                 streamp->bzfp = BZOPEN(path, "rb");
-            #endif
+#else
+			    struct stat st;
+                rewind(streamp->fp);
+				fstat(fileno(streamp->fp), &st);
+				streamp->size = st.st_size;
+				log_warning(_("File '%s' may be in BZIP2 format, but support was not compiled in!"), path);
+#endif
             } else {
 			    struct stat st;
                 rewind(streamp->fp);
