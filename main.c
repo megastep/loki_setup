@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.31 2000-07-31 21:27:08 megastep Exp $ */
+/* $Id: main.c,v 1.32 2000-07-31 21:53:39 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -254,6 +254,8 @@ int main(int argc, char **argv)
         state = SETUP_ABORT;
     }
     signal(SIGINT, signal_abort);
+    signal(SIGHUP, signal_abort);
+    signal(SIGTERM, signal_abort);
 
     /* Run the little state machine */
     exit_status = 0;

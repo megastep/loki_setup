@@ -1,6 +1,6 @@
 
 DISTDIR = ..
-PACKAGE = setup-1.3
+PACKAGE = setup-1.4
 
 arch := $(shell ./print_arch)
 libc := $(shell ./print_libc)
