@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.103 2003-03-30 04:37:07 megastep Exp $ */
+/* $Id: install.c,v 1.104 2003-03-31 23:22:50 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1262,6 +1262,7 @@ install_state install(install_info *info,
     xmlNodePtr node;
     install_state state;
 	const char *f;
+	struct component_elem *first_component, *old_component;
 
     /* Check if we need to create a default component entry */
     if ( GetProductNumComponents(info) == 0 ) {
@@ -1271,11 +1272,15 @@ install_state install(install_info *info,
     /* Walk the install tree */
     node = info->config->root->childs;
     info->install_size = size_tree(info, node);
+
+	first_component = current_component;
+    copy_tree(info, node, info->install_path, update);
+
 	/* Install the optional README and EULA files
 	   Warning: those are always installed in the root of the installation directory!
-	   We install these first to make sure that they are part of the main component
-	   in multiple component installations.
 	 */
+	old_component = current_component;
+	current_component = first_component;
 	f = GetProductREADME(info);
 	if ( f && ! GetProductIsMeta(info) ) {
 		copy_path(info, f, info->install_path, NULL, 1, NULL, update);
@@ -1284,8 +1289,6 @@ install_state install(install_info *info,
 	if ( f && ! GetProductIsMeta(info) ) {
 		copy_path(info, f, info->install_path, NULL, 1, NULL, update);
 	}
-
-    copy_tree(info, node, info->install_path, update);
     if(info->options.install_menuitems){
 		int i;
 		for(i = 0; i<MAX_DESKTOPS; i++) {
@@ -1296,7 +1299,7 @@ install_state install(install_info *info,
     if ( ! GetInstallOption(info, "nouninstall") ) {
         generate_uninstall(info);
     }
-
+	current_component = old_component;
 	info->install_complete = 1;
 
     /* Return the new install state */
