@@ -428,6 +428,9 @@ There are several optional attributes of the binary element:
             string of this attribute. See 'About localization' below for
             more details.
 
+ binpath    Specifies an optional directory from which the binaries will be pulled,
+            instead of the default "bin/<arch>/<libc>" directory.
+
  inrpm      If inrpm="true" then setup will not attempt to copy the file, but 
             it will assume that it was successfully installed by an RPM
             package. Setup will set up the symlink and menu items for it. 

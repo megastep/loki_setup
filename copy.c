@@ -384,7 +384,7 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
 {
     struct stat sb;
     char fpat[PATH_MAX], bin[PATH_MAX], final[PATH_MAX], fdest[PATH_MAX];
-    const char *arch, *libc, *keepdirs;
+    const char *arch, *libc, *keepdirs, *binpath;
     size_t size, copied;
     const char *inrpm = xmlGetProp(node, "inrpm");
     int in_rpm = (inrpm && !strcasecmp(inrpm, "true"));
@@ -400,6 +400,7 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
         libc = info->libc;
     }
 	keepdirs = xmlGetProp(node,"keepdirs");
+    binpath  = xmlGetProp(node,"binpath");
     copied = 0;
     size = 0;
     while ( filedesc && parse_line(&filedesc, final, (sizeof final)) ) {
@@ -410,7 +411,11 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
 
 			strncpy(current_option_txt, final, sizeof(current_option_txt));
 			strncat(current_option_txt, " binary", sizeof(current_option_txt)-strlen(current_option_txt));
-			snprintf(fpat, sizeof(fpat), "bin/%s/%s/%s", arch, libc, final);
+            if ( binpath ) {
+                strncpy(fpat, binpath, sizeof(fpat));
+            } else {
+                snprintf(fpat, sizeof(fpat), "bin/%s/%s/%s", arch, libc, final);
+            }
 			if ( keepdirs ) { /* Append the subdirectory to the final destination */
 				char *slash = strrchr(final, '/');
 				if(slash) {
@@ -430,7 +435,7 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
                 if ( stat(fullpath, &sb) == 0 ) {
                     check_dynamic(fpat, bin, cdpath);
                     copied = copy_file(info, cdpath, bin, fdest, final, 1, update, &file);
-                } else {
+                } else if ( ! binpath ) {
                     snprintf(fullpath, sizeof(fullpath), "%s/bin/%s/%s", cdpath, arch, final);
                     if ( stat(fullpath, &sb) == 0 ) {
                         snprintf(fullpath, sizeof(fullpath), "bin/%s/%s", arch, final);
@@ -440,12 +445,15 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
                         log_warning(info, _("Unable to find file '%s'"), fpat);
                         ui_fatal_error(_("Unable to find file '%s'"), fpat);
                     }
+                } else {
+                    log_warning(info, _("Unable to find file '%s'"), fpat);
+                    ui_fatal_error(_("Unable to find file '%s'"), fpat);
                 }
 			} else {
 				if ( stat(fpat, &sb) == 0 ) {
 					check_dynamic(fpat, bin, NULL);
 					copied = copy_file(info, NULL, bin, fdest, final, 1, update, &file);
-				} else {
+				} else if ( ! binpath ) {
 					snprintf(fpat, sizeof(fpat), "bin/%s/%s", arch, final);
 					if ( stat(fpat, &sb) == 0 ) {
 						check_dynamic(fpat, bin, NULL);
@@ -454,7 +462,10 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
 						log_warning(info, _("Unable to find file '%s'"), fpat);
                         ui_fatal_error(_("Unable to find file '%s'"), fpat);
 					}
-				}
+				} else {
+                    log_warning(info, _("Unable to find file '%s'"), fpat);
+                    ui_fatal_error(_("Unable to find file '%s'"), fpat);
+                }
 			}
 		} else {  /* if inrpm="true" */
 			if (strncmp("$INSTALLDIR", final, 11 ) == 0) {
