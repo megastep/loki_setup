@@ -10,7 +10,7 @@ os   := $(shell uname -s)
 # USE_OUTRAGE = true
 
 # If you modify this version, change it's setup.xml and release a new patch.
-UNINSTALL_VERSION = \"1.0a\"
+UNINSTALL_VERSION = \"1.0b\"
 
 CC = gcc
 
@@ -65,7 +65,6 @@ endif
 
 CONSOLE_LIBS = $(LIBS)
 GUI_LIBS = plugins/libplugins.a $(SETUPDB)/$(arch)/libsetupdb.a
-ifeq ($(arch),Linux)
 GUI_LIBS += -Wl,-Bstatic
 GUI_LIBS += -L$(shell libglade-config --prefix)/lib
 GUI_LIBS +=  -lglade
@@ -75,9 +74,6 @@ GUI_LIBS += -L$(shell xml-config --prefix)/lib
 GUI_LIBS += -lxml -lz
 GUI_LIBS += -Wl,-Bdynamic
 GUI_LIBS += -L/usr/X11R6/lib -lXi -lXext -lX11 -lm -ldl
-else
-GUI_LIBS += $(shell libglade-config --libs) $(shell xml-config --libs)
-endif
 
 all: do-plugins setup setup.gtk uninstall
 
