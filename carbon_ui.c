@@ -59,10 +59,12 @@ static const char *GetSpecialPathName(const char *Path)
         FSRef Ref;
         HFSUniStr255 SpecialPathHFS;
 
-        FSPathMakeRef(Path, &Ref, NULL);
+        if (FSPathMakeRef(Path, &Ref, NULL) != noErr)
+            return Path;  // yikes.  --ryan.
+
         FSGetCatalogInfo(&Ref, kFSCatInfoNone, NULL, &SpecialPathHFS, NULL, NULL);
         CFStringRef cfs = CFStringCreateWithCharacters(kCFAllocatorDefault, SpecialPathHFS.unicode, SpecialPathHFS.length);
-        CFStringGetCString(cfs, SpecialPath, 1024, kCFStringEncodingASCII);
+        CFStringGetCString(cfs, SpecialPath, 1024, kCFStringEncodingISOLatin1);
         CFRelease(cfs);
         return SpecialPath;
         /*//  Otherwise, it'll show /Users/joeshmo/Desktop.
@@ -336,10 +338,38 @@ static void update_space(void)
 
 static void init_install_path(void)
 {
+    FSRef Ref;
+    const char *Path = cur_info->install_path;
     carbon_debug("init_install_path()\n");
+
     // Set the textbox to the install folder, and show it as a "special folder" if
     //  we're an app bundle.
-    carbon_SetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, GetSpecialPathName(cur_info->install_path));
+
+    // Sanity check that default folder actually exists...  --ryan.
+    if (FSPathMakeRef(Path, &Ref, NULL) != noErr)
+    {
+        /* "/Applications" (or whatever) doesn't exist? Try Home dir... */
+        Path = getenv("HOME");
+        if ((!Path) || (FSPathMakeRef(Path, &Ref, NULL) != noErr))
+        {
+            /* oh well. Becomes "Macintosh HD" or whatever. */
+            Path = "/";
+            if (FSPathMakeRef(Path, &Ref, NULL) != noErr)
+            {
+                log_fatal(_("Can't find default install dir!"));
+                return;
+            }
+        }
+    }
+
+    if (Path != cur_info->install_path) // comparing pointers, not strings.
+    {
+        set_installpath(cur_info, Path, 1);
+        update_space();
+    }
+
+    Path = GetSpecialPathName(Path);
+    carbon_SetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, Path);
     check_install_button();
 }
 
@@ -655,9 +685,9 @@ static void OnCommandCDKeyContinue()
 
     // !!! FIXME: Only show do this if vcdk fails...  --ryan.
     if (0) //(strcasecmp(CDKey, CDConfirmKey) != 0)
-        carbon_Prompt(MyRes, PromptType_OK, "CD keys do not match.  Please try again.", NULL, 0);
+        carbon_Prompt(MyRes, PromptType_OK, _("CD keys do not match.  Please try again."), NULL, 0);
     else if(strcasecmp(CDKey, "") == 0)
-        carbon_Prompt(MyRes, PromptType_OK, "Please specify a CD key!", NULL, 0);
+        carbon_Prompt(MyRes, PromptType_OK, _("Please specify a CD key!"), NULL, 0);
     else
     {
         CDKeyOK = true;
@@ -675,7 +705,7 @@ static void OnCommandCDKeyContinue()
         }
 
         if (CDKeyOK == false)
-            carbon_Prompt(MyRes, PromptType_OK, "CD key is invalid!", NULL, 0);
+            carbon_Prompt(MyRes, PromptType_OK, _("CD key is invalid!"), NULL, 0);
         else
         {
             char *p;
@@ -1187,7 +1217,7 @@ static int carbonui_update(install_info *info, const char *path, size_t progress
             last_decimal = this_decimal;
             percent = ((int) (new_update * 100.0f));
             percent -= percent % 10;
-            snprintf(buf, sizeof (buf), "Installing %s : %d%%", filename, percent);
+            snprintf(buf, sizeof (buf), _("Installing %s : %d%%"), filename, percent);
             carbon_SetLabelText(MyRes, COPY_CURRENT_FILE_LABEL_ID, buf);
         }
 
