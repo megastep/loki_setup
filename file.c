@@ -14,58 +14,6 @@
 
 #include "file.h"
 
-void log_debug(install_info *info, const char *fmt, ...)
-{
-    va_list ap;
-    char buf[BUFSIZ];
-
-    va_start(ap, fmt);
-    vsprintf(buf, fmt, ap);
-    va_end(ap);
-    print_log(info->log, LOG_DEBUG, "%s\n", buf);
-}
-void log_quiet(install_info *info, const char *fmt, ...)
-{
-    va_list ap;
-    char buf[BUFSIZ];
-
-    va_start(ap, fmt);
-    vsprintf(buf, fmt, ap);
-    va_end(ap);
-    print_log(info->log, LOG_QUIET, "%s\n", buf);
-}
-void log_normal(install_info *info, const char *fmt, ...)
-{
-    va_list ap;
-    char buf[BUFSIZ];
-
-    va_start(ap, fmt);
-    vsprintf(buf, fmt, ap);
-    va_end(ap);
-    print_log(info->log, LOG_NORMAL, "%s\n", buf);
-}
-void log_warning(install_info *info, const char *fmt, ...)
-{
-    va_list ap;
-    char buf[BUFSIZ];
-
-    va_start(ap, fmt);
-    vsprintf(buf, fmt, ap);
-    va_end(ap);
-    print_log(info->log, LOG_WARNING, "%s\n", buf);
-}
-void log_fatal(install_info *info, const char *fmt, ...)
-{
-    va_list ap;
-    char buf[BUFSIZ];
-
-    va_start(ap, fmt);
-    vsprintf(buf, fmt, ap);
-    va_end(ap);
-    print_log(info->log, LOG_FATAL, "%s\n", buf);
-    abort();
-}
-
 stream *file_open(install_info *info, const char *path, const char *mode)
 {
     stream *streamp;
@@ -257,7 +205,7 @@ int file_mkdir(install_info *info, const char *path, int mode)
 
     /* Only create the directory if we need to */
     retval = 0;
-    if ( (stat(path, &sb) != 0) || S_ISDIR(sb.st_mode) ) {
+    if ( (stat(path, &sb) != 0) || !S_ISDIR(sb.st_mode) ) {
         /* Log the action */
         log_quiet(info, "Creating directory: %s\n", path);
 

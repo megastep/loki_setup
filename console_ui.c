@@ -104,7 +104,7 @@ static void parse_option(install_info *info, xmlNodePtr node)
         mark_option(info, node, "true", 0);
 
         /* Add this option size to the total */
-        sizestr = xmlGetProp(node, "install");
+        sizestr = xmlGetProp(node, "size");
         if ( sizestr ) {
             info->install_size += atoi(sizestr);
         }

@@ -4,6 +4,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#include "install_log.h"
 #include "log.h"
 
 struct _install_log {

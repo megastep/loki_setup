@@ -5,8 +5,6 @@
 #include <limits.h>
 #include <gnome-xml/parser.h>
 
-#include "log.h"
-
 /* The default location of the product */
 #define DEFAULT_PATH    "/usr/local/games"
 
@@ -23,6 +21,9 @@ typedef enum {
 
 /* Forward declaration (used by UI) */
 struct UI_data;
+
+/* Forward declaration */
+typedef struct _install_log install_log;
 
 /* The main installation information structure */
 typedef struct {

@@ -6,7 +6,7 @@
 
 #include "install.h"
 #include "detect.h"
-
+#include "log.h"
 
 /* Functions to retrieve attribution information from the XML tree */
 static const char *GetProductName(install_info *info)

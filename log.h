@@ -4,7 +4,7 @@
 
 /* Functions to perform install logging */
 
-typedef struct _install_log install_log;
+#include "install.h"
 
 typedef enum {
     LOG_DEBUG,

@@ -16,12 +16,6 @@ typedef struct {
     gzFile zfp;
 } stream;
 
-extern void log_debug(install_info *info, const char *fmt, ...);
-extern void log_quiet(install_info *info, const char *fmt, ...);
-extern void log_normal(install_info *info, const char *fmt, ...);
-extern void log_warning(install_info *info, const char *fmt, ...);
-extern void log_fatal(install_info *info, const char *fmt, ...);
-
 extern stream *file_open(install_info *info,const char *path,const char *mode);
 extern int file_read(install_info *info, void *buf, int len, stream *streamp);
 extern int file_write(install_info *info, void *buf, int len, stream *streamp);
