@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.13 1999-12-11 03:43:09 hercules Exp $ */
+/* $Id: main.c,v 1.14 2000-01-22 00:16:31 megastep Exp $ */
 
 #include <stdio.h>
 #include <setjmp.h>
@@ -151,6 +151,9 @@ int main(int argc, char **argv)
                 break;
             case SETUP_LICENSE:
                 state = UI.license(info);
+                break;
+            case SETUP_README:
+                state = UI.readme(info);
                 break;
             case SETUP_OPTIONS:
                 state = UI.setup(info);

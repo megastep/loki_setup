@@ -26,6 +26,7 @@ typedef enum {
     SETUP_ABORT = -1,
     SETUP_INIT,
     SETUP_LICENSE,
+    SETUP_README,
     SETUP_OPTIONS,
     SETUP_INSTALL,
     SETUP_WEBSITE,
@@ -140,6 +141,7 @@ extern const char *GetProductName(install_info *info);
 extern const char *GetProductDesc(install_info *info);
 extern const char *GetProductVersion(install_info *info);
 extern const char *GetProductEULA(install_info *info);
+extern const char *GetProductREADME(install_info *info);
 extern const char *GetWebsiteText(install_info *info);
 extern const char *GetProductURL(install_info *info);
 extern const char *GetLocalURL(install_info *info);

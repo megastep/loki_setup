@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.22 1999-12-11 04:14:01 hercules Exp $
+   $Id: gtk_ui.c,v 1.23 2000-01-22 00:16:31 megastep Exp $
 */
 
 #include <limits.h>
@@ -70,7 +70,7 @@ static int iterate_for_state(void)
   while(cur_state == start)
     gtk_main_iteration();
 
-  /*  fprintf(stderr,"New state: %d\n", cur_state); */
+  /* fprintf(stderr,"New state: %d\n", cur_state); */
   return cur_state;
 }
 
@@ -161,12 +161,14 @@ void setup_button_view_readme_slot( GtkWidget* w, gpointer data )
 {
     GtkWidget *readme;
     GtkWidget *widget;
+	const char *file;
 
     readme = glade_xml_get_widget(setup_glade, "readme_dialog");
     widget = glade_xml_get_widget(setup_glade, "readme_area");
-    if ( readme && widget ) {
+	file = GetProductREADME(cur_info);
+    if ( file && readme && widget ) {
         gtk_widget_hide(readme);
-        load_file(GTK_TEXT(widget), NULL, "README");
+        load_file(GTK_TEXT(widget), NULL, file);
         gtk_widget_show(readme);
     }
 }
@@ -615,6 +617,7 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
     GtkWidget *notebook;
     GtkWidget *options;
     GtkWidget *widget;
+ 	GtkWidget *button;
     char title[1024];
     xmlNodePtr node;
 
@@ -647,9 +650,15 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
         cur_state = SETUP_LICENSE;
     } else {
         license_okay = 1;
-        cur_state = SETUP_OPTIONS;
+        cur_state = SETUP_README;
     }
 	gtk_notebook_set_page(GTK_NOTEBOOK(notebook), OPTION_PAGE);
+
+	/* Disable the "View Readme" button if no README available */
+ 	button = glade_xml_get_widget(setup_glade, "button_readme");
+ 	if ( button && ! GetProductREADME(cur_info) ) {
+ 		gtk_widget_set_sensitive(button, FALSE);
+ 	}
 
     /* Go through the install options */
     options = glade_xml_get_widget(setup_glade, "option_vbox");
@@ -707,9 +716,15 @@ static install_state gtkui_license(install_info *info)
 
         iterate_for_state();
     } else {
-        cur_state = SETUP_OPTIONS;
+        cur_state = SETUP_README;
     }
     return cur_state;
+}
+
+static install_state gtkui_readme(install_info *info)
+{
+	cur_state = SETUP_OPTIONS;
+	return cur_state;
 }
 
 static install_state gtkui_setup(install_info *info)
@@ -846,6 +861,7 @@ int gtkui_okay(Install_UI *UI)
             /* Set up the driver */
             UI->init = gtkui_init;
             UI->license = gtkui_license;
+            UI->readme = gtkui_readme;
             UI->setup = gtkui_setup;
             UI->update = gtkui_update;
             UI->abort = gtkui_abort;

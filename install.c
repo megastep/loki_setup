@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.26 1999-12-11 04:14:01 hercules Exp $ */
+/* $Id: install.c,v 1.27 2000-01-22 00:16:31 megastep Exp $ */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -49,6 +49,18 @@ const char *GetDefaultPath(install_info *info)
 const char *GetProductEULA(install_info *info)
 {
     return xmlGetProp(info->config->root, "eula");
+}
+const char *GetProductREADME(install_info *info)
+{
+    const char *ret = xmlGetProp(info->config->root, "readme");
+	if ( ! ret ) {
+		ret = "README";
+	}
+	if ( ! access(ret, R_OK) ) {
+		return ret;
+	} else {
+		return NULL;
+	}
 }
 const char *GetWebsiteText(install_info *info)
 {

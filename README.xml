@@ -47,6 +47,11 @@ There are several optional attributes of the install element:
             must be agreed to by the user before the installation will
             proceed.
 
+ readme     This is the README file for the product, the user will be
+            prompted to see it before the installation begins. The default
+            value is "README" if not specified and such a file is
+            actually present.
+
  url        This is a web site which is launched after the install is
             completed.
 

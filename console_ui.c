@@ -183,7 +183,7 @@ static install_state console_init(install_info *info, int argc, char **argv)
     if ( GetProductEULA(info) ) {
         state = SETUP_LICENSE;
     } else {
-        state = SETUP_OPTIONS;
+        state = SETUP_README;
     }
     return state;
 }
@@ -194,15 +194,32 @@ static install_state console_license(install_info *info)
     char command[512];
 
     sleep(1);
-    sprintf(command, "more %s", GetProductEULA(info));
+    sprintf(command, PAGER_COMMAND " \"%s\"", GetProductEULA(info));
     system(command);
     if ( prompt_yesno("Do you agree with the license?", RESPONSE_YES) ==
                                                         RESPONSE_YES ) {
-        state = SETUP_OPTIONS;
+        state = SETUP_README;
     } else {
         state = SETUP_EXIT;
     }
     return state;
+}
+
+static install_state console_readme(install_info *info)
+{
+	const char *readme;
+
+	readme = GetProductREADME(info);
+	if ( readme && ! access(readme, R_OK) ) {
+		char prompt[256];
+
+		sprintf(prompt, "Would you like to read the %s file ?", readme);
+		if ( prompt_yesno(prompt, RESPONSE_YES) == RESPONSE_YES ) {
+			sprintf(prompt, PAGER_COMMAND " \"%s\"", readme);
+			system(prompt);
+		}
+	}
+    return SETUP_OPTIONS;
 }
 
 static install_state console_setup(install_info *info)
@@ -294,17 +311,8 @@ static void console_abort(install_info *info)
 
 static install_state console_complete(install_info *info)
 {
-    char readme[PATH_MAX], command[12+PATH_MAX];
     install_state new_state;
 
-    sprintf(readme, "%s/README", info->install_path);
-    if ( access(readme, R_OK) == 0 ) {
-        if ( prompt_yesno("Would you like to view the README?", RESPONSE_YES)
-               == RESPONSE_YES ) {
-            sprintf(command, PAGER_COMMAND " \"%s\"", readme);
-            system(command);
-        }
-    }
     printf("\n");
     printf("Installation complete.\n");
 
@@ -373,13 +381,12 @@ int console_okay(Install_UI *UI)
     /* Set up the driver */
     UI->init = console_init;
     UI->license = console_license;
+    UI->readme = console_readme;
     UI->setup = console_setup;
     UI->update = console_update;
     UI->abort = console_abort;
     UI->website = console_website;
     UI->complete = console_complete;
-  
-   
 
     return(1);
 }
