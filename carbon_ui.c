@@ -46,22 +46,33 @@ int OnCommandEvent(UInt32 CommandID);
 
 static yesno_answer carbonui_prompt(const char *, yesno_answer);
 
-static const char *DesktopName = "Desktop";
+/*static const char *DesktopName = "Desktop";
 static const char *DocumentsName = "Documents";
-static const char *ApplicationsName = "Applications";
+static const char *ApplicationsName = "Applications";*/
+static char SpecialPath[1024];
 
 /********** HELPER FUNCTIONS ***********/
 static const char *GetSpecialPathName(const char *Path)
 {
-    // If we find /Desktop, then we'll show just "Desktop".
-    //  Otherwise, it'll show /Users/joeshmo/Desktop.
-    if(strstr(Path, DesktopName) != NULL)
-        return DesktopName;
-    else if(strstr(Path, DocumentsName) != NULL)
-        return DocumentsName;
-    else if(strstr(Path, ApplicationsName) != NULL)
-        return ApplicationsName;
+    if(GetProductIsAppBundle(cur_info))
+    {
+        FSRef Ref;
+        HFSUniStr255 SpecialPathHFS;
 
+        FSPathMakeRef(Path, &Ref, NULL);
+        FSGetCatalogInfo(&Ref, kFSCatInfoNone, NULL, &SpecialPathHFS, NULL, NULL);
+        CFStringRef cfs = CFStringCreateWithCharacters(kCFAllocatorDefault, SpecialPathHFS.unicode, SpecialPathHFS.length);
+        CFStringGetCString(cfs, SpecialPath, 1024, kCFStringEncodingASCII);
+        CFRelease(cfs);
+        return SpecialPath;
+        /*//  Otherwise, it'll show /Users/joeshmo/Desktop.
+        if(strstr(Path, DesktopName) != NULL)
+            return DesktopName;
+        else if(strstr(Path, DocumentsName) != NULL)
+            return DocumentsName;
+        else if(strstr(Path, ApplicationsName) != NULL)
+            return ApplicationsName;*/
+    }
     return Path;
 }
 
@@ -328,10 +339,7 @@ static void init_install_path(void)
     carbon_debug("init_install_path()\n");
     // Set the textbox to the install folder, and show it as a "special folder" if
     //  we're an app bundle.
-    if(GetProductIsAppBundle(cur_info))
-        carbon_SetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, GetSpecialPathName(cur_info->install_path));
-    else
-        carbon_SetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, cur_info->install_path);
+    carbon_SetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, GetSpecialPathName(cur_info->install_path));
     check_install_button();
 }
 
