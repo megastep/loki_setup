@@ -237,7 +237,7 @@ size_t copy_directory(install_info *info, const char *path, const char *dest,
           }
         }
         globfree(&globbed);
-	} else if ( err == GLOB_NOMATCH ) { /* Empty directory */
+	} else if ( err < 0 && globbed.gl_pathc == 0 ) { /* Empty directory */
 		snprintf(fpat, sizeof(fpat), "%s/%s", dest, path);
 		file_create_hierarchy(info, fpat);
 		file_mkdir(info, fpat, 0755);
