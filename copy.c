@@ -46,7 +46,7 @@ int parse_line(const char **srcpp, char *buf, int maxlen)
 
     /* Update line pointer */
     *srcpp = srcp;
-	
+    
     /* Return the length of the line */
     return strlen(buf);
 }
@@ -70,7 +70,7 @@ size_t copy_tarball(install_info *info, const char *path, const char *dest,
         return(-1);
     }
     while ( ! file_eof(info, input) ) {
-	    int cur_size;
+        int cur_size;
         if ( file_read(info, &record, (sizeof record), input)
                                             != (sizeof record) ) {
             break;
@@ -81,7 +81,7 @@ size_t copy_tarball(install_info *info, const char *path, const char *dest,
         sprintf(final, "%s/%s", dest, record.hdr.name);
         sscanf(record.hdr.mode, "%o", &mode);
         sscanf(record.hdr.size, "%o", &left);
-		cur_size = left;
+        cur_size = left;
         blocks = (left+RECORDSIZE-1)/RECORDSIZE;
         switch (record.hdr.typeflag) {
             case TF_OLDNORMAL:
@@ -142,16 +142,16 @@ size_t copy_file(install_info *info, const char *path, const char *dest, char *f
     char buf[BUFSIZ];
     stream *input, *output;
 
-	if(binary){
-	  /* Get the final pathname (useful for binaries only!) */
-	  base = strrchr(path, '/');
-	  if ( base == NULL ) {
-		base = path;
-	  } else {
-	    base ++;
-	  }
-	}else
-	  base = path;
+    if(binary){
+      /* Get the final pathname (useful for binaries only!) */
+      base = strrchr(path, '/');
+      if ( base == NULL ) {
+        base = path;
+      } else {
+        base ++;
+      }
+    }else
+      base = path;
     sprintf(final, "%s/%s", dest, base);
 
     size = 0;
@@ -193,10 +193,10 @@ size_t copy_directory(install_info *info, const char *path, const char *dest,
     sprintf(fpat, "%s/*", path);
     if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
         for ( i=0; i<globbed.gl_pathc; ++i ) {
-		  copied = copy_path(info, globbed.gl_pathv[i], dest, update);
-		  if ( copied > 0 ) {
-			size += copied;
-		  }
+          copied = copy_path(info, globbed.gl_pathv[i], dest, update);
+          if ( copied > 0 ) {
+            size += copied;
+          }
         }
         globfree(&globbed);
     } else {
@@ -266,8 +266,8 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
 
     while ( filedesc && parse_line(&filedesc, final, (sizeof final)) ) {
         copied = 0;
-		strncpy(current_option, final, sizeof(current_option));
-		strncat(current_option, " binary", sizeof(current_option));
+        strncpy(current_option, final, sizeof(current_option));
+        strncat(current_option, " binary", sizeof(current_option));
         sprintf(fpat, "bin/%s/%s/%s", info->arch, info->libc, final);
         if ( stat(fpat, &sb) == 0 ) {
             copied = copy_file(info, fpat, dest, final, 1, update);
@@ -280,15 +280,15 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
             }
         }
         if ( copied > 0 ) {
-		    char *symlink = xmlGetProp(node, "symlink");
-			char sym_to[PATH_MAX];
+            char *symlink = xmlGetProp(node, "symlink");
+            char sym_to[PATH_MAX];
 
             size += copied;
-			file_chmod(info, final, 0755); /* Fix the permissions */
-			/* Create the symlink */
+            file_chmod(info, final, 0755); /* Fix the permissions */
+            /* Create the symlink */
             if ( *info->symlinks_path ) {
-			    sprintf(sym_to, "%s/%s", info->symlinks_path, symlink);
-			    file_symlink(info, final, sym_to);
+                sprintf(sym_to, "%s/%s", info->symlinks_path, symlink);
+                file_symlink(info, final, sym_to);
             }
             add_bin_entry(info, final, symlink,
                                        xmlGetProp(node, "desc"),
@@ -308,8 +308,8 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
     while ( node ) {
 /* printf("Checking node element '%s'\n", node->name); */
         if ( strcmp(node->name, "files") == 0 ) {
-		    const char *str = xmlNodeListGetString(info->config, (node->parent)->childs, 1);
-			parse_line(&str, current_option, sizeof(current_option));
+            const char *str = xmlNodeListGetString(info->config, (node->parent)->childs, 1);
+            parse_line(&str, current_option, sizeof(current_option));
             copied = copy_list(info,
                                xmlNodeListGetString(info->config, node->childs, 1),
                                dest, update);
@@ -410,8 +410,8 @@ size_t size_node(install_info *info, xmlNodePtr node)
     size = 0;
 
     /* First do it the easy way, look for a size attribute */
-	size_prop = xmlGetProp(node, "size");
-	if ( size_prop ) {
+    size_prop = xmlGetProp(node, "size");
+    if ( size_prop ) {
         size = atol(size_prop)*1024*1024;
     }
 

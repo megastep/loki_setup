@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.12 1999-09-11 03:33:34 megastep Exp $ */
+/* $Id: install.c,v 1.13 1999-09-11 04:00:55 hercules Exp $ */
 
 #include <sys/types.h>
 #include <stdlib.h>
@@ -72,13 +72,13 @@ install_info *create_install(const char *configfile, int log_level)
     info->arch = detect_arch();
     info->libc = detect_libc();
 
-	/* Read the optional default arguments for the game */
-	info->args = GetRuntimeArgs(info);
+    /* Read the optional default arguments for the game */
+    info->args = GetRuntimeArgs(info);
 
     /* Add the default install path */
     sprintf(info->install_path, "%s/%s", DEFAULT_PATH, GetProductName(info));
-	strcpy(info->symlinks_path, DEFAULT_SYMLINKS);
-	
+    strcpy(info->symlinks_path, DEFAULT_SYMLINKS);
+    
     /* That was easy.. :) */
     return(info);
 }
@@ -272,12 +272,12 @@ install_state install(install_info *info,
     node = info->config->root->childs;
     info->install_size = size_tree(info, node);
     copy_tree(info, node, info->install_path, update);
-	if(info->options.install_menuitems){
-	  int i;
-	  for(i = 0; i<MAX_DESKTOPS; i++)
-		install_menuitems(info, i);
-	}
-	generate_uninstall(info);
+    if(info->options.install_menuitems){
+      int i;
+      for(i = 0; i<MAX_DESKTOPS; i++)
+        install_menuitems(info, i);
+    }
+    generate_uninstall(info);
     return SETUP_COMPLETE;
 }
 
@@ -311,30 +311,30 @@ void uninstall(install_info *info)
 void generate_uninstall(install_info *info)
 {
     FILE *fp;
-	char script[PATH_MAX];
-	struct file_elem *felem;
-	struct dir_elem *delem;
+    char script[PATH_MAX];
+    struct file_elem *felem;
+    struct dir_elem *delem;
 
-	strncpy(script,info->install_path, PATH_MAX);
-	strncat(script,"/uninstall", PATH_MAX);
+    strncpy(script,info->install_path, PATH_MAX);
+    strncat(script,"/uninstall", PATH_MAX);
 
-	fp = fopen(script, "w");
-	fprintf(fp,
-			"#!/bin/sh\n"
-			"# Uninstall script for %s\n", info->desc
-			);
+    fp = fopen(script, "w");
+    fprintf(fp,
+            "#!/bin/sh\n"
+            "# Uninstall script for %s\n", info->desc
+            );
     for ( felem = info->file_list; felem; felem = felem->next ) {
-		fprintf(fp,"rm -f \"%s\"\n", felem->path);
+        fprintf(fp,"rm -f \"%s\"\n", felem->path);
     }
-	/* Don't forget to remove ourselves */
-	fprintf(fp,"rm -f \"%s\"\n", script);
+    /* Don't forget to remove ourselves */
+    fprintf(fp,"rm -f \"%s\"\n", script);
 
     for ( delem = info->dir_list; delem; delem = delem->next ) {
-		fprintf(fp,"rmdir \"%s\"\n", delem->path);
+        fprintf(fp,"rmdir \"%s\"\n", delem->path);
     }
-	fprintf(fp,"echo \"%s has been uninstalled.\"\n", info->desc);
-	fchmod(fileno(fp),0755); /* Turn on executable bit */
-	fclose(fp);
+    fprintf(fp,"echo \"%s has been uninstalled.\"\n", info->desc);
+    fchmod(fileno(fp),0755); /* Turn on executable bit */
+    fclose(fp);
 }
 
 /* Launch the game using the information in the install info */
@@ -342,10 +342,8 @@ install_state launch_game(install_info *info)
 {
     char cmd[PATH_MAX];
 
-    if ( *info->symlinks_path ) {
-        sprintf(cmd, "%s/%s %s &", info->symlinks_path, info->name, info->args);
-    } else {
-        sprintf(cmd, "%s/%s %s &", info->install_path, info->name, info->args);
+    if ( info->bin_list ) {
+        sprintf(cmd, "%s %s &", info->bin_list->path, info->name, info->args);
     }
     system(cmd);
     return SETUP_EXIT;
@@ -376,53 +374,53 @@ void install_menuitems(install_info *info, desktop_type d)
 
   switch(d){
   case DESKTOP_KDE:
-	app_links = kde_app_links;
-	break;
+    app_links = kde_app_links;
+    break;
   case DESKTOP_GNOME:
-	app_links = gnome_app_links;
-	break;
+    app_links = gnome_app_links;
+    break;
   }
   for( ; *app_links; app_links ++){
-	expand_home(info, *app_links, buf);
-	if(access(buf, W_OK))
-	  continue;
+    expand_home(info, *app_links, buf);
+    if(access(buf, W_OK))
+      continue;
 
-    for(elem = info->bin_list; elem; elem = elem->next ) {	  
-	  FILE *fp;
+    for(elem = info->bin_list; elem; elem = elem->next ) {      
+      FILE *fp;
 
-	  strncat(buf, elem->symlink, PATH_MAX);
-	  switch(d){
-	  case DESKTOP_KDE:
-		strncat(buf,".kdelnk", PATH_MAX);
-		break;
-	  case DESKTOP_GNOME:
-		strncat(buf,".desktop", PATH_MAX);
-		break;
-	  }
+      strncat(buf, elem->symlink, PATH_MAX);
+      switch(d){
+      case DESKTOP_KDE:
+        strncat(buf,".kdelnk", PATH_MAX);
+        break;
+      case DESKTOP_GNOME:
+        strncat(buf,".desktop", PATH_MAX);
+        break;
+      }
 
-	  fp = fopen(buf, "w");
-	  if(fp){
-		char exec[PATH_MAX], icon[PATH_MAX];
+      fp = fopen(buf, "w");
+      if(fp){
+        char exec[PATH_MAX], icon[PATH_MAX];
 
-		sprintf(exec, "%s/%s", info->symlinks_path, elem->symlink);
-		sprintf(icon, "%s/%s", info->install_path, elem->icon);
-		fprintf(fp,
-				"[%sDesktop Entry]\n"
-				"Name=%s\n"
-				"Comment=%s\n"
-				"Exec=%s\n"
-				"Icon=%s\n"
-				"Terminal=0\n"
-				"Type=Application\n",
-				(d==DESKTOP_KDE) ? "KDE " : "",
-				info->name, info->desc,
-				exec, icon
-				);
+        sprintf(exec, "%s", elem->path);
+        sprintf(icon, "%s/%s", info->install_path, elem->icon);
+        fprintf(fp,
+                "[%sDesktop Entry]\n"
+                "Name=%s\n"
+                "Comment=%s\n"
+                "Exec=%s\n"
+                "Icon=%s\n"
+                "Terminal=0\n"
+                "Type=Application\n",
+                (d==DESKTOP_KDE) ? "KDE " : "",
+                info->name, info->desc,
+                exec, icon
+                );
 
-		fclose(fp);
-		add_file_entry(info, buf);
-	  }else
-		log_warning(info, "Unable to create desktop file '%s'", buf);
-	}
+        fclose(fp);
+        add_file_entry(info, buf);
+      }else
+        log_warning(info, "Unable to create desktop file '%s'", buf);
+    }
   }
 }

@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.7 1999-09-11 02:55:05 hercules Exp $
+   $Id: gtk_ui.c,v 1.8 1999-09-11 04:00:55 hercules Exp $
 */
 
 #include <limits.h>
@@ -767,7 +767,6 @@ static GtkWidget* makeCopyPage()
     label = gtk_label_new( "Copying" );
     _copyTitleLabel = GTK_LABEL(label);
     PACKC( box0, label );
-    gtk_label_set_justify( GTK_LABEL(label), GTK_JUSTIFY_CENTER );
     gtk_widget_show( label );
 
     // File copy progress bar.
@@ -780,8 +779,7 @@ static GtkWidget* makeCopyPage()
 
     label = gtk_label_new( "File" );
     _copyLabel = (GtkLabel*) label;
-    PACKC( box0, label );
-    gtk_label_set_justify( GTK_LABEL(label), GTK_JUSTIFY_CENTER );
+    PACKC( box0, ALIGN(label, 0, 0, 0, 0) );
     gtk_widget_show( label );
 
 
