@@ -1,3 +1,5 @@
+#include <unistd.h>
+
 #include "carbon/carbonres.h"
 #include "carbon/carbondebug.h"
 
@@ -9,6 +11,7 @@
 #include "copy.h"
 #include "loki_launchurl.h"
 
+static int CDKeyOK;
 static int cur_state;
 static install_info *cur_info;
 static int diskspace;
@@ -416,7 +419,13 @@ static void OnCommandCancel(void)
 		}
     }
     else
+    {
+        // Set the CDKeyOK to true so that we'll get out of our
+        // iterate state function if we're on the CDKey screen.
+        CDKeyOK = true;
+        // Set our state to exit setup.
         cur_state = SETUP_EXIT;
+    }
 }
 
 static void OnCommandInstallPath(void)
@@ -453,7 +462,26 @@ void OnCommandBeginInstall()
 
     // Set install and binary paths accordingly
     char string[1024];
+    char appstring[1024];
+
     carbon_GetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, string, 1024);
+
+    // Create path with ".app" at the end
+    strcpy(appstring, string);
+    strcat(appstring, ".app");
+    // If product is an application bundle
+    if(GetProductIsAppBundle(cur_info))
+    {
+        // If user created the destination (when choosing a folder with the
+        //  nav dialog.
+        if(access(string, F_OK) == 0)
+        {
+            rename(string, appstring);
+        }
+    }
+    // Set our original string to the new app bundle string
+    strcpy(string, appstring);
+
     set_installpath(cur_info, string);
     // Only set binary path if symbolic link checkbox is set
     if(carbon_GetCheckbox(MyRes, OPTION_SYMBOLIC_LINK_CHECK_ID))
@@ -593,6 +621,22 @@ static void OnCommandWebsite()
     launch_browser(cur_info, carbon_LaunchURL);
 }
 
+static void OnCommandCDKeyContinue()
+{
+    char CDKey[1024];
+    char CDConfirmKey[1024];
+
+    carbon_GetEntryText(MyRes, CDKEY_ENTRY_ID, CDKey, 1024);
+    carbon_GetEntryText(MyRes, CDKEY_CONFIRM_ENTRY_ID, CDConfirmKey, 1024);
+
+    if(strcmp(CDKey, CDConfirmKey) != 0)
+        carbon_Prompt(MyRes, PromptType_OK, "CD keys do not match.  Please try again.", NULL, 0);
+    else if(strcmp(CDKey, "") == 0)
+        carbon_Prompt(MyRes, PromptType_OK, "Please specify a CD key!", NULL, 0);
+    else
+        CDKeyOK = true;
+}
+
 static void OnCommandSymbolicCheck()
 {
     char path[1024];
@@ -649,6 +693,7 @@ int OnCommandEvent(UInt32 CommandID)
             ReturnValue = true;
             break;
         case COMMAND_CANCEL:
+        case COMMAND_CDKEY_CANCEL:
         case 'quit':
             OnCommandCancel();
             ReturnValue = true;
@@ -687,6 +732,10 @@ int OnCommandEvent(UInt32 CommandID)
             break;
         case COMMAND_SYMBOLIC_CHECK:
             OnCommandSymbolicCheck();
+            ReturnValue = true;
+            break;
+        case COMMAND_CDKEY_CONTINUE:
+            OnCommandCDKeyContinue();
             ReturnValue = true;
             break;
         default:
@@ -849,7 +898,7 @@ static install_state carbonui_init(install_info *info, int argc, char **argv, in
     }
 
     // Update the install image
-    carbon_UpdateImage(MyRes, GetProductSplash(info), SETUP_BASE);
+    carbon_UpdateImage(MyRes, GetProductSplash(info), SETUP_BASE, GetProductSplashPosition(info));
 
     return cur_state;
 }
@@ -883,6 +932,7 @@ static install_state carbonui_readme(install_info *info)
 static install_state carbonui_pick_class(install_info *info)
 {
     carbon_debug("***carbonui_pick_class()\n");
+    carbon_SetProperWindowSize(MyRes, NULL);
     //!!!TODO - Not sure if this is needed...no reason it shouldn't 
     // always be enabled as far as I can tell.  They can only click
     // continue if the class setup display is shown in the first place.
@@ -905,7 +955,28 @@ static install_state carbonui_setup(install_info *info)
     xmlNodePtr node;
 
     carbon_debug("***carbonui_setup()\n");
-    
+
+    // These are required before displaying the CDKey.  I'm not sure why this
+    //  is true, but they show up blank later on...even when making a call to
+    //  these functions later in this function.
+    init_install_path();
+    init_binary_path();
+    update_size();
+    update_space();
+
+    // If CDKEY attribute was specified, show the CDKEY screen
+    if(GetProductCDKey(cur_info))
+    {
+        // Show CDKey entry page and wait for user to hit cancel or continue
+        carbon_SetProperWindowSize(MyRes, NULL);
+        carbon_ShowInstallScreen(MyRes, CDKEY_PAGE);
+        CDKeyOK = false;
+        carbon_IterateForState(MyRes, &CDKeyOK);
+        // Go back to the option page as normal for this function
+        if(!express_setup)
+            carbon_ShowInstallScreen(MyRes, OPTION_PAGE);
+    }
+
     // If express setup, go right to copy page
     if(express_setup)
     {
@@ -914,79 +985,86 @@ static install_state carbonui_setup(install_info *info)
         return cur_state;
     }
 
-    // Else, let the user select appropriate options
-    //options = glade_xml_get_widget(setup_glade, "option_vbox");
-    //gtk_container_foreach(GTK_CONTAINER(options), empty_container, options);
-    options = carbon_OptionsNewBox(MyRes, true, OnOptionClickEvent);
-    info->install_size = 0;
-    node = info->config->root->childs;
-    radio_list = NULL;
-    in_setup = TRUE;
-    while ( node ) {
-		if ( ! strcmp(node->name, "option") ) {
-			parse_option(info, NULL, node, options, 0, NULL, 0, NULL);
-		} else if ( ! strcmp(node->name, "exclusive") ) {
-			xmlNodePtr child;
-			RadioGroup *list = NULL;
-			for ( child = node->childs; child; child = child->next) {
-				parse_option(info, NULL, child, options, 0, NULL, 1, &list);
-			}
-		} else if ( ! strcmp(node->name, "component") ) {
-            if ( match_arch(info, xmlGetProp(node, "arch")) &&
-                 match_libc(info, xmlGetProp(node, "libc")) && 
-				 match_distro(info, xmlGetProp(node, "distro")) ) {
-                xmlNodePtr child;
-                if ( xmlGetProp(node, "showname") ) {
-                    //GtkWidget *widget = gtk_hseparator_new();
-                    //gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 0);
-                    //gtk_widget_show(widget);                
-                    carbon_OptionsNewSeparator(options);
-                    //widget = gtk_label_new(xmlGetProp(node, "name"));
-                    //gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 10);
-                    //gtk_widget_show(widget);
-                    carbon_OptionsNewLabel(options, xmlGetProp(node, "name"));
+    // User could've canceled installation during the CDKey
+    if(cur_state != SETUP_EXIT)
+    {
+        // Else, let the user select appropriate options
+        //options = glade_xml_get_widget(setup_glade, "option_vbox");
+        //gtk_container_foreach(GTK_CONTAINER(options), empty_container, options);
+        options = carbon_OptionsNewBox(MyRes, true, OnOptionClickEvent);
+        info->install_size = 0;
+        node = info->config->root->childs;
+        radio_list = NULL;
+        in_setup = TRUE;
+        while ( node ) {
+		    if ( ! strcmp(node->name, "option") ) {
+			    parse_option(info, NULL, node, options, 0, NULL, 0, NULL);
+		    } else if ( ! strcmp(node->name, "exclusive") ) {
+			    xmlNodePtr child;
+			    RadioGroup *list = NULL;
+			    for ( child = node->childs; child; child = child->next) {
+				    parse_option(info, NULL, child, options, 0, NULL, 1, &list);
+			    }
+		    } else if ( ! strcmp(node->name, "component") ) {
+                if ( match_arch(info, xmlGetProp(node, "arch")) &&
+                    match_libc(info, xmlGetProp(node, "libc")) && 
+				    match_distro(info, xmlGetProp(node, "distro")) ) {
+                    xmlNodePtr child;
+                    if ( xmlGetProp(node, "showname") ) {
+                        //GtkWidget *widget = gtk_hseparator_new();
+                        //gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 0);
+                        //gtk_widget_show(widget);                
+                        carbon_OptionsNewSeparator(options);
+                        //widget = gtk_label_new(xmlGetProp(node, "name"));
+                        //gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 10);
+                        //gtk_widget_show(widget);
+                        carbon_OptionsNewLabel(options, xmlGetProp(node, "name"));
+                    }
+                    for ( child = node->childs; child; child = child->next) {
+					    if ( ! strcmp(child->name, "option") ) {
+						    //parse_option(info, xmlGetProp(node, "name"), child, window, options, 0, NULL, 0, NULL);
+                            parse_option(info, xmlGetProp(node, "name"), child, options, 0, NULL, 0, NULL);
+					    } else if ( ! strcmp(child->name, "exclusive") ) {
+						    xmlNodePtr child2;
+						    RadioGroup *list = NULL;
+						    for ( child2 = child->childs; child2; child2 = child2->next) {
+							    //parse_option(info, xmlGetProp(node, "name"), child2, window, options, 0, NULL, 1, &list);
+                                parse_option(info, xmlGetProp(node, "name"), child2, options, 0, NULL, 1, &list);
+						    }
+					    }
+                    }
                 }
-                for ( child = node->childs; child; child = child->next) {
-					if ( ! strcmp(child->name, "option") ) {
-						//parse_option(info, xmlGetProp(node, "name"), child, window, options, 0, NULL, 0, NULL);
-                        parse_option(info, xmlGetProp(node, "name"), child, options, 0, NULL, 0, NULL);
-					} else if ( ! strcmp(child->name, "exclusive") ) {
-						xmlNodePtr child2;
-						RadioGroup *list = NULL;
-						for ( child2 = child->childs; child2; child2 = child2->next) {
-							//parse_option(info, xmlGetProp(node, "name"), child2, window, options, 0, NULL, 1, &list);
-                            parse_option(info, xmlGetProp(node, "name"), child2, options, 0, NULL, 1, &list);
-						}
-					}
-                }
-            }
-		}
-		node = node->next;
+		    }
+		    node = node->next;
+        }
+
+        // Render and display options in window
+        carbon_OptionsShowBox(options);
+        // Refresh the enable/disable status of buttons
+        carbon_RefreshOptions(options);
+        // Resize the window if there are too many options to fit
+        carbon_SetProperWindowSize(MyRes, options);
+
+        init_install_path();
+        init_binary_path();
+        update_size();
+        update_space();
+        init_menuitems_option(info);
+
+        in_setup = FALSE;
+
+        int TempState = carbon_IterateForState(MyRes, &cur_state);
+        // Return the window back to default size, if necessary except
+        //  if we're exiting (so we don't redisplay the window after it
+        //  has been hidden
+        if(cur_state != SETUP_EXIT)
+            carbon_SetProperWindowSize(MyRes, NULL);
+        // Return the next state as appopriate
+        return TempState;
     }
 
-    // Render and display options in window
-    carbon_OptionsShowBox(options);
-    // Refresh the enable/disable status of buttons
-    carbon_RefreshOptions(options);
-    // Resize the window if there are too many options to fit
-    carbon_SetProperWindowSize(options, true);
-
-    init_install_path();
-    init_binary_path();
-    update_size();
-    update_space();
-    init_menuitems_option(info);
-
-    in_setup = FALSE;
-
-    int TempState = carbon_IterateForState(MyRes, &cur_state);
-    // Return the window back to default size, if necessary except
-    //  if we're exiting (so we don't redisplay the window after it
-    //  has been hidden
-    if(cur_state != SETUP_EXIT)
-        carbon_SetProperWindowSize(options, false);
-    // Return the next state as appopriate
-    return TempState;
+    // Return the current state if it's SETUP_EXIT
+    return cur_state;
 }
 
 static int carbonui_update(install_info *info, const char *path, size_t progress, size_t size, const char *current)
@@ -1056,6 +1134,72 @@ static int carbonui_update(install_info *info, const char *path, size_t progress
     // Handle any UI events in queue
     carbon_HandlePendingEvents(MyRes);
 	return TRUE;
+/*
+    int textlen;
+    char text[1024];
+    char *install_path;
+
+    static char LastPath[1024] = "";
+    static char LastCurrent[1024] = "";
+    static int LastFileSize = 0;
+    static int LastTotalSize = 0;
+    int CurFileSize;
+    int CurTotalSize;
+
+    //carbon_debug("***carbonui_update()\n");
+
+    // Abort immediately if current state is SETUP_ABORT
+    if(cur_state == SETUP_ABORT)
+        return FALSE;
+
+    // Set "current_option" label to the current option (only if it's changed)
+    if(strcmp(current, LastCurrent) != 0)
+    {
+        strcpy(LastCurrent, current);
+        carbon_SetLabelText(MyRes, COPY_TITLE_LABEL_ID, current);
+    }
+
+    // Set "current_file" label to the current file (only if it's changed)
+    if(strcmp(path, LastPath) != 0)
+    {
+        strcpy(LastPath, path);
+
+        // Set the "current_file" label to the current file being processed
+        snprintf(text, sizeof(text), "%s", path);
+
+        // Remove the install path from the string
+        install_path = cur_info->install_path;
+        if(strncmp(text, install_path, strlen(install_path)) == 0)
+            strcpy(text, &text[strlen(install_path)+1]);
+        textlen = strlen(text);
+        if(textlen > MAX_TEXTLEN)
+            strcpy(text, text+(textlen-MAX_TEXTLEN));
+
+        carbon_SetLabelText(MyRes, COPY_CURRENT_FILE_LABEL_ID, text);
+    }
+
+    if(LastFileSize != size)
+    {
+        LastFileSize = size;
+        CurFileSize = size;
+    }
+    else
+        CurFileSize = -1;
+    // Update total file progress
+    carbon_SetProgress(MyRes, COPY_CURRENT_FILE_PROGRESS_ID, progress, CurFileSize);
+
+    if(LastTotalSize != info->install_size)
+    {
+        LastTotalSize = info->install_size;
+        CurTotalSize = info->install_size;
+    }
+    else
+        CurTotalSize = -1;
+    carbon_SetProgress(MyRes, COPY_TOTAL_PROGRESS_ID, info->installed_bytes, CurTotalSize);
+
+    // Handle any UI events in queue
+    carbon_HandlePendingEvents(MyRes);
+	return TRUE;*/
 }
 
 static void carbonui_abort(install_info *info)

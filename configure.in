@@ -374,6 +374,18 @@ if test x$HAVE_BZIP2_SUPPORT = xyes; then
   if test x$LIBBZ2_PREFIX = xyes; then
     AC_DEFINE(LIBBZ2_PREFIX, 1, libbz2 has "BZ_" prefix.)
   fi
+
+  # Use static version of BZIP2 under Carbon if it's available, otherwise
+  # just stick with the dynamic version
+  case "$target" in
+     powerpc-apple-darwin*)
+     if test -f /usr/lib/libbz2.a; then
+         BZ2LIB=""
+         LIBS="$LIBS /usr/lib/libbz2.a"
+         GUI_LIBS="$GUI_LIBS /usr/lib/libbz2.a"
+         CARBON_LIBS="$CARBON_LIBS /usr/lib/libbz2.a"
+     fi		
+  esac
 fi
 
 AC_ARG_ENABLE(dialog,

@@ -15,6 +15,7 @@
 #define UNINSTALL_GROUP_ID          135
 #define UNINSTALL_STATUS_GROUP_ID   136
 #define CHECK_GROUP_ID              137
+#define CDKEY_GROUP_ID              138
 
 // OPTION_GROUP_ID controls
 #define OPTION_INSTALL_PATH_LABEL_ID        200
@@ -98,6 +99,10 @@
 #define CHECK_DISMISS_BUTTON_ID             1102
 #define CHECK_RESCUE_BUTTON_ID              1103
 
+// CDKEY_GROUP_ID controls
+#define CDKEY_ENTRY_ID                      1202
+#define CDKEY_CONFIRM_ENTRY_ID              1204
+
 #define LOKI_SETUP_SIG      'loki'
 
 // Possible command events that are raised
@@ -117,6 +122,9 @@
 #define COMMAND_UNINSTALL       'unin'
 #define COMMAND_RESCUE          'resc'
 #define COMMAND_SYMBOLIC_CHECK	'symb'
+#define COMMAND_CDKEY_CANCEL    'cdcn'
+#define COMMAND_CDKEY_CONTINUE  'cdco'
+
 
 #define COMMAND_PROMPT_YES      'yes '
 #define COMMAND_PROMPT_NO       'no  '
@@ -170,10 +178,11 @@ typedef enum
     WEBSITE_PAGE = 6,
     UNINSTALL_PAGE = 7,
     UNINSTALL_STATUS_PAGE = 8,
-    CHECK_PAGE = 9
+    CHECK_PAGE = 9,
+    CDKEY_PAGE = 10
 } InstallPage;
 // Number of pages that exist
-#define PAGE_COUNT   10
+#define PAGE_COUNT   11
 
 typedef enum
 {
@@ -204,6 +213,7 @@ typedef struct
     ControlRef SplashImageView;
     size_t ImageWidth;
     size_t ImageHeight;
+    int LeftNotTop;
 } CarbonRes;
 
 // Function declarations
@@ -218,13 +228,14 @@ void carbon_DisableControl(CarbonRes *, int);
 void carbon_EnableControl(CarbonRes *, int);
 void carbon_SetInstallClass(CarbonRes *, int);
 int carbon_GetInstallClass(CarbonRes *);
-void carbon_UpdateImage(CarbonRes *, const char *, const char *);
+void carbon_UpdateImage(CarbonRes *, const char *, const char *, int);
 void carbon_HandlePendingEvents(CarbonRes *);
 void carbon_SetLabelText(CarbonRes *, int, const char *);
 void carbon_GetLabelText(CarbonRes *, int, char *, int);
 void carbon_SetEntryText(CarbonRes *, int, const char *);
 void carbon_GetEntryText(CarbonRes *, int, char *, int);
 void carbon_SetProgress(CarbonRes *, int, float);
+//void carbon_SetProgress(CarbonRes *, int, int, int);
 void carbon_SetCheckbox(CarbonRes *, int, int);
 int carbon_GetCheckbox(CarbonRes *, int);
 int carbon_Prompt(CarbonRes *, PromptType, const char *, char *, int);
@@ -311,7 +322,7 @@ void carbon_OptionsSetTooltip(OptionsButton *, const char *);
 void carbon_OptionsSetValue(OptionsButton *, int);
 int carbon_OptionsGetValue(OptionsButton *);
 void carbon_OptionsShowBox(OptionsBox *);
-void carbon_SetProperWindowSize(OptionsBox *, int);
+void carbon_SetProperWindowSize(CarbonRes *, OptionsBox *);
 void carbon_SetUninstallWindowSize(OptionsBox *);
 OptionsButton *carbon_GetButtonByName(OptionsBox *, const char *);
 void carbon_RefreshOptions(OptionsBox *);

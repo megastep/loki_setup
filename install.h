@@ -243,6 +243,9 @@ extern int         GetProductRequireRoot(install_info *info);
 extern int         GetProductAllowsExpress(install_info *info);
 extern int         GetProductInstallOnce(install_info *info);
 extern int         GetProductReinstall(install_info *info);
+extern int         GetProductIsAppBundle(install_info *info);
+extern int         GetProductSplashPosition(install_info *info);
+extern const char *GetProductCDKey(install_info *info);
 
 extern const char *IsReadyToInstall(install_info *info);
 extern int         CheckRequirements(install_info *info);

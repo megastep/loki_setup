@@ -42,9 +42,20 @@ static void MoveImage(CarbonRes *Res)
     HIViewFindByID(HIViewGetRoot(Res->Window), kHIViewWindowContentID, &WindowViewRef);
     // Get window view bounds...yeah.
     HIViewGetBounds(WindowViewRef, &bounds);
-    // Move image in the center (vertically)
-    MoveControl(Res->SplashImageView, bounds.origin.x,
-        bounds.size.height / 2 - Res->ImageHeight / 2);
+
+    if(Res->LeftNotTop)
+    {
+        // Move image in the center (vertically)
+        MoveControl(Res->SplashImageView, bounds.origin.x,
+            bounds.size.height / 2 - Res->ImageHeight / 2);
+    }
+    else
+    {
+        // Move image in the center (vertically)
+        MoveControl(Res->SplashImageView, bounds.size.width / 2 - Res->ImageWidth / 2,
+            bounds.origin.y);
+    }
+
     Draw1Control(Res->SplashImageView);
 }
 
@@ -82,8 +93,16 @@ static void MoveGroups(CarbonRes *Res)
 
     for(i = 0; i < PAGE_COUNT; i++)
     {
-        // Set the position of the group control to top/left position
-        MoveControl(Res->PageHandles[i], GROUP_LEFT + Res->ImageWidth, GROUP_TOP);
+        if(Res->LeftNotTop)
+        {
+            // Set the position of the group control to top/left position
+            MoveControl(Res->PageHandles[i], GROUP_LEFT + Res->ImageWidth, GROUP_TOP);
+        }
+        else
+        {
+            // Set the position of the group control to top/left position
+            MoveControl(Res->PageHandles[i], GROUP_LEFT, GROUP_TOP + Res->ImageHeight);
+        }
     }
 }
 static int OptionsSetRadioButton(OptionsButton *Button)
@@ -397,6 +416,7 @@ static void LoadGroupControlRefs(CarbonRes *Res)
     GroupControlIDs[UNINSTALL_PAGE].signature = LOKI_SETUP_SIG; GroupControlIDs[UNINSTALL_PAGE].id = UNINSTALL_GROUP_ID;
     GroupControlIDs[UNINSTALL_STATUS_PAGE].signature = LOKI_SETUP_SIG; GroupControlIDs[UNINSTALL_STATUS_PAGE].id = UNINSTALL_STATUS_GROUP_ID;
     GroupControlIDs[CHECK_PAGE].signature = LOKI_SETUP_SIG; GroupControlIDs[CHECK_PAGE].id = CHECK_GROUP_ID;
+    GroupControlIDs[CDKEY_PAGE].signature = LOKI_SETUP_SIG; GroupControlIDs[CDKEY_PAGE].id = CDKEY_GROUP_ID;
 
     // Get references for group controls via the ID
     for(i = 0; i < PAGE_COUNT; i++)
@@ -653,6 +673,11 @@ void carbon_ShowInstallScreen(CarbonRes *Res, InstallPage NewInstallPage)
             carbon_DisableControl(Res, OPTION_INSTALL_PATH_ENTRY_ID);
             carbon_DisableControl(Res, OPTION_LINK_PATH_ENTRY_ID);
         }
+        if(NewInstallPage != CDKEY_PAGE)
+        {
+            carbon_DisableControl(Res, CDKEY_ENTRY_ID);
+            carbon_DisableControl(Res, CDKEY_CONFIRM_ENTRY_ID);
+        }
         // Refresh window
         DrawControls(Res->Window);
 
@@ -803,7 +828,7 @@ int carbon_GetInstallClass(CarbonRes *Res)
     return ReturnValue;
 }
 
-void carbon_UpdateImage(CarbonRes *Res, const char *Filename, const char *Path)
+void carbon_UpdateImage(CarbonRes *Res, const char *Filename, const char *Path, int LeftNotTop)
 {
     CGDataProviderRef Provider;
     char FullPath[CARBON_MAX_APP_PATH];
@@ -863,6 +888,7 @@ void carbon_UpdateImage(CarbonRes *Res, const char *Filename, const char *Path)
                     HIViewFindByID(HIViewGetRoot(Res->Window), kHIViewWindowContentID, &WindowViewRef);
                     HIViewAddSubview(WindowViewRef, Res->SplashImageView);
                     // Move groups to accomodate the image
+                    Res->LeftNotTop = LeftNotTop;
                     MoveGroups(Res);
                     MoveImage(Res);
                 }
@@ -938,6 +964,16 @@ void carbon_SetProgress(CarbonRes *Res, int ProgressID, float Value)
 
     GetControlByID(Res->Window, &IDStruct, &Ref);
     SetControl32BitValue(Ref, ProgValue);
+
+    /*ControlRef Ref;
+    ControlID IDStruct = {LOKI_SETUP_SIG, ProgressID};
+
+    GetControlByID(Res->Window, &IDStruct, &Ref);
+    
+    if(Max != -1)
+        SetControl32BitMaximum(Ref, Max);
+
+    SetControl32BitValue(Ref, Value);*/
 }
 
 void carbon_SetCheckbox(CarbonRes *Res, int CheckboxID, int Value)
@@ -1448,42 +1484,55 @@ int carbon_OptionsGetValue(OptionsButton *Button)
     return ReturnValue;
 }
 
-void carbon_SetProperWindowSize(OptionsBox *Box, int OptionsNotOther)
+void carbon_SetProperWindowSize(CarbonRes *Res, OptionsBox *Box)
 {
     int NewHeight;
     int NewWidth;
 
     // Hide window while we're making changes to it
-    HideWindow(Box->Res->Window);
+    HideWindow(Res->Window);
 
-    // If true (and there are more options than can fit in default size,
-    // then set window size based on OPTIONS screen
-    if(OptionsNotOther && Box->ButtonCount > Box->BoxStartCount)
-        NewHeight = WINDOW_HEIGHT + (Box->ButtonCount - Box->BoxStartCount) * BUTTON_HEIGHT;
-    // Otherwise, set to standard window size
-    else
+    // If options box is NULL, resize to a "normal" screen size
+    if(Box == NULL)
+    {
         NewHeight = WINDOW_HEIGHT;
-
-    if(OptionsNotOther && Box->MaxButtonWidth > BUTTON_WIDTH)
-        NewWidth = WINDOW_WIDTH + (Box->MaxButtonWidth - BUTTON_WIDTH);
-    else
         NewWidth = WINDOW_WIDTH;
+    }
+    // Else, resize based on options screen
+    else
+    {
+        // If true (and there are more options than can fit in default size,
+        // then set window size based on OPTIONS screen
+        if(Box->ButtonCount > Box->BoxStartCount)
+            NewHeight = WINDOW_HEIGHT + (Box->ButtonCount - Box->BoxStartCount) * BUTTON_HEIGHT;
+        // Otherwise, set to standard window size
+        else
+            NewHeight = WINDOW_HEIGHT;
+
+        if(Box->MaxButtonWidth > BUTTON_WIDTH)
+            NewWidth = WINDOW_WIDTH + (Box->MaxButtonWidth - BUTTON_WIDTH);
+        else
+            NewWidth = WINDOW_WIDTH;
+    }
+
 
     // Resize window
-    printf("carbon_SetProperWindowSize - Box->MaxButtonWidth = %d", Box->MaxButtonWidth);
-    SizeWindow(Box->Res->Window, NewWidth + Box->Res->ImageWidth, NewHeight, true);
+    if(Res->LeftNotTop)
+        SizeWindow(Res->Window, NewWidth + Res->ImageWidth, NewHeight, true);
+    else
+        SizeWindow(Res->Window, NewWidth, NewHeight + Res->ImageHeight, true);
 
     // When size changes, we have to reposition it to the center
-    RepositionWindow(Box->Res->Window, NULL, kWindowCenterOnMainScreen);
+    RepositionWindow(Res->Window, NULL, kWindowCenterOnMainScreen);
 
     // Move the image to accomodate new window size
-    MoveImage(Box->Res);
+    MoveImage(Res);
 
     // Redraw it
-    DrawControls(Box->Res->Window);
+    DrawControls(Res->Window);
 
     // Show window in new state
-    ShowWindow(Box->Res->Window);
+    ShowWindow(Res->Window);
 }
 
 void carbon_SetUninstallWindowSize(OptionsBox *Box)

@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.108 2003-05-12 22:26:26 megastep Exp $ */
+/* $Id: install.c,v 1.109 2003-05-17 17:18:05 zeph Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -211,6 +211,29 @@ int GetProductHasPromptBinaries(install_info *info)
 		return 1;
 	}
     return 0;
+}
+
+int GetProductIsAppBundle(install_info *info)
+{
+    const char *str = xmlGetProp(info->config->root, "appbundle");
+    if ( str && !strcasecmp(str, "yes") ) {
+        return 1;
+    }
+    return 0;
+}
+
+int GetProductSplashPosition(install_info *info)
+{
+    const char *str = xmlGetProp(info->config->root, "splashpos");
+    if ( str && !strcasecmp(str, "top") ) {
+        return 0;
+    }
+    return 1;
+}
+
+const char *GetProductCDKey(install_info *info)
+{
+    return xmlGetProp(info->config->root, "cdkey");
 }
 
 /* returns true if any deviant paths are not writable */

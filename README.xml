@@ -91,6 +91,10 @@ There are several optional attributes of the install element:
  splash     Use this tag to specify an alternate splash image (displayed to
             the left of the installer in X11). The image must be in XPM format,
             and the default name for this attribute is "splash.xpm".
+ 
+ splashpos  (CARBON ONLY) This option sets the position that the splash image
+            will appear on the setup screen.  If unspecified, the default is
+            "left".  The only valid options currently are "left" and "top".
 
  url        This is a web site which is launched after the install is
             completed.
@@ -167,6 +171,10 @@ There are several optional attributes of the install element:
 
  reinstall  If set to 'yes', the install will allow the product to be reinstalled. The default behavior
             is not to let the user install product options twice.
+
+ appbundle  (CARBON ONLY) If this is "yes", then the destination folder is assumed to be a Mac OS
+            application bundle.  Therefore, the ".app" extension is automatically appended to the
+            selected target directory.
 
  category   Indicates the product category, used to specify the menu entry on some systems. Defaults
             to "Games"
