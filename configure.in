@@ -181,6 +181,8 @@ esac
 GTK_STATIC=$BSTATIC
 case "$target" in
 	*linux*)
+# Newer glibc's require to depend at least on them
+		STATIC="-Wl,-Bdynamic"
 		GTK_STATIC="\$(BDYNAMIC)" ;;
 esac
 
