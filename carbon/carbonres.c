@@ -258,6 +258,74 @@ static pascal OSStatus ReadmeWindowEventHandler(EventHandlerCallRef HandlerRef, 
     return err;
 }
 
+static pascal OSStatus MediaWindowEventHandler(EventHandlerCallRef HandlerRef, EventRef Event, void *UserData)
+{
+    OSStatus err = eventNotHandledErr;	// Default is event is not handled by this function
+    HICommand command;
+    CarbonRes *Res = (CarbonRes *)UserData;
+    char Path[CARBON_MAX_APP_PATH];
+    ControlRef TempCtrl;
+    ControlID ID;
+
+    ID.signature = MEDIA_SIGNATURE;
+
+    carbon_debug("MediaWindowEventHandler()\n");
+
+    GetEventParameter(Event, kEventParamDirectObject, typeHICommand, NULL, sizeof(HICommand), NULL, &command);
+
+    // If event is handled in the callback, then return "noErr"
+    switch(command.commandID)
+    {
+        case COMMAND_MEDIA_PICKDIR:
+            if(carbon_PromptForPath(Path, CARBON_MAX_APP_PATH))
+                ID.id = MEDIA_DIR_ENTRY_ID;
+                GetControlByID(Res->MediaWindow, &ID, &TempCtrl);
+                SetControlData(TempCtrl, kControlEditTextPart, kControlStaticTextTextTag, strlen(Path), Path);
+                Draw1Control(TempCtrl);
+            break;
+        case COMMAND_MEDIA_CDROM:
+            // Uncheck the OTHER option
+            ID.id = MEDIA_OTHER_RADIO_ID;
+            GetControlByID(Res->MediaWindow, &ID, &TempCtrl);
+            SetControl32BitValue(TempCtrl, kControlRadioButtonUncheckedValue);
+            // Disable OTHER option related controls
+            ID.id = MEDIA_DIR_ENTRY_ID;
+            GetControlByID(Res->MediaWindow, &ID, &TempCtrl);
+            DisableControl(TempCtrl);
+            ID.id = MEDIA_PICKDIR_BUTTON_ID;
+            GetControlByID(Res->MediaWindow, &ID, &TempCtrl);
+            DisableControl(TempCtrl);
+            break;
+        case COMMAND_MEDIA_OTHER:
+            // Uncheck the CDROM option
+            ID.id = MEDIA_CDROM_RADIO_ID;
+            GetControlByID(Res->MediaWindow, &ID, &TempCtrl);
+            SetControl32BitValue(TempCtrl, kControlRadioButtonUncheckedValue);
+            // Enable OTHER option related controls
+            ID.id = MEDIA_DIR_ENTRY_ID;
+            GetControlByID(Res->MediaWindow, &ID, &TempCtrl);
+            EnableControl(TempCtrl);
+            ID.id = MEDIA_PICKDIR_BUTTON_ID;
+            GetControlByID(Res->MediaWindow, &ID, &TempCtrl);
+            EnableControl(TempCtrl);
+            break;
+        case COMMAND_MEDIA_CANCEL:
+            PromptResponse = false;
+            PromptResponseValid = true;
+            err = noErr;
+            break;
+        case COMMAND_MEDIA_OK:
+            PromptResponse = true;
+            PromptResponseValid = true;
+            err = noErr;
+            break;
+        default:
+            carbon_debug("MediaWindowEventHandler() - Invalid command event received.\n");
+            break;
+    }
+    return err;
+}
+
 static void LoadGroupControlRefs(CarbonRes *Res)
 {
     int i;
@@ -275,6 +343,7 @@ static void LoadGroupControlRefs(CarbonRes *Res)
     GroupControlIDs[WEBSITE_PAGE].signature = LOKI_SETUP_SIG; GroupControlIDs[WEBSITE_PAGE].id = WEBSITE_GROUP_ID;
     GroupControlIDs[UNINSTALL_PAGE].signature = LOKI_SETUP_SIG; GroupControlIDs[UNINSTALL_PAGE].id = UNINSTALL_GROUP_ID;
     GroupControlIDs[UNINSTALL_STATUS_PAGE].signature = LOKI_SETUP_SIG; GroupControlIDs[UNINSTALL_STATUS_PAGE].id = UNINSTALL_STATUS_GROUP_ID;
+    GroupControlIDs[CHECK_PAGE].signature = LOKI_SETUP_SIG; GroupControlIDs[CHECK_PAGE].id = CHECK_GROUP_ID;
 
     // Get references for group controls via the ID
     for(i = 0; i < PAGE_COUNT; i++)
@@ -400,6 +469,8 @@ CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32))
     require_noerr(err, CantCreateWindow);
     err = CreateWindowFromNib(nibRef, CFSTR("readme"), &NewRes->ReadmeWindow);
     require_noerr(err, CantCreateWindow);
+    err = CreateWindowFromNib(nibRef, CFSTR("media"), &NewRes->MediaWindow);
+    require_noerr(err, CantCreateWindow);
 
     // Resize and center the window to the appropriate width/height.  Update parameter
     // is false since we haven't shown the window yet.
@@ -412,13 +483,13 @@ CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32))
     // Load references to all controls in the window
     LoadGroupControlRefs(NewRes);
 
-    // Create scrolling text 
+    // Create scrolling text for readme window
     Rect boundsRect = {3,3,314,434};
     //CreateScrollingTextBoxControl(NewRes->ReadmeWindow, &boundsRect, README_TEXT_ENTRY_ID, false, 0, 0, 0, &NewRes->MessageLabel);
     STUPCreateControl(NewRes->ReadmeWindow, &boundsRect, &NewRes->MessageLabel);
     ShowControl(NewRes->MessageLabel);
     //EnableControl(DummyControlRef);
-    
+
     // Install default event handler for window since we're not calling
     // RunApplicationEventLoop() to process events.
     InstallStandardEventHandler(GetWindowEventTarget(NewRes->Window));
@@ -437,6 +508,10 @@ CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32))
     // Setup the event handler associated with the readme window
     InstallWindowEventHandler(NewRes->ReadmeWindow,
         NewEventHandlerUPP(ReadmeWindowEventHandler), 1, &commSpec, (void *)NewRes,
+        NULL);
+    // Setup the event handler associated with the readme window
+    InstallWindowEventHandler(NewRes->MediaWindow,
+        NewEventHandlerUPP(MediaWindowEventHandler), 1, &commSpec, (void *)NewRes,
         NULL);
     // It's all good...return the resource object
     return NewRes;
@@ -501,6 +576,21 @@ void carbon_ShowInstallScreen(CarbonRes *Res, InstallPage NewInstallPage)
     ShowControl(Res->PageHandles[NewInstallPage]);
     // Set the new one as our current page
     Res->CurInstallPage = NewInstallPage;
+
+    // Not sure why we have to do this?!?!?  But otherwise this control
+    //  shows up on pages it's not supposed to
+    if(NewInstallPage == CHECK_PAGE)
+    {
+        // Create scrolling text for Check screen
+        ControlRef TempControlRef;
+        ControlID ID = {LOKI_SETUP_SIG, CHECK_GROUP_ID};
+        GetControlByID(Res->Window, &ID, &TempControlRef);
+        Rect boundsRect2 = {20,20,199,320};
+        STUPCreateControl(Res->Window, &boundsRect2, &Res->InstalledFilesLabel);
+        EmbedControl(Res->InstalledFilesLabel, TempControlRef);
+        //SetControlBounds(TempControlRef, &boundsRect2);
+        //MoveControl(TempControlRef, boundsRect2.left, boundsRect2.top);
+    }
 
     // If window is not show, then show it :-)
     if(!Res->IsShown)
@@ -1464,4 +1554,62 @@ void carbon_AddDesktopAlias(const char *Path)
     }
     else
         carbon_debug("carbon_AddDesktopAlias() - Could not create FSRef for path\n");
+}
+
+int carbon_MediaPrompt(CarbonRes *Res, int *CDRomNotDir, char *Dir, int DirLength)
+{
+    ControlRef DirControl;
+    ControlRef CDRadioControl;
+
+    ControlID IDStruct;
+    EventRef theEvent;
+    EventTargetRef theTarget;
+
+    carbon_debug("carbon_MediaPrompt()\n");
+
+    // Get references to button controls
+    IDStruct.signature = MEDIA_SIGNATURE; IDStruct.id = MEDIA_DIR_ENTRY_ID;
+    GetControlByID(Res->MediaWindow, &IDStruct, &DirControl);
+    IDStruct.signature = MEDIA_SIGNATURE; IDStruct.id = MEDIA_CDROM_RADIO_ID;
+    GetControlByID(Res->MediaWindow, &IDStruct, &CDRadioControl);
+
+    // Show the prompt window...make it happen!!!
+    ShowWindow(Res->MediaWindow);
+
+    // Prompt response hasn't been gotten yet...so it's invalid
+    PromptResponseValid = false;
+
+    // Wait for the prompt window to close
+    theTarget = GetEventDispatcherTarget();
+    // Wait for events until the prompt window has been responded to
+    while(!PromptResponseValid)
+    {
+        if(ReceiveNextEvent(0, NULL, kEventDurationForever, true, &theEvent) != noErr)
+        {
+            carbon_debug("carbon_MediaPrompt() - ReceiveNextEvent error");
+            break;
+        }
+
+        SendEventToEventTarget(theEvent, theTarget);
+        ReleaseEvent(theEvent);
+    }
+
+    // We're done with the prompt window...be gone!!!  Thus sayeth me.
+    HideWindow(Res->MediaWindow);
+
+    if(PromptResponse)
+    {
+        if(GetControl32BitValue(CDRadioControl) == kControlRadioButtonCheckedValue)
+            *CDRomNotDir = true;
+        else
+        {
+            *CDRomNotDir = false;
+            Size DummySize;
+            GetControlData(DirControl, kControlEditTextPart, kControlStaticTextTextTag, DirLength, Dir, &DummySize);
+            // Add null terminator to end of string
+            Dir[DummySize] = 0x00;            
+        }
+    }
+    // Return the prompt response...duh.
+    return PromptResponse;
 }

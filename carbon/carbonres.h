@@ -14,6 +14,7 @@
 #define WEBSITE_GROUP_ID            134
 #define UNINSTALL_GROUP_ID          135
 #define UNINSTALL_STATUS_GROUP_ID   136
+#define CHECK_GROUP_ID              137
 
 // OPTION_GROUP_ID controls
 #define OPTION_INSTALL_PATH_LABEL_ID        200
@@ -91,6 +92,12 @@
 #define UNINSTALL_STATUS_CANCEL_BUTTON_ID   1002
 #define UNINSTALL_STATUS_FINISHED_BUTTON_ID 1003
 
+// CHECK_STATUS_GROUP_ID controls
+//#define CHECK_LISTVIEW_ID                   1100
+#define CHECK_STATUS_LABEL_ID               1101
+#define CHECK_DISMISS_BUTTON_ID             1102
+#define CHECK_RESCUE_BUTTON_ID              1103
+
 #define LOKI_SETUP_SIG      'loki'
 
 // Possible command events that are raised
@@ -108,6 +115,7 @@
 #define COMMAND_WEBSITE         'webb'
 #define COMMAND_FINISHED        'fini'
 #define COMMAND_UNINSTALL       'unin'
+#define COMMAND_RESCUE          'resc'
 
 #define COMMAND_PROMPT_YES      'yes '
 #define COMMAND_PROMPT_NO       'no  '
@@ -116,6 +124,21 @@
 #define COMMAND_README_CANCEL   'cncl'
 #define COMMAND_README_CLOSE    'clos'
 #define COMMAND_README_AGREE    'agre'
+
+#define COMMAND_MEDIA_CDROM     'cdro'
+#define COMMAND_MEDIA_OTHER     'odir'
+#define COMMAND_MEDIA_PICKDIR   'pick'
+#define COMMAND_MEDIA_CANCEL    'cncl'
+#define COMMAND_MEDIA_OK        'okay'
+
+// Media resource IDs
+#define MEDIA_CDROM_RADIO_ID    128
+#define MEDIA_OTHER_RADIO_ID    129
+#define MEDIA_DIR_ENTRY_ID      130
+#define MEDIA_PICKDIR_BUTTON_ID 131
+#define MEDIA_CANCEL_BUTTON_ID  132
+#define MEDIA_OK_BUTTON_ID      133
+#define MEDIA_SIGNATURE         'medi'
 
 // Prompt resource IDs
 #define PROMPT_MESSAGE_LABEL_ID     200
@@ -144,9 +167,10 @@ typedef enum
     WEBSITE_PAGE = 6,
     UNINSTALL_PAGE = 7,
     UNINSTALL_STATUS_PAGE = 8,
+    CHECK_PAGE = 9
 } InstallPage;
 // Number of pages that exist
-#define PAGE_COUNT   9
+#define PAGE_COUNT   10
 
 typedef enum
 {
@@ -161,8 +185,10 @@ typedef struct
     WindowRef Window;
     WindowRef PromptWindow;
     WindowRef ReadmeWindow;
+    WindowRef MediaWindow;
     MenuRef Menu;
     ControlRef MessageLabel;
+    ControlRef InstalledFilesLabel;
     ControlRef PageHandles[PAGE_COUNT];
 
     int IsShown;
@@ -202,6 +228,7 @@ int carbon_LaunchURL(const char *);
 void carbon_GetAppPath(char *, int);
 int carbon_PromptForPath(char *, int);
 void carbon_AddDesktopAlias(const char *);
+int carbon_MediaPrompt(CarbonRes *, int *, char *, int);
 
 // Options related functions and data types
 typedef enum

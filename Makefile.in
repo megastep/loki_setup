@@ -43,6 +43,7 @@ LOKI_UNINSTALL_OBJS = loki_uninstall.o uninstall_ui.o
 CARBON_UNINSTALL_OBJS = carbon_uninstall.o uninstall_carbonui.o
 UNINSTALL_OBJS 		= uninstall.o
 CHECK_OBJS			= $(COMMON_OBJS) $(CORE_OBJS) check.o
+CHECK_CARBON_OBJS	= $(COMMON_OBJS) $(CORE_OBJS) check_carbon.o
 CONSOLE_OBJS 		= $(OBJS) console_ui.o @CONSOLE_OBJS@
 GUI_OBJS 			= $(OBJS) gtk_ui.o
 CARBON_OBJS          = $(OBJS) carbon_ui.o
@@ -83,6 +84,14 @@ uninstall: $(UNINSTALL_OBJS) $(COMMON_LIBS)
 
 check: $(CHECK_OBJS)  $(COMMON_LIBS)
 	$(CC) $(LDFLAGS) -o $@ $(CHECK_OBJS) $(GUI_LIBS)
+
+check.carbon: $(CHECK_CARBON_OBJS)  $(COMMON_LIBS)
+	$(CC) $(LDFLAGS) -o $@ $(CHECK_CARBON_OBJS) $(CARBON_LIBS)
+	rm -f -R ./check.APP
+	cp -R ./setup.APP ./check.APP
+	cp ./carbon/Info.plist.check ./check.APP/Contents/Info.plist
+	rm -f ./check.APP/Contents/MacOS/setup.carbon
+	cp ./check.carbon ./check.APP/Contents/MacOS
 
 testcd: testcd.o $(CORE_OBJS) $(COMMON_OBJS) $(COMMON_LIBS)
 	$(CC) $(LDFLAGS) -o $@ $^ @LIBS@ @CONSOLE_LIBS@ @STATIC@
