@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.86 2000-11-11 07:45:51 megastep Exp $ */
+/* $Id: install.c,v 1.87 2000-11-11 08:28:57 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -990,7 +990,9 @@ install_state install(install_info *info,
     return state;
 }
 
-/* Remove a partially installed product */
+/* Remove a partially installed product 
+   DO NOT FREE ANYTHING HERE. All memory is free()'d in delete_install()
+ */
 void uninstall(install_info *info)
 {
 	char path[PATH_MAX];
@@ -1007,66 +1009,36 @@ void uninstall(install_info *info)
 
     for ( comp = info->components_list; comp; comp = comp->next ) {
         for ( opt = comp->options_list; opt; opt = opt->next ) {
-
-            while ( opt->pre_script_list ) { /* RPM pre-uninstall */
-                struct script_elem *elem;
+            struct script_elem *selem;
+            struct file_elem *felem;
+            struct dir_elem *delem;
+            struct rpm_elem *relem;
  
-                elem = opt->pre_script_list;
-                opt->pre_script_list = elem->next;
-                run_script(info, elem->script, 0);
-                free(elem->script);
-                free(elem);
+            for ( selem = opt->pre_script_list; selem; selem = selem->next ) { /* RPM pre-uninstall */
+                run_script(info, selem->script, 0);
             }
 
-            while ( opt->file_list ) {
-                struct file_elem *elem;
- 
-                elem = opt->file_list;
-                opt->file_list = elem->next;
-                if ( unlink(elem->path) < 0 ) {
-                    log_warning(info, _("Unable to remove '%s'"), elem->path);
+            for ( felem = opt->file_list; felem; felem = felem->next ) {
+                if ( unlink(felem->path) < 0 ) {
+                    log_warning(info, _("Unable to remove '%s'"), felem->path);
                 }
-                free(elem->path);
-                free(elem);
             }
 
-            while ( opt->dir_list ) {
-                struct dir_elem *elem;
- 
-                elem = opt->dir_list;
-                opt->dir_list = elem->next;
-                if ( rmdir(elem->path) < 0 ) {
-                    log_warning(info, _("Unable to remove '%s'"), elem->path);
+            for ( delem = opt->dir_list; delem; delem = delem->next ) {
+                if ( rmdir(delem->path) < 0 ) {
+                    log_warning(info, _("Unable to remove '%s'"), delem->path);
                 }
-                free(elem->path);
-                free(elem);
             }
-            while ( opt->post_script_list ) { /* RPM post-uninstall */
-                struct script_elem *elem;
- 
-                elem = opt->post_script_list;
-                opt->post_script_list = elem->next;
-                run_script(info, elem->script, 0);
-                free(elem->script);
-                free(elem);
+            for ( selem = opt->post_script_list; selem; selem = selem->next ) { /* RPM post-uninstall */
+                run_script(info, selem->script, 0);
             }
 
-            while ( opt->rpm_list ) {
-                struct rpm_elem *elem;
- 
-                elem = opt->rpm_list;
-                opt->rpm_list = elem->next;
+            for ( relem = opt->rpm_list; relem; relem = relem->next ) {
                 log_warning(info, _("The '%s' RPM was installed or upgraded (version %s, release %d)"),
-                            elem->name, elem->version, elem->release);
-                free(elem->name);
-                free(elem->version);
-                free(elem);
+                            relem->name, relem->version, relem->release);
             }
 
-            free(opt->name);
         }
-        free(comp->name);
-        free(comp->version);
     }
     /* Check for uninstall script and remove it if present */
     snprintf(path, PATH_MAX, "%s/%s", info->install_path, GetProductUninstall(info));
