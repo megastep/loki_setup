@@ -98,6 +98,15 @@ typedef struct {
         int unused:31;
     } options;
 
+    /* The CDROM descriptions */
+    struct cdrom_elem {
+        char *id;
+        char *name;
+        char *file;
+        char *mounted;
+        struct cdrom_elem *next;
+    } *cdroms_list;
+
     /* Log of actions taken */
     install_log *log;
 
@@ -189,6 +198,7 @@ extern const char *GetProductComponent(install_info *info);
 extern const char *GetProductUninstall(install_info *info);
 extern const char *GetProductVersion(install_info *info);
 extern int         GetProductCDROMRequired(install_info *info);
+extern int         GetProductCDROMDescriptions(install_info *info);
 extern int         GetProductIsMeta(install_info *info);
 extern int         GetProductHasNoBinaries(install_info *info);
 extern int         GetProductHasPromptBinaries(install_info *info);
@@ -213,6 +223,10 @@ extern int         GetProductNumComponents(install_info *info);
 extern install_info *create_install(const char *configfile, int log_level,
                                     const char *install_path,
                                     const char *binary_path);
+
+/* Create a new CDROM description entry */
+struct cdrom_elem *add_cdrom_entry(install_info *info, const char *id, const char *name,
+                                   const char *file);
 
 /* Create a new component entry */
 struct component_elem *add_component_entry(install_info *info, const char *name, const char *version, int def);

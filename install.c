@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.77 2000-11-03 07:09:35 megastep Exp $ */
+/* $Id: install.c,v 1.78 2000-11-09 02:07:58 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -60,6 +60,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <stdio.h>
+#include <errno.h>
 
 #include "install.h"
 #include "install_log.h"
@@ -274,6 +275,30 @@ int GetProductNumComponents(install_info *info)
     return count;
 }
 
+int GetProductCDROMDescriptions(install_info *info)
+{
+    int count = 0;
+	xmlNodePtr node;
+    const char *text;
+    char name[BUFSIZ];
+
+	node = info->config->root->childs;
+	while(node) {
+        if ( !strcmp(node->name, "cdrom") ) {
+            text = xmlNodeListGetString(info->config, node->childs, 1);
+            if (text) {
+                *name = '\0';
+                while ( (*name == 0) && parse_line(&text, name, sizeof(name)) )
+						;
+            }
+            if ( add_cdrom_entry(info, xmlGetProp(node, "id"), xmlGetProp(node, "name"), name) )
+                count ++;
+        }
+        node = node->next;
+    }
+    return count;
+}
+
 const char *GetWebsiteText(install_info *info)
 {
     return xmlGetProp(info->config->root, "website_text");
@@ -395,6 +420,8 @@ install_info *create_install(const char *configfile, int log_level,
     info->arch = detect_arch();
     info->libc = detect_libc();
 
+    info->cdroms_list = NULL;
+
     /* Set product DB stuff to nothing by default */
     info->product = NULL;
     info->component = NULL;
@@ -464,6 +491,31 @@ const char *remove_root(install_info *info, const char *path)
 	return path;
 }
 
+struct cdrom_elem *add_cdrom_entry(install_info *info, const char *id, const char *name,
+                                   const char *file)
+{
+    struct cdrom_elem *elem;
+
+    elem = (struct cdrom_elem *)malloc(sizeof *elem);
+    if ( elem ) {
+        elem->name = strdup(name);
+        elem->id = strdup(id);
+        elem->file = strdup(file);
+        elem->mounted = NULL;
+        elem->next = info->cdroms_list;
+        info->cdroms_list = elem;
+    }
+    return elem;
+}
+
+void set_cdrom_mounted(struct cdrom_elem *cd, const char *path)
+{
+    if ( cd ) {
+        free(cd->mounted);
+        cd->mounted = path ? strdup(path) : NULL;
+    }
+}
+
 struct component_elem *add_component_entry(install_info *info, const char *name, const char *version,
                                            int def)
 {
@@ -484,6 +536,11 @@ struct component_elem *add_component_entry(install_info *info, const char *name,
 struct option_elem *add_option_entry(struct component_elem *comp, const char *name)
 {
     struct option_elem *elem;
+
+    if ( ! comp ) {
+        fprintf(stderr, _("Could not find default component. Make sure to define components for all entries."));
+        abort();
+    }
 
     elem = (struct option_elem *)malloc(sizeof *elem);
     if ( elem ) {
@@ -509,6 +566,7 @@ struct file_elem *add_file_entry(install_info *info, struct option_elem *comp,
     if ( elem ) {
         elem->path = strdup(remove_root(info, path));
         if ( elem->path ) {
+            memset(elem->md5sum, 0, 16);
             elem->next = comp->file_list;
 			if ( symlink ) {
 				elem->symlink = strdup(symlink);
@@ -774,6 +832,7 @@ const char *get_option_help(install_info *info, xmlNodePtr node)
 void delete_install(install_info *info)
 {
     struct component_elem *comp = info->components_list, *oldcomp;
+    struct cdrom_elem *cdrom = info->cdroms_list, *oldcd;
     while ( comp ) {
         struct option_elem *opt = comp->options_list, *old;
         while ( opt ) {
@@ -809,6 +868,15 @@ void delete_install(install_info *info)
         oldcomp = comp;
         comp = comp->next;
         free(oldcomp);
+    }
+    while ( cdrom ) {
+        free(cdrom->name);
+        free(cdrom->id);
+        free(cdrom->file);
+        free(cdrom->mounted);
+        oldcd = cdrom;
+        cdrom = cdrom->next;
+        free(oldcd);
     }
     if ( info->lookup ) {
         close_lookup(info->lookup);
@@ -881,7 +949,9 @@ void uninstall(install_info *info)
         run_script(info, GetPreUnInstall(info), 0);
     }
 
-    push_curdir(info->install_path);
+    if ( file_exists(info->install_path) ) {
+        push_curdir(info->install_path);
+    }
 
     for ( comp = info->components_list; comp; comp = comp->next ) {
         for ( opt = comp->options_list; opt; opt = opt->next ) {
@@ -1009,6 +1079,11 @@ void generate_uninstall(install_info *info)
             struct rpm_elem *relem;
             struct option_elem *opt;
 
+            if ( ! comp->options_list ) {
+                /* Skip empty components */
+                continue;
+            }
+
             if ( ! info->component ) {
                 component = loki_create_component(product, comp->name, comp->version);
                 if ( comp->is_default ) {
@@ -1021,7 +1096,7 @@ void generate_uninstall(install_info *info)
                 option = loki_create_option(component, opt->name);
                 /* Add files */
                 for ( felem = opt->file_list; felem; felem = felem->next ) {
-                    if ( felem->symlink ) {
+                    if ( felem->symlink || *(int *)felem->md5sum == 0 ) {
                         loki_register_file(option, felem->path, NULL);
                     } else {
                         loki_register_file(option, felem->path, get_md5(felem->md5sum));
@@ -1504,7 +1579,7 @@ void push_curdir(const char *path)
     } else {
         getcwd(curdirs[curdir_index++], PATH_MAX);
         if( chdir(path) < 0)
-            perror("chdir(push)");
+            fprintf(stderr, "chdir(push: %s): %s\n", path, strerror(errno));
     }
 }
 
