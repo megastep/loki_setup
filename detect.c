@@ -160,7 +160,7 @@ int detect_cdrom(install_info *info)
 
 #ifdef __FreeBSD__
     /* Try to mount unmounted CDROM filesystems */
-    while( fstab = getfsent() ){
+    while( (fstab = getfsent()) != NULL ){
         if ( !strcmp(fstab->fs_vfstype, MNTTYPE_CDROM)) {
             if ( !is_fs_mounted(fstab->fs_spec)) {
                 if ( ! run_command(info, "mount", fstab->fs_spec) ) {
