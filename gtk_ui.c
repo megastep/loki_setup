@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.96 2004-03-02 04:31:08 icculus Exp $
+   $Id: gtk_ui.c,v 1.97 2004-05-12 01:45:22 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1066,12 +1066,12 @@ static void init_man_path(void)
 {
     GList* list = NULL;
     char pathCopy[ 4069 ];
-    char* path;
+    const char *path;
 
 	if ( ! GetProductHasManPages(cur_info) )
 		return;
 
-    path = (char *)getenv( "MANPATH" );
+    path = getenv( "MANPATH" );
     if( path )
     {
         int len;
@@ -1084,7 +1084,7 @@ static void init_man_path(void)
         strncpy( pathCopy, path, sizeof (pathCopy) - 1 );
         pathCopy[sizeof (pathCopy) - 1] = '\0';  /* just in case. */
 
-        while( *pc != ':' && *pc != '\0' ) {
+        while ( *pc ) {
             pc0 = pc;
             len = 0;
             while( *pc != ':' && *pc != '\0' ) {
@@ -1153,7 +1153,7 @@ static void init_binary_path(void)
         strncpy( pathCopy, path, sizeof (pathCopy) - 1 );
         pathCopy[sizeof (pathCopy) - 1] = '\0';  /* just in case. */
 
-        while( *pc != ':' && *pc != '\0' ) {
+        while( *pc != '\0' ) {
             pc0 = pc;
             len = 0;
             while( *pc != ':' && *pc != '\0' ) {
