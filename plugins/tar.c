@@ -1,5 +1,5 @@
 /* TAR plugin for setup */
-/* $Id: tar.c,v 1.8 2002-12-07 00:57:32 megastep Exp $ */
+/* $Id: tar.c,v 1.9 2004-03-09 11:43:32 icculus Exp $ */
 
 #include "config.h"
 #include "plugins.h"
@@ -135,7 +135,7 @@ static size_t TarCopy(install_info *info, const char *path, const char *dest, co
 				}
                 break;
             default:
-                log_warning(_("Tar: '%s' is unknown file type: %c"),
+                log_fatal(_("Tar: '%s' is unknown file type: %c"),
                             record.hdr.name, record.hdr.typeflag);
                 break;
         }
