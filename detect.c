@@ -37,7 +37,8 @@
 #include <sys/statvfs.h>
 #endif
 
-#include <gnome-xml/encoding.h>
+/* From libxml */
+#include <encoding.h>
 
 #include "install.h"
 #include "install_ui.h"

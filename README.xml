@@ -2,13 +2,15 @@
 The setup XML specification has the following format:
 
 -----
-<?xml version="1.0" standalone="yes"?>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <install>
   one or more install options
 </install>
 ----
 An example product specification file is at the bottom of this document.
 
+The XML file should be a well-formed Unicode file (UTF-8), especially if you
+intend to use internationalization features and non-ASCII character sets.
 
 The INSTALL element:
 
