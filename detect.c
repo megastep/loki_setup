@@ -201,7 +201,7 @@ int detect_cdrom(install_info *info)
     mountfp = setmntent( _PATH_MNTTAB, "r" );
     if( mountfp != NULL ) {
         while( (mntent = getmntent( mountfp )) != NULL ){
-            if ( !strcmp(mntent->mnt_type, MNTTYPE_CDROM)) {
+            if ( !strcmp(mntent->mnt_type, MNTTYPE_CDROM) || !strcmp(mntent->mnt_type, "auto") ) {
                 char *fsname = strdup(mntent->mnt_fsname);
                 char *dir = strdup(mntent->mnt_dir);
                 if ( !is_fs_mounted(fsname)) {
@@ -224,7 +224,7 @@ int detect_cdrom(install_info *info)
 
             strcpy(mntdev, mntent->mnt_fsname);
             strcpy(mnt_type, mntent->mnt_type);
-            if ( strcmp(mntent->mnt_type, MNTTYPE_SUPER) == 0 ) {
+            if ( strcmp(mnt_type, MNTTYPE_SUPER) == 0 ) {
                 tmp = strstr(mntent->mnt_opts, "fs=");
                 if ( tmp ) {
                     strcpy(mnt_type, tmp+strlen("fs="));
