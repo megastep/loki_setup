@@ -409,6 +409,7 @@ void perform_uninstall_slot(GtkWidget* w, gpointer data)
 		break;
 	default:
         set_status_text(_("Uninstall complete"));
+		gtk_progress_set_percentage(GTK_PROGRESS(progress), 1.0f);
 		break;
     }
     widget = glade_xml_get_widget(uninstall_glade, "cancel_button");
