@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.75 2002-12-07 00:57:31 megastep Exp $
+   $Id: gtk_ui.c,v 1.76 2002-12-12 01:36:44 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -351,6 +351,8 @@ void setup_destroy_view_readme_slot( GtkWidget* w, gpointer data )
          */
         widget = glade_xml_get_widget(setup_glade, "button_readme");
         gtk_widget_set_sensitive(widget, TRUE);
+        widget = glade_xml_get_widget(setup_glade, "class_readme");
+        gtk_widget_set_sensitive(widget, TRUE);
         widget = glade_xml_get_widget(setup_glade, "view_readme_progress_button");
         gtk_widget_set_sensitive(widget, TRUE);
         widget = glade_xml_get_widget(setup_glade, "view_readme_end_button");
@@ -375,11 +377,13 @@ void setup_button_view_readme_slot( GtkWidget* w, gpointer data )
         gtk_widget_show(readme);
 		/* there are 3 'view readme' buttons...disable all of them */
 		widget = glade_xml_get_widget(setup_glade, "button_readme");
-		gtk_widget_set_sensitive(widget, 0);
+		gtk_widget_set_sensitive(widget, FALSE);
+		widget = glade_xml_get_widget(setup_glade, "class_readme");
+		gtk_widget_set_sensitive(widget, FALSE);
 		widget = glade_xml_get_widget(setup_glade, "view_readme_progress_button");
-		gtk_widget_set_sensitive(widget, 0);
+		gtk_widget_set_sensitive(widget, FALSE);
 		widget = glade_xml_get_widget(setup_glade, "view_readme_end_button");
-		gtk_widget_set_sensitive(widget, 0);
+		gtk_widget_set_sensitive(widget, FALSE);
     }
 }
 
@@ -1287,6 +1291,8 @@ static install_state gtkui_init(install_info *info, int argc, char **argv, int n
          gtk_widget_set_sensitive(button, FALSE);
          button = glade_xml_get_widget(setup_glade, "view_readme_progress_button");
          gtk_widget_hide(button);
+		 button = glade_xml_get_widget(setup_glade, "view_readme_end_button");
+         gtk_widget_hide(button);		 
          button = glade_xml_get_widget(setup_glade, "class_readme");
          gtk_widget_hide(button);
      }
