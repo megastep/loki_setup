@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Setup 1.5\n"
-"POT-Creation-Date: 2000-10-25 12:52-0700\n"
+"POT-Creation-Date: 2000-10-30 18:55-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Stéphane Peter <megastep@lokigames.com>\n"
 "Language-Team: French <LL@li.org>\n"
@@ -37,12 +37,12 @@ msgstr "Signal %d reçu. Abandon.\n"
 msgid "Notice: the %s RPM was installed for this product.\n"
 msgstr "Attention: l'archive RPM %s a été installée pour ce produit.\n"
 
-#: uninstall.c:177
+#: uninstall.c:177 uninstall.c:180
 #, c-format
 msgid "Could not change to directory: %s\n"
 msgstr "Ne peut aller dans le répertoire: %s\n"
 
-#: uninstall.c:201
+#: uninstall.c:201 uninstall.c:204
 msgid ""
 "No write access to the installation directory.\n"
 "Aborting.\n"
@@ -50,7 +50,7 @@ msgstr ""
 "Pas d'accès en écriture dans le répertoire d'installation.\n"
 "Abandon.\n"
 
-#: uninstall.c:206
+#: uninstall.c:206 uninstall.c:209
 #, c-format
 msgid ""
 "No write access to the registry file: %s.\n"
@@ -59,20 +59,20 @@ msgstr ""
 "Pas d'accès en écriture pour le fichier de registre: %s.\n"
 "Abandon.\n"
 
-#: uninstall.c:245
+#: uninstall.c:245 uninstall.c:248
 msgid "Installed products:\n"
 msgstr "Produits installés:\n"
 
-#: uninstall.c:251
+#: uninstall.c:251 uninstall.c:254
 #, c-format
 msgid "installed in %s\n"
 msgstr "installé dans %s\n"
 
-#: uninstall.c:254
+#: uninstall.c:254 uninstall.c:257
 msgid " Error while accessing product info\n"
 msgstr " Erreur lors de l'accès aux infos du produit\n"
 
-#: uninstall.c:262
+#: uninstall.c:262 uninstall.c:265
 #, c-format
 msgid "Could not open product information for %s\n"
 msgstr "Impossible d'ouvrir les informations du produit pour %s\n"
@@ -86,20 +86,34 @@ msgstr ""
 "Nom du produit: %s\n"
 "Installé dans %s\n"
 
-#: uninstall.c:275
+#: uninstall.c:275 uninstall.c:278
 msgid "Components:\n"
 msgstr "Composants:\n"
 
-#: uninstall.c:288
+#: uninstall.c:288 uninstall.c:291
 #, c-format
 msgid "Unable to find component %s\n"
 msgstr "Impossible de trouver le composant %s\n"
 
-#: uninstall.c:296
+#: uninstall.c:296 uninstall.c:299
 msgid "An error occured during the uninstallation process.\n"
 msgstr "Une erreur est apparue durant le processus d'installation.\n"
 
-#: uninstall.c:300
+#: uninstall.c:300 uninstall.c:303
 #, c-format
 msgid "%s has been successfully uninstalled.\n"
 msgstr "%s a été désinstallé avec succès.\n"
+
+#: uninstall.c:170
+#, fuzzy, c-format
+msgid "Component %s has been successfully uninstalled.\n"
+msgstr "Le composant %s a été désinstallé avec succès.\n"
+
+#: uninstall.c:271
+#, fuzzy, c-format
+msgid ""
+"Product: %s\n"
+"Installed in %s\n"
+msgstr ""
+"Produit: %s\n"
+"Installé dans %s\n"

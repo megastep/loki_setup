@@ -5,8 +5,8 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: Setup 1.5\n"
-"POT-Creation-Date: 2000-10-25 12:52-0700\n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2000-10-30 18:55-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,38 +33,38 @@ msgstr ""
 msgid "Notice: the %s RPM was installed for this product.\n"
 msgstr ""
 
-#: uninstall.c:177
+#: uninstall.c:177 uninstall.c:180
 #, c-format
 msgid "Could not change to directory: %s\n"
 msgstr ""
 
-#: uninstall.c:201
+#: uninstall.c:201 uninstall.c:204
 msgid ""
 "No write access to the installation directory.\n"
 "Aborting.\n"
 msgstr ""
 
-#: uninstall.c:206
+#: uninstall.c:206 uninstall.c:209
 #, c-format
 msgid ""
 "No write access to the registry file: %s.\n"
 "Aborting.\n"
 msgstr ""
 
-#: uninstall.c:245
+#: uninstall.c:245 uninstall.c:248
 msgid "Installed products:\n"
 msgstr ""
 
-#: uninstall.c:251
+#: uninstall.c:251 uninstall.c:254
 #, c-format
 msgid "installed in %s\n"
 msgstr ""
 
-#: uninstall.c:254
+#: uninstall.c:254 uninstall.c:257
 msgid " Error while accessing product info\n"
 msgstr ""
 
-#: uninstall.c:262
+#: uninstall.c:262 uninstall.c:265
 #, c-format
 msgid "Could not open product information for %s\n"
 msgstr ""
@@ -76,20 +76,32 @@ msgid ""
 "Installed in %s\n"
 msgstr ""
 
-#: uninstall.c:275
+#: uninstall.c:275 uninstall.c:278
 msgid "Components:\n"
 msgstr ""
 
-#: uninstall.c:288
+#: uninstall.c:288 uninstall.c:291
 #, c-format
 msgid "Unable to find component %s\n"
 msgstr ""
 
-#: uninstall.c:296
+#: uninstall.c:296 uninstall.c:299
 msgid "An error occured during the uninstallation process.\n"
 msgstr ""
 
-#: uninstall.c:300
+#: uninstall.c:300 uninstall.c:303
 #, c-format
 msgid "%s has been successfully uninstalled.\n"
+msgstr ""
+
+#: uninstall.c:170
+#, c-format
+msgid "Component %s has been successfully uninstalled.\n"
+msgstr ""
+
+#: uninstall.c:271
+#, c-format
+msgid ""
+"Product: %s\n"
+"Installed in %s\n"
 msgstr ""
