@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Setup 1.5\n"
-"POT-Creation-Date: 2001-10-23 16:44-0700\n"
+"POT-Creation-Date: 2002-09-12 01:09-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Stefan Gehn <sgehn@gmx.net>\n"
 "Language-Team: German <LL@li.org>\n"
@@ -15,56 +15,58 @@ msgstr ""
 "Content-Transfer-Encoding: ENCODING\n"
 
 # SOME DESCRIPTIVE TITLE
-#: uninstall.glade:300
+#: uninstall.glade:310
 msgid "%P %%"
 msgstr ""
 
-#: uninstall.glade:94
+#: uninstall.glade:99
 msgid "... LOADING PRODUCT LIST ..."
 msgstr "... LADE PRODUKTLISTE ..."
 
-#: uninstall.glade:142
+#: uninstall.glade:147
 msgid "0 MB"
 msgstr "0 MB"
 
-#: uninstall.glade:359
+#: uninstall.glade:369
 msgid "Cancel"
 msgstr "Abbruch"
 
-#: uninstall.glade:188
-msgid "Exit"
-msgstr "Beenden"
-
-#: uninstall.glade:373
+#: uninstall.glade:383
 msgid "Finished"
 msgstr "Fertig"
 
-#: uninstall.glade:231
+#: uninstall.glade:241
 msgid "Performing uninstall:"
 msgstr "Führe Deinstallation aus:"
 
-#: uninstall.glade:51
+#: uninstall.glade:56
 msgid "Please select the packages you would like to uninstall:"
 msgstr "Bitte wählen sie das zu deinstallierende Produkt aus:"
 
-#: uninstall.glade:125
+#: uninstall.glade:130
 msgid "Recovered space: "
 msgstr "Freigegebener Speicherplatz: "
 
-#: uninstall.glade:202
-msgid "Uninstall"
-msgstr "Deinstalliere"
-
-#: uninstall.glade:23
+#: uninstall.glade:28
 #, fuzzy
 msgid "Uninstall Tool"
 msgstr "Loki Deinstallationstool"
 
-#: uninstall.glade:265
+#: uninstall.glade:275
 msgid "[current component]"
 msgstr ""
 
-#: uninstall.c:31
+#: uninstall.glade:198
+#, fuzzy
+msgid "_Exit"
+msgstr "Beenden"
+
+#: uninstall.glade:212
+#, fuzzy
+msgid "_Uninstall"
+msgstr "Deinstalliere"
+
+#: uninstall.c:35
 #, c-format
 msgid ""
 "Usage: %s product to uninstall the product\n"
@@ -77,27 +79,27 @@ msgstr ""
 "       %s product -l        um alle Komponenten aufzulisten\n"
 "       %s product component um eine einzelne Komponente zu deinstallieren\n"
 
-#: uninstall.c:109
+#: uninstall.c:113
 #, c-format
 msgid "Signal %d caught. Aborting.\n"
 msgstr "Signal %d erhalten. Breche ab.\n"
 
-#: uninstall.c:123
+#: uninstall.c:127
 #, c-format
 msgid "Could not change to directory: %s\n"
 msgstr "Konnte nicht ins Verzeichnis %s wechseln\n"
 
-#: uninstall.c:145
+#: uninstall.c:149
 #, c-format
 msgid "Notice: the %s RPM was installed for this product.\n"
 msgstr "Achtung: Das %s RPM ist für dieses Produkt installiert worden.\n"
 
-#: uninstall.c:180
+#: uninstall.c:184
 #, c-format
 msgid "Component %s has been successfully uninstalled.\n"
 msgstr "Die Komponente %s wurde erfolgreich deinstalliert.\n"
 
-#: uninstall.c:218
+#: uninstall.c:222
 msgid ""
 "No write access to the installation directory.\n"
 "Aborting.\n"
@@ -105,7 +107,7 @@ msgstr ""
 "Kein Schreibzugriff auf das Installationsverzeichnis.\n"
 "Breche ab.\n"
 
-#: uninstall.c:226
+#: uninstall.c:230
 #, c-format
 msgid ""
 "No write access to the registry file: %s.\n"
@@ -114,30 +116,30 @@ msgstr ""
 "Kein Schreibzugriff auf die Registrierungsdatei %s.\n"
 "Breche ab.\n"
 
-#: uninstall.c:311
+#: uninstall.c:315
 #, fuzzy
 msgid "Couldn't change to install directory\n"
 msgstr "Konnte nicht ins Verzeichnis %s wechseln\n"
 
-#: uninstall.c:348
+#: uninstall.c:352
 msgid "Installed products:\n"
 msgstr "Installierte Produkte:\n"
 
-#: uninstall.c:354
+#: uninstall.c:358
 #, c-format
 msgid "installed in %s\n"
 msgstr "Installiert in %s\n"
 
-#: uninstall.c:357
+#: uninstall.c:361
 msgid " Error while accessing product info\n"
 msgstr " Fehler beim Zugriff auf die Produktinformationen\n"
 
-#: uninstall.c:369
+#: uninstall.c:373
 #, c-format
 msgid "Could not open product information for %s\n"
 msgstr "Konnte die Produktinformationen für %s nicht öffnen\n"
 
-#: uninstall.c:375
+#: uninstall.c:379
 #, c-format
 msgid ""
 "Product: %s\n"
@@ -146,50 +148,62 @@ msgstr ""
 "Produkt: %s\n"
 "Installiert in %s\n"
 
-#: uninstall.c:382
+#: uninstall.c:386
 msgid "Components:\n"
 msgstr "Komponenten:\n"
 
-#: uninstall.c:395
+#: uninstall.c:403
 #, c-format
 msgid "Unable to find component %s\n"
 msgstr "Konnte Komponente %s nicht finden\n"
 
-#: uninstall.c:399
+#: uninstall.c:407
 msgid "Too many arguments for the command\n"
 msgstr "Zu viele Argumente für das Kommando\n"
 
-#: uninstall.c:406
+#: uninstall.c:414
 msgid "An error occured during the uninstallation process.\n"
 msgstr "Es trat ein Fehler während der Deinstallation auf.\n"
 
-#: uninstall.c:410
+#: uninstall.c:418
 #, c-format
 msgid "%s has been successfully uninstalled.\n"
 msgstr "%s wurde erfolgreich deinstalliert.\n"
 
-#: uninstall_ui.c:169
+#: uninstall_ui.c:67
+msgid "OK"
+msgstr ""
+
+#: uninstall_ui.c:68
+msgid "Abort"
+msgstr ""
+
+#: uninstall_ui.c:89
+msgid "Message"
+msgstr ""
+
+#: uninstall_ui.c:224
 #, c-format
 msgid "%d MB"
 msgstr "%d MB"
 
-#: uninstall_ui.c:314
+#: uninstall_ui.c:385
 msgid "Uninstall cancelled"
 msgstr "Deinstallation abgebrochen"
 
-#: uninstall_ui.c:316
+#: uninstall_ui.c:387
 msgid "Uninstall complete"
 msgstr "Deinstallation abgeschlossen"
 
-#: uninstall_ui.c:407
+#: uninstall_ui.c:478
 msgid "No uninstall_vbox in glade file!\n"
 msgstr "Kein 'uninstall_vbox' in der Glade-Datei vorhanden!\n"
 
-#: uninstall_ui.c:439
+#: uninstall_ui.c:510
 msgid "Complete uninstall"
 msgstr "Vervollständige Deinstallation"
 
-#: uninstall_ui.c:476
+#: uninstall_ui.c:547
 msgid ""
 "No products found.\n"
 "Are you the one that installed the software?"

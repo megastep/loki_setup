@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.3 2002-04-03 08:10:24 megastep Exp $
+ * $Id: dialog_ui.c,v 1.4 2002-09-17 22:40:46 megastep Exp $
  */
 
 #include <limits.h>
@@ -19,6 +19,7 @@
 #include "copy.h"
 #include "loki_launchurl.h"
 #include "dialog/dialog.h"
+
 
 /* Count the number of newlines in a string */
 static int count_lines(const char *str)
@@ -40,9 +41,14 @@ static void clear_screen(void)
 static
 yesno_answer dialog_prompt(const char *txt, yesno_answer suggest)
 {
-    int ret = dialog_yesno(_("Request"), txt, count_lines(txt)+5, 50,
-			   suggest == RESPONSE_NO);
-    return (ret == 0) ? RESPONSE_YES : RESPONSE_NO;
+    if ( suggest == RESPONSE_OK ) {
+	dialog_msgbox(_("Message"), txt, count_lines(txt)+5, 50, 1);
+	return RESPONSE_OK;
+    } else {
+	int ret = dialog_yesno(_("Request"), txt, count_lines(txt)+5, 50,
+			       suggest == RESPONSE_NO);
+	return (ret == 0) ? RESPONSE_YES : RESPONSE_NO;
+    }
 }
 
 static
@@ -135,9 +141,28 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr pa
 	int i = 0, nb_choices = 0;
 
 	xmlNodePtr node = parent->childs;
-	while ( node && nb_choices<MAX_CHOICES ) {
-		const char *set = xmlGetProp(node, "install");
-		if ( ! strcmp(node->name, "option") ) {
+	for ( ; node && nb_choices<MAX_CHOICES; node = node->next ) {
+	    const char *set = xmlGetProp(node, "install");
+
+		if ( ! set ) {
+			/* it's also possible to use the "required" attribute */
+			set = xmlGetProp(node, "required");
+		}
+	    if ( ! strcmp(node->name, "option") ) {
+		    
+			if ( ! match_arch(info, xmlGetProp(node, "arch")) )
+				continue;
+		
+			if ( ! match_libc(info, xmlGetProp(node, "libc")) )
+				continue;
+			 
+			if ( ! match_distro(info, xmlGetProp(node, "distro")) )
+				continue;
+		
+			if ( ! get_option_displayed(info, node) ) {
+				continue;
+			}
+
 			/* Skip options that are already installed */
 			if ( info->product && ! GetProductReinstall(info) ) {
 				product_component_t *comp;
@@ -148,6 +173,7 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr pa
 					comp = loki_getdefault_component(info->product);
 				}
 				if ( comp && loki_find_option(comp, get_option_name(info, node, NULL, 0)) ) {
+					continue;
 				}
 			}
 			nodes[nb_choices] = node;
@@ -157,24 +183,26 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr pa
 			choices[i++] = get_option_help(info, node);
 
 			nb_choices++;
-		} else if ( ! strcmp(node->name, "exclusive") ) {
+	    } else if ( ! strcmp(node->name, "exclusive") ) {
 			nodes[nb_choices] = node;
 			choices[i++] = "";
 			choices[i++] = strdup(get_option_name(info, node, NULL, 0));
 			choices[i++] = "on";
 			choices[i++] = get_option_help(info, node);
 			nb_choices++;
-		} else if ( ! strcmp(node->name, "component") ) {
+	    } else if ( ! strcmp(node->name, "component") ) {
 			nodes[nb_choices] = node;
 			choices[i++] = _("Component");
 			choices[i++] = xmlGetProp(node, "name");
 			choices[i++] = (set && !strcmp(set,"true")) ? "on" : "off";
 			choices[i++] = get_option_help(info, node);
 			nb_choices++;
-		}
-		node = node->next;
+	    }
 	}
 
+
+	/* TTimo: loop until the selected options are all validated by possible EULA */
+options_loop:  
 	clear_screen();
 	snprintf(buf, sizeof(buf), _("Installation of %s"), info->desc); 
 	if ( dialog_checklist(buf, _("Please choose the options to install"),
@@ -186,19 +214,63 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr pa
 	/* Now parse the results */
 	for ( i = 0; i < nb_choices; ++i ) {
 		if ( !strcmp(nodes[i]->name, "option") ) {
-			if ( result[i] ) {
+		    if ( result[i] ) {
+				const char *warn = get_option_warn(info, nodes[i]);
+
+				/* does this option have a EULA item */
+				xmlNodePtr child;
+				child = nodes[i]->childs;
+				while(child) {
+					if (!strcmp(child->name, "eula")) {
+						/* this option has some EULA nodes
+						 * we need to prompt before this change can be validated / turned on
+						 */
+						const char* name = GetProductEULANode(info, nodes[i]);
+						if (name) {
+							/* prompt for the EULA */
+							dialog_textbox(_("License Agreement"), name, -1, -1);
+							clear_screen();
+							if ( dialog_prompt(_("Do you agree with the license?"), RESPONSE_YES) == RESPONSE_NO ) {
+								/* refused the license, don't set the option and bounce back */
+								choices[i*4+2] = "off";
+								goto options_loop; /* I hate doing this :( */
+							}							
+						} else {
+							snprintf(buf, BUFSIZ, _("Option-specific EULA not found for '%s', can't toggle\n"), choices[i*4+1]);
+							dialog_msgbox(_("Error"), buf, 6, strlen(buf), 1);
+							choices[i*4+2] = "off";
+							goto options_loop;
+						}
+					}
+					child = child->next;
+				}			
+				
+				if ( warn ) { /* Display a warning message to the user */
+					snprintf(buf, sizeof(buf), "%s:\n%s", get_option_name(info, nodes[i], NULL, 0), warn);
+					dialog_prompt(buf, RESPONSE_OK);
+				}
 				/* Mark this option for installation */
 				mark_option(info, nodes[i], "true", 0);
 				
 				/* Add this option size to the total */
 				info->install_size += size_node(info, nodes[i]);
-			} else { /* Unmark */
+		    } else if ( xmlGetProp(nodes[i], "required") ) {
+				snprintf(buf, sizeof(buf), _("Option '%s' is required.\n"), 
+						 get_option_name(info, nodes[i], NULL, 0));
+				dialog_prompt(buf, RESPONSE_OK);
+			    
+				/* Mark this option for installation */
+				mark_option(info, nodes[i], "true", 0);
+				
+				/* Add this option size to the total */
+				info->install_size += size_node(info, nodes[i]);
+		    } else { /* Unmark */
 				mark_option(info, nodes[i], "false", 0);
-			}
+		    }
 		} else if ( !strcmp(nodes[i]->name, "exclusive") && result[i]) {
-			parse_option(info, component, nodes[i], 1);
+		    parse_option(info, component, nodes[i], 1);
 		} else if ( !strcmp(nodes[i]->name, "component") && result[i]) {
-			parse_option(info, xmlGetProp(nodes[i], "name"), nodes[i], 1);
+		    parse_option(info, xmlGetProp(nodes[i], "name"), nodes[i], 1);
 		}
 	}
 	return 1;
@@ -477,10 +549,18 @@ install_state dialog_pick_class(install_info *info)
 	return SETUP_OPTIONS;
 }
 
-int dialog_okay(Install_UI *UI)
+static void dialog_shutdown(install_info *info)
 {
-    if ( ! init_dialog() )
-		return(0);
+    clear_screen();
+    end_dialog();
+}
+
+int dialog_okay(Install_UI *UI, int *argc, char ***argv)
+{
+    if ( !isatty(STDIN_FILENO) )
+	return(0);
+    if ( !init_dialog() )
+	return(0);
 
     /* Set up the driver */
     UI->init = dialog_init;
@@ -492,9 +572,10 @@ int dialog_okay(Install_UI *UI)
     UI->prompt = dialog_prompt;
     UI->website = dialog_website;
     UI->complete = dialog_complete;
-	UI->exit = dialog_exit;
-	UI->pick_class = dialog_pick_class;
+    UI->exit = dialog_exit;
+    UI->pick_class = dialog_pick_class;
     UI->idle = NULL;
+    UI->shutdown = dialog_shutdown;
     UI->is_gui = 0;
 
     return(1);

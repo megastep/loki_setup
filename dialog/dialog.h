@@ -1,5 +1,5 @@
 /*
- *  $Id: dialog.h,v 1.3 2002-04-03 08:10:25 megastep Exp $
+ *  $Id: dialog.h,v 1.4 2002-09-17 22:40:46 megastep Exp $
  *
  *  dialog.h -- common declarations for all dialog modules
  *
@@ -23,11 +23,7 @@
 #ifndef DIALOG_H_included
 #define DIALOG_H_included 1
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#else
-#define RETSIGTYPE void
-#endif
+#include "../config.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -35,8 +31,12 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef HAVE_STRINGS_H
+#  include <strings.h>
+#endif
 #include <signal.h>	/* fork() etc. */
 #include <math.h>	/* sqrt() */
+#include <stdarg.h>
 
 #if defined(HAVE_NCURSES_CURSES_H)
 #include <ncurses/curses.h>

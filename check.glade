@@ -18,6 +18,11 @@
 <widget>
   <class>GtkDialog</class>
   <name>check_dialog</name>
+  <signal>
+    <name>delete_event</name>
+    <handler>on_dismiss_button_clicked</handler>
+    <last_modification_time>Mon, 26 Aug 2002 18:47:40 GMT</last_modification_time>
+  </signal>
   <title>Check And Rescue</title>
   <type>GTK_WINDOW_TOPLEVEL</type>
   <position>GTK_WIN_POS_NONE</position>
@@ -186,6 +191,11 @@
 <widget>
   <class>GtkDialog</class>
   <name>media_select</name>
+  <signal>
+    <name>delete_event</name>
+    <handler>on_media_cancel_clicked</handler>
+    <last_modification_time>Mon, 26 Aug 2002 18:48:23 GMT</last_modification_time>
+  </signal>
   <title>Media Selection</title>
   <type>GTK_WINDOW_TOPLEVEL</type>
   <position>GTK_WIN_POS_NONE</position>

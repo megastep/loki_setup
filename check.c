@@ -2,7 +2,7 @@
  * Check and Rescue Tool for Loki Setup packages. Verifies the consistency of the files,
  * and optionally restores them from the original installation medium.
  *
- * $Id: check.c,v 1.3 2002-04-03 08:10:24 megastep Exp $
+ * $Id: check.c,v 1.4 2002-09-17 22:40:45 megastep Exp $
  */
 
 #include <stdlib.h>
@@ -279,6 +279,9 @@ on_media_ok_clicked (GtkButton       *button,
 		if ( GetProductNumComponents(install) == 0 ) {
 			current_component = add_component_entry(install, "Default", install->version, 1);
 		}
+
+		/* Enable the relevant options */
+		select_corrupt_options(install);
 		copy_tree(install, install->config->root->childs, install->install_path, NULL);
 	}
 
@@ -436,12 +439,12 @@ int main(int argc, char *argv[])
 				case LOKI_REMOVED:
 					add_message(list, _("%s was REMOVED"), loki_getpath_file(file));
 					removed ++;
-					add_corrupt_file(loki_getpath_file(file), loki_getname_option(option));
+					add_corrupt_file(product, loki_getpath_file(file), loki_getname_option(option));
 					break;
 				case LOKI_CHANGED:
 					add_message(list, _("%s was MODIFIED"), loki_getpath_file(file));
 					modified ++;
-					add_corrupt_file(loki_getpath_file(file), loki_getname_option(option));
+					add_corrupt_file(product, loki_getpath_file(file), loki_getname_option(option));
 					break;
 				case LOKI_OK:
 					add_message(list, _("%s is OK"), loki_getpath_file(file));

@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="yes"?>
 <install product="RT2" desc="Railroad Tycoon II" version="1.54" uninstall="uninstall.sh" binarypath="/usr/bin"
-         promptbinaries="yes" update_url="http://www.lokigames.com/updates/" express="yes" superuser="yes">
+         promptbinaries="yes" update_url="http://www.lokigames.com/updates/" express="yes">
   <readme>
     README
   </readme>
@@ -13,9 +13,8 @@
     <lang lang="es">Instalación base</lang>
     <lang lang="it">Installazione base</lang>
     <lang lang="de">Minimale Installation</lang>
-
     <help          >Required for play</help>
-    <help lang="fr">Requise pour jouer</help>
+    <help lang="fr">Requis pour jouer</help>
     <help lang="es">Se necesita para jugar</help>
     <help lang="it">È necessaria per giocare</help>
     <help lang="de">Zum Spielen benötigt</help>
@@ -43,11 +42,15 @@
   </option>
   <option>
     Classic Campaign (can run from CD)
+    <warn>Don't touch that
+    or you may hurt yourself
+    </warn>
     <files cdrom="yes">
       maps/#[01]*
     </files>
     <option>
       Classic Campaign Movies (can run from CD)
+      <eula>license.txt</eula>
       <files>
         anim/cv[01]*
         anim/cvwin.mjpg

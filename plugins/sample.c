@@ -1,5 +1,5 @@
 /* Sample plugin for setup */
-/* $Id: sample.c,v 1.3 2002-04-03 08:10:25 megastep Exp $ */
+/* $Id: sample.c,v 1.4 2002-09-17 22:40:49 megastep Exp $ */
 
 #include "plugins.h"
 #include "file.h"
@@ -32,10 +32,12 @@ static size_t Size(install_info *info, const char *path)
 }
 
 /* Extract the file */
-static size_t Copy(install_info *info, const char *path, const char *dest, const char *current_option, xmlNodePtr node,
+static size_t Copy(install_info *info, const char *path, const char *dest, const char *current_option, 
+				   xmlNodePtr node, int mutable, const char *md5,
 				   int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
-	/* TODO: Extract the files, calling the update function as often as possible */
+	/* TODO: Extract the files, calling the update function as often as possible. 
+	   Also check for optional MD5 sum */
 	return 0;
 }
 
@@ -47,7 +49,7 @@ static
 SetupPlugin sample_plugin = {
 	"Sample Plugin",
 	"1.0",
-	"Stéphane Peter <megastep@lokigames.com>",
+	"Stéphane Peter <megastep@megastep.org>",
 	1, {".txt"},
 	InitPlugin, FreePlugin,
 	Size, Copy

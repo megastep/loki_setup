@@ -11,10 +11,15 @@
                being provided as command line arguments (see main.c). If the
 	       command-line paths are invalid, install will abort.
 */
+#include "config.h"
+
 #include <limits.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#ifdef HAVE_STRINGS_H
+#  include <strings.h>
+#endif
 #include <ctype.h>
 #include <stdlib.h>
 
@@ -113,10 +118,10 @@ static yesno_answer prompt_warning(const char *warning)
    should continue (used for exclusive options) */
 static int parse_option(install_info *info, const char *component, xmlNodePtr node, int exclusive)
 {
-	const char *help = "";
+	const char *help = "", *name;
     char line[BUFSIZ];
     char prompt[BUFSIZ];
-    const char *wanted;
+    const char *wanted, *warn;
 	int retval = 1;
     yesno_answer response = RESPONSE_INVALID, default_response;
 
@@ -134,6 +139,10 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
     wanted = xmlGetProp(node, "distro");
     if ( ! match_distro(info, wanted) ) {
         return retval;
+    }
+
+    if ( ! get_option_displayed(info, node) ) {
+		return retval;
     }
 
     /* Skip any options that are already installed */
@@ -171,6 +180,7 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
 		response = RESPONSE_YES;
 	}
 
+ options_loop:
     /* See if the user wants this option */
     while ( response == RESPONSE_INVALID ) {
 		snprintf(prompt, sizeof(prompt), _("Install %s?"), get_option_name(info,node,line,BUFSIZ));
@@ -190,6 +200,22 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
 
     switch(response) {
         case RESPONSE_YES:
+			/* See if there is an EULA for this option */
+			name = GetProductEULANode(info, node);
+			if ( name ) {
+				snprintf(prompt, sizeof(prompt), PAGER_COMMAND " \"%s\"", name);
+				system(prompt);
+				if ( console_prompt(_("Do you agree with the license?"), RESPONSE_YES) !=
+					 RESPONSE_YES ) {
+					response = RESPONSE_INVALID;
+					goto options_loop;
+				}
+			}
+
+			warn = get_option_warn(info, node);
+			if ( warn ) { /* Display a warning message to the user */
+				console_prompt(warn, RESPONSE_OK);
+			}
             /* Mark this option for installation */
             mark_option(info, node, "true", 0);
 
@@ -575,12 +601,10 @@ static install_state console_website(install_info *info)
     }
     return SETUP_COMPLETE;
 }
-
-
  
-int console_okay(Install_UI *UI)
+int console_okay(Install_UI *UI, int *argc, char ***argv)
 {
-    if(!isatty(1)){
+    if(!isatty(STDIN_FILENO)){
       fprintf(stderr,_("Standard input is not a terminal!\n"));
       return(0);
     }
@@ -597,13 +621,14 @@ int console_okay(Install_UI *UI)
     UI->pick_class = console_pick_class;
     UI->idle = NULL;
     UI->exit = NULL;
+    UI->shutdown = NULL;
     UI->is_gui = 0;
 
     return(1);
 }
 
 #ifdef STUB_UI
-int gtkui_okay(Install_UI *UI)
+int gtkui_okay(Install_UI *UI, int *argc, char ***argv)
 {
     return(0);
 }

@@ -1,5 +1,5 @@
 /*
- *  $Id: arrows.c,v 1.2 2002-04-03 08:10:24 megastep Exp $
+ *  $Id: arrows.c,v 1.3 2002-09-17 22:40:46 megastep Exp $
  *
  *  arrows.c -- draw arrows to indicate end-of-range for lists
  *

@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.92 2002-04-03 08:10:24 megastep Exp $ */
+/* $Id: install.c,v 1.93 2002-09-17 22:40:46 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -50,12 +50,16 @@
 			   and $SETUP_CDROMPATH
 */
 
+#include "config.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef HAVE_STRINGS_H
+#  include <strings.h>
+#endif
 #include <pwd.h>
 #include <unistd.h>
 #include <signal.h>
@@ -81,6 +85,7 @@ int disable_install_path = 0;
 int disable_binary_path = 0;
 
 static int install_updatemenus_script = 0;
+static int uninstall_generated = 0;
 
 /* Functions to retrieve attribution information from the XML tree */
 const char *GetProductName(install_info *info)
@@ -280,19 +285,23 @@ const char *GetDefaultPath(install_info *info)
 
 const char *GetProductEULA(install_info *info)
 {
+	return GetProductEULANode(info, info->config->root);
+}
+
+const char *GetProductEULANode(install_info *info, xmlNodePtr node)
+{
 	const char *text;
 	static char name[BUFSIZ], matched_name[BUFSIZ];
-	xmlNodePtr node;
 	int found = 0;
 
-    text = xmlGetProp(info->config->root, "eula");
+    text = xmlGetProp(node, "eula");
 	if (text) {
 		strncpy(matched_name, text, BUFSIZ);
 		found = 1;
 		log_warning("The 'eula' attribute is deprecated, please use the 'eula' element from now on.");
 	}
 	/* Look for EULA elements */
-	node = info->config->root->childs;
+	node = node->childs;
 	while(node) {
 		if(! strcmp(node->name, "eula") ) {
 			const char *prop = xmlGetProp(node, "lang");
@@ -460,7 +469,9 @@ const char *GetLocalURL(install_info *info)
 
         path = (char *)malloc(PATH_MAX);
         strcpy(path, "file://");
-        getcwd(path+strlen(path), PATH_MAX-strlen(path));
+        if ( getcwd(path+strlen(path), PATH_MAX-strlen(path)) == NULL ) {
+			perror("GetLocalURL: getcwd");
+		}
         strcat(path, "/");
         strncat(path, file, PATH_MAX-strlen(path));
         file = path;
@@ -565,7 +576,8 @@ install_info *create_install(const char *configfile,
     info->component = NULL;
     info->components_list = NULL;
 
-	getcwd(info->setup_path, PATH_MAX);
+	if ( getcwd(info->setup_path, PATH_MAX) == NULL )
+		perror("create_install: getcwd");
 
     /* Read the optional default arguments for the game */
     info->args = GetRuntimeArgs(info);
@@ -710,13 +722,14 @@ struct option_elem *add_option_entry(struct component_elem *comp, const char *na
 
 /* Add a file entry to the list of files installed */
 struct file_elem *add_file_entry(install_info *info, struct option_elem *comp,
-                                 const char *path, const char *symlink)
+                                 const char *path, const char *symlink, int mutable)
 {
     struct file_elem *elem;
 
     elem = (struct file_elem *)malloc(sizeof *elem);
     if ( elem ) {
         elem->path = strdup(remove_root(info, path));
+		elem->mutable = mutable;
         if ( elem->path ) {
             memset(elem->md5sum, 0, 16);
             elem->next = comp->file_list;
@@ -808,7 +821,7 @@ void add_bin_entry(install_info *info, struct option_elem *comp, struct file_ele
     if ( elem ) {
         elem->file = file;
         elem->symlink = symlink;
-        elem->desc = desc;
+        elem->desc = desc ? desc : "";
         elem->menu = menu;
         elem->name = name;
         elem->icon = icon;
@@ -875,6 +888,7 @@ void expand_home(install_info *info, const char *path, char *buffer)
             }
         }
     }
+	/* TODO: Expand shell variables as well */
     strcat(buffer, path);
 }
 
@@ -1010,6 +1024,7 @@ char *get_option_name(install_info *info, xmlNodePtr node, char *name, int len)
 						*name = '\0';
 						while ( (*name == 0) && parse_line(&text, name, len) )
 							;
+						break;
 					} else {
 						log_warning(_("XML: option listed without translated description for locale '%s'"), prop);
 					}
@@ -1046,12 +1061,63 @@ const char *get_option_help(install_info *info, xmlNodePtr node)
 					*line = '\0';
 					while ( (*line == 0) && parse_line(&text, line, sizeof(line)) )
 						;
+					break;
 				}
 			}
 		}
 		n = n->next;
 	}
 	return (*line) ? line : NULL;
+}
+
+/* Get the optional selection warning of an option node, with localization support */
+const char *get_option_warn(install_info *info, xmlNodePtr node)
+{
+	static char buf[BUFSIZ];
+	char line[BUFSIZ];
+    const char *text;
+	xmlNodePtr n;
+
+	*buf = *line = '\0';
+	/* Look for translated strings */
+	n = node->childs;
+	while ( n ) {
+		if( strcmp(n->name, "warn") == 0 ) {
+			const char *prop = xmlGetProp(n, "lang");
+			if ( MatchLocale(prop) ) {
+				text = xmlNodeListGetString(info->config, n->childs, 1);
+				if(text) {
+					*line = '\0';
+					*buf = '\0';
+					while ( *text ) { 
+						parse_line(&text, line, sizeof(line));
+						strcat(buf, line);
+						strcat(buf, "\n");
+					}
+					break;
+				}
+			}
+		}
+		n = n->next;
+	}
+	return (*buf) ? buf : NULL;
+}
+
+
+/* Determine if an option should be displayed */
+int get_option_displayed(install_info *info, xmlNodePtr node)
+{
+    if ( node ) {
+	const char *txt = xmlGetProp(node, "show");
+	if ( txt ) {
+	    if ( !strcasecmp(txt, "false") )
+		return 0;
+
+	    /* Launch the command */
+	    return run_script(info, txt, 0) == 0;
+	}
+    }
+    return 1;
 }
 
 void delete_cdrom_install(install_info *info)
@@ -1175,11 +1241,11 @@ install_state install(install_info *info,
 	 */
 	f = GetProductREADME(info);
 	if ( f && ! GetProductIsMeta(info) ) {
-		copy_path(info, f, info->install_path, NULL, 1, NULL, update);
+		copy_path(info, f, info->install_path, NULL, 1, 0, NULL, NULL, update);
 	}
 	f = GetProductEULA(info);
 	if ( f && ! GetProductIsMeta(info) ) {
-		copy_path(info, f, info->install_path, NULL, 1, NULL, update);
+		copy_path(info, f, info->install_path, NULL, 1, 0, NULL, NULL, update);
 	}
 
     if ( ! GetInstallOption(info, "nouninstall") ) {
@@ -1200,12 +1266,17 @@ install_state install(install_info *info,
  */
 void uninstall(install_info *info)
 {
-	char path[PATH_MAX];
+    char path[PATH_MAX];
     struct option_elem *opt;
     struct component_elem *comp;
 
+	if ( info->installed_bytes == 0 ) { /* Nothing to do */
+		return;
+	}
+
     if (GetPreUnInstall(info) && info->installed_bytes>0) {
-        run_script(info, GetPreUnInstall(info), 0);
+		snprintf(path, sizeof(path), "sh %s", GetPreUnInstall(info));
+        run_script(info, path, 0);
     }
 
     if ( file_exists(info->install_path) ) {
@@ -1256,9 +1327,14 @@ void uninstall(install_info *info)
         log_warning(_("Unable to remove '%s'"), path);
     }
     if (GetPostUnInstall(info) && info->installed_bytes>0) {
-        run_script(info, GetPostUnInstall(info), 0);
+	snprintf(path, sizeof(path), "sh %s", GetPostUnInstall(info));
+        run_script(info, path, 0);
     }
 
+    if ( uninstall_generated ) {
+	/* Remove support files as well */
+	loki_removeproduct(info->product);
+    }
     pop_curdir();
 }
 
@@ -1280,7 +1356,7 @@ static void output_script_header(FILE *f, install_info *info, product_component_
             info->install_path,
             info->symlinks_path,
             info->cdroms_list ? info->cdroms_list->mounted : "",
-			info->distro ? distribution_symbol[info->distro] : "");
+	    info->distro ? distribution_symbol[info->distro] : "");
 #ifdef RPM_SUPPORT
     if(strcmp(rpm_root,"/")) /* Emulate RPM environment for scripts */
         fprintf(f,"RPM_INSTALL_PREFIX=%s\n", rpm_root);
@@ -1304,16 +1380,19 @@ void generate_uninstall(install_info *info)
         if ( ! product ) {
             product = loki_create_product(info->name, info->install_path, info->desc,
                                           info->update_url);
-			if ( *info->prefix ) {
-				loki_setprefix_product(product, info->prefix);
-			}
         }
+	if ( *info->prefix ) {
+	    loki_setprefix_product(product, info->prefix);
+	}
+	info->product = product;
     }
 
-	if ( product ) {
+    if ( product ) {
         char buf[PATH_MAX];
 		const char *msg;
         int count;
+
+		uninstall_generated = 1;
 
         for ( comp = info->components_list; comp; comp = comp->next ) {
             struct file_elem *felem;
@@ -1435,29 +1514,32 @@ void generate_uninstall(install_info *info)
             pop_curdir();
         }
 
-		if ( install_updatemenus_script ) {
-			/* Add a call to the post-uninstall scripts */
-			loki_registerscript_component(component, LOKI_SCRIPT_POSTUNINSTALL,
-										  "update-menus", "update-menus 2> /dev/null\nkbuildsycoca 2>/dev/null");
-		}
+	if ( install_updatemenus_script ) {
+	    /* Add a call to the post-uninstall scripts */
+	    loki_registerscript_component(component, LOKI_SCRIPT_POSTUNINSTALL,
+					  "update-menus", 
+					  "if type update-menus 2>&1 > /dev/null; then update-menus 2> /dev/null; fi\n"
+					  "if type kbuildsycoca 2>&1 > /dev/null; then kbuildsycoca 2>/dev/null; fi\n"
+					  "if type dtaction 2>&1 > /dev/null; then dtaction ReloadActions 2>/dev/null; fi\n");
+	}
 
         /* Register the pre and post uninstall scripts with the default component */
         component = loki_getdefault_component(product);
 
-		/* And the uninstall message as well */
-		/* FIXME: Allow real per-component messages */
-		msg = GetProductMessage(info);
-		if ( msg ) {
-			loki_setmessage_component(component, msg);
-		}
+	/* And the uninstall message as well */
+	/* FIXME: Allow real per-component messages */
+	msg = GetProductMessage(info);
+	if ( msg ) {
+	    loki_setmessage_component(component, msg);
+	}
 
         if (GetPreUnInstall(info)) {
-			FILE *pre;
-			char tmp_name[] = "/tmp/setupXXXXXX";
-			int tmp = mkstemp(tmp_name);
-			if ( tmp < 0 ) {
-				log_fatal(_("Could not create temporary script"));
-			}
+	    FILE *pre;
+	    char tmp_name[] = "/tmp/setupXXXXXX";
+	    int tmp = mkstemp(tmp_name);
+	    if ( tmp < 0 ) {
+		log_fatal(_("Could not create temporary script"));
+	    }
             
             pre = fdopen(tmp, "w");
             if ( pre ) {
@@ -1620,8 +1702,8 @@ install_state launch_game(install_info *info)
 
     if ( info->installed_symlink && info->symlinks_path &&
 	 *info->symlinks_path && *info->play_binary ) {
-        snprintf(cmd, PATH_MAX, "%s %s &", info->play_binary, info->args);
-		system(cmd);
+        snprintf(cmd, PATH_MAX, "%s %s", info->play_binary, info->args);
+	system(cmd);
     }
     return SETUP_EXIT;
 }
@@ -1691,6 +1773,17 @@ int install_menuitems(install_info *info, desktop_type desktop)
 		app_links[i++] = "~/.gnome/apps/";
 		app_links[i++] = NULL;
 		break;
+	case DESKTOP_CDE:
+		app_links[0] = "/etc/dt/appconfig/types/C/"; /* FIXME: Expand $LANG */
+		app_links[1] = "~/.dt/types/";
+		app_links[2] = NULL;
+		break;
+	case DESKTOP_IRIX:
+		app_links[0] = "/usr/lib/X11/app-chests/";
+		app_links[1] = "/usr/local/X11/app-chests/";
+		app_links[2] = "~/.auxchestrc/";
+		app_links[3] = NULL;
+		break;
 	default:
 		return ret_val;
     }
@@ -1710,10 +1803,10 @@ int install_menuitems(install_info *info, desktop_type desktop)
     for (comp = info->components_list; comp; comp = comp->next ) {
         for (opt = comp->options_list; opt; opt = opt->next ) {
             for (elem = opt->bin_list; elem; elem = elem->next ) {      
-				/* Presumably if there is no icon, no desktop entry */
-				if ( (elem->icon == NULL) || (elem->symlink == NULL) ) {
-					continue;
-				}
+		/* Presumably if there is no icon, no desktop entry */
+		if ( (elem->icon == NULL) || (elem->symlink == NULL) ) {
+		    continue;
+		}
 
                 for ( tmp_links = app_links; *tmp_links; ++tmp_links ) {
                     FILE *fp;
@@ -1726,87 +1819,207 @@ int install_menuitems(install_info *info, desktop_type desktop)
                     if ( access(buf, W_OK) < 0 )
                         continue;
 
-					if (*exec_command) {
-						strncpy(exec, exec_command, sizeof(exec));
-					} else {
-						snprintf(exec, sizeof(exec), "%s/%s", info->install_path, elem->file->path);
-					}
-					snprintf(icon, PATH_MAX, "%s/%s", info->install_path, elem->icon);
+		    if (*exec_command) {
+			strncpy(exec, exec_command, sizeof(exec));
+		    } else {
+			snprintf(exec, sizeof(exec), "%s/%s", info->install_path, elem->file->path);
+		    }
+		    snprintf(icon, PATH_MAX, "%s/%s", info->install_path, elem->icon);
 
-					if ( desktop == DESKTOP_MENUDEBIAN ) {
-						/* Present on newer Mandrake and Debian systems, we just create 
-						   a single file */
+		    switch ( desktop ) {
+		    case DESKTOP_MENUDEBIAN:
+			/* Present on newer Mandrake and Debian systems, we just create 
+			   a single file */
 
-						/* The directory may exist so we need to check for the command as well */
-						if( access("/usr/bin/update-menus", X_OK) < 0 )
-							continue;
+			/* The directory may exist so we need to check for the command as well */
+			if( access("/usr/bin/update-menus", X_OK) < 0 )
+			    continue;
 
-						snprintf(finalbuf, PATH_MAX, "%s%s", buf, elem->symlink);
-						/* Maybe we should try to group menu entries in a single file, but it
-						   can be tricky for components. Maybe per component? */
-						fp = fopen(finalbuf, "w");
-						if (fp) {
-							fprintf(fp,"?package(local.%s):\\\n"
-									" needs=\"X11\" \\\n"
-									" section=\"%s\" \\\n"
-									" title=\"%s\" \\\n"
-									" longtitle=\"%s\" \\\n"
-									" command=\"%s\" \\\n"
-									" icon=\"%s\"\n",
-									info->name, elem->menu ? elem->menu : "Games",
-									elem->name ? elem->name : info->name,
-									elem->desc ? elem->desc : info->desc,
-									exec, icon);
-							fclose(fp);
-							add_file_entry(info, opt, finalbuf, NULL);
-							++ num_items;
-							ret_val = 1; /* No need to install anything else */
-						} else {
-							log_warning(_("Unable to create desktop file '%s'"), finalbuf);
-						}
-					} else {
-						snprintf(finalbuf, PATH_MAX, "%s%s/", buf, elem->menu ? elem->menu : "Games");
-						file_create_hierarchy(info, finalbuf);
+			snprintf(finalbuf, PATH_MAX, "%s%s", buf, elem->symlink);
+			/* Maybe we should try to group menu entries in a single file, but it
+			   can be tricky for components. Maybe per component? */
+			fp = fopen(finalbuf, "w");
+			if (fp) {
+			    fprintf(fp,"?package(local.%s):\\\n"
+				    " needs=\"X11\" \\\n"
+				    " section=\"%s\" \\\n"
+				    " title=\"%s\" \\\n"
+				    " longtitle=\"%s\" \\\n"
+				    " command=\"%s\" \\\n"
+				    " icon=\"%s\"\n",
+				    info->name, elem->menu ? elem->menu : "Games",
+				    elem->name ? elem->name : info->name,
+				    elem->desc ? elem->desc : info->desc,
+				    exec, icon);
+			    fclose(fp);
+			    add_file_entry(info, opt, finalbuf, NULL, 0);
+			    ++ num_items;
+			    ret_val = 1; /* No need to install anything else */
+			} else {
+			    log_warning(_("Unable to create desktop file '%s'"), finalbuf);
+			}
+			break;
+		    case DESKTOP_GNOME:
+		    case DESKTOP_KDE:
+		    case DESKTOP_REDHAT:
+			snprintf(finalbuf, PATH_MAX, "%s%s/", buf, elem->menu ? elem->menu : "Games");
+			file_create_hierarchy(info, finalbuf);
 
-						strncat(finalbuf, elem->symlink, PATH_MAX-strlen(finalbuf));
+			strncat(finalbuf, elem->symlink, PATH_MAX-strlen(finalbuf));
 
-						if ( desktop == DESKTOP_KDE ) {
-							strncat(finalbuf,".kdelnk", PATH_MAX-strlen(finalbuf));
-						} else {
-							strncat(finalbuf,".desktop", PATH_MAX-strlen(finalbuf));
-						}
+			if ( desktop == DESKTOP_KDE ) {
+			    strncat(finalbuf,".kdelnk", PATH_MAX-strlen(finalbuf));
+			} else {
+			    strncat(finalbuf,".desktop", PATH_MAX-strlen(finalbuf));
+			}
 
-						fp = fopen(finalbuf, "w");
-						if (fp) {
-							if (desktop == DESKTOP_KDE) {
-								fprintf(fp, "# KDE Config File\n");
-							}
-							fprintf(fp, "[%sDesktop Entry]\n"
-									"Name=%s\n"
-									"Comment=%s\n"
-									"Exec=%s\n"
-									"Icon=%s\n"
-									"Terminal=0\n"
-									"Type=Application\n",
-									(desktop==DESKTOP_KDE) ? "KDE " : "",
-									elem->name ? elem->name : info->name,
-									elem->desc ? elem->desc : info->desc,
-									exec, icon);
-							fclose(fp);
-							add_file_entry(info, opt, finalbuf, NULL);
-							++ num_items;
-							// successful REDHAT takes care of KDE/GNOME
-							// tell caller no need to continue others
-							// UNLESS we are Redhat 6.1 or earlier, in which case we need to install
-							// everything else.
-							if ( (info->distro != DISTRO_REDHAT) || (info->distro_maj>6) || (info->distro_min>1) ) {
-								ret_val = (desktop == DESKTOP_REDHAT);
-							}
+			fp = fopen(finalbuf, "w");
+			if (fp) {
+			    if (desktop == DESKTOP_KDE) {
+				fprintf(fp, "# KDE Config File\n");
+			    }
+			    fprintf(fp, "[%sDesktop Entry]\n"
+				    "Name=%s\n"
+				    "Comment=%s\n"
+				    "Exec=%s\n"
+				    "Icon=%s\n"
+				    "Terminal=0\n"
+				    "Type=Application\n",
+				    (desktop==DESKTOP_KDE) ? "KDE " : "",
+				    elem->name ? elem->name : info->name,
+				    elem->desc ? elem->desc : info->desc,
+				    exec, icon);
+			    fclose(fp);
+			    add_file_entry(info, opt, finalbuf, NULL, 0);
+			    ++ num_items;
+			    // successful REDHAT takes care of KDE/GNOME
+			    // tell caller no need to continue others
+			    // UNLESS we are Redhat 6.1 or earlier, in which case we need to install
+			    // everything else.
+			    if ( (info->distro != DISTRO_REDHAT) || (info->distro_maj>6) || (info->distro_min>1) ) {
+				ret_val = (desktop == DESKTOP_REDHAT);
+			    }
 
-						} else {
-							log_warning(_("Unable to create desktop file '%s'"), finalbuf);
-						}
-					}
+			} else {
+			    log_warning(_("Unable to create desktop file '%s'"), finalbuf);
+			}
+			break;
+		    case DESKTOP_CDE:
+			if ( num_items == 0 ) {
+			    /* Create a menu in the front panel */
+			    snprintf(finalbuf, PATH_MAX, "%s%s.fp", buf, info->name);
+			    file_create_hierarchy(info, finalbuf);
+			    fp = fopen(finalbuf, "w");
+			    if (fp) {
+				fprintf(fp,
+					"CONTROL %s\n"
+					"{\n"
+					"  TYPE icon\n"
+					"  CONTAINER_NAME   Top\n"
+					"  CONTAINER_TYPE   BOX\n"
+					"  ICON             OWgenapp.m.pm\n"
+					"  POSITION_HINTS   first\n"
+					"  LABEL            \"%s\"\n"
+					"  PUSH_ACTION      %s\n"
+					"}\n\n", info->name, info->desc, info->name
+					);
+
+				fprintf(fp,
+					"SUBPANEL %s_Panel\n"
+					"{\n"
+					"  CONTAINER_NAME %s\n"
+					"  TITLE          %s\n"
+					"}\n\n", info->name, info->name, info->desc
+					);
+				fclose(fp);
+				add_file_entry(info, opt, finalbuf, NULL, 0);
+			    }
+			}
+
+			snprintf(finalbuf, PATH_MAX, "%s%s.dt", buf, elem->symlink);
+			file_create_hierarchy(info, finalbuf);
+
+			fp = fopen(finalbuf, "w");
+			if (fp) {
+			    fprintf(fp,
+				    "ACTION %s\n"
+				    "{\n"
+				    "     LABEL         %s\n"
+				    "     TYPE          COMMAND\n"
+				    "     EXEC_STRING   %s\n"
+				    "     ICON          %s\n"
+				    "     WINDOW_TYPE   NO_STDIO\n"
+				    "     DESCRIPTION   %s\n"
+				    "}\n\n", elem->symlink,
+				    elem->name, exec, icon, elem->desc
+				    );
+			    fclose(fp);
+			    add_file_entry(info, opt, finalbuf, NULL, 0);
+
+			    snprintf(finalbuf, PATH_MAX, "%s%s.fp", buf, elem->symlink);
+			    fp = fopen(finalbuf, "w");
+			    if ( fp ) {
+				fprintf(fp,
+					"CONTROL %s\n"
+					"{\n"
+					"  TYPE icon\n"
+					"  CONTAINER_NAME	%s_Panel\n"
+					"  CONTAINER_TYPE	SUBPANEL\n"
+					"  ICON				%s\n"
+					"  PUSH_ACTION		%s\n"
+					"  DROP_ACTION		%s\n"
+					"  LABEL			%s\n"
+					"}\n\n", elem->symlink,
+					info->name, icon, elem->symlink, elem->symlink, elem->name
+					);
+				fclose(fp);
+				add_file_entry(info, opt, finalbuf, NULL, 0);
+				++ num_items;
+				ret_val = 1;
+			    } else {
+				log_warning(_("Unable to create CDE desktop file '%s'"), finalbuf);
+			    }
+			} else {
+			    log_warning(_("Unable to create CDE desktop file '%s'"), finalbuf);
+			}
+
+			break;
+		    case DESKTOP_IRIX:
+			snprintf(finalbuf, PATH_MAX, "%s%02d%s.chest", buf, num_items, elem->symlink);
+			file_create_hierarchy(info, finalbuf);
+
+			fp = fopen(finalbuf, "w");
+			if (fp) {
+			    if ( num_items == 0 ) {
+				/* First add an entry for the menu itself */
+				fprintf(fp,
+					"Menu ToolChest\n"
+					"{\n"
+					"  no-label  f.separator\n"
+					"  \"%s\"    f.menu %s\n"
+					"}\n\n",  elem->menu ? elem->menu : "Games",
+					info->name
+					);
+			    }
+			    fprintf(fp,
+				    "Menu %s\n"
+				    "{\n"
+				    "  no-label  f.separator\n"
+				    "  \"%s\"    f.checkexec \"%s\"\n"
+				    "}\n",  info->name,
+				    elem->name ? elem->name : info->name, exec
+				    );
+			    fclose(fp);
+			    add_file_entry(info, opt, finalbuf, NULL, 0);
+			    ++ num_items;
+			    ret_val = 1;
+			} else {
+			    log_warning(_("Unable to create ToolChest menu file '%s'"), finalbuf);
+			}
+			break;
+		    default:
+			break;
+		    }
                     /* Created a desktop item, our job is done here */
                     break;
                 }
@@ -1814,17 +2027,27 @@ int install_menuitems(install_info *info, desktop_type desktop)
         }
     }
 
-	if ( desktop == DESKTOP_MENUDEBIAN && num_items > 0 ) {
-		/* Run update-menus */
-		run_command(info, "update-menus", NULL, 1);
-		install_updatemenus_script = 1;
+    if ( num_items > 0 ) {
+	switch(desktop) {
+	case DESKTOP_MENUDEBIAN:
+	    /* Run update-menus */
+	    run_command(info, "update-menus", NULL, 1);
+	    install_updatemenus_script = 1;
+	    break;
+	case DESKTOP_KDE:
+	    /* Run kbuildsycoca */
+	    run_command(info, "kbuildsycoca", NULL, 0);
+	    install_updatemenus_script = 1;
+	    break;
+	case DESKTOP_CDE:
+	    /* Run dtaction */
+	    run_command(info, "dtaction", "ReloadActions", 0);
+	    install_updatemenus_script = 1;
+	    break;
+	default:
+	    break;
 	}
-
-	if ( desktop == DESKTOP_KDE && num_items > 0 ) {
-		/* Run update-menus */
-		run_command(info, "kbuildsycoca", NULL, 0);
-		install_updatemenus_script = 1;
-	}
+    }
     return ret_val;
 }
 
@@ -1842,7 +2065,9 @@ int run_script(install_info *info, const char *script, int arg)
     */
     working_dir[0] = '\0'; 
     if ( access(script, R_OK) == 0 ) {
-        getcwd(working_dir, sizeof(working_dir));
+        if ( getcwd(working_dir, sizeof(working_dir)) == NULL ) {
+			perror("run_script: getcwd");
+		}
         strncat(working_dir, "/", sizeof(working_dir)-strlen(working_dir));
     }
 
@@ -1946,7 +2171,8 @@ void push_curdir(const char *path)
     if (curdir_index >= MAX_CURDIRS) {
         fprintf(stderr,"ERROR: Too many curdirs. FIX IT!\n");
     } else {
-        getcwd(curdirs[curdir_index++], PATH_MAX);
+        if ( getcwd(curdirs[curdir_index++], PATH_MAX) == NULL )
+			perror("getcwd");
         if( chdir(path) < 0)
             fprintf(stderr, "chdir(push: %s): %s\n", path, strerror(errno));
     }
@@ -1956,6 +2182,6 @@ void pop_curdir(void)
 {
     if (curdir_index>0) {
         if(chdir(curdirs[--curdir_index])<0)
-            perror("chdir(pop)");
+            fprintf(stderr, "chdir(pop: %s): %s\n", curdirs[curdir_index], strerror(errno));
     }
 }

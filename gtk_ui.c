@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.70 2002-09-09 10:30:34 icculus Exp $
+   $Id: gtk_ui.c,v 1.71 2002-09-17 22:40:46 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -90,7 +90,6 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <ctype.h>
-#include <X11/Xlib.h>
 #include <gtk/gtk.h>
 #include <glade/glade.h>
 
@@ -141,17 +140,14 @@ typedef enum
     WEBSITE_PAGE
 } InstallPages;
 
-typedef struct {
-  xmlNodePtr node;
-} option_data;
-
-static GladeXML *setup_glade;
-static GladeXML *setup_glade_readme;
-static GladeXML *setup_glade_license;
+static GladeXML *setup_glade = NULL;
+static GladeXML *setup_glade_readme = NULL;
+static GladeXML *setup_glade_license = NULL;
 static int cur_state;
 static install_info *cur_info;
 static int diskspace;
-static int license_okay;
+static int license_okay = 0;
+static gboolean in_setup = TRUE;
 static GSList *radio_list = NULL; /* Group for the radio buttons */
 
 /******** Local prototypes **********/
@@ -622,30 +618,94 @@ void on_use_binary_toggled ( GtkWidget* widget, gpointer func_data)
 void setup_checkbox_option_slot( GtkWidget* widget, gpointer func_data)
 {
 	GtkWidget *window;
-	xmlNodePtr node;
-	option_data *data = gtk_object_get_data(GTK_OBJECT(widget),"data");
+	xmlNodePtr node, data_node = (xmlNodePtr) func_data; //gtk_object_get_data(GTK_OBJECT(widget),"data");
 	
-	if(!data)
+	if(!data_node)
 		return;
 	
 	window = glade_xml_get_widget(setup_glade, "setup_window");
 
 	if ( GTK_TOGGLE_BUTTON(widget)->active ) {
+		const char *warn = get_option_warn(cur_info, data_node);
+
+		/* does this option require a seperate EULA? */
+		xmlNodePtr child;
+		child = data_node->childs;
+		while(child)
+		{
+			if (!strcmp(child->name, "eula"))
+			{
+				/* this option has some EULA nodes
+				 * we need to prompt before this change can be validated / turned on
+				 */
+				const char* name = GetProductEULANode(cur_info, data_node);
+				if (name)
+				{
+					GtkWidget *license;
+					GtkWidget *license_widget;
+					
+					if (!setup_glade_license)
+						setup_glade_license = glade_xml_new(SETUP_GLADE, "license_dialog");
+					glade_xml_signal_autoconnect(setup_glade_license);
+					license = glade_xml_get_widget(setup_glade_license, "license_dialog");
+					license_widget = glade_xml_get_widget(setup_glade_license, "license_area");
+					if ( license && license_widget ) {
+						GdkFont *font;
+						install_state start;
+						
+						font = gdk_font_load(LICENSE_FONT);
+						gtk_widget_hide(license);
+						load_file(GTK_TEXT(license_widget), font, name);
+						gtk_widget_show(license);
+						gtk_window_set_modal(GTK_WINDOW(license), TRUE);
+						
+						start = cur_state; /* happy hacking */
+						license_okay = 0;
+						iterate_for_state();
+						cur_state = start;
+
+						gtk_widget_hide(license);
+						if (!license_okay)
+						{
+							/* the user doesn't accept the option EULA, leave this option disabled */
+							license_okay = 1; /* put things back in order regarding the product EULA */
+							gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget), FALSE);
+							return;
+						}
+						license_okay = 1;
+						break;
+					}
+				}
+				else
+				{
+					log_warning("option-specific EULA not found, can't set option on\n");
+					/* EULA not found 	or not accepted */
+					gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget), FALSE);
+					return;
+				}
+			}
+			child = child->next;
+		}
+		
+		if ( warn && !in_setup ) { /* Display a warning message to the user */
+			gtkui_prompt(warn, RESPONSE_OK);
+		}
+
 		/* Mark this option for installation */
-		mark_option(cur_info, data->node, "true", 0);
+		mark_option(cur_info, data_node, "true", 0);
 		
 		/* Recurse down any other options to re-enable grayed out options */
-		node = data->node->childs;
+		node = data_node->childs;
 		while ( node ) {
 			enable_tree(node, window);
 			node = node->next;
 		}
 	} else {
 		/* Unmark this option for installation */
-		mark_option(cur_info, data->node, "false", 1);
+		mark_option(cur_info, data_node, "false", 1);
 		
 		/* Recurse down any other options */
-		node = data->node->childs;
+		node = data_node->childs;
 		while ( node ) {
 			if ( !strcmp(node->name, "option") ) {
 				GtkWidget *button;
@@ -706,6 +766,7 @@ static yesno_answer gtkui_prompt(const char *txt, yesno_answer suggest)
     
     dialog = gtk_dialog_new();
     label = gtk_label_new (txt);
+	gtk_misc_set_padding(GTK_MISC(label), 8, 8);
     ok_button = gtk_button_new_with_label(_("OK"));
 
     prompt_response = RESPONSE_INVALID;
@@ -975,7 +1036,6 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
     gchar *name;
     int i;
     GtkWidget *button;
-    option_data *dat;
 
     /* See if this node matches the current architecture */
     wanted = xmlGetProp(node, "arch");
@@ -991,6 +1051,10 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
     wanted = xmlGetProp(node, "distro");
     if ( ! match_distro(info, wanted) ) {
         return;
+    }
+
+    if ( ! get_option_displayed(info, node) ) {
+		return;
     }
 
     /* See if the user wants this option */
@@ -1036,19 +1100,17 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
     }
 
     /* Set the data associated with the button */
-    dat = (option_data *)malloc(sizeof(option_data));
-    dat->node = node;
-    gtk_object_set_data(GTK_OBJECT(button), "data", (gpointer)dat);
+    gtk_object_set_data(GTK_OBJECT(button), "data", (gpointer)node);
 
     /* Register the button in the window's private data */
     window = glade_xml_get_widget(setup_glade, "setup_window");
     gtk_object_set_data(GTK_OBJECT(window), name, (gpointer)button);
 
-	/* Check for required option */
-	if ( xmlGetProp(node, "required") ) {
-		xmlSetProp(node, "install", "true");
-		gtk_widget_set_sensitive(GTK_WIDGET(button), FALSE);
-	}
+    /* Check for required option */
+    if ( xmlGetProp(node, "required") ) {
+	xmlSetProp(node, "install", "true");
+	gtk_widget_set_sensitive(GTK_WIDGET(button), FALSE);
+    }
 
     /* If this is a sub-option and parent is not active, then disable option */
     wanted = xmlGetProp(node, "install");
@@ -1139,6 +1201,7 @@ static install_state gtkui_init(install_info *info, int argc, char **argv, int n
     cur_state = SETUP_INIT;
     cur_info = info;
 
+	gtk_set_locale();
     gtk_init(&argc,&argv);
     glade_init();
 
@@ -1201,13 +1264,6 @@ static install_state gtkui_init(install_info *info, int argc, char **argv, int n
 
     /* Set the initial state */
     notebook = glade_xml_get_widget(setup_glade, "setup_notebook");
-    if ( GetProductEULA(info) ) {
-        license_okay = 0;
-        cur_state = SETUP_LICENSE;
-    } else {
-        license_okay = 1;
-        cur_state = SETUP_README;
-    }
 
     if ( noninteractive ) {
         gtk_notebook_set_page(GTK_NOTEBOOK(notebook), COPY_PAGE);        
@@ -1220,6 +1276,7 @@ static install_state gtkui_init(install_info *info, int argc, char **argv, int n
     } else {
         gtk_notebook_set_page(GTK_NOTEBOOK(notebook), OPTION_PAGE);
     }
+	gtk_widget_queue_draw(window);
 
     /* Disable the "View Readme" button if no README available */
      if ( ! GetProductREADME(cur_info) ) {
@@ -1299,11 +1356,21 @@ static install_state gtkui_init(install_info *info, int argc, char **argv, int n
 
     info->install_size = size_tree(info, info->config->root->childs);
 
+    license_okay = 1; /* Needed so that Expert is detected properly at this point */
+    
 	/* Check if we should check "Expert" installation by default */
 	if ( check_for_installation(info) ) {
 		widget = glade_xml_get_widget(setup_glade, "expert_but");
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget), TRUE);
 	}
+    
+    if ( GetProductEULA(info) ) {
+        license_okay = 0;
+        cur_state = SETUP_LICENSE;
+    } else {
+        license_okay = 1;
+        cur_state = SETUP_README;
+    }
 
     /* Realize the main window for pixmap loading */
     gtk_widget_realize(window);
@@ -1345,11 +1412,11 @@ static install_state gtkui_license(install_info *info)
 
 static install_state gtkui_readme(install_info *info)
 {
-	if ( GetProductAllowsExpress(info) ) {
-		cur_state = SETUP_CLASS;
-	} else {
-		cur_state = SETUP_OPTIONS;
-	}
+    if ( GetProductAllowsExpress(info) ) {
+	cur_state = SETUP_CLASS;
+    } else {
+	cur_state = SETUP_OPTIONS;
+    }
     return cur_state;
 }
 
@@ -1374,11 +1441,11 @@ static install_state gtkui_setup(install_info *info)
     GtkWidget *options;
     xmlNodePtr node;
 
-	if ( express_setup ) {
-		GtkWidget *notebook = glade_xml_get_widget(setup_glade, "setup_notebook");
-		gtk_notebook_set_page(GTK_NOTEBOOK(notebook), COPY_PAGE);
-		return cur_state = SETUP_INSTALL;
-	}
+    if ( express_setup ) {
+	GtkWidget *notebook = glade_xml_get_widget(setup_glade, "setup_notebook");
+	gtk_notebook_set_page(GTK_NOTEBOOK(notebook), COPY_PAGE);
+	return cur_state = SETUP_INSTALL;
+    }
 
     /* Go through the install options */
     window = glade_xml_get_widget(setup_glade, "setup_window");
@@ -1387,19 +1454,20 @@ static install_state gtkui_setup(install_info *info)
     info->install_size = 0;
     node = info->config->root->childs;
     radio_list = NULL;
+    in_setup = TRUE;
     while ( node ) {
-		if ( ! strcmp(node->name, "option") ) {
-			parse_option(info, NULL, node, window, options, 0, NULL, 0, NULL);
-		} else if ( ! strcmp(node->name, "exclusive") ) {
-			xmlNodePtr child;
-			GSList *list = NULL;
-			for ( child = node->childs; child; child = child->next) {
-				parse_option(info, NULL, child, window, options, 0, NULL, 1, &list);
-			}
-		} else if ( ! strcmp(node->name, "component") ) {
+	if ( ! strcmp(node->name, "option") ) {
+	    parse_option(info, NULL, node, window, options, 0, NULL, 0, NULL);
+	} else if ( ! strcmp(node->name, "exclusive") ) {
+	    xmlNodePtr child;
+	    GSList *list = NULL;
+	    for ( child = node->childs; child; child = child->next) {
+		parse_option(info, NULL, child, window, options, 0, NULL, 1, &list);
+	    }
+	} else if ( ! strcmp(node->name, "component") ) {
             if ( match_arch(info, xmlGetProp(node, "arch")) &&
                  match_libc(info, xmlGetProp(node, "libc")) && 
-				 match_distro(info, xmlGetProp(node, "distro")) ) {
+		 match_distro(info, xmlGetProp(node, "distro")) ) {
                 xmlNodePtr child;
                 if ( xmlGetProp(node, "showname") ) {
                     GtkWidget *widget = gtk_hseparator_new();
@@ -1414,13 +1482,15 @@ static install_state gtkui_setup(install_info *info)
                 }
             }
         }
-		node = node->next;
+	node = node->next;
     }
     init_install_path();
     init_binary_path();
     update_size();
     update_space();
     init_menuitems_option(info, info->config->root->childs);
+
+    in_setup = FALSE;
 
     return iterate_for_state();
 }
@@ -1434,9 +1504,9 @@ static int gtkui_update(install_info *info, const char *path, size_t progress, s
     char *install_path;
     gfloat new_update;
 
-	if ( cur_state == SETUP_ABORT ) {
-		return FALSE;
-	}
+    if ( cur_state == SETUP_ABORT ) {
+	return FALSE;
+    }
 
     if ( progress && size ) {
         new_update = (gfloat)progress / (gfloat)size;
@@ -1487,12 +1557,12 @@ static int gtkui_update(install_info *info, const char *path, size_t progress, s
 
 static void gtkui_abort(install_info *info)
 {
-    GtkWidget *notebook;
+    GtkWidget *notebook, *w;
 
-    /* No point in waiting for a change of state if the window is not there */
-    GtkWidget *w = glade_xml_get_widget(setup_glade, "setup_window");
-    if ( ! GTK_WIDGET_VISIBLE(w) )
-        return;
+	/* No point in waiting for a change of state if the window is not there */
+	w = glade_xml_get_widget(setup_glade, "setup_window");
+	if ( ! GTK_WIDGET_VISIBLE(w) )
+		return;
 
     if ( setup_glade ) {
         notebook = glade_xml_get_widget(setup_glade, "setup_notebook");
@@ -1579,16 +1649,32 @@ static install_state gtkui_complete(install_info *info)
     return iterate_for_state();
 }
 
-int gtkui_okay(Install_UI *UI)
+static void gtkui_shutdown(install_info *info)
+{
+    /* Destroy all windows */
+    GtkWidget *window = glade_xml_get_widget(setup_glade, "setup_window");
+
+    gtk_widget_hide(window);
+    if ( setup_glade_readme ) {
+	window = glade_xml_get_widget(setup_glade_readme, "readme_dialog");
+	gtk_widget_hide(window);
+    }
+    if ( setup_glade_license ) {
+	window = glade_xml_get_widget(setup_glade_license, "license_dialog");
+	gtk_widget_hide(window);
+    }
+    gtkui_idle(info);
+}
+
+int gtkui_okay(Install_UI *UI, int *argc, char ***argv)
 {
     extern int force_console;
     int okay;
 
     okay = 0;
     if ( !force_console ) {
-        /* Try to open a X11 connection */
-        Display *dpy = XOpenDisplay(NULL);
-        if( dpy ) {
+        /* Try to open a GTK connection */
+        if( gtk_init_check(argc, argv) ) {
             /* Set up the driver */
             UI->init = gtkui_init;
             UI->license = gtkui_license;
@@ -1599,11 +1685,11 @@ int gtkui_okay(Install_UI *UI)
             UI->prompt = gtkui_prompt;
             UI->website = gtkui_website;
             UI->complete = gtkui_complete;
-			UI->pick_class = gtkui_pick_class;
-			UI->idle = gtkui_idle;
-			UI->exit = NULL;
-			UI->is_gui = 1;
-            XCloseDisplay(dpy);
+	    UI->pick_class = gtkui_pick_class;
+	    UI->idle = gtkui_idle;
+	    UI->exit = NULL;
+	    UI->shutdown = gtkui_shutdown;
+	    UI->is_gui = 1;
 
             okay = 1;
         }
@@ -1612,12 +1698,12 @@ int gtkui_okay(Install_UI *UI)
 }
 
 #ifdef STUB_UI
-int console_okay(Install_UI *UI)
+int console_okay(Install_UI *UI, int *argc, char ***argv)
 {
     return(0);
 }
 
-int dialog_okay(Install_UI *UI)
+int dialog_okay(Install_UI *UI, int *argc, char ***argv)
 {
     return(0);
 }

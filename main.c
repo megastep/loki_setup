@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.48 2002-04-03 08:10:24 megastep Exp $ */
+/* $Id: main.c,v 1.49 2002-09-17 22:40:46 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -77,7 +77,7 @@ void signal_abort(int sig)
     if ( UI.abort )
         UI.abort(info);
     uninstall(info);
-    exit_setup(0);
+    exit_setup(3);
 }
 
 /* Abort a running installation (to be called from the update function) */
@@ -87,7 +87,7 @@ void abort_install(void)
 }
     
 /* List of UI drivers */
-static int (*GUI_okay[])(Install_UI *UI) = {
+static int (*GUI_okay[])(Install_UI *UI, int *argc, char ***argv) = {
     gtkui_okay,
     dialog_okay,
     console_okay,
@@ -173,7 +173,7 @@ int main(int argc, char **argv)
 		case 'c':
 			if ( chdir(optarg) < 0 ) {
 				perror(optarg);
-				exit(-1);
+				exit(3);
 			}
 			break;
 		case 'f':
@@ -241,18 +241,18 @@ int main(int argc, char **argv)
     info = create_install(xml_file, install_path, binary_path, product_prefix);
     if ( info == NULL ) {
         fprintf(stderr, _("Couldn't load '%s'\n"), xml_file);
-        exit(1);
+        exit(3);
     }
 
     /* Get the appropriate setup UI */
     for ( i=0; GUI_okay[i]; ++i ) {
-        if ( GUI_okay[i](&UI) ) {
+        if ( GUI_okay[i](&UI, &argc, &argv) ) {
             break;
         }
     }
     if ( ! GUI_okay[i] ) {
-        fprintf(stderr, _("No UI drivers available\n"));
-        exit(1);
+        log_debug(_("No UI drivers available\n"));
+        exit(2);
     }
 
     /* Setup the interrupt handlers */
@@ -273,25 +273,32 @@ int main(int argc, char **argv)
 
                 state = UI.init(info,argc,argv, enabled_options != NULL);
                 if ( state == SETUP_ABORT ) {
-                    exit_status = 1;
+                    exit_status = 3;
                 }
-				/* Check if we should be root */
-				if ( GetProductRequireRoot(info) && geteuid()!=0 ) {
-					UI.prompt(_("You need to run this installer as the super-user.\n"), RESPONSE_OK);
-					state = SETUP_ABORT;
-					continue;
-				}
-				if ( info->product && GetProductInstallOnce(info) ) {
-					UI.prompt(_("\nThis product is already installed.\nUninstall it before running this program again.\n"), RESPONSE_OK);
-					state = SETUP_EXIT;
-					continue;
-				}
+		/* Check if getcwd() works now */
+		if ( getcwd(buf, sizeof(buf)) == NULL ) {
+		    UI.prompt(_("Unable to determine the current directory.\n"
+				"Please check the permissions of the parent directories.\n"), RESPONSE_OK);
+		    state = SETUP_EXIT;
+		    continue;
+		}
+		/* Check if we should be root */
+		if ( GetProductRequireRoot(info) && geteuid()!=0 ) {
+		    UI.prompt(_("You need to run this installer as the super-user.\n"), RESPONSE_OK);
+		    state = SETUP_EXIT;
+		    continue;
+		}
+		if ( info->product && GetProductInstallOnce(info) ) {
+		    UI.prompt(_("\nThis product is already installed.\nUninstall it before running this program again.\n"), RESPONSE_OK);
+		    state = SETUP_EXIT;
+		    continue;
+		}
                 /* Check for the presence of the product if we install a component */
                 if ( GetProductComponent(info) ) {
                     if ( GetProductNumComponents(info) > 0 ) {
                         UI.prompt(_("\nIllegal installation: do not mix components with a component installation.\n"), RESPONSE_OK);
                         state = SETUP_EXIT;
-						continue;
+			continue;
                     } else if ( info->product ) {
                         if ( ! info->component ) {
                             snprintf(buf, sizeof(buf), _("\nThe %s component is already installed.\n"
@@ -299,7 +306,7 @@ int main(int argc, char **argv)
                                      GetProductComponent(info));
                             UI.prompt(buf, RESPONSE_OK);
                             state = SETUP_EXIT;
-							continue;
+			    continue;
                         }
                     } else {                        
                         snprintf(buf, sizeof(buf), _("\nYou must install %s before running this\n"
@@ -307,7 +314,7 @@ int main(int argc, char **argv)
                                 info->desc);
                         UI.prompt(buf, RESPONSE_OK);
                         state = SETUP_EXIT;
-						continue;
+			continue;
                     }
                 }
 
@@ -327,10 +334,10 @@ int main(int argc, char **argv)
                     detect_cdrom(info);
                 }
 
-				if ( ! CheckRequirements(info) ) {
-					state = SETUP_ABORT;
-					break;
-				}
+		if ( ! CheckRequirements(info) ) {
+		    state = SETUP_ABORT;
+		    break;
+		}
 
                 if ( enabled_options ) {
                     enabled_opt = enabled_options;
@@ -343,9 +350,9 @@ int main(int argc, char **argv)
                     state = SETUP_INSTALL;
                 }
                 break;
-		    case SETUP_CLASS:
-				state = UI.pick_class(info);
-				break;
+	    case SETUP_CLASS:
+		state = UI.pick_class(info);
+		break;
             case SETUP_LICENSE:
                 state = UI.license(info);
                 break;
@@ -367,6 +374,8 @@ int main(int argc, char **argv)
                 state = UI.complete(info);
                 break;
             case SETUP_PLAY:
+		if ( UI.shutdown ) 
+		    UI.shutdown(info);
                 state = launch_game(info);
                 break;
             case SETUP_ABORT:
@@ -374,10 +383,10 @@ int main(int argc, char **argv)
                 break;
             case SETUP_EXIT:
                 /* Optional cleanup */
-				if ( UI.exit ) {
-					UI.exit(info);
-				}
-				get_out = 1;
+		if ( UI.exit ) {
+		    UI.exit(info);
+		}
+		get_out = 1;
                 break;
         }
     }

@@ -8,11 +8,11 @@ extern SetupPlugin tar_plugin;
 #ifdef RPM_SUPPORT
 extern SetupPlugin rpm_plugin;
 #endif
-#ifdef ZIP_SUPPORT
-extern SetupPlugin zip_plugin;
-#endif
 #ifdef OUTRAGE_SUPPORT
 extern SetupPlugin opkg_plugin;
+#endif
+#ifdef ZIP_SUPPORT
+extern SetupPlugin zip_plugin;
 #endif
 #endif /* !DYNAMIC_PLUGINS */
 

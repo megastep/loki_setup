@@ -1,9 +1,11 @@
 /* ZIP plugin for setup */
-/* $Id: zip.c,v 1.2 2002-09-04 18:21:13 icculus Exp $ */
+/* $Id: zip.c,v 1.3 2002-09-17 22:40:49 megastep Exp $ */
 
 #include "plugins.h"
 #include "file.h"
 #include "install_log.h"
+#include "arch.h"
+#include "md5.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -134,7 +136,7 @@ static int readui32(FILE *in, uint32 *val)
 {
     uint32 v;
     BAIL_IF_MACRO(fread(&v, sizeof (v), 1, in) != 1, NULL, 0);
-#if 0  // !!! FIXME!
+#if BYTE_ORDER == BIG_ENDIAN
 	*val = ((v<<24)|((v<<8)&0x00FF0000)|((v>>8)&0x0000FF00)|(v>>24));
 #else
     *val = v;
@@ -150,7 +152,7 @@ static int readui16(FILE *in, uint16 *val)
 {
     uint16 v;
     BAIL_IF_MACRO(fread(&v, sizeof (v), 1, in) != 1, NULL, 0);
-#if 0  // !!! FIXME!
+#if BYTE_ORDER == BIG_ENDIAN
     *val = ((v << 8) | (v >> 8));
 #else
     *val = v;
@@ -659,8 +661,9 @@ zip_zipsize_end:
 
 
 /* Extract the file */
-static size_t ZIPCopy(install_info *info, const char *path, const char *dest, const char *current_option, xmlNodePtr node,
-				   int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+static size_t ZIPCopy(install_info *info, const char *path, const char *dest, const char *current_option,
+					  int mutable, const char *md5, xmlNodePtr node,
+					  int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     char final[BUFSIZ];
     z_stream zstr;
@@ -723,7 +726,7 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
 
         if (!symlnk)
         {
-            out = file_open(info, final, "wb");
+            out = file_open(info, final, mutable ? "wm" : "wb");
             if (!out)
             {
                 log_debug("ZIP: failed to open [%s] for write.", final);

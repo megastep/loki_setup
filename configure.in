@@ -1,11 +1,15 @@
-AC_INIT(uninstall.c)
+AC_INIT
 AC_CONFIG_HEADER(config.h)
 
 dnl Define the release numbers here
 
 SETUP_VERSION_MAJOR=1
 SETUP_VERSION_MINOR=6
-SETUP_VERSION_RELEASE=0
+SETUP_VERSION_RELEASE=1
+
+PACKAGE_NAME="Loki Setup"
+PACKAGE_TARNAME="setup"
+PACKAGE_VERSION="$SETUP_VERSION_MAJOR.$SETUP_VERSION_MINOR.$SETUP_VERSION_RELEASE"
 
 dnl Detect the canonical host and target build environment
 AC_CANONICAL_HOST
@@ -18,40 +22,157 @@ AC_PROG_INSTALL
 
 AC_PATH_X
 AC_CHECK_HEADERS(unistd.h)
+AC_CHECK_HEADERS(strings.h)
 AC_CHECK_HEADERS(pwd.h)
 AC_CHECK_HEADERS(gtk.h)
 AC_CHECK_HEADERS(dirent.h)
+AC_CHECK_HEADERS(sys/dirent.h)
 AC_CHECK_HEADERS(sys/ndir.h)
 AC_CHECK_HEADERS(ndir.h)
+AC_CHECK_HEADERS(sys/dir.h)
+AC_CHECK_HEADERS(sys/statfs.h)
+AC_CHECK_HEADERS(sys/statvfs.h)
+AC_CHECK_HEADERS(sys/vfs.h)
 AC_CHECK_HEADERS(dir.h)
 AC_CHECK_HEADERS(util.h)
 AC_CHECK_HEADERS(libutil.h)
 AC_CHECK_HEADERS(pty.h)
+AC_CHECK_HEADERS(sys/ptms.h)
 AC_CHECK_HEADERS(sys/stropts.h)
-AC_CHECK_HEADERS(ncurses/term.h)
-AC_CHECK_FILE(/dev/ptmx)
-AC_CHECK_FILES(/dev/pts,/dev/ptc)
+AC_CHECK_FILES(/dev/ptmx)
+AC_CHECK_FILES(/dev/pts)
+AC_CHECK_FILES(/dev/ptc)
 
 AC_CHECK_FUNCS(strcasecmp)
 AC_CHECK_FUNCS(ptsname_r)
-AC_CHECK_FUNCS(openpty)
 AC_CHECK_FUNCS(vhangup)
 AC_CHECK_FUNCS(_getpty)
 AC_CHECK_FUNCS(ttyname_r)
 AC_CHECK_FUNCS(strlcpy)
-AC_CHECK_PROG(SU_PATH, su, /bin/su, $PATH:/usr/sbin:/sbin)
+AC_CHECK_FUNCS(waitpid)
+AC_PATH_PROG(SU_PATH, su, /bin/su, $PATH:/usr/sbin:/sbin)
+AC_PATH_PROG(BRANDELF, brandelf, true)
 
 CFLAGS="-fsigned-char -funroll-loops -Wall -g -O2 -I. $X_CFLAGS"
+CONSOLE_LIBS=""
+if test -d /usr/codehost/lib; then
+	LIBS="-L/usr/codehost/lib"
+fi
+LIBS="$LIBS -L/usr/local/lib"
 
-LIBS="-L/usr/local/lib -L$x_libraries"
-AC_CHECK_LIB(intl, gettext, USE_LIBINTL=yes)
-AC_CHECK_LIB(ncurses, keypad, USE_NCURSES=yes)
+# Build some static binaries by default when possible
+STATIC="-static"
+RDYNAMIC="-rdynamic"
+BSTATIC="-Wl,-Bstatic"
+BDYNAMIC="-Wl,-Bdynamic"
+LIBDL="-ldl"
+EXTRA_LIBS=""
 
+case "$target" in
+    *i?86*OpenUNIX*)
+	STATIC=""
+	CFLAGS="$CFLAGS -Dsco"
+	RDYNAMIC="-Wl,-Bexport"
+	EXTRA_LIBS="-lsocket -lnsl -lresolv -lcdfs"
+	AC_DEFINE(NO_XOPEN_SOURCE, 1, XOPEN source breaks)
+	AC_DEFINE(NO_POSIX_C_SOURCE, 1, POSIX C source breaks)
+	AC_DEFINE(NO_POSIX_SOURCE, 1, POSIX source breaks)
+	ARCH=x86 ;;
+    *i?86*sco*)
+	STATIC=""
+	CFLAGS="$CFLAGS -Dsco"
+	RDYNAMIC="-Wl,-Bexport"
+	LIBDL=""
+	EXTRA_LIBS="-L/udk/usr/lib -lsocket -lnsl -lresolv -lgen"
+	AC_DEFINE(NO_XOPEN_SOURCE, 1, XOPEN source breaks)
+	AC_DEFINE(NO_POSIX_C_SOURCE, 1, POSIX C source breaks)
+	AC_DEFINE(NO_POSIX_SOURCE, 1, POSIX source breaks)
+	ARCH=x86 ;;
+    *i?86*freebsd*)
+	LIBDL=""
+        ARCH=x86 ;;
+    *i?86*)
+        ARCH=x86 ;;
+    *alpha*)
+        CFLAGS="$CFLAGS -mcpu=ev4 -Wa,-mall"
+        ARCH=alpha ;;
+    *sgi*)
+        LIBSUFFIX=32
+	CFLAGS="$CFLAGS -D_SGI_SOURCE"
+	EXTRA_LIBS="-L/usr/freeware/lib$LIBSUFFIX"
+	RDYNAMIC=""
+	AC_DEFINE(NO_POSIX_SOURCE, 1, POSIX source breaks)
+	AC_DEFINE(NO_POSIX_C_SOURCE, 1, POSIX C source breaks)
+	AC_DEFINE(NO_XOPEN_SOURCE, 1, XOPEN source breaks)
+	ARCH=mips ;;
+    hppa*)
+        CFLAGS="$CFLAGS -D_XOPEN_SOURCE_EXTENDED -I/opt/zlib/include"
+	LDFLAGS="$LDFLAGS -Wl,-a,archive_shared"
+	LIBDL="-ldld"
+	STATIC="-Wl,-a,archive_shared"
+	RDYNAMIC="-Wl,-E"
+	BSTATIC=""
+	BDYNAMIC="-Wl,-a,archive_shared"
+	CONSOLE_LIBS="$LIBDL"
+	ARCH=hppa ;;
+    *solaris*)
+	EXTRA_LIBS="-lsocket -lnsl -lresolv -ldl"
+	STATIC=""
+	RDYNAMIC="-Wl,-export-dynamic"
+	LIBDL=""
+	ARCH=`uname -m` ;;
+    *)
+        ARCH=`uname -m` ;;
+esac
+
+GTK_STATIC=$BSTATIC
+case "$target" in
+	*linux*)
+		GTK_STATIC=$BDYNAMIC ;;
+esac
+
+AC_CHECK_LIB(util, forkpty, LIBUTIL="-lutil"; LIBS="$LIBS -lutil")
+AC_CHECK_FUNCS(openpty)
+
+SETUPDB="`pwd`/../setupdb-$PACKAGE_VERSION"
+if test ! -d "$SETUPDB"; then
+    SETUPDB="`pwd`/../setupdb"
+fi
+
+
+AC_ARG_WITH(setupdb,
+[  --with-setupdb            with setupdb library at  [default=../setupdb]],
+              ,   with_setupdb=$SETUPDB)
+if test x$with_setupdb != x$SETUPDB; then
+        SETUPDB=$with_setupdb
+fi
+
+dnl Check for correct setupdb installation
+
+if test -f $SETUPDB/$ARCH/libsetupdb.a; then
+    AC_MSG_RESULT([SetupDB library found in $SETUPDB/$ARCH])
+else
+    AC_MSG_ERROR([*** Please compile setupdb first!])
+fi
+
+CFLAGS="$CFLAGS -I$SETUPDB"
+
+GUI_LIBS=$GTK_STATIC
+GTK_LIBS=$GTK_STATIC
+
+LIBS="$LIBS $EXTRA_LIBS"
+
+AC_CHECK_LIB(intl, gettext, USE_LIBINTL=yes,
+	if test -f /opt/gettext/lib/libintl.a; then
+		LIBINTL="/opt/gettext/lib/libintl.a /opt/libiconv/lib/libiconv.a"
+		LIBS="$LIBS $LIBINTL"
+		GUILIBS="$GUI_LIBS $LIBINTL"
+	fi
+)
 AC_CHECK_LIB(gpm, Gpm_Open, USE_GPM=yes)
-AC_CHECK_LIB(util, forkpty, LIBUTIL="-lutil")
 
 dnl Check for gtk12 libraries in case those are available (FreeBSD)
-AC_CHECK_LIB(gdk12, gdk_init, GTK12="12")
+AC_CHECK_LIB(glib12, g_log, GTK12="12")
 
 AC_CHECK_LIB(dl, dlopen, USE_LIBDL=yes)
 
@@ -82,27 +203,6 @@ if test x$enable_bzip2 = xyes; then
   fi
 fi
 
-# Build some static binaries by default when possible
-STATIC="-static"
-RDYNAMIC="-rdynamic"
-LIBDL="-ldl"
-
-case "$target" in
-    *i?86*)
-        ARCH=x86 ;;
-    *alpha*)
-        CFLAGS="$CFLAGS -mcpu=ev4 -Wa,-mall"
-        ARCH=alpha ;; 
-    *solaris*)
-		LIBS="$LIBS -lsocket -lnsl -lresolv -ldl"
-		STATIC=""
-		RDYNAMIC="-Wl,-export-dynamic"
-		LIBDL=""
-		ARCH=`uname -m` ;;
-    *)
-        ARCH=`uname -m` ;;
-esac
-
 dnl Detect the LibC version
 AC_MSG_CHECKING(libc version)
 if test `uname -s` != Linux; then
@@ -123,9 +223,18 @@ fi
 AC_MSG_RESULT($LIBC)
 
 PLUGINS="tar.c"
-GUI_LIBS="-Wl,-Bstatic"
-GTK_LIBS="-Wl,-Bstatic"
-CONSOLE_LIBS=""
+
+AC_ARG_WITH(ncurses,
+[  --with-ncurses            specify ncurses library location], 
+	CONSOLE_LIBS="$CONSOLE_LIBS -L$with_ncurses/lib$LIBSUFFIX"
+	CFLAGS="$CFLAGS -I$with_ncurses/include"
+	USE_NCURSES=yes
+)	
+
+AC_CHECK_HEADERS(ncurses/term.h)
+AC_CHECK_HEADERS(ncurses/curses.h)
+AC_CHECK_HEADERS(ncurses.h)
+AC_CHECK_LIB(ncurses, keypad, USE_NCURSES=yes)
 
 dnl Look for the XML libraries
 
@@ -135,8 +244,8 @@ if test ! -z "$HAVEXML"; then
     XML_PREFIX=`$HAVEXML --prefix`
 
     CFLAGS="$CFLAGS $XML_CFLAGS"
-    LIBS="$LIBS $XML_PREFIX/lib/libxml.a"
-    GUI_LIBS="$GUI_LIBS $XML_PREFIX/lib/libxml.a"
+    LIBS="$LIBS $XML_PREFIX/lib$LIBSUFFIX/libxml.a"
+    GUI_LIBS="$GUI_LIBS $XML_PREFIX/lib$LIBSUFFIX/libxml.a"
 else
     AC_MSG_ERROR([*** xml-config not found. You need a working libxml installation.])
 fi
@@ -149,19 +258,21 @@ if test ! -z "$HAVEGLADE"; then
     GLADE_PREFIX=`$HAVEGLADE --prefix`
 
     CFLAGS="$CFLAGS $GLADE_CFLAGS"
-    GUI_LIBS="$GUI_LIBS -L$GLADE_PREFIX/lib -lglade"
+    GUI_LIBS="$GUI_LIBS $BSTATIC -L$GLADE_PREFIX/lib$LIBSUFFIX -lglade"
 else
     AC_MSG_ERROR([*** libglade-config not found. You need a working libglade installation.])
 fi
 
 dnl Check for GTK
-AC_PATH_PROG(HAVEGTK, gtk-config, $PATH)
+AC_PATH_PROG(HAVEGTK, gtk$GTK12-config, $PATH)
+AC_PATH_PROG(HAVEGLIB, glib$GTK12-config, $PATH)
 if test ! -z "$HAVEGTK"; then
     GTK_CFLAGS=`$HAVEGTK --cflags`
     GTK_PREFIX=`$HAVEGTK --prefix`
+    GLIB_PREFIX=`$HAVEGLIB --prefix`
 
     CFLAGS="$CFLAGS $GTK_CFLAGS"
-    GTK_LIBS="$GTK_LIBS -L$GTK_PREFIX/lib -lgtk$GTK12 -lgdk$GTK12 $RDYNAMIC -lgmodule$GTK12 -lglib$GTK12"
+    GTK_LIBS="$GTK_LIBS -L$GTK_PREFIX/lib$LIBSUFFIX -L$GLIB_PREFIX/lib$LIBSUFFIX -lgtk$GTK12 -lgdk$GTK12 $RDYNAMIC -lgmodule$GTK12 -lglib$GTK12"
     GUI_LIBS="$GUI_LIBS $GTK_LIBS"
 else
     AC_MSG_ERROR([*** gtk-config not found. You need a working GTK+ 1.2 installation.])
@@ -176,7 +287,6 @@ if test x$HAVE_BZIP2_SUPPORT = xyes; then
   fi
 fi
 
-
 dnl enable ZIP support
 AC_ARG_ENABLE(zip,
 [  --enable-zip              enable ZIP archives support  [default=no]],
@@ -187,7 +297,6 @@ if test x$enable_zip = xyes; then
   AC_DEFINE(ENABLE_ZIP, 1, ZIP support.)
 fi
 
-
 dnl enable RPM support
 AC_ARG_ENABLE(rpm,
 [  --enable-rpm              enable RPM archives support  [default=no]],
@@ -196,7 +305,7 @@ if test x$enable_rpm = xyes; then
         CFLAGS="$CFLAGS -DRPM_SUPPORT=3 -I/usr/include/rpm"
         PLUGINS="$PLUGINS rpm.c"
 		# This is for RPM 3.x
-		RPM_LIBS="-Wl,-Bstatic -lrpm -ldb1 -lpopt"
+		RPM_LIBS="$BSTATIC -lrpm -ldb1 -lpopt"
         LIBS="$LIBS $RPM_LIBS"
         GUI_LIBS="$GUI_LIBS $RPM_LIBS"
         AC_DEFINE(ENABLE_RPM, 1, RPM support.)
@@ -214,9 +323,9 @@ if test x$enable_rpm4 = xyes; then
 		# This is for RPM 4.x
 		AC_CHECK_LIB(rpmdb, rpmdbInit, RPMDB=yes)
 		if test x$RPMDB = xyes; then # Mostly Mandrake it looks like
-			RPM_LIBS="-Wl,-Bstatic -lrpm -lrpmio -lrpmdb -ldb1 -ldb-3.1 -lpopt"
+			RPM_LIBS="$BSTATIC -lrpm -lrpmio -lrpmdb -ldb1 -ldb-3.1 -lpopt"
 		else
-			RPM_LIBS="-Wl,-Bstatic -lrpm -lrpmio -ldb1 -ldb-3.1 -lpopt"
+			RPM_LIBS="$BSTATIC -lrpm -lrpmio -ldb1 -ldb-3.1 -lpopt"
 		fi
         LIBS="$LIBS $RPM_LIBS"
         GUI_LIBS="$GUI_LIBS $RPM_LIBS"
@@ -226,25 +335,46 @@ fi
 LIBS="$LIBS $BZ2LIB"
 
 if test ! -z "$USE_LIBINTL"; then
-	LIBS="$LIBS -lintl"
-	GUI_LIBS="$GUI_LIBS -lintl"
+	LIBINTL="$BSTATIC -L/usr/local/lib -lintl"
+	AC_CHECK_LIB(iconv, libiconv, 
+			LIBINTL="$LIBINTL -liconv"
+	)
+	LIBINTL="$LIBINTL -lz $BDYNAMIC"
+	LIBS="$LIBS $LIBINTL"
+	GUI_LIBS="$GUI_LIBS $LIBINTL"
+else
+	if test "$STATIC" = ""; then
+		LIBS="$LIBS $BSTATIC -lz $BDYNAMIC"
+	else
+		LIBS="$LIBS -lz"
+	fi
+	GUI_LIBS="$GUI_LIBS $BSTATIC -lz $BDYNAMIC"
 fi
 
+
 if test ! -z "$USE_NCURSES"; then
-	CONSOLE_LIBS="$CONSOLE_LIBS -lncurses"
+	if test "$STATIC" = ""; then
+		CONSOLE_LIBS="$CONSOLE_LIBS $BSTATIC -lncurses $BDYNAMIC"
+	else
+		CONSOLE_LIBS="$CONSOLE_LIBS -lncurses"
+	fi
 else
-	CONSOLE_LIBS="$CONSOLE_LIBS -lcurses"
+	if test "$STATIC" = ""; then
+		CONSOLE_LIBS="$CONSOLE_LIBS $BSTATIC -lcurses $BDYNAMIC"
+	else
+		CONSOLE_LIBS="$CONSOLE_LIBS -lcurses"
+	fi
 fi
 
 if test ! -z "$USE_GPM"; then
 	CONSOLE_LIBS="$CONSOLE_LIBS -lgpm"
 fi
 
-X11_LIBS="-Wl,-Bdynamic $X_PRE_LIBS -L$x_libraries -lXi -lXext -lX11 -lm"
+X11_LIBS="$BDYNAMIC $X_PRE_LIBS -L$x_libraries -lXi -lXext -lX11 -lm"
 GUI_LIBS="$GUI_LIBS $X11_LIBS"
 if test ! -z "$HAVEGTK"; then
     GUI_LIBS="$GUI_LIBS $LIBDL"
-    GTK_LIBS="$GTK_LIBS $LIBDL"
+    GTK_LIBS="$GTK_LIBS $BDYNAMIC $LIBDL $BSTATIC"
 fi
 
 dnl Check for various options
@@ -273,28 +403,6 @@ fi
 #        AC_DEFINE(ENABLE_OUTRAGE, 1, Outrage package decoder.)
 #fi
 
-SETUPDB_VERSION=1.0.0
-SETUPDB="`pwd`/../loki_setupdb-$SETUPDB_VERSION"
-if test ! -d "$SETUPDB"; then
-    SETUPDB="`pwd`/../loki_setupdb"
-fi
-
-AC_ARG_WITH(setupdb,
-[  --with-setupdb            with setupdb library at  [default=../loki_setupdb]],
-              ,   with_setupdb=$SETUPDB)
-if test x$with_setupdb != x$SETUPDB; then
-        SETUPDB=$with_setupdb
-fi
-
-dnl Check for correct setupdb installation
-
-if test -f $SETUPDB/$ARCH/libsetupdb.a; then
-    AC_MSG_RESULT([SetupDB library found in $SETUPDB/$ARCH])
-else
-    AC_MSG_ERROR([*** Please compile setupdb first!])
-fi
-
-CFLAGS="$CFLAGS -I$SETUPDB -DSU_PATH=\\\"$SU_PATH\\\""
 OS=`uname -s`
 
 AC_SUBST(SETUPDB)
@@ -303,6 +411,7 @@ AC_SUBST(DYN_PLUGINS)
 AC_SUBST(GUI_LIBS)
 AC_SUBST(GTK_LIBS)
 AC_SUBST(X11_LIBS)
+AC_SUBST(EXTRA_LIBS)
 AC_SUBST(CONSOLE_LIBS)
 AC_SUBST(BZ2LIB)
 AC_SUBST(ARCH)
@@ -310,9 +419,12 @@ AC_SUBST(LIBC)
 AC_SUBST(OS)
 AC_SUBST(STATIC)
 AC_SUBST(LIBUTIL)
+AC_SUBST(LIBINTL)
+AC_SUBST(SU_PATH)
 AC_SUBST(SETUP_VERSION_MAJOR)
 AC_SUBST(SETUP_VERSION_MINOR)
 AC_SUBST(SETUP_VERSION_RELEASE)
+AC_SUBST(BRANDELF)
 
 AC_OUTPUT(Makefile plugins/Makefile dialog/Makefile)
 

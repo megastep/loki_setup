@@ -18,9 +18,25 @@
  *                                                                             *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */ 
 
+#include "config.h"
+
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
+#include <pwd.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <locale.h>
+#include <signal.h>
+#include <ctype.h>
+
 #include "xsu.h"
 
-static FILE *fd_term = NULL;
+static int term = -1;
 
 static gint
 exec_su_failed (gpointer user_data)
@@ -32,9 +48,32 @@ exec_su_failed (gpointer user_data)
 	return FALSE;
 }
 
+typedef void SigFunc(int);
+
+static SigFunc *Signal(int signo, SigFunc *func)
+{
+    struct sigaction act, oact;
+
+    act.sa_handler = func;
+    sigemptyset(&act.sa_mask);
+    act.sa_flags = 0;
+    if ( signo == SIGALRM ) {
+#ifdef SA_INTERRUPT
+		act.sa_flags |= SA_INTERRUPT;
+#endif
+    } else {
+#ifdef SA_RESTART
+		act.sa_flags |= SA_RESTART;
+#endif
+    }
+    if ( sigaction(signo, &act, &oact) < 0 )
+		return SIG_ERR;
+    return oact.sa_handler;
+}
+
 void sighandler(int sig)
 {
-  if ( sig == SIGCHLD && fd_term ) {
+  if ( sig == SIGCHLD && term > 0 ) {
     int status;
 
 /*     pid_t pid =  */
@@ -46,7 +85,8 @@ void sighandler(int sig)
 /*       printf("Gnome Xsu: subprocess has died "); */
       gtk_exit(EXIT_ERROR);
     }
-    fclose(fd_term);
+    close(term); term = -1;
+
     while (gtk_events_pending ()) gtk_main_iteration ();
     gtk_main_quit ();
   }
@@ -59,15 +99,15 @@ int exec_program(const char *prog, char *argv[])
 	pid_t child;
 	char slavename[PATH_MAX];
 
-	signal(SIGCHLD, sighandler);
+	Signal(SIGCHLD, sighandler);
 
 	switch( child = pty_fork(&fd, slavename, sizeof(slavename), NULL, NULL) ) {
 	case 0:
-		execvp(prog, argv);
-		fprintf(stderr, "execv(%s): %s\n", prog, strerror(errno));
-		break;
+	  execvp(prog, argv);
+	  fprintf(stderr, "execv(%s): %s\n", prog, strerror(errno));
+	  _exit(1);
 	case -1:
-		perror("fork");
+		perror("pty_fork");
 		break;
 	default:
 /* 	  fprintf(stderr,"Started program %s, fd = %d, PID = %d\n", prog, fd, child); */
@@ -82,13 +122,14 @@ void xsu_perform()
 	Some code from gnomesu, thanks to Hongli Lai <hongli@telekabel.nl> 
 */
 	guint timeout;
-	int term;
 	gchar *password_return, 
 		  *username=gtk_entry_get_text (GTK_ENTRY (gtk_user_textbox)),
 		  *password=gtk_entry_get_text (GTK_ENTRY (gtk_password_textbox)),
 		  *command=gtk_entry_get_text (GTK_ENTRY (gtk_command_textbox));
 	gchar *buffer;
-	char *argv[6];
+	char *argv[6], c;
+	fd_set fds;
+	struct timeval delay = { 0, 10*1000 }; /* 10 ms wait */
 
 #ifdef DEBUG
     printf("void xsu_perform()\n");
@@ -125,32 +166,49 @@ void xsu_perform()
 	/* buffer = g_strdup_printf("%s - %s -c %s",SU_PATH, username, buffer); */
 	
 	/* su - username -c command */
-	argv[0] = SU_PATH;
+	argv[0] = su_command;
 	argv[1] = username;
 	argv[2] = "-c";
 	argv[3] = buffer;
 	argv[4] = NULL;
-	term = exec_program(SU_PATH, argv);
+	term = exec_program(su_command, argv);
 	/* We are not a gnome-application anymore but under control of su */
-		
-	/* I tried using the SSH client for this. But it then gives an error
-	   that it has been put in the background after auth. */
+
 	if ( term < 0 ) {
-	  perror ("Could not exec\n");
-	  exit (EXIT_ERROR);
+	  perror ("Could not exec");
+	  gtk_exit (EXIT_ERROR);
 	}
 
-	fd_term = fdopen(term, "a+");
-	setbuf(fd_term, NULL);
 	timeout = gtk_timeout_add (SU_DELAY, exec_su_failed, NULL);
 	for (;;)
 	{
-		char buf[80];
+		char buf[80], *ptr;
+		int cnt;
 
-		fscanf(fd_term, "%80s", buf);
-/* 		fprintf(stderr,"reading from pty: '%s'\n", buf); */
+		/* We can not use fscanf as there might not be a space
+		   character after the initial prompt, hence hanging */
+		/* fscanf(fd_term, "%80s", buf); */
+		ptr = buf;
+		cnt = 0;
+		do {
+		  read(term, &c, 1);
 
-		if (strcmp (buf, SU_PWD_OUT) == 0)
+		  if ( c == EOF || isspace(c) ) {
+		    *ptr ++ = '\0';
+		    break;
+		  } else {
+		    *ptr ++ = c;
+		  }
+		  cnt++;
+		  if ( cnt==SU_PWD_LEN && !strncmp(buf, SU_PWD_OUT, SU_PWD_LEN) ) {
+		    *ptr ++ = '\0';
+		    break;
+		  }
+		} while ( cnt < sizeof(buf));
+		
+ 		//fprintf(stderr,"reading from pty: '%s'\n", buf);
+
+		if (strncmp (buf, SU_PWD_OUT, SU_PWD_LEN) == 0)
 		{
 			gtk_timeout_remove (timeout);
 			break;
@@ -161,18 +219,28 @@ void xsu_perform()
 		usleep (5);
 	}
 
+	/* Discard any remaining characters on stdin */
+	for(;;) {
+		FD_ZERO(&fds);
+		FD_SET(term, &fds);
+		if ( select(term+1, &fds, NULL, NULL, &delay) ) {
+			read(term, &c, 1);
+		} else
+			break;
+	}
+
 	password_return = g_strdup_printf ("%s\n", password);
+ 	/* fprintf(stderr,"Sending password\n"); */
 /* 0.2.2 *
 	Minor security fix, clear the password from memory
 */  
-/* 	fprintf(stderr,"Sending password\n"); */
-	password = memset (password, 0, strlen (password));	
-	fputs(password_return, fd_term);
-	password_return = memset (password_return, 0, strlen (password_return));
-	g_free (password_return);
-	g_free (password);
-	password_return = NULL;
-	password = NULL;
+	memset (password, 0, strlen (password));	
+	if ( write(term, password_return, strlen(password_return)) < 0 ) {
+	    perror("write");
+	}
+	memset (password_return, 0, strlen (password_return));
+	g_free (password_return); password_return = NULL;
+	g_free (password); password = NULL;
 
 	gtk_main();
 	return;
@@ -211,8 +279,8 @@ void on_gtk_cancel_button_clicked (GtkButton *button, gpointer user_data)
 #ifdef DEBUG
     printf("on_gtk_cancel_button_clicked (GtkButton *button, gpointer user_data)\n");
 #endif
-    /* return 2 to tell setup that the user willingly aborted */
-    exit(2);
+    /* return 3 to tell setup that the user willingly aborted */
+    gtk_exit(3);
 }
 
 
@@ -494,6 +562,14 @@ int main (int argc, char *argv[])
 				command_in=TRUE;
 			}
 		}
+
+		if ((!strcmp (argv[x], "-s")) || (!strcmp (argv[x], "--su-command")))
+		{
+			if (argv[x+1] != NULL)
+			{
+				su_command = g_strdup(argv[x+1]);
+			}
+		}
     
 		if ((!strcmp (argv[x], "-u")) || (!strcmp (argv[x], "--username")))
 		{
@@ -581,6 +657,7 @@ int main (int argc, char *argv[])
 			printf("Arguments :\n\n");
 			printf("\t-u|--username \"USERNAME\"\n");
 			printf("\t-c|--command \"COMMAND\"\n");
+			printf("\t-s|--su-command \"SU COMMAND\"\n");
 			printf("\t-m|--message \"MESSAGE\"\n");
 			printf("\t-i|--icon \"FILENAME\"\n");
 			printf("\t-t|--title \"WINDOW TITLE\"\n");
@@ -608,9 +685,15 @@ int main (int argc, char *argv[])
 */
 
 	argc=1;
-	/* And init gnome ... */
-	gtk_init(&argc, &argv);
+	/* And init GTK ... */
+	if ( ! gtk_init_check(&argc, &argv) ) {
+	    return 1; /* X11 not available */
+	}
 	gtk_xsu_window = create_gtk_xsu_window ();
+
+	if ( !su_command ) {
+		su_command = g_strdup(SU_PATH);
+	}
 
 	if (username_in) /* If there was a username argument */
 	{
@@ -660,6 +743,10 @@ int main (int argc, char *argv[])
 	gtk_widget_show (gtk_xsu_window);
 	gtk_main ();    
 
+	if ( term > 0 )
+	  close(term);
+
+	g_free(su_command);
 	return 0;
 }
 

@@ -63,8 +63,8 @@ win32/
    autorun.exe          (Win32 program that starts up explorer on REAMDE.htm)
    README.htm           (An HTML README file for people running Windows)
 bin/
-bin/<arch>/*
-bin/<arch>/<libc>/*     (Directories holding the binaries for the program)
+bin/<OS>/<arch>/*
+bin/<OS>/<arch>/<libc>/* (Directories holding the binaries for the program)
 
 --
 You should edit the setup.data/setup.xml file to match your product,

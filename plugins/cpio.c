@@ -6,6 +6,7 @@
 #include "file.h"
 #include "install_log.h"
 #include "cpio.h"
+#include "md5.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -53,6 +54,7 @@ static size_t CPIOSize(install_info *info, const char *path)
 
 /* Exported so that the RPM plugin can access it */
 size_t copy_cpio_stream(install_info *info, stream *input, const char *dest, const char *current_option,
+						int mutable, const char *md5,
                         int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     stream *output;
@@ -133,12 +135,12 @@ size_t copy_cpio_stream(install_info *info, stream *input, const char *dest, con
 			file_symlink(info, lnk, file_hdr.c_name);
 			free(lnk);
 		}else{
-			if ( restoring_corrupt() && !file_is_corrupt(file_hdr.c_name) ) {
+			if ( restoring_corrupt() && !file_is_corrupt(info->product, file_hdr.c_name) ) {
 				file_skip(info, file_hdr.c_filesize, input);
 			} else {
 				unsigned long chk = 0;
 				/* Open the file for output */
-				output = file_open(info, file_hdr.c_name, "wb"); /* FIXME: Mmh, is the path expanded??? */
+				output = file_open(info, file_hdr.c_name, mutable ? "wm" : "wb"); /* FIXME: Mmh, is the path expanded??? */
 				if(output){
 					left = file_hdr.c_filesize;
 					while(left && (nread=file_read(info, buf, (left >= BUFSIZ) ? BUFSIZ : left, input))){
@@ -162,6 +164,14 @@ size_t copy_cpio_stream(install_info *info, stream *input, const char *dest, con
 						log_warning(_("Bad checksum for file '%s'"), file_hdr.c_name);
 					size += file_hdr.c_filesize;
 					file_close(info, output);
+					if ( md5 ) { /* Verify the output file */
+						char sum[CHECKSUM_SIZE+1];
+						
+						strcpy(sum, get_md5(output->md5.buf));
+						if ( strcasecmp(md5, sum) ) {
+							log_fatal(_("File '%s' has an invalid checksum! Aborting."), file_hdr.c_name);
+						}
+					}
 					chmod(file_hdr.c_name, file_hdr.c_mode & C_MODE);
 				}else { /* Skip the file data */
 					file_skip(info, file_hdr.c_filesize, input);
@@ -180,12 +190,13 @@ size_t copy_cpio_stream(install_info *info, stream *input, const char *dest, con
 }
 
 /* Extract the file */
-static size_t CPIOCopy(install_info *info, const char *path, const char *dest, const char *current_option, xmlNodePtr node,
-			int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+static size_t CPIOCopy(install_info *info, const char *path, const char *dest, const char *current_option, 
+					   int mutable, const char *md5, xmlNodePtr node,
+					   int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
 	stream *input = file_open(info, path, "rb");
 	if(input)
-		return copy_cpio_stream(info, input, dest, current_option, update);
+		return copy_cpio_stream(info, input, dest, current_option, mutable, md5, update);
 	return 0;
 }
 

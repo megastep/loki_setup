@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.26 2002-04-03 08:10:24 megastep Exp $ */
+/* $Id: uninstall.c,v 1.27 2002-09-17 22:40:46 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>

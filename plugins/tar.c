@@ -1,9 +1,10 @@
 /* TAR plugin for setup */
-/* $Id: tar.c,v 1.4 2002-04-03 08:10:25 megastep Exp $ */
+/* $Id: tar.c,v 1.5 2002-09-17 22:40:49 megastep Exp $ */
 
 #include "plugins.h"
 #include "tar.h"
 #include "file.h"
+#include "md5.h"
 #include "install_log.h"
 
 #include <stdlib.h>
@@ -33,7 +34,8 @@ static size_t TarSize(install_info *info, const char *path)
 }
 
 /* Extract the file */
-static size_t TarCopy(install_info *info, const char *path, const char *dest, const char *current_option, xmlNodePtr node,
+static size_t TarCopy(install_info *info, const char *path, const char *dest, const char *current_option, 
+					  int mutable, const char *md5, xmlNodePtr node,
 			int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     static tar_record zeroes;
@@ -70,11 +72,11 @@ static size_t TarCopy(install_info *info, const char *path, const char *dest, co
         switch (record.hdr.typeflag) {
             case TF_OLDNORMAL:
             case TF_NORMAL:
-				if ( restoring_corrupt() && !file_is_corrupt(final) ) {
+				if ( restoring_corrupt() && !file_is_corrupt(info->product, final) ) {
 					file_skip(info, left, input);
 				} else {
 					this_size = 0;
-					output = file_open(info, final, "wb");
+					output = file_open(info, final, mutable ? "wm" : "wb");
 					if ( output ) {
 						while ( blocks-- > 0 ) {
 							if ( file_read(info, &record, (sizeof record), input)
@@ -98,6 +100,14 @@ static size_t TarCopy(install_info *info, const char *path, const char *dest, co
 							}
 						}
 						file_close(info, output);
+						if ( md5 ) { /* Verify the output file */
+							char sum[CHECKSUM_SIZE+1];
+							
+							strcpy(sum, get_md5(output->md5.buf));
+							if ( strcasecmp(md5, sum) ) {
+								log_fatal(_("File '%s' has an invalid checksum! Aborting."), final);
+							}
+						}
 						chmod(final, mode);
 					}
 				}

@@ -1,3 +1,4 @@
+#include "config.h"
 
 #include <stdlib.h>
 #include <limits.h>
@@ -14,11 +15,20 @@
 #include <fstab.h>
 #elif defined(__svr4__)
 #include <sys/mnttab.h>
-#include <sys/vfs.h>
-#include <sys/statvfs.h>
 #else /* Linux assumed */
 #include <mntent.h>
+#endif
+
+#ifdef HAVE_SYS_VFS_H
 #include <sys/vfs.h>
+#endif
+
+#ifdef HAVE_SYS_STATFS_H
+#include <sys/statfs.h>
+#endif
+
+#ifdef HAVE_SYS_STATVFS_H
+#include <sys/statvfs.h>
 #endif
 
 #include "install.h"
@@ -31,6 +41,8 @@
 #define MNTTYPE_CDROM    "cd9660"
 #elif defined(__svr4__)
 #define MNTTYPE_CDROM    "hsfs"
+#elif defined(hpux)
+#define MNTTYPE_CDROM    "cdfs"
 #else
 #define MNTTYPE_CDROM    "iso9660"
 #endif
@@ -42,8 +54,18 @@
 /* #define MOUNTS_FILE "/proc/mounts" */
 #ifdef __svr4__
 #define MOUNTS_FILE MNTTAB
+#elif defined(MNT_MNTTAB)
+#define MOUNTS_FILE MNT_MNTTAB
+#elif defined(MOUNTED)
+#define MOUNTS_FILE MOUNTED
 #else
 #define MOUNTS_FILE _PATH_MOUNTED
+#endif
+
+#ifdef MNTTAB
+#define FSTAB MNTTAB
+#else
+#define FSTAB _PATH_MNTTAB
 #endif
 
 /* The filesystems that were mounted by setup */
@@ -164,7 +186,7 @@ int detect_diskspace(const char *path)
 	long long avail = 0LL;
 
 	if ( path[0] == '/' ) {
-#ifdef __svr4__
+#ifdef HAVE_SYS_STATVFS_H
 		struct statvfs fs;
 #else
 		struct statfs fs;
@@ -180,7 +202,7 @@ int detect_diskspace(const char *path)
             *cp = '\0';
         }
 		if ( buf[0] ) {
-#ifdef __svr4__
+#ifdef HAVE_SYS_STATVFS_H
 			if ( statvfs(buf, &fs) ) {
 #else
 			if ( statfs(buf, &fs) ) {
@@ -217,32 +239,93 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
     endfsent();
 
     mounted = getfsstat(NULL, 0, MNT_WAIT);
-	if ( mounted > 0 ) {
+    if ( mounted > 0 ) {
         int i;
-		struct statfs *mnts = (struct statfs *)malloc(sizeof(struct statfs) * mounted);
+	struct statfs *mnts = (struct statfs *)malloc(sizeof(struct statfs) * mounted);
 
-		mounted = getfsstat(mnts, mounted * sizeof(struct statfs), MNT_WAIT);
-		for ( i = 0; i < mounted && num_cdroms < SETUP_MAX_DRIVES; ++ i ) {
-			if ( ! strcmp(mnts[i].f_fstypename, MNTTYPE_CDROM) ) {
-				path[num_cdroms ++] = strdup(mnts[i].f_mntonname);
-			}
-		}
-		
-		free(mnts);
+	mounted = getfsstat(mnts, mounted * sizeof(struct statfs), MNT_WAIT);
+	for ( i = 0; i < mounted && num_cdroms < SETUP_MAX_DRIVES; ++ i ) {
+	    if ( ! strcmp(mnts[i].f_fstypename, MNTTYPE_CDROM) ) {
+		path[num_cdroms ++] = strdup(mnts[i].f_mntonname);
+	    }
 	}
+		
+	free(mnts);
+    }
 
 #elif defined(__svr4__)
-	/* TODO */
+    /* TODO: Add CD detection code */
+    
+#elif defined(hpux)
+    char mntdevpath[PATH_MAX];
+    FILE *mountfp;
+    struct mntent *mntent;
+    const char *fstab, *mtab, *mount_cmd, *mnttype;
+
+    /* HPUX: We need to support PFS */
+    if ( !access("/etc/pfs_fstab", F_OK) ) {
+	fstab = "/etc/pfs_fstab";
+	mtab = "/etc/pfs_mtab";
+	mount_cmd = "/usr/sbin/pfs_mount";
+	mnttype = "pfs-rrip";
+    } else {
+	fstab = FSTAB;
+	mtab = MOUNTS_FILE;
+	mnttype = MNTTYPE_CDROM;
+	mount_cmd = "mount";
+    }
+
+    /* Try to mount unmounted CDROM filesystems */
+    mountfp = setmntent( fstab, "r" );
+    if( mountfp != NULL ) {
+        while( (mntent = getmntent( mountfp )) != NULL ){
+            if ( !strcmp(mntent->mnt_type, MNTTYPE_CDROM) ) {
+                char *fsname = strdup(mntent->mnt_fsname);
+                char *dir = strdup(mntent->mnt_dir);
+                if ( !is_fs_mounted(fsname)) {
+                    if ( ! run_command(NULL, mount_cmd, fsname, 1) ) {
+                        add_mounted_entry(fsname, dir);
+                        log_normal(_("Mounted device %s"), fsname);
+                    }
+                }
+                free(fsname);
+                free(dir);
+            }
+        }
+        endmntent(mountfp);
+    }
+    
+    mountfp = setmntent(mtab, "r" );
+    if( mountfp != NULL ) {
+        while( (mntent = getmntent( mountfp )) != NULL && num_cdroms < SETUP_MAX_DRIVES){
+            char *tmp, mntdev[1024], mnt_type[32];
+
+            strcpy(mntdev, mntent->mnt_fsname);
+            strcpy(mnt_type, mntent->mnt_type);
+            if( strncmp(mntdev, "/dev", 4) || 
+                realpath(mntdev, mntdevpath) == NULL ) {
+                continue;
+            }
+            if ( strcmp(mnt_type, MNTTYPE_CDROM) == 0 ) {
+		path[num_cdroms ++] = strdup(mntent->mnt_dir);
+            }
+        }
+        endmntent( mountfp );
+    }
 #else
     char mntdevpath[PATH_MAX];
     FILE *mountfp;
     struct mntent *mntent;
 
     /* Try to mount unmounted CDROM filesystems */
-    mountfp = setmntent( _PATH_MNTTAB, "r" );
+    mountfp = setmntent( FSTAB, "r" );
     if( mountfp != NULL ) {
         while( (mntent = getmntent( mountfp )) != NULL ){
-            if ( !strcmp(mntent->mnt_type, MNTTYPE_CDROM) || !strcmp(mntent->mnt_type, "auto") ) {
+            if ( !strcmp(mntent->mnt_type, MNTTYPE_CDROM) 
+#ifdef sgi
+		|| !strcmp(mntent->mnt_type, "cdfs")
+#endif
+		|| !strcmp(mntent->mnt_type, "auto") ) {
                 char *fsname = strdup(mntent->mnt_fsname);
                 char *dir = strdup(mntent->mnt_dir);
                 if ( !is_fs_mounted(fsname)) {
@@ -274,8 +357,8 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
                         *tmp = '\0';
                     }
                 }
-				tmp = strstr(mntent->mnt_opts, "dev=");
-                if ( tmp ) {
+		tmp = strstr(mntent->mnt_opts, "dev=");
+		if ( tmp ) {
                     strcpy(mntdev, tmp+strlen("dev="));
                     tmp = strchr(mntdev, ',');
                     if ( tmp ) {
@@ -364,7 +447,7 @@ const char *get_cdrom(install_info *info, const char *id)
     struct cdrom_elem *cd;
 
     while ( ! mounted ) {
-        detect_cdrom(info);
+		detect_cdrom(info);
         for ( cd = info->cdroms_list; cd; cd = cd->next ) {
             if ( !strcmp(id, cd->id) ) {
                 desc = cd->name;
@@ -463,6 +546,30 @@ int match_libc(install_info *info, const char *wanted)
     }
 }
 
+static int match_versions(const char *str, int distro_maj, int distro_min)
+{
+    int maj = 0, min = 0, ass, match = 1;
+    char policy[20] = "up";
+
+    ass = sscanf(str, "%d.%d-%19s", &maj, &min, policy);
+    if ( !strcmp(policy, "up")) { 
+	if ((distro_maj < maj) || ((distro_maj == maj) && (distro_min < min))) {
+	    match = 0;
+	}
+    } else if (!strcmp(policy, "major")) {
+	if ( distro_maj != maj ) {
+	    match = 0;
+	}
+    } else if (!strcmp(policy, "exact")) {
+	if ( (distro_maj != maj) || (distro_min != min) ) {
+	    match = 0;
+	}
+    } else {
+	log_fatal(_("Invalid matching policy: %s"), policy);
+    }
+    return match;
+}
+
 int match_distro(install_info *info, const char *wanted)
 {
 	int match = 1;
@@ -475,28 +582,24 @@ int match_distro(install_info *info, const char *wanted)
 			if ( ptr ) {
 				*ptr ++ = '\0'; /* Now points to the release number information */
 			}
-			if ( strcmp(dup, distribution_symbol[info->distro]) ) { /* Different distribution */
-				match = 0;
-			} else if ( ptr ) { /* Compare version numbers; */
-				int maj = 0, min = 0, ass;
-				char policy[20] = "up";
 
-				ass = sscanf(ptr, "%d.%d-%19s", &maj, &min, policy);
-				if ( !strcmp(policy, "up")) { 
-					if ((info->distro_maj < maj) || ((info->distro_maj == maj) && (info->distro_min < min))) {
-						match = 0;
-					}
-				} else if (!strcmp(policy, "major")) {
-					if ( info->distro_maj != maj ) {
-						match = 0;
-					}
-				} else if (!strcmp(policy, "exact")) {
-					if ( (info->distro_maj != maj) || (info->distro_min != min) ) {
-						match = 0;
-					}
-				} else {
-					log_fatal(_("Invalid matching policy: %s"), policy);
-				}
+#ifdef __linux
+			if ( !strcmp(dup, "linux") ) {
+			    if ( ptr ) { /* Match the kernel version */
+				struct utsname n;
+				int maj_ver, min_ver;
+
+				uname(&n);
+				sscanf(n.release, "%d.%d", &maj_ver, &min_ver);
+				match = match_versions(ptr, maj_ver, min_ver);
+				/* FIXME: It would be good to match releases as well */
+			    }
+			} else
+#endif
+			if ( strcmp(dup, distribution_symbol[info->distro]) ) { /* Different distribution */
+			    match = 0;
+			} else if ( ptr ) { /* Compare version numbers; */
+			    match = match_versions(ptr, info->distro_maj, info->distro_min);
 			}
 			free(dup);
 		} else {

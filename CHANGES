@@ -1,8 +1,33 @@
-current:
-Ryan C. Gordon (icculus.org) - Fri Jul 12 05:57:29 EDT 2002
- * configure script should detect libs more correctly.
+1.6.1:
+Stephane Peter (Codehost) - Sun Mar 31 22:46:57 PST 2002
+ * Rewrote xsu 0.2.3 to eliminate all dependencies on Gnome, and also added
+   proper i18n support to it.
+ * Imported the updated setup.sh from TTimo's branch, with very slight changes.
+   The setup.data/config.sh script is now officially recognized as well.
+Stephane Peter (Codehost) - Thu Apr 11 18:36:47 PDT 2002
+ * Added Solaris CDE icons support.
+Stephane Peter (Codehost) - Fri May  3 19:57:03 PDT 2002
+ * Added the 'mutable' attribute for files, to mark them as being able to change
+   without confusing the setup tools.
+Stephane Peter (Codehost) - Wed Jun 12 17:25:35 PDT 2002
+ * Added the 'warn' subelement to support warning messages on selecting certain
+   options in the UI.
+Stephane Peter (Codehost) - Mon Jun 24 17:31:11 PDT 2002
+ * Separate the distribution binaries in operating system directories, just like
+   the Setup binaries in setup.data.
+Stephane Peter (Codehost) - Fri Jun 28 18:45:56 PDT 2002
+ * Initial IRIX 6.5 port
+Stephane Peter (Codehost) - Tue Jul 23 18:56:31 PDT 2002
+ * Added the 'show' attribute to the 'option' tag to allow options to be hidden
+   based upon the return value of a command.
+ * Added the generic 'linux' distro name to generically match any Linux kernel.
 Ryan C. Gordon (icculus.org) - Fri Aug 23 19:46:21 CEST 2002
  * Added PkZip/Info-ZIP/WinZip compatible archive plugin.
+Stephane Peter (Codehost) - Fri Sep 13 16:36:15 PDT 2002
+ * Added "md5sum" attribute for files/binary elements, to implement installation-time
+   checksum verifications with MD5 sums (idea suggested by zakk).
+Timothee Besset / merged by Stephane Peter - Fri Sep 13 19:57:22 PDT 2002
+ * Support EULA tags for options as well.
 
 1.6.0:
 Stephane Peter (Codehost) - Tue Aug 21 20:22:10 PDT 2001
@@ -55,12 +80,6 @@ Ryan C. Gordon
  * VERY preliminary BeOS support.
 Timothée Besset
  * EULA can now word wrap with text-based setup.
-Stephane Peter (Codehost) - Sun Mar 31 22:46:57 PST 2002
- * Added the 'reinstall' tag to allow multiple reinstallations
- * Rewrote xsu 0.2.3 to eliminate all dependencies on Gnome, and also added
-   proper i18n support to it.
- * Imported the updated setup.sh from TTimo's branch, with very slight changes.
-   The setup.data/config.sh script is now officially recognized as well.
 
 1.5.9:
 Sam Lantinga - Thu Mar  8 18:09:29 PST 2001

@@ -41,8 +41,10 @@ typedef enum {
 typedef enum {
     DESKTOP_MENUDEBIAN,
     DESKTOP_REDHAT,
-    DESKTOP_KDE, // KDE first because RH6.1 does not yet handle KDE well.
+    DESKTOP_KDE, /* KDE first because RH6.1 does not yet handle KDE well. */
     DESKTOP_GNOME,
+	DESKTOP_CDE, /* Common Desktop Environment */
+	DESKTOP_IRIX, /* IRIX ToolChest */
     MAX_DESKTOPS
     /* More to come ? */
 } desktop_type;
@@ -128,6 +130,7 @@ typedef struct _install_info {
                 const char *option;
                 unsigned char md5sum[16];
                 char *symlink; /* If file is a symlink, what it points to */
+				int mutable;
                 struct file_elem *next;
             } *file_list;
 
@@ -200,6 +203,7 @@ extern int         GetProductHasNoBinaries(install_info *info);
 extern int         GetProductHasPromptBinaries(install_info *info);
 extern const char *GetProductSplash(install_info *info);
 extern const char *GetProductCDROMFile(install_info *info);
+extern const char *GetProductEULANode(install_info *info, xmlNodePtr node);
 extern const char *GetProductEULA(install_info *info);
 extern const char *GetProductREADME(install_info *info);
 extern const char *GetWebsiteText(install_info *info);
@@ -243,7 +247,7 @@ struct component_elem *add_component_entry(install_info *info, const char *name,
 struct option_elem *add_option_entry(struct component_elem *comp, const char *name);
 
 /* Add a file entry to the list of files installed */
-extern struct file_elem *add_file_entry(install_info *info, struct option_elem *opt, const char *path, const char *symlink);
+extern struct file_elem *add_file_entry(install_info *info, struct option_elem *opt, const char *path, const char *symlink, int mutable);
 
 /* Add a script entry for uninstallation of manually installed RPMs */
 extern void add_script_entry(install_info *info, struct option_elem *opt, const char *script, int post);
@@ -282,6 +286,12 @@ extern char *get_option_name(install_info *info, xmlNodePtr node, char *name, in
 
 /* Get the optional help of an option node, with localization support */
 const char *get_option_help(install_info *info, xmlNodePtr node);
+
+/* Get the optional selection warning of an option node, with localization support */
+const char *get_option_warn(install_info *info, xmlNodePtr node);
+
+/* Determine if an option should be displayed */
+int         get_option_displayed(install_info *info, xmlNodePtr node);
 
 /* Free the install information structure */
 extern void delete_install(install_info *info);
@@ -339,9 +349,9 @@ extern void pop_curdir(void);
 int run_command(install_info *info, const char *cmd, const char *arg, int warn);
 
 /* Manage the list of corrupt files if we're restoring */
-extern void add_corrupt_file(const char *path, const char *option);
+extern void add_corrupt_file(const product_t *prod, const char *path, const char *option);
 extern void free_corrupt_files(void);
-extern int file_is_corrupt(const char *path);
+extern int file_is_corrupt(const product_t *prod, const char *path);
 extern int restoring_corrupt(void);
 extern void select_corrupt_options(install_info *info);
 

@@ -1,0 +1,5 @@
+Outstanding bugs :
+
+- pseudo.c does not seem to work correctly on SCO and FreeBSD, at least
+- When per-option EULAs are specified, we should probably preclude the
+  "Express" mode from bypassing these licenses.

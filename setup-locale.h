@@ -1,6 +1,6 @@
 /*
  * Isolate the macros related to locale
- * $Id: setup-locale.h,v 1.1 2002-04-03 08:10:24 megastep Exp $
+ * $Id: setup-locale.h,v 1.2 2002-09-17 22:40:46 megastep Exp $
  */
 
 #ifndef _setup_locale_h_

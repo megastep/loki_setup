@@ -1,10 +1,11 @@
 /* RPM plugin for setup */
-/* $Id: rpm.c,v 1.5 2002-04-03 08:10:25 megastep Exp $ */
+/* $Id: rpm.c,v 1.6 2002-09-17 22:40:49 megastep Exp $ */
 
 #include "plugins.h"
 #include "file.h"
 #include "cpio.h"
 #include "install_log.h"
+#include "md5.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -83,8 +84,9 @@ static size_t RPMSize(install_info *info, const char *path)
 }
 
 /* Extract the file */
-static size_t RPMCopy(install_info *info, const char *path, const char *dest, const char *current_option_name, xmlNodePtr node,
-			int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+static size_t RPMCopy(install_info *info, const char *path, const char *dest, const char *current_option_name, 
+		      int mutable, const char *md5, xmlNodePtr node,
+		      int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     FD_t fdi;
     Header hd;
@@ -187,10 +189,10 @@ static size_t RPMCopy(install_info *info, const char *path, const char *dest, co
         }
 
 		/* Identify the type of compression for the archive */
-		if ( Fread(magic, 1, 2, fdi) < 2 ) {
+		if ( fdRead(fdi, magic, 2) < 2 ) {
 			return 0;
 		}
-		Fseek(fdi, -2L, SEEK_CUR); 
+		lseek(fdFileno(fdi), -2L, SEEK_CUR); 
 		if ( magic[0]==037 && magic[1]==0213 ) {
 			gzdi = gzdopen(fdFileno(fdi), "r");    /* XXX gzdi == fdi */
 		} else if ( magic[0]=='B' && magic[1]=='Z' ) {
@@ -203,9 +205,9 @@ static size_t RPMCopy(install_info *info, const char *path, const char *dest, co
 
         /* if relocate="true", copy the files into dest instead of rpm_root */
 		if (relocate) {
-			size = copy_cpio_stream(info, cpio, dest, current_option_name, update);
+			size = copy_cpio_stream(info, cpio, dest, current_option_name, mutable, md5, update);
 		} else {
-			size = copy_cpio_stream(info, cpio, rpm_root, current_option_name, update);
+			size = copy_cpio_stream(info, cpio, rpm_root, current_option_name, mutable, md5, update);
 		}
 
         if(headerIsEntry(hd, RPMTAG_POSTIN)){      

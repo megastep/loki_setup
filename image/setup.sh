@@ -1,7 +1,7 @@
 #! /bin/sh
 #
-# Product setup script - Loki Entertainment Software
-
+# Product setup script
+#
 # Go to the proper setup directory (if not already there)
 cd `dirname $0`
 
@@ -13,12 +13,85 @@ FATAL_ERROR="Fatal error, no tech support email configured in this setup"
 # 2: require, abort if root fails
 GET_ROOT=0
 XSU_ICON=""
-# this is the message for su call, echo -e
+# You may want to set USE_XHOST to 1 if you want an X11 application to
+# be launched with root privileges right after installation
+USE_XHOST=0
+# this is the message for su call, printf
 SU_MESSAGE="You need to run this installation as the super user.\nPlease enter the root password."
+
+NULL=/dev/null
+
+# Return the appropriate architecture string
+DetectARCH()
+{
+	status=1
+	case `uname -m` in
+	    i?86)
+		echo "x86"
+		status=0;;
+	    90*/*) 
+		echo "hppa"
+		status=0;;
+	    *)
+		case `uname -s` in
+		    IRIX*)
+			echo "mips"
+			status=0;;
+		    *)
+			echo "`uname -m`"
+			status=0;;
+		esac
+	esac
+	return $status
+}
+
+# Return the appropriate version string
+DetectLIBC()
+{
+    status=1
+	  if [ `uname -s` != Linux ]; then
+		  echo "glibc-2.1"
+		  return $status
+	  fi
+      if [ -f `echo /lib/libc.so.6* | tail -1` ]; then
+	      if fgrep GLIBC_2.1 /lib/libc.so.6* 2>&1 >> $NULL; then
+	              echo "glibc-2.1"
+	              status=0
+	      else    
+	              echo "glibc-2.0"
+	              status=0
+	      fi        
+      elif [ -f /lib/libc.so.5 ]; then
+	      echo "libc5"
+	      status=0
+      else
+	      echo "unknown"
+      fi
+      return $status
+}
+
+DetectOS()
+{
+	os=`uname -s`
+	if test "$os" = "OpenUNIX"; then
+		echo SCO_SV
+	else
+		echo $os
+	fi
+	return 0
+}
+
+# Detect the environment
+arch=`DetectARCH`
+libc=`DetectLIBC`
+os=`DetectOS`
 
 # Import preferences from a secondary script
 if [ -f setup.data/config.sh ]; then
     . setup.data/config.sh
+elif [ -f SETUP.DAT/CONFIG.SH\;1 ]; then
+	# HP-UX and other systems unable to get LFN correctly
+	. SETUP.DAT/CONFIG.SH\;1
 fi
 
 # Add some standard paths for compatibility
@@ -47,49 +120,6 @@ fi
 
 # Feel free to add some additional command-line arguments for setup here.
 args=""
-
-# Return the appropriate architecture string
-DetectARCH()
-{
-	status=1
-	case `uname -m` in
-		i?86)  echo "x86"
-			status=0;;
-		*)     echo "`uname -m`"
-			status=0;;
-	esac
-	return $status
-}
-
-# Return the appropriate version string
-DetectLIBC()
-{
-    status=1
-	  if [ `uname -s` != Linux ]; then
-		  echo "glibc-2.1"
-		  return $status
-	  fi
-      if [ -f `echo /lib/libc.so.6* | tail -1` ]; then
-	      if fgrep GLIBC_2.1 /lib/libc.so.6* 2>&1 >/dev/null; then
-	              echo "glibc-2.1"
-	              status=0
-	      else    
-	              echo "glibc-2.0"
-	              status=0
-	      fi        
-      elif [ -f /lib/libc.so.5 ]; then
-	      echo "libc5"
-	      status=0
-      else
-	      echo "unknown"
-      fi
-      return $status
-}
-
-# Detect the Linux environment
-arch=`DetectARCH`
-libc=`DetectLIBC`
-os=`uname -s`
 
 # Find the installation program
 # try_run [-absolute] [-fatal] INSTALLER_NAME [PARAMETERS_PASSED]
@@ -156,7 +186,7 @@ __EOF__
         "$setup" "$@"
         failed="$?"
     else
-        "$setup" "$@" 2>/dev/null
+        "$setup" "$@" 2>> $NULL
         failed="$?"
     fi
     if [ "$absolute" -eq 0 ]
@@ -174,30 +204,31 @@ then
   GOT_ROOT=`whoami`
   if [ "$GOT_ROOT" != "root" ]
   then
-    try_run xsu -e -a -u root -c "`pwd`/setup.sh -auth" $XSU_ICON
+	if [ "$USE_XHOST" -eq 1 ]; then
+		xhost +127.0.0.1 2>> $NULL
+	fi
+    try_run xsu -e -a -u root -c "sh `pwd`/setup.sh -auth" $XSU_ICON
     status="$?"
     # echo "got $status"
     # if try_run successfully executed xsu, it will return xsu's exit code
     # xsu returns 2 if ran and cancelled (i.e. the user 'doesn't want' to auth)
     # it will return 0 if the command was executed correctly
     # summing up, if we get 1, something failed
-    if [ "$status" -eq 1 ]
-    then
-      # xsu wasn't found, or failed to run
-      # if xsu actually ran and the auth was cancelled, $status is 2
-      # try with su
-      echo -e "$SU_MESSAGE"
-      try_run -absolute /bin/su root -c "export DISPLAY=$DISPLAY;`pwd`/setup.sh -auth"
-      status="$?"
-    fi
     if [ "$status" -eq 0 ]
     then
       # the auth command was properly executed
       exit 0
-    fi
-    # the auth failed or was canceled
-    if [ "$GET_ROOT" -eq 2 ]
+    elif [ "$status" -eq 1 ]
     then
+      # xsu wasn't found, or failed to run
+      # if xsu actually ran and the auth was cancelled, $status is 2
+      # try with su
+      printf "$SU_MESSAGE\n"
+      try_run -absolute /bin/su root -c "export DISPLAY=$DISPLAY;sh `pwd`/setup.sh -auth"
+      status="$?"
+    elif [ "$status" -eq 3 ]
+    then
+      # the auth failed or was canceled
       # we don't want to even start the setup if not root
       echo "Please run this installation as the super user"
       exit 1
@@ -207,12 +238,15 @@ then
 fi
 
 # Try to run the setup program
-status=0
-try_run setup.gtk $args $* || try_run -fatal setup $args $* || {
-    # NOTE TTimo: with -fatal working correctly, this never happens
-    echo "The setup program seems to have failed on $arch/$libc"
-    echo
-    echo $FATAL_ERROR
-    status=1
-}
+try_run setup.gtk $args $*
+status=$?
+if [ $status -eq 2 ]; then  # setup.gtk couldn't connect to X11 server - ignore
+	try_run -fatal setup $args $* || {
+		# NOTE TTimo: with -fatal working correctly, this never happens
+		echo "The setup program seems to have failed on $arch/$libc"
+		echo
+		echo $FATAL_ERROR
+		status=1
+	}
+fi
 exit $status

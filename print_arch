@@ -7,8 +7,15 @@ DetectARCH()
 	case `uname -m` in
 		i?86)  echo "x86"
 			status=0;;
-		*)     echo "`uname -m`"
+		*) 
+		  case `uname -s` in
+		  IRIX*)
+			echo "sgi"
 			status=0;;
+		  *)    
+			echo "`uname -m`"
+			status=0;;
+		  esac
 	esac
 	return $status
 }

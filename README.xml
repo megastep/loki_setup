@@ -64,6 +64,10 @@ There are several optional attributes of the install element:
             scripts. This file is not installed, but is added to the
             end of the uninstall script.
 
+            IMPORTANT: An actual file name for a shell scripts needs to be specified,
+            not a command, for both pre/postuninstall entries.
+            "sh script.sh" is incorrect, but "script.sh" is correct.
+
             Both the preuninstall and postuninstall scripts will have access
             to the default environment variables. See the 'SCRIPT' section
             for details. 
@@ -240,8 +244,13 @@ Both elements take an optional attribute :
 
 The important thing to remember about those elements is that they are
 siblings of the OPTION element described below, and thus direct children
-of the INSTALL element. Those elements should NOT be inside an OPTION
+of the INSTALL element. The README elements should NOT be inside an OPTION
 element, alongside 'file' and 'binary' elements.
+
+Starting with version 1.6.1, EULA elements CAN be specified for each option
+as sub-elements of an OPTION tag. The syntax is identical to global EULA tags.
+You may not want to combine multiple EULAs with an "Express" installer, as this
+would currently allow the licensing agreements to be bypassed by the user.
 
 There is also no need to have the files designated by those tags explicitly
 installed in a FILES section, setup will take care of that for you.
@@ -357,6 +366,13 @@ There are several optional attributes of the option element:
  required   If this attribute is set to "true", the option will always
             be installed. The user won't be able to disable it.
 
+ show       If present, this attribute specifies a command to be run whose return
+            value will determine if this option will be presented to the user at all.
+            A 0 return value means that the option will be displayed.
+            A "false" string for this attribute will always hide the option from the user.
+            All suboptions are also affected by this setting. Note that default values
+            and actual selection of the option (with the above tags) is not affected.
+
  help       This attribute is a help string which is displayed to the
             user if the user requests more information about the option.
             This string can be translated to other languages using the 'help'
@@ -412,6 +428,12 @@ applies to. Here is an example to clarify all this :
 This provides French and Spanish translations of the "You really need this"
 help message. Please forgive my very poor Spanish ;-)
 
+Starting with version 1.6.0, the OPTION element also supports the WARN sub-element.
+WARN has a syntax identical to the HELP sub-element, but allows you to specify a
+warning message that will be displayed to the user when the corresponding option
+is selected. Just like HELP, this warning message can be translated through the use
+of the 'lang' attribute.
+
 The EXCLUSIVE element:
 
 This special element is used to describe a set of OPTION elements that are
@@ -444,14 +466,15 @@ this option.  The binary is installed in the top level of the install
 directory, and if the symlink attribute is set, a symbolic link is
 placed in the system executable path.
 
-The actual file that is copied resides in bin/<arch>/<libc>/, where
+The actual file that is copied resides in bin/<os>/<arch>/<libc>/, where
+"<os>" is the Operating System string (output from the 'uname -s' command),
 "<arch>" is the current architecture string (x86, ppc, alpha, etc.)
 and "<libc>" is an optional C library version (glibc-2.0, glibc-2.1, etc.)
 
 For example, if you wanted to install an executable file named "foo"
-on a PPC system, you would need it on the install disk as bin/ppc/foo.
+on a PPC system, you would need it on the install disk as bin/Linux/ppc/foo.
 If it depended upon version 2.1 of the GNU C library, you would place
-it on the install disk as bin/ppc/glibc-2.1/foo.
+it on the install disk as bin/Linux/ppc/glibc-2.1/foo.
 
 There are several required attributes of the binary element:
 
@@ -532,6 +555,11 @@ There are several optional attributes of the binary element:
             appear before the <binary> tag to ensure that the file exists
             before the symlink and menu items are created.
 
+ md5sum     You can optionally specify a MD5 checksum string (32 characters from
+            the output of the 'md5sum' command), and the copied file will be verified
+            against this checksum. Installation will abort in the case of an invalid
+            checksum, indicating corruption.
+
 The FILES element:
 
 The files element contains a list of files and directories, one per line,
@@ -567,6 +595,9 @@ There are several optional attributes of the files element:
 
  cdromid    Specifies a CDROM from which the file will be pulled.
 
+ mutable    If set to "yes", then the file will be considered mutable, i.e. it
+            will not be considered corrupted if its checksum changes.
+ 
  lang       The files are only installed if the current locale matches the
             string of this attribute. See 'About localization' below for
             more details.
@@ -591,6 +622,11 @@ There are several optional attributes of the files element:
             remove it. This will apply to all RPM files within this <files> 
             tag.
 
+ md5sum     You can optionally specify a MD5 checksum string (32 characters from
+            the output of the 'md5sum' command), and the copied file will be verified
+            against this checksum. Installation will abort in the case of an invalid
+            checksum, indicating corruption.
+
 The SCRIPT element:
 
 The script element contains shell commands which are executed when the
@@ -608,7 +644,7 @@ For example:
         sh setup.data/stage1.sh
     </script>
 
-There only supported attribute for the script element is the 'lang' element:
+There supported attributes for the script element are :
 
  lang       The script is only installed if the current locale matches the
             string of this attribute. See 'About localization' below for
@@ -663,13 +699,20 @@ versions of the same major number), and 'exact' (for the exact specification).
 
 Currently, the recognized distribution names are :
 
-redhat, mandrake, suse, debian, slackware, caldera, linuxppc
+Linux: redhat, mandrake, suse, debian, slackware, caldera, linuxppc, yellowdog, linux
+
+UNIX: freebsd, solaris, hpux, irix, sco, aix
+
+'linux' is a special distribution name that can be used to differentiate between a GNU/Linux
+system and other UNIX flavors. The 'linux' version numbers correspond to the kernel version.
+Hence, the 'linux' name matches all distributions.
 
 Examples: redhat-7.1 (will match RedHat 7.1 and up)
           mandrake (will match all versions of Mandrake Linux)
           slackware-7 (will match Slackware 7.0 and up)
           slackware-7.0-major (will match all Slackware 7.x releases, but not 8.x and up)
           caldera-3.1-exact (will match Caldera OpenLinux 3.1 only)
+          linux-2.4 (requires a 2.4.x Linux kernel or above)
 
 About Meta-Installations :
 

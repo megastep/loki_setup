@@ -72,6 +72,8 @@
 	       functions were changed to pass the value along.
 */
 
+#include "config.h"
+
 #include <limits.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -79,6 +81,9 @@
 #include <fcntl.h>
 #include <ctype.h>
 #include <string.h>
+#ifdef HAVE_STRINGS_H
+#  include <strings.h>
+#endif
 #include <errno.h>
 #include <stdlib.h>
 #include <glob.h>
@@ -102,12 +107,12 @@ typedef struct _corrupt_list {
 
 static corrupt_list *corrupts = NULL;
 
-void add_corrupt_file(const char *path, const char *option)
+void add_corrupt_file(const product_t *prod, const char *path, const char *option)
 {
 	corrupt_list *item;
 	/* TODO: Should we look at sorting this list to optimize ? */
 	item = (corrupt_list *) malloc(sizeof(corrupt_list));
-	item->path = strdup(path);
+	item->path = strdup(loki_remove_root(prod, path));
 	item->option = strdup(option);
 	item->next = corrupts;
 	corrupts = item;
@@ -125,11 +130,12 @@ void free_corrupt_files(void)
 	}
 }
 
-int file_is_corrupt(const char *path)
+int file_is_corrupt(const product_t *prod, const char *path)
 {
 	/* If found, return TRUE and remove it from the list */
 	corrupt_list *i = corrupts, *prev = NULL;
 
+	path = loki_remove_root(prod, path);
 	while ( i ) {
 		if ( !strcmp(path, i->path) ) {
 			/* Remove */
@@ -236,11 +242,12 @@ int parse_line(const char **srcpp, char *buf, int maxlen)
     return strlen(buf);
 }
 
-size_t copy_file(install_info *info, const char *cdrom, const char *path, const char *dest, char *final, int binary,
-				 int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current),
-                 struct file_elem **elem)
+ssize_t copy_file(install_info *info, const char *cdrom, const char *path, const char *dest, char *final, 
+				  int binary, int mutable, const char *md5,
+				  int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current),
+				  struct file_elem **elem)
 {
-	size_t size = 0;
+    ssize_t size = 0;
     const char *base;
     char buf[BUFSIZ], fullpath[PATH_MAX];
     stream *input, *output;
@@ -258,9 +265,11 @@ size_t copy_file(install_info *info, const char *cdrom, const char *path, const 
     }
     sprintf(final, "%s/%s", dest, base);
 
-	if ( corrupts && !file_is_corrupt(final) ) { /* We are actually restoring corrupted files */
+	if ( corrupts && !file_is_corrupt(info->product, final) ) { /* We are actually restoring corrupted files */
 		return 0;
 	}
+
+	//fprintf(stderr, "copy_file %s\n", final);
 
     if ( cdrom ) {
         snprintf(fullpath, sizeof(fullpath), "%s/%s", cdrom, path);
@@ -287,7 +296,7 @@ size_t copy_file(install_info *info, const char *cdrom, const char *path, const 
 		if ( input == NULL ) {
 			return(-1);
 		}
-		output = file_open(info, final, "w");
+		output = file_open(info, final, mutable ? "wm" : "w");
 		if ( output == NULL ) {
 			file_close(info, input);
 			return(-1);
@@ -310,12 +319,20 @@ size_t copy_file(install_info *info, const char *cdrom, const char *path, const 
         }
 		file_close(info, output);
 		file_close(info, input);
+		if ( md5 ) { /* Verify the output file */
+			char sum[CHECKSUM_SIZE+1];
+
+			strcpy(sum, get_md5(output->md5.buf));
+			if ( strcasecmp(md5, sum) ) {
+				log_fatal(_("File '%s' has an invalid checksum! Aborting."), base);
+			}
+		}
 	}
     return size;
 }
 
 size_t copy_directory(install_info *info, const char *path, const char *dest, 
-					  const char *cdrom, xmlNodePtr node,
+					  const char *cdrom, int mutable, const char *md5, xmlNodePtr node,
 					  int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     char fpat[PATH_MAX];
@@ -325,15 +342,18 @@ size_t copy_directory(install_info *info, const char *path, const char *dest,
 
     size = 0;
     snprintf(fpat, sizeof(fpat), "%s/*", path);
+
+	//fprintf(stderr, "copy_dir %s\n", fpat);
+
 	err = glob(fpat, GLOB_NOSORT | GLOB_NOCHECK, NULL, &globbed);
     if ( err == 0 ) {
 		if ( globbed.gl_pathc==1 && !strcmp(globbed.gl_pathv[0], fpat) ) { /* No match, empty directory */
 			snprintf(fpat, sizeof(fpat), "%s/%s", dest, path);
 			file_create_hierarchy(info, fpat);
-			file_mkdir(info, fpat, 0755);			
+			file_mkdir(info, fpat, 0755);
 		} else {
 			for ( i=0; i<globbed.gl_pathc; ++i ) {
-				copied = copy_path(info, globbed.gl_pathv[i], dest, cdrom, 0, 
+				copied = copy_path(info, globbed.gl_pathv[i], dest, cdrom, 0, mutable, md5,
 								   node, update);
 				if ( copied > 0 ) {
 					size += copied;
@@ -347,24 +367,25 @@ size_t copy_directory(install_info *info, const char *path, const char *dest,
     return size;
 }
 
-size_t copy_path(install_info *info, const char *path, const char *dest, 
-				 const char *cdrom, int strip_dirs, xmlNodePtr node,
+ssize_t copy_path(install_info *info, const char *path, const char *dest, 
+				 const char *cdrom, int strip_dirs, int mutable, const char *md5, xmlNodePtr node,
 				 int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     char final[PATH_MAX];
     struct stat sb;
-    size_t size, copied;
+    ssize_t size, copied;
 
     size = 0;
+	//fprintf(stderr, "copy_path %s\n", path);
     if ( ! stat(path, &sb) ) {
         if ( S_ISDIR(sb.st_mode) ) {
-            copied = copy_directory(info, path, dest, cdrom, node, update);
+            copied = copy_directory(info, path, dest, cdrom, mutable, md5, node, update);
         } else {
 			const SetupPlugin *plug = FindPluginForFile(path);
 			if (plug) {
-				copied = plug->Copy(info, path, dest, current_option_txt, node, update);
+				copied = plug->Copy(info, path, dest, current_option_txt, mutable, md5, node, update);
             } else {
-                copied = copy_file(info, cdrom, path, dest, final, strip_dirs, update, NULL);
+                copied = copy_file(info, cdrom, path, dest, final, strip_dirs, mutable, md5, update, NULL);
             }
         }
         if ( copied > 0 ) {
@@ -376,17 +397,18 @@ size_t copy_path(install_info *info, const char *path, const char *dest,
     return size;
 }
 
-size_t copy_list(install_info *info, const char *filedesc, const char *dest, 
-				 const char *from_cdrom, const char *srcpath, int strip_dirs,
-                 xmlNodePtr node,
+ssize_t copy_list(install_info *info, const char *filedesc, const char *dest, 
+				 const char *from_cdrom, const char *srcpath, int strip_dirs, int mutable,
+                 const char *md5, xmlNodePtr node,
 				 int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     char fpat[BUFSIZ];
     int i;
     glob_t globbed;
-    size_t size, copied;
+    ssize_t size, copied;
 
     size = 0;
+	//fprintf(stderr, "copy_list %s\n", srcpath);
     while ( filedesc && parse_line(&filedesc, fpat, (sizeof fpat)) ) {
         if ( from_cdrom ) {
             char full_cdpath[PATH_MAX];
@@ -402,7 +424,7 @@ size_t copy_list(install_info *info, const char *filedesc, const char *dest,
             if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
                 for ( i=0; i<globbed.gl_pathc; ++i ) {
                     copied = copy_path(info, globbed.gl_pathv[i], dest, 
-                                       cdpath, strip_dirs, node, update);
+                                       cdpath, strip_dirs, mutable, md5, node, update);
                     if ( copied > 0 ) {
                         size += copied;
                     }
@@ -417,7 +439,7 @@ size_t copy_list(install_info *info, const char *filedesc, const char *dest,
             if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
                 for ( i=0; i<globbed.gl_pathc; ++i ) {
                     copied = copy_path(info, globbed.gl_pathv[i], dest, NULL,
-                                       strip_dirs, node, update);
+                                       strip_dirs, mutable, md5, node, update);
                     if ( copied > 0 ) {
                         size += copied;
                     }
@@ -461,13 +483,13 @@ static void check_dynamic(const char *fpat, char *bin, const char *cdrom)
     }
 }
 
-size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, const char *dest, const char *from_cdrom,
-                int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, const char *dest, const char *from_cdrom, const char *md5,
+					int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     struct stat sb;
     char fpat[PATH_MAX], bin[PATH_MAX], final[PATH_MAX], fdest[PATH_MAX];
-    const char *arch, *libc, *keepdirs, *binpath;
-    size_t size, copied;
+    const char *arch, *libc, *keepdirs, *binpath, *os;
+    ssize_t size, copied;
     const char *inrpm = xmlGetProp(node, "inrpm");
     int in_rpm = (inrpm && !strcasecmp(inrpm, "true"));
     int count, i;
@@ -483,6 +505,7 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
     }
 	keepdirs = xmlGetProp(node,"keepdirs");
     binpath  = xmlGetProp(node,"binpath");
+	os = detect_os();
     copied = 0;
     size = 0;
     while ( filedesc && parse_line(&filedesc, final, (sizeof final)) ) {
@@ -496,7 +519,7 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
             if ( binpath ) {
                 strncpy(fpat, binpath, sizeof(fpat));
             } else {
-                snprintf(fpat, sizeof(fpat), "bin/%s/%s/%s", arch, libc, final);
+                snprintf(fpat, sizeof(fpat), "bin/%s/%s/%s/%s", os, arch, libc, final);
             }
 
 			if ( keepdirs ) { /* Append the subdirectory to the final destination */
@@ -520,13 +543,13 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
                 snprintf(fullpath, sizeof(fullpath), "%s/%s", cdpath, fpat);
                 if ( stat(fullpath, &sb) == 0 ) {
                     check_dynamic(fpat, bin, cdpath);
-                    copied = copy_file(info, cdpath, bin, fdest, final, 1, update, &file);
+                    copied = copy_file(info, cdpath, bin, fdest, final, 1, 0, md5, update, &file);
                 } else if ( ! binpath ) {
-                    snprintf(fullpath, sizeof(fullpath), "%s/bin/%s/%s", cdpath, arch, final);
+                    snprintf(fullpath, sizeof(fullpath), "%s/bin/%s/%s/%s", cdpath, os, arch, final);
                     if ( stat(fullpath, &sb) == 0 ) {
-                        snprintf(fullpath, sizeof(fullpath), "bin/%s/%s", arch, final);
+                        snprintf(fullpath, sizeof(fullpath), "bin/%s/%s/%s", os, arch, final);
                         check_dynamic(fullpath, bin, cdpath);
-                        copied = copy_file(info, cdpath, bin, fdest, final, 1, update, &file);
+                        copied = copy_file(info, cdpath, bin, fdest, final, 1, 0, md5, update, &file);
                     } else {
                         log_warning(_("Unable to find file '%s'"), fpat);
                         ui_fatal_error(_("Unable to find file '%s'"), fpat);
@@ -538,12 +561,12 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
 			} else {
 				if ( stat(fpat, &sb) == 0 ) {
 					check_dynamic(fpat, bin, NULL);
-					copied = copy_file(info, NULL, bin, fdest, final, 1, update, &file);
+					copied = copy_file(info, NULL, bin, fdest, final, 1, 0, md5, update, &file);
 				} else if ( ! binpath ) {
-					snprintf(fpat, sizeof(fpat), "bin/%s/%s", arch, final);
+					snprintf(fpat, sizeof(fpat), "bin/%s/%s/%s", os, arch, final);
 					if ( stat(fpat, &sb) == 0 ) {
 						check_dynamic(fpat, bin, NULL);
-						copied = copy_file(info, NULL, bin, fdest, final, 1, update, &file);
+						copied = copy_file(info, NULL, bin, fdest, final, 1, 0, md5, update, &file);
 					} else {
 						log_warning(_("Unable to find file '%s'"), fpat);
                         ui_fatal_error(_("Unable to find file '%s'"), fpat);
@@ -565,7 +588,10 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
 				strcpy(final, fpat);
 			}
 		}
-        if ( copied > 0 || in_rpm ) {
+		if ( copied < 0 ) {
+			log_warning(_("Unable to copy file '%s'"), fpat);
+			ui_fatal_error(_("Unable to copy file '%s'"), fpat);
+        } else if ( copied > 0 || in_rpm ) {
             char *symlink = xmlGetProp(node, "symlink");
             char sym_to[PATH_MAX];
 
@@ -601,10 +627,10 @@ int copy_script(install_info *info, xmlNodePtr node, const char *script, const c
     return(run_script(info, script, -1));
 }
 
-size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
+ssize_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
                 int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
-    size_t size, copied;
+    ssize_t size, copied;
     char tmppath[PATH_MAX];
     const char *str;
 
@@ -656,13 +682,18 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
 			 match_arch(info, xmlGetProp(node, "arch")) &&
 			 match_libc(info, xmlGetProp(node, "libc")) &&
 			 match_distro(info, xmlGetProp(node, "distro"))) {
+
+			/* Optional MD5 sum can be specified in the XML file */
+			const char *md5 = xmlGetProp(node, "md5sum");
+
 			if ( strcmp(node->name, "files") == 0 ) {
 				const char *str = xmlNodeListGetString(info->config, (node->parent)->childs, 1);
+				const char *mut = xmlGetProp(node, "mutable");
             
 				parse_line(&str, current_option_txt, sizeof(current_option_txt));
 				copied = copy_list(info,
 								   xmlNodeListGetString(info->config, node->childs, 1),
-								   path, from_cdrom, srcpath, strip_dirs, node,
+								   path, from_cdrom, srcpath, strip_dirs, mut && *mut=='y', md5, node,
 								   update);
 				if ( copied > 0 ) {
 					size += copied;
@@ -670,7 +701,7 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
 			} else if ( strcmp(node->name, "binary") == 0 ) {
 				copied = copy_binary(info, node,
 									 xmlNodeListGetString(info->config, node->childs, 1),
-									 path, from_cdrom, update);
+									 path, from_cdrom, md5, update);
 				if ( copied > 0 ) {
 					size += copied;
 				}
@@ -686,10 +717,10 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
     return size;
 }
 
-size_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
-                int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+ssize_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
+				  int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
-    size_t size, copied;
+    ssize_t size, copied;
     char tmppath[PATH_MAX];
 
     size = 0;
@@ -759,11 +790,11 @@ size_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
 }
 
 /* Returns the install size of a binary, in bytes */
-size_t size_binary(install_info *info, const char *from_cdrom, const char *filedesc)
+ssize_t size_binary(install_info *info, const char *from_cdrom, const char *filedesc)
 {
     struct stat sb;
     char fpat[BUFSIZ], final[BUFSIZ];
-    size_t size;
+    ssize_t size;
 
     size = 0;
     if ( from_cdrom ) {
@@ -772,11 +803,11 @@ size_t size_binary(install_info *info, const char *from_cdrom, const char *filed
             return 0;
         
         while ( filedesc && parse_line(&filedesc, final, (sizeof final)) ) {
-            snprintf(fpat, sizeof(fpat), "%s/bin/%s/%s/%s", cdpath, info->arch, info->libc, final);
+            snprintf(fpat, sizeof(fpat), "%s/bin/%s/%s/%s/%s", cdpath, detect_os(), info->arch, info->libc, final);
             if ( stat(fpat, &sb) == 0 ) {
                 size += sb.st_size;
             } else {
-                snprintf(fpat, sizeof(fpat), "%s/bin/%s/%s", cdpath, info->arch, final);
+                snprintf(fpat, sizeof(fpat), "%s/bin/%s/%s/%s", cdpath, detect_os(), info->arch, final);
                 if ( stat(fpat, &sb) == 0 ) {
                     size += sb.st_size;
                 }
@@ -784,11 +815,11 @@ size_t size_binary(install_info *info, const char *from_cdrom, const char *filed
         }
     } else {
         while ( filedesc && parse_line(&filedesc, final, (sizeof final)) ) {
-            snprintf(fpat, sizeof(fpat), "bin/%s/%s/%s", info->arch, info->libc, final);
+            snprintf(fpat, sizeof(fpat), "bin/%s/%s/%s/%s", detect_os(), info->arch, info->libc, final);
             if ( stat(fpat, &sb) == 0 ) {
                 size += sb.st_size;
             } else {
-                snprintf(fpat, sizeof(fpat), "bin/%s/%s", info->arch, final);
+                snprintf(fpat, sizeof(fpat), "bin/%s/%s/%s", detect_os(), info->arch, final);
                 if ( stat(fpat, &sb) == 0 ) {
                     size += sb.st_size;
                 }
@@ -799,13 +830,13 @@ size_t size_binary(install_info *info, const char *from_cdrom, const char *filed
 }
 
 /* Returns the install size of a list of files, in bytes */
-size_t size_list(install_info *info, const char *from_cdrom, const char *srcpath, const char *filedesc)
+ssize_t size_list(install_info *info, const char *from_cdrom, const char *srcpath, const char *filedesc)
 {
     char fpat[PATH_MAX];
     char fullpath[PATH_MAX];
     int i;
     glob_t globbed;
-    size_t size, count;
+    ssize_t size, count;
 
     size = 0;
     if( from_cdrom ) {
@@ -856,7 +887,7 @@ size_t size_list(install_info *info, const char *from_cdrom, const char *srcpath
 }
 
 /* Get the install size of an option node, in bytes */
-size_t size_readme(install_info *info, xmlNodePtr node)
+ssize_t size_readme(install_info *info, xmlNodePtr node)
 {
     const char *lang_prop;
 
@@ -868,10 +899,10 @@ size_t size_readme(install_info *info, xmlNodePtr node)
 }
 
 /* Get the install size of an option node, in bytes */
-size_t size_node(install_info *info, xmlNodePtr node)
+ssize_t size_node(install_info *info, xmlNodePtr node)
 {
     const char *size_prop, *lang_prop;
-    size_t size;
+    ssize_t size;
 	int lang_matched = 1;
 
     size = 0;
@@ -936,9 +967,9 @@ size_t size_node(install_info *info, xmlNodePtr node)
 }
 
 /* Get the install size of an option tree, in bytes */
-size_t size_tree(install_info *info, xmlNodePtr node)
+ssize_t size_tree(install_info *info, xmlNodePtr node)
 {
-    size_t size;
+    ssize_t size;
 
     size = 0;
     while ( node ) {

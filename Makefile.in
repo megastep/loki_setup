@@ -7,6 +7,7 @@ PACKAGE = setup-$(SETUP_VERSION)
 arch := @ARCH@
 libc := @LIBC@
 os   := @OS@
+BRANDELF = @BRANDELF@
 
 # If you modify this version, change it's setup.xml and release a new patch.
 UNINSTALL_VERSION = 1.0.3
@@ -16,7 +17,7 @@ CC = @CC@
 # This indicates where the 'setupdb' CVS module is checked out
 SETUPDB	= @SETUPDB@
 
-IMAGE = ../../spp/image
+IMAGE = ../../spp/private/image
 BRAND = codehost
 UPDATES = /loki/updates/loki_uninstall
 CONVERT_IMAGE = /loki/patch-tools/convert-image
@@ -25,11 +26,12 @@ CONVERT_IMAGE = /loki/patch-tools/convert-image
 LOCALES = fr de es sv it nl ru
 
 OPTIMIZE = @CFLAGS@
+LDFLAGS = @LDFLAGS@
 HEADERS = -I/usr/X11R6/include -I/usr/local/include
 OPTIONS = -DSTUB_UI -DSETUP_VERSION_MAJOR=@SETUP_VERSION_MAJOR@ \
 		  -DSETUP_VERSION_MINOR=@SETUP_VERSION_MINOR@ \
 		  -DSETUP_VERSION_RELEASE=@SETUP_VERSION_RELEASE@ \
-		  -DSETUP_VERSION=\"$(SETUP_VERSION)\"
+		  -DSETUP_VERSION=\"$(SETUP_VERSION)\" -DSU_PATH=\"@SU_PATH@\"
 
 CFLAGS += $(OPTIMIZE) $(HEADERS) $(OPTIONS)
 
@@ -47,35 +49,35 @@ SRCS = $(OBJS:.o=.c) $(CONSOLE_OBJS:.o=.c) $(GUI_OBJS:.o=.c) $(XSU_OBJS:.o=.c)
 
 COMMON_LIBS = plugins/libplugins.a dialog/libdialog.a \
 	      $(SETUPDB)/$(arch)/libsetupdb.a
-LIBS =  $(COMMON_LIBS) @LIBS@ -lz -lm
-GUI_LIBS = $(COMMON_LIBS) @LIBS@ @GUI_LIBS@ -lz
+LIBS =  $(COMMON_LIBS) @LIBS@ -lm
+GUI_LIBS = $(COMMON_LIBS) @LIBS@ @GUI_LIBS@
 CONSOLE_LIBS = $(LIBS) @CONSOLE_LIBS@
 
 all: do-plugins do-dialog setup setup.gtk uninstall xsu
 
 testxml: testxml.o
-	$(CC) -o $@ $^ $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
 
 loki_uninstall.o: uninstall.c
-	$(CC) -c -o $@ $^ $(CFLAGS) -DUNINSTALL_UI -DVERSION=\"$(UNINSTALL_VERSION)\"
+	$(CC) $(LDFLAGS) -c -o $@ $^ $(CFLAGS) -DUNINSTALL_UI -DVERSION=\"$(UNINSTALL_VERSION)\"
 
 loki_uninstall: $(LOKI_UNINSTALL_OBJS) $(SETUPDB)/$(arch)/libsetupdb.a
-	$(CC) -o $@ $^ $(GUI_LIBS)
+	$(CC) $(LDFLAGS) -o $@ $^ $(GUI_LIBS)
 
 uninstall: $(UNINSTALL_OBJS) $(COMMON_LIBS)
-	$(CC) -o $@ $^ $(CONSOLE_LIBS) @STATIC@
+	$(CC) $(LDFLAGS) -o $@ $^ $(CONSOLE_LIBS) @STATIC@
 
 check: $(CHECK_OBJS)  $(COMMON_LIBS)
-	$(CC) -o $@ $^ $(GUI_LIBS)
+	$(CC) $(LDFLAGS) -o $@ $^ $(GUI_LIBS)
 
 setup:	$(CONSOLE_OBJS) $(COMMON_LIBS)
-	$(CC) -o $@ $^ $(CONSOLE_LIBS) @STATIC@
+	$(CC) $(LDFLAGS) -o $@ $^ $(CONSOLE_LIBS) @STATIC@
 
 setup.gtk: $(GUI_OBJS) $(COMMON_LIBS)
-	$(CC) -o $@ $^ $(GUI_LIBS)
+	$(CC) $(LDFLAGS) -o $@ $^ $(GUI_LIBS)
 
 xsu: $(XSU_OBJS)
-	$(CC) -o $@ $^ @GTK_LIBS@ @LIBUTIL@ @X11_LIBS@
+	$(CC) $(LDFLAGS) -o $@ $^ @GTK_LIBS@ @LIBUTIL@ @X11_LIBS@ @LIBINTL@ @EXTRA_LIBS@
 
 do-plugins:
 	$(MAKE) -C plugins all
@@ -100,16 +102,16 @@ endif
 	@if [ -d image/setup.data/bin/$(os)/$(arch)/$(libc) ]; then \
 	    cp setup image/setup.data/bin/$(os)/$(arch); \
 	    strip image/setup.data/bin/$(os)/$(arch)/setup; \
-	    brandelf -t $(os) image/setup.data/bin/$(os)/$(arch)/setup; \
+	    $(BRANDELF) -t $(os) image/setup.data/bin/$(os)/$(arch)/setup; \
 	    cp uninstall image/setup.data/bin/$(os)/$(arch); \
 	    strip image/setup.data/bin/$(os)/$(arch)/uninstall; \
-	    brandelf -t $(os) image/setup.data/bin/$(os)/$(arch)/uninstall; \
+	    $(BRANDELF) -t $(os) image/setup.data/bin/$(os)/$(arch)/uninstall; \
 	    cp xsu image/setup.data/bin/$(os)/$(arch)/$(libc); \
 	    strip image/setup.data/bin/$(os)/$(arch)/$(libc)/xsu; \
-	    brandelf -t $(os) image/setup.data/bin/$(os)/$(arch)/$(libc)/xsu; \
+	    $(BRANDELF) -t $(os) image/setup.data/bin/$(os)/$(arch)/$(libc)/xsu; \
 	    cp setup.gtk image/setup.data/bin/$(os)/$(arch)/$(libc); \
 	    strip image/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk; \
-	    brandelf -t $(os) image/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk; \
+	    $(BRANDELF) -t $(os) image/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk; \
 	else \
 		echo No directory to copy the binary files to.; \
 	fi
@@ -121,17 +123,17 @@ endif
 	@if [ -d $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc) ]; then \
 	    cp setup $(IMAGE)/setup.data/bin/$(os)/$(arch); \
 	    strip $(IMAGE)/setup.data/bin/$(os)/$(arch)/setup; \
-	    brandelf -t $(os) $(IMAGE)/setup.data/bin/$(os)/$(arch)/setup; \
+	    $(BRANDELF) -t $(os) $(IMAGE)/setup.data/bin/$(os)/$(arch)/setup; \
 	    cp uninstall $(IMAGE)/setup.data/bin/$(os)/$(arch); \
 	    strip $(IMAGE)/setup.data/bin/$(os)/$(arch)/uninstall; \
-	    brandelf -t $(os) $(IMAGE)/setup.data/bin/$(os)/$(arch)/uninstall; \
+	    $(BRANDELF) -t $(os) $(IMAGE)/setup.data/bin/$(os)/$(arch)/uninstall; \
 	    cp xsu $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc); \
 	    strip $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc)/xsu; \
-	    brandelf -t $(os) $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc)/xsu; \
+	    $(BRANDELF) -t $(os) $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc)/xsu; \
 		if [ $(os) = Linux -a -d $(CONVERT_IMAGE) ]; then \
 	    	cp uninstall $(CONVERT_IMAGE)/bin/$(os)/$(arch); \
 	    	strip $(CONVERT_IMAGE)/bin/$(os)/$(arch)/uninstall; \
-	    	brandelf -t $(os) $(CONVERT_IMAGE)/bin/$(os)/$(arch)/uninstall; \
+	    	$(BRANDELF) -t $(os) $(CONVERT_IMAGE)/bin/$(os)/$(arch)/uninstall; \
 		fi; \
 	    cp setup.gtk $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc); \
 	    strip $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk; \
@@ -141,9 +143,9 @@ endif
 
 # Pretty LPP-specific
 install-check: check
-	@if [ -d $(IMAGE)/bin/$(arch)/ ]; then \
-	    cp check $(IMAGE)/bin/$(arch)/; \
-	    strip $(IMAGE)/bin/$(arch)/check; \
+	@if [ -d $(IMAGE)/bin/$(os)/$(arch)/ ]; then \
+	    cp check $(IMAGE)/bin/$(os)/$(arch)/; \
+	    strip $(IMAGE)/bin/$(os)/$(arch)/check; \
 	    cp check.glade $(IMAGE)/misc/; \
 	else \
 		echo No directory to copy the binary files to.; \
@@ -151,13 +153,13 @@ install-check: check
 
 # Copy loki_uninstall and the required files
 
-spp: all loki_uninstall install-image install-check
-	@if [ -d $(IMAGE)/bin/$(arch)/ ]; then \
-	    cp loki_uninstall $(IMAGE)/bin/$(arch)/bin/$(BRAND)-uninstall; \
-	    strip $(IMAGE)/bin/$(arch)/bin/$(BRAND)-uninstall; \
+copy-image: all loki_uninstall install-image install-check po-image
+	@if [ -d $(IMAGE)/bin/$(os)/$(arch)/ ]; then \
+	    cp loki_uninstall $(IMAGE)/bin/$(os)/$(arch)/bin/$(BRAND)-uninstall; \
+	    strip $(IMAGE)/bin/$(os)/$(arch)/bin/$(BRAND)-uninstall; \
 	    for file in `find image/setup.data -name loki-uninstall.mo -print`; \
 	    do  path="$(IMAGE)/`dirname $$file | sed 's,image/setup.data/,,'`"; \
-	        mkdirhier $$path; \
+	        mkdir -p $$path; \
 	        cp $$file $$path; \
 	    done; \
 	else \
@@ -172,7 +174,7 @@ install-loki_uninstall: loki_uninstall
 	    cp icon.xpm uninstall.glade $(IMAGE)/loki_uninstall/; \
 	    for file in `find image/setup.data -name loki-uninstall.mo -print`; \
 	    do  path="$(IMAGE)/loki_uninstall/`dirname $$file | sed 's,image/setup.data/,,'`"; \
-	        mkdirhier $$path; \
+	        mkdir -p $$path; \
 	        cp $$file $$path; \
 	    done; \
 	else \
@@ -189,7 +191,7 @@ install-loki_uninstall: loki_uninstall
 	    cp icon.xpm uninstall.glade $(UPDATES)/data-$(UNINSTALL_VERSION)/; \
 	    for file in `find image/setup.data -name loki-uninstall.mo -print`; \
 	    do  path="$(UPDATES)/data-$(UNINSTALL_VERSION)/`dirname $$file | sed 's,image/setup.data/,,'`"; \
-	        mkdirhier $$path; \
+	        mkdir -p $$path; \
 	        cp $$file $$path; \
 	    done; \
 	fi
@@ -198,7 +200,7 @@ install-loki_uninstall: loki_uninstall
 po-image:
 	for lang in $(LOCALES); do \
 		cp -f image/setup.data/locale/$$lang/LC_MESSAGES/*.mo $(IMAGE)/setup.data/locale/$$lang/LC_MESSAGES/; \
-		cp -f image/setup.data/locale/$$lang/LC_MESSAGES/loki-uninstall.mo $(CONVERT_IMAGE)/locale/$$lang/LC_MESSAGES/; \
+		if test -d $(CONVERT_IMAGE); then cp -f image/setup.data/locale/$$lang/LC_MESSAGES/loki-uninstall.mo $(CONVERT_IMAGE)/locale/$$lang/LC_MESSAGES/; fi \
 	done
 
 clean:

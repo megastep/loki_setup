@@ -1,6 +1,7 @@
 
 /* Network functions for the Loki Setup program */
 
+#include "config.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -12,6 +13,9 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <string.h>
+#ifdef HAVE_STRINGS_H
+#  include <strings.h>
+#endif
 #include <signal.h>
 
 #ifndef TEST_MAIN

@@ -175,7 +175,7 @@ stream *file_open(install_info *info, const char *path, const char *mode)
             log_warning(_("Couldn't write to file: %s"), path);
             return(NULL);
         }
-        streamp->elem = add_file_entry(info, current_option, path, NULL);
+        streamp->elem = add_file_entry(info, current_option, path, NULL, mode[1] == 'm' );
 		md5_init(&streamp->md5);
     }
     return(streamp);
@@ -350,7 +350,7 @@ int file_symlink(install_info *info, const char *oldpath, const char *newpath)
     if ( retval < 0 ) {
         log_warning(_("Can't create %s: %s"), newpath, strerror(errno));
     } else {
-        add_file_entry(info, current_option, newpath, oldpath);
+        add_file_entry(info, current_option, newpath, oldpath, 0);
     }
     return(retval);
 }
@@ -401,7 +401,7 @@ int file_mkfifo(install_info *info, const char *path, int mode)
 		if(errno != EEXIST)
 			log_warning(_("Can't create %s: %s"), path, strerror(errno));
 	} else {
-		add_file_entry(info, current_option, path, "FIFO");
+		add_file_entry(info, current_option, path, "FIFO", 0);
 	}
 	return(retval);
 }
@@ -420,7 +420,7 @@ int file_mknod(install_info *info, const char *path, int mode, dev_t dev)
 		if(errno != EEXIST)
 			log_warning(_("Can't create %s: %s"), path, strerror(errno));
 	} else {
-		add_file_entry(info, current_option, path, "Device");
+		add_file_entry(info, current_option, path, "Device", 0);
 	}
 	return(retval);
 }

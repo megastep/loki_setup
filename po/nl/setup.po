@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2001-10-23 16:44-0700\n"
+"POT-Creation-Date: 2002-09-12 01:09-0700\n"
 "PO-Revision-Date: 2000-05-10 01:11+1\n"
 "Last-Translator: MARTIJN DE MEULDER <MARTIJN@NL.LINUX.ORG>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,100 +15,82 @@ msgstr ""
 "Content-Transfer-Encoding: ENCODING\n"
 
 # SOME DESCRIPTIVE TITLE
-#: image/setup.data/setup.glade:881 image/setup.data/setup.glade:930
+#: image/setup.data/setup.glade:912 image/setup.data/setup.glade:961
 msgid "%P %%"
 msgstr "%P %%"
 
-#: image/setup.data/setup.glade:460 image/setup.data/setup.glade:486
+#: image/setup.data/setup.glade:481 image/setup.data/setup.glade:507
 msgid "0 MB"
 msgstr "0 MB"
 
-#: image/setup.data/setup.glade:710
-msgid "Begin Install"
-msgstr "Begin installatie"
-
-#: image/setup.data/setup.glade:159 image/setup.data/setup.glade:682
-#: image/setup.data/setup.glade:977 image/setup.data/setup.glade:1418
-#: image/setup.data/setup.glade:1929
+#: image/setup.data/setup.glade:167 image/setup.data/setup.glade:708
+#: image/setup.data/setup.glade:1013 image/setup.data/setup.glade:1494
 msgid "Cancel"
 msgstr "Breek af"
 
-#: image/setup.data/setup.glade:1831
-msgid "Close"
-msgstr "Sluit"
-
-#: image/setup.data/setup.glade:1117
+#: image/setup.data/setup.glade:1178
 msgid "Congratulations!"
 msgstr "Gefeliciteerd!"
 
-#: image/setup.data/setup.glade:195 image/setup.data/setup.glade:1432
-#: image/setup.data/setup.glade:1569
+#: image/setup.data/setup.glade:1514 image/setup.data/setup.glade:1662
 msgid "Continue"
 msgstr "Ga verder"
 
-#: image/setup.data/setup.glade:576
+#: image/setup.data/setup.glade:597
 msgid "Estimated size:"
 msgstr "Geschatte omvang:"
 
-#: image/setup.data/setup.glade:1053 image/setup.data/setup.glade:1292
-#: image/setup.data/setup.glade:1541
-msgid "Exit"
-msgstr "Afsluiten"
-
-#: dialog_ui.c:433 image/setup.data/setup.glade:127
+#: dialog_ui.c:483 image/setup.data/setup.glade:129
 #, fuzzy
 msgid "Expert"
 msgstr "Afsluiten"
 
-#: image/setup.data/setup.glade:550
+#: image/setup.data/setup.glade:571
 msgid "Free space:"
 msgstr "Vrije ruimte:"
 
-#: image/setup.data/setup.glade:231
+#: image/setup.data/setup.glade:252
 msgid "Global Options"
 msgstr "Algemene opties"
 
-#: image/setup.data/setup.glade:1943
-msgid "I Agree"
-msgstr "Ik ben accoord"
-
-#: image/setup.data/setup.glade:1300
+#: image/setup.data/setup.glade:1371
 msgid "Install Aborted"
 msgstr "Installatie afgebroken"
 
-#: image/setup.data/setup.glade:1089
+#: image/setup.data/setup.glade:1150
 msgid "Install Complete"
 msgstr "Installatie compleet"
 
-#: image/setup.data/setup.glade:429
+#: image/setup.data/setup.glade:450
 msgid "Install Options"
 msgstr "Installatie-opties"
 
-#: image/setup.data/setup.glade:767
+#: image/setup.data/setup.glade:798
 msgid "Install Progress"
 msgstr "Installatie-voortgang"
 
-#: image/setup.data/setup.glade:405
+#: image/setup.data/setup.glade:426
 msgid "Install a symbolic link into the path"
 msgstr ""
 
-#: image/setup.data/setup.glade:262
+#: image/setup.data/setup.glade:283
 msgid "Install path:"
 msgstr "Installatie-pad:"
 
-#: image/setup.data/setup.glade:1758
-msgid "Launch Browser"
+#: image/setup.data/setup.glade:1851
+#, fuzzy
+msgid "Launch _Browser"
 msgstr "Start browser"
 
-#: image/setup.data/setup.glade:1719
+#: image/setup.data/setup.glade:1812
 msgid "Launching browser, please wait..."
 msgstr "Browser start, een moment alstublieft..."
 
-#: dialog_ui.c:87 image/setup.data/setup.glade:1875
+#: dialog_ui.c:96 image/setup.data/setup.glade:1978
 msgid "License Agreement"
 msgstr "Licentie-overeenkomst"
 
-#: image/setup.data/setup.glade:329
+#: image/setup.data/setup.glade:350
 #, fuzzy
 msgid "Link path:"
 msgstr "Installatie-pad:"
@@ -118,80 +100,80 @@ msgstr "Installatie-pad:"
 msgid "Please choose the class of installation."
 msgstr "Geef het installatiepad op"
 
-#: image/setup.data/setup.glade:1668
+#: image/setup.data/setup.glade:1761
 msgid "Please visit our website for updates and support."
 msgstr "Bezoek onze website voor updates en ondersteuning."
 
-#: image/setup.data/setup.glade:1345
+#: image/setup.data/setup.glade:1416
 msgid "Press 'Exit' to clean up temporary files."
 msgstr "Druk op 'sluiten' om tijdelijke bestanden te verwijderen."
 
-#: image/setup.data/setup.glade:1577
+#: image/setup.data/setup.glade:1670
 msgid "Product Website"
 msgstr "Product-website"
 
-#: image/setup.data/setup.glade:1792
+#: image/setup.data/setup.glade:1885
 msgid "Readme File"
 msgstr "Readme-bestand"
 
-#: dialog_ui.c:432 image/setup.data/setup.glade:111
+#: dialog_ui.c:482 image/setup.data/setup.glade:112
 msgid "Recommended"
 msgstr ""
 
-#: image/setup.data/setup.glade:1081
-msgid "Start"
-msgstr ""
-
-#: image/setup.data/setup.glade:608
+#: image/setup.data/setup.glade:629
 #, fuzzy
-msgid "Startup menu entries (KDE/Gnome)"
+msgid "Startup menu entries (KDE/Gnome/CDE)"
 msgstr "Menu-onderdelen voor het bureaublad (KDE/Gnome)"
 
-#: image/setup.data/setup.glade:380
+#: image/setup.data/setup.glade:401
 msgid "Symbolic links to installed binaries are placed here"
 msgstr "De symbolische links naar de geïnstalleerde programma's staan hier"
 
-#: image/setup.data/setup.glade:1633
+#: image/setup.data/setup.glade:1726
 msgid "Thank you for installing "
 msgstr "Bedankt voor het installeren "
 
-#: image/setup.data/setup.glade:1134
+#: image/setup.data/setup.glade:1195
 msgid "The installation was successfully completed!"
 msgstr "De installatie is geslaagd!"
 
-#: image/setup.data/setup.glade:1168
+#: image/setup.data/setup.glade:1229
 #, fuzzy
 msgid "The product was installed in:"
 msgstr "Het spel is geïnstalleerd in:"
 
-#: image/setup.data/setup.glade:1328
+#: image/setup.data/setup.glade:1399
 msgid "This installation has been aborted."
 msgstr "De installatie is afgebroken."
 
-#: image/setup.data/setup.glade:906
+#: image/setup.data/setup.glade:127
+msgid ""
+"This will allow you to pick the installation paths and options to be "
+"installed "
+msgstr ""
+
+#: image/setup.data/setup.glade:110
+msgid "This will install the product with the default options and paths"
+msgstr ""
+
+#: image/setup.data/setup.glade:937
 msgid "Total Install"
 msgstr "Volledige installatie"
 
-#: image/setup.data/setup.glade:1219
+#: image/setup.data/setup.glade:1280
 #, fuzzy
 msgid "Type '[game]' to start."
 msgstr "Typ '[game]' om te spelen."
 
-#: image/setup.data/setup.glade:177 image/setup.data/setup.glade:696
-#: image/setup.data/setup.glade:991 image/setup.data/setup.glade:1067
-#: image/setup.data/setup.glade:1555
-msgid "View Readme"
-msgstr "Bekijk Readme"
-
-#: image/setup.data/setup.glade:1440
+#: image/setup.data/setup.glade:1522
 msgid "Warning"
 msgstr "Waarschuwing"
 
-#: image/setup.data/setup.glade:857
+#: image/setup.data/setup.glade:888
 msgid "[current file]"
 msgstr "[huidig bestand]"
 
-#: image/setup.data/setup.glade:823
+#: image/setup.data/setup.glade:854
 msgid "[current option]"
 msgstr "[huidige optie]"
 
@@ -199,50 +181,88 @@ msgstr "[huidige optie]"
 msgid "[image area]"
 msgstr "[afbeeldingsgebied]"
 
-#: image/setup.data/setup.glade:1185
+#: image/setup.data/setup.glade:1246
 msgid "[install directory]"
 msgstr "[installatie-directory]"
 
-#: image/setup.data/setup.glade:718
+#: image/setup.data/setup.glade:749
 msgid "[options status]"
 msgstr "[status opties]"
 
-#: image/setup.data/setup.glade:532
+#: image/setup.data/setup.glade:553
 msgid "[packages go here]"
 msgstr "[de pakketten gaan hierheen]"
 
-#: image/setup.data/setup.glade:1650
+#: image/setup.data/setup.glade:1743
 msgid "[product]"
 msgstr "[product]"
 
-#: image/setup.data/setup.glade:1468
+#: image/setup.data/setup.glade:1550
 msgid "[warning text]"
 msgstr "[waarschuwingstekst]"
 
-#: image/setup.data/setup.glade:210
-msgid "label68"
+#: image/setup.data/setup.glade:741
+#, fuzzy
+msgid "_Begin Install"
+msgstr "Begin installatie"
+
+#: image/setup.data/setup.glade:2037
+#, fuzzy
+msgid "_Cancel"
+msgstr "Breek af"
+
+#: image/setup.data/setup.glade:1934
+#, fuzzy
+msgid "_Close"
+msgstr "Sluit"
+
+#: image/setup.data/setup.glade:216
+#, fuzzy
+msgid "_Continue"
+msgstr "Ga verder"
+
+#: image/setup.data/setup.glade:1099 image/setup.data/setup.glade:1363
+#: image/setup.data/setup.glade:1628
+#, fuzzy
+msgid "_Exit"
+msgstr "Afsluiten"
+
+#: image/setup.data/setup.glade:2066
+#, fuzzy
+msgid "_I Agree"
+msgstr "Ik ben accoord"
+
+#: image/setup.data/setup.glade:1142
+msgid "_Start"
 msgstr ""
 
-#: install.c:495 install_log.c:19
+#: image/setup.data/setup.glade:191 image/setup.data/setup.glade:727
+#: image/setup.data/setup.glade:1032 image/setup.data/setup.glade:1118
+#: image/setup.data/setup.glade:1647
+#, fuzzy
+msgid "_View Readme"
+msgstr "Bekijk Readme"
+
+#: install.c:545 install_log.c:19
 msgid "Out of memory\n"
 msgstr "Te weinig geheugen\n"
 
-#: detect.c:125
+#: detect.c:170
 #, fuzzy, c-format
 msgid "Unmounting device %s"
 msgstr "Bezig met maken van device %s"
 
-#: detect.c:127
+#: detect.c:172
 #, c-format
 msgid "Failed to unmount device %s mounted on %s"
 msgstr ""
 
-#: detect.c:181 detect.c:218
+#: detect.c:234 detect.c:288 detect.c:334
 #, c-format
 msgid "Mounted device %s"
 msgstr ""
 
-#: detect.c:349
+#: detect.c:466
 #, fuzzy, c-format
 msgid ""
 "\n"
@@ -253,7 +273,7 @@ msgstr ""
 "Mount de %s CDROM.\n"
 "Kies Ja om opnieuw te proberen, Nee om af te breken"
 
-#: detect.c:352
+#: detect.c:469
 #, c-format
 msgid ""
 "\n"
@@ -264,10 +284,15 @@ msgstr ""
 "Mount de %s CDROM.\n"
 "Kies Ja om opnieuw te proberen, Nee om af te breken"
 
-#: detect.c:377
+#: detect.c:493
 #, c-format
 msgid "Detected locale is %s"
 msgstr "Gedetecteerde locale is %s"
+
+#: detect.c:568
+#, c-format
+msgid "Invalid matching policy: %s"
+msgstr ""
 
 #: plugins.c:96
 msgid ""
@@ -307,259 +332,284 @@ msgstr ""
 msgid "Error trying to load %s plugin: %s\n"
 msgstr ""
 
-#: network.c:142
+#: network.c:146
 msgid "Out of memory, no network check"
 msgstr "Te weinig geheugen, geen netwerkcontrole"
 
-#: network.c:152
+#: network.c:156
 msgid "Unable to create pipe, no network check"
 msgstr "Niet in staat om pipe te maken, geen netwerkcontrole"
 
-#: network.c:166
+#: network.c:170
 msgid "Fork failed, no network check"
 msgstr "Vork mislukt, geen netwerkcontrole"
 
-#: install.c:236
+#: install.c:248
 msgid "No destination directory selected"
 msgstr "Geen doeldirectory geselecteerd"
 
-#: install.c:239
+#: install.c:251
 msgid "Please select at least one option"
 msgstr "Selecteer minstens een optie"
 
-#: install.c:242
+#: install.c:254
 msgid "Not enough free space for the selected options"
 msgstr "Niet genoeg vrije schijfruimte voor de geselecteerde opties"
 
-#: install.c:244
+#: install.c:256
 msgid "Install path is not a directory"
 msgstr "Installatiepad is geen directory"
 
-#: install.c:246
+#: install.c:258
 msgid "No write permissions on the install directory"
 msgstr "Geen schrijfpermissie in de installatie-directory"
 
-#: install.c:248
+#: install.c:260
 msgid "Binary path and install path must be different"
 msgstr ""
 
-#: install.c:250
+#: install.c:262
 msgid "No write permissions to install a selected package"
 msgstr "Geen schrijfpermissie om een geselecteerd pakket te installeren"
 
-#: install.c:253
+#: install.c:265
 msgid "No write permissions on the binary directory"
 msgstr "Geen schrijfpermissie in de programma-directory"
 
-#: install.c:516
+#: install.c:566
 #, c-format
 msgid "Detected distribution: %s %d.%d"
 msgstr ""
 
-#: install.c:642
+#: install.c:701
 msgid ""
 "Could not find default component. Make sure to define components for all "
 "entries."
 msgstr ""
 
-#: file.c:66 file.c:86 file.c:93 install.c:680 install.c:702 install.c:724
-#: install.c:745 install.c:787
+#: file.c:88 file.c:109 file.c:116 install.c:740 install.c:762 install.c:784
+#: install.c:805 install.c:847
 msgid "Out of memory"
 msgstr "Te weinig geheugen"
 
-#: install.c:769
+#: install.c:829
 msgid "You must use a 'symlink' attribute with 'play'"
 msgstr ""
 
-#: install.c:777
+#: install.c:837
 msgid "There can be only one binary with a 'play' attribute"
 msgstr ""
 
-#: install.c:780
+#: install.c:840
 msgid "The only valid values for the 'play' attribute are yes, gui and no"
 msgstr ""
 
-#: install.c:805
+#: install.c:865
 msgid "Couldn't find your home directory"
 msgstr "Uw home directory is onvindbaar"
 
-#: install.c:823
+#: install.c:883
 #, c-format
 msgid "Couldn't find home directory for %s"
 msgstr "De home directory van %s is onvindbaar"
 
-#: install.c:906
+#: install.c:970
 #, fuzzy
 msgid "XML: 'require' tag doesn't have a mandatory 'command' attribute"
 msgstr "XML: de 'lang' tag heeft geen goed 'lang' attribuut"
 
-#: install.c:949
+#: install.c:1016
 msgid "XML: 'lang' tag does not have a mandatory 'lang' attribute"
 msgstr "XML: de 'lang' tag heeft geen goed 'lang' attribuut"
 
-#: install.c:957
+#: install.c:1025
 #, c-format
 msgid "XML: option listed without translated description for locale '%s'"
 msgstr "XML: optie weergegeven zonder vertaalde beschrijving voor locale '%s'"
 
-#: install.c:964
+#: install.c:1032
 msgid "XML: option listed without description"
 msgstr "XML: optie weergegeven zonder beschrijving"
 
-#: install.c:1171 install.c:1177 install.c:1194
+#: install.c:1298 install.c:1304 install.c:1323
 #, c-format
 msgid "Unable to remove '%s'"
 msgstr "Niet in staat om '%s' te verwijderen"
 
-#: install.c:1185
+#: install.c:1314
 #, fuzzy, c-format
 msgid "The '%s' RPM was installed or upgraded (version %s, release %d)"
 msgstr "De '%s'-RPM is geïnstalleerd of bijgewerkt (versie %s, release %s)"
 
-#: install.c:1298
+#: install.c:1439
 #, fuzzy, c-format
 msgid "Could not register binary: %s"
 msgstr "Kan niet schrijven naar bestand: %s"
 
-#: install.c:1336
+#: install.c:1462 install.c:1490 install.c:1537 install.c:1567
+#, fuzzy
+msgid "Could not create temporary script"
+msgstr "Kan niet schrijven naar bestand: %s"
+
+#: install.c:1481
 #, c-format
 msgid "Could not write temporary pre-uninstall script in %s"
 msgstr ""
 
-#: install.c:1357
+#: install.c:1506
 #, c-format
 msgid "Could not write post-uninstall script in %s"
 msgstr ""
 
-#: install.c:1421
+#: install.c:1596
 msgid "Could not create install log"
 msgstr ""
 
-#: install.c:1448
+#: install.c:1623
 #, c-format
 msgid "Please visit %s"
 msgstr "Bezoek alstublieft %s"
 
-#: install.c:1500
+#: install.c:1675
 msgid "Missing 'command' attribute for an option"
 msgstr ""
 
-#: install.c:1669
+#: install.c:1855 install.c:1900
 #, c-format
 msgid "Unable to create desktop file '%s'"
 msgstr "Kan het desktopbestand '%s' niet aanmaken"
 
-#: copy.c:281
+#: install.c:1976 install.c:1979
+#, fuzzy, c-format
+msgid "Unable to create CDE desktop file '%s'"
+msgstr "Kan het desktopbestand '%s' niet aanmaken"
+
+#: install.c:2013
+#, fuzzy, c-format
+msgid "Unable to create ToolChest menu file '%s'"
+msgstr "Kan het desktopbestand '%s' niet aanmaken"
+
+#: copy.c:290
 #, fuzzy, c-format
 msgid "Unable to create %s symlink pointing to %s"
 msgstr "Kan het desktopbestand '%s' niet aanmaken"
 
-#: copy.c:343
+#: copy.c:357
 #, c-format
 msgid "Unable to copy directory '%s'"
 msgstr "Kan directory '%s' niet kopiëren"
 
-#: copy.c:372 copy.c:425 copy.c:525 copy.c:526 copy.c:529 copy.c:530
-#: copy.c:542 copy.c:543 copy.c:546 copy.c:547
+#: copy.c:387 copy.c:441 copy.c:546 copy.c:547 copy.c:550 copy.c:551
+#: copy.c:563 copy.c:564 copy.c:567 copy.c:568
 #, c-format
 msgid "Unable to find file '%s'"
 msgstr "Bestand '%s' is onvindbaar"
 
-#: copy.c:410
+#: copy.c:426
 #, c-format
 msgid "Unable to find file '%s' on any of the CDROM drives"
 msgstr "Bestand '%s' is niet op een CD-Rom-drive te vinden"
 
-#: copy.c:592
+#: copy.c:584 copy.c:585
+#, fuzzy, c-format
+msgid "Unable to copy file '%s'"
+msgstr "Bestand '%s' is onvindbaar"
+
+#: copy.c:616
 msgid "Running script"
 msgstr ""
 
-#: copy.c:733
+#: copy.c:759
 msgid "Component element needs to have a name"
 msgstr ""
 
-#: copy.c:736
+#: copy.c:762
 msgid "Component element needs to have a version"
 msgstr ""
 
-#: copy.c:890
+#: copy.c:916
 #, c-format
 msgid "Suspect size value for option %s\n"
 msgstr ""
 
 #: file.c:127
+#, fuzzy, c-format
+msgid "Failed to open file %s"
+msgstr "Bestand '%s' is onvindbaar"
+
+#: file.c:162
 #, c-format
 msgid "Couldn't read from file: %s"
 msgstr "Kan niet lezen uit bestand: %s"
 
-#: file.c:135
+#: file.c:170
 #, c-format
 msgid "Installing file %s"
 msgstr "Bezig met installeren van bestand %s"
 
-#: file.c:140
+#: file.c:175
 #, c-format
 msgid "Couldn't write to file: %s"
 msgstr "Kan niet schrijven naar bestand: %s"
 
-#: file.c:161
+#: file.c:200
 msgid "Read on write stream"
 msgstr "Lees op schrijf-stroom"
 
-#: file.c:204
+#: file.c:252
 msgid "Skip zeroes on write stream"
 msgstr "Sla nullen over in de schrijf-stroom"
 
-#: file.c:221 file.c:252 file.c:259
+#: file.c:272 file.c:308 file.c:314
 #, c-format
 msgid "Short write on %s"
 msgstr "Snel schrijven op %s"
 
-#: file.c:227
+#: file.c:278
 msgid "Write on read stream"
 msgstr "Schrijf op lees-stroom"
 
-#: file.c:279
+#: file.c:338
 #, c-format
 msgid "Creating symbolic link: %s --> %s\n"
 msgstr "Bezig met maken van symbolische link: %s --> %s\n"
 
-#: file.c:288
+#: file.c:347
 #, c-format
 msgid "Can't remove existing symlink %s: %s"
 msgstr "Kan bestaande symbolische link %s: %s niet verwijderen"
 
-#: file.c:292 file.c:323 file.c:343 file.c:362
+#: file.c:351 file.c:382 file.c:402 file.c:421
 #, c-format
 msgid "Can't create %s: %s"
 msgstr "Kan %s: %s niet maken"
 
-#: file.c:317
+#: file.c:376
 #, c-format
 msgid "Creating directory: %s\n"
 msgstr "Bezig met maken van directory: %s\n"
 
-#: file.c:336
+#: file.c:395
 #, c-format
 msgid "Creating FIFO: %s\n"
 msgstr "Bezig met maken van FIFO: %s\n"
 
-#: file.c:355
+#: file.c:414
 #, c-format
 msgid "Creating device: %s\n"
 msgstr "Bezig met maken van device: %s\n"
 
-#: file.c:375
+#: file.c:434
 #, c-format
 msgid "Can't change permissions for %s: %s"
 msgstr "Kan permissies voor %s: %s niet veranderen"
 
-#: file.c:409 file.c:433
+#: file.c:468 file.c:492
 #, c-format
 msgid "Unable to read %s"
 msgstr "Kan %s niet lezen"
 
-#: main.c:107
+#: main.c:103
 #, fuzzy, c-format
 msgid ""
 "Usage: %s [options]\n"
@@ -576,6 +626,7 @@ msgid ""
 "   -o opt   Enable the option named \"opt\" from the XML file. Also enables "
 "non\n"
 "            interactive operation. Can be used multiple times.\n"
+"   -p pref  Specify a path prefix in the installation media.\n"
 "   -r root  Set the root directory for extracting RPM files (default is /)\n"
 "   -v n     Set verbosity level to n. Available values :\n"
 "            0: Debug  1: Quiet  2: Normal 3: Warnings 4: Fatal\n"
@@ -594,7 +645,7 @@ msgstr ""
 "            0: Debug  1: Stil  2: Normaal 3: Waarschuwingen 4: Fataal\n"
 "   -V       Toon de versie van het setup-programma en sluit af\n"
 
-#: main.c:123
+#: main.c:120
 #, fuzzy, c-format
 msgid ""
 "Usage: %s [options]\n"
@@ -609,6 +660,7 @@ msgid ""
 "   -o opt   Enable the option named \"opt\" from the XML file. Also enables "
 "non\n"
 "            interactive operation. Can be used multiple times.\n"
+"   -p pref  Specify a path prefix in the installation media.\n"
 "   -v n     Set verbosity level to n. Available values :\n"
 "            0: Debug  1: Quiet  2: Normal 3: Warnings 4: Fatal\n"
 "   -V       Print the version of the setup program and exit\n"
@@ -626,38 +678,44 @@ msgstr ""
 "            0: Debug  1: Stil  2: Normaal 3: Waarschuwingen 4: Fataal\n"
 "   -V       Toon de versie van het setup-programma en sluit af\n"
 
-#: main.c:196
+#: main.c:195
 msgid "Out of range value, setting verbosity level to normal.\n"
 msgstr ""
 "Waarde is buiten bereik, het verbosity-niveau is teruggezet naar normaal.\n"
 
-#: main.c:241
+#: main.c:243
 #, c-format
 msgid "Couldn't load '%s'\n"
 msgstr "Kan '%s' niet laden\n"
 
-#: main.c:252
+#: main.c:254
 msgid "No UI drivers available\n"
 msgstr "Geen drivers beschikbaar voor gebruikersinterface\n"
 
-#: main.c:276
+#: main.c:280
+msgid ""
+"Unable to determine the current directory.\n"
+"Please check the permissions of the parent directories.\n"
+msgstr ""
+
+#: main.c:287
 msgid "You need to run this installer as the super-user.\n"
 msgstr ""
 
-#: main.c:281
+#: main.c:292
 msgid ""
 "\n"
 "This product is already installed.\n"
 "Uninstall it before running this program again.\n"
 msgstr ""
 
-#: main.c:288
+#: main.c:299
 msgid ""
 "\n"
 "Illegal installation: do not mix components with a component installation.\n"
 msgstr ""
 
-#: main.c:293
+#: main.c:304
 #, c-format
 msgid ""
 "\n"
@@ -665,7 +723,7 @@ msgid ""
 "Please uninstall it beforehand.\n"
 msgstr ""
 
-#: main.c:301
+#: main.c:312
 #, c-format
 msgid ""
 "\n"
@@ -673,139 +731,139 @@ msgid ""
 "installation program.\n"
 msgstr ""
 
-#: main.c:315
+#: main.c:324
 msgid ""
 "The 'cdromfile' attribute is now mandatory when using the 'cdrom' attribute."
 msgstr ""
 
-#: main.c:337
+#: main.c:346
 #, fuzzy, c-format
 msgid "Could not enable option: %s"
 msgstr "Kan niet schrijven naar bestand: %s"
 
-#: console_ui.c:31
+#: console_ui.c:36
 msgid "Y"
 msgstr "J"
 
-#: console_ui.c:32
+#: console_ui.c:37
 msgid "N"
 msgstr "N"
 
-#: console_ui.c:56
+#: console_ui.c:61
 msgid "Y/n"
 msgstr "J/n"
 
-#: console_ui.c:59
+#: console_ui.c:64
 msgid "N/y"
 msgstr "N/j"
 
-#: console_ui.c:62
+#: console_ui.c:67
 #, c-format
 msgid "%s [Press Enter] "
 msgstr ""
 
-#: console_ui.c:66 console_ui.c:92
+#: console_ui.c:71 console_ui.c:97
 #, c-format
 msgid "Warning, invalid yesno prompt: %s\n"
 msgstr "Waarschuwing, ongeldige ja-nee prompt: %s\n"
 
-#: console_ui.c:86
+#: console_ui.c:91
 msgid "Y/n/?"
 msgstr "J/n?"
 
-#: console_ui.c:89
+#: console_ui.c:94
 msgid "N/y/?"
 msgstr "N/j?"
 
-#: console_ui.c:109
+#: console_ui.c:114
 msgid "Continue?"
 msgstr "Doorgaan?"
 
-#: console_ui.c:170
+#: console_ui.c:179
 #, fuzzy, c-format
 msgid "'%s' option will be installed.\n"
 msgstr "%d MB beschikbaar, %d MB wordt geïnstalleerd.\n"
 
-#: console_ui.c:176
+#: console_ui.c:185
 #, c-format
 msgid "Install %s?"
 msgstr "Installeer %s?"
 
-#: console_ui.c:219
+#: console_ui.c:232
 #, fuzzy
 msgid "No help available\n"
 msgstr "Geen drivers beschikbaar voor gebruikersinterface\n"
 
-#: console_ui.c:237
+#: console_ui.c:250
 #, fuzzy, c-format
 msgid "----====== %s / %s installation program ======----\n"
 msgstr "----====== %s installatieprogramma ======----\n"
 
-#: console_ui.c:240
+#: console_ui.c:253
 #, c-format
 msgid "----====== %s installation program ======----\n"
 msgstr "----====== %s installatieprogramma ======----\n"
 
-#: console_ui.c:243
+#: console_ui.c:256
 #, c-format
 msgid "You are running a %s machine with %s\n"
 msgstr "U gebruikt een %s machine met %s\n"
 
-#: console_ui.c:244
+#: console_ui.c:257
 msgid "Hit Control-C anytime to cancel this installation program.\n"
 msgstr ""
 "Druk op Control-C wanneer u dit installatieprogramma tussentijds wilt "
 "stoppen.\n"
 
-#: console_ui.c:265 dialog_ui.c:90
+#: console_ui.c:278 dialog_ui.c:99
 msgid "Do you agree with the license?"
 msgstr "Bent u het eens met de licentie?"
 
-#: console_ui.c:284 dialog_ui.c:109
+#: console_ui.c:297 dialog_ui.c:118
 #, c-format
 msgid "Would you like to read the %s file ?"
 msgstr "Wilt u het %s-bestand lezen ?"
 
-#: console_ui.c:330
+#: console_ui.c:343
 msgid "Please choose the product to install, or Q to quit. "
 msgstr ""
 
-#: console_ui.c:360 dialog_ui.c:237
+#: console_ui.c:373 dialog_ui.c:286
 msgid "Please enter the installation path"
 msgstr "Geef het installatiepad op"
 
-#: console_ui.c:365
+#: console_ui.c:378
 #, fuzzy, c-format
 msgid "Install path set to: %s\n"
 msgstr "Installatie-pad: %s\n"
 
-#: console_ui.c:380 console_ui.c:434 dialog_ui.c:257 dialog_ui.c:317
+#: console_ui.c:393 console_ui.c:447 dialog_ui.c:306 dialog_ui.c:366
 #, c-format
 msgid "No write permission to %s\n"
 msgstr "Geen schrijfpermissie naar %s\n"
 
-#: console_ui.c:406 dialog_ui.c:284
+#: console_ui.c:419 dialog_ui.c:333
 #, fuzzy
 msgid "Do you want to install symbolic links to a directory in your path?"
 msgstr "Wilt u onderdelen voor het bureaublad installeren?"
 
-#: console_ui.c:413 dialog_ui.c:293
+#: console_ui.c:426 dialog_ui.c:342
 #, fuzzy
 msgid "Please enter the path in which to create the symbolic links"
 msgstr "Geef het pad op voor de programma-installatie"
 
-#: console_ui.c:418
+#: console_ui.c:431
 #, c-format
 msgid "Binary path set to: %s\n"
 msgstr ""
 
-#: console_ui.c:425 dialog_ui.c:308
+#: console_ui.c:438 dialog_ui.c:357
 msgid ""
 "Binary path must be different than the install path.\n"
 "The binary path must be an existing directory.\n"
 msgstr ""
 
-#: console_ui.c:460
+#: console_ui.c:473
 #, c-format
 msgid ""
 "\n"
@@ -813,44 +871,44 @@ msgid ""
 "\n"
 msgstr ""
 
-#: console_ui.c:473 dialog_ui.c:342
+#: console_ui.c:486 dialog_ui.c:391
 #, fuzzy
 msgid "Do you want to install startup menu entries?"
 msgstr "Wilt u onderdelen voor het bureaublad installeren?"
 
-#: console_ui.c:479
+#: console_ui.c:492
 #, c-format
 msgid "Installing to %s\n"
 msgstr "Bezig met installeren naar %s\n"
 
-#: console_ui.c:480
+#: console_ui.c:493
 #, c-format
 msgid "%d MB available, %d MB will be installed.\n"
 msgstr "%d MB beschikbaar, %d MB wordt geïnstalleerd.\n"
 
-#: console_ui.c:483
+#: console_ui.c:496
 msgid "Continue install?"
 msgstr "Doorgaan met de installatie?"
 
-#: console_ui.c:497
+#: console_ui.c:510
 #, c-format
 msgid "Installing %s ...\n"
 msgstr "Bezig met installeren: %s ...\n"
 
-#: console_ui.c:512 dialog_ui.c:395
+#: console_ui.c:526 dialog_ui.c:445
 msgid "Install aborted - cleaning up files\n"
 msgstr "Installatie onderbroken - bezig met opschonen bestanden\n"
 
-#: console_ui.c:520
+#: console_ui.c:534
 msgid "Installation complete.\n"
 msgstr "Installatie compleet.\n"
 
-#: console_ui.c:524
+#: console_ui.c:538
 #, fuzzy
 msgid "Would you like to start now?"
 msgstr "Wilt u het spel nu starten?"
 
-#: console_ui.c:529
+#: console_ui.c:543
 #, fuzzy
 msgid ""
 "If you run the program as root, the preferences will be stored in\n"
@@ -860,11 +918,11 @@ msgstr ""
 "opgeslagen in\n"
 "de home-directory van root in plaats van in uw eigen home-directory."
 
-#: console_ui.c:545
+#: console_ui.c:559
 msgid "Do you want to proceed with Express installation?"
 msgstr ""
 
-#: console_ui.c:550 dialog_ui.c:457 gtk_ui.c:315
+#: console_ui.c:564 dialog_ui.c:507 gtk_ui.c:317
 #, c-format
 msgid ""
 "Installation could not proceed due to the following error:\n"
@@ -872,137 +930,146 @@ msgid ""
 "Try to use 'Expert' installation."
 msgstr ""
 
-#: console_ui.c:562
+#: console_ui.c:576
 #, c-format
 msgid "Thank you for installing %s!\n"
 msgstr "Bedankt voor het installeren %s!\n"
 
-#: console_ui.c:567
+#: console_ui.c:581
 msgid "Please visit our website for updates and support.\n"
 msgstr "Bezoek alstublieft onze website voor updates en ondersteuning.\n"
 
-#: console_ui.c:572
+#: console_ui.c:586
 msgid "Would you like to launch web browser?"
 msgstr "Wilt u nu uw webbrowser starten?"
 
-#: console_ui.c:583
+#: console_ui.c:595
 msgid "Standard input is not a terminal!\n"
 msgstr "Standaard input is geen terminal!\n"
 
-#: dialog_ui.c:43
+#: dialog_ui.c:45
+msgid "Message"
+msgstr ""
+
+#: dialog_ui.c:48
 msgid "Request"
 msgstr ""
 
-#: dialog_ui.c:57
+#: dialog_ui.c:63
 #, fuzzy, c-format
 msgid "%s / %s Installation"
 msgstr "Installatie-opties"
 
-#: dialog_ui.c:61
+#: dialog_ui.c:67
 #, fuzzy, c-format
 msgid "%s Installation"
 msgstr "Installatie-opties"
 
-#: dialog_ui.c:67
+#: dialog_ui.c:76
 #, fuzzy, c-format
 msgid ""
 "You are running a %s machine with %s\n"
 "Distribution: %s %d.%d"
 msgstr "U gebruikt een %s machine met %s\n"
 
-#: dialog_ui.c:111
+#: dialog_ui.c:120
 msgid "README"
 msgstr ""
 
-#: dialog_ui.c:155
+#: dialog_ui.c:190
 msgid "Component"
 msgstr ""
 
-#: dialog_ui.c:165 dialog_ui.c:447
+#: dialog_ui.c:199 dialog_ui.c:497
 #, fuzzy, c-format
 msgid "Installation of %s"
 msgstr "Bezig met installeren naar %s\n"
 
-#: dialog_ui.c:166
+#: dialog_ui.c:200
 msgid "Please choose the options to install"
 msgstr ""
 
-#: dialog_ui.c:222
+#: dialog_ui.c:221
+#, c-format
+msgid "Option '%s' is required.\n"
+msgstr ""
+
+#: dialog_ui.c:271
 msgid "Choose the product"
 msgstr ""
 
-#: dialog_ui.c:223
+#: dialog_ui.c:272
 msgid "Please pick a product to install"
 msgstr ""
 
-#: dialog_ui.c:236
+#: dialog_ui.c:285
 #, fuzzy
 msgid "Installation path"
 msgstr "Installatie-pad:"
 
-#: dialog_ui.c:258
+#: dialog_ui.c:307
 #, fuzzy
 msgid "Failed permissions"
 msgstr "Geen schrijfpermissie naar %s\n"
 
-#: dialog_ui.c:292
+#: dialog_ui.c:341
 #, fuzzy
 msgid "Symlink path"
 msgstr "Installatie-pad:"
 
-#: dialog_ui.c:308 dialog_ui.c:320
+#: dialog_ui.c:357 dialog_ui.c:369
 msgid "Error"
 msgstr ""
 
-#: dialog_ui.c:378
+#: dialog_ui.c:427
 #, fuzzy, c-format
 msgid "Installing %s ..."
 msgstr "Bezig met installeren: %s ...\n"
 
-#: dialog_ui.c:379 dialog_ui.c:381
+#: dialog_ui.c:428 dialog_ui.c:430
 #, fuzzy
 msgid "Installing..."
 msgstr "Bezig met installeren: %s ...\n"
 
-#: dialog_ui.c:395
+#: dialog_ui.c:445
 msgid "Aborting"
 msgstr ""
 
-#: dialog_ui.c:405
+#: dialog_ui.c:455
 #, fuzzy
 msgid "Would you like to launch a Web browser?"
 msgstr "Wilt u nu uw webbrowser starten?"
 
-#: dialog_ui.c:419
+#: dialog_ui.c:469
 msgid ""
 "Installation complete!\n"
 "Would you like to start now?"
 msgstr ""
 
-#: dialog_ui.c:423
+#: dialog_ui.c:473
 msgid "Finished"
 msgstr ""
 
-#: dialog_ui.c:423
+#: dialog_ui.c:473
 #, fuzzy
 msgid "Installation complete!"
 msgstr "Installatie compleet.\n"
 
-#: dialog_ui.c:432
+#: dialog_ui.c:482
 msgid "Express installation using detected defaults"
 msgstr ""
 
-#: dialog_ui.c:433
+#: dialog_ui.c:483
 #, fuzzy
 msgid "Full control over the installation parameters"
 msgstr "Geef het installatiepad op"
 
-#: dialog_ui.c:448
+#: dialog_ui.c:498
 #, fuzzy
 msgid "Please select the class of installation"
 msgstr "Selecteer minstens een optie"
 
-#: gtk_ui.c:438
+#: gtk_ui.c:443
 #, fuzzy
 msgid ""
 "If you run this as root, the preferences will be stored in\n"
@@ -1012,85 +1079,99 @@ msgstr ""
 "opgeslagen in\n"
 "de home-directory van root in plaats van in uw eigen home-directory."
 
-#: gtk_ui.c:487
+#: gtk_ui.c:476
+msgid ""
+"Are you sure you want to abort\n"
+"this installation?"
+msgstr ""
+
+#: gtk_ui.c:505
 msgid "Please respond to the license dialog"
 msgstr "Antwoord alstublieft op de licentie-dialoog"
 
-#: gtk_ui.c:507
+#: gtk_ui.c:525
 msgid "Ready to install!"
 msgstr "Klaar voor installatie!"
 
-#: gtk_ui.c:520 gtk_ui.c:534
+#: gtk_ui.c:538 gtk_ui.c:552
 #, c-format
 msgid "%d MB"
 msgstr "%d MB"
 
-#: gtk_ui.c:700
+#: gtk_ui.c:710
+msgid "OK"
+msgstr ""
+
+#: gtk_ui.c:723
 msgid "Yes"
 msgstr "Ja"
 
-#: gtk_ui.c:701
+#: gtk_ui.c:724
 msgid "No"
 msgstr "Nee"
 
-#: gtk_ui.c:721
+#: gtk_ui.c:744
 msgid "Setup"
 msgstr "Setup"
 
-#: gtk_ui.c:769
+#: gtk_ui.c:808
 #, fuzzy
 msgid "Fatal error:  out of memory\n"
 msgstr "Te weinig geheugen\n"
 
-#: gtk_ui.c:776
+#: gtk_ui.c:815
 #, c-format
 msgid "Error: maximum of %d install_path entries exceeded\n"
 msgstr ""
 
-#: gtk_ui.c:894
+#: gtk_ui.c:946
 msgid "Warning: No writable targets in path... You may want to be root.\n"
 msgstr ""
 
-#: gtk_ui.c:913
+#: gtk_ui.c:966
 msgid "Unable to locate 'setup_menuitems_checkbox'"
 msgstr "Kan 'setup_menuitems_checkbox' niet vinden"
 
-#: gtk_ui.c:1152
+#: gtk_ui.c:1199
 #, fuzzy, c-format
 msgid "%s / %s Setup"
 msgstr "%s Setup"
 
-#: gtk_ui.c:1154
+#: gtk_ui.c:1201
 #, c-format
 msgid "%s Setup"
 msgstr "%s Setup"
 
-#: gtk_ui.c:1441
+#: gtk_ui.c:1512
 #, c-format
 msgid "Unable to open %s, aborting!\n"
 msgstr "Kan %s niet openenen, het programma stopt!\n"
 
-#: gtk_ui.c:1496
+#: gtk_ui.c:1567
 #, c-format
 msgid "Type '%s' to start the program"
 msgstr "Typ '%s' om het programma te starten"
 
-#: plugins/cpio.c:158
+#: plugins/cpio.c:102
+msgid "Invalid CPIO header\n"
+msgstr ""
+
+#: plugins/cpio.c:162
 #, c-format
 msgid "Bad checksum for file '%s'"
 msgstr "Foutieve checksum voor het bestand '%s'"
 
-#: plugins/rpm.c:66 plugins/rpm.c:99
+#: plugins/rpm.c:72 plugins/rpm.c:106
 #, c-format
 msgid "RPM error: %s"
 msgstr "RPM-fout: %s"
 
-#: plugins/rpm.c:147 plugins/rpm.c:153
+#: plugins/rpm.c:155 plugins/rpm.c:162
 #, c-format
 msgid "Unable to install RPM file: '%s'"
 msgstr "Kan het RPM-bestand: '%s' niet installeren"
 
-#: plugins/tar.c:115
+#: plugins/tar.c:117
 #, c-format
 msgid "Tar: '%s' is unknown file type: %c"
 msgstr "Tar: '%s' is een onbekend bestandstype: %c"
@@ -1108,14 +1189,12 @@ msgstr "Tar: '%s' is een onbekend bestandstype: %c"
 #~ msgid ""
 #~ "echo\n"
 #~ "echo WARNING: The following RPM archives have been installed or upgraded\n"
-#~ "echo when this software was installed. You may want to manually remove some "
-#~ "of those:\n"
+#~ "echo when this software was installed. You may want to manually remove "
+#~ "some of those:\n"
 #~ msgstr ""
 #~ "echo\n"
-#~ "echo WAARSCHUWING: De volgende RPM-archieven zijn geïnstalleerd of "
-#~ "bijgewerkt\n"
-#~ "echo terwijl deze software werd geïnstalleerd. Misschien wilt u sommige "
-#~ "ervan met de hand verwijderen:\n"
+#~ "echo WAARSCHUWING: De volgende RPM-archieven zijn geïnstalleerd of bijgewerkt\n"
+#~ "echo terwijl deze software werd geïnstalleerd. Misschien wilt u sommige ervan met de hand verwijderen:\n"
 
 #~ msgid "Binary directory:"
 #~ msgstr "Binaire directory:"

@@ -18,20 +18,6 @@
  *									       *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */ 
 
-#include "config.h"
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
-#include <pwd.h>
-#include <unistd.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <locale.h>
-#include <signal.h>
-
 #include <gtk/gtk.h>
 
 #include "pseudo.h"
@@ -44,6 +30,7 @@
 #define NAME            "Login Prompt"
 #define SET_DISPL_ENV   "export DISPLAY="
 #define SU_PWD_OUT      "Password:"
+#define SU_PWD_LEN      9
 #define SU_DELAY        30000
 
 /* These are set global because more then one function modifies them,
@@ -73,7 +60,7 @@ GtkWidget *gtk_user_textbox;
 GtkWidget *gtk_password_textbox;
 GtkTooltips *tooltips;
 
-gchar *arg_message, *arg_title, *displ_host;
+gchar *arg_message, *arg_title, *displ_host, *su_command = NULL;
 
 gboolean message_in=FALSE,
 		 title_in=FALSE,

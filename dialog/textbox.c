@@ -1,5 +1,5 @@
 /*
- *  $Id: textbox.c,v 1.3 2002-04-03 08:10:25 megastep Exp $
+ *  $Id: textbox.c,v 1.4 2002-09-17 22:40:46 megastep Exp $
  *
  *  textbox.c -- implements the text box
  *

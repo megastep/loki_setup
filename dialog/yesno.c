@@ -1,5 +1,5 @@
 /*
- *  $Id: yesno.c,v 1.2 2002-04-03 08:10:25 megastep Exp $
+ *  $Id: yesno.c,v 1.3 2002-09-17 22:40:46 megastep Exp $
  *
  *  yesno.c -- implements the yes/no box
  *
