@@ -1,4 +1,6 @@
 Current:
+Rob Crittenden - Fri Apr  9 18:03:22 PDT 2004
+ * Allow scripts to require CDs and specify a size.
 Ryan C. Gordon (Epic Games) - Thu Apr  8 17:57:37 EDT 2004
  * Mac version deals with the default install path ("/Applications") not
    existing. Used to crash in this case.

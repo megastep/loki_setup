@@ -760,6 +760,18 @@ There supported attributes for the script element are :
             string of this attribute. See 'About localization' below for
             more details.
 
+ size       If the script handles the installation of some files and you want
+            the progress bar to reflect it, indicate the size here. The size
+            is updated when the script finishes. The unit is in bytes.
+
+ message    The message to display to the user. By default this is
+            "Running script"
+
+ cdromid    When doing a multi-cd installation and running scripts then
+            SETUP_CDROMPATH may not be set as expected. To ensure that it is
+            set properly indicate which CD the script is executing against
+            if it is copying files from a CD.
+
 It is also possible to filter the scripts on system characteristics, through
 the use of the "arch", "glibc" and "distro" attributes, that work just like
 for the "files" element.

@@ -729,16 +729,36 @@ ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, c
 }
 
 int copy_script(install_info *info, xmlNodePtr node, const char *script, const char *dest,
-				int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+				int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current), const char *from_cdrom, const char *msg)
 {
+    struct cdrom_elem *cdrom;
+    struct cdrom_elem *cdrom_start;
+    int rc;
+
 	if ( corrupts ) { /* Don't run any scripts while restoring files */
 		return 0;
 	}
 	if ( update ) {
-		if ( ! update(info, _("Running script"), 0, 0, current_option_txt) )
+		if (msg != NULL)
+			rc = update(info, msg, 0, 0, current_option_txt);
+		else
+			rc = update(info, _("Running script"), 0, 0, current_option_txt);
+		if ( !rc ) 
 			return 0;
 	}
-    return(run_script(info, script, -1, 1));
+
+    cdrom_start = info->cdroms_list;
+    while ( from_cdrom != NULL && info->cdroms_list ) {
+        cdrom = info->cdroms_list;
+        if (!strcmp(cdrom->id, from_cdrom)) {
+            break;
+        }
+        info->cdroms_list = cdrom->next;
+    }
+
+    rc = run_script(info, script, -1, 1);
+    info->cdroms_list = cdrom_start;
+    return rc;
 }
 
 ssize_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
@@ -819,9 +839,16 @@ ssize_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
 					size += copied;
 				}
 			} else if ( strcmp(node->name, "script") == 0 ) {
-				copy_script(info, node,
+				const char *sz= xmlGetProp(node, "size");
+				const char *msg= xmlGetProp(node, "message");
+				int rc;
+				rc = copy_script(info, node,
 					    xmlNodeListGetString(info->config, node->childs, 1),
-					    path, update);
+					    path, update, from_cdrom, msg);
+				if (rc == 0 && sz) {
+					info->installed_bytes += atoi(sz);
+					size += atoi(sz);
+				}
 			}
 		}
         /* Do not handle exclusive elements here; it gets called multiple times else */
