@@ -25,6 +25,7 @@ AC_CHECK_HEADERS(unistd.h)
 AC_CHECK_HEADERS(strings.h)
 AC_CHECK_HEADERS(pwd.h)
 AC_CHECK_HEADERS(gtk.h)
+AC_CHECK_HEADERS(carbon/carbon.h)
 AC_CHECK_HEADERS(dirent.h)
 AC_CHECK_HEADERS(sys/dirent.h)
 AC_CHECK_HEADERS(sys/ndir.h)
@@ -206,6 +207,8 @@ CFLAGS="$CFLAGS -I$SETUPDB"
 
 GUI_LIBS=$GTK_STATIC
 GTK_LIBS=$GTK_STATIC
+#!!!TODO - Add carbon libs as necessary
+CARBON_LIBS=
 
 LIBS="$LIBS $EXTRA_LIBS"
 
@@ -221,6 +224,7 @@ AC_CHECK_LIB(intl, gettext,
 		LIBINTL="/opt/gettext/lib/libintl.a /opt/libiconv/lib/libiconv.a"
 		LIBS="$LIBS $LIBINTL"
 		GUILIBS="$GUI_LIBS $LIBINTL"
+		CARBONLIBS="$CARBON_LIBS $LIBINTL"
 	fi
 )
 AC_CHECK_LIB(gpm, Gpm_Open, USE_GPM=yes)
@@ -301,9 +305,11 @@ if test ! -z "$HAVEXML"; then
     if test "$STATIC" = ""; then
         LIBS="$LIBS $BSTATIC -L$XML_PREFIX/lib$LIBSUFFIX -lxml"
         GUI_LIBS="$GUI_LIBS -L$XML_PREFIX/lib$LIBSUFFIX -lxml"
+        CARBON_LIBS="$CARBON_LIBS -L$XML_PREFIX/lib$LIBSUFFIX -lxml"
     else
         LIBS="$LIBS $XML_PREFIX/lib$LIBSUFFIX/libxml.a"
         GUI_LIBS="$GUI_LIBS $XML_PREFIX/lib$LIBSUFFIX/libxml.a"
+        CARBON_LIBS="$CARBON_LIBS $XML_PREFIX/lib$LIBSUFFIX/libxml.a"
     fi
 else
     AC_MSG_ERROR([*** xml-config not found. You need a working libxml installation.])
@@ -377,6 +383,7 @@ if test x$enable_rpm = xyes; then
 		RPM_LIBS="$BSTATIC -lrpm -ldb1 -lpopt"
         LIBS="$LIBS $RPM_LIBS"
         GUI_LIBS="$GUI_LIBS $RPM_LIBS"
+        CARBON_LIBS="$CARBON_LIBS $RPM_LIBS"
         AC_DEFINE(ENABLE_RPM, 1, RPM support.)
 fi
 dnl RPM 4.x support, needs additional libraries
@@ -398,6 +405,7 @@ if test x$enable_rpm4 = xyes; then
 		fi
         LIBS="$LIBS $RPM_LIBS"
         GUI_LIBS="$GUI_LIBS $RPM_LIBS"
+        CARBON_LIBS="$CARBON_LIBS $RPM_LIBS"
         AC_DEFINE(ENABLE_RPM, 1, RPM support.)
 fi
 
@@ -407,6 +415,7 @@ if test ! -z "$USE_LIBINTL"; then
 	LIBINTL="$BSTATIC $LIBINTL -lz \$(BDYNAMIC)"
 	LIBS="$LIBS $LIBINTL"
 	GUI_LIBS="$GUI_LIBS $LIBINTL"
+	CARBON_LIBS="$CARBON_LIBS $LIBINTL"
 else
 	if test "$STATIC" = ""; then
 		LIBS="$LIBS $BSTATIC -lz \$(BDYNAMIC)"
@@ -414,6 +423,7 @@ else
 		LIBS="$LIBS -lz"
 	fi
 	GUI_LIBS="$GUI_LIBS $BSTATIC -lz \$(BDYNAMIC)"
+	CARBON_LIBS="$CARBON_LIBS $BSTATIC -lz \$(BDYNAMIC)"
 fi
 
 
@@ -454,6 +464,7 @@ if test x$enable_dynamic = xyes; then
         CFLAGS="$CFLAGS -DDYNAMIC_PLUGINS"
         LIBS="$LIBS -ldl"
         GUI_LIBS="$GUI_LIBS -ldl"
+        CARBON_LIBS="$CARBON_LIBS -ldl"
         DYN_PLUGINS=true
         AC_DEFINE(DYNAMIC_PLUGINS, 1, Dynamic plugin support.)
 fi
@@ -484,6 +495,7 @@ AC_SUBST(SETUPDB)
 AC_SUBST(PLUGINS)
 AC_SUBST(DYN_PLUGINS)
 AC_SUBST(GUI_LIBS)
+AC_SUBST(CARBON_LIBS)
 AC_SUBST(GTK_LIBS)
 AC_SUBST(X11_LIBS)
 AC_SUBST(EXTRA_LIBS)
