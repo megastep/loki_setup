@@ -61,7 +61,16 @@ LIBS += -ldl
 endif
 
 CONSOLE_LIBS = $(LIBS)
-GUI_LIBS = $(LIBS) -Wl,-Bdynamic $(shell gtk-config --libs || echo "-lgtk -lgdk") $(shell libglade-config --prefix)/lib/libglade.a -rdynamic
+GUI_LIBS = plugins/libplugins.a $(SETUPDB)/$(arch)/libsetupdb.a
+GUI_LIBS += -Wl,-Bstatic
+GUI_LIBS += -L$(shell libglade-config --prefix)
+GUI_LIBS +=  -lglade
+GUI_LIBS += -L$(shell gtk-config --prefix)
+GUI_LIBS +=  -lgtk -lgdk -rdynamic -lgmodule -lglib 
+GUI_LIBS += -L$(shell xml-config --prefix)
+GUI_LIBS += -lxml -lz
+GUI_LIBS += -Wl,-Bdynamic
+GUI_LIBS += -L/usr/X11R6/lib -lXi -lXext -lX11 -lm -ldl
 
 all: do-plugins setup setup.gtk uninstall
 
@@ -113,7 +122,7 @@ endif
 		echo No directory to copy the binary files to.; \
 	fi
 
-install-image: all
+install-image: all loki_uninstall
 ifeq ($(DYN_PLUGINS),true)
 	$(MAKE) -C plugins DYN_PLUGINS=true USE_RPM=$(USE_RPM) install
 endif
@@ -131,7 +140,8 @@ endif
 		fi; \
 	    cp -v setup.gtk $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc); \
 	    strip $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk; \
-	    brandelf -t $(os) $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk; \
+	    cp -v loki_uninstall $(IMAGE)/loki_uninstall/bin/$(arch)/$(libc)/; \
+	    strip $(IMAGE)/loki_uninstall/bin/$(arch)/$(libc)/loki_uninstall; \
 	else \
 		echo No directory to copy the binary files to.; \
 	fi
