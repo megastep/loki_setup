@@ -12,7 +12,7 @@
 static int cur_state;
 static install_info *cur_info;
 static int diskspace;
-static int license_okay = 0;
+//static int license_okay = 0;
 static int in_setup = true;
 static CarbonRes *MyRes;
 static RadioGroup *radio_list = NULL; // Group for the radio buttons
@@ -276,8 +276,8 @@ static const char *check_for_installation(install_info *info)
 {
     carbon_debug("check_for_installation()\n");
 
-    if(!license_okay)
-        return _("Please respond to the license dialog");
+    /*if(!license_okay)
+        return _("Please respond to the license dialog");*/
 	return IsReadyToInstall(info);
 }
 
@@ -479,54 +479,24 @@ int OnOptionClickEvent(OptionsButton *ButtonWithEventClick)
 			{
                 carbon_debug("EULA not supported yet!\n");
                 //!!!TODO - Support EULA
-				/* this option has some EULA nodes
-				 * we need to prompt before this change can be validated / turned on
-				 */
-				/*const char* name = GetProductEULANode(cur_info, data_node);
-				if (name)
+				const char* name = GetProductEULANode(cur_info, data_node);
+				if(name)
 				{
-					GtkWidget *license;
-					GtkWidget *license_widget;
-					
-					if (!setup_glade_license)
-						setup_glade_license = glade_xml_new(SETUP_GLADE, "license_dialog");
-					glade_xml_signal_autoconnect(setup_glade_license);
-					license = glade_xml_get_widget(setup_glade_license, "license_dialog");
-					license_widget = glade_xml_get_widget(setup_glade_license, "license_area");
-					if ( license && license_widget ) {
-						GdkFont *font;
-						install_state start;
-						
-						font = gdk_font_load(LICENSE_FONT);
-						gtk_widget_hide(license);
-						load_file(GTK_TEXT(license_widget), font, name);
-						gtk_widget_show(license);
-						gtk_window_set_modal(GTK_WINDOW(license), TRUE);
-						
-						start = cur_state; // happy hacking
-						license_okay = 0;
-						iterate_for_state();
-						cur_state = start;
-
-						gtk_widget_hide(license);
-						if (!license_okay)
-						{
-							// the user doesn't accept the option EULA, leave this option disabled
-							license_okay = 1; // put things back in order regarding the product EULA
-							gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget), FALSE);
-							return;
-						}
-						license_okay = 1;
-						break;
+                    if(!carbon_ReadmeOrLicense(MyRes, false, name))
+                    {
+                        carbon_OptionsSetValue(ButtonWithEventClick, false);
+					    return true;
 					}
+                    // Else, license was accepted...get out of loop
+                    break;
 				}
 				else
 				{
 					log_warning("option-specific EULA not found, can't set option on\n");
 					// EULA not found 	or not accepted
-					gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget), FALSE);
-					return;
-				}*/
+					carbon_OptionsSetValue(ButtonWithEventClick, false);
+					return true;
+				}
 			}
 			child = child->next;
 		}
@@ -805,7 +775,7 @@ static install_state carbonui_init(install_info *info, int argc, char **argv, in
     info->install_size = size_tree(info, info->config->root->childs);
 
     // Needed so that Expert is detected properly at this point
-    license_okay = 1;
+    //license_okay = 1;
 
     // Check if we should check "Expert" installation by default
 	if(check_for_installation(info))
@@ -814,13 +784,13 @@ static install_state carbonui_init(install_info *info, int argc, char **argv, in
     // If product has an end user license, show it
     if(GetProductEULA(info))
     {
-        license_okay = 0;
+        //license_okay = 0;
         cur_state = SETUP_LICENSE;
     }
     // Otherwise, show the readme
     else
     {
-        license_okay = 1;
+        //license_okay = 1;
         cur_state = SETUP_README;
     }
 
@@ -832,9 +802,12 @@ static install_state carbonui_init(install_info *info, int argc, char **argv, in
 
 static install_state carbonui_license(install_info *info)
 {
-    carbon_debug("***carbonui_license() (not implemented)\n");
-    //!!!TODO - Implement license (right now, just go to next state
-    cur_state = SETUP_README;
+    carbon_debug("***carbonui_license()\n");
+    // If license is accepted
+    if(carbon_ReadmeOrLicense(MyRes, false, GetProductEULA(info)))
+        cur_state = SETUP_README;
+    else
+        cur_state = SETUP_EXIT;
 
     return cur_state;
 }

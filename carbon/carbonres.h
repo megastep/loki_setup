@@ -96,7 +96,7 @@
 #define COMMAND_PROMPT_NO       'no  '
 #define COMMAND_PROMPT_OK       'ok  '
 
-#define COMMAND_README_CANCEL   'canc'
+#define COMMAND_README_CANCEL   'cncl'
 #define COMMAND_README_CLOSE    'clos'
 #define COMMAND_README_AGREE    'agre'
 

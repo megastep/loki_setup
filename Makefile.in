@@ -220,6 +220,7 @@ clean:
 	$(MAKE) -C plugins clean
 	$(MAKE) -C dialog clean
 	rm -f foo.xml core tags *.o
+	rm -f carbon/*.o
 
 distclean: clean
 	rm -f Makefile config.cache config.status config.log
