@@ -55,22 +55,19 @@ endif
 CONSOLE_LIBS = $(LIBS)
 GUI_LIBS = $(LIBS) -Wl,-Bdynamic $(shell gtk-config --libs || echo "-lgtk -lgdk") $(shell libglade-config --prefix)/lib/libglade.a -rdynamic
 
-all: $(SETUPDB)/brandelf do-plugins setup setup.gtk uninstall
+all: do-plugins setup setup.gtk uninstall
 
 testxml: testxml.o
 	$(CC) -o $@ $^ $(LIBS)
 
 uninstall: $(UNINSTALL_OBJS) $(SETUPDB)/libsetupdb.a
 	$(CC) -o $@ $^ $(CONSOLE_LIBS) -static
-	$(SETUPDB)/brandelf -t $(os) $@
 
 setup:	$(CONSOLE_OBJS) $(SETUPDB)/libsetupdb.a
 	$(CC) -o $@ $^ $(CONSOLE_LIBS) -static
-	$(SETUPDB)/brandelf -t $(os) $@
 
 setup.gtk: $(GUI_OBJS) $(SETUPDB)/libsetupdb.a
 	$(CC) -o $@ $^ $(GUI_LIBS)
-	$(SETUPDB)/brandelf -t $(os) $@
 
 do-plugins:
 	$(MAKE) -C plugins DYN_PLUGINS=$(DYN_PLUGINS) USE_RPM=$(USE_RPM) SETUPDB=$(shell pwd)/$(SETUPDB) all
@@ -88,17 +85,20 @@ endif
 	    cp -v setup.gtk image/setup.data/bin/$(os)/$(arch)/$(libc); \
 	fi
 
-install: all
+install: all $(SETUPDB)/brandelf
 ifeq ($(DYN_PLUGINS),true)
 	$(MAKE) -C plugins DYN_PLUGINS=true USE_RPM=$(USE_RPM) install
 endif
 	@if [ -d image/setup.data/bin/$(os)/$(arch)/$(libc) ]; then \
 	    cp -v setup image/setup.data/bin/$(os)/$(arch); \
 	    strip image/setup.data/bin/$(os)/$(arch)/setup; \
+	    $(SETUPDB)/brandelf -t $(os) image/setup.data/bin/$(os)/$(arch)/setup; \
 	    cp -v uninstall image/setup.data/bin/$(os)/$(arch); \
 	    strip image/setup.data/bin/$(os)/$(arch)/uninstall; \
+	    $(SETUPDB)/brandelf -t $(os) image/setup.data/bin/$(os)/$(arch)/uninstall; \
 	    cp -v setup.gtk image/setup.data/bin/$(os)/$(arch)/$(libc); \
 	    strip image/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk; \
+	    $(SETUPDB)/brandelf -t $(os) image/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk; \
 	fi
 
 clean:
