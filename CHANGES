@@ -1,3 +1,13 @@
+1.6.1:
+Ryan C. Gordon
+ * makeself now uses the md5sum program for MD5 calculation.
+ * bzip2 fixes/enhancements.
+ * installation/symlink paths in GTK+ combo boxes should be more sane now.
+ * autoconf warning cleanups.
+ * Now looks for setupdb at ../loki_setupdb by default.
+ * Required CD-ROM detection works now.
+ * VERY preliminary BeOS support.
+
 1.6.0:
 Stephane Peter (Codehost) - Tue Aug 21 20:22:10 PDT 2001
  * Added distribution detection: "distro" attribute, SETUP_DISTRO environment
