@@ -1,6 +1,8 @@
 
+#include <sys/types.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pwd.h>
 
 #include "install.h"
 #include "detect.h"
@@ -116,6 +118,45 @@ void add_bin_entry(install_info *info, const char *path,
     }
 }
 
+/* Function to set the install path string, expanding home directories */
+void set_installpath(install_info *info, const char *path)
+{
+    info->install_path[0] = '\0';
+    if ( *path == '~' ) {
+        ++path;
+        if ( *path == '/' ) {
+            const char *home;
+
+            /* Substitute '~' with our home directory */
+            home = getenv("HOME");
+            if ( home ) {
+                strcpy(info->install_path, home);
+            } else {
+                log_warning(info, "Couldn't find your home directory");
+            }
+        } else {
+            char user[PATH_MAX];
+            int i;
+            struct passwd *pwent;
+
+            /* Find out which user to use for home directory */
+            for ( i=0; *path && (*path != '/'); ++i ) {
+                user[i] = *path++;
+            }
+            user[i] = '\0';
+
+            /* Get their home directory if possible */
+            pwent = getpwnam(user);
+            if ( pwent ) {
+                strcpy(info->install_path, pwent->pw_dir);
+            } else {
+                log_warning(info, "Couldn't find home directory for %s", user);
+            }
+        }
+    }
+    strcat(info->install_path, path);
+}
+
 /* Free the install information structure */
 void delete_install(install_info *info)
 {
@@ -158,15 +199,7 @@ install_state install(install_info *info,
 
     /* Walk the install tree */
     node = info->config->root->childs;
-    while ( node ) {
-        const char *wanted;
-
-        wanted = xmlGetProp(node, "install");
-        if ( wanted  && (strcmp(wanted, "true") == 0) ) {
-            copy_node(info, node, info->install_path, update);
-        }
-        node = node->next;
-    }
+    copy_tree(info, node, info->install_path, update);
     return SETUP_COMPLETE;
 }
 

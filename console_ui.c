@@ -146,7 +146,7 @@ static install_state console_setup(install_info *info)
                         info->install_path, path, sizeof(path)) ) {
             return SETUP_ABORT;
         }
-        strcpy(info->install_path, path);
+        set_installpath(info, path);
 
         /* Go through the install options */
         info->install_size = 0;

@@ -284,34 +284,49 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
     return size;
 }
 
-size_t copy_node(install_info *info, xmlNodePtr cur, const char *dest,
+size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
                 void (*update)(install_info *info, const char *path, size_t progress, size_t size))
 {
     size_t size, copied;
 
     size = 0;
-    cur = cur->childs;
-    while ( cur ) {
-printf("Checking node element '%s'\n", cur->name);
-        if ( strcmp(cur->name, "files") == 0 ) {
-printf("Installing file set for '%s'\n", xmlNodeListGetString(info->config, (cur->parent)->childs, 1));
+    node = node->childs;
+    while ( node ) {
+printf("Checking node element '%s'\n", node->name);
+        if ( strcmp(node->name, "files") == 0 ) {
+printf("Installing file set for '%s'\n", xmlNodeListGetString(info->config, (node->parent)->childs, 1));
             copied = copy_list(info,
-                               xmlNodeListGetString(info->config, cur->childs, 1),
+                               xmlNodeListGetString(info->config, node->childs, 1),
                                dest, update);
             if ( copied > 0 ) {
                 size += copied;
             }
         }
-        if ( strcmp(cur->name, "binary") == 0 ) {
+        if ( strcmp(node->name, "binary") == 0 ) {
 printf("Installing binary\n");
-            copied = copy_binary(info, cur,
-                               xmlNodeListGetString(info->config, cur->childs, 1),
+            copied = copy_binary(info, node,
+                               xmlNodeListGetString(info->config, node->childs, 1),
                                dest, update);
             if ( copied > 0 ) {
                 size += copied;
             }
         }
-        cur = cur->next;
+        node = node->next;
     }
     return size;
+}
+
+size_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
+                void (*update)(install_info *info, const char *path, size_t progress, size_t size))
+{
+    while ( node ) {
+        const char *wanted;
+
+        wanted = xmlGetProp(node, "install");
+        if ( wanted  && (strcmp(wanted, "true") == 0) ) {
+            copy_node(info, node, info->install_path, update);
+            copy_tree(info, node->childs, dest, update);
+        }
+        node = node->next;
+    }
 }

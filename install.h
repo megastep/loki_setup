@@ -93,6 +93,9 @@ extern void add_dir_entry(install_info *info, const char *path);
 extern void add_bin_entry(install_info *info, const char *path,
                 const char *symlink, const char *desc, const char *icon);
 
+/* Function to set the install path string, expanding home directories */
+extern void set_installpath(install_info *info, const char *path);
+
 /* Free the install information structure */
 extern void delete_install(install_info *info);
 
