@@ -46,7 +46,25 @@ int OnCommandEvent(UInt32 CommandID);
 
 static yesno_answer carbonui_prompt(const char *, yesno_answer);
 
+static const char *DesktopName = "Desktop";
+static const char *DocumentsName = "Documents";
+static const char *ApplicationsName = "Applications";
+
 /********** HELPER FUNCTIONS ***********/
+static const char *GetSpecialPathName(const char *Path)
+{
+    // If we find /Desktop, then we'll show just "Desktop".
+    //  Otherwise, it'll show /Users/joeshmo/Desktop.
+    if(strstr(Path, DesktopName) != NULL)
+        return DesktopName;
+    else if(strstr(Path, DocumentsName) != NULL)
+        return DocumentsName;
+    else if(strstr(Path, ApplicationsName) != NULL)
+        return ApplicationsName;
+
+    return Path;
+}
+
 static void EnableTree(xmlNodePtr node, OptionsBox *box)
 {
     if(strcmp(node->name, "option") == 0)
@@ -311,8 +329,13 @@ static void update_space(void)
 static void init_install_path(void)
 {
     carbon_debug("init_install_path()\n");
-    // Just set the Applications folder as the default install dir
-    carbon_SetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, cur_info->install_path);
+    // Set the textbox to the install folder, and show it as a "special folder" if
+    //  we're an app bundle.
+    if(GetProductIsAppBundle(cur_info))
+        carbon_SetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, GetSpecialPathName(cur_info->install_path));
+    else
+        carbon_SetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, cur_info->install_path);
+    check_install_button();
 }
 
 static void init_binary_path(void)
@@ -443,12 +466,9 @@ static void OnCommandInstallPath(void)
     {
         // If user hit OK
         set_installpath(cur_info, InstallPath);
-        // If we find /Desktop, then we'll show just "Desktop".
-        //  Otherwise, it'll show /Users/joeshmo/Desktop.
-        if(strstr(InstallPath, "/Desktop") != NULL)
-            carbon_SetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, "Desktop");
-        else
-            carbon_SetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, cur_info->install_path);
+
+        carbon_SetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, GetSpecialPathName(InstallPath));
+        check_install_button();
     }
 }
 
@@ -472,7 +492,7 @@ void OnCommandBeginInstall()
 
     // Set install and binary paths accordingly
     char string[1024];
-    char appstring[1024];
+    //char appstring[1024];
 
     if(!GetProductIsAppBundle(cur_info))
     {
@@ -1298,7 +1318,7 @@ static install_state carbonui_complete(install_info *info)
     // Show the install complete page
     carbon_ShowInstallScreen(MyRes, DONE_PAGE);
     // Set the install directory label accordingly
-    carbon_SetLabelText(MyRes, DONE_INSTALL_DIR_LABEL_ID, info->install_path);
+    carbon_SetLabelText(MyRes, DONE_INSTALL_DIR_LABEL_ID, GetSpecialPathName(info->install_path));
     // Set game label accordingly
     if (info->installed_symlink && info->symlinks_path && *info->symlinks_path)
         snprintf(text, sizeof(text), _("Type '%s' to start the program"), info->installed_symlink);
