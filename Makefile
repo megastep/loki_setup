@@ -76,8 +76,7 @@ GUI_LIBS += -lxml -lz
 GUI_LIBS += -Wl,-Bdynamic
 GUI_LIBS += -L/usr/X11R6/lib -lXi -lXext -lX11 -lm -ldl
 else
-GUI_LIST += $(shell libglade-config --libs) $(xml-config --libs)
-GUI_LIST += -lm -ldl
+GUI_LIBS += $(shell libglade-config --libs) $(shell xml-config --libs)
 endif
 
 all: do-plugins setup setup.gtk uninstall
