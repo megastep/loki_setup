@@ -27,7 +27,7 @@
 
 #define SETUP_VERSION_MAJOR 1
 #define SETUP_VERSION_MINOR 5
-#define SETUP_VERSION_RELEASE 4
+#define SETUP_VERSION_RELEASE 5
 
 /* The different setup states */
 typedef enum {
