@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.45 2000-08-05 02:39:10 megastep Exp $
+   $Id: gtk_ui.c,v 1.46 2000-08-11 20:25:01 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1442,7 +1442,7 @@ static install_state gtkui_complete(install_info *info)
     widget = glade_xml_get_widget(setup_glade, "install_directory_label");
     gtk_label_set_text(GTK_LABEL(widget), info->install_path);
     widget = glade_xml_get_widget(setup_glade, "play_game_label");
-    if ( info->installed_symlink ) {
+    if ( info->installed_symlink && info->symlinks_path && *info->symlinks_path ) {
         snprintf(text, sizeof(text), _("Type '%s' to start the program"), info->installed_symlink);
     } else {
 		*text = '\0';
@@ -1451,7 +1451,8 @@ static install_state gtkui_complete(install_info *info)
 
     /* Hide the play game button if there's no game to play. :) */
     widget = glade_xml_get_widget(setup_glade, "play_game_button");
-    if ( widget && ! info->installed_symlink ) {
+    if ( widget && 
+		 (!info->installed_symlink || !info->symlinks_path || !*info->symlinks_path ) ) {
         gtk_widget_hide(widget);
     }
 
