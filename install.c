@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.85 2000-11-11 03:53:26 megastep Exp $ */
+/* $Id: install.c,v 1.86 2000-11-11 07:45:51 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -853,11 +853,18 @@ const char *get_option_help(install_info *info, xmlNodePtr node)
 /* Free the install information structure */
 void delete_install(install_info *info)
 {
-    struct component_elem *comp = info->components_list, *oldcomp;
-    struct cdrom_elem *cdrom = info->cdroms_list, *oldcd;
-    while ( comp ) {
-        struct option_elem *opt = comp->options_list, *old;
-        while ( opt ) {
+    struct component_elem *comp;
+    struct cdrom_elem *cdrom;
+    while ( info->components_list ) {
+        struct option_elem *opt;
+        
+        comp = info->components_list;
+        info->components_list = comp->next;
+
+        while ( comp->options_list ) {
+            opt = comp->options_list;
+            comp->options_list = opt->next;
+
             while ( opt->file_list ) {
                 struct file_elem *elem;
  
@@ -881,28 +888,48 @@ void delete_install(install_info *info)
                 opt->bin_list = elem->next;
                 free(elem);
             }
-            old = opt;
-            opt = opt->next;
-            free(old);
+            while ( opt->pre_script_list ) {
+                struct script_elem *elem;
+ 
+                elem = opt->pre_script_list;
+                opt->pre_script_list = elem->next;
+                free(elem->script);
+                free(elem);
+            }
+            while ( opt->post_script_list ) {
+                struct script_elem *elem;
+ 
+                elem = opt->post_script_list;
+                opt->post_script_list = elem->next;
+                free(elem->script);
+                free(elem);
+            }
+            while ( opt->rpm_list ) {
+                struct rpm_elem *elem;
+ 
+                elem = opt->rpm_list;
+                opt->rpm_list = elem->next;
+                free(elem->name);
+                free(elem->version);
+                free(elem);
+            }
+            free(opt->name);
+            free(opt);
         }
         free(comp->name);
         free(comp->version);
-        oldcomp = comp;
-        comp = comp->next;
-        free(oldcomp);
+        free(comp);
     }
-    while ( cdrom ) {
+    while ( info->cdroms_list ) {
+        cdrom = info->cdroms_list;
+        info->cdroms_list = cdrom->next;
         free(cdrom->name);
         free(cdrom->id);
         free(cdrom->file);
         free(cdrom->mounted);
-        oldcd = cdrom;
-        cdrom = cdrom->next;
-        free(oldcd);
+        free(cdrom);
     }
     unmount_filesystems(info);
-    info->cdroms_list = NULL;
-    info->components_list = NULL;
     if ( info->lookup ) {
         close_lookup(info->lookup);
     }
