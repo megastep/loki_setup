@@ -761,8 +761,8 @@
     <reference idRef="328"/>
     <reference idRef="329"/>
     <object class="IBCarbonWindow" id="337">
-      <string name="windowRect">324 415 486 795 </string>
-      <string name="title">Window</string>
+      <string name="windowRect">328 351 490 731 </string>
+      <string name="title">Setup</string>
       <object name="rootControl" class="IBCarbonRootControl" id="338">
         <string name="bounds">0 0 162 380 </string>
         <array count="5" name="subviews">

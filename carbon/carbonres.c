@@ -48,10 +48,10 @@ static const char *GetEXEPath()
     Bundle = CFBundleGetMainBundle();
     url = CFBundleCopyExecutableURL(Bundle);
     // Get EXE path as a CFString
-    CFExePath = CFURLCopyPath(url);
+    CFExePath = CFURLCopyFileSystemPath(url, kCFURLPOSIXPathStyle);
     // Convert it to a char *
     CFStringGetCString(CFExePath, EXEPath, CARBON_MAX_APP_PATH, kCFStringEncodingASCII);
-    printf("carbon_GetAppPath() - Executable path = '%s'\n", EXEPath);
+    //printf("carbon_GetAppPath() - Executable path = '%s'\n", EXEPath);
 
     CFRelease(url);
     CFRelease(CFExePath);
@@ -86,7 +86,7 @@ static void MoveImage(CarbonRes *Res)
 
 static void HResize(OptionsBox *Box, int ID, int Offset)
 {
-    printf("HResize() - Offset = %d\n", Offset);
+    //printf("HResize() - Offset = %d\n", Offset);
 
     ControlID IDStruct = {LOKI_SETUP_SIG, ID};
     ControlRef TempControl;
@@ -100,7 +100,7 @@ static void HResize(OptionsBox *Box, int ID, int Offset)
 
 static void HMove(OptionsBox *Box, int ID, int Offset)
 {
-    printf("HMove() - Offset = %d\n", Offset);
+    //printf("HMove() - Offset = %d\n", Offset);
 
     ControlID IDStruct = {LOKI_SETUP_SIG, ID};
     ControlRef TempControl;
@@ -144,8 +144,8 @@ static int OptionsSetRadioButton(OptionsButton *Button)
     {
         // Only do something if button state as changed
         Value = GetControl32BitValue(Button->Control);
-        printf("OptionsSetRadioButton() - Current state = %d\n", Value);
-        printf("OptionsSetRadioButton() - Last state = %d\n", Button->LastState);
+        //printf("OptionsSetRadioButton() - Current state = %d\n", Value);
+        //printf("OptionsSetRadioButton() - Last state = %d\n", Button->LastState);
         if(Value != Button->LastState)
         {
             // Save the new state as current state for the radio button
@@ -216,7 +216,7 @@ static pascal OSStatus OptionButtonEventHandler(EventHandlerCallRef HandlerRef, 
     OSStatus err = eventNotHandledErr;	// Default is event is not handled by this function
     OptionsButton *Button = (OptionsButton *)UserData;
 
-    printf("OptionsButtonEventHandler()\n");
+    //printf("OptionsButtonEventHandler()\n");
 
     // If radio button, unselect other radio buttons in group and raise any relevant toggle events
     if(OptionsSetRadioButton(Button))
@@ -456,7 +456,7 @@ static void LoadGroupControlRefs(CarbonRes *Res)
 static void AddOptionsButton(OptionsBox *Box, OptionsButton *Button)
 {
     carbon_debug("AddOptionsButton()\n");
-    printf("AddOptionsButton() - BoxPtr == %p\n", Box);
+    //printf("AddOptionsButton() - BoxPtr == %p\n", Box);
 
     // Create singlely linked-list with buttons
     if(Box->ButtonCount > 0)
@@ -473,9 +473,9 @@ static void AddOptionsButton(OptionsBox *Box, OptionsButton *Button)
 
     // Install click event handler for new button
     EventTypeSpec commSpec = {kEventClassControl, kEventControlHit};    
-    printf("Return value for InstallEvent = %ld", InstallControlEventHandler(Button->Control,
+    InstallControlEventHandler(Button->Control,
         NewEventHandlerUPP(OptionButtonEventHandler), 1, &commSpec,
-        (void *)Button, NULL));
+        (void *)Button, NULL);
 }
 
 static void ApplyOffsetToControl(OptionsBox *Box, int ID, int Offset, int GrowNotMove)
@@ -668,7 +668,7 @@ int carbon_IterateForState(CarbonRes *Res, int *StateFlag)
     {
         if((err = ReceiveNextEvent(0, NULL, kEventDurationForever, true, &theEvent)) != noErr)
         {
-            printf("ReceiveNextEvent returned error: %ld", err);
+            //printf("ReceiveNextEvent returned error: %ld", err);
             break;
         }
 
@@ -725,11 +725,11 @@ void carbon_ShowInstallScreen(CarbonRes *Res, InstallPage NewInstallPage)
         //STUPCreateControl(Res->Window, &boundsRect2, &Res->InstalledFilesLabel);
         CreateYASTControl(Res->Window, &boundsRect2, &Res->InstalledFilesLabel);
         ShowControl(Res->InstalledFilesLabel);
-        printf("Rock\n");
+        //printf("Rock\n");
         //Boolean readonly = true;
         //SetControlData(Res->InstalledFilesLabel, kControlEntireControl, kYASTControlReadOnlyTag, sizeof(Boolean), &readonly);
         EmbedControl(Res->InstalledFilesLabel, TempControlRef);
-         printf("Rock2\n");
+         //printf("Rock2\n");
         //SetControlBounds(TempControlRef, &boundsRect2);
         //MoveControl(TempControlRef, boundsRect2.left, boundsRect2.top);
     }
@@ -869,7 +869,7 @@ void carbon_UpdateImage(CarbonRes *Res, const char *Filename, const char *Path, 
     strcat(FullPath, AppPath);
     strcat(FullPath, Path);
     strcat(FullPath, Filename);
-    printf("carbon_UpdateImage() - Image Path: '%s'\n", FullPath);
+    //printf("carbon_UpdateImage() - Image Path: '%s'\n", FullPath);
     // Create URL to image
     //url = CFURLCreateWithBytes(kCFAllocatorDefault, FullPath, strlen(FullPath), kCFStringEncodingASCII, NULL);
     url = CFURLCreateWithBytes(kCFAllocatorDefault, FullPath, strlen(FullPath), kCFStringEncodingMacRoman, NULL);
@@ -883,7 +883,7 @@ void carbon_UpdateImage(CarbonRes *Res, const char *Filename, const char *Path, 
         char URLString[CARBON_MAX_APP_PATH]; 
         //CFStringGetCString(CFURLString, URLString, CARBON_MAX_APP_PATH, kCFStringEncodingASCII);
         CFStringGetCString(CFURLString, URLString, CARBON_MAX_APP_PATH, kCFStringEncodingMacRoman);
-        printf("carbon_UpdateImage() - URL = '%s'\n", URLString);
+        //printf("carbon_UpdateImage() - URL = '%s'\n", URLString);
 
         // Create provider for accessing file data
         Provider = CGDataProviderCreateWithURL(url);
@@ -1173,6 +1173,9 @@ int carbon_ReadmeOrLicense(CarbonRes *Res, int ReadmeNotLicense, char *Message)
     SetControlData(Res->MessageLabel,  kControlLabelPart, kControlStaticTextTextTag, strlen(Message), Message);
     CFStringRef CFMessage = CFStringCreateWithCString(NULL, Message, kCFStringEncodingMacRoman);
     SetControlData(Res->MessageLabel, kControlEntireControl, kYASTControlAllUnicodeTextTag, sizeof(CFMessage), &CFMessage);
+
+    YASTControlEditTextSelectionRec range = {1, 1};
+    SetControlData(Res->MessageLabel, kControlEntireControl, kYASTControlSelectionRangeTag, sizeof(YASTControlEditTextSelectionRec), &range);
     readonly = true;
     SetControlData(Res->MessageLabel, kControlEntireControl, kYASTControlReadOnlyTag, sizeof(Boolean), &readonly);
 
@@ -1234,7 +1237,7 @@ int carbon_ReadmeOrLicense(CarbonRes *Res, int ReadmeNotLicense, char *Message)
 //now, the code to create them dynamically is commented out.
 OptionsButton *carbon_OptionsNewLabel(OptionsBox *Box, const char *Name)
 {
-    printf("carbon_OptionsNewLabel() - %s\n", Name);
+    //printf("carbon_OptionsNewLabel() - %s\n", Name);
 
     // Create our option button
     OptionsButton *Button = malloc(sizeof(OptionsButton));
@@ -1256,7 +1259,7 @@ OptionsButton *carbon_OptionsNewLabel(OptionsBox *Box, const char *Name)
 
 OptionsButton *carbon_OptionsNewCheckButton(OptionsBox *Box, const char *Name)
 {
-    printf("carbon_OptionsNewCheckButton() - %s\n", Name);
+    //printf("carbon_OptionsNewCheckButton() - %s\n", Name);
 
     // Create our option button
     OptionsButton *Button = malloc(sizeof(OptionsButton));
@@ -1278,7 +1281,7 @@ OptionsButton *carbon_OptionsNewCheckButton(OptionsBox *Box, const char *Name)
 
 OptionsButton *carbon_OptionsNewSeparator(OptionsBox *Box)
 {
-    printf("carbon_OptionsNewSeparator()\n");
+    //printf("carbon_OptionsNewSeparator()\n");
 
     // Create our option button
     OptionsButton *Button = malloc(sizeof(OptionsButton));
@@ -1296,7 +1299,7 @@ OptionsButton *carbon_OptionsNewSeparator(OptionsBox *Box)
 
 OptionsButton *carbon_OptionsNewRadioButton(OptionsBox *Box, const char *Name, RadioGroup **Group)
 {
-    printf("carbon_OptionsNewRadioButton() - %s\n", Name);
+    //printf("carbon_OptionsNewRadioButton() - %s\n", Name);
 
     // Create our option button
     OptionsButton *Button = malloc(sizeof(OptionsButton));
@@ -1425,9 +1428,9 @@ void carbon_OptionsShowBox(OptionsBox *Box)
         // Save as max if applicable
         if(ButtonRect.right > Box->MaxButtonWidth)
             Box->MaxButtonWidth = ButtonRect.right;
-        printf("carbon_OptionsShowBox() - Button width = %d\n", ButtonRect.right);
+        //printf("carbon_OptionsShowBox() - Button width = %d\n", ButtonRect.right);
 
-        printf("EmbedControl returned: %d\n", EmbedControl(Box->Buttons[i]->Control, Box->BoxControlRef));
+        EmbedControl(Box->Buttons[i]->Control, Box->BoxControlRef);
         //!!!TODO - Might have to change height for separators (always be 1)
         SetControlBounds(Box->Buttons[i]->Control, &ButtonRect);
         MoveControl(Box->Buttons[i]->Control, BoxControlBounds.left + BUTTON_MARGIN, BoxControlBounds.top + BUTTON_TOP_MARGIN + i * BUTTON_HEIGHT);
@@ -1471,7 +1474,7 @@ void carbon_OptionsShowBox(OptionsBox *Box)
 
 void carbon_OptionsSetTooltip(OptionsButton *Button, const char *Name)
 {
-    printf("carbon_OptionsSetTooltip() - %s\n", Name);
+    //printf("carbon_OptionsSetTooltip() - %s\n", Name);
 
     HMHelpContentRec Tooltip;
     CFStringRef CFName = CFStringCreateWithCString(NULL, Name, kCFStringEncodingMacRoman);
@@ -1489,7 +1492,7 @@ void carbon_OptionsSetTooltip(OptionsButton *Button, const char *Name)
 
 void carbon_OptionsSetValue(OptionsButton *Button, int Value)
 {
-    printf("carbon_OptionsSetValue() - %d\n", Value);
+    //printf("carbon_OptionsSetValue() - %d\n", Value);
     if(Value)
         SetControl32BitValue(Button->Control, kControlRadioButtonCheckedValue);
     // Can't set a Radio Button to False
@@ -1586,7 +1589,7 @@ void carbon_SetUninstallWindowSize(OptionsBox *Box)
         NewWidth = WINDOW_WIDTH;
 
     // Resize window
-    printf("carbon_SetUninstallWindowSize - Box->MaxButtonWidth = %d", Box->MaxButtonWidth);
+    //printf("carbon_SetUninstallWindowSize - Box->MaxButtonWidth = %d", Box->MaxButtonWidth);
     SizeWindow(Box->Res->Window, NewWidth, NewHeight, true);
 
     // When size changes, we have to reposition it to the center
@@ -1624,7 +1627,7 @@ OptionsButton *carbon_GetButtonByName(OptionsBox *Box, const char *Name)
 int carbon_LaunchURL(const char *url)
 {
     int ReturnValue;
-    printf("carbon_LaunchURL: %s", url);
+    //printf("carbon_LaunchURL: %s", url);
 
     CFURLRef theCFURL = CFURLCreateWithBytes(kCFAllocatorDefault, url, strlen(url),
         kCFStringEncodingMacRoman, NULL);
@@ -1668,13 +1671,13 @@ void carbon_GetAppPath(char *Dest, int Length)
             // Reposition end of path just after the current '/'
             *(p + 1) = 0x00;
             // Check for existence of setup.data folder
-            printf("carbon_GetAppPath() - Checking for existence of '%s'\n", TempEXEPath);
+            //printf("carbon_GetAppPath() - Checking for existence of '%s'\n", TempEXEPath);
             strcpy(TempStr, TempEXEPath);
             strcat(TempStr, "setup.data");
             // If setup.data found
             if(access(TempStr, F_OK) == 0)
             {
-                printf("carbon_GetAppPath() - Found in setup.data\n");
+                //printf("carbon_GetAppPath() - Found in setup.data\n");
                 break;
             }
             else
@@ -1686,7 +1689,7 @@ void carbon_GetAppPath(char *Dest, int Length)
         }
     }
 
-    printf("carbon_GetAppPath() - AppPath = '%s'\n", TempEXEPath);
+    //printf("carbon_GetAppPath() - AppPath = '%s'\n", TempEXEPath);
     strcpy(Dest, TempEXEPath);
 }
 
@@ -1884,6 +1887,6 @@ void carbon_AuthorizeUser()
 
     AuthorizationFree (myAuthorizationRef, kAuthorizationFlagDefaults);		//17
 
-    if (myStatus) printf("Status: %i\n", myStatus);
+    //if (myStatus) printf("Status: %i\n", myStatus);
     //return myStatus;
 }
