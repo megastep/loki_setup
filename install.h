@@ -276,5 +276,11 @@ extern char install_menuitems(install_info *info, desktop_type d);
  */
 extern int run_script(install_info *info, const char *script, int arg);
 
+/* Convenience functions to quickly change back and forth between current directories */
+
+extern void push_curdir(const char *path);
+
+extern void pop_curdir(void);
+
 #endif /* _install_h */
 

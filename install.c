@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.62 2000-10-11 23:47:04 megastep Exp $ */
+/* $Id: install.c,v 1.63 2000-10-12 00:57:30 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -806,8 +806,7 @@ void uninstall(install_info *info)
         run_script(info, GetPreUnInstall(info), 0);
     }
 
-	/* TODO: Check for relative paths !! */
-    chdir(info->install_path);
+    push_curdir(info->install_path);
 
     for ( opt = info->options_list; opt; opt = opt->next ) {
 
@@ -876,6 +875,8 @@ void uninstall(install_info *info)
     if (GetPostUnInstall(info)) {
         run_script(info, GetPostUnInstall(info), 0);
     }
+
+    pop_curdir();
 }
 
 void generate_uninstall(install_info *info)
@@ -896,6 +897,8 @@ void generate_uninstall(install_info *info)
 		struct rpm_elem *relem;
         struct option_elem *opt;
 		char buf[PATH_MAX];
+        
+        push_curdir(info->install_path);
 
         for ( opt = info->options_list; opt; opt = opt->next ) {
             option = loki_create_option(component, opt->name);
@@ -911,7 +914,12 @@ void generate_uninstall(install_info *info)
             /* Add binaries */
             for ( belem = opt->bin_list; belem; belem = belem->next ) {
                 /* TODO: Find a way to get the damn MD5 that was computed while copying the file */
-                loki_register_file(option, belem->path, NULL);
+                product_file_t *file = loki_register_file(option, belem->path, NULL);
+                if (file) {
+                    loki_setmode_file(file, 0755); /* Binaries have special permissions */
+                } else {
+                    log_warning(info, _("Could not register binary: %s"), belem->path);
+                }
             }
 
             /* Add directories */
@@ -1022,6 +1030,8 @@ void generate_uninstall(install_info *info)
             }
         }
 		loki_closeproduct(product);
+        
+        pop_curdir();
 
         update_uninstall(info);
 
@@ -1472,4 +1482,30 @@ int run_script(install_info *info, const char *script, int arg)
         unlink(script_file);
     }
     return(exitval);
+}
+
+/* Convenience functions to quickly change back and forth between current directories */
+
+#define MAX_CURDIRS 10
+
+static char curdirs[PATH_MAX][MAX_CURDIRS];
+static int curdir_index = 0;
+
+void push_curdir(const char *path)
+{
+    if (curdir_index >= MAX_CURDIRS) {
+        fprintf(stderr,"ERROR: Too much curdirs. FIX IT!\n");
+    } else {
+        getcwd(curdirs[curdir_index++], PATH_MAX);
+        if( chdir(path) < 0)
+            perror("chdir(push)");
+    }
+}
+
+void pop_curdir(void)
+{
+    if (curdir_index>0) {
+        if(chdir(curdirs[--curdir_index])<0)
+            perror("chdir(pop)");
+    }
 }
