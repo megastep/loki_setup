@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.55 2000-07-31 21:27:08 megastep Exp $ */
+/* $Id: install.c,v 1.56 2000-07-31 22:25:32 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -154,13 +154,13 @@ const char *GetDefaultPath(install_info *info)
 const char *GetProductEULA(install_info *info)
 {
 	const char *text;
-	static char name[BUFSIZ];
+	static char name[BUFSIZ], matched_name[BUFSIZ];
 	xmlNodePtr node;
 	int found = 0;
 
     text = xmlGetProp(info->config->root, "eula");
 	if (text) {
-		strncpy(name, text, BUFSIZ);
+		strncpy(matched_name, text, BUFSIZ);
 		found = 1;
 		log_warning(info, "The 'eula' attribute is deprecated, please use the 'eula' element from now on.");
 	}
@@ -174,8 +174,8 @@ const char *GetProductEULA(install_info *info)
 					log_warning(info, "Duplicate matching EULA entries in XML file!");
 				text = xmlNodeListGetString(info->config, node->childs, 1);
 				if(text) {
-					*name = '\0';
-					while ( (*name == 0) && parse_line(&text, name, sizeof(name)) )
+					*matched_name = '\0';
+					while ( (*matched_name == 0) && parse_line(&text, matched_name, sizeof(matched_name)) )
 						;
 					found = 2;
 				}
@@ -183,11 +183,13 @@ const char *GetProductEULA(install_info *info)
 		}
 		node = node->next;
 	}
-    if ( found && ! access(name, R_OK) ) {
-        return name;
-    } else {
-        return NULL;
+    if ( found ) {
+		snprintf(name, sizeof(name), "%s/%s", info->setup_path, matched_name);
+		if ( !access(name, R_OK) ) {
+			return name;
+		}
     }
+	return NULL;
 }
 
 const char *GetProductREADME(install_info *info)
