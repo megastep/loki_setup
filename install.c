@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.79 2000-11-10 06:38:00 megastep Exp $ */
+/* $Id: install.c,v 1.80 2000-11-10 20:07:51 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1082,8 +1082,12 @@ void generate_uninstall(install_info *info)
         product = info->product;
         component = info->component;
     } else {
-        product = loki_create_product(info->name, info->install_path, info->desc,
-                                      info->update_url);
+        /* Try to open the product first in case it was installed previously */
+        product = loki_openproduct(info->name);
+        if ( ! product ) {
+            product = loki_create_product(info->name, info->install_path, info->desc,
+                                          info->update_url);
+        }
     }
 
 	if ( product ) {
@@ -1104,7 +1108,10 @@ void generate_uninstall(install_info *info)
             }
 
             if ( ! info->component ) {
-                component = loki_create_component(product, comp->name, comp->version);
+                component = loki_find_component(product, comp->name);
+                if ( ! component ) {
+                    component = loki_create_component(product, comp->name, comp->version);
+                }
                 if ( comp->is_default ) {
                     loki_setdefault_component(component);
                 }
@@ -1112,7 +1119,10 @@ void generate_uninstall(install_info *info)
 
             push_curdir(info->install_path);
             for ( opt = comp->options_list; opt; opt = opt->next ) {
-                option = loki_create_option(component, opt->name);
+                option = loki_find_option(component, opt->name);
+                if ( ! option ) {
+                    option = loki_create_option(component, opt->name);
+                }
                 /* Add files */
                 for ( felem = opt->file_list; felem; felem = felem->next ) {
                     if ( felem->symlink || *(int *)felem->md5sum == 0 ) {
