@@ -579,8 +579,8 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
         while( (mntent = getmntent( mountfp )) != NULL && num_cdroms < SETUP_MAX_DRIVES){
             char *tmp, mntdev[1024], mnt_type[32];
 
-			if ( strncmp(mntent->mnt_fsname, DEVICE_FLOPPY, strlen(DEVICE_FLOPPY)) == 0)
-				continue;
+            if ( strncmp(mntent->mnt_fsname, DEVICE_FLOPPY, strlen(DEVICE_FLOPPY)) == 0)
+                continue;
 
             strcpy(mntdev, mntent->mnt_fsname);
             strcpy(mnt_type, mntent->mnt_type);
@@ -593,8 +593,8 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
                         *tmp = '\0';
                     }
                 }
-		tmp = strstr(mntent->mnt_opts, "dev=");
-		if ( tmp ) {
+                tmp = strstr(mntent->mnt_opts, "dev=");
+                if ( tmp ) {
                     strcpy(mntdev, tmp+strlen("dev="));
                     tmp = strchr(mntdev, ',');
                     if ( tmp ) {
@@ -602,16 +602,26 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
                     }
                 }
             }
-            if( strncmp(mntdev, "/dev", 4) || 
+
+            tmp = strstr(mntent->mnt_opts, "loop=");
+            if ( tmp ) {
+                strcpy(mntdev, tmp+strlen("loop="));
+                tmp = strchr(mntdev, ',');
+                if ( tmp ) {
+                    *tmp = '\0';
+                }
+            }
+
+            if( strncmp(mntdev, "/dev", 4) ||
                 realpath(mntdev, mntdevpath) == NULL ) {
                 continue;
             }
             if ( strcmp(mnt_type, MNTTYPE_CDROM) == 0 ) {
-	        path[num_cdroms ++] = strdup(mntent->mnt_dir);
+                path[num_cdroms ++] = strdup(mntent->mnt_dir);
             } else if ( strcmp(mnt_type, "auto") == 0 &&
-			strncmp(mntdev, DEVICE_FLOPPY, strlen(DEVICE_FLOPPY))) {
-	        path[num_cdroms ++] = strdup(mntent->mnt_dir);		
-	    }
+                strncmp(mntdev, DEVICE_FLOPPY, strlen(DEVICE_FLOPPY))) {
+                path[num_cdroms ++] = strdup(mntent->mnt_dir);
+            }
 #ifdef sgi
             else if ( strcmp(mnt_type, "cdfs") == 0 ||
                       strcmp(mnt_type, "efs")  == 0 ) {
