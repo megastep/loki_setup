@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.153 2005-02-05 01:52:58 megastep Exp $ */
+/* $Id: install.c,v 1.154 2005-02-09 03:36:05 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1030,7 +1030,8 @@ struct file_elem *add_file_entry(install_info *info, struct option_elem *comp,
 
     elem = (struct file_elem *)malloc(sizeof *elem);
     if ( elem ) {
-        //verify comp is not NULL
+		elem->desktop = NULL;
+        /* verify comp is not NULL */
         if (comp)
         {
             elem->path = strdup(remove_root(info, path));
