@@ -461,6 +461,16 @@ static install_state console_setup(install_info *info)
 			}
 			set_symlinkspath(info, path);
 
+			/* Check for manual path */
+			if ( GetProductHasManPages(info) ) {
+				if ( ! prompt_user(_("Please enter the path in which to install manual pages for this product"),
+								   info->man_path, path, sizeof(path)) ) {
+					return SETUP_ABORT;
+				}
+				
+				set_manpath(info, path);
+			}
+
 			/* If the binary and install path are the same, give an error */
 			if (strcmp(info->symlinks_path, info->install_path) == 0) {
 				printf(_("Binary path must be different than the install path.\nThe binary path must be an existing directory.\n"));

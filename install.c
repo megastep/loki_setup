@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.126 2004-02-06 03:03:13 megastep Exp $ */
+/* $Id: install.c,v 1.127 2004-02-18 03:56:55 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -207,6 +207,15 @@ int GetProductHasNoBinaries(install_info *info)
 int GetProductHasPromptBinaries(install_info *info)
 {
     char *p = xmlGetProp(info->config->root, "promptbinaries");
+    if (p && strstr(p, "yes")) {
+		return 1;
+	}
+    return 0;
+}
+
+int GetProductHasManPages(install_info *info)
+{
+    char *p = xmlGetProp(info->config->root, "manpages");
     if (p && strstr(p, "yes")) {
 		return 1;
 	}
@@ -807,6 +816,7 @@ struct option_elem *add_option_entry(struct component_elem *comp, const char *na
         elem->file_list = NULL;
         elem->dir_list = NULL;
         elem->bin_list = NULL;
+        elem->man_list = NULL;
         elem->pre_script_list = elem->post_script_list = NULL;
         elem->rpm_list = NULL;
         elem->next = comp->options_list;
@@ -903,6 +913,21 @@ void add_dir_entry(install_info *info, struct option_elem *comp,
     } else {
         log_fatal(_("Out of memory"));
     }
+}
+
+/* Add a man page entry */
+void add_man_entry(install_info *info, struct option_elem *comp, struct file_elem *file,
+				   const char *section)
+{
+	struct man_elem *elem = (struct man_elem *) malloc(sizeof(struct man_elem));
+	if ( elem ) {
+        elem->file = file;
+		elem->section = section;
+		elem->next = comp->man_list;
+		comp->man_list = elem;
+    } else {
+        log_fatal(_("Out of memory"));
+	}
 }
 
 /* Add a binary entry to the list of binaries installed */
@@ -1012,6 +1037,12 @@ void set_installpath(install_info *info, const char *path, int append_slash)
 void set_symlinkspath(install_info *info, const char *path)
 {
     expand_home(info, path, info->symlinks_path);
+}
+
+/* Function to set the man path string, expanding home directories */
+void set_manpath(install_info *info, const char *path)
+{
+    expand_home(info, path, info->man_path);
 }
 
 /* Mark/unmark an option node for install, optionally recursing */
@@ -1281,6 +1312,13 @@ void delete_install(install_info *info)
                 elem = opt->dir_list;
                 opt->dir_list = elem->next;
                 free(elem->path);
+                free(elem);
+            }
+            while ( opt->man_list ) {
+                struct man_elem *elem;
+ 
+                elem = opt->man_list;
+                opt->man_list = elem->next;
                 free(elem);
             }
             while ( opt->bin_list ) {

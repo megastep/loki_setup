@@ -186,6 +186,9 @@ There are several optional attributes of the install element:
  category   Indicates the product category, used to specify the menu entry on some systems. Defaults
             to "Games"
 
+ manpages   If set to "yes", then the user will be prompted for the install pages installation path.
+            Should be used when using the MANPAGE element described below.
+
 The CDROM element:
 
 An installer can fetch the necesary data files from one or more CDROM discs. As of setup 1.5.0,
@@ -714,6 +717,25 @@ There are several optional attributes of the files element:
             mode for all files uncompressed from the archive.
             NOTE: This doesn't apply to directories, which are currently always created with
             mode 755.
+
+The MANPAGE element:
+
+If your product comes with man pages (destined to be installed system-wide), they have to be
+installed under a man/man<section>/<name>.<section> directory structure inside the image.
+Section and name are provided using the following mandatory attributes :
+
+ name       The name of the command or function the man page refers to. Can be arbitrary.
+
+ section    The section of the man pages the corresponding page belongs to.
+
+The following attributes are optional :
+
+ symlink    A comma-separated list of symbolic links to create for this man page, in the same
+            section. Use this when your man page covers several commands / functions.
+
+Note that the MANPAGE element does not take any children.
+Do not forget to set the "manpages" attribute to the root <install> element to "yes" to be able
+to use this feature.
 
 The SCRIPT element:
 

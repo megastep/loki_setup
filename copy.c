@@ -546,6 +546,40 @@ static void check_dynamic(const char *fpat, char *bin)
     }
 }
 
+ssize_t copy_manpage(install_info *info, xmlNodePtr node, const char *dest,
+		    const char *from_cdrom,
+		    int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+{
+    ssize_t copied = 0;
+	char fpat[PATH_MAX], final[PATH_MAX];
+	const char *section = xmlGetProp(node, "section"), *name = xmlGetProp(node, "name");
+	struct file_elem *file = NULL;
+
+	snprintf(fpat, sizeof(fpat), "man/man%s/%s.%s", section, name, section);
+	if ( from_cdrom ) {
+        const char *cdpath = get_cdrom(info, from_cdrom);
+        if ( !cdpath )
+            return 0;
+
+		copied = copy_file(info, cdpath, fpat, dest, final, 0, 0, node, update, &file);
+	} else {
+		copied = copy_file(info, NULL, fpat, dest, final, 0, 0, node, update, &file);
+	}
+
+	if ( copied < 0 ) {
+		log_warning(_("Unable to copy man page '%s'"), fpat);
+		ui_fatal_error(_("Unable to copy man page '%s'"), fpat);
+	} else if ( copied > 0 ) {
+		/* Process symlinks here */
+		if ( *info->man_path ) {
+			snprintf(fpat, sizeof(fpat), "%s/man%s/%s.%s", info->man_path, section, name, section);
+			file_symlink(info, final, fpat);
+		}
+		add_man_entry(info, current_option, file, section);
+	}
+	return copied;
+}
+
 ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, const char *dest, 
 		    const char *from_cdrom,
 		    int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
@@ -778,6 +812,11 @@ ssize_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
 				if ( copied > 0 ) {
 					size += copied;
 				}
+			} else if ( strcmp(node->name, "manpage") == 0 ) {
+				copied = copy_manpage(info, node, path, from_cdrom, update);
+				if ( copied > 0 ) {
+					size += copied;
+				}
 			} else if ( strcmp(node->name, "script") == 0 ) {
 				copy_script(info, node,
 					    xmlNodeListGetString(info->config, node->childs, 1),
@@ -892,6 +931,33 @@ ssize_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
         node = node->next;
     }
     return size;
+}
+
+/* Returns the install size of a man page, in bytes */
+ssize_t size_manpage(install_info *info, xmlNodePtr node, const char *from_cdrom)
+{
+    struct stat sb;
+    char fpat[BUFSIZ], final[BUFSIZ];
+	const char *section = xmlGetProp(node, "section"), *name = xmlGetProp(node, "name");
+    ssize_t size = 0;
+
+	if ( from_cdrom ) {
+        const char *cdpath = get_cdrom(info, from_cdrom);
+        if ( !cdpath )
+            return 0;
+
+		snprintf(fpat, sizeof(fpat), "%s/man/man%s/%s.%s", cdpath, section, name, section);
+		if ( stat(fpat, &sb) == 0 ) {
+			size += sb.st_size;
+		}
+
+	} else {
+		snprintf(fpat, sizeof(fpat), "man/man%s/%s.%s", section, name, section);
+		if ( stat(fpat, &sb) == 0 ) {
+			size += sb.st_size;
+		}
+	}
+	return size;
 }
 
 /* Returns the install size of a binary, in bytes */
@@ -1063,6 +1129,8 @@ ssize_t size_node(install_info *info, xmlNodePtr node)
 				} else if ( strcmp(node->name, "binary") == 0 ) {
 					size += size_binary(info, from_cdrom,
 									xmlNodeListGetString(info->config, node->childs, 1));
+				} else if ( strcmp(node->name, "manpage") == 0 ) {
+					size += size_manpage(info, node, from_cdrom);
 				}
 			}
             node = node->next;

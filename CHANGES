@@ -1,4 +1,6 @@
 Current:
+Stephane Peter (Codehost) - Tue Feb 17 19:54:25 PST 2004
+ * Preliminary support for installing man pages (<manpage> tag).
 Ryan C. Gordon (icculus.org) - Sat Feb 14 20:28:17 EST 2004
  * Respect new "tail" behaviour in image/setup.sh
 Ryan C. Gordon (icculus.org) - Sat Feb 14 20:28:17 EST 2004

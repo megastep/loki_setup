@@ -82,6 +82,9 @@ typedef struct _install_info {
     char symlinks_path[PATH_MAX];
     const char *installed_symlink;
 
+	/* The root of the manpage directory structure to install to */
+	char man_path[PATH_MAX];
+
 	/* The path to the binary for the 'Play' button */
 	char play_binary[PATH_MAX];
 
@@ -162,6 +165,13 @@ typedef struct _install_info {
                 const char *icon;
                 struct bin_elem *next;
             } *bin_list;
+
+			/* List of installed man pages */
+			struct man_elem {
+				struct file_elem *file;
+				const char *section;
+				struct man_elem *next;
+			} *man_list;
 
             /* List of post-uninstall scripts to run (from RPM files) */
             struct script_elem {
@@ -247,6 +257,7 @@ extern int         GetProductReinstall(install_info *info);
 extern int         GetReinstallNode(install_info *info, xmlNodePtr node);
 extern int         GetProductIsAppBundle(install_info *info);
 extern int         GetProductSplashPosition(install_info *info);
+extern int         GetProductHasManPages(install_info *info);
 extern const char *GetProductCDKey(install_info *info);
 extern const char *GetProductPostInstallMsg(install_info *info);
 
@@ -293,8 +304,11 @@ extern void add_dir_entry(install_info *info, struct option_elem *opt, const cha
 
 /* Add a binary entry to the list of binaries installed */
 extern void add_bin_entry(install_info *info, struct option_elem *opt, struct file_elem *file,
-                   const char *symlink, const char *desc, const char *menu,
-                   const char *name, const char *icon, const char *play);
+						  const char *symlink, const char *desc, const char *menu,
+						  const char *name, const char *icon, const char *play);
+/* Add a man page entry */
+extern void add_man_entry(install_info *info, struct option_elem *comp, struct file_elem *file,
+						  const char *section);
 
 /* Expand a path with home directories into the provided buffer */
 extern void expand_home(install_info *info, const char *path, char *buffer);
@@ -304,6 +318,9 @@ extern void set_installpath(install_info *info, const char *path, int append_sla
 
 /* Function to set the symlink path string, expanding home directories */
 extern void set_symlinkspath(install_info *info, const char *path);
+
+/* Function to set the man path string, expanding home directories */
+extern void set_manpath(install_info *info, const char *path);
 
 /* Mark/unmark an option node for install, optionally recursing */
 extern void mark_option(install_info *info, xmlNodePtr node,

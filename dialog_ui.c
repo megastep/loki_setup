@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.18 2004-02-06 03:03:13 megastep Exp $
+ * $Id: dialog_ui.c,v 1.19 2004-02-18 03:56:55 megastep Exp $
  */
 
 #include <limits.h>
@@ -419,6 +419,18 @@ install_state dialog_setup(install_info *info)
 				}
 
 				set_symlinkspath(info, path);
+
+				if ( GetProductHasManPages(info) ) {
+					clear_screen();
+					if ( dialog_inputbox(_("Manual path"), 
+										 _("Please enter the path in which to install manual pages"),
+										 10, 50, info->man_path, 0) < 0 ) {
+						return SETUP_ABORT;
+					} else {
+						strncpy(path, dialog_vars.input_result, sizeof(path));
+					}
+					set_manpath(info, path);
+				}
 
 				/* If the binary and install path are the same, give an error */
 				if (strcmp(info->symlinks_path, info->install_path) == 0) {

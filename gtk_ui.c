@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.91 2004-02-08 06:01:21 megastep Exp $
+   $Id: gtk_ui.c,v 1.92 2004-02-18 03:56:55 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -579,6 +579,21 @@ static void enable_tree(xmlNodePtr node, GtkWidget *window)
   }
 }
 
+gboolean on_manpage_entry_focus_out_event(GtkWidget *widget,
+										  GdkEventFocus *event,
+										  gpointer user_data)
+{
+    char* string;
+    string = gtk_entry_get_text( GTK_ENTRY(widget) );
+    if ( string ) {
+        set_manpath(cur_info, string);
+        if ( strcmp(string, cur_info->man_path) != 0 ) {
+            gtk_entry_set_text(GTK_ENTRY(widget), cur_info->man_path);
+        }
+	}
+	return TRUE;
+}
+
 /*-----------------------------------------------------------------------------
 **  on_use_binary_toggled
 **      Signal function to repsond to a toggle state in the
@@ -934,6 +949,60 @@ static void init_install_path(void)
     gtk_combo_set_use_arrows( GTK_COMBO(widget), 0);
 }
 
+static void init_man_path(void)
+{
+    GList* list = NULL;
+    char pathCopy[ 4069 ];
+    char* path;
+
+	if ( ! GetProductHasManPages(cur_info) )
+		return;
+
+    path = (char *)getenv( "MANPATH" );
+    if( path )
+    {
+        int len;
+        char* pc0;
+        char* pc;
+        int sc;
+        int end = 0;
+
+        pc = pathCopy;
+        strncpy( pathCopy, path, sizeof (pathCopy) - 1 );
+        pathCopy[sizeof (pathCopy) - 1] = '\0';  /* just in case. */
+
+        while( *pc != ':' && *pc != '\0' ) {
+            pc0 = pc;
+            len = 0;
+            while( *pc != ':' && *pc != '\0' ) {
+                len++;
+                pc++;
+            }
+            if( *pc == '\0' )
+                end = 1;
+            else
+                *pc = '\0';
+
+            if( len && ((sc=strcmp( pc0, cur_info->symlinks_path)) != 0) && (*pc0 != '.') ) {
+				if ((!str_in_g_list(pc0, list)) && (access(pc0, W_OK) == 0)) {
+					list = g_list_append( list, pc0 );
+				}
+            }
+
+            if( ! end )
+                pc++;
+        }
+    } else {
+		list = g_list_append(list, "/usr/local/man");
+		list = g_list_append(list, "/usr/man");
+	}
+
+    if ( list ) {
+		GtkWidget *widget = glade_xml_get_widget(setup_glade, "manpage_combo");
+        gtk_combo_set_popdown_strings( GTK_COMBO(widget), list );
+		set_manpath(cur_info, list->data);
+    }
+}
 
 static void init_binary_path(void)
 {
@@ -1387,7 +1456,12 @@ static install_state gtkui_init(install_info *info, int argc, char **argv, int n
 		widget = glade_xml_get_widget(setup_glade, "setup_menuitems_checkbox");
 		if(widget) gtk_widget_hide(widget);
 	}
-
+	if ( !GetProductHasManPages(info) ) {
+        widget = glade_xml_get_widget(setup_glade, "manpage_combo");
+		if(widget) gtk_widget_hide(widget);
+        widget = glade_xml_get_widget(setup_glade, "manpage_label");
+		if(widget) gtk_widget_hide(widget);
+	}
 	/*--------------------------------------------------------------------
 	**  Hide the checkbox allowing the user to pick whether or
 	**      not to install a symlink to the binaries if they
@@ -1546,6 +1620,7 @@ static install_state gtkui_setup(install_info *info)
     }
     init_install_path();
     init_binary_path();
+	init_man_path();
     update_size();
     update_space();
     init_menuitems_option(info);
