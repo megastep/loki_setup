@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.17 2000-11-14 22:39:51 hercules Exp $ */
+/* $Id: uninstall.c,v 1.18 2000-11-16 23:24:42 hercules Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -237,7 +237,8 @@ static void init_locale(void)
 
 	setlocale (LC_ALL, "");
 #ifdef UINSTALL_UI
-    strcpy(locale, "locale");
+    getcwd(locale, sizeof(locale)-7);
+    strcat(locale, "/locale");
 #else
     snprintf(locale, sizeof(locale), "%s/.loki/installed/locale", getenv("HOME"));
 #endif
@@ -366,7 +367,11 @@ int main(int argc, char *argv[])
             }
         }
     } else if ( !strcmp(argv[1], "-v") || !strcmp(argv[1], "--version") ) {
+#ifdef UNINSTALL_UI
+        printf("Loki Uninstall Tool " VERSION "\n");
+#else
         printf("%d.%d.%d\n", SETUP_VERSION_MAJOR, SETUP_VERSION_MINOR, SETUP_VERSION_RELEASE);
+#endif
     } else {
         prod = loki_openproduct(argv[1]);
         if ( ! prod ) {

@@ -9,6 +9,9 @@ os   := $(shell uname -s)
 # USE_RPM = true
 # USE_OUTRAGE = true
 
+# If you modify this version, change it's setup.xml and release a new patch.
+UNINSTALL_VERSION = \"1.0a\"
+
 CC = gcc
 
 # This indicates where the 'setupdb' CVS module is checked out
@@ -78,7 +81,7 @@ testxml: testxml.o
 	$(CC) -o $@ $^ $(LIBS)
 
 loki_uninstall.o: uninstall.c
-	$(CC) -c -o $@ $^ $(CFLAGS) -DUNINSTALL_UI
+	$(CC) -c -o $@ $^ $(CFLAGS) -DUNINSTALL_UI -DVERSION=$(UNINSTALL_VERSION)
 
 loki_uninstall: $(LOKI_UNINSTALL_OBJS) $(SETUPDB)/$(arch)/libsetupdb.a
 	$(CC) -o $@ $^ $(GUI_LIBS)
@@ -142,6 +145,26 @@ endif
 	    strip $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk; \
 	    cp -v loki_uninstall $(IMAGE)/loki_uninstall/bin/$(arch)/$(libc)/; \
 	    strip $(IMAGE)/loki_uninstall/bin/$(arch)/$(libc)/loki_uninstall; \
+	    cp -v uninstall.glade $(IMAGE)/loki_uninstall/; \
+        for file in `find image/setup.data -name loki-uninstall.mo -print`; \
+        do  path="$(IMAGE)/loki_uninstall/`dirname $$file | sed 's,image/setup.data/,,'`"; \
+            mkdirhier $$path; \
+            cp -v $$file $$path; \
+        done; \
+	else \
+		echo No directory to copy the binary files to.; \
+	fi
+
+install-loki_uninstall: loki_uninstall
+	@if [ -d $(IMAGE)/loki_uninstall/bin/$(arch)/$(libc)/ ]; then \
+	    cp -v loki_uninstall $(IMAGE)/loki_uninstall/bin/$(arch)/$(libc)/; \
+	    strip $(IMAGE)/loki_uninstall/bin/$(arch)/$(libc)/loki_uninstall; \
+	    cp -v uninstall.glade $(IMAGE)/loki_uninstall/; \
+        for file in `find image/setup.data -name loki-uninstall.mo -print`; \
+        do  path="$(IMAGE)/loki_uninstall/`dirname $$file | sed 's,image/setup.data/,,'`"; \
+            mkdirhier $$path; \
+            cp -v $$file $$path; \
+        done; \
 	else \
 		echo No directory to copy the binary files to.; \
 	fi
