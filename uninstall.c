@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.43 2003-08-08 03:14:26 megastep Exp $ */
+/* $Id: uninstall.c,v 1.44 2003-08-13 22:19:53 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -378,31 +378,32 @@ int main(int argc, char *argv[])
 {
     product_info_t *info;
     char desc[128];
-
-printf("Your command line:\n");
-{ int i; for (i = 0; i < argc; i++) { printf("argv[%d] == \"%s\"\n", i, argv[i]); } } 
-printf("\n\n");
-
-// If running from an APP bundle in Carbon, it passed -p*** as the first argument
-// This code effectively cuts out argv[1] as though it wasn't specified
-if(argc > 1 && argv[1][0] == '-' && argv[1][1] == 'p')
-{
-    // Move the first argument to overwite the second 
-    argv[1] = argv[0];
-    // Set our arguments starting point to the second argumement
-    argv++;
-    argc--;
-}
-
-printf("Your NEW command line:\n");
-{ int i; for (i = 0; i < argc; i++) { printf("argv[%d] == \"%s\"\n", i, argv[i]); } }
-printf("\n\n");
-
 #ifdef UNINSTALL_UI
 	const char *p;
 #endif
 	int ret = 0;
 
+#if defined(darwin)
+	printf("Your command line:\n");
+	{ 
+		int i; for (i = 0; i < argc; i++) { printf("argv[%d] == \"%s\"\n", i, argv[i]); } } 
+	printf("\n\n");
+
+	// If running from an APP bundle in Carbon, it passed -p*** as the first argument
+	// This code effectively cuts out argv[1] as though it wasn't specified
+	if(argc > 1 && argv[1][0] == '-' && argv[1][1] == 'p') {
+		// Move the first argument to overwite the second 
+		argv[1] = argv[0];
+		// Set our arguments starting point to the second argumement
+		argv++;
+		argc--;
+	}
+
+	printf("Your NEW command line:\n");
+	{ int i; for (i = 0; i < argc; i++) { printf("argv[%d] == \"%s\"\n", i, argv[i]); } }
+	printf("\n\n");
+#endif
+	
 #ifdef SETUP_COPY_UNINSTALL
     const char *env;
 	/* HP-UX wouldn't allow us to uninstall ourselves unless we copy the binary some other place */
