@@ -161,6 +161,9 @@ int loki_launchURL(const char *url)
 
     /* See what web browser is available */
     command = getenv("LOKI_BROWSER");
+	if ( ! command ) {
+		command = getenv("BROWSER"); /* FIXME: We should try all colon-separated commands in turn */
+	}
     if ( ! command ) {
         for ( i=0; i<(sizeof browser_list)/(sizeof browser_list[0]); ++i ) {
             if ( (running == browser_list[i].running) &&
@@ -171,7 +174,11 @@ int loki_launchURL(const char *url)
         }
     }
     if ( command ) {
-        snprintf(command_string, sizeof(command_string), command, url, url);
+		if ( strstr(command, "%s") ) {
+			snprintf(command_string, sizeof(command_string), command, url, url);
+		} else {
+			snprintf(command_string, sizeof(command_string), "%s %s", command, url);
+		}
         status = system(command_string);
     }
     return status;
