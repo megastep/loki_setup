@@ -36,17 +36,32 @@ dnl Check for gtk12 libraries in case those are available (FreeBSD)
 AC_CHECK_LIB(gdk12, gdk_init, GTK12="12")
 
 AC_CHECK_LIB(dl, dlopen, USE_LIBDL=yes)
-AC_CHECK_LIB(bz2, BZ2_bzopen, HAVE_BZ2_BZOPEN=yes)
-AC_CHECK_LIB(bz2, bzopen, HAVE_NORMAL_BZOPEN=yes)
 
-if test x$HAVE_BZ2_BZOPEN = xyes; then
-    LIBBZ2_PREFIX="yes"
-    HAVE_BZIP2_SUPPORT="yes"
-fi
+AC_ARG_ENABLE(bzip2,
+[  --enable-bzip2            enable bzip2 support  [default=no]],
+              , enable_bzip2=no)
+if test x$enable_bzip2 = xyes; then
 
-if test x$HAVE_NORMAL_BZOPEN = xyes; then
+  HAVE_BZIP2_SUPPORT="no"
+
+  AC_CHECK_LIB(bz2, BZ2_bzopen, HAVE_BZ2_BZOPEN=yes)
+  AC_CHECK_LIB(bz2, bzopen, HAVE_NORMAL_BZOPEN=yes)
+
+  if test x$HAVE_NORMAL_BZOPEN = xyes; then
     LIBBZ2_PREFIX="no"
     HAVE_BZIP2_SUPPORT="yes"
+  fi
+
+  dnl favor the BZ2_ prefix version, since it's a later revision of the lib.
+  if test x$HAVE_BZ2_BZOPEN = xyes; then
+    LIBBZ2_PREFIX="yes"
+    HAVE_BZIP2_SUPPORT="yes"
+  fi
+
+  if test x$HAVE_BZIP2_SUPPORT = xno; then
+    AC_MSG_WARN([*** libbz2 not found. bzip2 support has been disabled!])
+    AC_MSG_WARN([*** you can disable this warning with --disable-bzip2])
+  fi
 fi
 
 case "$target" in
@@ -134,7 +149,7 @@ if test x$enable_rpm = xyes; then
 		RPM_LIBS="-lrpm -ldb1 -lbz2 -lpopt"
         LIBS="$LIBS $RPM_LIBS"
         GUI_LIBS="$GUI_LIBS $RPM_LIBS"
-        AC_DEFINE(ENABLE_RPM)
+        AC_DEFINE(ENABLE_RPM, 1, RPM support.)
 fi
 dnl RPM 4.x support, needs additional libraries
 AC_ARG_ENABLE(rpm4,
@@ -155,7 +170,7 @@ if test x$enable_rpm4 = xyes; then
 		fi
         LIBS="$LIBS $RPM_LIBS"
         GUI_LIBS="$GUI_LIBS $RPM_LIBS"
-        AC_DEFINE(ENABLE_RPM)
+        AC_DEFINE(ENABLE_RPM, 1, RPM support.)
 fi
 
 if test ! -z "$USE_LIBINTL"; then
@@ -164,10 +179,11 @@ if test ! -z "$USE_LIBINTL"; then
 fi
 
 if test x$HAVE_BZIP2_SUPPORT = xyes; then
-  CFLAGS="$CFLAGS -DHAVE_BZIP2_SUPPORT"
+  AC_DEFINE(HAVE_BZIP2_SUPPORT, 1, libbz2 support.)
+
   BZ2LIB="-lbz2"
   if test x$LIBBZ2_PREFIX = xyes; then
-    CFLAGS="$CFLAGS -DLIBBZ2_PREFIX"
+    AC_DEFINE(LIBBZ2_PREFIX, 1, libbz2 has "BZ_" prefix.)
   fi
 fi
 
@@ -191,7 +207,7 @@ if test x$enable_dynamic = xyes; then
         LIBS="$LIBS -ldl"
         GUI_LIBS="$GUI_LIBS -ldl"
         DYN_PLUGINS=true
-        AC_DEFINE(DYNAMIC_PLUGINS)
+        AC_DEFINE(DYNAMIC_PLUGINS, 1, Dynamic plugin support.)
 fi
 
 #dnl enable the Outrage plugin (proprietary)
@@ -201,7 +217,7 @@ fi
 #if test x$enable_outrage = xyes; then
 #        CFLAGS="$CFLAGS -DOUTRAGE_SUPPORT"
 #        PLUGINS="$PLUGINS outrage.c"
-#        AC_DEFINE(ENABLE_OUTRAGE)
+#        AC_DEFINE(ENABLE_OUTRAGE, 1, Outrage package decoder.)
 #fi
 
 SETUPDB_VERSION=1.0.0

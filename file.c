@@ -14,6 +14,8 @@
 
 #include <zlib.h>
 
+#include "config.h"
+
 #include "file.h"
 #include "install_log.h"
 
@@ -185,8 +187,10 @@ int file_read(install_info *info, void *buf, int len, stream *streamp)
             nread = fread(buf, 1, len, streamp->fp);
         } else if ( streamp->zfp ) {
             nread = gzread(streamp->zfp, buf, len);
+        #ifdef HAVE_BZIP2_SUPPORT
         } else if ( streamp->bzfp ) {
 			nread = BZREAD(streamp->bzfp, buf, len);
+        #endif
 		}
     } else {
         log_warning(_("Read on write stream"));
@@ -216,9 +220,11 @@ void file_skip_zeroes(install_info *info, stream *streamp)
 		  c = fgetc(streamp->fp);
 	  }else if ( streamp->zfp ) {
 		  c = gzgetc(streamp->zfp);
+      #ifdef HAVE_BZIP2_SUPPORT
 	  }else if ( streamp->bzfp ) {
 		  c = EOF;
 		  BZREAD(streamp->bzfp, &c, 1);
+      #endif
 	  } else {
 		  c = EOF;
       }
@@ -230,8 +236,10 @@ void file_skip_zeroes(install_info *info, stream *streamp)
 			fseek(streamp->fp, -1L, SEEK_CUR);
 		} else if ( streamp->zfp ) { /* Probably slow */
 			gzseek(streamp->zfp, -1L, SEEK_CUR);
+        #ifdef HAVE_BZIP2_SUPPORT
 		} else if ( streamp->bzfp ) {
 			/* Doh! But it's OK, this function is not used any more */
+        #endif
 		}
 		break;
 	  }
@@ -250,8 +258,10 @@ int file_write(install_info *info, void *buf, int len, stream *streamp)
             nwrote = fwrite(buf, 1, len, streamp->fp);
         } else if ( streamp->zfp ) {
             nwrote = gzwrite(streamp->zfp, buf, len);
+        #ifdef HAVE_BZIP2_SUPPORT
         } else if ( streamp->bzfp ) {
             nwrote = BZWRITE(streamp->bzfp, buf, len);
+        #endif
         }
 
         if ( nwrote <= 0 ) {
@@ -275,10 +285,12 @@ int file_eof(install_info *info, stream *streamp)
         eof = feof(streamp->fp);
     } else if ( streamp->zfp ) {
         eof = gzeof(streamp->fp);
+    #ifdef HAVE_BZIP2_SUPPORT
     } else if ( streamp->bzfp ) {
 		int err;
 		BZERROR(streamp->bzfp, &err);
 		eof = ( err == BZ_STREAM_END );
+    #endif
     }
     return(eof);
 }
@@ -298,8 +310,10 @@ int file_close(install_info *info, stream *streamp)
                     log_warning(_("Short write on %s"), streamp->path);
                 }
             }
+        #ifdef HAVE_BZIP2_SUPPORT
         } else if ( streamp->bzfp ) {
 			BZCLOSE(streamp->bzfp);
+        #endif
         }
 		if ( streamp->elem ) {
 			md5_final(&streamp->md5);

@@ -1,11 +1,13 @@
-/* config.h.in.  Generated from configure.in by autoheader.  */
-/* Additional macro definitions for autoheader */
+/* config.h.in.  Generated automatically from configure.in by autoheader.  */
 
+/* Dynamic plugin support. */
 #undef DYNAMIC_PLUGINS
 
-#undef ENABLE_OUTRAGE
+/* RPM support. */
+#undef ENABLE_RPM
 
-#define ENABLE_RPM
+/* libbz2 support. */
+#undef HAVE_BZIP2_SUPPORT
 
 /* Define if you have the <dirent.h> header file. */
 #undef HAVE_DIRENT_H
@@ -16,12 +18,6 @@
 /* Define if you have the <gtk.h> header file. */
 #undef HAVE_GTK_H
 
-/* Define if you have the <inttypes.h> header file. */
-#undef HAVE_INTTYPES_H
-
-/* Define if you have the <memory.h> header file. */
-#undef HAVE_MEMORY_H
-
 /* Define if you have the <ncurses/term.h> header file. */
 #undef HAVE_NCURSES_TERM_H
 
@@ -31,32 +27,14 @@
 /* Define if you have the <pwd.h> header file. */
 #undef HAVE_PWD_H
 
-/* Define if you have the <stdint.h> header file. */
-#undef HAVE_STDINT_H
-
-/* Define if you have the <stdlib.h> header file. */
-#undef HAVE_STDLIB_H
-
 /* Define if you have the `strcasecmp' function. */
 #undef HAVE_STRCASECMP
-
-/* Define if you have the <strings.h> header file. */
-#undef HAVE_STRINGS_H
-
-/* Define if you have the <string.h> header file. */
-#undef HAVE_STRING_H
 
 /* Define if you have the <sys/ndir.h> header file. */
 #undef HAVE_SYS_NDIR_H
 
-/* Define if you have the <sys/stat.h> header file. */
-#undef HAVE_SYS_STAT_H
-
-/* Define if you have the <sys/types.h> header file. */
-#undef HAVE_SYS_TYPES_H
-
 /* Define if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
-/* Define if you have the ANSI C header files. */
-#undef STDC_HEADERS
+/* libbz2 has "BZ_" prefix. */
+#undef LIBBZ2_PREFIX

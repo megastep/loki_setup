@@ -1,4 +1,4 @@
-/* $Id: file.h,v 1.14 2002-01-28 01:13:30 megastep Exp $ */
+/* $Id: file.h,v 1.15 2002-02-23 21:30:20 icculus Exp $ */
 
 #ifndef __LOKI_FILE_H__
 #define __LOKI_FILE_H__
@@ -10,10 +10,16 @@
 #include <stdarg.h>
 
 #include <zlib.h>
-#include <bzlib.h>
 
+#include "config.h"
 #include "install.h"
 #include "md5.h"
+
+#ifdef HAVE_BZIP2_SUPPORT
+#  include <bzlib.h>
+#else
+   typedef void *BZFILE;
+#endif
 
 typedef struct {
     char *path;
