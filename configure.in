@@ -35,7 +35,7 @@ case "$target" in
         CFLAGS="$CFLAGS -mcpu=ev4 -Wa,-mall"
         ARCH=alpha ;; 
     *)
-        ARCH=`uname -a` ;;
+        ARCH=`uname -m` ;;
 esac
 
 dnl Detect the LibC version
