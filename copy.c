@@ -166,7 +166,8 @@ int parse_line(const char **srcpp, char *buf, int maxlen)
 }
 
 size_t copy_file(install_info *info, const char *cdrom, const char *path, const char *dest, char *final, int binary,
-				 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+				 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current),
+                 struct file_elem **elem)
 {
 	size_t size = 0;
     const char *base;
@@ -227,6 +228,9 @@ size_t copy_file(install_info *info, const char *cdrom, const char *path, const 
 				update(info, final, size, input->size, current_option_txt);
 			}
 		}
+        if ( elem ) { /* Give the pointer to the element, for what it's worth (binaries mostly) */
+            *elem = output->elem;
+        }
 		file_close(info, output);
 		file_close(info, input);
 	}
@@ -283,7 +287,7 @@ size_t copy_path(install_info *info, const char *path, const char *dest,
 			if (plug) {
 				copied = plug->Copy(info, path, dest, current_option_txt, node, update);
             } else {
-                copied = copy_file(info, cdrom, path, dest, final, strip_dirs, update);
+                copied = copy_file(info, cdrom, path, dest, final, strip_dirs, update, NULL);
             }
         }
         if ( copied > 0 ) {
@@ -388,6 +392,7 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
     const char *inrpm = xmlGetProp(node, "inrpm");
     int in_rpm = (inrpm && !strcasecmp(inrpm, "true"));
     int count, i;
+    struct file_elem *file = NULL;
 
     arch = xmlGetProp(node, "arch");
     if ( !arch || !strcasecmp(arch,"any") ) {
@@ -425,14 +430,14 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
 					snprintf(fullpath, sizeof(fullpath), "%s/%s", cdroms[d], fpat);
 					if ( stat(fullpath, &sb) == 0 ) {
 						check_dynamic(fpat, bin, cdroms[d]);
-						copied = copy_file(info, cdroms[d], bin, fdest, final, 1, update);
+						copied = copy_file(info, cdroms[d], bin, fdest, final, 1, update, &file);
 						break;
 					} else {
 						snprintf(fullpath, sizeof(fullpath), "%s/bin/%s/%s", cdroms[d], arch, final);
 						if ( stat(fullpath, &sb) == 0 ) {
 							snprintf(fullpath, sizeof(fullpath), "bin/%s/%s", arch, final);
 							check_dynamic(fullpath, bin, cdroms[d]);
-							copied = copy_file(info, cdroms[d], bin, fdest, final, 1, update);
+							copied = copy_file(info, cdroms[d], bin, fdest, final, 1, update, &file);
 							break;
 						}
 					}
@@ -443,12 +448,12 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
 			} else {
 				if ( stat(fpat, &sb) == 0 ) {
 					check_dynamic(fpat, bin, NULL);
-					copied = copy_file(info, NULL, bin, fdest, final, 1, update);
+					copied = copy_file(info, NULL, bin, fdest, final, 1, update, &file);
 				} else {
 					snprintf(fpat, sizeof(fpat), "bin/%s/%s", arch, final);
 					if ( stat(fpat, &sb) == 0 ) {
 						check_dynamic(fpat, bin, NULL);
-						copied = copy_file(info, NULL, bin, fdest, final, 1, update);
+						copied = copy_file(info, NULL, bin, fdest, final, 1, update, &file);
 					} else {
 						log_warning(info, _("Unable to find file '%s'"), fpat);
 					}
@@ -477,7 +482,7 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
                 snprintf(sym_to, sizeof(sym_to), "%s/%s", info->symlinks_path, symlink);
                 file_symlink(info, final, sym_to);
             }
-            add_bin_entry(info, current_option, final, symlink,
+            add_bin_entry(info, current_option, file, symlink,
 						  xmlGetProp(node, "desc"),
 						  xmlGetProp(node, "menu"),
 						  xmlGetProp(node, "name"),
