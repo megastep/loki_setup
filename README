@@ -3,6 +3,15 @@ The Loki Game Installer 1.2.1
 Written by Sam Lantinga and Stephane Peter
 ------------------------------------------
 
+New in 1.2.1:
+ * Improved C library detection
+ * Support for loading install files from CD-ROM
+ * Additional attributes for the binary element
+ * Environment variable parsing in the XML file
+ * Added some environment variables for shell scripts
+
+------------------------------------------
+
 This installer uses an XML description file to describe a package,
 and provides both a console and a GTk front-end to install it.
 
