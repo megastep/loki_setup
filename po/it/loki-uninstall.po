@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2004-06-30 16:57-0700\n"
+"POT-Creation-Date: 2004-08-02 18:55-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -84,7 +84,8 @@ msgstr ""
 "  -v | --version   : Ottiene le informazioni sulla versione.\n"
 "  product [componente] : Disinstalla il prodotto specificato o il relativo "
 "componente secondario.\n"
-"  product < -l | --list > : Elenca i componenti secondari installati del prodotto.\n"
+"  product < -l | --list > : Elenca i componenti secondari installati del "
+"prodotto.\n"
 
 #: uninstall.c:125
 #, c-format

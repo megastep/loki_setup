@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2004-08-02 18:55-0700\n"
+"POT-Creation-Date: 2004-08-03 15:06-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -638,63 +638,68 @@ msgstr ""
 
 #: file.c:465
 #, c-format
+msgid "Trying to create a symbolic link on the same file: %s\n"
+msgstr ""
+
+#: file.c:470
+#, c-format
 msgid "Creating symbolic link: %s --> %s\n"
 msgstr ""
 
-#: file.c:474
+#: file.c:479
 #, c-format
 msgid "Can't remove existing symlink %s: %s"
 msgstr ""
 
-#: file.c:478 file.c:509 file.c:529 file.c:548
+#: file.c:483 file.c:514 file.c:534 file.c:553
 #, c-format
 msgid "Can't create %s: %s"
 msgstr ""
 
-#: file.c:503
+#: file.c:508
 #, c-format
 msgid "Creating directory: %s\n"
 msgstr ""
 
-#: file.c:522
+#: file.c:527
 #, c-format
 msgid "Creating FIFO: %s\n"
 msgstr ""
 
-#: file.c:541
+#: file.c:546
 #, c-format
 msgid "Creating device: %s\n"
 msgstr ""
 
-#: file.c:561
+#: file.c:566
 #, c-format
 msgid "Can't change permissions for %s: %s"
 msgstr ""
 
-#: file.c:595 file.c:619
+#: file.c:600 file.c:624
 #, c-format
 msgid "Unable to read %s"
 msgstr ""
 
-#: file.c:697
+#: file.c:702
 msgid "BZ2 support not available"
 msgstr ""
 
-#: file.c:722
+#: file.c:727
 #, c-format
 msgid "BZ2: *** Symbol \"%s\" not found, bzip2 support disabled"
 msgstr ""
 
-#: file.c:735
+#: file.c:740
 #, c-format
 msgid "BZ2: Try open %s"
 msgstr ""
 
-#: file.c:741
+#: file.c:746
 msgid "BZ2: *** Unable to open bzip2 library. bzip2 support disabled"
 msgstr ""
 
-#: file.c:745
+#: file.c:750
 #, c-format
 msgid "BZ2: got %s"
 msgstr ""

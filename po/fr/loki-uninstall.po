@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2004-06-30 16:57-0700\n"
+"POT-Creation-Date: 2004-08-02 18:55-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -77,14 +77,16 @@ msgid ""
 "  product < -l | --list > : List installed subcomponents of product.\n"
 msgstr ""
 "Utilisation : %s [arguments]\n"
-"Les arguments peuvent correspondre à l'un quelconque des éléments suivants :\n"
+"Les arguments peuvent correspondre à l'un quelconque des éléments "
+"suivants :\n"
 "\n"
 "  -h | --help      : Imprimer ce message d'aide.\n"
 "  -l | --list      : Répertorier tous les produits et composants installés.\n"
 "  -v | --version   : Obtenir des détails sur la version.\n"
-"  product [composant] : Désinstalle le produit spécifié ou son "
-"sous-composant.\n"
-"  product < -l | --list > : Répertorier les sous-composants installés du produit.\n"
+"  product [composant] : Désinstalle le produit spécifié ou son sous-"
+"composant.\n"
+"  product < -l | --list > : Répertorier les sous-composants installés du "
+"produit.\n"
 
 #: uninstall.c:125
 #, c-format
@@ -150,7 +152,8 @@ msgstr ""
 
 #: uninstall.c:483
 msgid "Warning: Unable to replicate uninstallation program.\n"
-msgstr "Avertissement : impossible de reproduire le programme de désinstallation.\n"
+msgstr ""
+"Avertissement : impossible de reproduire le programme de désinstallation.\n"
 
 #: uninstall.c:487
 #, c-format
@@ -187,7 +190,8 @@ msgstr " Erreur lors de l'accès aux infos du produit\n"
 msgid ""
 "No products could be found. Maybe you need to run as a different user?\n"
 msgstr ""
-"Produits introuvables. Peut-être faut-il essayer sous l'identité d'un autre utilisateur ?\n"
+"Produits introuvables. Peut-être faut-il essayer sous l'identité d'un autre "
+"utilisateur ?\n"
 
 #: uninstall.c:568
 #, c-format
@@ -296,4 +300,3 @@ msgid ""
 msgstr ""
 "Aucun produit n'a été installé par cet utilisateur.\n"
 "Il faut peut-être exécuter cet outil en qualité d'administrateur."
-

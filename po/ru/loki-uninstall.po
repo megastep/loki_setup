@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2004-06-30 16:57-0700\n"
+"POT-Creation-Date: 2004-08-02 18:55-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -329,7 +329,8 @@ msgstr ""
 #~ msgstr ""
 #~ "Использование: %s программа            удалить программу\n"
 #~ "               %s -l                   получить список программ\n"
-#~ "               %s программа -l         получить список компонент программ\n"
+#~ "               %s программа -l         получить список компонент "
+#~ "программ\n"
 #~ "               %s программа компонент  удалить один компонент\n"
 
 # uninstall_ui.c:476

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2004-06-30 16:57-0700\n"
+"POT-Creation-Date: 2004-08-02 18:55-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -104,7 +104,9 @@ msgstr "Aviso: RPM %s se instaló para este producto.\n"
 #: uninstall.c:198
 #, c-format
 msgid "Post-uninstall scripts for %s have failed.\n"
-msgstr "Fallaron las secuencias de comandos posteriores a la desinstalación para %s.\n"
+msgstr ""
+"Fallaron las secuencias de comandos posteriores a la desinstalación para %"
+"s.\n"
 
 #: uninstall.c:203
 #, c-format
@@ -187,7 +189,8 @@ msgstr " Se produjo un error al obtener acceso a la información del producto\n"
 msgid ""
 "No products could be found. Maybe you need to run as a different user?\n"
 msgstr ""
-"No se pudieron encontrar productos. Es posible que necesite ejecutar como un usuario diferente\n"
+"No se pudieron encontrar productos. Es posible que necesite ejecutar como un "
+"usuario diferente\n"
 
 #: uninstall.c:568
 #, c-format
