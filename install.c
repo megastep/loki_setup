@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.151 2005-02-02 04:20:51 megastep Exp $ */
+/* $Id: install.c,v 1.152 2005-02-03 01:47:53 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -2716,7 +2716,7 @@ int install_menuitems(install_info *info, desktop_type desktop)
     return ret_val;
 }
 
-x/* Run some shell script commands */
+/* Run some shell script commands */
 int run_script(install_info *info, const char *script, int arg, int include_tags)
 {
     char script_file[PATH_MAX];
