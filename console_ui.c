@@ -127,7 +127,7 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
     yesno_answer response = RESPONSE_INVALID, default_response;
 
 	/* Check if we are on a valid tag */
-	if ( !strcmp(node->name, "text") ) {
+	if ( strcmp(node->name, "option") && strcmp(node->name, "exclusive") ) {
 		return retval;
 	}
 
@@ -189,9 +189,9 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
  options_loop:
     /* See if the user wants this option */
     while ( response == RESPONSE_INVALID ) {
-		snprintf(prompt, sizeof(prompt), _("Install %s?"), get_option_name(info,node,line,BUFSIZ));
+		snprintf(prompt, sizeof(prompt), _("Option: '%s' ?"), get_option_name(info,node,line,BUFSIZ));
 		wanted = xmlGetProp(node, "install");
-		if ( wanted  && (strcmp(wanted, "true") == 0) ) {
+		if ( (wanted  && (strcmp(wanted, "true") == 0)) || !strcmp(node->name, "exclusive") ) {
 			default_response = RESPONSE_YES;
 		} else {
 			default_response = RESPONSE_NO;
@@ -313,7 +313,7 @@ static install_state console_readme(install_info *info)
 	const char *str;
 
 	str = readme + strlen(info->setup_path)+1; /* Skip the install path */
-        snprintf(prompt, sizeof(prompt), _("Would you like to read the %s file ?"), readme);
+        snprintf(prompt, sizeof(prompt), _("Would you like to read the %s file ?"), str);
         if ( console_prompt(prompt, RESPONSE_YES) == RESPONSE_YES ) {
             snprintf(prompt, sizeof(prompt), "%s \"%s\"", pagercmd, readme);
             system(prompt);

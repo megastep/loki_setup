@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.9 2003-04-12 01:46:01 megastep Exp $
+ * $Id: dialog_ui.c,v 1.10 2003-06-18 01:40:12 megastep Exp $
  */
 
 #include <limits.h>
@@ -113,10 +113,17 @@ install_state dialog_readme(install_info *info)
     readme = GetProductREADME(info);
     if ( readme ) {
         char prompt[256];
+		const char *str;
 
-	clear_screen();
-	readme += strlen(info->setup_path)+1; /* Skip the install path */
-        snprintf(prompt, sizeof(prompt), _("Would you like to read the %s file ?"), readme);
+		clear_screen();
+		readme += strlen(info->setup_path)+1; /* Skip the install path */
+		str = strrchr(readme, '/');
+		if ( str )
+			str ++;
+		else
+			str = readme;
+
+        snprintf(prompt, sizeof(prompt), _("Would you like to read the %s file ?"), str);
         if ( dialog_prompt(prompt, RESPONSE_YES) == RESPONSE_YES ) {
 			dialog_textbox(_("README"), GetProductREADME(info),
 						   -1, -1);
@@ -196,7 +203,7 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr pa
 			nodes[nb_choices] = node;
 			choices[i++] = _("Component");
 			choices[i++] = xmlGetProp(node, "name");
-			choices[i++] = (set && !strcmp(set,"true")) ? "on" : "off";
+			choices[i++] = "on"; /* Components are always selected by default  */
 			choices[i++] = get_option_help(info, node);
 			nb_choices++;
 	    }
@@ -277,7 +284,8 @@ options_loop:
 		} else if ( !strcmp(nodes[i]->name, "exclusive") && result[i]) {
 		    parse_option(info, component, nodes[i], 1, get_option_name(info, nodes[i], NULL, 0));
 		} else if ( !strcmp(nodes[i]->name, "component") && result[i]) {
-		    parse_option(info, xmlGetProp(nodes[i], "name"), nodes[i], 1, xmlGetProp(nodes[i], "name"));
+			snprintf(buf, sizeof(buf), _("Component: %s"), xmlGetProp(nodes[i], "name"));
+		    parse_option(info, xmlGetProp(nodes[i], "name"), nodes[i], 1, buf);
 		}
 	}
 	return 1;
@@ -323,6 +331,7 @@ install_state dialog_setup(install_info *info)
 		} else {
 			char path[PATH_MAX];
 			int okay = 0;
+			const char *label;
 
 			while ( !okay ) {
 				if ( !disable_install_path ) {
@@ -422,7 +431,12 @@ install_state dialog_setup(install_info *info)
 				/* Go through the install options */
 
 				info->install_size = 0;
-				if ( parse_option(info, NULL, info->config->root, 0, _("Please choose the options to install")) ) {
+				if ( GetProductNumComponents(info) > 1 ) {
+					label = _("Please choose the components to install");
+				} else {
+					label = _("Please choose the options to install");
+				}
+				if ( parse_option(info, NULL, info->config->root, 0, label) ) {
 					okay = TRUE;
 				} else {
 					return SETUP_ABORT;
