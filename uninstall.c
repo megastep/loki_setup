@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.7 2000-10-12 03:53:28 megastep Exp $ */
+/* $Id: uninstall.c,v 1.8 2000-10-14 03:29:05 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -52,38 +52,51 @@ static int perform_uninstall(product_t *prod, product_info_t *info)
         for ( opt = loki_getfirst_option(comp); opt; opt = loki_getnext_option(opt)){
             product_file_t *file = loki_getfirst_file(opt), *nextfile;
             while ( file ) {
-                switch(loki_gettype_file(file)) {
-                case LOKI_FILE_DIRECTORY:
-                    // printf("Removing directory: %s\n", loki_getpath_file(file));
+                file_type_t t = loki_gettype_file(file);
+                if ( t == LOKI_FILE_DIRECTORY ) {
+                    file = loki_getnext_file(file);
+                } else {
+                    switch( t ) {
+                    case LOKI_FILE_SCRIPT: /* Ignore scripts */
+                        break;
+                    case LOKI_FILE_RPM:
+                        printf("Notice: the %s RPM was installed for this product.\n", loki_getpath_file(file));
+                        break;
+                    default:
+                        printf("Removing file: %s\n", loki_getpath_file(file));
+                        if ( unlink(loki_getpath_file(file)) < 0 ) {
+                            log_file(loki_getpath_file(file), strerror(errno));  
+                        }
+                        break;
+                    }
+                    
+                    nextfile = loki_getnext_file(file);
+                    loki_unregister_file(file);
+                    file = nextfile;
+                }
+            }
+            /* Remove directories after all files */
+            file = loki_getfirst_file(opt);
+            while ( file ) {
+                if ( loki_gettype_file(file) == LOKI_FILE_DIRECTORY ) {
+                    printf("Removing directory: %s\n", loki_getpath_file(file));
                     if ( rmdir(loki_getpath_file(file)) < 0 ) {
                         log_file(loki_getpath_file(file), strerror(errno));  
                     }
-                    break;
-                case LOKI_FILE_SCRIPT: /* Ignore scripts */
-                    break;
-                case LOKI_FILE_RPM:
-                    printf("Notice: the %s RPM was installed for this product.\n", loki_getpath_file(file));
-                    break;
-                default:
-                    // printf("Removing file: %s\n", loki_getpath_file(file));
-                    if ( unlink(loki_getpath_file(file)) < 0 ) {
-                        log_file(loki_getpath_file(file), strerror(errno));  
-                    }
-                    break;
                 }
-
                 nextfile = loki_getnext_file(file);
                 loki_unregister_file(file);
                 file = nextfile;
             }
         }
+
         /* Run post-uninstall scripts */
         loki_runscripts(comp, LOKI_SCRIPT_POSTUNINSTALL);
         loki_unregister_script(comp, "preun");
         loki_unregister_script(comp, "postun");
     }
 
-	/* Remove all product-related files from the manifest, i.e. the INI file and associated scripts */
+	/* Remove all product-related files from the manifest, i.e. the XML file and associated scripts */
     if ( unlink("uninstall") < 0 )
         log_file("uninstall", strerror(errno));;
 
