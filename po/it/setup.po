@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-11-16 15:26-0800\n"
+"POT-Creation-Date: 2000-12-01 14:33-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Pancrazio 'Ezio' de Mauro <ezio@direct.it>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -199,7 +199,7 @@ msgstr "[product]"
 msgid "[warning text]"
 msgstr "[warning text]"
 
-#: main.c:115
+#: main.c:114
 #, fuzzy, c-format
 msgid ""
 "Usage: %s [options]\n"
@@ -233,7 +233,7 @@ msgstr ""
 "            0: Debug  1: Silenzioso 2: Normale 3: Warning  4: Fatali\n"
 "   -V       Mostra la versione del programma di setup ed esce\n"
 
-#: main.c:129
+#: main.c:128
 #, fuzzy, c-format
 msgid ""
 "Usage: %s [options]\n"
@@ -263,6 +263,17 @@ msgstr ""
 "   -V       Mostra la versione del programma di setup ed esce\n"
 
 #: main.c:166
+#, fuzzy, c-format
+msgid ""
+"\n"
+"Please insert the %s CDROM.\n"
+"Choose Yes to retry, No to cancel"
+msgstr ""
+"\n"
+"Per favore, monta il CDROM %s.\n"
+"Scegli Sì per riprovare, No per annullare"
+
+#: main.c:169
 #, c-format
 msgid ""
 "\n"
@@ -273,31 +284,31 @@ msgstr ""
 "Per favore, monta il CDROM %s.\n"
 "Scegli Sì per riprovare, No per annullare"
 
-#: main.c:241
+#: main.c:260
 msgid "Out of range value, setting verbosity level to normal.\n"
 msgstr "Valore non consentito, livello di output impostato a normale.\n"
 
-#: main.c:278
+#: main.c:297
 #, c-format
 msgid "Couldn't load '%s'\n"
 msgstr "Impossibile caricare '%s'\n"
 
-#: main.c:282
+#: main.c:301
 #, c-format
 msgid "Detected locale is %s"
 msgstr "Il 'locale' trovato è %s"
 
-#: main.c:291
+#: main.c:310
 msgid "No UI drivers available\n"
 msgstr "Nessun driver UI utilizzabile\n"
 
-#: main.c:316
+#: main.c:335
 msgid ""
 "\n"
 "Illegal installation: do not mix components with a component installation.\n"
 msgstr ""
 
-#: main.c:320
+#: main.c:339
 #, c-format
 msgid ""
 "\n"
@@ -305,7 +316,7 @@ msgid ""
 "Please uninstall it beforehand.\n"
 msgstr ""
 
-#: main.c:327
+#: main.c:346
 #, c-format
 msgid ""
 "\n"
@@ -313,7 +324,7 @@ msgid ""
 "installation program.\n"
 msgstr ""
 
-#: main.c:340
+#: main.c:359
 msgid ""
 "The 'cdromfile' attribute is now mandatory when using the 'cdrom' attribute."
 msgstr ""
@@ -328,7 +339,7 @@ msgstr "Creazione device %s"
 msgid "Failed to unmount device %s mounted on %s"
 msgstr ""
 
-#: detect.c:168 detect.c:210
+#: detect.c:167 detect.c:209
 #, c-format
 msgid "Mounted device %s"
 msgstr ""
@@ -486,7 +497,7 @@ msgstr "Impossibile creare il link simbolico %s che punta a %s"
 msgid "Unable to copy directory '%s'"
 msgstr "Impossibile copiare la directory '%s'"
 
-#: copy.c:298 copy.c:346 copy.c:440 copy.c:453
+#: copy.c:298 copy.c:346 copy.c:440 copy.c:441 copy.c:454 copy.c:455
 #, c-format
 msgid "Unable to find file '%s'"
 msgstr "Impossibile trovare il file '%s'"
@@ -496,19 +507,19 @@ msgstr "Impossibile trovare il file '%s'"
 msgid "Unable to find file '%s' on any of the CDROM drives"
 msgstr "Impossibile trovare il file '%s' su nessun CDROM"
 
-#: copy.c:495
+#: copy.c:497
 msgid "Running script"
 msgstr "Esecuzione dello script"
 
-#: copy.c:625
+#: copy.c:627
 msgid "Component element needs to have a name"
 msgstr ""
 
-#: copy.c:628
+#: copy.c:630
 msgid "Component element needs to have a version"
 msgstr ""
 
-#: copy.c:780
+#: copy.c:782
 #, c-format
 msgid "Suspect size value for option %s\n"
 msgstr "Valore dimensioni sospetto per l'opzione %s\n"
@@ -779,7 +790,7 @@ msgstr "Vuoi eseguire il browser Web?"
 msgid "Standard input is not a terminal!\n"
 msgstr "Lo standard input non è un terminale!\n"
 
-#: gtk_ui.c:406
+#: gtk_ui.c:409
 #, fuzzy
 msgid ""
 "If you run this as root, the preferences will be stored in\n"
@@ -788,103 +799,103 @@ msgstr ""
 "Se esegui il gioco come root, le preferenze saranno salvate \n"
 "nella home directory di root invece della tua."
 
-#: gtk_ui.c:520
+#: gtk_ui.c:523
 msgid "Please respond to the license dialog"
 msgstr "Per favore, rispondi alla finestra di dialogo della licenza"
 
-#: gtk_ui.c:522
+#: gtk_ui.c:525
 msgid "No destination directory selected"
 msgstr "Nessua directory di destinazione selezionata"
 
-#: gtk_ui.c:525
+#: gtk_ui.c:528
 msgid "Please select at least one option"
 msgstr "Seleziona almeno una opzione"
 
-#: gtk_ui.c:528
+#: gtk_ui.c:531
 msgid "Not enough free space for the selected options"
 msgstr "Spazio libero non sufficente per le opzioni selezionate"
 
-#: gtk_ui.c:530
+#: gtk_ui.c:533
 msgid "Install path is not a directory"
 msgstr "Il percorso di installazione non è una directory"
 
-#: gtk_ui.c:532
+#: gtk_ui.c:535
 msgid "No write permissions on the install directory"
 msgstr "Non ci sono i permessi di scrittura sulla directory di installazione"
 
-#: gtk_ui.c:534
+#: gtk_ui.c:537
 msgid "Binary path and install path must be different"
 msgstr ""
 "Il percorso degli eseguibili ed il percorso di installazione devono essere "
 "differenti"
 
-#: gtk_ui.c:536
+#: gtk_ui.c:539
 msgid "No write permissions to install a selected package"
 msgstr ""
 "Non ci sono i permessi di scrittura per installare uno dei pacchetti "
 "selezionati"
 
-#: gtk_ui.c:539
+#: gtk_ui.c:542
 msgid "No write permissions on the binary directory"
 msgstr "Non ci sono i permessi di scrittura per la directory degli eseguibili"
 
-#: gtk_ui.c:548
+#: gtk_ui.c:551
 msgid "Ready to install!"
 msgstr "Pronto per installare!"
 
-#: gtk_ui.c:561 gtk_ui.c:575
+#: gtk_ui.c:564 gtk_ui.c:578
 #, c-format
 msgid "%d MB"
 msgstr "%d MB"
 
-#: gtk_ui.c:729
+#: gtk_ui.c:732
 msgid "Yes"
 msgstr "Sì"
 
-#: gtk_ui.c:730
+#: gtk_ui.c:733
 msgid "No"
 msgstr "No"
 
-#: gtk_ui.c:757
+#: gtk_ui.c:760
 msgid "Setup"
 msgstr "Setup"
 
-#: gtk_ui.c:805
+#: gtk_ui.c:808
 #, fuzzy
 msgid "Fatal error:  out of memory\n"
 msgstr "Errore fatale: Memoria esaurita\n"
 
-#: gtk_ui.c:812
+#: gtk_ui.c:815
 #, c-format
 msgid "Error: maximum of %d install_path entries exceeded\n"
 msgstr "Errore: numero massimo di %d elementi di install_path superato\n"
 
-#: gtk_ui.c:930
+#: gtk_ui.c:933
 msgid "Warning: No writable targets in path... You may want to be root.\n"
 msgstr ""
 "Attenzione: non ci sono elementi scrivibili nel percorso... probabilmente "
 "devi essere root.\n"
 
-#: gtk_ui.c:949
+#: gtk_ui.c:952
 msgid "Unable to locate 'setup_menuitems_checkbox'"
 msgstr "Impossibile trovare 'setup_menuitems_checkbox'"
 
-#: gtk_ui.c:1163
+#: gtk_ui.c:1166
 #, fuzzy, c-format
 msgid "%s / %s Setup"
 msgstr "Setup di %s"
 
-#: gtk_ui.c:1165
+#: gtk_ui.c:1168
 #, c-format
 msgid "%s Setup"
 msgstr "Setup di %s"
 
-#: gtk_ui.c:1413
+#: gtk_ui.c:1416
 #, c-format
 msgid "Unable to open %s, aborting!\n"
 msgstr "Impossibile aprire %s, interruzione!\n"
 
-#: gtk_ui.c:1468
+#: gtk_ui.c:1471
 #, c-format
 msgid "Type '%s' to start the program"
 msgstr "Digita '%s' per eseguire il programma"
@@ -923,12 +934,12 @@ msgstr "OPKG: fallimento della read() per leggere il timestamp!"
 msgid "read() failed!"
 msgstr "read() fallita!"
 
-#: plugins/rpm.c:63 plugins/rpm.c:96
+#: plugins/rpm.c:64 plugins/rpm.c:97
 #, c-format
 msgid "RPM error: %s"
 msgstr "Errore RPM: %s"
 
-#: plugins/rpm.c:144 plugins/rpm.c:150
+#: plugins/rpm.c:145 plugins/rpm.c:151
 #, c-format
 msgid "Unable to install RPM file: '%s'"
 msgstr "Impossibile installare il file RPM: '%s'"

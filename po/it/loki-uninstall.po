@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Setup 1.5\n"
-"POT-Creation-Date: 2000-11-19 15:58-0800\n"
+"POT-Creation-Date: 2000-12-01 14:33-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -139,11 +139,15 @@ msgstr ""
 msgid "Unable to find component %s\n"
 msgstr ""
 
-#: uninstall.c:402
+#: uninstall.c:398
+msgid "Too many arguments for the command\n"
+msgstr ""
+
+#: uninstall.c:405
 msgid "An error occured during the uninstallation process.\n"
 msgstr ""
 
-#: uninstall.c:406
+#: uninstall.c:409
 #, c-format
 msgid "%s has been successfully uninstalled.\n"
 msgstr ""

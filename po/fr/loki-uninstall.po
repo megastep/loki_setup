@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Setup 1.5\n"
-"POT-Creation-Date: 2000-11-19 15:58-0800\n"
+"POT-Creation-Date: 2000-12-01 14:33-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Stéphane Peter <megastep@lokigames.com>\n"
 "Language-Team: French <LL@li.org>\n"
@@ -149,11 +149,15 @@ msgstr "Composants:\n"
 msgid "Unable to find component %s\n"
 msgstr "Impossible de trouver le composant %s\n"
 
-#: uninstall.c:402
+#: uninstall.c:398
+msgid "Too many arguments for the command\n"
+msgstr "Trop d'arguments pour la commande\n"
+
+#: uninstall.c:405
 msgid "An error occured during the uninstallation process.\n"
 msgstr "Une erreur est apparue durant le processus d'installation.\n"
 
-#: uninstall.c:406
+#: uninstall.c:409
 #, c-format
 msgid "%s has been successfully uninstalled.\n"
 msgstr "%s a été désinstallé avec succès.\n"
