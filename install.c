@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.129 2004-03-31 16:30:39 icculus Exp $ */
+/* $Id: install.c,v 1.130 2004-04-07 02:51:33 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1762,7 +1762,6 @@ void generate_uninstall(install_info *info)
     product_component_t *component = NULL;
     product_option_t *option;
     struct component_elem *comp;
-	int free_product = 0;
 
     if ( info->component ) { /* Component install, the product has already been opened */
         product = info->product;
@@ -1778,7 +1777,6 @@ void generate_uninstall(install_info *info)
 			loki_setprefix_product(product, info->prefix);
 		}
 		info->product = product;
-		free_product = 1;
     }
 
     if ( product ) {
@@ -1953,8 +1951,8 @@ void generate_uninstall(install_info *info)
 
         snprintf(buf, sizeof(buf), "setup.data/bin/%s/%s/uninstall", detect_os(), detect_arch());
         loki_upgrade_uninstall(product, buf, "setup.data/locale");
-		if ( free_product ) 
-			loki_closeproduct(product);
+		/* We must call the following in all cases - component installs even, as we have to save the changes */
+		loki_closeproduct(product);
     } else {
 		log_fatal(_("Could not create install log"),
 				  detect_home(), info->name);
