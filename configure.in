@@ -296,7 +296,7 @@ AC_ARG_ENABLE(dialog,
 if test x$enable_dialog = xyes; then
 	CFLAGS="$CFLAGS -DENABLE_DIALOG"
 	COMMON_LIBS="dialog/libdialog.a"
-	CONSOLE_OBJS="dialog_ui.c"
+	CONSOLE_OBJS="dialog_ui.o"
 	DO_DIALOG="do-dialog"
 fi
 
