@@ -6,16 +6,19 @@
   </object>
   <array count="107" name="allObjects">
     <object class="IBCarbonWindow" id="166">
-      <string name="windowRect">179 -204 734 1884 </string>
+      <string name="windowRect">289 137 844 2225 </string>
       <string name="title">Window</string>
       <object name="rootControl" class="IBCarbonRootControl" id="167">
         <string name="bounds">0 0 555 2088 </string>
+        <string name="viewFrame">0 0 2088 555 </string>
         <array count="11" name="subviews">
           <object class="IBCarbonGroupBox" id="182">
             <string name="bounds">9 6 271 345 </string>
+            <string name="viewFrame">6 9 339 262 </string>
             <array count="6" name="subviews">
               <object class="IBCarbonStaticText" id="193">
                 <string name="bounds">223 11 239 340 </string>
+                <string name="viewFrame">5 214 329 16 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">206</int>
                 <boolean name="small">TRUE</boolean>
@@ -25,6 +28,7 @@
               </object>
               <object class="IBCarbonButton" id="190">
                 <string name="bounds">239 252 256 335 </string>
+                <string name="viewFrame">246 230 83 17 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">212</int>
                 <boolean name="small">TRUE</boolean>
@@ -34,6 +38,7 @@
               </object>
               <object class="IBCarbonButton" id="191">
                 <string name="bounds">239 122 256 230 </string>
+                <string name="viewFrame">116 230 108 17 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">211</int>
                 <boolean name="small">TRUE</boolean>
@@ -43,6 +48,7 @@
               </object>
               <object class="IBCarbonButton" id="192">
                 <string name="bounds">239 15 256 94 </string>
+                <string name="viewFrame">9 230 79 17 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">210</int>
                 <boolean name="small">TRUE</boolean>
@@ -52,9 +58,11 @@
               </object>
               <object class="IBCarbonGroupBox" id="298">
                 <string name="bounds">8 11 123 340 </string>
+                <string name="viewFrame">5 -1 329 115 </string>
                 <array count="7" name="subviews">
                   <object class="IBCarbonStaticText" id="299">
                     <string name="bounds">97 19 113 91 </string>
+                    <string name="viewFrame">8 89 72 16 </string>
                     <ostype name="controlSignature">loki</ostype>
                     <int name="controlID">203</int>
                     <boolean name="enabled">FALSE</boolean>
@@ -65,6 +73,7 @@
                   </object>
                   <object class="IBCarbonCheckBox" id="305">
                     <string name="bounds">71 29 85 277 </string>
+                    <string name="viewFrame">18 63 248 14 </string>
                     <ostype name="controlSignature">loki</ostype>
                     <int name="controlID">202</int>
                     <boolean name="small">TRUE</boolean>
@@ -74,6 +83,7 @@
                   </object>
                   <object class="IBCarbonStaticText" id="306">
                     <string name="bounds">31 19 47 91 </string>
+                    <string name="viewFrame">8 23 72 16 </string>
                     <ostype name="controlSignature">loki</ostype>
                     <int name="controlID">200</int>
                     <boolean name="small">TRUE</boolean>
@@ -83,23 +93,31 @@
                   </object>
                   <object class="IBCarbonEditText" id="326">
                     <string name="bounds">29 102 45 302 </string>
+                    <string name="viewFrame">91 21 200 16 </string>
                     <ostype name="controlSignature">loki</ostype>
                     <int name="controlID">207</int>
+                    <boolean name="isUnicode">TRUE</boolean>
+                    <boolean name="isSingleLine">TRUE</boolean>
                   </object>
                   <object class="IBCarbonEditText" id="327">
                     <string name="bounds">95 102 111 302 </string>
+                    <string name="viewFrame">91 87 200 16 </string>
                     <ostype name="controlSignature">loki</ostype>
                     <int name="controlID">208</int>
                     <boolean name="enabled">FALSE</boolean>
+                    <boolean name="isUnicode">TRUE</boolean>
+                    <boolean name="isSingleLine">TRUE</boolean>
                   </object>
                   <object class="IBCarbonRoundButton" id="328">
                     <string name="bounds">27 312 47 332 </string>
+                    <string name="viewFrame">301 19 20 20 </string>
                     <ostype name="controlSignature">loki</ostype>
                     <int name="controlID">201</int>
                     <ostype name="command">inst</ostype>
                   </object>
                   <object class="IBCarbonRoundButton" id="329">
                     <string name="bounds">92 312 112 332 </string>
+                    <string name="viewFrame">301 84 20 20 </string>
                     <ostype name="controlSignature">loki</ostype>
                     <int name="controlID">204</int>
                     <boolean name="enabled">FALSE</boolean>
@@ -114,9 +132,11 @@
               </object>
               <object class="IBCarbonGroupBox" id="189">
                 <string name="bounds">124 11 218 340 </string>
+                <string name="viewFrame">5 115 329 94 </string>
                 <array count="4" name="subviews">
                   <object class="IBCarbonStaticText" id="318">
                     <string name="bounds">201 273 217 336 </string>
+                    <string name="viewFrame">262 77 63 16 </string>
                     <ostype name="controlSignature">loki</ostype>
                     <int name="controlID">216</int>
                     <boolean name="small">TRUE</boolean>
@@ -125,6 +145,7 @@
                   </object>
                   <object class="IBCarbonStaticText" id="319">
                     <string name="bounds">201 183 217 265 </string>
+                    <string name="viewFrame">172 77 82 16 </string>
                     <ostype name="controlSignature">loki</ostype>
                     <int name="controlID">215</int>
                     <boolean name="small">TRUE</boolean>
@@ -134,6 +155,7 @@
                   </object>
                   <object class="IBCarbonStaticText" id="320">
                     <string name="bounds">201 16 217 87 </string>
+                    <string name="viewFrame">5 77 71 16 </string>
                     <ostype name="controlSignature">loki</ostype>
                     <int name="controlID">213</int>
                     <boolean name="small">TRUE</boolean>
@@ -143,6 +165,7 @@
                   </object>
                   <object class="IBCarbonStaticText" id="317">
                     <string name="bounds">201 95 217 171 </string>
+                    <string name="viewFrame">84 77 76 16 </string>
                     <ostype name="controlSignature">loki</ostype>
                     <int name="controlID">214</int>
                     <boolean name="small">TRUE</boolean>
@@ -165,9 +188,11 @@
           </object>
           <object class="IBCarbonGroupBox" id="203">
             <string name="bounds">276 6 548 345 </string>
+            <string name="viewFrame">6 276 339 272 </string>
             <array count="6" name="subviews">
               <object class="IBCarbonButton" id="201">
                 <string name="bounds">516 256 533 335 </string>
+                <string name="viewFrame">250 240 79 17 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">306</int>
                 <boolean name="small">TRUE</boolean>
@@ -177,6 +202,7 @@
               </object>
               <object class="IBCarbonButton" id="194">
                 <string name="bounds">516 122 533 230 </string>
+                <string name="viewFrame">116 240 108 17 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">305</int>
                 <boolean name="small">TRUE</boolean>
@@ -186,6 +212,7 @@
               </object>
               <object class="IBCarbonButton" id="195">
                 <string name="bounds">516 15 533 94 </string>
+                <string name="viewFrame">9 240 79 17 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">304</int>
                 <boolean name="small">TRUE</boolean>
@@ -195,6 +222,7 @@
               </object>
               <object class="IBCarbonStaticText" id="205">
                 <string name="bounds">302 15 318 335 </string>
+                <string name="viewFrame">9 26 320 16 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">301</int>
                 <boolean name="small">TRUE</boolean>
@@ -204,6 +232,7 @@
               </object>
               <object class="IBCarbonRadioButton" id="322">
                 <string name="bounds">354 46 368 246 </string>
+                <string name="viewFrame">40 78 200 14 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">302</int>
                 <string name="title">Recommended</string>
@@ -212,6 +241,7 @@
               </object>
               <object class="IBCarbonRadioButton" id="323">
                 <string name="bounds">413 46 427 150 </string>
+                <string name="viewFrame">40 137 104 14 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">303</int>
                 <string name="title">Expert</string>
@@ -227,9 +257,11 @@
           </object>
           <object class="IBCarbonGroupBox" id="212">
             <string name="bounds">-1 351 271 690 </string>
+            <string name="viewFrame">351 -1 339 272 </string>
             <array count="7" name="subviews">
               <object class="IBCarbonButton" id="211">
                 <string name="bounds">239 467 256 575 </string>
+                <string name="viewFrame">116 240 108 17 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">404</int>
                 <boolean name="small">TRUE</boolean>
@@ -239,6 +271,7 @@
               </object>
               <object class="IBCarbonButton" id="210">
                 <string name="bounds">239 360 256 439 </string>
+                <string name="viewFrame">9 240 79 17 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">403</int>
                 <boolean name="small">TRUE</boolean>
@@ -248,6 +281,7 @@
               </object>
               <object class="IBCarbonStaticText" id="209">
                 <string name="bounds">44 360 60 686 </string>
+                <string name="viewFrame">9 45 326 16 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">400</int>
                 <boolean name="small">TRUE</boolean>
@@ -257,6 +291,7 @@
               </object>
               <object class="IBCarbonStaticText" id="217">
                 <string name="bounds">146 360 162 686 </string>
+                <string name="viewFrame">9 147 326 16 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">401</int>
                 <boolean name="small">TRUE</boolean>
@@ -266,15 +301,16 @@
               </object>
               <object class="IBCarbonStaticText" id="218">
                 <string name="bounds">107 360 123 686 </string>
+                <string name="viewFrame">9 108 326 16 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">402</int>
                 <boolean name="small">TRUE</boolean>
                 <int name="controlSize">1</int>
-                <string name="title"> </string>
                 <int name="justification">-2</int>
               </object>
               <object class="IBCarbonProgressBar" id="219">
                 <string name="bounds">162 359 181 681 </string>
+                <string name="viewFrame">8 163 322 19 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">405</int>
                 <boolean name="hidden">TRUE</boolean>
@@ -282,6 +318,7 @@
               </object>
               <object class="IBCarbonProgressBar" id="220">
                 <string name="bounds">121 359 140 681 </string>
+                <string name="viewFrame">8 122 322 19 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">406</int>
                 <boolean name="indeterminate">FALSE</boolean>
@@ -296,9 +333,11 @@
           </object>
           <object class="IBCarbonGroupBox" id="225">
             <string name="bounds">276 351 548 690 </string>
+            <string name="viewFrame">351 276 339 272 </string>
             <array count="8" name="subviews">
               <object class="IBCarbonButton" id="221">
                 <string name="bounds">516 601 533 680 </string>
+                <string name="viewFrame">250 240 79 17 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">507</int>
                 <boolean name="small">TRUE</boolean>
@@ -308,6 +347,7 @@
               </object>
               <object class="IBCarbonButton" id="222">
                 <string name="bounds">516 467 533 575 </string>
+                <string name="viewFrame">116 240 108 17 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">506</int>
                 <boolean name="small">TRUE</boolean>
@@ -317,6 +357,7 @@
               </object>
               <object class="IBCarbonButton" id="224">
                 <string name="bounds">516 360 533 439 </string>
+                <string name="viewFrame">9 240 79 17 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">505</int>
                 <boolean name="small">TRUE</boolean>
@@ -326,6 +367,7 @@
               </object>
               <object class="IBCarbonStaticText" id="223">
                 <string name="bounds">302 360 318 680 </string>
+                <string name="viewFrame">9 26 320 16 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">500</int>
                 <boolean name="small">TRUE</boolean>
@@ -335,6 +377,7 @@
               </object>
               <object class="IBCarbonStaticText" id="227">
                 <string name="bounds">318 360 334 680 </string>
+                <string name="viewFrame">9 42 320 16 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">501</int>
                 <boolean name="small">TRUE</boolean>
@@ -344,6 +387,7 @@
               </object>
               <object class="IBCarbonStaticText" id="228">
                 <string name="bounds">363 360 379 606 </string>
+                <string name="viewFrame">9 87 246 16 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">502</int>
                 <boolean name="small">TRUE</boolean>
@@ -353,6 +397,7 @@
               </object>
               <object class="IBCarbonStaticText" id="230">
                 <string name="bounds">376 360 392 621 </string>
+                <string name="viewFrame">9 100 261 16 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">503</int>
                 <boolean name="small">TRUE</boolean>
@@ -362,6 +407,7 @@
               </object>
               <object class="IBCarbonStaticText" id="325">
                 <string name="bounds">416 360 432 621 </string>
+                <string name="viewFrame">9 140 261 16 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">504</int>
                 <boolean name="small">TRUE</boolean>
@@ -379,9 +425,11 @@
           </object>
           <object class="IBCarbonGroupBox" id="237">
             <string name="bounds">-1 696 271 1035 </string>
+            <string name="viewFrame">696 -1 339 272 </string>
             <array count="3" name="subviews">
               <object class="IBCarbonButton" id="231">
                 <string name="bounds">239 705 256 784 </string>
+                <string name="viewFrame">9 240 79 17 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">602</int>
                 <boolean name="small">TRUE</boolean>
@@ -391,6 +439,7 @@
               </object>
               <object class="IBCarbonStaticText" id="238">
                 <string name="bounds">25 705 41 1025 </string>
+                <string name="viewFrame">9 26 320 16 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">600</int>
                 <boolean name="small">TRUE</boolean>
@@ -400,6 +449,7 @@
               </object>
               <object class="IBCarbonStaticText" id="234">
                 <string name="bounds">41 705 57 1025 </string>
+                <string name="viewFrame">9 42 320 16 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">601</int>
                 <boolean name="small">TRUE</boolean>
@@ -417,9 +467,11 @@
           </object>
           <object class="IBCarbonGroupBox" id="239">
             <string name="bounds">276 696 548 1035 </string>
+            <string name="viewFrame">696 276 339 272 </string>
             <array count="3" name="subviews">
               <object class="IBCarbonStaticText" id="240">
                 <string name="bounds">297 712 507 1032 </string>
+                <string name="viewFrame">16 21 320 210 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">700</int>
                 <boolean name="small">TRUE</boolean>
@@ -429,6 +481,7 @@
               </object>
               <object class="IBCarbonButton" id="270">
                 <string name="bounds">515 712 532 791 </string>
+                <string name="viewFrame">16 239 79 17 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">701</int>
                 <boolean name="small">TRUE</boolean>
@@ -438,6 +491,7 @@
               </object>
               <object class="IBCarbonButton" id="273">
                 <string name="bounds">515 940 532 1019 </string>
+                <string name="viewFrame">244 239 79 17 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">702</int>
                 <boolean name="small">TRUE</boolean>
@@ -455,9 +509,11 @@
           </object>
           <object class="IBCarbonGroupBox" id="250">
             <string name="bounds">-1 1040 271 1379 </string>
+            <string name="viewFrame">1040 -1 339 272 </string>
             <array count="8" name="subviews">
               <object class="IBCarbonButton" id="249">
                 <string name="bounds">239 1290 256 1369 </string>
+                <string name="viewFrame">250 240 79 17 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">807</int>
                 <boolean name="small">TRUE</boolean>
@@ -467,6 +523,7 @@
               </object>
               <object class="IBCarbonButton" id="248">
                 <string name="bounds">239 1156 256 1264 </string>
+                <string name="viewFrame">116 240 108 17 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">806</int>
                 <boolean name="small">TRUE</boolean>
@@ -476,6 +533,7 @@
               </object>
               <object class="IBCarbonButton" id="245">
                 <string name="bounds">239 1049 256 1128 </string>
+                <string name="viewFrame">9 240 79 17 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">805</int>
                 <boolean name="small">TRUE</boolean>
@@ -485,6 +543,7 @@
               </object>
               <object class="IBCarbonStaticText" id="247">
                 <string name="bounds">25 1049 41 1178 </string>
+                <string name="viewFrame">9 26 129 16 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">800</int>
                 <boolean name="small">TRUE</boolean>
@@ -494,6 +553,7 @@
               </object>
               <object class="IBCarbonStaticText" id="251">
                 <string name="bounds">41 1049 109 1369 </string>
+                <string name="viewFrame">9 42 320 68 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">802</int>
                 <boolean name="small">TRUE</boolean>
@@ -503,6 +563,7 @@
               </object>
               <object class="IBCarbonStaticText" id="252">
                 <string name="bounds">110 1049 126 1369 </string>
+                <string name="viewFrame">9 111 320 16 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">803</int>
                 <boolean name="small">TRUE</boolean>
@@ -512,6 +573,7 @@
               </object>
               <object class="IBCarbonButton" id="253">
                 <string name="bounds">151 1140 171 1272 </string>
+                <string name="viewFrame">100 152 132 20 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">804</int>
                 <string name="title">Launch Browser</string>
@@ -519,6 +581,7 @@
               </object>
               <object class="IBCarbonStaticText" id="324">
                 <string name="bounds">25 1178 41 1364 </string>
+                <string name="viewFrame">138 26 186 16 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">801</int>
                 <boolean name="small">TRUE</boolean>
@@ -536,9 +599,11 @@
           </object>
           <object class="IBCarbonGroupBox" id="417">
             <string name="bounds">286 1040 548 1379 </string>
+            <string name="viewFrame">1040 286 339 262 </string>
             <array count="6" name="subviews">
               <object class="IBCarbonButton" id="422">
                 <string name="bounds">516 1290 533 1369 </string>
+                <string name="viewFrame">250 230 79 17 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">905</int>
                 <boolean name="small">TRUE</boolean>
@@ -548,6 +613,7 @@
               </object>
               <object class="IBCarbonButton" id="421">
                 <string name="bounds">516 1049 533 1128 </string>
+                <string name="viewFrame">9 230 79 17 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">904</int>
                 <boolean name="small">TRUE</boolean>
@@ -557,6 +623,7 @@
               </object>
               <object class="IBCarbonStaticText" id="415">
                 <string name="bounds">295 1049 311 1369 </string>
+                <string name="viewFrame">9 9 320 16 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">900</int>
                 <boolean name="small">TRUE</boolean>
@@ -566,11 +633,13 @@
               </object>
               <object class="IBCarbonGroupBox" id="423">
                 <string name="bounds">321 1044 494 1374 </string>
+                <string name="viewFrame">4 35 330 173 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">901</int>
               </object>
               <object class="IBCarbonStaticText" id="424">
                 <string name="bounds">498 1049 514 1145 </string>
+                <string name="viewFrame">9 212 96 16 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">902</int>
                 <boolean name="small">TRUE</boolean>
@@ -580,6 +649,7 @@
               </object>
               <object class="IBCarbonStaticText" id="425">
                 <string name="bounds">498 1153 514 1249 </string>
+                <string name="viewFrame">113 212 96 16 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">903</int>
                 <boolean name="small">TRUE</boolean>
@@ -596,9 +666,11 @@
           </object>
           <object class="IBCarbonGroupBox" id="436">
             <string name="bounds">-1 1387 271 1726 </string>
+            <string name="viewFrame">1387 -1 339 272 </string>
             <array count="4" name="subviews">
               <object class="IBCarbonButton" id="440">
                 <string name="bounds">239 1403 256 1482 </string>
+                <string name="viewFrame">16 240 79 17 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">1002</int>
                 <boolean name="small">TRUE</boolean>
@@ -608,6 +680,7 @@
               </object>
               <object class="IBCarbonStaticText" id="434">
                 <string name="bounds">80 1396 96 1722 </string>
+                <string name="viewFrame">9 81 326 16 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">1000</int>
                 <boolean name="small">TRUE</boolean>
@@ -617,12 +690,14 @@
               </object>
               <object class="IBCarbonProgressBar" id="441">
                 <string name="bounds">96 1395 115 1717 </string>
+                <string name="viewFrame">8 97 322 19 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">1001</int>
                 <boolean name="indeterminate">FALSE</boolean>
               </object>
               <object class="IBCarbonButton" id="442">
                 <string name="bounds">239 1637 256 1716 </string>
+                <string name="viewFrame">250 240 79 17 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">1003</int>
                 <boolean name="small">TRUE</boolean>
@@ -640,9 +715,11 @@
           </object>
           <object class="IBCarbonGroupBox" id="443">
             <string name="bounds">276 1387 548 1726 </string>
+            <string name="viewFrame">1387 276 339 272 </string>
             <array count="3" name="subviews">
               <object class="IBCarbonButton" id="444">
                 <string name="bounds">516 1403 533 1482 </string>
+                <string name="viewFrame">16 240 79 17 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">1102</int>
                 <boolean name="small">TRUE</boolean>
@@ -652,6 +729,7 @@
               </object>
               <object class="IBCarbonStaticText" id="445">
                 <string name="bounds">498 1396 514 1722 </string>
+                <string name="viewFrame">9 222 326 16 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">1101</int>
                 <boolean name="small">TRUE</boolean>
@@ -661,6 +739,7 @@
               </object>
               <object class="IBCarbonButton" id="447">
                 <string name="bounds">516 1637 533 1716 </string>
+                <string name="viewFrame">250 240 79 17 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">1103</int>
                 <boolean name="small">TRUE</boolean>
@@ -678,9 +757,11 @@
           </object>
           <object class="IBCarbonGroupBox" id="465">
             <string name="bounds">-1 1739 271 2078 </string>
+            <string name="viewFrame">1739 -1 339 272 </string>
             <array count="5" name="subviews">
               <object class="IBCarbonButton" id="461">
                 <string name="bounds">239 1755 256 1834 </string>
+                <string name="viewFrame">16 240 79 17 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">1205</int>
                 <boolean name="small">TRUE</boolean>
@@ -690,6 +771,7 @@
               </object>
               <object class="IBCarbonButton" id="464">
                 <string name="bounds">239 1989 256 2068 </string>
+                <string name="viewFrame">250 240 79 17 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">1206</int>
                 <boolean name="small">TRUE</boolean>
@@ -699,6 +781,7 @@
               </object>
               <object class="IBCarbonStaticText" id="466">
                 <string name="bounds">118 1741 134 1857 </string>
+                <string name="viewFrame">2 119 116 16 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">1201</int>
                 <boolean name="small">TRUE</boolean>
@@ -708,13 +791,17 @@
               </object>
               <object class="IBCarbonEditText" id="468">
                 <string name="bounds">118 1864 134 2065 </string>
+                <string name="viewFrame">125 119 201 16 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">1202</int>
                 <boolean name="small">TRUE</boolean>
                 <int name="controlSize">1</int>
+                <boolean name="isUnicode">TRUE</boolean>
+                <boolean name="isSingleLine">TRUE</boolean>
               </object>
               <object class="IBCarbonStaticText" id="470">
                 <string name="bounds">25 1755 41 2068 </string>
+                <string name="viewFrame">16 26 313 16 </string>
                 <ostype name="controlSignature">loki</ostype>
                 <int name="controlID">1200</int>
                 <string name="title">Please enter your CD product key.</string>
@@ -729,10 +816,12 @@
           </object>
         </array>
       </object>
+      <boolean name="receiveUpdates">FALSE</boolean>
       <boolean name="hasCloseBox">FALSE</boolean>
       <boolean name="hasHorizontalZoom">FALSE</boolean>
       <boolean name="isResizable">FALSE</boolean>
       <boolean name="hasVerticalZoom">FALSE</boolean>
+      <boolean name="compositing">TRUE</boolean>
       <int name="themeBrush">1</int>
       <int name="windowPosition">1</int>
     </object>

@@ -1464,7 +1464,7 @@ void carbon_OptionsShowBox(OptionsBox *Box)
         EmbedControl(Box->Buttons[i]->Control, Box->BoxControlRef);
         //!!!TODO - Might have to change height for separators (always be 1)
         SetControlBounds(Box->Buttons[i]->Control, &ButtonRect);
-        MoveControl(Box->Buttons[i]->Control, BoxControlBounds.left + BUTTON_MARGIN, BoxControlBounds.top + BUTTON_TOP_MARGIN + i * BUTTON_HEIGHT);
+        MoveControl(Box->Buttons[i]->Control, BoxControlBounds.left + BUTTON_MARGIN, /*BoxControlBounds.top +*/ BUTTON_TOP_MARGIN + i * BUTTON_HEIGHT);
         ShowControl(Box->Buttons[i]->Control);
     }
 
