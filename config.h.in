@@ -60,6 +60,9 @@
 /* Define if you have the <libutil.h> header file.  */
 #undef HAVE_LIBUTIL_H
 
+/* Define if you have the <locale.h> header file.  */
+#undef HAVE_LOCALE_H
+
 /* Define if you have the <mntent.h> header file.  */
 #undef HAVE_MNTENT_H
 
