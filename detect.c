@@ -144,13 +144,13 @@ int detect_cdrom(install_info *info)
                 *ptr ++ = toupper(*pid);
             }
             *ptr = '\0';
-
+            fprintf(stderr,"Looking for %s\n", cdenv);
             env = getenv(cdenv);
             if ( !env )
                 continue;
         }
         snprintf(file, sizeof(file), "%s/%s", env, cd->file);
-        if ( access(file, F_OK) < 0 ) {
+        if ( ! access(file, F_OK) ) {
             set_cdrom_mounted(cd, env);
             num_cdroms ++;
         }
