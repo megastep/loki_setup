@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.46 2003-10-15 00:08:11 megastep Exp $ */
+/* $Id: uninstall.c,v 1.47 2004-02-08 06:01:21 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -295,7 +295,7 @@ static void init_locale(void)
 
 	setlocale (LC_ALL, "");
 #ifdef UNINSTALL_UI
-    strcpy(locale, "locale");
+    strcpy(locale, LOCALEDIR);
 #else
     snprintf(locale, sizeof(locale), "%s/.loki/installed/locale", detect_home());
 #endif

@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.90 2004-02-06 03:03:13 megastep Exp $
+   $Id: gtk_ui.c,v 1.91 2004-02-08 06:01:21 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -832,6 +832,7 @@ static inline int str_in_g_list(const char *str, GList *list)
     return 0;  /* not in the list. */
 }
 
+// FIXME: this does not belong into the UI
 static void init_install_path(void)
 {
     GtkWidget* widget;
@@ -849,7 +850,7 @@ static void init_install_path(void)
     }
 
     list = NULL;
-    if (access(cur_info->install_path, R_OK) == 0)
+    if (access(cur_info->install_path, W_OK) == 0)
         list = g_list_append( list, cur_info->install_path);
 
     /*----------------------------------------------------------------------

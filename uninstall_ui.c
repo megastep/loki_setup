@@ -476,7 +476,7 @@ int uninstall_ui(int argc, char *argv[])
 
     /* Initialize Glade */
     glade_init();
-    uninstall_glade = glade_xml_new("uninstall.glade", "loki_uninstall"); 
+    uninstall_glade = glade_xml_new(DATADIR "/uninstall.glade", "loki_uninstall"); 
 
     /* Add all signal handlers defined in glade file */
     glade_xml_signal_autoconnect(uninstall_glade);
