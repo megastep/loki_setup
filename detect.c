@@ -144,7 +144,6 @@ int detect_cdrom(install_info *info)
                 *ptr ++ = toupper(*pid);
             }
             *ptr = '\0';
-            fprintf(stderr,"Looking for %s\n", cdenv);
             env = getenv(cdenv);
             if ( !env )
                 continue;
