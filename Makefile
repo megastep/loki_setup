@@ -55,20 +55,20 @@ endif
 CONSOLE_LIBS = $(LIBS)
 GUI_LIBS = $(LIBS) -Wl,-Bdynamic $(shell gtk-config --libs || echo "-lgtk -lgdk") $(shell libglade-config --prefix)/lib/libglade.a -rdynamic
 
-all: do-plugins setup setup.gtk uninstall
+all: $(SETUPDB)/brandelf do-plugins setup setup.gtk uninstall
 
 testxml: testxml.o
 	$(CC) -o $@ $^ $(LIBS)
 
-uninstall: $(SETUPDB)/brandelf $(UNINSTALL_OBJS) $(SETUPDB)/libsetupdb.a
+uninstall: $(UNINSTALL_OBJS) $(SETUPDB)/libsetupdb.a
 	$(CC) -o $@ $^ $(CONSOLE_LIBS) -static
 	$(SETUPDB)/brandelf -t $(os) $@
 
-setup:	$(SETUPDB)/brandelf $(CONSOLE_OBJS) $(SETUPDB)/libsetupdb.a
+setup:	$(CONSOLE_OBJS) $(SETUPDB)/libsetupdb.a
 	$(CC) -o $@ $^ $(CONSOLE_LIBS) -static
 	$(SETUPDB)/brandelf -t $(os) $@
 
-setup.gtk: $(SETUPDB)/brandelf $(GUI_OBJS) $(SETUPDB)/libsetupdb.a
+setup.gtk: $(GUI_OBJS) $(SETUPDB)/libsetupdb.a
 	$(CC) -o $@ $^ $(GUI_LIBS)
 	$(SETUPDB)/brandelf -t $(os) $@
 
