@@ -44,7 +44,7 @@ UNINSTALL_OBJS 		= uninstall.o
 CHECK_OBJS			= $(COMMON_OBJS) $(CORE_OBJS) check.o
 CONSOLE_OBJS 		= $(OBJS) console_ui.o @CONSOLE_OBJS@
 GUI_OBJS 			= $(OBJS) gtk_ui.o
-CARBON_OBJS          = $(OBJS) carbon_ui.o
+CARBON_OBJS          = $(OBJS) carbon_ui.o carbon/carbonres.o carbon/carbondebug.o
 XSU_OBJS			= xsu.o pseudo.o
 
 SRCS = $(OBJS:.o=.c) $(CONSOLE_OBJS:.o=.c) $(GUI_OBJS:.o=.c) $(CARBON_OBJS:.o=.c) $(XSU_OBJS:.o=.c) testcd.c
