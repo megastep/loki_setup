@@ -11,6 +11,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <time.h>
 
 #include <zlib.h>
 
@@ -784,3 +785,71 @@ static void dobz2init()
 }
 
 #endif
+
+static char tmpdirname[PATH_MAX] = "\0";
+
+const char* tmpdir()
+{
+	unsigned count;
+
+	if(*tmpdirname)
+		return tmpdirname;
+
+	srand(time(NULL));
+	for(count = 0; count < 1000; ++count)
+	{
+		snprintf(tmpdirname, sizeof(tmpdirname), "/tmp/setuptmp.%06X", rand());
+		if(mkdir(tmpdirname, 0700) == 0)
+		{
+			log_debug("temporary directory %s created", tmpdirname);
+			return tmpdirname;
+		}
+	}
+	log_fatal(_("Unable to create temporary directory: %s"), strerror(errno));
+	
+	return NULL;
+}
+
+int cleantmpdir()
+{
+	DIR* dir;
+	struct dirent *entry;
+	char cwd[PATH_MAX];
+
+	if(!*tmpdirname)
+		return 0;
+
+	if(!getcwd(cwd, sizeof(cwd)))
+		cwd[0] = '\0';
+
+	if(chdir(tmpdirname) == -1)
+	{
+		log_warning(_("Can not chdir to temporary directory: %s"), strerror(errno));
+		return -1;
+	}
+
+	dir = opendir(tmpdirname);
+	if(!dir)
+	{
+		log_warning(_("Can not open temporary directory: %s"), strerror(errno));
+		return -1;
+	}
+
+	while((entry = readdir(dir)) != NULL)
+	{
+		if(!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
+			continue;
+
+		log_debug("unlink temporary file %s", entry->d_name);
+		if(unlink(entry->d_name) == -1)
+			log_warning(_("Can not remove %s/%s: %s"), tmpdirname, entry->d_name, strerror(errno));
+	}
+
+	closedir(dir);
+
+	if(*cwd)
+		chdir(cwd);
+
+	return rmdir(tmpdirname);
+}
+

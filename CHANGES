@@ -1,4 +1,6 @@
 Current:
+Ludwig Nussel - Wed Nov 10 14:21:21 PST 2004
+ * Added support for inline binary scripts.
 Ludwig Nussel - Mon Nov  1 19:39:21 PST 2004
  * New 'suffix' attribute to the files element to force plugins to be used.
  * Fixes in ZIP plugin

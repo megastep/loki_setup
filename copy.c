@@ -108,6 +108,8 @@ typedef struct _corrupt_list {
 
 static corrupt_list *corrupts = NULL;
 
+static void copy_binary_finish(install_info* info, xmlNodePtr node, const char* fn, struct file_elem *file);
+
 void add_corrupt_file(const product_t *prod, const char *path, const char *option)
 {
 	corrupt_list *item;
@@ -587,6 +589,50 @@ ssize_t copy_manpage(install_info *info, xmlNodePtr node, const char *dest,
 	return copied;
 }
 
+/** write memory 'data' with length 'len' to a temporary file called 'name'.
+ * The full path to the created file is returned in name_out which must hold at
+ * least PATH_MAX characters.
+ * @return pointer to name_out for convenience. On error NULL is returned.
+ * content of name_out is undefined in this case.
+ */
+static char* write_temp_script(const char* name, char* name_out,
+		const char* data,
+		size_t len)
+{
+	int fd;
+	ssize_t ret;
+
+	if(!name_out)
+		return NULL;
+
+	if(strrchr(name, '/'))
+	{
+		log_warning("'name' must not contain slashes");
+		return NULL;
+	}
+
+	name_out[PATH_MAX-1] = '\0';
+	name_out[PATH_MAX-2] = '\0';
+	strncpy(name_out, tmpdir(), PATH_MAX-2);
+	name_out[strlen(name_out)] = '/';
+	strncpy(name_out+strlen(name_out), name, PATH_MAX-strlen(name_out)-1);
+
+	if((fd = open(name_out, O_WRONLY|O_CREAT, 0755)) == -1)
+	{
+		log_warning(_("Could not create temporary script: %s"), strerror(errno));
+		return NULL;
+	}
+
+	ret = write(fd, data, len);
+	if(ret < 0 || (unsigned)ret != len)
+	{
+		log_warning(_("Could not create temporary script: %s"), strerror(errno));
+		name_out = NULL;
+	}
+	close(fd);
+	return name_out;
+}
+
 ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, const char *dest, 
 		    const char *from_cdrom,
 		    UIUpdateFunc update)
@@ -618,6 +664,36 @@ ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, c
     os = detect_os();
     copied = 0;
     size = 0;
+
+	if(xmlNodePropIsTrue(node, "inline"))
+	{
+		if(!binpath)
+		{
+			log_warning(_("'binpath' attribute is mandatory for inline 'binary' tag"));
+			goto copy_binary_exit; 
+		}
+		else if(strrchr(binpath, '/'))
+		{
+			log_warning(_("'binpath' attribute must not contain slashes for inline 'binary' tag"));
+			goto copy_binary_exit; 
+		}
+
+		strncpy(fdest, dest, sizeof(fdest));
+		fdest[sizeof(fdest)-1] = '\0';
+
+		if(!write_temp_script(binpath, bin, filedesc, strlen(filedesc)))
+			goto copy_binary_exit;
+
+		copied = copy_file(info, NULL, bin, fdest, final, 1, 1, node, update, &file);
+		if(copied > 0)
+		{
+			size += copied;
+
+			copy_binary_finish(info, node, final, file);
+		}
+		unlink(bin);
+		goto copy_binary_exit;
+	}
 
     while ( filedesc && parse_line(&filedesc, final, (sizeof final)) ) {
 		if (! in_rpm) {
@@ -718,28 +794,37 @@ ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, c
 			log_warning(_("Unable to copy file '%s'"), fpat);
 			ui_fatal_error(_("Unable to copy file '%s'"), fpat);
         } else if ( copied > 0 || in_rpm ) {
-            char *symlink = xmlGetProp(node, "symlink");
-            char sym_to[PATH_MAX];
-
             size += copied;
-            /* Create the symlink */
-            if ( *info->symlinks_path && symlink ) {
-                snprintf(sym_to, sizeof(sym_to), "%s/%s", info->symlinks_path, symlink);
-                file_symlink(info, final, sym_to);
-            }
-            add_bin_entry(info, current_option, file, symlink,
-						  xmlGetProp(node, "desc"),
-						  xmlGetProp(node, "menu"),
-						  xmlGetProp(node, "name"),
-						  xmlGetProp(node, "icon"),
-						  xmlGetProp(node, "args"),
-						  xmlGetProp(node, "play")
-						  );
+
+			copy_binary_finish(info, node, final, file);
         }
     }
  copy_binary_exit:
 	xmlFree(keepdirs); xmlFree(binpath);
     return size;
+}
+
+/** to be called when binary was successfully installed. creates optional
+ * symlink and registers the file in the setup database.
+ */
+static void copy_binary_finish(install_info* info, xmlNodePtr node, const char* fn, struct file_elem *file)
+{
+	char *symlink = xmlGetProp(node, "symlink");
+	char sym_to[PATH_MAX];
+
+	/* Create the symlink */
+	if ( *info->symlinks_path && symlink ) {
+		snprintf(sym_to, sizeof(sym_to), "%s/%s", info->symlinks_path, symlink);
+		file_symlink(info, fn, sym_to);
+	}
+	add_bin_entry(info, current_option, file, symlink,
+			xmlGetProp(node, "desc"),
+			xmlGetProp(node, "menu"),
+			xmlGetProp(node, "name"),
+			xmlGetProp(node, "icon"),
+			xmlGetProp(node, "args"),
+			xmlGetProp(node, "play")
+			);
 }
 
 static int copy_script(install_info *info, xmlNodePtr node, const char *script, const char *dest, size_t size,
@@ -1206,7 +1291,8 @@ unsigned long long size_node(install_info *info, xmlNodePtr node)
 									  xmlNodeListGetString(info->config, node->childs, 1), suffix);
 					xmlFree(suffix);
 				} else if ( strcmp(node->name, "binary") == 0 ) {
-					size += size_binary(info, from_cdrom,
+					if(!xmlNodePropIsTrue(node, "inline"))
+						size += size_binary(info, from_cdrom,
 									xmlNodeListGetString(info->config, node->childs, 1));
 				} else if ( strcmp(node->name, "manpage") == 0 ) {
 					size += size_manpage(info, node, from_cdrom);
@@ -1265,5 +1351,6 @@ int has_binaries(install_info *info, xmlNodePtr node)
     }
     return num_binaries;
 }
+
 
 
