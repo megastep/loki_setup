@@ -651,6 +651,10 @@ int gtkui_okay(Install_UI *UI, int *argc, char ***argv)
 {
     return(0);
 }
+int carbonui_okay(Install_UI *UI, int *argc, char ***argv)
+{
+    return(0);
+}
 #endif
 
 
