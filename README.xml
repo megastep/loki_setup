@@ -533,6 +533,8 @@ encompassing 'exclusive' element, as such :
 WARNING: You should always define a default option within the group of
 exclusive options, by setting its 'install' attribute to 'true'.
 
+The EXCLUSIVE element also supports LANG sub-elements to provide translations.
+
 The EXCLUSIVE element has the following optional attributes :
 
  reinstall  If this is a reinstallation, and this is set to "false", then

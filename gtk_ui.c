@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.102 2004-06-30 03:21:24 megastep Exp $
+   $Id: gtk_ui.c,v 1.103 2004-08-20 01:05:10 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1216,7 +1216,9 @@ static void init_menuitems_option(install_info *info)
     }
 }
 
-static void parse_option(install_info *info, const char *component, xmlNodePtr node, GtkWidget *window, GtkWidget *box, int level, GtkWidget *parent, int exclusive, int excl_reinst, GSList **radio)
+static void parse_option(install_info *info, const char *component, xmlNodePtr node,
+						 GtkWidget *window, GtkWidget *box, int level, GtkWidget *parent,
+						 int exclusive, int excl_reinst, GSList **radio)
 {
     xmlNodePtr child;
     char text[1024] = "";
@@ -1225,6 +1227,10 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
     gchar *name;
     int i;
     GtkWidget *button = NULL;
+
+	/* Skip translation nodes */
+	if ( !strcmp(node->name, "lang") )
+		return;
 
     /* See if this node matches the current architecture */
     wanted = xmlGetProp(node, "arch");
@@ -1248,12 +1254,12 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
 
     /* See if the user wants this option */
 	if ( node->type == XML_TEXT_NODE ) {
-		log_debug("Parsing text node.\n");
+		log_debug("Parsing text node: '%s'\n", node->content);
 		name = g_strdup(node->content);
 		g_strstrip(name);
 		if ( *name ) {
 			log_debug("String: '%s'\n", name);
-			button = gtk_label_new(name);
+			button = gtk_label_new(get_option_name(info, node->parent, NULL, 0));
 			gtk_widget_show(button);
 			gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(button), FALSE, FALSE, 0);
 		}

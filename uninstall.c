@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.55 2004-08-14 01:25:38 megastep Exp $ */
+/* $Id: uninstall.c,v 1.56 2004-08-20 01:05:10 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -400,6 +400,9 @@ int main(int argc, char *argv[])
 #endif
 	int c, is_listing = 0, ret = 0;
 	const char *use_locale = NULL;
+#ifdef SETUP_COPY_UNINSTALL
+    const char *env;
+#endif
 
 	struct option long_options[] = { 
 		{ "help", no_argument, NULL, 'h' },
@@ -431,7 +434,6 @@ int main(int argc, char *argv[])
 #endif
 	
 #ifdef SETUP_COPY_UNINSTALL
-    const char *env;
 	/* HP-UX wouldn't allow us to uninstall ourselves unless we copy the binary some other place */
 
 	/* See if we have already being run from the script */
