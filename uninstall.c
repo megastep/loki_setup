@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.16 2000-11-11 03:38:28 hercules Exp $ */
+/* $Id: uninstall.c,v 1.17 2000-11-14 22:39:51 hercules Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -14,11 +14,15 @@
 
 #include "setupdb.h"
 #include "install.h"
+#ifdef UNINSTALL_UI
+#include "uninstall_ui.h"
+#endif
+#include "uninstall.h"
 
 #define PACKAGE "loki-uninstall"
 
 static char *current_locale = NULL;
-static product_t *prod = NULL;
+product_t *prod = NULL;
 
 /* List the valid command-line options */
 
@@ -109,10 +113,16 @@ static void emergency_exit(int sig)
     }
 }
 
-static void uninstall_component(product_component_t *comp, product_info_t *info)
+void uninstall_component(product_component_t *comp, product_info_t *info)
 {
     product_option_t *opt;
     struct dir_entry *list = NULL, *freeable;
+
+    /* Go to the install directory, so the log appears in the right place */
+    if ( chdir(info->root) < 0) {
+        fprintf(stderr, _("Could not change to directory: %s\n"), info->root);
+        return;
+    }
 
     /* Run pre-uninstall scripts */
     loki_runscripts(comp, LOKI_SCRIPT_PREUNINSTALL);
@@ -172,13 +182,9 @@ static void uninstall_component(product_component_t *comp, product_info_t *info)
     loki_remove_component(comp);
 }
 
-static int perform_uninstall(product_t *prod, product_info_t *info)
+int perform_uninstall(product_t *prod, product_info_t *info)
 {
     product_component_t *comp, *next;
-
-    if ( chdir(info->root) < 0) {
-        fprintf(stderr, _("Could not change to directory: %s\n"), info->root);
-    }
 
     comp = loki_getfirst_component(prod);
     while ( comp ) {
@@ -204,56 +210,152 @@ static int perform_uninstall(product_t *prod, product_info_t *info)
 	return 1;
 }
 
-static int check_permissions(product_info_t *info)
+int check_permissions(product_info_t *info, int verbose)
 {
     if ( access(info->root, W_OK) < 0 ) {
-        fprintf(stderr, _("No write access to the installation directory.\nAborting.\n"));
+        if ( verbose ) {
+            fprintf(stderr,
+            _("No write access to the installation directory.\nAborting.\n"));
+        }
         return 0;
     }
     
     if ( access(info->registry_path, W_OK) < 0 ) {
-        fprintf(stderr, _("No write access to the registry file: %s.\nAborting.\n"),
-                info->registry_path);
+        if ( verbose ) {
+            fprintf(stderr,
+            _("No write access to the registry file: %s.\nAborting.\n"),
+                    info->registry_path);
+        }
         return 0;
     }
     return 1;
 }
 
-int main(int argc, char **argv)
+static void init_locale(void)
 {
-    product_info_t *info;
-    char desc[128], locale[PATH_MAX];
-	int ret = 0;
+    char locale[PATH_MAX];
 
-	/* Set the locale */
 	setlocale (LC_ALL, "");
+#ifdef UINSTALL_UI
+    strcpy(locale, "locale");
+#else
     snprintf(locale, sizeof(locale), "%s/.loki/installed/locale", getenv("HOME"));
+#endif
 	bindtextdomain (PACKAGE, locale);
 	textdomain (PACKAGE);
-
 	current_locale = getenv("LC_ALL");
+
 	if(!current_locale) {
 		current_locale = getenv("LC_MESSAGES");
 		if(!current_locale) {
 			current_locale = getenv("LANG");
 		}
 	}
+}
 
+#ifdef UNINSTALL_UI
+static void goto_installpath(char *argv0)
+{
+    char temppath[PATH_MAX];
+    char datapath[PATH_MAX];
+    char *home;
+
+    home = getenv("HOME");
+    if ( ! home ) {
+        home = ".";
+    }
+
+    strcpy(temppath, argv0);    /* If this overflows, it's your own fault :) */
+    if ( ! strrchr(temppath, '/') ) {
+        char *path;
+        char *last;
+        int found;
+
+        found = 0;
+        path = getenv("PATH");
+        do {
+            /* Initialize our filename variable */
+            temppath[0] = '\0';
+
+            /* Get next entry from path variable */
+            last = strchr(path, ':');
+            if ( ! last )
+                last = path+strlen(path);
+
+            /* Perform tilde expansion */
+            if ( *path == '~' ) {
+                strcpy(temppath, home);
+                ++path;
+            }
+
+            /* Fill in the rest of the filename */
+            if ( last > (path+1) ) {
+                strncat(temppath, path, (last-path));
+                strcat(temppath, "/");
+            }
+            strcat(temppath, "./");
+            strcat(temppath, argv0);
+
+            /* See if it exists, and update path */
+            if ( access(temppath, X_OK) == 0 ) {
+                ++found;
+            }
+            path = last+1;
+
+        } while ( *last && !found );
+
+    } else {
+        /* Increment argv0 to the basename */
+        argv0 = strrchr(argv0, '/')+1;
+    }
+
+    /* Now canonicalize it to a full pathname for the data path */
+    datapath[0] = '\0';
+    if ( realpath(temppath, datapath) ) {
+        /* There should always be '/' in the path */
+        *(strrchr(datapath, '/')) = '\0';
+    }
+    if ( ! *datapath || (chdir(datapath) < 0) ) {
+        fprintf(stderr, "Couldn't change to install directory\n");
+        exit(1);
+    }
+}
+#endif /* UNINSTALL_UI */
+
+int main(int argc, char *argv[])
+{
+    product_info_t *info;
+    char desc[128];
+	int ret = 0;
+
+#ifdef UNINSTALL_UI
+    goto_installpath(argv[0]);
+#endif
+
+	/* Set the locale */
+    init_locale();
+
+#ifdef UNINSTALL_UI
+	if ( argc < 2 ) {
+        return uninstall_ui(argc, argv);
+    }
+#endif
 	if ( argc < 2 ) {
 		print_usage(argv[0]);
 		return 1;
 	}
 
-    signal(SIGINT, emergency_exit);
-    signal(SIGTERM, emergency_exit);
+    /* Add emergency signal handlers */
     signal(SIGHUP, emergency_exit);
+    signal(SIGINT, emergency_exit);
     signal(SIGQUIT, emergency_exit);
+    signal(SIGTERM, emergency_exit);
 
     if ( !strcmp(argv[1], "-l") ) {
         const char *product;
         printf(_("Installed products:\n"));
         for( product = loki_getfirstproduct(); product; product = loki_getnextproduct() ) {
-            product_t *prod = loki_openproduct(product);
+            prod = loki_openproduct(product);
             printf("\t%s: ", product);
             if ( prod ) {
                 info = loki_getinfo_product(prod);
@@ -289,7 +391,7 @@ int main(int argc, char **argv)
             } else { /* Uninstall a single component */
                 comp = loki_find_component(prod, argv[2]);
                 if ( comp ) {
-                    if ( ! check_permissions(info) )
+                    if ( ! check_permissions(info, 1) )
                         return 1;
                     uninstall_component(comp, info);
                     loki_closeproduct(prod);
@@ -299,7 +401,7 @@ int main(int argc, char **argv)
             }
         } else {            
             /* Uninstall the damn thing */
-            if ( ! check_permissions(info) )
+            if ( ! check_permissions(info, 1) )
                 return 1;
             if ( ! perform_uninstall(prod, info) ) {
                 fprintf(stderr, _("An error occured during the uninstallation process.\n"));

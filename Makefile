@@ -41,7 +41,8 @@ CFLAGS += $(OPTIMIZE) $(HEADERS) $(OPTIONS)
 
 COMMON_OBJS = log.o install_log.o
 OBJS = $(COMMON_OBJS) main.o detect.o plugins.o network.o install.o copy.o file.o loki_launchurl.o
-UNINSTALL_OBJS = $(COMMON_OBJS) uninstall.o
+LOKI_UNINSTALL_OBJS = loki_uninstall.o uninstall_ui.o
+UNINSTALL_OBJS = uninstall.o
 CONSOLE_OBJS = $(OBJS) console_ui.o
 GUI_OBJS = $(OBJS) gtk_ui.o
 
@@ -66,6 +67,12 @@ all: do-plugins setup setup.gtk uninstall
 
 testxml: testxml.o
 	$(CC) -o $@ $^ $(LIBS)
+
+loki_uninstall.o: uninstall.c
+	$(CC) -c -o $@ $^ $(CFLAGS) -DUNINSTALL_UI
+
+loki_uninstall: $(LOKI_UNINSTALL_OBJS) $(SETUPDB)/$(arch)/libsetupdb.a
+	$(CC) -o $@ $^ $(GUI_LIBS)
 
 uninstall: $(UNINSTALL_OBJS) $(SETUPDB)/$(arch)/libsetupdb.a
 	$(CC) -o $@ $^ $(CONSOLE_LIBS) -static
