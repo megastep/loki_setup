@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.67 2003-09-24 04:02:48 megastep Exp $ */
+/* $Id: main.c,v 1.68 2004-03-08 02:32:24 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -256,6 +256,8 @@ int main(int argc, char **argv)
 	}
 
 	log_init(verbosity);
+
+    file_init();
 
     /* Initialize the XML setup configuration */
     info = create_install(xml_file, install_path, binary_path, product_prefix);

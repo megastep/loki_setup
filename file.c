@@ -21,6 +21,7 @@
 
 #ifdef HAVE_BZIP2_SUPPORT
 
+#ifndef BZIP2_DLOPEN
 #ifdef LIBBZ2_PREFIX
 #define BZOPEN BZ2_bzopen
 #define BZDOPEN BZ2_bzdopen
@@ -36,6 +37,27 @@
 #define BZERROR bzerror
 #define BZCLOSE bzclose
 #endif
+#else
+
+#include <dlfcn.h>
+
+static BZFILE* dummy_bzopen(const char* path, const char* mode);
+static BZFILE* dummy_bzdopen(int fd, const char* mode);
+static int dummy_bzread(BZFILE* b, void* buf, int len);
+static int dummy_bzwrite(BZFILE* b, void* buf, int len);
+static const char* dummy_bzerror(BZFILE *b, int *errnum);
+static void dummy_bzclose(BZFILE* b);
+
+static BZFILE* (*BZOPEN)(const char* path, const char* mode) = dummy_bzopen;
+static BZFILE* (*BZDOPEN)(int fd, const char* mode)          = dummy_bzdopen;
+static int (*BZREAD)(BZFILE* b, void* buf, int len)          = dummy_bzread;
+static int (*BZWRITE)(BZFILE* b, void* buf, int len)         = dummy_bzwrite;
+static const char* (*BZERROR)(BZFILE *b, int *errnum)        = dummy_bzerror;
+static void (*BZCLOSE)(BZFILE* b)                            = dummy_bzclose;
+
+static void dobz2init(void); // dlopen libbz2
+
+#endif
 
 #endif
 
@@ -43,6 +65,13 @@
 static const char gzip_magic[2] = { 0037, 0213 }, bzip_magic[2] = "BZ" ;
 
 extern struct option_elem *current_option;
+
+void file_init(void)
+{
+#ifdef BZIP2_DLOPEN
+	dobz2init();
+#endif
+}
 
 void file_create_hierarchy(install_info *info, const char *path)
 {
@@ -626,3 +655,93 @@ int dir_is_accessible(const char *path)
 	free(str);
 	return ret;
 }
+
+#ifdef BZIP2_DLOPEN
+/*
+ * BZ2 dlopen stuff
+ */
+
+/* dummy functions if lib couldn't be opened */
+static BZFILE* dummy_bzopen(const char* path, const char* mode)
+{
+	return NULL;
+}
+
+static BZFILE* dummy_bzdopen(int fd, const char* mode)
+{
+	return NULL;
+}
+
+static int dummy_bzread(BZFILE* b, void* buf, int len)
+{
+	return -1;
+}
+
+static int dummy_bzwrite(BZFILE* b, void* buf, int len)
+{
+	return -1;
+}
+
+static const char* dummy_bzerror(BZFILE *b, int *errnum)
+{
+	if(errnum)
+		*errnum = BZ_STREAM_END;
+	return _("BZ2 support not available");
+}
+
+static void dummy_bzclose(BZFILE* b)
+{
+	return;
+}
+
+static void bz2dummies()
+{
+	BZOPEN  = dummy_bzopen;
+	BZDOPEN = dummy_bzdopen;
+	BZREAD  = dummy_bzread;
+	BZWRITE = dummy_bzwrite;
+	BZERROR = dummy_bzerror;
+	BZCLOSE = dummy_bzclose;
+}
+
+#define GET_SYM(func, sym) \
+	func = dlsym(lib, sym); \
+	if(!func) \
+		func = dlsym(lib, sym+4); \
+	if(!func) \
+	{ \
+		bz2dummies(); \
+		log_warning(_("BZ2: *** Symbol \"%s\" not found, bzip2 support disabled"), sym); \
+		return; \
+	}
+
+/** dlopen libbz2.so.1, libbz2.so.1.0 */
+static void dobz2init()
+{
+	void* lib = NULL;
+	char* libnames[] = { "libbz2.so.1", "libbz2.so.1.0", NULL };
+	unsigned i;
+
+	for(i = 0; libnames[i] && !lib; ++i)
+	{
+		log_debug(_("BZ2: Try open %s"), libnames[i]);
+		lib = dlopen(libnames[i], RTLD_NOW);
+	}
+
+	if(!lib)
+	{
+		log_warning(_("BZ2: *** Unable to open bzip2 library. bzip2 support disabled"));
+		return;
+	}
+	else
+		log_debug(_("BZ2: got %s"), libnames[i]);
+
+	GET_SYM(BZOPEN, "BZ2_bzopen")
+	GET_SYM(BZDOPEN,"BZ2_bzdopen")
+	GET_SYM(BZREAD, "BZ2_bzread")
+	GET_SYM(BZWRITE,"BZ2_bzwrite")
+	GET_SYM(BZERROR,"BZ2_bzerror")
+	GET_SYM(BZCLOSE,"BZ2_bzclose")
+}
+
+#endif

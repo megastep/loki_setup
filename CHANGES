@@ -1,4 +1,6 @@
 Current:
+Ludwig Nussel - Sun Mar  7 18:31:37 PST 2004
+ * Added dlopen()-based support for libbz2 (optional)
 Ryan C. Gordon (Epic Games) - Sun Mar  7 11:30:01 EST 2004
  * Carbon_ui's main window is now set to compositing.
 Ryan C. Gordon (Epic Games) - Fri Mar  5 05:40:55 EST 2004

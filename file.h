@@ -1,4 +1,4 @@
-/* $Id: file.h,v 1.21 2003-02-27 06:16:01 megastep Exp $ */
+/* $Id: file.h,v 1.22 2004-03-08 02:32:24 megastep Exp $ */
 
 #ifndef __LOKI_FILE_H__
 #define __LOKI_FILE_H__
@@ -32,6 +32,7 @@ typedef struct {
 	struct file_elem *elem;
 } stream;
 
+extern void file_init(void);
 extern stream *file_open(install_info *info,const char *path,const char *mode);
 extern stream *file_fdopen(install_info *info, const char *path, FILE *fd, gzFile zfd, BZFILE *bzfd, const char *mode);
 extern int file_read(install_info *info, void *buf, int len, stream *streamp);
