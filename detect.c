@@ -143,6 +143,7 @@ int detect_diskspace(const char *path)
 int detect_cdrom(const char *unique_file)
 {
     int count = 0, i;
+	char *env = getenv("SETUP_CDROM");
 
 #ifdef __FreeBSD__
 	int mounted = getfsstat(NULL, 0, MNT_NOWAIT);
@@ -150,6 +151,11 @@ int detect_cdrom(const char *unique_file)
 	for( i = 0; i < num_cdroms; ++ i ) {
 		if(cdroms[i])
 			free(cdroms[i]);
+	}
+
+	if ( env ) { /* Override the CD detection */
+		cdroms[0] = env;
+		return num_cdroms = 1;
 	}
 	
 	if ( mounted > 0 ) {
@@ -184,6 +190,11 @@ int detect_cdrom(const char *unique_file)
         if(cdroms[i])
             free(cdroms[i]);
     }
+
+	if ( env ) { /* Override the CD detection */
+		cdroms[0] = env;
+		return num_cdroms = 1;
+	}
 
     mountfp = setmntent( _PATH_MOUNTED, "r" );
     if( mountfp != NULL ) {

@@ -1,4 +1,7 @@
 1.4.0:
+Stéphane Peter - Fri Aug  4 14:01:49 PDT 2000
+ * Added support for the SETUP_CDROM environment variable that can be
+   used to force setup to treat a specific directory as a CDROM.
 Stéphane Peter - Wed Aug  2 15:18:23 PDT 2000
  * Run an idle loop while executing shell scripts, so that the installer
    does not appear to be frozen.
