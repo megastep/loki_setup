@@ -104,8 +104,6 @@ stream *file_open(install_info *info, const char *path, const char *mode)
                 streamp->size >>= 8;
                 streamp->size |= (((unsigned int)fgetc(streamp->fp))<<24);
 
-				fprintf(stderr,"Uncompressed size for %s: %d bytes\n", path, streamp->size);
-
                 fclose(streamp->fp);
                 streamp->fp = NULL;
                 streamp->zfp = gzopen(path, "rb");
@@ -155,10 +153,6 @@ int file_read(install_info *info, void *buf, int len, stream *streamp)
 
     nread = 0;
     if ( streamp->mode == 'r' ) {
-        if ( file_eof(info, streamp) ) {
-            log_warning(info, "Short read on %s", streamp->path);
-            return(0);
-        }
         if ( streamp->fp ) {
             nread = fread(buf, 1, len, streamp->fp);
         }
@@ -174,7 +168,6 @@ int file_read(install_info *info, void *buf, int len, stream *streamp)
 int file_write(install_info *info, void *buf, int len, stream *streamp)
 {
     int nwrote;
-	// TODO: Update the size
     nwrote = 0;
     if ( streamp->mode == 'w' ) {
         if ( streamp->fp ) {
@@ -185,7 +178,8 @@ int file_write(install_info *info, void *buf, int len, stream *streamp)
         }
         if ( nwrote <= 0 ) {
             log_warning(info, "Short write on %s", streamp->path);
-        }
+        }else
+		  streamp->size += nwrote; /* Warning: we assume that we always append data */
     } else {
         log_warning(info, "Write on read stream");
     }

@@ -7,11 +7,11 @@
       rt2
     </binary>
     <files>
-      main.tar.gz
-      maps.tar.gz
-      Manual
       icon.bmp
       README
+      Manual
+      main.tar.gz
+      maps.tar.gz
     </files>
   </option>
   <option size="">

@@ -88,10 +88,12 @@ static install_state console_setup(install_info *info)
     return SETUP_INSTALL;
 }
 
-static void console_update(install_info *info, const char *path, size_t size)
+static void console_update(install_info *info, const char *path, size_t progress, size_t size)
 {
-    printf("#");
-    fflush(stdout);
+  printf("%s: %3d%%\r", path, (int) (((float)progress/(float)size)*100.0));
+  if(progress==size)
+	putchar('\n');
+  fflush(stdout);
 }
 
 static void console_abort(install_info *info)

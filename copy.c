@@ -51,7 +51,7 @@ int parse_line(const char **srcpp, char *buf, int maxlen)
 
 
 size_t copy_tarball(install_info *info, const char *path, const char *dest,
-                void (*update)(install_info *info, const char *path, size_t size))
+                void (*update)(install_info *info, const char *path, size_t progress, size_t size))
 {
     static tar_record zeroes;
     tar_record record;
@@ -68,6 +68,7 @@ size_t copy_tarball(install_info *info, const char *path, const char *dest,
         return(-1);
     }
     while ( ! file_eof(info, input) ) {
+	    int cur_size;
         if ( file_read(info, &record, (sizeof record), input)
                                             != (sizeof record) ) {
             break;
@@ -78,6 +79,7 @@ size_t copy_tarball(install_info *info, const char *path, const char *dest,
         sprintf(final, "%s/%s", dest, record.hdr.name);
         sscanf(record.hdr.mode, "%o", &mode);
         sscanf(record.hdr.size, "%o", &left);
+		cur_size = left;
         blocks = (left+RECORDSIZE-1)/RECORDSIZE;
         switch (record.hdr.typeflag) {
             case TF_OLDNORMAL:
@@ -101,7 +103,7 @@ size_t copy_tarball(install_info *info, const char *path, const char *dest,
                         this_size += copied;
 
                         if ( update ) {
-                            update(info, final, this_size);
+                            update(info, final, this_size, cur_size);
                         }
                     }
                     file_close(info, output);
@@ -130,7 +132,7 @@ size_t copy_tarball(install_info *info, const char *path, const char *dest,
 }
 
 size_t copy_file(install_info *info, const char *path, const char *dest,
-                void (*update)(install_info *info, const char *path, size_t size))
+                void (*update)(install_info *info, const char *path, size_t progress, size_t size))
 {
     size_t size, copied;
     const char *base;
@@ -142,7 +144,9 @@ size_t copy_file(install_info *info, const char *path, const char *dest,
     base = strrchr(path, '/');
     if ( base == NULL ) {
         base = path;
-    }
+    }else
+	  base ++;
+
     sprintf(final, "%s/%s", dest, base);
 
     size = 0;
@@ -161,7 +165,7 @@ size_t copy_file(install_info *info, const char *path, const char *dest,
         }
         size += copied;
         if ( update ) {
-            update(info, final, size);
+            update(info, final, size, input->size);
         }
     }
     file_close(info, output);
@@ -171,7 +175,7 @@ size_t copy_file(install_info *info, const char *path, const char *dest,
 }
 
 size_t copy_directory(install_info *info, const char *path, const char *dest,
-                void (*update)(install_info *info, const char *path, size_t size))
+                void (*update)(install_info *info, const char *path, size_t progress, size_t size))
 {
     struct stat sb;
     char dirb[BUFSIZ];
@@ -198,7 +202,7 @@ size_t copy_directory(install_info *info, const char *path, const char *dest,
 }
 
 size_t copy_path(install_info *info, const char *path, const char *dest,
-                void (*update)(install_info *info, const char *path, size_t size))
+                void (*update)(install_info *info, const char *path, size_t progress, size_t size))
 {
     struct stat sb;
     size_t size, copied;
@@ -224,7 +228,7 @@ size_t copy_path(install_info *info, const char *path, const char *dest,
 }
 
 size_t copy_list(install_info *info, const char *filedesc, const char *dest,
-                void (*update)(install_info *info, const char *path, size_t size))
+                void (*update)(install_info *info, const char *path, size_t progress, size_t size))
 {
     char fpat[BUFSIZ];
     int i;
@@ -249,7 +253,7 @@ size_t copy_list(install_info *info, const char *filedesc, const char *dest,
 }
 
 size_t copy_node(install_info *info, xmlNodePtr cur, const char *dest,
-                void (*update)(install_info *info, const char *path, size_t size))
+                void (*update)(install_info *info, const char *path, size_t progress, size_t size))
 {
     size_t size, copied;
 
