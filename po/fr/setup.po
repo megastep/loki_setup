@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: setup 1.0\n"
-"POT-Creation-Date: 2000-11-10 18:25-0800\n"
+"POT-Creation-Date: 2000-11-15 19:01-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Stéphane Peter <megastep@lokigames.com>\n"
 "Language-Team: French <LI@li.org>\n"
@@ -202,7 +202,7 @@ msgstr "[produit]"
 msgid "[warning text]"
 msgstr "[texte d'avertissement]"
 
-#: main.c:105
+#: main.c:115
 #, fuzzy, c-format
 msgid ""
 "Usage: %s [options]\n"
@@ -238,7 +238,7 @@ msgstr ""
 "            0: Debug 1: Tranquille 2: Normal 3: Avertissements 4: Fatal\n"
 "   -V       Affiche la version de setup et sort\n"
 
-#: main.c:119
+#: main.c:129
 #, fuzzy, c-format
 msgid ""
 "Usage: %s [options]\n"
@@ -267,7 +267,7 @@ msgstr ""
 "            0: Debug 1: Tranquille 2: Normal 3: Avertissements 4: Fatal\n"
 "   -V       Affiche la version de setup et sort\n"
 
-#: main.c:156
+#: main.c:166
 #, c-format
 msgid ""
 "\n"
@@ -278,33 +278,34 @@ msgstr ""
 "Veuillez monter le CDROM %s.\n"
 "Choisissez Oui pour réessayer, Non pour annuler"
 
-#: main.c:232
+#: main.c:241
 msgid "Out of range value, setting verbosity level to normal.\n"
 msgstr "Valeur invalide, le niveau de verbosité est normal.\n"
 
-#: main.c:269
+#: main.c:278
 #, c-format
 msgid "Couldn't load '%s'\n"
 msgstr "Ne peut pas charger '%s'\n"
 
-#: main.c:273
+#: main.c:282
 #, c-format
 msgid "Detected locale is %s"
 msgstr "La localisation détectée est %s"
 
-#: main.c:282
+#: main.c:291
 msgid "No UI drivers available\n"
 msgstr "Aucun pilote d'interface disponible\n"
 
-#: main.c:311
+#: main.c:316
 msgid ""
 "\n"
 "Illegal installation: do not mix components with a component installation.\n"
 msgstr ""
 "\n"
-"Installation illégale: ne mélangez pas les composants multiples avec une installation de composant.\n"
+"Installation illégale: ne mélangez pas les composants multiples avec une "
+"installation de composant.\n"
 
-#: main.c:315
+#: main.c:320
 #, c-format
 msgid ""
 "\n"
@@ -315,7 +316,7 @@ msgstr ""
 "Le composant %s est déjà installé.\n"
 "Veuillez le désinstaller auparavant.\n"
 
-#: main.c:322
+#: main.c:327
 #, fuzzy, c-format
 msgid ""
 "\n"
@@ -326,11 +327,12 @@ msgstr ""
 "Vous devez installer %s avant de pouvoir\n"
 "lancer ce programme d'installation.\n"
 
-#: main.c:335
+#: main.c:340
 msgid ""
 "The 'cdromfile' attribute is now mandatory when using the 'cdrom' attribute."
 msgstr ""
-"L'attribut 'cdromfile' est désormais obligatoire conjointement à l'attribut 'cdrom'."
+"L'attribut 'cdromfile' est désormais obligatoire conjointement à l'attribut "
+"'cdrom'."
 
 #: detect.c:73
 #, fuzzy, c-format
@@ -411,8 +413,8 @@ msgid ""
 "Could not find default component. Make sure to define components for all "
 "entries."
 msgstr ""
-"Ne peut trouver le composant par défaut. Veuillez vous assurer de définir des composants "
-"pour toutes les entrées."
+"Ne peut trouver le composant par défaut. Veuillez vous assurer de définir "
+"des composants pour toutes les entrées."
 
 #: file.c:66 file.c:86 file.c:93 install.c:599 install.c:621 install.c:643
 #: install.c:664 install.c:703
@@ -453,42 +455,42 @@ msgstr "XML: option listée sans description traduite pour la langue '%s'"
 msgid "XML: option listed without description"
 msgstr "XML: option listée sans description"
 
-#: install.c:998 install.c:1010 install.c:1045
+#: install.c:1023 install.c:1029 install.c:1046
 #, c-format
 msgid "Unable to remove '%s'"
 msgstr "Impossible de supprimer '%s'"
 
-#: install.c:1030
+#: install.c:1037
 #, fuzzy, c-format
 msgid "The '%s' RPM was installed or upgraded (version %s, release %d)"
 msgstr ""
 "L'archive RPM '%s' a été installée ou mise à jour (version %s, release %s)"
 
-#: install.c:1147
+#: install.c:1148
 #, fuzzy, c-format
 msgid "Could not register binary: %s"
 msgstr "N'a pas pu écrire dans le fichier: %s"
 
-#: install.c:1185
+#: install.c:1186
 #, c-format
 msgid "Could not write temporary pre-uninstall script in %s"
 msgstr "Ne peut sauver le script temporaire de pré-désinstallation dans %s"
 
-#: install.c:1206
+#: install.c:1207
 #, c-format
 msgid "Could not write post-uninstall script in %s"
 msgstr "Ne peut sauver le script temporaire de post-désinstallation dans %s"
 
-#: install.c:1270
+#: install.c:1271
 msgid "Could not create install log"
 msgstr "Ne peut créer le registre d'installation"
 
-#: install.c:1297
+#: install.c:1298
 #, c-format
 msgid "Please visit %s"
 msgstr "Veuillez visiter %s"
 
-#: install.c:1499
+#: install.c:1500
 #, c-format
 msgid "Unable to create desktop file '%s'"
 msgstr "Impossible de créer le fichier de bureau '%s'"
@@ -776,7 +778,7 @@ msgstr "Installation terminée.\n"
 msgid "Would you like to launch the game now?"
 msgstr "Voulez-vous lancer le jeu maintenant?"
 
-#: console_ui.c:521 gtk_ui.c:406
+#: console_ui.c:521
 msgid ""
 "If you run a game as root, the preferences will be stored in\n"
 "root's home directory instead of your user account directory."
@@ -803,6 +805,16 @@ msgstr "Voulez-vous lancer un brouteur?"
 #: console_ui.c:558
 msgid "Standard input is not a terminal!\n"
 msgstr "L'entrée standard n'est pas un terminal!\n"
+
+#: gtk_ui.c:406
+#, fuzzy
+msgid ""
+"If you run this as root, the preferences will be stored in\n"
+"root's home directory instead of your user account directory."
+msgstr ""
+"Si vous lancez le jeu en tant que root, les préférences seront\n"
+"sauvées dans le répertoire utilisateur de root au lieu de celui\n"
+"de votre utilisateur."
 
 #: gtk_ui.c:520
 msgid "Please respond to the license dialog"

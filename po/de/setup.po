@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-11-10 18:25-0800\n"
+"POT-Creation-Date: 2000-11-15 19:01-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -200,7 +200,7 @@ msgstr ""
 msgid "[warning text]"
 msgstr ""
 
-#: main.c:105
+#: main.c:115
 #, fuzzy, c-format
 msgid ""
 "Usage: %s [options]\n"
@@ -233,7 +233,7 @@ msgstr ""
 "            0: Debug  1: Quiet  2: Normal 3: Warnings 4: Fatal\n"
 "   -V       Zeigt die Version des Setup Programmes an und beendet dieses\n"
 
-#: main.c:119
+#: main.c:129
 #, fuzzy, c-format
 msgid ""
 "Usage: %s [options]\n"
@@ -263,7 +263,7 @@ msgstr ""
 "            0: Debug  1: Quiet  2: Normal 3: Warnings 4: Fatal\n"
 "   -V       Zeigt die Version des Setup Programmes an und beendet dieses\n"
 
-#: main.c:156
+#: main.c:166
 #, c-format
 msgid ""
 "\n"
@@ -274,32 +274,32 @@ msgstr ""
 "Bitte mounten Sie die %s CDROM.\n"
 "Wählen Sie Ja um es nochmal zu versuche, Nein um abzubrechen"
 
-#: main.c:232
+#: main.c:241
 msgid "Out of range value, setting verbosity level to normal.\n"
 msgstr ""
 "Wert außerhalb des gültigen Bereiches; setze Ausgabelevel auf normal.\n"
 
-#: main.c:269
+#: main.c:278
 #, c-format
 msgid "Couldn't load '%s'\n"
 msgstr "Laden von '%s' fehlgeschlagen\n"
 
-#: main.c:273
+#: main.c:282
 #, c-format
 msgid "Detected locale is %s"
 msgstr ""
 
-#: main.c:282
+#: main.c:291
 msgid "No UI drivers available\n"
 msgstr "Keine UI Treiber vorhanden\n"
 
-#: main.c:311
+#: main.c:316
 msgid ""
 "\n"
 "Illegal installation: do not mix components with a component installation.\n"
 msgstr ""
 
-#: main.c:315
+#: main.c:320
 #, c-format
 msgid ""
 "\n"
@@ -307,7 +307,7 @@ msgid ""
 "Please uninstall it beforehand.\n"
 msgstr ""
 
-#: main.c:322
+#: main.c:327
 #, c-format
 msgid ""
 "\n"
@@ -315,7 +315,7 @@ msgid ""
 "installation program.\n"
 msgstr ""
 
-#: main.c:335
+#: main.c:340
 msgid ""
 "The 'cdromfile' attribute is now mandatory when using the 'cdrom' attribute."
 msgstr ""
@@ -434,41 +434,41 @@ msgstr "XML: Option aufgelistet ohne übersetzte Beschreibung für '%s'"
 msgid "XML: option listed without description"
 msgstr "XML: Option aufgelistet ohne Beschreibung"
 
-#: install.c:998 install.c:1010 install.c:1045
+#: install.c:1023 install.c:1029 install.c:1046
 #, c-format
 msgid "Unable to remove '%s'"
 msgstr "Löschen von '%s' fehlgeschlagen"
 
-#: install.c:1030
+#: install.c:1037
 #, fuzzy, c-format
 msgid "The '%s' RPM was installed or upgraded (version %s, release %d)"
 msgstr "Das '%s' RPM wurde installiert oder erneuert (Version %s, Release %s)"
 
-#: install.c:1147
+#: install.c:1148
 #, fuzzy, c-format
 msgid "Could not register binary: %s"
 msgstr "Konnte nicht auf Datei %s schreiben"
 
-#: install.c:1185
+#: install.c:1186
 #, c-format
 msgid "Could not write temporary pre-uninstall script in %s"
 msgstr ""
 
-#: install.c:1206
+#: install.c:1207
 #, c-format
 msgid "Could not write post-uninstall script in %s"
 msgstr ""
 
-#: install.c:1270
+#: install.c:1271
 msgid "Could not create install log"
 msgstr ""
 
-#: install.c:1297
+#: install.c:1298
 #, c-format
 msgid "Please visit %s"
 msgstr "Bitte besuchen Sie %s"
 
-#: install.c:1499
+#: install.c:1500
 #, c-format
 msgid "Unable to create desktop file '%s'"
 msgstr "Konnte Desktop Datei '%s' nicht erzeugen"
@@ -747,7 +747,7 @@ msgstr "Installation abgeschlossen.\n"
 msgid "Would you like to launch the game now?"
 msgstr "Möchten Sie das Spiel jetzt starten?"
 
-#: console_ui.c:521 gtk_ui.c:406
+#: console_ui.c:521
 msgid ""
 "If you run a game as root, the preferences will be stored in\n"
 "root's home directory instead of your user account directory."
@@ -772,6 +772,16 @@ msgstr "Wollen Sie einen Web Browser starten?"
 #: console_ui.c:558
 msgid "Standard input is not a terminal!\n"
 msgstr "Standardeingabe ist kein Terminal!\n"
+
+#: gtk_ui.c:406
+#, fuzzy
+msgid ""
+"If you run this as root, the preferences will be stored in\n"
+"root's home directory instead of your user account directory."
+msgstr ""
+"Wenn Sie das Spiel als root starten werden die Einstellungen in\n"
+"dem Heimatverzeichnis von root installiert anstatt in Ihrem "
+"Benutzerverzeichnis."
 
 #: gtk_ui.c:520
 msgid "Please respond to the license dialog"

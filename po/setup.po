@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-11-10 19:22-0800\n"
+"POT-Creation-Date: 2000-11-15 19:01-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -198,7 +198,7 @@ msgstr ""
 msgid "[warning text]"
 msgstr ""
 
-#: main.c:105
+#: main.c:115
 #, c-format
 msgid ""
 "Usage: %s [options]\n"
@@ -218,7 +218,7 @@ msgid ""
 "   -V       Print the version of the setup program and exit\n"
 msgstr ""
 
-#: main.c:119
+#: main.c:129
 #, c-format
 msgid ""
 "Usage: %s [options]\n"
@@ -235,7 +235,7 @@ msgid ""
 "   -V       Print the version of the setup program and exit\n"
 msgstr ""
 
-#: main.c:156
+#: main.c:166
 #, c-format
 msgid ""
 "\n"
@@ -243,31 +243,31 @@ msgid ""
 "Choose Yes to retry, No to cancel"
 msgstr ""
 
-#: main.c:232
+#: main.c:241
 msgid "Out of range value, setting verbosity level to normal.\n"
 msgstr ""
 
-#: main.c:269
+#: main.c:278
 #, c-format
 msgid "Couldn't load '%s'\n"
 msgstr ""
 
-#: main.c:273
+#: main.c:282
 #, c-format
 msgid "Detected locale is %s"
 msgstr ""
 
-#: main.c:282
+#: main.c:291
 msgid "No UI drivers available\n"
 msgstr ""
 
-#: main.c:311
+#: main.c:316
 msgid ""
 "\n"
 "Illegal installation: do not mix components with a component installation.\n"
 msgstr ""
 
-#: main.c:315
+#: main.c:320
 #, c-format
 msgid ""
 "\n"
@@ -275,7 +275,7 @@ msgid ""
 "Please uninstall it beforehand.\n"
 msgstr ""
 
-#: main.c:322
+#: main.c:327
 #, c-format
 msgid ""
 "\n"
@@ -283,7 +283,7 @@ msgid ""
 "installation program.\n"
 msgstr ""
 
-#: main.c:335
+#: main.c:340
 msgid ""
 "The 'cdromfile' attribute is now mandatory when using the 'cdrom' attribute."
 msgstr ""
@@ -402,41 +402,41 @@ msgstr ""
 msgid "XML: option listed without description"
 msgstr ""
 
-#: install.c:1000 install.c:1012 install.c:1047
+#: install.c:1023 install.c:1029 install.c:1046
 #, c-format
 msgid "Unable to remove '%s'"
 msgstr ""
 
-#: install.c:1032
+#: install.c:1037
 #, c-format
 msgid "The '%s' RPM was installed or upgraded (version %s, release %d)"
 msgstr ""
 
-#: install.c:1149
+#: install.c:1148
 #, c-format
 msgid "Could not register binary: %s"
 msgstr ""
 
-#: install.c:1187
+#: install.c:1186
 #, c-format
 msgid "Could not write temporary pre-uninstall script in %s"
 msgstr ""
 
-#: install.c:1208
+#: install.c:1207
 #, c-format
 msgid "Could not write post-uninstall script in %s"
 msgstr ""
 
-#: install.c:1272
+#: install.c:1271
 msgid "Could not create install log"
 msgstr ""
 
-#: install.c:1299
+#: install.c:1298
 #, c-format
 msgid "Please visit %s"
 msgstr ""
 
-#: install.c:1501
+#: install.c:1500
 #, c-format
 msgid "Unable to create desktop file '%s'"
 msgstr ""
@@ -710,7 +710,7 @@ msgstr ""
 msgid "Would you like to launch the game now?"
 msgstr ""
 
-#: console_ui.c:521 gtk_ui.c:406
+#: console_ui.c:521
 msgid ""
 "If you run a game as root, the preferences will be stored in\n"
 "root's home directory instead of your user account directory."
@@ -731,6 +731,12 @@ msgstr ""
 
 #: console_ui.c:558
 msgid "Standard input is not a terminal!\n"
+msgstr ""
+
+#: gtk_ui.c:406
+msgid ""
+"If you run this as root, the preferences will be stored in\n"
+"root's home directory instead of your user account directory."
 msgstr ""
 
 #: gtk_ui.c:520

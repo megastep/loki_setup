@@ -156,8 +156,9 @@ po/setup.po: $(SRCS) image/setup.data/setup.glade
 	libglade-xgettext image/setup.data/setup.glade > po/setup.po
 	xgettext -p po -j -d setup --keyword=_ $(SRCS) plugins/*.c
 
-po/loki-uninstall.po: uninstall.c
-	xgettext -p po -j -d loki-uninstall --keyword=_ uninstall.c
+po/loki-uninstall.po: uninstall.c uninstall_ui.c uninstall.glade
+	libglade-xgettext uninstall.glade > po/loki-uninstall.po
+	xgettext -p po -j -d loki-uninstall --keyword=_ uninstall.c uninstall_ui.c
 
 gettext: po/setup.po po/loki-uninstall.po
 	for lang in $(LOCALES); do \

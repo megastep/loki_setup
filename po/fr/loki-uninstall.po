@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Setup 1.5\n"
-"POT-Creation-Date: 2000-10-30 18:55-0800\n"
+"POT-Creation-Date: 2000-11-15 19:04-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Stéphane Peter <megastep@lokigames.com>\n"
 "Language-Team: French <LL@li.org>\n"
@@ -14,7 +14,57 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: ENCODING\n"
 
-#: uninstall.c:27
+# SOME DESCRIPTIVE TITLE
+#: uninstall.glade:298
+msgid "%P %%"
+msgstr ""
+
+#: uninstall.glade:94
+msgid "... LOADING PRODUCT LIST ..."
+msgstr "... CHARGEMENT DE LA LISTE DE PRODUITS ..."
+
+#: uninstall.glade:142
+msgid "0 MB"
+msgstr "0 Mo"
+
+#: uninstall.glade:357
+msgid "Cancel"
+msgstr "Annuler"
+
+#: uninstall.glade:188
+msgid "Exit"
+msgstr "Sortir"
+
+#: uninstall.glade:370
+msgid "Finished"
+msgstr "Fini"
+
+#: uninstall.glade:51
+#, fuzzy
+msgid "Installed products:"
+msgstr "Produits installés:"
+
+#: uninstall.glade:23
+msgid "Loki Uninstall Tool"
+msgstr ""
+
+#: uninstall.glade:229
+msgid "Performing uninstall:"
+msgstr "Désinstallation:"
+
+#: uninstall.glade:125
+msgid "Recovered space: "
+msgstr "Espace disque récupéré: "
+
+#: uninstall.glade:201
+msgid "Uninstall"
+msgstr "Désinstaller"
+
+#: uninstall.glade:263
+msgid "[current component]"
+msgstr "[composant en cours]"
+
+#: uninstall.c:31
 #, c-format
 msgid ""
 "Usage: %s product to uninstall the product\n"
@@ -27,22 +77,27 @@ msgstr ""
 "             %s produit -l pour lister tous les composants\n"
 "             %s produit composant pour désinstaller un composant\n"
 
-#: uninstall.c:105
+#: uninstall.c:109
 #, c-format
 msgid "Signal %d caught. Aborting.\n"
 msgstr "Signal %d reçu. Abandon.\n"
 
-#: uninstall.c:135
-#, c-format
-msgid "Notice: the %s RPM was installed for this product.\n"
-msgstr "Attention: l'archive RPM %s a été installée pour ce produit.\n"
-
-#: uninstall.c:177 uninstall.c:180
+#: uninstall.c:123
 #, c-format
 msgid "Could not change to directory: %s\n"
 msgstr "Ne peut aller dans le répertoire: %s\n"
 
-#: uninstall.c:201 uninstall.c:204
+#: uninstall.c:145
+#, c-format
+msgid "Notice: the %s RPM was installed for this product.\n"
+msgstr "Attention: l'archive RPM %s a été installée pour ce produit.\n"
+
+#: uninstall.c:180
+#, fuzzy, c-format
+msgid "Component %s has been successfully uninstalled.\n"
+msgstr "Le composant %s a été désinstallé avec succès.\n"
+
+#: uninstall.c:218
 msgid ""
 "No write access to the installation directory.\n"
 "Aborting.\n"
@@ -50,7 +105,7 @@ msgstr ""
 "Pas d'accès en écriture dans le répertoire d'installation.\n"
 "Abandon.\n"
 
-#: uninstall.c:206 uninstall.c:209
+#: uninstall.c:226
 #, c-format
 msgid ""
 "No write access to the registry file: %s.\n"
@@ -59,57 +114,25 @@ msgstr ""
 "Pas d'accès en écriture pour le fichier de registre: %s.\n"
 "Abandon.\n"
 
-#: uninstall.c:245 uninstall.c:248
+#: uninstall.c:356
 msgid "Installed products:\n"
 msgstr "Produits installés:\n"
 
-#: uninstall.c:251 uninstall.c:254
+#: uninstall.c:362
 #, c-format
 msgid "installed in %s\n"
 msgstr "installé dans %s\n"
 
-#: uninstall.c:254 uninstall.c:257
+#: uninstall.c:365
 msgid " Error while accessing product info\n"
 msgstr " Erreur lors de l'accès aux infos du produit\n"
 
-#: uninstall.c:262 uninstall.c:265
+#: uninstall.c:373
 #, c-format
 msgid "Could not open product information for %s\n"
 msgstr "Impossible d'ouvrir les informations du produit pour %s\n"
 
-#: uninstall.c:268
-#, c-format
-msgid ""
-"Product name: %s\n"
-"Installed in %s\n"
-msgstr ""
-"Nom du produit: %s\n"
-"Installé dans %s\n"
-
-#: uninstall.c:275 uninstall.c:278
-msgid "Components:\n"
-msgstr "Composants:\n"
-
-#: uninstall.c:288 uninstall.c:291
-#, c-format
-msgid "Unable to find component %s\n"
-msgstr "Impossible de trouver le composant %s\n"
-
-#: uninstall.c:296 uninstall.c:299
-msgid "An error occured during the uninstallation process.\n"
-msgstr "Une erreur est apparue durant le processus d'installation.\n"
-
-#: uninstall.c:300 uninstall.c:303
-#, c-format
-msgid "%s has been successfully uninstalled.\n"
-msgstr "%s a été désinstallé avec succès.\n"
-
-#: uninstall.c:170
-#, fuzzy, c-format
-msgid "Component %s has been successfully uninstalled.\n"
-msgstr "Le composant %s a été désinstallé avec succès.\n"
-
-#: uninstall.c:271
+#: uninstall.c:379
 #, fuzzy, c-format
 msgid ""
 "Product: %s\n"
@@ -117,3 +140,57 @@ msgid ""
 msgstr ""
 "Produit: %s\n"
 "Installé dans %s\n"
+
+#: uninstall.c:386
+msgid "Components:\n"
+msgstr "Composants:\n"
+
+#: uninstall.c:399
+#, c-format
+msgid "Unable to find component %s\n"
+msgstr "Impossible de trouver le composant %s\n"
+
+#: uninstall.c:407
+msgid "An error occured during the uninstallation process.\n"
+msgstr "Une erreur est apparue durant le processus d'installation.\n"
+
+#: uninstall.c:411
+#, c-format
+msgid "%s has been successfully uninstalled.\n"
+msgstr "%s a été désinstallé avec succès.\n"
+
+#: uninstall_ui.c:143
+#, c-format
+msgid "%d MB"
+msgstr "%d Mo"
+
+#: uninstall_ui.c:287
+msgid "Uninstall cancelled"
+msgstr "Désinstallation annulée"
+
+#: uninstall_ui.c:289
+msgid "Uninstall complete"
+msgstr "Désinstallation terminée"
+
+#: uninstall_ui.c:375
+msgid "No uninstall_vbox in glade file!\n"
+msgstr "Pas de uninstall_vbox dans le fichier glade!\n"
+
+#: uninstall_ui.c:410
+msgid "Complete uninstall"
+msgstr "Désinstallation complète"
+
+#: uninstall_ui.c:448
+msgid ""
+"No products found.\n"
+"Are you the one that installed the software?"
+msgstr ""
+"Aucun produit trouvé.\n"
+"Etes-vous l'utilisateur qui a installé le logiciel?"
+
+#~ msgid ""
+#~ "Product name: %s\n"
+#~ "Installed in %s\n"
+#~ msgstr ""
+#~ "Nom du produit: %s\n"
+#~ "Installé dans %s\n"
