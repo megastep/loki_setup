@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.40 2003-06-27 22:45:29 megastep Exp $ */
+/* $Id: uninstall.c,v 1.41 2003-07-11 03:38:23 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -210,6 +210,11 @@ static int check_for_message(product_component_t *comp)
 	const char *message = loki_getmessage_component(comp);
 	
 	if ( message ) {
+		const char *env = getenv("SETUP_NO_PROMPT");
+
+		if ( env && atoi(env) )
+			return 1;
+
 		if ( isatty(0) && !feof(stdin) ) { /* If we have a TTY, try to get user input */
 			int c;
 			puts(message);
