@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.131 2004-04-30 01:09:00 megastep Exp $ */
+/* $Id: install.c,v 1.132 2004-05-01 03:53:10 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -312,27 +312,28 @@ char check_deviant_paths(xmlNodePtr node, install_info *info)
 
     while ( node ) {
         char *wanted;
-        char *dpath;
+        char *orig_dpath;
+		const char *dpath;
         char deviant_path[PATH_MAX];
 
         wanted = xmlGetProp(node, "install");
         if ( wanted  && (strcmp(wanted, "true") == 0) ) {
             xmlNodePtr elements = node->childs;
             while ( elements ) {
-                dpath = xmlGetProp(elements, "path");
+                dpath = orig_dpath = xmlGetProp(elements, "path");
                 if ( dpath ) {
-					parse_line((const char **) &dpath, deviant_path, PATH_MAX);
+					parse_line(&dpath, deviant_path, PATH_MAX);
                     topmost_valid_path(path_up, deviant_path);
 					if ( path_up[0] != '/' ) { /* Not an absolute path */
 						char buf[PATH_MAX];
 						snprintf(buf, PATH_MAX, "%s/%s", info->install_path, path_up);
-						xmlFree(dpath);
+						xmlFree(orig_dpath);
 						return ! dir_is_accessible(buf);
 					} else if ( ! dir_is_accessible(path_up) ) {
-						xmlFree(dpath);
+						xmlFree(orig_dpath);
                         return 1;
 					}
-					xmlFree(dpath);
+					xmlFree(orig_dpath);
                 }
                 elements = elements->next;
             }

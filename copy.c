@@ -719,7 +719,7 @@ ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, c
 			ui_fatal_error(_("Unable to copy file '%s'"), fpat);
         } else if ( copied > 0 || in_rpm ) {
             char *symlink = xmlGetProp(node, "symlink");
-            char sym_to[PATH_MAX], *desc, *menu, *name, *icon, *play;
+            char sym_to[PATH_MAX];
 
             size += copied;
             /* Create the symlink */
@@ -728,14 +728,12 @@ ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, c
                 file_symlink(info, final, sym_to);
             }
             add_bin_entry(info, current_option, file, symlink,
-						  desc = xmlGetProp(node, "desc"),
-						  menu = xmlGetProp(node, "menu"),
-						  name = xmlGetProp(node, "name"),
-						  icon = xmlGetProp(node, "icon"),
-						  play = xmlGetProp(node, "play")
+						  xmlGetProp(node, "desc"),
+						  xmlGetProp(node, "menu"),
+						  xmlGetProp(node, "name"),
+						  xmlGetProp(node, "icon"),
+						  xmlGetProp(node, "play")
 						  );
-			xmlFree(desc); xmlFree(menu); xmlFree(name); xmlFree(icon); xmlFree(play);
-			xmlFree(symlink);
         }
     }
  copy_binary_exit:
@@ -794,8 +792,7 @@ ssize_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
     node = node->childs;
     while ( node ) {
         const char *path = xmlGetProp(node, "path");
-		char *xmlsrcpath = xmlGetProp(node, "srcpath");
-        char *srcpath = ((xmlsrcpath != NULL) ? xmlsrcpath : ".");
+		char *srcpath = xmlGetProp(node, "srcpath");
 		const char *from_cdrom = xmlGetProp(node, "cdromid");
 		int lang_matched = match_locale(tmp = xmlGetProp(node, "lang"));
 		int strip_dirs = 0;
@@ -826,6 +823,8 @@ ssize_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
 			strip_dirs = 1;
             path = tmppath;
         }
+		if (!srcpath)   	 
+            srcpath = xmlMemStrdup(".");
 /* printf("Checking node element '%s'\n", node->name); */
 		if ( lang_matched &&
 			 match_arch(info, xmlGetProp(node, "arch")) &&
@@ -872,8 +871,7 @@ ssize_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
 		}
         /* Do not handle exclusive elements here; it gets called multiple times else */
         node = node->next;
-		if (xmlsrcpath != NULL)
-			xmlFree(xmlsrcpath);
+		xmlFree(srcpath);
     }
     return size;
 }
