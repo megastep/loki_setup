@@ -644,6 +644,8 @@ There are several optional attributes of the binary element:
  mode       Use an octal value to specify the permissions of the file once installed (755
             is the default for binaries).
 
+ args       Specify optional arguments to be added on the command line when running the binary.
+
 The FILES element:
 
 The files element contains a list of files and directories, one per line,

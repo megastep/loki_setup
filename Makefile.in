@@ -2,7 +2,7 @@ DISTDIR = ..
 SETUP_VERSION = @SETUP_VERSION_MAJOR@.@SETUP_VERSION_MINOR@.@SETUP_VERSION_RELEASE@
 PACKAGE = setup-$(SETUP_VERSION)
 DATADIR = .
-LOCALEDIR = $(DATADIR)/locale
+LOCALEDIR = locale
 
 @SET_MAKE@
 arch := @ARCH@
@@ -11,7 +11,7 @@ os   := @OS@
 BRANDELF = @BRANDELF@
 
 # If you modify this version, change it's setup.xml and release a new patch.
-UNINSTALL_VERSION = 1.0.3
+UNINSTALL_VERSION = 1.0.4
 
 CC = @CC@
 
@@ -197,6 +197,8 @@ copy-image: all loki_uninstall install-image po-image
 	@if [ -d $(IMAGE)/bin/$(os)/$(arch)/ ]; then \
 	    cp loki_uninstall $(IMAGE)/bin/$(os)/$(arch)/bin/$(BRAND)-uninstall; \
 	    strip $(IMAGE)/bin/$(os)/$(arch)/bin/$(BRAND)-uninstall; \
+	    cp uninstall $(IMAGE)/bin/$(os)/$(arch)/uninstall; \
+	    strip $(IMAGE)/bin/$(os)/$(arch)/uninstall; \
 	    for file in `find image/setup.data -name loki-uninstall.mo -print`; \
 	    do  path="$(IMAGE)/`dirname $$file | sed 's,image/setup.data/,,'`"; \
 	        mkdir -p $$path; \

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2004-08-03 15:06-0700\n"
+"POT-Creation-Date: 2004-08-03 19:38-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -401,111 +401,111 @@ msgstr ""
 "Einträge."
 
 #: install.c:947 install.c:969 install.c:991 install.c:1012 install.c:1027
-#: install.c:1069 file.c:117 file.c:138 file.c:145
+#: install.c:1070 file.c:117 file.c:138 file.c:145
 msgid "Out of memory"
 msgstr "Speicherplatz nicht ausreichend"
 
-#: install.c:1051
+#: install.c:1052
 msgid "You must use a 'symlink' attribute with 'play'"
 msgstr "Sie müssen ein 'symlink' Attribut bei 'play' benutzen"
 
-#: install.c:1059
+#: install.c:1060
 msgid "There can be only one binary with a 'play' attribute"
 msgstr "Bei einem 'play' Attribut kann es nur ein Binary geben"
 
-#: install.c:1062
+#: install.c:1063
 msgid "The only valid values for the 'play' attribute are yes, gui and no"
 msgstr ""
 "Die einzigen gültigen Werte für das 'play' Attribut sind Yes, GUI und No"
 
-#: install.c:1087
+#: install.c:1088
 msgid "Couldn't find your home directory"
 msgstr "Ihr Home-Verzeichnis wurde nicht gefunden"
 
-#: install.c:1105
+#: install.c:1106
 #, c-format
 msgid "Couldn't find home directory for %s"
 msgstr "Ihr Home-Verzeichnis für %s wurde nicht gefunden"
 
-#: install.c:1225
+#: install.c:1226
 msgid "XML: 'require' tag doesn't have a mandatory 'command' attribute"
 msgstr "XML: 'Anforderung' Tag hat kein obligatorisches 'Befehl' Attribut"
 
-#: install.c:1275
+#: install.c:1276
 msgid "XML: 'lang' tag does not have a mandatory 'lang' attribute"
 msgstr "XML: 'Sprache' Tag hat kein obligatorisches 'Sprache' Attribut"
 
-#: install.c:1284
+#: install.c:1285
 #, c-format
 msgid "XML: option listed without translated description for locale '%s'"
 msgstr "XML: Option aufgeführt ohne übersetzte Beschreibung für Locale '%s'"
 
-#: install.c:1292
+#: install.c:1293
 msgid "XML: option listed without description"
 msgstr "XML: Option aufgeführt ohne Beschreibung"
 
-#: install.c:1535
+#: install.c:1536
 msgid "CDKey file could not be opened."
 msgstr "CD Key-Datei konnte nicht geöffnet werden."
 
-#: install.c:1640 install.c:1646 install.c:1665
+#: install.c:1641 install.c:1647 install.c:1666
 #, c-format
 msgid "Unable to remove '%s'"
 msgstr "Entfernen '%s' nicht möglich"
 
-#: install.c:1656
+#: install.c:1657
 #, c-format
 msgid "The '%s' RPM was installed or upgraded (version %s, release %d)"
 msgstr ""
 "Der '%s' RPM wurde installiert oder aktualisiert (Version %s, Ausgabe %d)"
 
-#: install.c:1785
+#: install.c:1786
 msgid "Options tag string maxed out!"
 msgstr "Optionen Tag-String ausgeschöpft!"
 
-#: install.c:1834 install.c:1978 install.c:2006
+#: install.c:1835 install.c:1979 install.c:2007
 msgid "Could not create temporary script"
 msgstr "Temporäres Script konnte nicht erstellt werden"
 
-#: install.c:1955
+#: install.c:1956
 #, c-format
 msgid "Could not register binary: %s"
 msgstr "Binary konnte nicht registriert werden: %s"
 
-#: install.c:1997
+#: install.c:1998
 #, c-format
 msgid "Could not write temporary pre-uninstall script in %s"
 msgstr "Temporäres Pre-uninstall Script konnte nicht in %s geschrieben werden"
 
-#: install.c:2022
+#: install.c:2023
 #, c-format
 msgid "Could not write post-uninstall script in %s"
 msgstr "Post-uninstall Script konnte nicht in %s geschrieben werden"
 
-#: install.c:2056
+#: install.c:2057
 msgid "Could not create install log"
 msgstr "Installations-Log konnte nicht erstellt werden"
 
-#: install.c:2083
+#: install.c:2084
 #, c-format
 msgid "Please visit %s"
 msgstr "Bitte besuchen Sie %s"
 
-#: install.c:2137
+#: install.c:2138
 msgid "Missing 'command' attribute for an option"
 msgstr "'Befehl' Attribut für eine Option fehlt"
 
-#: install.c:2368 install.c:2431
+#: install.c:2371 install.c:2434
 #, c-format
 msgid "Unable to create desktop file '%s'"
 msgstr "Desktop-Datei '%s' kann nicht erstellt werden"
 
-#: install.c:2494 install.c:2497
+#: install.c:2497 install.c:2500
 #, c-format
 msgid "Unable to create CDE desktop file '%s'"
 msgstr "CDE Desktop-Datei '%s' kann nicht erstellt werden"
 
-#: install.c:2531
+#: install.c:2534
 #, c-format
 msgid "Unable to create ToolChest menu file '%s'"
 msgstr "Datei ToolChest-Menü '%s' kann nicht erstellt werden"
@@ -571,33 +571,33 @@ msgstr "Datei '%s' in '%s' nicht gefunden"
 msgid "Unable to copy file '%s'"
 msgstr "Kopieren Datei '%s' nicht möglich"
 
-#: copy.c:759
+#: copy.c:760
 msgid "Running script"
 msgstr "Script läuft"
 
-#: copy.c:948
+#: copy.c:949
 msgid "The remove_msg element should be within a component!\n"
 msgstr ""
 "Das remove_msg Element muss sich innerhalb einer Komponente befinden!\n"
 
-#: copy.c:951
+#: copy.c:952
 msgid "Only one remove_msg per component is allowed.\n"
 msgstr "Nur eine remove_msg pro Komponente ist zulässig.\n"
 
-#: copy.c:969
+#: copy.c:970
 msgid "Component element needs to have a name"
 msgstr "Element der Komponente muss einen Namen haben"
 
-#: copy.c:972
+#: copy.c:973
 msgid "Component element needs to have a version"
 msgstr "Element der Komponente muss eine Version haben"
 
-#: copy.c:994
+#: copy.c:995
 msgid "Malformed 'environment' element in XML file : missing 'var' property"
 msgstr ""
 "Missgebildetes 'Umgebung' Element in XML-Datei: 'var' Eigenschaft fehlt"
 
-#: copy.c:1169
+#: copy.c:1170
 #, c-format
 msgid "Suspect size value for option %s\n"
 msgstr "Verdächtiger Größenwert für Option %s\n"
@@ -727,7 +727,7 @@ msgstr ""
 msgid "BZ2: got %s"
 msgstr "BZ2: %s erhalten"
 
-#: main.c:115
+#: main.c:119
 #, c-format
 msgid ""
 "Usage: %s [options]\n"
@@ -771,7 +771,7 @@ msgstr ""
 "            0: Debug  1: Quiet  2: Normal 3: Warnungen 4: Fatal\n"
 "   -V       Version des Setup-Programms drucken und beenden\n"
 
-#: main.c:132
+#: main.c:136
 #, c-format
 msgid ""
 "Usage: %s [options]\n"
@@ -808,27 +808,27 @@ msgstr ""
 "            0: Debug  1: Quiet  2: Normal 3: Warnungen 4: Fatal\n"
 "   -V       Version des Setup-Programms drucken und beenden\n"
 
-#: main.c:216
+#: main.c:220
 msgid "Out of range value, setting verbosity level to normal.\n"
 msgstr "Außerhalb Wertebereich, Verbosity-Level wird auf Normal gesetzt.\n"
 
-#: main.c:266
+#: main.c:270
 #, c-format
 msgid "Couldn't load '%s'\n"
 msgstr "Laden '%s' nicht möglich\n"
 
-#: main.c:277
+#: main.c:281
 msgid "No UI drivers available\n"
 msgstr "Keine UI Treiber verfügbar\n"
 
-#: main.c:300
+#: main.c:304
 msgid ""
 "The 'cdromfile' attribute is now mandatory when using the 'cdrom' attribute."
 msgstr ""
 "Das 'cdromfile' Attribut ist bei Benutzung des 'cdrom' Attributs jetzt "
 "obligatorisch."
 
-#: main.c:312
+#: main.c:316
 msgid ""
 "Unable to determine the current directory.\n"
 "Please check the permissions of the parent directories.\n"
@@ -836,11 +836,11 @@ msgstr ""
 "Aktuelles Verzeichnis kann nicht festgelegt werden.\n"
 "Bitte Genehmigungen der Ursprungsverzeichnisse prüfen.\n"
 
-#: main.c:326
+#: main.c:330
 msgid "You need to run this installer as the super-user.\n"
 msgstr "Sie müssen dieses Installations-Instrument als SuperUser verwenden.\n"
 
-#: main.c:333
+#: main.c:337
 msgid ""
 "\n"
 "This product is already installed.\n"
@@ -850,7 +850,7 @@ msgstr ""
 "Dieses Produkt ist bereits installiert.\n"
 "Deinstallieren Sie es, bevor Sie dieses Programm erneut laufen lassen.\n"
 
-#: main.c:338
+#: main.c:342
 msgid ""
 "Warning: You are about to reinstall\n"
 "on top of an existing installation.\n"
@@ -858,7 +858,7 @@ msgstr ""
 "Warnung: Sie versuchen gerade,\n"
 "über eine bestehende Installation zu installieren.\n"
 
-#: main.c:350
+#: main.c:354
 msgid ""
 "\n"
 "Illegal installation: do not mix components with a component installation.\n"
@@ -867,7 +867,7 @@ msgstr ""
 "Ungültige Installation: fügen Sie bei einer Komponenteninstallation keine "
 "Komponenten zusammen.\n"
 
-#: main.c:355
+#: main.c:359
 #, c-format
 msgid ""
 "\n"
@@ -878,7 +878,7 @@ msgstr ""
 "Die %s Komponente ist bereits installiert.\n"
 "Bitte deinstallieren Sie sie zuerst.\n"
 
-#: main.c:363
+#: main.c:367
 #, c-format
 msgid ""
 "\n"
@@ -889,7 +889,7 @@ msgstr ""
 "Sie müssen %s installieren, bevor Sie dieses\n"
 "Installationsprogramm laufen lassen.\n"
 
-#: main.c:390
+#: main.c:394
 #, c-format
 msgid "Could not enable option: %s"
 msgstr "Option konnte nicht aktiviert werden: %s"

@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.136 2004-07-23 01:08:44 megastep Exp $ */
+/* $Id: install.c,v 1.137 2004-08-04 03:12:34 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1031,7 +1031,7 @@ void add_man_entry(install_info *info, struct option_elem *comp, struct file_ele
 /* Add a binary entry to the list of binaries installed */
 void add_bin_entry(install_info *info, struct option_elem *comp, struct file_elem *file,
                    const char *symlink, const char *desc, const char *menu,
-                   const char *name, const char *icon, const char *play)
+                   const char *name, const char *icon, const char *args, const char *play)
 {
     struct bin_elem *elem;
 
@@ -1043,6 +1043,7 @@ void add_bin_entry(install_info *info, struct option_elem *comp, struct file_ele
         elem->menu = menu;
         elem->name = name;
         elem->icon = icon;
+		elem->args = args;
         elem->next = comp->bin_list;
         comp->bin_list = elem;
         if ( play ) {
@@ -2049,7 +2050,7 @@ void generate_uninstall(install_info *info)
         }
 
         snprintf(buf, sizeof(buf), "setup.data/bin/%s/%s/uninstall", detect_os(), detect_arch());
-        loki_upgrade_uninstall(product, buf, "setup.data/locale");
+        loki_upgrade_uninstall(product, buf, "setup.data/" LOCALEDIR);
 		/* We must call the following in all cases - component installs even, as we have to save the changes */
 		loki_closeproduct(product);
     } else {
@@ -2160,9 +2161,9 @@ install_state launch_game(install_info *info)
     char cmd[PATH_MAX];
 
     if ( info->installed_symlink && info->symlinks_path &&
-	 *info->symlinks_path && *info->play_binary ) {
+		 *info->symlinks_path && *info->play_binary ) {
         snprintf(cmd, PATH_MAX, "%s %s", info->play_binary, info->args);
-	system(cmd);
+		system(cmd);
     }
     return SETUP_EXIT;
 }
@@ -2328,212 +2329,214 @@ int install_menuitems(install_info *info, desktop_type desktop)
                     if ( access(buf, W_OK) < 0 )
                         continue;
 
-		    if (*exec_command) {
-			strncpy(exec, exec_command, sizeof(exec));
-		    } else {
-			snprintf(exec, sizeof(exec), "%s/%s", info->install_path, elem->file->path);
-		    }
-		    snprintf(icon, PATH_MAX, "%s/%s", info->install_path, elem->icon);
-
-		    switch ( desktop ) {
-		    case DESKTOP_MENUDEBIAN:
-			/* Present on newer Mandrake and Debian systems, we just create 
-			   a single file */
-
-			/* The directory may exist so we need to check for the command as well */
-			if( access("/usr/bin/update-menus", X_OK) < 0 )
-			    continue;
-
-			snprintf(finalbuf, PATH_MAX, "%s%s", buf, elem->symlink);
-			/* Maybe we should try to group menu entries in a single file, but it
-			   can be tricky for components. Maybe per component? */
-			fp = fopen(finalbuf, "w");
-			if (fp) {
-			    fprintf(fp,"?package(local.%s):\\\n"
-				    " needs=\"X11\" \\\n"
-				    " section=\"%s\" \\\n"
-				    " title=\"%s\" \\\n"
-				    " longtitle=\"%s\" \\\n"
-				    " command=\"%s\" \\\n"
-				    " icon=\"%s\"\n",
-				    info->name, elem->menu ? elem->menu : "Games",
-				    elem->name ? elem->name : info->name,
-				    elem->desc ? elem->desc : info->desc,
-				    exec, icon);
-			    fclose(fp);
-			    add_file_entry(info, opt, finalbuf, NULL, 0);
-			    ++ num_items;
-			    ret_val = 1; /* No need to install anything else */
-			} else {
-			    log_warning(_("Unable to create desktop file '%s'"), finalbuf);
-			}
-			break;
-		    case DESKTOP_GNOME:
-		    case DESKTOP_KDE:
-		    case DESKTOP_REDHAT:
-				if (desktop == DESKTOP_GNOME && gnome_vfolders) {
-					// menu paths are embedded in the file, not the pathname
-					snprintf(finalbuf, PATH_MAX, "%s", buf);
-				} else {
-					snprintf(finalbuf, PATH_MAX, "%s%s/", buf, elem->menu ? elem->menu : "Games");
-				}
-				file_create_hierarchy(info, finalbuf);
-
-			strncat(finalbuf, elem->symlink, PATH_MAX-strlen(finalbuf));
-
-			if ( desktop == DESKTOP_KDE ) {
-			    strncat(finalbuf,".kdelnk", PATH_MAX-strlen(finalbuf));
-			} else {
-			    strncat(finalbuf,".desktop", PATH_MAX-strlen(finalbuf));
-			}
-
-			fp = fopen(finalbuf, "w");
-			if (fp) {
-			    if (desktop == DESKTOP_KDE) {
-					fprintf(fp, "# KDE Config File\n");
-			    }
-			    fprintf(fp, "[%sDesktop Entry]\n"
-						"Encoding=UTF-8\n"
-						"Name=%s\n"
-						"Comment=%s\n"
-						"Exec=%s\n"
-						"Icon=%s\n"
-						"Terminal=0\n"
-						"Type=Application\n"
-						"Categories=Application;%s;X-Red-Hat-Base;\n",
-				    (desktop==DESKTOP_KDE) ? "KDE " : "",
-				    elem->name ? elem->name : info->name,
-				    elem->desc ? elem->desc : info->desc,
-				    exec, icon, info->category);
-			    fclose(fp);
-			    add_file_entry(info, opt, finalbuf, NULL, 0);
-			    ++ num_items;
-			    if (desktop == DESKTOP_REDHAT && info->distro==DISTRO_REDHAT && info->distro_maj >= 8) {
-					/* try to create a symlink for redhat 8.0 symlink
-					   directory; not strictly necessary but it will
-					   allow menuitem to show up in kde without an x
-					   restart */
-					symlink_desktop_file(info, finalbuf, "/usr/share/applnk-redhat", elem);
-			    } else  if (desktop == DESKTOP_GNOME && info->distro==DISTRO_SUSE ) {
-					/* Now for some SuSE nonsense */
-					symlink_desktop_file(info, finalbuf, "/etc/opt/gnome/SuSE", elem);
-				}
-
-			    /* successful REDHAT takes care of KDE/GNOME
-			       tell caller no need to continue others
-			       UNLESS we are Redhat 6.1 or earlier, in which case we need to install
-			       everything else. */
-			    if ( (info->distro != DISTRO_REDHAT) || (info->distro_maj>6) || (info->distro_min>1) ) {
-					ret_val = (desktop == DESKTOP_REDHAT);
-			    }
-
-			} else {
-			    log_warning(_("Unable to create desktop file '%s'"), finalbuf);
-			}
-			break;
-		    case DESKTOP_CDE:
-			snprintf(finalbuf, PATH_MAX, "%s%s.dt", buf, elem->symlink);
-			file_create_hierarchy(info, finalbuf);
-
-			fp = fopen(finalbuf, "w");
-			if (fp) {
-			    fprintf(fp,
-						"ACTION %s\n"
-						"{\n"
-						"     LABEL         %s\n"
-						"     TYPE          COMMAND\n"
-						"     EXEC_STRING   %s\n"
-						"     ICON          %s\n"
-						"     WINDOW_TYPE   NO_STDIO\n"
-						"     DESCRIPTION   %s\n"
-						"}\n\n", elem->symlink,
-						elem->name, exec, icon, elem->desc
-						);
-			    fclose(fp);
-			    add_file_entry(info, opt, finalbuf, NULL, 0);
-				
-			    snprintf(finalbuf, PATH_MAX, "%s%s.fp", buf, elem->symlink);
-			    fp = fopen(finalbuf, "w");
-			    if ( fp ) {
-					fprintf(fp,
-							"CONTROL %s\n"
-							"{\n"
-							"  TYPE icon\n", elem->symlink);
-					if ( num_items == 0 ) {
-						fprintf(fp,
-								"  CONTAINER_NAME	Top\n"
-								"  CONTAINER_TYPE	BOX\n");
+					if (*exec_command) {
+						strncpy(exec, exec_command, sizeof(exec));
+					} else if ( elem->args ) {
+						snprintf(exec, sizeof(exec), "%s/%s %s", info->install_path, elem->file->path, elem->args);
 					} else {
-						fprintf(fp,
-								"  CONTAINER_NAME	%s_Panel\n"
-								"  CONTAINER_TYPE	SUBPANEL\n", info->name
-								);
+						snprintf(exec, sizeof(exec), "%s/%s", info->install_path, elem->file->path);
 					}
-					fprintf(fp,
-							"  ICON				%s\n"
-							"  PUSH_ACTION		%s\n"
-							"  DROP_ACTION		%s\n"
-							"  LABEL			%s\n"
-							"}\n\n",
-							icon, elem->symlink, elem->symlink, elem->name
-							);
-					if ( num_items == 0 ) {
-						fprintf(fp,
-								"SUBPANEL %s_Panel\n"
-								"{\n"
-								"  CONTAINER_NAME %s\n"
-								"  TITLE          %s\n"
-								"}\n\n", info->name, elem->symlink, info->desc
-								);
+					snprintf(icon, PATH_MAX, "%s/%s", info->install_path, elem->icon);
+
+					switch ( desktop ) {
+					case DESKTOP_MENUDEBIAN:
+						/* Present on newer Mandrake and Debian systems, we just create 
+						   a single file */
+
+						/* The directory may exist so we need to check for the command as well */
+						if( access("/usr/bin/update-menus", X_OK) < 0 )
+							continue;
+
+						snprintf(finalbuf, PATH_MAX, "%s%s", buf, elem->symlink);
+						/* Maybe we should try to group menu entries in a single file, but it
+						   can be tricky for components. Maybe per component? */
+						fp = fopen(finalbuf, "w");
+						if (fp) {
+							fprintf(fp,"?package(local.%s):\\\n"
+									" needs=\"X11\" \\\n"
+									" section=\"%s\" \\\n"
+									" title=\"%s\" \\\n"
+									" longtitle=\"%s\" \\\n"
+									" command=\"%s\" \\\n"
+									" icon=\"%s\"\n",
+									info->name, elem->menu ? elem->menu : "Games",
+									elem->name ? elem->name : info->name,
+									elem->desc ? elem->desc : info->desc,
+									exec, icon);
+							fclose(fp);
+							add_file_entry(info, opt, finalbuf, NULL, 0);
+							++ num_items;
+							ret_val = 1; /* No need to install anything else */
+						} else {
+							log_warning(_("Unable to create desktop file '%s'"), finalbuf);
+						}
+						break;
+					case DESKTOP_GNOME:
+					case DESKTOP_KDE:
+					case DESKTOP_REDHAT:
+						if (desktop == DESKTOP_GNOME && gnome_vfolders) {
+							// menu paths are embedded in the file, not the pathname
+							snprintf(finalbuf, PATH_MAX, "%s", buf);
+						} else {
+							snprintf(finalbuf, PATH_MAX, "%s%s/", buf, elem->menu ? elem->menu : "Games");
+						}
+						file_create_hierarchy(info, finalbuf);
+
+						strncat(finalbuf, elem->symlink, PATH_MAX-strlen(finalbuf));
+
+						if ( desktop == DESKTOP_KDE ) {
+							strncat(finalbuf,".kdelnk", PATH_MAX-strlen(finalbuf));
+						} else {
+							strncat(finalbuf,".desktop", PATH_MAX-strlen(finalbuf));
+						}
+
+						fp = fopen(finalbuf, "w");
+						if (fp) {
+							if (desktop == DESKTOP_KDE) {
+								fprintf(fp, "# KDE Config File\n");
+							}
+							fprintf(fp, "[%sDesktop Entry]\n"
+									"Encoding=UTF-8\n"
+									"Name=%s\n"
+									"Comment=%s\n"
+									"Exec=%s\n"
+									"Icon=%s\n"
+									"Terminal=0\n"
+									"Type=Application\n"
+									"Categories=Application;%s;X-Red-Hat-Base;\n",
+									(desktop==DESKTOP_KDE) ? "KDE " : "",
+									elem->name ? elem->name : info->name,
+									elem->desc ? elem->desc : info->desc,
+									exec, icon, info->category);
+							fclose(fp);
+							add_file_entry(info, opt, finalbuf, NULL, 0);
+							++ num_items;
+							if (desktop == DESKTOP_REDHAT && info->distro==DISTRO_REDHAT && info->distro_maj >= 8) {
+								/* try to create a symlink for redhat 8.0 symlink
+								   directory; not strictly necessary but it will
+								   allow menuitem to show up in kde without an x
+								   restart */
+								symlink_desktop_file(info, finalbuf, "/usr/share/applnk-redhat", elem);
+							} else  if (desktop == DESKTOP_GNOME && info->distro==DISTRO_SUSE ) {
+								/* Now for some SuSE nonsense */
+								symlink_desktop_file(info, finalbuf, "/etc/opt/gnome/SuSE", elem);
+							}
+
+							/* successful REDHAT takes care of KDE/GNOME
+							   tell caller no need to continue others
+							   UNLESS we are Redhat 6.1 or earlier, in which case we need to install
+							   everything else. */
+							if ( (info->distro != DISTRO_REDHAT) || (info->distro_maj>6) || (info->distro_min>1) ) {
+								ret_val = (desktop == DESKTOP_REDHAT);
+							}
+
+						} else {
+							log_warning(_("Unable to create desktop file '%s'"), finalbuf);
+						}
+						break;
+					case DESKTOP_CDE:
+						snprintf(finalbuf, PATH_MAX, "%s%s.dt", buf, elem->symlink);
+						file_create_hierarchy(info, finalbuf);
+
+						fp = fopen(finalbuf, "w");
+						if (fp) {
+							fprintf(fp,
+									"ACTION %s\n"
+									"{\n"
+									"     LABEL         %s\n"
+									"     TYPE          COMMAND\n"
+									"     EXEC_STRING   %s\n"
+									"     ICON          %s\n"
+									"     WINDOW_TYPE   NO_STDIO\n"
+									"     DESCRIPTION   %s\n"
+									"}\n\n", elem->symlink,
+									elem->name, exec, icon, elem->desc
+									);
+							fclose(fp);
+							add_file_entry(info, opt, finalbuf, NULL, 0);
+				
+							snprintf(finalbuf, PATH_MAX, "%s%s.fp", buf, elem->symlink);
+							fp = fopen(finalbuf, "w");
+							if ( fp ) {
+								fprintf(fp,
+										"CONTROL %s\n"
+										"{\n"
+										"  TYPE icon\n", elem->symlink);
+								if ( num_items == 0 ) {
+									fprintf(fp,
+											"  CONTAINER_NAME	Top\n"
+											"  CONTAINER_TYPE	BOX\n");
+								} else {
+									fprintf(fp,
+											"  CONTAINER_NAME	%s_Panel\n"
+											"  CONTAINER_TYPE	SUBPANEL\n", info->name
+											);
+								}
+								fprintf(fp,
+										"  ICON				%s\n"
+										"  PUSH_ACTION		%s\n"
+										"  DROP_ACTION		%s\n"
+										"  LABEL			%s\n"
+										"}\n\n",
+										icon, elem->symlink, elem->symlink, elem->name
+										);
+								if ( num_items == 0 ) {
+									fprintf(fp,
+											"SUBPANEL %s_Panel\n"
+											"{\n"
+											"  CONTAINER_NAME %s\n"
+											"  TITLE          %s\n"
+											"}\n\n", info->name, elem->symlink, info->desc
+											);
+								}
+								fclose(fp);
+								add_file_entry(info, opt, finalbuf, NULL, 0);
+								++ num_items;
+								ret_val = 1;
+							} else {
+								log_warning(_("Unable to create CDE desktop file '%s'"), finalbuf);
+							}
+						} else {
+							log_warning(_("Unable to create CDE desktop file '%s'"), finalbuf);
+						}
+
+						break;
+					case DESKTOP_IRIX:
+						snprintf(finalbuf, PATH_MAX, "%s%02d%s.chest", buf, num_items, elem->symlink);
+						file_create_hierarchy(info, finalbuf);
+
+						fp = fopen(finalbuf, "w");
+						if (fp) {
+							if ( num_items == 0 ) {
+								/* First add an entry for the menu itself */
+								fprintf(fp,
+										"Menu ToolChest\n"
+										"{\n"
+										"  no-label  f.separator\n"
+										"  \"%s\"    f.menu %s\n"
+										"}\n\n",  elem->menu ? elem->menu : "Games",
+										info->name
+										);
+							}
+							fprintf(fp,
+									"Menu %s\n"
+									"{\n"
+									"  no-label  f.separator\n"
+									"  \"%s\"    f.checkexec \"%s\"\n"
+									"}\n",  info->name,
+									elem->name ? elem->name : info->name, exec
+									);
+							fclose(fp);
+							add_file_entry(info, opt, finalbuf, NULL, 0);
+							++ num_items;
+							ret_val = 1;
+						} else {
+							log_warning(_("Unable to create ToolChest menu file '%s'"), finalbuf);
+						}
+						break;
+					default:
+						break;
 					}
-					fclose(fp);
-					add_file_entry(info, opt, finalbuf, NULL, 0);
-					++ num_items;
-					ret_val = 1;
-			    } else {
-					log_warning(_("Unable to create CDE desktop file '%s'"), finalbuf);
-			    }
-			} else {
-			    log_warning(_("Unable to create CDE desktop file '%s'"), finalbuf);
-			}
-
-			break;
-		    case DESKTOP_IRIX:
-			snprintf(finalbuf, PATH_MAX, "%s%02d%s.chest", buf, num_items, elem->symlink);
-			file_create_hierarchy(info, finalbuf);
-
-			fp = fopen(finalbuf, "w");
-			if (fp) {
-			    if ( num_items == 0 ) {
-				/* First add an entry for the menu itself */
-				fprintf(fp,
-					"Menu ToolChest\n"
-					"{\n"
-					"  no-label  f.separator\n"
-					"  \"%s\"    f.menu %s\n"
-					"}\n\n",  elem->menu ? elem->menu : "Games",
-					info->name
-					);
-			    }
-			    fprintf(fp,
-				    "Menu %s\n"
-				    "{\n"
-				    "  no-label  f.separator\n"
-				    "  \"%s\"    f.checkexec \"%s\"\n"
-				    "}\n",  info->name,
-				    elem->name ? elem->name : info->name, exec
-				    );
-			    fclose(fp);
-			    add_file_entry(info, opt, finalbuf, NULL, 0);
-			    ++ num_items;
-			    ret_val = 1;
-			} else {
-			    log_warning(_("Unable to create ToolChest menu file '%s'"), finalbuf);
-			}
-			break;
-		    default:
-			break;
-		    }
                     /* Created a desktop item, our job is done here */
                     break;
                 }

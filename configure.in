@@ -5,7 +5,7 @@ dnl Define the release numbers here
 
 SETUP_VERSION_MAJOR=1
 SETUP_VERSION_MINOR=6
-SETUP_VERSION_RELEASE=1
+SETUP_VERSION_RELEASE=4
 
 PACKAGE_NAME="Loki Setup"
 PACKAGE_TARNAME="setup"
@@ -47,6 +47,7 @@ AC_CHECK_HEADERS(pty.h)
 AC_CHECK_HEADERS(sys/ptms.h)
 AC_CHECK_HEADERS(sys/stropts.h)
 AC_CHECK_HEADERS(libintl.h)
+AC_CHECK_HEADERS(getopt.h)
 AC_CHECK_FILES(/dev/ptmx)
 AC_CHECK_FILES(/dev/pts)
 AC_CHECK_FILES(/dev/ptc)

@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.52 2004-07-20 22:27:49 megastep Exp $ */
+/* $Id: uninstall.c,v 1.53 2004-08-04 03:12:34 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -25,6 +25,10 @@
 #endif
 #include "uninstall.h"
 
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
+
 #ifdef PACKAGE
 #undef PACKAGE
 #endif
@@ -43,13 +47,13 @@ void abort_install(void)
 static void print_usage(const char *argv0)
 {
 	printf( _("Usage: %s [args]\n"
-		  "args can be any of the following:\n\n"
-		  "  -h | --help      : Print this help message.\n"
-		  "  -l | --list      : List all installed products and components.\n"
-		  "  -v | --version   : Get version information.\n"
-		  "  product [component] : Uninstalls the specified product, or its subcomponent.\n"
-		  "  product < -l | --list > : List installed subcomponents of product.\n"
-		  ), argv0);
+			  "args can be any of the following:\n\n"
+			  "  -h      : Print this help message.\n"
+			  "  -l      : List all installed products and components.\n"
+			  "  -v      : Get version information.\n"
+			  "  product [component1] [component2] ... : Uninstalls the specified product, or its subcomponent(s).\n"
+			  "  product < -l > : List installed subcomponents of product.\n"
+			  ), argv0);
 }
 
 static void log_file(const char *name, const char *reason)
@@ -291,16 +295,27 @@ int check_permissions(product_info_t *info, int verbose)
     return 1;
 }
 
-static void init_locale(void)
+static void init_locale(const char *product)
 {
     char locale[PATH_MAX];
 
 	setlocale (LC_ALL, "");
-#ifdef UNINSTALL_UI
-    strcpy(locale, LOCALEDIR);
-#else
-    snprintf(locale, sizeof(locale), "%s/" LOKI_DIRNAME "/installed/locale", detect_home());
-#endif
+
+	if ( product ) { /* Use the installation directory from the product */
+        product_t *prod = loki_openproduct(product);
+		if ( prod ) {
+			product_info_t *info = loki_getinfo_product(prod);
+
+			snprintf(locale, sizeof(locale), "%s/" LOCALEDIR, info->root);
+			if ( access(locale, R_OK) < 0 ) { /* If not existing, revert to copy in the home directory */
+				snprintf(locale, sizeof(locale), "%s/" LOKI_DIRNAME "/installed/" LOCALEDIR, detect_home());
+			}
+		} else {
+			snprintf(locale, sizeof(locale), "%s/" LOKI_DIRNAME "/installed/" LOCALEDIR, detect_home());
+		}
+	} else {
+		snprintf(locale, sizeof(locale), "%s/" LOKI_DIRNAME "/installed/" LOCALEDIR, detect_home());
+	}
 	bindtextdomain (PACKAGE, locale);
 	textdomain (PACKAGE);
 }
@@ -383,7 +398,8 @@ int main(int argc, char *argv[])
 #ifdef UNINSTALL_UI
 	const char *p;
 #endif
-	int ret = 0;
+	int c, is_listing = 0, ret = 0;
+	const char *use_locale = NULL;
 
 #if defined(darwin)
 	printf("Your command line:\n");
@@ -508,19 +524,38 @@ int main(int argc, char *argv[])
 #endif
 #endif
 
+	while ( (c=getopt(argc, argv, "hlL:v")) != EOF ) {
+		switch(c) {
+		case 'h':
+			print_usage(argv[0]);
+			return 0;
+		case 'v':
+#ifdef UNINSTALL_UI
+			printf("Uninstall Tool " VERSION "\n");
+#else
+			printf("%d.%d.%d\n", SETUP_VERSION_MAJOR, SETUP_VERSION_MINOR, SETUP_VERSION_RELEASE);
+#endif
+			return 0;
+		case 'l':
+			is_listing = 1;
+			break;
+		case 'L':
+			use_locale = optarg;
+			break;
+		default:
+			break;
+		}
+	}
+
 	/* Set the locale */
-    init_locale();
+    init_locale(use_locale);
 	memset(&UI, 0, sizeof(UI));
 
 #ifdef UNINSTALL_UI
-    if ( argc < 2 ) {
+    if ( ! argv[optind] ) {
         return uninstall_ui(argc, argv);
     }
 #endif
-	if ( argc < 2 ) {
-		print_usage(argv[0]);
-		return 1;
-	}
 
     /* Add emergency signal handlers */
     signal(SIGHUP, emergency_exit);
@@ -528,44 +563,42 @@ int main(int argc, char *argv[])
     signal(SIGQUIT, emergency_exit);
     signal(SIGTERM, emergency_exit);
 
-    if ( !strcmp(argv[1], "-l") || !strcmp(argv[1], "--list") ) {
-		if ( loki_getfirstproduct() ) {
-			const char *product;
-			printf(_("Installed products:\n"));
-			for( product = loki_getfirstproduct(); product; product = loki_getnextproduct() ) {
-				prod = loki_openproduct(product);
-				printf("\t%s: ", product);
-				if ( prod ) {
-					product_component_t *comp;
+    if ( !argv[optind] ) {
+		if ( is_listing ) {
+			if ( loki_getfirstproduct() ) {
+				const char *product;
+				printf(_("Installed products:\n"));
+				for( product = loki_getfirstproduct(); product; product = loki_getnextproduct() ) {
+					prod = loki_openproduct(product);
+					printf("\t%s: ", product);
+					if ( prod ) {
+						product_component_t *comp;
 					
-					info = loki_getinfo_product(prod);
-					printf(_("installed in %s\n\tComponents:\n"), info->root);
-					/* List components */
-					for ( comp = loki_getfirst_component(prod); comp; comp = loki_getnext_component(comp)) {
-						printf("\t\t%s\n", loki_getname_component(comp));
+						info = loki_getinfo_product(prod);
+						printf(_("installed in %s\n\tComponents:\n"), info->root);
+						/* List components */
+						for ( comp = loki_getfirst_component(prod); comp; comp = loki_getnext_component(comp)) {
+							printf("\t\t%s\n", loki_getname_component(comp));
+						}
+						loki_closeproduct(prod);
+					} else {
+						printf(_(" Error while accessing product info\n"));
 					}
-					loki_closeproduct(prod);
-				} else {
-					printf(_(" Error while accessing product info\n"));
 				}
+			} else {
+				fprintf(stderr, _("No products could be found. Maybe you need to run as a different user?\n"));
+				ret = 1;
 			}
 		} else {
-			fprintf(stderr, _("No products could be found. Maybe you need to run as a different user?\n"));
+			print_usage(argv[0]);
 			ret = 1;
 		}
-    } else if ( !strcmp(argv[1], "-v") || !strcmp(argv[1], "--version") ) {
-#ifdef UNINSTALL_UI
-        printf("Uninstall Tool " VERSION "\n");
-#else
-        printf("%d.%d.%d\n", SETUP_VERSION_MAJOR, SETUP_VERSION_MINOR, SETUP_VERSION_RELEASE);
-#endif
-    } else if ( !strcmp(argv[1], "-h") || !strcmp(argv[1], "--help") ) {
-		print_usage(argv[0]);
-		return 0;
     } else {
-        prod = loki_openproduct(argv[1]);
+		product_component_t *comp;
+
+        prod = loki_openproduct(argv[optind]);
         if ( ! prod ) {
-            fprintf(stderr, _("Could not open product information for %s\n"), argv[1]);
+            fprintf(stderr, _("Could not open product information for %s\n"), argv[optind]);
             return 1;
         }
 
@@ -578,37 +611,37 @@ int main(int argc, char *argv[])
 		}
         strncpy(desc, *info->description ? info->description : info->name, sizeof(desc));
 
-        if ( argc == 3 && *argv[2] ) {
-            product_component_t *comp;
-            if ( !strcmp(argv[2], "-l") || !strcmp(argv[1], "--list") ) { /* List components */
-                printf(_("Components:\n"));
-                for ( comp = loki_getfirst_component(prod); comp; 
-                      comp = loki_getnext_component(comp) ) {
-                    printf("\t%s\n", loki_getname_component(comp));
-                }
-			} else if ( !strcmp(argv[2], "Default") ) { 
+		if ( is_listing ) { /* List components */
+			printf(_("Components:\n"));
+			for ( comp = loki_getfirst_component(prod); comp; 
+				  comp = loki_getnext_component(comp) ) {
+				printf("\t%s\n", loki_getname_component(comp));
+			}
+		} else if ( (optind+1) < argc ) {
+			if ( !strcmp(argv[optind+1], "Default") ) { 
 				/* The default component is parent to all other components, therefore do a full uninstall */
 				goto full_uninstall; /* I feel so dirty :-/ */
-            } else { /* Uninstall a single component */
-                comp = loki_find_component(prod, argv[2]);
-                if ( comp ) {
+			} else { /* Uninstall one or more component */
+				int i;
 
-                    if ( ! check_permissions(info, 1) )
-                        return 1;
-					if ( ! check_for_message(comp) ) {
-						return 1;
+				for ( i = optind+1; i < argc; i ++ ) {
+					comp = loki_find_component(prod, argv[i]);
+					if ( comp ) {
+					
+						if ( ! check_permissions(info, 1) )
+							return 1;
+						if ( ! check_for_message(comp) ) {
+							return 1;
+						}
+						if ( ! uninstall_component(comp, info) ) {
+							fprintf(stderr, _("Failed to properly uninstall component %s\n"), argv[i]);
+						}
+					} else {
+						fprintf(stderr, _("Unable to find component %s\n"), argv[i]);
 					}
-                    if ( ! uninstall_component(comp, info) ) {
-						fprintf(stderr, _("Failed to properly uninstall component %s\n"), argv[2]);
-					}
-                    loki_closeproduct(prod);
-                } else {
-                    fprintf(stderr, _("Unable to find component %s\n"), argv[2]);
-                }
-            }
-        } else if ( argc > 3 ) {
-            fprintf(stderr, _("Too many arguments for the command\n"));
-            ret = 1;
+				}
+				loki_closeproduct(prod);
+			}
         } else {        
 full_uninstall:
             /* Uninstall the damn thing */

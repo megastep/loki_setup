@@ -782,12 +782,10 @@ const char *get_cdrom(install_info *info, const char *id)
 void DetectLocale(void)
 {
 	current_locale = getenv("LC_ALL");
-	if(!current_locale) {
+	if (!current_locale)
 		current_locale = getenv("LC_MESSAGES");
-		if(!current_locale) {
-			current_locale = getenv("LANG");
-		}
-	}
+	if (!current_locale)
+		current_locale = getenv("LANG");
 	if ( current_locale )
 		log_debug(_("Detected locale is %s"), current_locale);
 }

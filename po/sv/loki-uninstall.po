@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Setup 1.5\n"
-"POT-Creation-Date: 2004-08-02 18:55-0700\n"
+"POT-Creation-Date: 2004-08-03 19:38-0700\n"
 "PO-Revision-Date: 2000-12-01 18:04-08:00\n"
 "Last-Translator: David Hedbor <david@hedbor.org>\n"
 "Language-Team: Swedish\n"
@@ -65,65 +65,65 @@ msgstr "Avsluta"
 msgid "_Uninstall"
 msgstr "Avinstallera"
 
-#: uninstall.c:45
+#: uninstall.c:49
 #, c-format
 msgid ""
 "Usage: %s [args]\n"
 "args can be any of the following:\n"
 "\n"
-"  -h | --help      : Print this help message.\n"
-"  -l | --list      : List all installed products and components.\n"
-"  -v | --version   : Get version information.\n"
-"  product [component] : Uninstalls the specified product, or its "
-"subcomponent.\n"
-"  product < -l | --list > : List installed subcomponents of product.\n"
+"  -h      : Print this help message.\n"
+"  -l      : List all installed products and components.\n"
+"  -v      : Get version information.\n"
+"  product [component1] [component2] ... : Uninstalls the specified product, "
+"or its subcomponent(s).\n"
+"  product < -l > : List installed subcomponents of product.\n"
 msgstr ""
 
-#: uninstall.c:125
+#: uninstall.c:129
 #, c-format
 msgid "Signal %d caught. Aborting.\n"
 msgstr "Signal %d fångad. Avbryter.\n"
 
-#: uninstall.c:140
+#: uninstall.c:144
 #, c-format
 msgid "Could not change to directory: %s\n"
 msgstr "Kunde inte byta bibliotek till: %s\n"
 
-#: uninstall.c:165
+#: uninstall.c:169
 #, c-format
 msgid "Notice: the %s RPM was installed for this product.\n"
 msgstr "Notera: RPM-filen %s installedes för den här produkten.\n"
 
-#: uninstall.c:198
+#: uninstall.c:202
 #, c-format
 msgid "Post-uninstall scripts for %s have failed.\n"
 msgstr ""
 
-#: uninstall.c:203
+#: uninstall.c:207
 #, fuzzy, c-format
 msgid ""
 "Component %s has been successfully uninstalled.\n"
 "\n"
 msgstr "Komponenten %s har avinstallerats.\n"
 
-#: uninstall.c:223
+#: uninstall.c:227
 #, fuzzy
 msgid "Uninstall ? [Y/n] "
 msgstr "Avinstallera"
 
-#: uninstall.c:227
+#: uninstall.c:231
 msgid "n"
 msgstr ""
 
-#: uninstall.c:227
+#: uninstall.c:231
 msgid "N"
 msgstr ""
 
-#: uninstall.c:228
+#: uninstall.c:232
 msgid "Aborted.\n"
 msgstr ""
 
-#: uninstall.c:278
+#: uninstall.c:282
 msgid ""
 "No write access to the installation directory.\n"
 "Aborting.\n"
@@ -131,7 +131,7 @@ msgstr ""
 "Kan inte skriva till installationsbiblioteket.\n"
 "Avbryter.\n"
 
-#: uninstall.c:286
+#: uninstall.c:290
 #, c-format
 msgid ""
 "No write access to the registry file: %s.\n"
@@ -140,51 +140,51 @@ msgstr ""
 "Kan inte skriva till registerfilen %s.\n"
 "Avbryter.\n"
 
-#: uninstall.c:483
+#: uninstall.c:499
 msgid "Warning: Unable to replicate uninstallation program.\n"
 msgstr ""
 
-#: uninstall.c:487
+#: uninstall.c:503
 #, fuzzy, c-format
 msgid "Unable to open %s for writing.\n"
 msgstr "Kan inte hitta komponent %s\n"
 
-#: uninstall.c:491
+#: uninstall.c:507
 #, fuzzy, c-format
 msgid "Unable to open %s for copying.\n"
 msgstr "Kan inte hitta komponent %s\n"
 
-#: uninstall.c:503
+#: uninstall.c:519
 #, fuzzy
 msgid "Couldn't change to install directory\n"
 msgstr "Kunde inte byta bibliotek till: %s\n"
 
-#: uninstall.c:534
+#: uninstall.c:570
 msgid "Installed products:\n"
 msgstr "Installerade produkter:\n"
 
-#: uninstall.c:542
+#: uninstall.c:578
 #, fuzzy, c-format
 msgid ""
 "installed in %s\n"
 "\tComponents:\n"
 msgstr "installerad i %s\n"
 
-#: uninstall.c:549
+#: uninstall.c:585
 msgid " Error while accessing product info\n"
 msgstr " Fel vid hämtning av produktinformation\n"
 
-#: uninstall.c:553
+#: uninstall.c:589
 msgid ""
 "No products could be found. Maybe you need to run as a different user?\n"
 msgstr ""
 
-#: uninstall.c:568
+#: uninstall.c:601
 #, c-format
 msgid "Could not open product information for %s\n"
 msgstr "Kunde inte öppna produktinformation för %s\n"
 
-#: uninstall.c:576
+#: uninstall.c:609
 #, c-format
 msgid ""
 "Product: %s\n"
@@ -193,29 +193,25 @@ msgstr ""
 "Produkt: %s\n"
 "Installerad i %s\n"
 
-#: uninstall.c:584
+#: uninstall.c:615
 msgid "Components:\n"
 msgstr "Komponenter:\n"
 
-#: uninstall.c:602
+#: uninstall.c:637
 #, fuzzy, c-format
 msgid "Failed to properly uninstall component %s\n"
 msgstr "Kan inte hitta komponent %s\n"
 
-#: uninstall.c:606
+#: uninstall.c:640
 #, c-format
 msgid "Unable to find component %s\n"
 msgstr "Kan inte hitta komponent %s\n"
 
-#: uninstall.c:610
-msgid "Too many arguments for the command\n"
-msgstr "För många argument till programmet.\n"
-
-#: uninstall.c:618
+#: uninstall.c:651
 msgid "An error occured during the uninstallation process.\n"
 msgstr "Ett fel uppstod under avinstallationen.\n"
 
-#: uninstall.c:622
+#: uninstall.c:655
 #, fuzzy, c-format
 msgid ""
 "%s has been successfully uninstalled.\n"
@@ -279,6 +275,9 @@ msgid ""
 "No products were installed by this user.\n"
 "You may need to run this tool as an administrator."
 msgstr ""
+
+#~ msgid "Too many arguments for the command\n"
+#~ msgstr "För många argument till programmet.\n"
 
 #~ msgid ""
 #~ "Usage: %s product to uninstall the product\n"

@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.71 2004-07-23 18:53:37 megastep Exp $ */
+/* $Id: main.c,v 1.72 2004-08-04 03:12:34 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -41,6 +41,10 @@ Modifications by Borland/Inprise Corp.:
 #include "file.h"
 #include "detect.h"
 #include "plugins.h"
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 /* Global options */
 
@@ -177,7 +181,7 @@ int main(int argc, char **argv)
 
 	/* Set the locale */
 	setlocale (LC_ALL, "");
-	bindtextdomain (PACKAGE, LOCALEDIR);
+	bindtextdomain (PACKAGE, "setup.data/" LOCALEDIR);
 	textdomain (PACKAGE);
 
 	DetectLocale();
@@ -396,7 +400,7 @@ int main(int argc, char **argv)
                 break;
 	    case SETUP_CLASS:
 			state = UI.pick_class(info);
-		break;
+			break;
             case SETUP_LICENSE:
                 state = UI.license(info);
                 break;
@@ -423,8 +427,8 @@ int main(int argc, char **argv)
 				}
                 break;
             case SETUP_PLAY:
-		if ( UI.shutdown ) 
-		    UI.shutdown(info);
+				if ( UI.shutdown ) 
+					UI.shutdown(info);
                 state = launch_game(info);
                 break;
             case SETUP_ABORT:

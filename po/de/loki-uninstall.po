@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2004-08-02 18:55-0700\n"
+"POT-Creation-Date: 2004-08-03 19:38-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -63,18 +63,18 @@ msgstr "_Beenden"
 msgid "_Uninstall"
 msgstr "_Deinstallieren"
 
-#: uninstall.c:45
-#, c-format
+#: uninstall.c:49
+#, fuzzy, c-format
 msgid ""
 "Usage: %s [args]\n"
 "args can be any of the following:\n"
 "\n"
-"  -h | --help      : Print this help message.\n"
-"  -l | --list      : List all installed products and components.\n"
-"  -v | --version   : Get version information.\n"
-"  product [component] : Uninstalls the specified product, or its "
-"subcomponent.\n"
-"  product < -l | --list > : List installed subcomponents of product.\n"
+"  -h      : Print this help message.\n"
+"  -l      : List all installed products and components.\n"
+"  -v      : Get version information.\n"
+"  product [component1] [component2] ... : Uninstalls the specified product, "
+"or its subcomponent(s).\n"
+"  product < -l > : List installed subcomponents of product.\n"
 msgstr ""
 "Verwendung: %s [args]\n"
 "Argumente können beispielsweise sein:\n"
@@ -87,27 +87,27 @@ msgstr ""
 "  product < -l | --list > : Installierte Subkomponenten des Produkts "
 "aufführen.\n"
 
-#: uninstall.c:125
+#: uninstall.c:129
 #, c-format
 msgid "Signal %d caught. Aborting.\n"
 msgstr "Signal %d erhalten. Abbruch.\n"
 
-#: uninstall.c:140
+#: uninstall.c:144
 #, c-format
 msgid "Could not change to directory: %s\n"
 msgstr "Verzeichnis konnte nicht gewechselt werden: %s\n"
 
-#: uninstall.c:165
+#: uninstall.c:169
 #, c-format
 msgid "Notice: the %s RPM was installed for this product.\n"
 msgstr "Hinweis: für dieses Produkt wurde der %s RPM installiert.\n"
 
-#: uninstall.c:198
+#: uninstall.c:202
 #, c-format
 msgid "Post-uninstall scripts for %s have failed.\n"
 msgstr "Deinstallation-PostScripts für %s nicht erfolgreich.\n"
 
-#: uninstall.c:203
+#: uninstall.c:207
 #, c-format
 msgid ""
 "Component %s has been successfully uninstalled.\n"
@@ -116,23 +116,23 @@ msgstr ""
 "Komponente %s wurde erfolgreich deinstalliert.\n"
 "\n"
 
-#: uninstall.c:223
+#: uninstall.c:227
 msgid "Uninstall ? [Y/n] "
 msgstr "Deinstallieren? [Y/n] "
 
-#: uninstall.c:227
+#: uninstall.c:231
 msgid "n"
 msgstr "n"
 
-#: uninstall.c:227
+#: uninstall.c:231
 msgid "N"
 msgstr "N"
 
-#: uninstall.c:228
+#: uninstall.c:232
 msgid "Aborted.\n"
 msgstr "Abbruch.\n"
 
-#: uninstall.c:278
+#: uninstall.c:282
 msgid ""
 "No write access to the installation directory.\n"
 "Aborting.\n"
@@ -140,7 +140,7 @@ msgstr ""
 "Kein Schreibzugriff auf Installationsverzeichnis.\n"
 "Abbruch.\n"
 
-#: uninstall.c:286
+#: uninstall.c:290
 #, c-format
 msgid ""
 "No write access to the registry file: %s.\n"
@@ -149,29 +149,29 @@ msgstr ""
 "Kein Schreibzugriff auf Registrierungsverzeichnis: %s.\n"
 "Abbruch.\n"
 
-#: uninstall.c:483
+#: uninstall.c:499
 msgid "Warning: Unable to replicate uninstallation program.\n"
 msgstr "Warnung: Deinstallationsprogramm kann nicht repliziert werden.\n"
 
-#: uninstall.c:487
+#: uninstall.c:503
 #, c-format
 msgid "Unable to open %s for writing.\n"
 msgstr "%s kann nicht zum Schreiben geöffnet werden.\n"
 
-#: uninstall.c:491
+#: uninstall.c:507
 #, c-format
 msgid "Unable to open %s for copying.\n"
 msgstr "%s kann nicht zum Kopieren geöffnet werden.\n"
 
-#: uninstall.c:503
+#: uninstall.c:519
 msgid "Couldn't change to install directory\n"
 msgstr "Wechsel in Installationsverzeichnis nicht möglich\n"
 
-#: uninstall.c:534
+#: uninstall.c:570
 msgid "Installed products:\n"
 msgstr "Installierte Produkte:\n"
 
-#: uninstall.c:542
+#: uninstall.c:578
 #, c-format
 msgid ""
 "installed in %s\n"
@@ -180,21 +180,21 @@ msgstr ""
 "installiert in %s\n"
 "\tKomponenten:\n"
 
-#: uninstall.c:549
+#: uninstall.c:585
 msgid " Error while accessing product info\n"
 msgstr " Fehler beim Zugriff auf Produktinfo\n"
 
-#: uninstall.c:553
+#: uninstall.c:589
 msgid ""
 "No products could be found. Maybe you need to run as a different user?\n"
 msgstr "Keine Produkte gefunden. Ggf. als anderer User ausführen?\n"
 
-#: uninstall.c:568
+#: uninstall.c:601
 #, c-format
 msgid "Could not open product information for %s\n"
 msgstr "Produktinformation für %s kann nicht geöffnet werden\n"
 
-#: uninstall.c:576
+#: uninstall.c:609
 #, c-format
 msgid ""
 "Product: %s\n"
@@ -203,29 +203,25 @@ msgstr ""
 "Produkt: %s\n"
 "Installiert in %s\n"
 
-#: uninstall.c:584
+#: uninstall.c:615
 msgid "Components:\n"
 msgstr "Komponenten:\n"
 
-#: uninstall.c:602
+#: uninstall.c:637
 #, c-format
 msgid "Failed to properly uninstall component %s\n"
 msgstr "Komponente %s konnte nicht richtig deinstalliert werden\n"
 
-#: uninstall.c:606
+#: uninstall.c:640
 #, c-format
 msgid "Unable to find component %s\n"
 msgstr "Komponente %s nicht gefunden\n"
 
-#: uninstall.c:610
-msgid "Too many arguments for the command\n"
-msgstr "Zu viele Argumente für den Befehl\n"
-
-#: uninstall.c:618
+#: uninstall.c:651
 msgid "An error occured during the uninstallation process.\n"
 msgstr "Fehler während des Deinstallationsvorgangs.\n"
 
-#: uninstall.c:622
+#: uninstall.c:655
 #, c-format
 msgid ""
 "%s has been successfully uninstalled.\n"
@@ -296,3 +292,6 @@ msgid ""
 msgstr ""
 "Keine Produkte durch diesen User installiert.\n"
 "Sie müssen dieses Tool ggf. als Administrator anwenden."
+
+#~ msgid "Too many arguments for the command\n"
+#~ msgstr "Zu viele Argumente für den Befehl\n"

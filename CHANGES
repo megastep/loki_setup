@@ -1,4 +1,6 @@
 Current:
+Stephane Peter (Codehost) - Tue Aug  3 19:32:48 PDT 2004
+ * Added 'args' attribute for binary tags.
 Ryan C. Gordon (icculus.org) - Thu May 27 12:39:23 EDT 2004
  * Carbon UI now handles Apple-Q quit hotkey at end of installation correctly.
 Ryan C. Gordon (icculus.org) - Thu 20 May 06:05:23 EDT 2004

@@ -166,6 +166,7 @@ typedef struct _install_info {
                 const char *menu;
                 const char *name;
                 const char *icon;
+				const char *args;
                 struct bin_elem *next;
             } *bin_list;
 
@@ -308,7 +309,7 @@ extern void add_dir_entry(install_info *info, struct option_elem *opt, const cha
 /* Add a binary entry to the list of binaries installed */
 extern void add_bin_entry(install_info *info, struct option_elem *opt, struct file_elem *file,
 						  const char *symlink, const char *desc, const char *menu,
-						  const char *name, const char *icon, const char *play);
+						  const char *name, const char *icon, const char *args, const char *play);
 /* Add a man page entry */
 extern void add_man_entry(install_info *info, struct option_elem *comp, struct file_elem *file,
 						  const char *section);

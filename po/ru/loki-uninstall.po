@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2004-08-02 18:55-0700\n"
+"POT-Creation-Date: 2004-08-03 19:38-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -78,45 +78,45 @@ msgstr "Выход"
 msgid "_Uninstall"
 msgstr "Удалить"
 
-#: uninstall.c:45
+#: uninstall.c:49
 #, c-format
 msgid ""
 "Usage: %s [args]\n"
 "args can be any of the following:\n"
 "\n"
-"  -h | --help      : Print this help message.\n"
-"  -l | --list      : List all installed products and components.\n"
-"  -v | --version   : Get version information.\n"
-"  product [component] : Uninstalls the specified product, or its "
-"subcomponent.\n"
-"  product < -l | --list > : List installed subcomponents of product.\n"
+"  -h      : Print this help message.\n"
+"  -l      : List all installed products and components.\n"
+"  -v      : Get version information.\n"
+"  product [component1] [component2] ... : Uninstalls the specified product, "
+"or its subcomponent(s).\n"
+"  product < -l > : List installed subcomponents of product.\n"
 msgstr ""
 
 # uninstall.c:108
-#: uninstall.c:125
+#: uninstall.c:129
 #, c-format
 msgid "Signal %d caught. Aborting.\n"
 msgstr "Получен сигнал %d. Прекращение работы.\n"
 
 # uninstall.c:122
-#: uninstall.c:140
+#: uninstall.c:144
 #, c-format
 msgid "Could not change to directory: %s\n"
 msgstr "Невозможно зайти в каталог %s\n"
 
 # uninstall.c:144
-#: uninstall.c:165
+#: uninstall.c:169
 #, c-format
 msgid "Notice: the %s RPM was installed for this product.\n"
 msgstr "Примечание: для этой программы был установлен RPM %s.\n"
 
-#: uninstall.c:198
+#: uninstall.c:202
 #, c-format
 msgid "Post-uninstall scripts for %s have failed.\n"
 msgstr ""
 
 # uninstall.c:179
-#: uninstall.c:203
+#: uninstall.c:207
 #, fuzzy, c-format
 msgid ""
 "Component %s has been successfully uninstalled.\n"
@@ -124,25 +124,25 @@ msgid ""
 msgstr "Компонет %s был успешно удалён.\n"
 
 # uninstall.glade:201
-#: uninstall.c:223
+#: uninstall.c:227
 #, fuzzy
 msgid "Uninstall ? [Y/n] "
 msgstr "Удалить"
 
-#: uninstall.c:227
+#: uninstall.c:231
 msgid "n"
 msgstr ""
 
-#: uninstall.c:227
+#: uninstall.c:231
 msgid "N"
 msgstr ""
 
-#: uninstall.c:228
+#: uninstall.c:232
 msgid "Aborted.\n"
 msgstr ""
 
 # uninstall.c:217
-#: uninstall.c:278
+#: uninstall.c:282
 msgid ""
 "No write access to the installation directory.\n"
 "Aborting.\n"
@@ -151,7 +151,7 @@ msgstr ""
 "Прекращение работы.\n"
 
 # uninstall.c:225
-#: uninstall.c:286
+#: uninstall.c:290
 #, c-format
 msgid ""
 "No write access to the registry file: %s.\n"
@@ -160,35 +160,35 @@ msgstr ""
 "Нет доступа на запись к файлу реестра: %s.\n"
 "Прекращение работы.\n"
 
-#: uninstall.c:483
+#: uninstall.c:499
 msgid "Warning: Unable to replicate uninstallation program.\n"
 msgstr ""
 
 # uninstall.c:394
-#: uninstall.c:487
+#: uninstall.c:503
 #, fuzzy, c-format
 msgid "Unable to open %s for writing.\n"
 msgstr "Невозможно найти компонент %s\n"
 
 # uninstall.c:394
-#: uninstall.c:491
+#: uninstall.c:507
 #, fuzzy, c-format
 msgid "Unable to open %s for copying.\n"
 msgstr "Невозможно найти компонент %s\n"
 
 # uninstall.c:122
-#: uninstall.c:503
+#: uninstall.c:519
 #, fuzzy
 msgid "Couldn't change to install directory\n"
 msgstr "Невозможно зайти в каталог %s\n"
 
 # uninstall.c:347
-#: uninstall.c:534
+#: uninstall.c:570
 msgid "Installed products:\n"
 msgstr "Установленные программы:\n"
 
 # uninstall.c:353
-#: uninstall.c:542
+#: uninstall.c:578
 #, fuzzy, c-format
 msgid ""
 "installed in %s\n"
@@ -196,23 +196,23 @@ msgid ""
 msgstr "установлено в %s\n"
 
 # uninstall.c:356
-#: uninstall.c:549
+#: uninstall.c:585
 msgid " Error while accessing product info\n"
 msgstr " Ошибка во время доступа к информации о программе\n"
 
-#: uninstall.c:553
+#: uninstall.c:589
 msgid ""
 "No products could be found. Maybe you need to run as a different user?\n"
 msgstr ""
 
 # uninstall.c:368
-#: uninstall.c:568
+#: uninstall.c:601
 #, c-format
 msgid "Could not open product information for %s\n"
 msgstr "Невозможно открыть информацию о программе %s\n"
 
 # uninstall.c:374
-#: uninstall.c:576
+#: uninstall.c:609
 #, c-format
 msgid ""
 "Product: %s\n"
@@ -222,34 +222,29 @@ msgstr ""
 "Установлена в %s\n"
 
 # uninstall.c:381
-#: uninstall.c:584
+#: uninstall.c:615
 msgid "Components:\n"
 msgstr "Компоненты:\n"
 
 # uninstall.c:394
-#: uninstall.c:602
+#: uninstall.c:637
 #, fuzzy, c-format
 msgid "Failed to properly uninstall component %s\n"
 msgstr "Невозможно найти компонент %s\n"
 
 # uninstall.c:394
-#: uninstall.c:606
+#: uninstall.c:640
 #, c-format
 msgid "Unable to find component %s\n"
 msgstr "Невозможно найти компонент %s\n"
 
-# uninstall.c:398
-#: uninstall.c:610
-msgid "Too many arguments for the command\n"
-msgstr "Слишком много аргументов команды\n"
-
 # uninstall.c:405
-#: uninstall.c:618
+#: uninstall.c:651
 msgid "An error occured during the uninstallation process.\n"
 msgstr "Произошла ошибка во время процесса удаления.\n"
 
 # uninstall.c:409
-#: uninstall.c:622
+#: uninstall.c:655
 #, fuzzy, c-format
 msgid ""
 "%s has been successfully uninstalled.\n"
@@ -319,6 +314,10 @@ msgid ""
 "No products were installed by this user.\n"
 "You may need to run this tool as an administrator."
 msgstr ""
+
+# uninstall.c:398
+#~ msgid "Too many arguments for the command\n"
+#~ msgstr "Слишком много аргументов команды\n"
 
 # uninstall.c:30
 #~ msgid ""
