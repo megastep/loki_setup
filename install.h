@@ -185,6 +185,9 @@ extern void install_menuitems(install_info *info, desktop_type d);
 /* Run shell script commands from a string */
 extern void run_script(const char *script, int arg);
 
+/* Launch a web browser with the URL specified in the XML file */
+extern int launch_browser(install_info *info);
+
 /* Launch the game using the information in the install info */
 extern install_state launch_game(install_info *info);
 

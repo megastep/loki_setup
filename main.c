@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.6 1999-09-25 03:42:57 megastep Exp $ */
+/* $Id: main.c,v 1.7 1999-11-25 01:32:30 hercules Exp $ */
 
 #include <stdio.h>
 #include <setjmp.h>
@@ -155,7 +155,11 @@ int main(int argc, char **argv)
             case SETUP_PLAY:
 			    state = launch_game(info);
             case SETUP_EXIT:
+                /* Not reached */
                 break;
+        }
+        if ( state == SETUP_EXIT ) {
+            launch_browser(info);
         }
     }
 

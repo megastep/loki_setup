@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.17 1999-09-30 00:58:32 hercules Exp $ */
+/* $Id: install.c,v 1.18 1999-11-25 01:32:30 hercules Exp $ */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -28,6 +28,10 @@ const char *GetProductDesc(install_info *info)
 const char *GetProductVersion(install_info *info)
 {
     return xmlGetProp(info->config->root, "version");
+}
+const char *GetProductURL(install_info *info)
+{
+    return xmlGetProp(info->config->root, "URL");
 }
 const char *GetRuntimeArgs(install_info *info)
 {
@@ -436,6 +440,40 @@ void generate_uninstall(install_info *info)
         fchmod(fileno(fp),0755); /* Turn on executable bit */
         fclose(fp);
     }
+}
+
+/* Launch a web browser with a product information page
+   Since this blocks waiting for the browser to return (unless
+   you are using netscape and it's already open), you should do
+   this as the very last stage of the installation.
+ */
+int launch_browser(install_info *info)
+{
+    const char *url;
+    int retval;
+
+    url = GetProductURL(info);
+    retval = 0;
+    if ( url ) {
+        char command[4096];
+
+#if 0  /* This isn't very helpful in textmode */
+        printf("Launching brower for product URL:\n");
+        printf("\t%s\n", url);
+        sleep(3);
+#endif
+        sprintf(command, "netscape -remote \"openURL(%s,new-window)\"", url);
+        if ( system(command) != 0 ) {
+            sprintf(command, "netscape %s", url);
+            if ( system(command) != 0 ) {
+                sprintf(command, "lynx %s", url);
+                if ( system(command) != 0 ) {
+                    retval = -1;
+                }
+            }
+        }
+    }
+    return retval;
 }
 
 /* Launch the game using the information in the install info */
