@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.26 2004-06-30 03:21:24 megastep Exp $
+ * $Id: dialog_ui.c,v 1.27 2004-07-06 19:12:06 megastep Exp $
  */
 
 #include <limits.h>
@@ -559,20 +559,21 @@ int dialog_update(install_info *info, const char *path, size_t progress,
 		/* FIXME: Anything useful to be done here? */
 	}
 
+	percent = (int) (((float)(info->installed_bytes) /
+					  (float)(info->install_size))*100.0);
+#if 0	
 	if (size) {
-		/* percent = (int) (((float)progress/(float)size)*100.0); */
-		percent = (int) (((float)(info->installed_bytes) /
-						  (float)(info->install_size))*100);
+		percent = (int) (((float)progress/(float)size)*100.0);
 	} else {
 		percent = 100;
 	}
+#endif
 
-	if ( progress && size && !path ) {
-        int percent = (int) (((float)progress/(float)size)*100.0);
+	if ( progress && !path ) {
 		snprintf(buf, sizeof(buf), _("Installing %s ..."), current);
 		dialog_gauge_update(_("Installing..."), buf, percent);
     } else { /* Script */
-		dialog_gauge_update(_("Installing..."), path, 100);
+		dialog_gauge_update(_("Installing..."), path, percent);
 	}
 	return 1;
 }
