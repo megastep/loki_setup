@@ -1,4 +1,4 @@
-/* $Id: file.h,v 1.24 2004-11-10 22:23:07 megastep Exp $ */
+/* $Id: file.h,v 1.25 2004-11-10 22:26:08 megastep Exp $ */
 
 #ifndef __LOKI_FILE_H__
 #define __LOKI_FILE_H__
@@ -56,11 +56,11 @@ extern void file_create_hierarchy(install_info *info, const char *path);
 extern void dir_create_hierarchy(install_info *info, const char *path, int mode);
 extern int dir_is_accessible(const char *path);
 
-/** create a temporary directory and return it's name. Failure to create the
+/** Create a temporary directory and return it's name. Failure to create the
  * directory will abort the program. It is only allowed to created inodes that
  * can be removed with unlink() in that directory */
-extern const char* tmpdir();
+extern const char *dir_mktmp(void);
 
-/** clean all files in the temporary directory and remove it */
-extern int cleantmpdir();
+/** Clean all files in the temporary directory and remove it */
+extern int dir_cleantmp(void);
 #endif

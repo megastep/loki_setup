@@ -613,7 +613,7 @@ static char* write_temp_script(const char* name, char* name_out,
 
 	name_out[PATH_MAX-1] = '\0';
 	name_out[PATH_MAX-2] = '\0';
-	strncpy(name_out, tmpdir(), PATH_MAX-2);
+	strncpy(name_out, dir_mktmp(), PATH_MAX-2);
 	name_out[strlen(name_out)] = '/';
 	strncpy(name_out+strlen(name_out), name, PATH_MAX-strlen(name_out)-1);
 

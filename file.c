@@ -788,7 +788,7 @@ static void dobz2init()
 
 static char tmpdirname[PATH_MAX] = "\0";
 
-const char* tmpdir()
+const char* dir_mktmp(void)
 {
 	unsigned count;
 
@@ -810,7 +810,7 @@ const char* tmpdir()
 	return NULL;
 }
 
-int cleantmpdir()
+int dir_cleantmp(void)
 {
 	DIR* dir;
 	struct dirent *entry;

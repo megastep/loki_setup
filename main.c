@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.75 2004-11-10 22:23:07 megastep Exp $ */
+/* $Id: main.c,v 1.76 2004-11-10 22:26:08 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -75,7 +75,7 @@ void exit_setup(int ret)
     FreePlugins();
 	free_corrupt_files();
     unmount_filesystems();
-	cleantmpdir();
+	dir_cleantmp();
 	log_exit();
     exit(ret);
 }
