@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.57 2003-03-24 00:48:26 zeph Exp $ */
+/* $Id: main.c,v 1.58 2003-03-30 04:37:07 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -146,7 +146,7 @@ int main(int argc, char **argv)
     int i, c;
     install_state state;
     char *xml_file = SETUP_CONFIG;
-    int log_level = LOG_NORMAL;
+    log_level verbosity = LOG_NORMAL;
     char install_path[PATH_MAX];
     char binary_path[PATH_MAX];
 	const char *product_prefix = NULL;
@@ -193,14 +193,14 @@ int main(int argc, char **argv)
 #endif
 		case 'v':
 			if ( optarg ) {
-				log_level = atoi(optarg);
-				if ( (log_level < LOG_DEBUG) || (log_level > LOG_FATAL) ){
+				verbosity = atoi(optarg);
+				if ( (verbosity < LOG_DEBUG) || (verbosity > LOG_FATAL) ){
 					fprintf(stderr,
 							_("Out of range value, setting verbosity level to normal.\n"));
-					log_level = LOG_NORMAL;
+					verbosity = LOG_NORMAL;
 				}
 			} else {
-				log_level = LOG_DEBUG;
+				verbosity = LOG_DEBUG;
 			}
 			break;
 		case 'V':
@@ -235,11 +235,11 @@ int main(int argc, char **argv)
     }
 
 	InitPlugins();
-	if ( log_level == LOG_DEBUG ) {
+	if ( verbosity == LOG_DEBUG ) {
 		DumpPlugins(stderr);
 	}
 
-	log_init(log_level);
+	log_init(verbosity);
 
     /* Initialize the XML setup configuration */
     info = create_install(xml_file, install_path, binary_path, product_prefix);

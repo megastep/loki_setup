@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.78 2003-03-24 00:47:16 zeph Exp $
+   $Id: gtk_ui.c,v 1.79 2003-03-30 04:37:07 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -538,7 +538,7 @@ static void update_size(void)
 
     widget = glade_xml_get_widget(setup_glade, "label_install_size");
     if ( widget ) {
-        snprintf(text, sizeof(text), _("%d MB"), BYTES2MB(cur_info->install_size));
+        snprintf(text, sizeof(text), _("%ld MB"), BYTES2MB(cur_info->install_size));
         gtk_label_set_text(GTK_LABEL(widget), text);
         check_install_button();
     }
@@ -1477,12 +1477,12 @@ static install_state gtkui_setup(install_info *info)
 	    xmlNodePtr child;
 	    GSList *list = NULL;
 	    for ( child = node->childs; child; child = child->next) {
-		parse_option(info, NULL, child, window, options, 0, NULL, 1, &list);
+			  parse_option(info, NULL, child, window, options, 0, NULL, 1, &list);
 	    }
 	} else if ( ! strcmp(node->name, "component") ) {
             if ( match_arch(info, xmlGetProp(node, "arch")) &&
                  match_libc(info, xmlGetProp(node, "libc")) && 
-		 match_distro(info, xmlGetProp(node, "distro")) ) {
+				 match_distro(info, xmlGetProp(node, "distro")) ) {
                 xmlNodePtr child;
                 if ( xmlGetProp(node, "showname") ) {
                     GtkWidget *widget = gtk_hseparator_new();
@@ -1493,7 +1493,15 @@ static install_state gtkui_setup(install_info *info)
                     gtk_widget_show(widget);
                 }
                 for ( child = node->childs; child; child = child->next) {
-                    parse_option(info, xmlGetProp(node, "name"), child, window, options, 0, NULL, 0, NULL);
+				  if ( ! strcmp(child->name, "option") ) {
+					parse_option(info, xmlGetProp(node, "name"), child, window, options, 0, NULL, 0, NULL);
+				  } else if ( ! strcmp(child->name, "exclusive") ) {
+					xmlNodePtr child2;
+					GSList *list = NULL;
+					for ( child2 = node->childs; child2; child2 = child->next) {
+					  parse_option(info, xmlGetProp(node, "name"), child2, window, options, 0, NULL, 1, &list);
+					}
+				  }
                 }
             }
         }

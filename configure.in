@@ -157,7 +157,7 @@ case "$target" in
 	ARCH=`uname -p` ;;
     powerpc-apple-darwin*)
 	STATIC=""
-	RDYNAMIC=""
+	RDYNAMIC="-Wl,-Sn"
 	BSTATIC=""
 	BDYNAMIC=""
 	CFLAGS="$CFLAGS -I/sw/include -Ddarwin"

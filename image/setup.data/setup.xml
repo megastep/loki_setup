@@ -7,7 +7,8 @@
   <eula>
    license.txt
   </eula>
-  <option install="true" required="true">
+  <component name="Default" version="1.54" default="yes">
+   <option install="true" required="true">
     Base Install
     <lang lang="fr">Installation de base</lang>
     <lang lang="es">Instalación base</lang>
@@ -39,8 +40,8 @@
 	   PPC binaries
 	  </option>
     </exclusive>
-  </option>
-  <option>
+   </option>
+   <option>
     Classic Campaign (can run from CD)
     <warn>Don't touch that
     or you may hurt yourself
@@ -56,8 +57,10 @@
         anim/cvwin.mjpg
       </files>
     </option>
-  </option>
-  <option>
+   </option>
+  </component>
+  <component name="Second Century" version="1.0" showname="yes">
+   <option>
     Second Century Campaign (can run from CD)
     <files>
       maps/#e[01]*
@@ -69,5 +72,6 @@
         anim/cvewin.mjpg
       </files>
     </option>
-  </option>
+   </option>
+  </component>
 </install>
