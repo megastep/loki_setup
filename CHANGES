@@ -1,3 +1,7 @@
+current:
+Ryan C. Gordon (icculus.org) - Fri Jul 12 05:57:29 EDT 2002
+ * configure script should detect libs more correctly.
+
 1.6.0:
 Stephane Peter (Codehost) - Tue Aug 21 20:22:10 PDT 2001
  * Added distribution detection: "distro" attribute, SETUP_DISTRO environment
