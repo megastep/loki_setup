@@ -950,7 +950,7 @@ msgstr "L'option '%s', qui était déjà installée, va être installée.\n"
 #: console_ui.c:196
 #, c-format
 msgid "'%s' option will be installed.\n"
-msgstr "'%s' - L'option va être désinstallée.\n"
+msgstr "'%s' - L'option va être installée.\n"
 
 #: console_ui.c:201
 #, c-format

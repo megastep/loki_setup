@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.59 2004-09-21 01:52:42 megastep Exp $ */
+/* $Id: uninstall.c,v 1.60 2004-09-25 00:47:31 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -293,11 +293,12 @@ int check_permissions(product_info_t *info, int verbose)
 static void init_locale(const char *product)
 {
 	char locale[PATH_MAX] = "";
+	const char *env;
 
 	setlocale (LC_ALL, "");
-
-	if(getenv("SETUP_LOCALEDIR")) {
-		strncpy(locale, getenv("SETUP_LOCALEDIR"), sizeof(locale));
+	env = getenv("SETUP_LOCALEDIR");
+	if ( env ) {
+		strncpy(locale, env, sizeof(locale));
 		locale[sizeof(locale)-1]='\0';
 	}
 	else if ( product ) { /* Use the installation directory from the product */
