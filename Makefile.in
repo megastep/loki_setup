@@ -85,7 +85,7 @@ setup.gtk: $(GUI_OBJS) $(COMMON_LIBS)
 #!!!TODO - Take dependency of dialog libs out of carbon	
 #!!!TODO - Should we include setup.carbon as part of "all", "install", etc...?
 # Carbon needs to be a target all its own
-setup.carbon: do-plugins @DO_DIALOG@ $(CARBON_OBJS) $(CARBON_LIBS)
+setup.carbon: do-plugins @DO_DIALOG@ $(CARBON_OBJS) $(COMMON_LIBS)
 	$(CC) $(LDFLAGS) -o $@ $(CARBON_OBJS) $(CARBON_LIBS) 
 	cp setup.carbon setup.APP/Contents/MacOS
 
