@@ -1,4 +1,5 @@
 #include "carbonres.h"
+#include "STUPControl.h"
 #include "carbondebug.h"
 #include <stdlib.h>
 #include <unistd.h>
@@ -403,7 +404,8 @@ CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32), const char 
 
     // Create scrolling text 
     Rect boundsRect = {3,3,314,434};
-    CreateScrollingTextBoxControl(NewRes->ReadmeWindow, &boundsRect, README_TEXT_ENTRY_ID, false, 0, 0, 0, &NewRes->MessageLabel);
+    //CreateScrollingTextBoxControl(NewRes->ReadmeWindow, &boundsRect, README_TEXT_ENTRY_ID, false, 0, 0, 0, &NewRes->MessageLabel);
+    STUPCreateControl(NewRes->ReadmeWindow, &boundsRect, &NewRes->MessageLabel);
     ShowControl(NewRes->MessageLabel);
     //EnableControl(DummyControlRef);
     
@@ -850,6 +852,16 @@ int carbon_ReadmeOrLicense(CarbonRes *Res, int ReadmeNotLicense, const char *Mes
 
     carbon_debug("carbon_ReadmeOrLicense()\n");
 
+    // Scan for '\n' and replace with '\r' (textbox only displays '\r' correctly
+    int i;
+    int MessageLen = strlen(Message);
+
+    for(i = 0; i < MessageLen; i++)
+    {
+        if(Message[i] == '\n')
+            Message[i] = '\r';
+    }
+
     // Get references to button controls
     IDStruct.signature = README_SIGNATURE; IDStruct.id = README_CANCEL_BUTTON_ID;
     GetControlByID(Res->ReadmeWindow, &IDStruct, &CancelButton);
@@ -858,12 +870,13 @@ int carbon_ReadmeOrLicense(CarbonRes *Res, int ReadmeNotLicense, const char *Mes
     IDStruct.signature = README_SIGNATURE; IDStruct.id = README_AGREE_BUTTON_ID;
     GetControlByID(Res->ReadmeWindow, &IDStruct, &AgreeButton);
 
-    SetControlData(Res->MessageLabel,  kControlLabelPart, kControlStaticTextTextTag, strlen(Message), Message);
+    /*SetControlData(Res->MessageLabel,  kControlLabelPart, kControlStaticTextTextTag, strlen(Message), Message);
     //CFStringRef CFMessage = CFStringCreateWithCString(NULL, Message, kCFStringEncodingMacRoman);
     //SetControlTitleWithCFString(Res->MessageLabel, CFMessage);
     HideControl(Res->MessageLabel);
     ShowControl(Res->MessageLabel);
-    //CFRelease(CFMessage);
+    //CFRelease(CFMessage);*/
+    STUPSetText(Res->MessageLabel, Message, strlen(Message));
     Draw1Control(Res->MessageLabel);
 
     // If Yes/No prompt requested

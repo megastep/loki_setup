@@ -373,7 +373,7 @@ static void OnCommandReadme(void)
     if(filename)
     {
         load_file(filename, buffer, MAX_README_SIZE);
-        carbon_ReadmeOrLicense(MyRes, true, "hello world");
+        carbon_ReadmeOrLicense(MyRes, true, buffer);
     }
 
     else
