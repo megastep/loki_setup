@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.71 2002-09-17 22:40:46 megastep Exp $
+   $Id: gtk_ui.c,v 1.72 2002-09-20 22:51:44 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1703,10 +1703,12 @@ int console_okay(Install_UI *UI, int *argc, char ***argv)
     return(0);
 }
 
+#ifdef ENABLE_DIALOG
 int dialog_okay(Install_UI *UI, int *argc, char ***argv)
 {
     return(0);
 }
+#endif
 
 #endif
 

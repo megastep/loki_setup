@@ -1,6 +1,9 @@
 Current:
 Ryan C. Gordon (icculus.org) - Thu Sep 19 17:05:48 EDT 2002
  * console_ui.c now respects $PAGER environment var.
+Stephane Peter (Codehost) - Fri Sep 20 15:46:23 PDT 2002
+ * Added --disable-dialog flag to configure script to
+   avoid compiling the dialog UI in if necesary.
 
 1.6.1:
 Stephane Peter (Codehost) - Sun Mar 31 22:46:57 PST 2002
