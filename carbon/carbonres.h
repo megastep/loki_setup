@@ -223,6 +223,7 @@ void carbon_ShowInstallScreen(CarbonRes *, InstallPage);
 void carbon_SetWindowTitle(CarbonRes *, char *);
 void carbon_HideControl(CarbonRes *, int);
 void carbon_ShowControl(CarbonRes *, int);
+void carbon_FocusControl(CarbonRes *, int);
 void carbon_DisableControl(CarbonRes *, int);
 void carbon_EnableControl(CarbonRes *, int);
 void carbon_SetInstallClass(CarbonRes *, int);
