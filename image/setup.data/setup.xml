@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="yes"?>
 <install product="RT2" desc="Railroad Tycoon II" version="1.54" uninstall="uninstall.sh"
-         promptbinaries="yes">
+         promptbinaries="yes" update_url="http://www.lokigames.com/updates/">
   <readme>
     README
   </readme>
