@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.73 2004-09-02 03:19:59 megastep Exp $ */
+/* $Id: main.c,v 1.74 2004-10-19 00:39:50 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -164,6 +164,7 @@ static void init_locale()
 
 	bindtextdomain (PACKAGE, locale);
 	textdomain (PACKAGE);
+	DetectLocale();
 }
 
 /* The main installer code */
@@ -197,8 +198,6 @@ int main(int argc, char **argv)
 	/* Set the locale */
 	init_locale();
 		
-	DetectLocale();
-
     /* Parse the command-line options */
     while ( (c=getopt(argc, argv,
 #ifdef RPM_SUPPORT

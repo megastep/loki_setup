@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.28 2004-07-23 01:03:26 megastep Exp $
+ * $Id: dialog_ui.c,v 1.29 2004-10-19 00:39:50 megastep Exp $
  */
 
 #include <limits.h>
@@ -74,7 +74,8 @@ install_state dialog_init(install_info *info,int argc, char **argv,
 	dialog_vars.backtitle = title;
 
     snprintf(msg, sizeof(msg),
-			 _("You are running a %s machine with %s\nOperating System: %s %d.%d"),
+			 _("You are running a %s machine with %s\n"
+			   "Operating System: %s %d.%d"),
 			 info->arch, info->libc, distribution_name[info->distro],
 			 info->distro_maj, info->distro_min);
 	

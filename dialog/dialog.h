@@ -1,5 +1,5 @@
 /*
- *  $Id: dialog.h,v 1.6 2002-12-07 00:57:32 megastep Exp $
+ *  $Id: dialog.h,v 1.7 2004-10-19 00:39:50 megastep Exp $
  *
  *  dialog.h -- common declarations for all dialog modules
  *
@@ -57,14 +57,7 @@
 #undef buttons
 #endif
 
-#ifdef ENABLE_NLS
-#include <libintl.h>
-#include <langinfo.h>
-#define _(s) gettext(s)
-#else
-#undef _
-#define _(s) s
-#endif
+#include "setup-locale.h"
 
 /*
  * Change these if you want
