@@ -135,10 +135,17 @@ There are several optional attributes of the binary element:
  symlink    This is a symbolic link that is installed in the system path
             and points to the installed binary.
 
- icon       This is an optional icon file that should be installed in the
-            top level of the install directory.  If both a symlink and an
-            icon are specified for a binary, it will also have a desktop
-            icon or menu item created for it, if the user wishes.
+ icon       This is an optional icon file that you should install into
+            the top level of the install directory.  If both a symlink
+            and an icon are specified for a binary, it will also have a
+            desktop icon or menu item created for it, if the user wishes.
+
+ menu       This is an optional submenu that the application menuitem is
+            installed into.  If no submenu is defined, the menu item will
+            be placed in the "Games" submenu.
+
+ name       This is an optional name for the menu entry.  By default the
+            name of the product is used. 
 
 
 The FILES element:

@@ -621,6 +621,8 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
             }
             add_bin_entry(info, final, symlink,
                                        xmlGetProp(node, "desc"),
+                                       xmlGetProp(node, "menu"),
+                                       xmlGetProp(node, "name"),
                                        xmlGetProp(node, "icon"));
         }
     }

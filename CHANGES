@@ -1,8 +1,12 @@
 
 1.2.1:
+Troy A. Griffitts - Mon, 14 Feb 2000 12:24:32 -0700
+ * Added support for the RedHat /etc/X11/applnk desktop directory
+ * Added "menu" and "name" attributes to the binary element
+Troy A. Griffitts - Fri, 11 Feb 2000 12:07:39 -0700
+ * Added environment variable parsing to the parse_line() function
 Troy A. Griffitts - Fri, 11 Feb 2000 12:07:39 -0700
  * Added "path" attribute to the files element
- * Added environment variable parsing to the parse_line() function
 Bernd Kreimeier - 1999-12-10
  * detect.c (detect_diskspace): replaced Karl's libc detection code
    (which failed on glibc-2.0 on our testbox) with new one.

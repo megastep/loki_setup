@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.27 2000-01-22 00:16:31 megastep Exp $ */
+/* $Id: install.c,v 1.28 2000-02-14 21:01:30 hercules Exp $ */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -7,12 +7,14 @@
 #include <pwd.h>
 #include <unistd.h>
 #include <signal.h>
+#include <stdio.h>
 
 #include "install.h"
 #include "install_log.h"
 #include "detect.h"
 #include "log.h"
 #include "copy.h"
+#include "file.h"
 #include "network.h"
 
 extern char *rpm_root;
@@ -246,7 +248,8 @@ void add_dir_entry(install_info *info, const char *path)
 
 /* Add a binary entry to the list of binaries installed */
 void add_bin_entry(install_info *info, const char *path,
-                   const char *symlink, const char *desc, const char *icon)
+                   const char *symlink, const char *desc, const char *menu,
+                   const char *name, const char *icon)
 {
     struct bin_elem *elem;
 
@@ -256,6 +259,8 @@ void add_bin_entry(install_info *info, const char *path,
         if ( elem->path ) {
             elem->symlink = symlink;
             elem->desc = desc;
+            elem->menu = menu;
+            elem->name = name;
             elem->icon = icon;
             elem->next = info->bin_list;
             info->bin_list = elem;
@@ -409,8 +414,10 @@ install_state install(install_info *info,
     copy_tree(info, node, info->install_path, update);
     if(info->options.install_menuitems){
       int i;
-      for(i = 0; i<MAX_DESKTOPS; i++)
-        install_menuitems(info, i);
+      for(i = 0; i<MAX_DESKTOPS; i++) {
+        if (install_menuitems(info, i))
+          break;
+        }
     }
     generate_uninstall(info);
 
@@ -609,64 +616,110 @@ install_state launch_game(install_info *info)
     return SETUP_EXIT;
 }
 
+static const char* redhat_app_links[] =
+{
+    "/etc/X11/applnk/",
+    0
+};
+
+
 static const char* kde_app_links[] =
 {
-    "/usr/share/applnk/Games/",
-    "/opt/kde/share/applnk/Games/",
+    "/usr/share/applnk/",
+    "/opt/kde/share/applnk/",
     "~/.kde/share/applnk/",
     0
 };
 
+
 static const char* gnome_app_links[] =
 {
-    "/usr/share/gnome/apps/Games/",
-    "/opt/gnome/apps/Games/",
+    "/usr/share/gnome/apps/",
+    "/usr/local/share/gnome/apps/",
+    "/opt/gnome/share/gnome/apps/",
     "~/.gnome/apps/",
     0
 };
 
 /* Install the desktop menu items */
-void install_menuitems(install_info *info, desktop_type desktop)
+char install_menuitems(install_info *info, desktop_type desktop)
 {
     const char **app_links;
     char buf[PATH_MAX];
     struct bin_elem *elem;
+    char ret_val = 0;
+    const char *desk_base;
+    char icon_base[PATH_MAX];
+    const char *found_links[3];
+    FILE *fp;
 
     switch (desktop) {
+        case DESKTOP_REDHAT:
+            app_links = redhat_app_links;
+            break;
         case DESKTOP_KDE:
-            app_links = kde_app_links;
+            desk_base = getenv("KDEDIR");
+            if (desk_base) {
+                sprintf(icon_base, "%s/share/applnk/", desk_base); 
+                found_links[0] = icon_base;
+                found_links[1] = "~/.kde/share/applnk/";
+                found_links[2] = 0;
+                app_links = found_links;
+            }
+            else {
+                app_links = kde_app_links;
+            }
             break;
         case DESKTOP_GNOME:
-            app_links = gnome_app_links;
+            fp = popen("gnome-config --prefix", "r");
+            if (fp) {
+                fgets(icon_base, PATH_MAX, fp);
+                icon_base[strlen(icon_base)-1]=0;
+                strcat(icon_base, "/share/gnome/apps/");
+                found_links[0] = icon_base;
+                found_links[1] = "~/.gnome/apps/";
+                found_links[2] = 0;
+                app_links = found_links;
+            }
+            else {
+                app_links = gnome_app_links;
+            }
             break;
         default:
-            return;
+            return ret_val;
     }
+
     for( ; *app_links; app_links ++){
         expand_home(info, *app_links, buf);
+
         if ( access(buf, W_OK) < 0 )
             continue;
 
         for (elem = info->bin_list; elem; elem = elem->next ) {      
             FILE *fp;
+            char finalbuf[PATH_MAX];
+
+            sprintf(finalbuf,"%s%s/", buf, (elem->menu) ? elem->menu : "Games");
+            file_create_hierarchy(info, finalbuf);
 
             /* Presumably if there is no icon, no desktop entry */
             if ( (elem->icon == NULL) || (elem->symlink == NULL) ) {
                 continue;
             }
-            strncat(buf, elem->symlink, PATH_MAX);
+            strncat(finalbuf, elem->symlink, PATH_MAX);
             switch(desktop){
                 case DESKTOP_KDE:
-                    strncat(buf,".kdelnk", PATH_MAX);
+                    strncat(finalbuf,".kdelnk", PATH_MAX);
                     break;
+                case DESKTOP_REDHAT:
                 case DESKTOP_GNOME:
-                    strncat(buf,".desktop", PATH_MAX);
+                    strncat(finalbuf,".desktop", PATH_MAX);
                     break;
                 default:
                     break;
             }
 
-            fp = fopen(buf, "w");
+            fp = fopen(finalbuf, "w");
             if (fp) {
                 char exec[PATH_MAX], icon[PATH_MAX];
 
@@ -683,16 +736,21 @@ void install_menuitems(install_info *info, desktop_type desktop)
                              "Terminal=0\n"
                              "Type=Application\n",
                              (desktop==DESKTOP_KDE) ? "KDE " : "",
-                             info->name, info->desc,
-                             exec, icon
-                             );
+                             elem->name ? elem->name : info->name,
+                             info->desc, exec, icon);
                 fclose(fp);
-                add_file_entry(info, buf);
+                add_file_entry(info, finalbuf);
+
+                // successful REDHAT takes care of KDE/GNOME
+                // tell caller no need to continue others
+                ret_val = (desktop == DESKTOP_REDHAT);
+
             } else {
-                log_warning(info, "Unable to create desktop file '%s'", buf);
+                log_warning(info, "Unable to create desktop file '%s'", finalbuf);
             }
         }
     }
+    return ret_val;
 }
 
 /* Run some shell script commands */

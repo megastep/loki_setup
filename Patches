@@ -1,7 +1,310 @@
 *************************************************************************
 *** Applied ***
+Date: Mon, 14 Feb 2000 12:24:32 -0700
+From: "Troy A. Griffitts" <scribe@crosswire.org>
+Subject: desktops, icons, etc.
+
+I've made the desktop location code a little more intuitive for gnome
+and kde.
+
+There is a new destop: REDHAT where info is stored in /etc/Xll/applnk. 
+Redhat intends for this to work in both the gnome and kde worlds, but
+kde is not handled well as of 6.1, so KDE icons are still installed
+regardless if a redhat desktop is found.
+
+There are also new options on binary nodes to specify the 'name' on the
+icon and to what sub-'menu' the icon will be intalled (created if
+necessary).  This handles multiple binaries much better.
+eg.
+
+    <binary arch="any" libc="any" symlink="app1"
+menu="Applications/MyProject" name="Application 1" icon="app1icon.xpm">
+      app1
+    </binary>
+    <binary arch="any" libc="any" symlink="app2"
+menu="Applications/MyProject" name="Application 2" icon="app2icon.xpm">
+      app2
+    </binary>
+
+Everything should still default to 'Games' and such, if none of these
+extra options are used.
+
+Again, hope these are useful.  I'm not sure if I'm being more of a
+burden then a help on this list.  Would you like me to continue posting
+patches or should we just maintain our own branch and, if you are
+interested, you may check our CVS repository?  Let me know.  I don't
+mind either.
+
+        -Troy.
+
+Index: copy.c
+===================================================================
+RCS file: /usr/local/cvsroot/setup/copy.c,v
+retrieving revision 1.3
+diff -u -r1.3 copy.c
+--- copy.c	2000/02/11 18:34:04	1.3
++++ copy.c	2000/02/14 19:07:38
+@@ -615,6 +615,8 @@
+             }
+             add_bin_entry(info, final, symlink,
+                                        xmlGetProp(node, "desc"),
++                                       xmlGetProp(node, "menu"),
++                                       xmlGetProp(node, "name"),
+                                        xmlGetProp(node, "icon"));
+         }
+     }
+Index: install.c
+===================================================================
+RCS file: /usr/local/cvsroot/setup/install.c,v
+retrieving revision 1.1.1.1
+diff -u -r1.1.1.1 install.c
+--- install.c	2000/02/06 01:04:01	1.1.1.1
++++ install.c	2000/02/14 19:07:41
+@@ -7,12 +7,14 @@
+ #include <pwd.h>
+ #include <unistd.h>
+ #include <signal.h>
++#include <stdio.h>
+ 
+ #include "install.h"
+ #include "install_log.h"
+ #include "detect.h"
+ #include "log.h"
+ #include "copy.h"
++#include "file.h"
+ #include "network.h"
+ 
+ extern char *rpm_root;
+@@ -214,7 +216,8 @@
+ 
+ /* Add a binary entry to the list of binaries installed */
+ void add_bin_entry(install_info *info, const char *path,
+-                   const char *symlink, const char *desc, const char *icon)
++                   const char *symlink, const char *desc, const char *menu,
++                   const char *name, const char *icon)
+ {
+     struct bin_elem *elem;
+ 
+@@ -224,6 +227,8 @@
+         if ( elem->path ) {
+             elem->symlink = symlink;
+             elem->desc = desc;
++            elem->menu = menu;
++            elem->name = name;
+             elem->icon = icon;
+             elem->next = info->bin_list;
+             info->bin_list = elem;
+@@ -376,8 +381,10 @@
+     copy_tree(info, node, info->install_path, update);
+     if(info->options.install_menuitems){
+       int i;
+-      for(i = 0; i<MAX_DESKTOPS; i++)
+-        install_menuitems(info, i);
++      for(i = 0; i<MAX_DESKTOPS; i++) {
++        if (install_menuitems(info, i))
++          break;
++        }
+     }
+     generate_uninstall(info);
+     return SETUP_COMPLETE;
+@@ -570,64 +577,110 @@
+     return SETUP_EXIT;
+ }
+ 
++static const char* redhat_app_links[] =
++{
++    "/etc/X11/applnk/",
++    0
++};
++
++
+ static const char* kde_app_links[] =
+ {
+-    "/usr/share/applnk/Games/",
+-    "/opt/kde/share/applnk/Games/",
++    "/usr/share/applnk/",
++    "/opt/kde/share/applnk/",
+     "~/.kde/share/applnk/",
+     0
+ };
+ 
++
+ static const char* gnome_app_links[] =
+ {
+-    "/usr/share/gnome/apps/Games/",
+-    "/opt/gnome/apps/Games/",
++    "/usr/share/gnome/apps/",
++    "/usr/local/share/gnome/apps/",
++    "/opt/gnome/share/gnome/apps/",
+     "~/.gnome/apps/",
+     0
+ };
+ 
+ /* Install the desktop menu items */
+-void install_menuitems(install_info *info, desktop_type desktop)
++char install_menuitems(install_info *info, desktop_type desktop)
+ {
+     const char **app_links;
+     char buf[PATH_MAX];
+     struct bin_elem *elem;
++    char ret_val = 0;
++    const char *desk_base;
++    char icon_base[PATH_MAX];
++    const char *found_links[3];
++    FILE *fp;
+ 
+     switch (desktop) {
++        case DESKTOP_REDHAT:
++            app_links = redhat_app_links;
++            break;
+         case DESKTOP_KDE:
+-            app_links = kde_app_links;
++            desk_base = getenv("KDEDIR");
++            if (desk_base) {
++                sprintf(icon_base, "%s/share/applnk/", desk_base); 
++                found_links[0] = icon_base;
++                found_links[1] = "~/.kde/share/applnk/";
++                found_links[2] = 0;
++                app_links = found_links;
++            }
++            else {
++                app_links = kde_app_links;
++            }
+             break;
+         case DESKTOP_GNOME:
+-            app_links = gnome_app_links;
++            fp = popen("gnome-config --prefix", "r");
++            if (fp) {
++                fgets(icon_base, PATH_MAX, fp);
++                icon_base[strlen(icon_base)-1]=0;
++                strcat(icon_base, "/share/gnome/apps/");
++                found_links[0] = icon_base;
++                found_links[1] = "~/.gnome/apps/";
++                found_links[2] = 0;
++                app_links = found_links;
++            }
++            else {
++                app_links = gnome_app_links;
++            }
+             break;
+         default:
+-            return;
++            return ret_val;
+     }
++
+     for( ; *app_links; app_links ++){
+         expand_home(info, *app_links, buf);
++
+         if ( access(buf, W_OK) < 0 )
+             continue;
+ 
+         for (elem = info->bin_list; elem; elem = elem->next ) {      
+             FILE *fp;
++            char finalbuf[PATH_MAX];
++
++            sprintf(finalbuf, "%s%s/", buf, (elem->menu) ? elem->menu : "Games");
++            file_create_hierarchy(info, finalbuf);
+ 
+             /* Presumably if there is no icon, no desktop entry */
+             if ( (elem->icon == NULL) || (elem->symlink == NULL) ) {
+                 continue;
+             }
+-            strncat(buf, elem->symlink, PATH_MAX);
++            strncat(finalbuf, elem->symlink, PATH_MAX);
+             switch(desktop){
+                 case DESKTOP_KDE:
+-                    strncat(buf,".kdelnk", PATH_MAX);
++                    strncat(finalbuf,".kdelnk", PATH_MAX);
+                     break;
++                case DESKTOP_REDHAT:
+                 case DESKTOP_GNOME:
+-                    strncat(buf,".desktop", PATH_MAX);
++                    strncat(finalbuf,".desktop", PATH_MAX);
+                     break;
+                 default:
+                     break;
+             }
+ 
+-            fp = fopen(buf, "w");
++            fp = fopen(finalbuf, "w");
+             if (fp) {
+                 char exec[PATH_MAX], icon[PATH_MAX];
+ 
+@@ -644,16 +697,22 @@
+                              "Terminal=0\n"
+                              "Type=Application\n",
+                              (desktop==DESKTOP_KDE) ? "KDE " : "",
+-                             info->name, info->desc,
++                             elem->name, info->desc,
+                              exec, icon
+                              );
+                 fclose(fp);
+-                add_file_entry(info, buf);
++                add_file_entry(info, finalbuf);
++
++                // successful REDHAT takes care of KDE/GNOME
++                // tell caller no need to continue others
++                ret_val = (desktop == DESKTOP_REDHAT);
++
+             } else {
+-                log_warning(info, "Unable to create desktop file '%s'", buf);
++                log_warning(info, "Unable to create desktop file '%s'", finalbuf);
+             }
+         }
+     }
++    return ret_val;
+ }
+ 
+ /* Run some shell script commands */
+Index: install.h
+===================================================================
+RCS file: /usr/local/cvsroot/setup/install.h,v
+retrieving revision 1.1.1.1
+diff -u -r1.1.1.1 install.h
+--- install.h	2000/02/06 01:04:03	1.1.1.1
++++ install.h	2000/02/14 19:07:42
+@@ -33,7 +33,8 @@
+ 
+ /* The types of desktop we support menu items for */
+ typedef enum {
+-    DESKTOP_KDE,
++    DESKTOP_KDE, // KDE first because RH6.1 does not yet handle KDE well.
++    DESKTOP_REDHAT,
+     DESKTOP_GNOME,
+ 	MAX_DESKTOPS
+ 	/* More to come ? */
+@@ -102,6 +103,8 @@
+         char *path;
+         const char *symlink;
+         const char *desc;
++        const char *menu;
++        const char *name;
+         const char *icon;
+         struct bin_elem *next;
+     } *bin_list;
+@@ -164,7 +167,8 @@
+ 
+ /* Add a binary entry to the list of binaries installed */
+ extern void add_bin_entry(install_info *info, const char *path,
+-                const char *symlink, const char *desc, const char *icon);
++                   const char *symlink, const char *desc, const char *menu,
++                   const char *name, const char *icon);
+ 
+ /* Expand a path with home directories into the provided buffer */
+ extern void expand_home(install_info *info, const char *path, char *buffer);
+@@ -209,7 +213,7 @@
+ extern int launch_browser(install_info *info, int (*browser)(const char *url));
+ 
+ /* Install the desktop menu items */
+-extern void install_menuitems(install_info *info, desktop_type d);
++extern char install_menuitems(install_info *info, desktop_type d);
+ 
+ /* Run shell script commands from a string
+    If 'arg' is >= 0, it is passed to the script as a numeric argument,
+
 *************************************************************************
-Date: Sat, 05 Feb 2000 14:41:09 -0700
+*** Applied ***
+Date: Fri, 11 Feb 2000 12:07:39 -0700
 From: "Troy A. Griffitts" <scribe@crosswire.org>
 Subject: setup patches
 
@@ -185,6 +488,7 @@ diff -u -r1.1 -r1.3
                      topmost_valid_path(path_up, deviant_path);
                      if (access(path_up, W_OK) < 0 )
                          return 1;
+*************************************************************************
 *** Applied ***
 Date: Sat, 05 Feb 2000 14:41:09 -0700
 From: "Troy A. Griffitts" <scribe@crosswire.org>

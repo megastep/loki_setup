@@ -37,7 +37,8 @@ typedef enum {
 
 /* The types of desktop we support menu items for */
 typedef enum {
-    DESKTOP_KDE,
+    DESKTOP_KDE, // KDE first because RH6.1 does not yet handle KDE well.
+    DESKTOP_REDHAT,
     DESKTOP_GNOME,
     MAX_DESKTOPS
     /* More to come ? */
@@ -106,6 +107,8 @@ typedef struct {
         char *path;
         const char *symlink;
         const char *desc;
+        const char *menu;
+        const char *name;
         const char *icon;
         struct bin_elem *next;
     } *bin_list;
@@ -167,7 +170,8 @@ extern void add_dir_entry(install_info *info, const char *path);
 
 /* Add a binary entry to the list of binaries installed */
 extern void add_bin_entry(install_info *info, const char *path,
-                const char *symlink, const char *desc, const char *icon);
+                   const char *symlink, const char *desc, const char *menu,
+                   const char *name, const char *icon);
 
 /* Expand a path with home directories into the provided buffer */
 extern void expand_home(install_info *info, const char *path, char *buffer);
@@ -212,7 +216,7 @@ extern install_state launch_game(install_info *info);
 extern int launch_browser(install_info *info, int (*browser)(const char *url));
 
 /* Install the desktop menu items */
-extern void install_menuitems(install_info *info, desktop_type d);
+extern char install_menuitems(install_info *info, desktop_type d);
 
 /* Run shell script commands from a string
    If 'arg' is >= 0, it is passed to the script as a numeric argument,
