@@ -345,6 +345,17 @@ Example:
 This is always failing! Thus this message is always displayed.
 </require>
 
+The POST_INSTALL_MSG element :
+
+This element displays an optional message to the user at the end of a successful installation.
+Whether this message is displayed or not can be conditionned by an external command.
+
+This element takes some optional attributes :
+  lang      Specify the language for the message. Used for localization. The message will be showed
+            only if the locale settings match.
+
+  command   A shell commands whose return value will determine whether to display the message.
+            A return value of 0 must be returned for the message to be displayed.
 
 The REMOVE_MSG element :
 

@@ -248,6 +248,7 @@ extern int         GetReinstallNode(install_info *info, xmlNodePtr node);
 extern int         GetProductIsAppBundle(install_info *info);
 extern int         GetProductSplashPosition(install_info *info);
 extern const char *GetProductCDKey(install_info *info);
+extern const char *GetProductPostInstallMsg(install_info *info);
 
 extern const char *IsReadyToInstall(install_info *info);
 extern int         CheckRequirements(install_info *info);

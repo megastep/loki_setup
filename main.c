@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.66 2003-09-04 02:29:04 megastep Exp $ */
+/* $Id: main.c,v 1.67 2003-09-24 04:02:48 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -157,7 +157,7 @@ int main(int argc, char **argv)
     log_level verbosity = LOG_NORMAL;
     char install_path[PATH_MAX];
     char binary_path[PATH_MAX];
-	const char *product_prefix = NULL;
+	const char *product_prefix = NULL, *str;
     struct enabled_option *enabled_opt;
 #if defined(darwin)
     // If we're on Mac OS, we need to make sure the current working directoy
@@ -409,6 +409,11 @@ int main(int argc, char **argv)
                 break;
             case SETUP_COMPLETE:
                 state = UI.complete(info);
+				/* Check for a post-install message */
+				str = GetProductPostInstallMsg(info);
+				if ( str ) {
+					UI.prompt(str, RESPONSE_OK);
+				}
                 break;
             case SETUP_PLAY:
 		if ( UI.shutdown ) 
@@ -420,10 +425,10 @@ int main(int argc, char **argv)
                 break;
             case SETUP_EXIT:
                 /* Optional cleanup */
-		if ( UI.exit ) {
-		    UI.exit(info);
-		}
-		get_out = 1;
+				if ( UI.exit ) {
+					UI.exit(info);
+				}
+				get_out = 1;
                 break;
         }
     }
