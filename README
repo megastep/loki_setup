@@ -16,7 +16,7 @@ This installer uses an XML description file to describe a package,
 and provides both a console and a GTk front-end to install it.
 
 The installer requires libxml 1.4.0 to parse the XML configuration,
-and libglade 1.7 to dynamically load the GTk user interface definition.
+and libglade 0.7 to dynamically load the GTk user interface definition.
 Source archives for these libraries can be found in ./libs, and newer
 versions may also work.  You should only install static versions of
 these libraries, so they will not be required on the user systems.
