@@ -578,17 +578,20 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
     mountfp = setmntent(MOUNTS_FILE, "r" );
     if( mountfp != NULL ) {
         while( (mntent = getmntent( mountfp )) != NULL && num_cdroms < SETUP_MAX_DRIVES){
-            char *tmp, mntdev[1024], mnt_type[32];
+            char *tmp, mntdev[1024], mnt_type[1024];
 
             if ( strncmp(mntent->mnt_fsname, DEVICE_FLOPPY, strlen(DEVICE_FLOPPY)) == 0)
                 continue;
 
-            strcpy(mntdev, mntent->mnt_fsname);
-            strcpy(mnt_type, mntent->mnt_type);
+#define XXXstrcpy(d,s) \
+           do { strncpy(d,s,sizeof(d)); d[sizeof(d)-1] = '\0'; } while(0);
+
+            XXXstrcpy(mntdev, mntent->mnt_fsname);
+            XXXstrcpy(mnt_type, mntent->mnt_type);
             if ( strcmp(mnt_type, MNTTYPE_SUPER) == 0 ) {
                 tmp = strstr(mntent->mnt_opts, "fs=");
                 if ( tmp ) {
-                    strcpy(mnt_type, tmp+strlen("fs="));
+                    XXXstrcpy(mnt_type, tmp+strlen("fs="));
                     tmp = strchr(mnt_type, ',');
                     if ( tmp ) {
                         *tmp = '\0';
@@ -596,7 +599,7 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
                 }
                 tmp = strstr(mntent->mnt_opts, "dev=");
                 if ( tmp ) {
-                    strcpy(mntdev, tmp+strlen("dev="));
+                    XXXstrcpy(mntdev, tmp+strlen("dev="));
                     tmp = strchr(mntdev, ',');
                     if ( tmp ) {
                         *tmp = '\0';
@@ -604,14 +607,28 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
                 }
             }
 
+           if ( strcmp(mnt_type, "subfs") == 0 ) {
+                tmp = strstr(mntent->mnt_opts, "fs=");
+                if ( tmp ) {
+                    XXXstrcpy(mnt_type, tmp+strlen("fs="));
+                    tmp = strchr(mnt_type, ',');
+                    if ( tmp ) {
+                        *tmp = '\0';
+                    }
+                }
+               if(!strcmp(mnt_type, "cdfss"))
+                   XXXstrcpy(mnt_type, MNTTYPE_CDROM);
+            }
+
             tmp = strstr(mntent->mnt_opts, "loop=");
             if ( tmp ) {
-                strcpy(mntdev, tmp+strlen("loop="));
+                XXXstrcpy(mntdev, tmp+strlen("loop="));
                 tmp = strchr(mntdev, ',');
                 if ( tmp ) {
                     *tmp = '\0';
                 }
             }
+#undef XXXstrcpy
 
             if( strncmp(mntdev, "/dev", 4) ||
                 realpath(mntdev, mntdevpath) == NULL ) {

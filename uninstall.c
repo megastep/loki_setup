@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.50 2004-04-16 22:27:47 megastep Exp $ */
+/* $Id: uninstall.c,v 1.51 2004-04-18 00:09:33 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -49,7 +49,7 @@ static void print_usage(const char *argv0)
 		  "  -v | --version   : Get version information.\n"
 		  "  product [component] : Uninstalls the specified product, or its subcomponent.\n"
 		  "  product < -l | --list > : List installed subcomponents of product.\n"
-		  ), argv[0]);
+		  ), argv0);
 }
 
 static void log_file(const char *name, const char *reason)
