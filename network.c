@@ -13,6 +13,7 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <string.h>
+#include <errno.h>
 #ifdef HAVE_STRINGS_H
 #  include <strings.h>
 #endif
@@ -24,6 +25,7 @@
 #endif
 #include "network.h"
 
+
 /* This is the structure we pass back as a lookup handle */
 struct _URLlookup {
     int pid;
@@ -33,6 +35,7 @@ struct _URLlookup {
 /* Utility function to connect to a URL and return a status */
 int connect_url(const char *url)
 {
+    int rc;
     char *proto;
     char *host;
     char *string;
@@ -85,7 +88,7 @@ int connect_url(const char *url)
     printf("Resolving %s port %d\n", host, portnum);
 #endif
     socka.sin_addr.s_addr = inet_addr(host);
-    if ( inet_aton(host, &socka.sin_addr) != 0 ) {
+    if ( inet_aton(host, &socka.sin_addr) == 0 ) {
         struct hostent *hp;
 
         hp = gethostbyname(host);
@@ -93,7 +96,7 @@ int connect_url(const char *url)
             memcpy(&socka.sin_addr.s_addr,hp->h_addr,hp->h_length);
         } else {
 #ifdef TEST_MAIN
-            printf("Resolving failed!\n");
+            printf("Resolving failed! %s\n", strerror(errno));
 #endif
             return(-1);
         }
@@ -103,19 +106,26 @@ int connect_url(const char *url)
 
     /* Now try to create a socket and connect */
 #ifdef TEST_MAIN
-    printf("Connecting to remote host\n");
+    printf("Connecting to remote host [%s]\n", host);
 #endif
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if ( sock < 0 ) {
-        return(-1);
-    }
-    if ( connect(sock, (struct sockaddr *)&socka, sizeof(socka)) < 0 ) {
 #ifdef TEST_MAIN
-    printf("Connect failed!\n");
+        printf("socket() failed! %s\n", strerror(errno));
 #endif
         return(-1);
     }
+
+    rc = connect(sock, (struct sockaddr *)&socka, sizeof(socka));
+#ifdef TEST_MAIN
+    if (rc < 0)
+        printf("Connect failed! %s\n", strerror(errno));
+#endif
+
     close(sock);
+
+    if (rc < 0)
+        return(-1);
 
     /* Hey, we successfully connected! */
 #ifdef TEST_MAIN
