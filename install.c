@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.135 2004-06-24 01:01:01 megastep Exp $ */
+/* $Id: install.c,v 1.136 2004-07-23 01:08:44 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -292,10 +292,10 @@ int GetProductIsAppBundle(install_info *info)
 
 int GetProductSplashPosition(install_info *info)
 {
-	int ret = 0;
+	int ret = 1; /* Left */
     char *str = xmlGetProp(info->config->root, "splashpos");
     if ( str && !strcasecmp(str, "top") ) {
-        ret = 1;
+        ret = 0; /* Top */
     }
     return ret;
 }
