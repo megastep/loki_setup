@@ -8,8 +8,16 @@
 #define GROUP_TOP       0
 #define GROUP_LEFT      6
 
+// Option related sizes
+#define BUTTON_MARGIN       5
+#define BUTTON_TOP_MARGIN   15
+#define BUTTON_WIDTH        310
+#define BUTTON_HEIGHT       20
+#define BOX_START_COUNT     3       // Number of buttons box can hold without resize
+
 static int PromptResponse;
 static int PromptResponseValid;
+static Rect DefaultBounds = {BUTTON_MARGIN, BUTTON_MARGIN, BUTTON_HEIGHT, BUTTON_WIDTH};
 
 static pascal OSStatus WindowEventHandler(EventHandlerCallRef HandlerRef, EventRef Event, void *UserData)
 {
@@ -32,7 +40,6 @@ static pascal OSStatus PromptWindowEventHandler(EventHandlerCallRef HandlerRef, 
 {
     OSStatus err = eventNotHandledErr;	// Default is event is not handled by this function
     HICommand command;
-    CarbonRes *Res = (CarbonRes *)UserData;
 
     carbon_debug("PromptWindowEventHandler()\n");
 
@@ -63,6 +70,40 @@ static pascal OSStatus PromptWindowEventHandler(EventHandlerCallRef HandlerRef, 
     return err;
 }
 
+static pascal OSStatus ReadmeWindowEventHandler(EventHandlerCallRef HandlerRef, EventRef Event, void *UserData)
+{
+    OSStatus err = eventNotHandledErr;	// Default is event is not handled by this function
+    HICommand command;
+
+    carbon_debug("ReadmeWindowEventHandler()\n");
+
+    GetEventParameter(Event, kEventParamDirectObject, typeHICommand, NULL, sizeof(HICommand), NULL, &command);
+
+    // If event is handled in the callback, then return "noErr"
+    switch(command.commandID)
+    {
+        case COMMAND_README_CANCEL:
+            PromptResponse = false;
+            PromptResponseValid = true;
+            err = noErr;
+            break;
+        case COMMAND_README_CLOSE:
+            PromptResponse = true;
+            PromptResponseValid = true;
+            err = noErr;
+            break;
+        case COMMAND_README_AGREE:
+            PromptResponse = true;
+            PromptResponseValid = true;
+            err = noErr;
+            break;
+        default:
+            carbon_debug("ReadmeWindowEventHandler() - Invalid command event received.\n");
+            break;
+    }
+    return err;
+}
+
 static void LoadGroupControlRefs(CarbonRes *Res)
 {
     int i;
@@ -86,6 +127,48 @@ static void LoadGroupControlRefs(CarbonRes *Res)
         GetControlByID(Res->Window, &GroupControlIDs[i], &Res->PageHandles[i]);
         // Set the position of the group control to top/left position
         MoveControl(Res->PageHandles[i], GROUP_LEFT, GROUP_TOP);
+    }
+}
+
+static void AddOptionsButton(OptionsBox *Box, OptionsButton *Button)
+{
+    carbon_debug("AddOptionsButton()\n");
+    printf("AddOptionsButton() - BoxPtr == %ld\n", Box);
+
+    // Add the button to the list of other buttons
+    Box->Buttons[Box->ButtonCount] = Button;
+    // Increment the number of buttons...yeah.
+    Box->ButtonCount++;
+}
+
+static void ApplyOffsetToControl(OptionsBox *Box, int ID, int Offset, int GrowNotMove)
+{
+    ControlRef Control;
+    Rect MyRect;
+
+    carbon_debug("ApplyOffsetToControl()\n");
+
+    // Get reference to specified control
+    ControlID ControlID = {LOKI_SETUP_SIG, ID};
+    GetControlByID(Box->Res->Window, &ControlID, &Control);
+
+    // Get current size of inner box
+    GetControlBounds(Control, &MyRect);
+
+    if(GrowNotMove)
+    {
+        // Make control longer
+        MyRect.bottom += Offset;
+        // Set new dimensions of control
+        SetControlBounds(Control, &MyRect);
+        MoveControl(Control, MyRect.left, MyRect.top);
+    }
+    else
+    {
+        //!!!TODO - Using SetControlBounds() for moving seems to be broken.
+        //Controls don't get updated correctly...even when forcing a draw.
+        //MoveControl works fine
+        MoveControl(Control, MyRect.left, MyRect.top + Offset);
     }
 }
 
@@ -133,6 +216,8 @@ CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32))
     require_noerr(err, CantCreateWindow);
     err = CreateWindowFromNib(nibRef, CFSTR("prompt"), &NewRes->PromptWindow);
     require_noerr(err, CantCreateWindow);
+    err = CreateWindowFromNib(nibRef, CFSTR("readme"), &NewRes->ReadmeWindow);
+    require_noerr(err, CantCreateWindow);
 
     // Resize and center the window to the appropriate width/height.  Update parameter
     // is false since we haven't shown the window yet.
@@ -144,6 +229,12 @@ CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32))
 
     // Load references to all controls in the window
     LoadGroupControlRefs(NewRes);
+
+    // Create scrolling text 
+    Rect boundsRect = {3,3,314,434};
+    CreateScrollingTextBoxControl(NewRes->ReadmeWindow, &boundsRect, README_TEXT_ENTRY_ID, false, 0, 0, 0, &NewRes->MessageLabel);
+    ShowControl(NewRes->MessageLabel);
+    //EnableControl(DummyControlRef);
     
     // Install default event handler for window since we're not calling
     // RunApplicationEventLoop() to process events.
@@ -155,6 +246,10 @@ CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32))
     // Setup the event handler associated with the prompt window
     InstallWindowEventHandler(NewRes->PromptWindow,
         NewEventHandlerUPP(PromptWindowEventHandler), 1, &commSpec, (void *)NewRes,
+        NULL);
+    // Setup the event handler associated with the readme window
+    InstallWindowEventHandler(NewRes->ReadmeWindow,
+        NewEventHandlerUPP(ReadmeWindowEventHandler), 1, &commSpec, (void *)NewRes,
         NULL);
     // It's all good...return the resource object
     return NewRes;
@@ -226,6 +321,9 @@ void carbon_ShowInstallScreen(CarbonRes *Res, InstallPage NewInstallPage)
         ShowWindow(Res->Window);
         Res->IsShown = true;
     }
+
+    // Refresh window
+    DrawControls(Res->Window);
 }
 
 void carbon_SetWindowTitle(CarbonRes *Res, char *Title)
@@ -344,9 +442,6 @@ void carbon_HandlePendingEvents(CarbonRes *Res)
     {
         SendEventToEventTarget (theEvent, theTarget);
         ReleaseEvent(theEvent);
-
-        // Update any thing on the window display that needs to be updated.
-        //QDFlushPortBuffer(GetWindowPort(Res->Window), NULL);
     }
 }
 
@@ -363,25 +458,16 @@ void carbon_SetLabelText(CarbonRes *Res, int LabelID, const char *Text)
     carbon_debug(Text);
     carbon_debug("\n");
 
-    //!!!TODO - Static controls are not updating unless we hide and show the window?!?!?!
-    HideWindow(Res->Window);
+    //!!!TODO - Static controls are not updating unless we hide and show the control?!?!?!
+    //HideControl(Ref);
     SetControlData(Ref, kControlEditTextPart, kControlStaticTextTextTag, strlen(Text), Text);
-    //!!!TODO - Static controls are not updating unless we hide and show the window?!?!?!
-    ShowWindow(Res->Window);
-
-    //SetPortWindowPort(Res->Window);
-    //QDFlushPortBuffer(GetWindowPort(Res->Window), NULL);
-    /*// Convert char* to a CFString
-    CFText = CFStringCreateWithCString(NULL, Text, kCFStringEncodingMacRoman);
-    // Set the window title
-    SetControlTitleWithCFString(Ref, CFText);
-    // Release the string value from memory
-    CFRelease(CFText);*/
+    Draw1Control(Ref);
+    //!!!TODO - Static controls are not updating unless we hide and show the control?!?!?!
+    //ShowControl(Ref);
 }
 
 void carbon_GetLabelText(CarbonRes *Res, int LabelID, char *Buffer, int BufferSize)
 {
-    //CFStringRef CFText;
     ControlRef Ref;
     ControlID IDStruct = {LOKI_SETUP_SIG, LabelID};
     Size DummySize;
@@ -391,12 +477,6 @@ void carbon_GetLabelText(CarbonRes *Res, int LabelID, char *Buffer, int BufferSi
     // Get control reference
     GetControlByID(Res->Window, &IDStruct, &Ref);
     GetControlData(Ref, kControlEditTextPart, kControlStaticTextTextTag, BufferSize, Buffer, &DummySize);
-    /*// Set the window title
-    CopyControlTitleAsCFString(Ref, &CFText);
-    // Convert CFString to char *
-    CFStringGetCString(CFText, Buffer, BufferSize, kCFStringEncodingMacRoman);
-    // Release the string value from memory
-    CFRelease(CFText);*/
 }
 
 void carbon_SetProgress(CarbonRes *Res, int ProgressID, float Value)
@@ -445,8 +525,6 @@ int carbon_Prompt(CarbonRes *Res, int YesNoNotOK, const char *Message)
     ControlRef OKButton;
     ControlRef MessageLabel;
 
-    Str255 PascalMessage;
-
     ControlID IDStruct;
     EventRef theEvent;
     EventTargetRef theTarget;
@@ -463,16 +541,6 @@ int carbon_Prompt(CarbonRes *Res, int YesNoNotOK, const char *Message)
     IDStruct.signature = PROMPT_SIGNATURE; IDStruct.id = PROMPT_MESSAGE_LABEL_ID;
     GetControlByID(Res->PromptWindow, &IDStruct, &MessageLabel);
 
-    /*// Convert char* to a CFString
-    CFText = CFStringCreateWithCString(NULL, Message, kCFStringEncodingMacRoman);
-    // Set the window title
-    printf("Message = %s\n", Message);
-    printf("SetControlTitleWithCFString returned %ld\n", SetControlTitleWithCFString(MessageLabel, CFText));
-    // Release the string value from memory
-    CFRelease(CFText);*/
-    //CopyCStringToPascal(Message, PascalMessage);
-    //SetDialogItemText((Handle)MessageLabel, PascalMessage);
-    //SetDialogItemText((Handle)MessageLabel, "\ptest");
     SetControlData(MessageLabel, kControlEditTextPart, kControlStaticTextTextTag, strlen(Message), Message);
 
     // If Yes/No prompt requested
@@ -480,10 +548,15 @@ int carbon_Prompt(CarbonRes *Res, int YesNoNotOK, const char *Message)
     {
         ShowControl(YesButton);
         ShowControl(NoButton);
+        HideControl(OKButton);
     }
     // If OK prompt requested
     else
+    {
         ShowControl(OKButton);
+        HideControl(YesButton);
+        HideControl(NoButton);
+    }
 
     // Show the prompt window...make it happen!!!
     ShowWindow(Res->PromptWindow);
@@ -511,4 +584,270 @@ int carbon_Prompt(CarbonRes *Res, int YesNoNotOK, const char *Message)
 
     // Return the prompt response...duh.
     return PromptResponse;
+}
+
+int carbon_ReadmeOrLicense(CarbonRes *Res, int ReadmeNotLicense, const char *Message)
+{
+    ControlRef CancelButton;
+    ControlRef CloseButton;
+    ControlRef AgreeButton;
+
+    ControlID IDStruct;
+    EventRef theEvent;
+    EventTargetRef theTarget;
+
+    carbon_debug("carbon_ReadmeOrLicense()\n");
+
+    // Get references to button controls
+    IDStruct.signature = README_SIGNATURE; IDStruct.id = README_CANCEL_BUTTON_ID;
+    GetControlByID(Res->ReadmeWindow, &IDStruct, &CancelButton);
+    IDStruct.signature = README_SIGNATURE; IDStruct.id = README_CLOSE_BUTTON_ID;
+    GetControlByID(Res->ReadmeWindow, &IDStruct, &CloseButton);
+    IDStruct.signature = README_SIGNATURE; IDStruct.id = README_AGREE_BUTTON_ID;
+    GetControlByID(Res->ReadmeWindow, &IDStruct, &AgreeButton);
+
+    SetControlData(Res->MessageLabel,  kControlLabelPart, kControlStaticTextTextTag, strlen(Message), Message);
+    //CFStringRef CFMessage = CFStringCreateWithCString(NULL, Message, kCFStringEncodingMacRoman);
+    //SetControlTitleWithCFString(Res->MessageLabel, CFMessage);
+    HideControl(Res->MessageLabel);
+    ShowControl(Res->MessageLabel);
+    //CFRelease(CFMessage);
+    Draw1Control(Res->MessageLabel);
+
+    // If Yes/No prompt requested
+    if(ReadmeNotLicense)
+    {
+        ShowControl(CloseButton);
+        HideControl(CancelButton);
+        HideControl(AgreeButton);
+    }
+    // If OK prompt requested
+    else
+    {
+        HideControl(CloseButton);
+        ShowControl(CancelButton);
+        ShowControl(AgreeButton);
+    }
+
+    // Show the prompt window...make it happen!!!
+    ShowWindow(Res->ReadmeWindow);
+
+    // Prompt response hasn't been gotten yet...so it's invalid
+    PromptResponseValid = false;
+
+    // Wait for the prompt window to close
+    theTarget = GetEventDispatcherTarget();
+    // Wait for events until the prompt window has been responded to
+    while(!PromptResponseValid)
+    {
+        if(ReceiveNextEvent(0, NULL, kEventDurationForever, true, &theEvent) != noErr)
+        {
+            carbon_debug("carbon_Prompt() - ReceiveNextEvent error");
+            break;
+        }
+
+        SendEventToEventTarget(theEvent, theTarget);
+        ReleaseEvent(theEvent);
+    }
+
+    // We're done with the prompt window...be gone!!!  Thus sayeth me.
+    HideWindow(Res->ReadmeWindow);
+
+    // Return the prompt response...duh.
+    return PromptResponse;
+}
+
+/*!!!TODO - Because embedding of newly created controls is not currently working,
+ we had to create the controls on the resource ahead of time (12 of each type).
+ This amount should be sufficient for most/all applications.
+
+ The existing code to create the controls dynamically is currently commented out.
+ The code works, but embedding the controls in the inner options group is currently
+ not working for an unknown reason.
+
+ Instead, we are just making visible the appropriate existing controls.
+ */
+OptionsButton *carbon_OptionsNewLabel(OptionsBox *Box, const char *Name)
+{
+    printf("carbon_OptionsNewLabel() - %s\n", Name);
+
+    // Create our option button
+    OptionsButton *Button = malloc(sizeof(OptionsButton));
+    // Create the physical button in the window
+    CFStringRef CFName = CFStringCreateWithCString(NULL, Name, kCFStringEncodingMacRoman);
+    // Create the static text control
+    CreateStaticTextControl(Box->Res->Window, &DefaultBounds, CFName, NULL, &Button->Control);
+    CFRelease(Name);
+    /*ControlID ID = {LOKI_SETUP_SIG, Box->CurLabelID++};
+    GetControlByID(Box->Res->Window, &ID, &Button->Control);
+    SetControlData(Button->Control, kControlEditTextPart, kControlStaticTextTextTag, strlen(Name), Name);*/
+    // Add button to options box
+    AddOptionsButton(Box, Button);
+    // Set button type accordingly
+    Button->Type = ButtonType_Label;
+
+    return Button;
+}
+
+OptionsButton *carbon_OptionsNewCheckButton(OptionsBox *Box, const char *Name)
+{
+    printf("carbon_OptionsNewCheckButton() - %s\n", Name);
+
+    // Create our option button
+    OptionsButton *Button = malloc(sizeof(OptionsButton));
+    // Create the physical button in the window
+    CFStringRef CFName = CFStringCreateWithCString(NULL, Name, kCFStringEncodingMacRoman);
+    // Create the static text control
+    CreateCheckBoxControl(Box->Res->Window, &DefaultBounds, CFName, false, true, &Button->Control);
+    /*ControlID ID = {LOKI_SETUP_SIG, Box->CurCheckID++};
+    GetControlByID(Box->Res->Window, &ID, &Button->Control);
+    SetControlTitleWithCFString(Button->Control, CFName);*/
+    CFRelease(Name);
+    // Add button to options box
+    AddOptionsButton(Box, Button);
+    // Set button type accordingly
+    Button->Type = ButtonType_Checkbox;
+
+    return Button;
+}
+
+OptionsButton *carbon_OptionsNewSeparator(OptionsBox *Box)
+{
+    printf("carbon_OptionsNewSeparator()\n");
+
+    // Create our option button
+    OptionsButton *Button = malloc(sizeof(OptionsButton));
+    // Create the static text control
+    CreateSeparatorControl(Box->Res->Window, &DefaultBounds, &Button->Control);
+    /*ControlID ID = {LOKI_SETUP_SIG, Box->CurSepID++};
+    GetControlByID(Box->Res->Window, &ID, &Button->Control);*/
+    // Add control to options box
+    AddOptionsButton(Box, Button);
+    // Set button type accordingly
+    Button->Type = ButtonType_Separator;
+
+    return Button;
+}
+
+OptionsButton *carbon_OptionsNewRadioButton(OptionsBox *Box, const char *Name, RadioGroup **Group)
+{
+    printf("carbon_OptionsNewRadioButton() - %s\n", Name);
+
+    // Create our option button
+    OptionsButton *Button = malloc(sizeof(OptionsButton));
+    // Create the physical button in the window
+    CFStringRef CFName = CFStringCreateWithCString(NULL, Name, kCFStringEncodingMacRoman);
+    // Create the static text control
+    CreateRadioButtonControl(Box->Res->Window, &DefaultBounds, CFName, false, true, &Button->Control);
+    /*ControlID ID = {LOKI_SETUP_SIG, Box->CurRadioID++};
+    GetControlByID(Box->Res->Window, &ID, &Button->Control);
+    SetControlTitleWithCFString(Button->Control, CFName);*/
+    CFRelease(Name);
+    // Add button to options box
+    AddOptionsButton(Box, Button);
+    // Set button type accordingly
+    Button->Type = ButtonType_Radio;
+
+    return Button;
+}
+
+OptionsBox *carbon_OptionsNewBox(CarbonRes *Res)
+{
+    carbon_debug("carbon_OptionsNewBox()\n");
+    OptionsBox *Box = malloc(sizeof(OptionsBox));
+    
+    // Set default box properties
+    Box->Res = Res;
+    Box->ButtonCount = 0;
+
+    // Set starting IDs for "dynamic" controls
+    /*Box->CurLabelID = START_LABEL_ID;
+    Box->CurRadioID = START_RADIO_ID;
+    Box->CurSepID = START_SEP_ID;
+    Box->CurCheckID = START_CHECK_ID;*/
+
+    return Box;
+}
+
+void carbon_OptionsShowBox(OptionsBox *Box)
+{
+    ControlRef BoxControlRef;
+    Rect ButtonRect = {BUTTON_MARGIN, BUTTON_MARGIN, BUTTON_HEIGHT, BUTTON_WIDTH};
+    int Offset;     // Offset to move or resize controls to accomodate options
+    int i;
+
+    carbon_debug("carbon_OptionsShowBox()\n");
+
+    // Only resize stuff if options box is not big enough
+    if(Box->ButtonCount > BOX_START_COUNT)
+    {
+        // Calculate offset for all controls based on number of options
+        Offset = (Box->ButtonCount - BOX_START_COUNT) * BUTTON_HEIGHT;
+        // Adjust the height of the following controls
+        //ApplyOffsetToControl(Box, OPTION_INNER_OPTIONS_GROUP_ID, Offset, true);
+        ApplyOffsetToControl(Box, OPTION_OPTIONS_GROUP_ID, Offset, true);
+        ApplyOffsetToControl(Box, OPTION_GROUP_ID, Offset, true);
+        // Adjust the top of the following controls
+        ApplyOffsetToControl(Box, OPTION_CANCEL_BUTTON_ID, Offset, false);
+        ApplyOffsetToControl(Box, OPTION_README_BUTTON_ID, Offset, false);
+        ApplyOffsetToControl(Box, OPTION_BEGIN_INSTALL_BUTTON_ID, Offset, false);
+        ApplyOffsetToControl(Box, OPTION_STATUS_LABEL_ID, Offset, false);
+        ApplyOffsetToControl(Box, OPTION_FREESPACE_LABEL_ID, Offset, false);
+        ApplyOffsetToControl(Box, OPTION_FREESPACE_VALUE_LABEL_ID, Offset, false);
+        ApplyOffsetToControl(Box, OPTION_ESTSIZE_LABEL_ID, Offset, false);
+        ApplyOffsetToControl(Box, OPTION_ESTSIZE_VALUE_LABEL_ID, Offset, false);
+    }
+
+    // Get reference to box control
+    ControlID ID = {LOKI_SETUP_SIG, OPTION_OPTIONS_GROUP_ID};
+    GetControlByID(Box->Res->Window, &ID, &BoxControlRef);
+
+    Rect BoxControlBounds;
+    GetControlBounds(BoxControlRef, &BoxControlBounds);
+
+    // Add controls to inner options box
+    for(i = 0; i < Box->ButtonCount; i++)
+    {
+        //printf("EmbedControl returned: %d\n", EmbedControl(Box->Buttons[i]->Control, BoxControlRef));
+        //!!!TODO - Might have to change height for separators (always be 1)
+        SetControlBounds(Box->Buttons[i]->Control, &ButtonRect);
+        MoveControl(Box->Buttons[i]->Control, BoxControlBounds.left + BUTTON_MARGIN, BoxControlBounds.top + BUTTON_TOP_MARGIN + i * BUTTON_HEIGHT);
+        ShowControl(Box->Buttons[i]->Control);
+    }
+
+    // Refresh all of the controls
+    DrawControls(Box->Res->Window);
+}
+
+void carbon_OptionsSetTooltip(OptionsButton *Box, const char *Name)
+{
+    printf("carbon_OptionsSetTooltip() - %s\n", Name);
+}
+
+void carbon_OptionsSetValue(OptionsButton *Button, int Value)
+{
+    printf("carbon_OptionsSetValue() - %d\n", Value);
+}
+
+int carbon_OptionsGetValue(OptionsButton *Button)
+{
+    carbon_debug("carbon_OptionsGetValue() not implemented\n");
+}
+
+void carbon_SetProperWindowSize(OptionsBox *Box, int OptionsNotOther)
+{
+    int NewHeight;
+
+    // If true (and there are more options than can fit in default size,
+    // then set window size based on OPTIONS screen
+    if(OptionsNotOther && Box->ButtonCount > BOX_START_COUNT)
+        NewHeight = WINDOW_HEIGHT + (Box->ButtonCount - BOX_START_COUNT) * BUTTON_HEIGHT;
+    // Otherwise, set to standard window size
+    else
+        NewHeight = WINDOW_HEIGHT;
+
+    // Resize window
+    SizeWindow(Box->Res->Window, WINDOW_WIDTH, NewHeight, true);
+    // Redraw it
+    DrawControls(Box->Res->Window);
 }

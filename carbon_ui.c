@@ -15,8 +15,10 @@ static int diskspace;
 static int license_okay = 0;
 static int in_setup = true;
 static CarbonRes *MyRes;
+static RadioGroup *radio_list = NULL; // Group for the radio buttons
 
 #define MAX_TEXTLEN	40	// The maximum length of current filename
+#define MAX_README_SIZE     65535
 #define DEFAULT_INSTALL_FOLDER "/Applications"
 
 /******* PROTOTYPE DECLARATION *******/
@@ -36,57 +38,54 @@ int OnCommandEvent(UInt32 CommandID);
 static yesno_answer carbonui_prompt(const char *, yesno_answer);
 
 /********** HELPER FUNCTIONS ***********/
-/*static void parse_option(install_info *info, const char *component, xmlNodePtr node, GtkWidget *window,
-                         GtkWidget *box, int level, GtkWidget *parent, int exclusive, GSList **radio)*/
-static void parse_option(install_info *info, const char *component, xmlNodePtr node, int level, ControlRef parent, int exclusive)
+static void parse_option(install_info *info, const char *component, xmlNodePtr node, OptionsBox *box, int level, OptionsButton *parent, int exclusive, RadioGroup **radio)
 {
-    char buffer[2048];
-    carbon_debug("parse_option()\n");
-    sprintf(buffer, "   component - %s: node - %s: level - %d: exclusive - %d\n", component, node->name, level, exclusive);
-    carbon_debug(buffer);
-
-    /*xmlNodePtr child;
+    xmlNodePtr child;
     char text[1024] = "";
     const char *help;
     const char *wanted;
     char *name;
     int i;
-    //GtkWidget *button;
+    OptionsButton *button = NULL;
 
-    // See if this node matches the current architecture
+    /* See if this node matches the current architecture */
     wanted = xmlGetProp(node, "arch");
-    if(!match_arch(info, wanted))
+    if ( ! match_arch(info, wanted) ) {
         return;
+    }
+
     wanted = xmlGetProp(node, "libc");
-    if(!match_libc(info, wanted))
+    if ( ! match_libc(info, wanted) ) {
         return;
+    }
+
     wanted = xmlGetProp(node, "distro");
-    if(!match_distro(info, wanted))
+    if ( ! match_distro(info, wanted) ) {
         return;
+    }
 
-    if(!get_option_displayed(info, node))
+    if ( ! get_option_displayed(info, node) ) {
 		return;
+    }
 
-    // See if the user wants this option
-	if(node->type == XML_TEXT_NODE)
-    {
-        //!!!TODO - Have to strip string (for now, we'll just keep a reference to the string
-        //name = strdup(node->content);
-        //g_strstrip(name);
-        name = node->content;
-
-		if(*name)
-        {
-            printf("   New label - %s\n", name);
+    /* See if the user wants this option */
+	if ( node->type == XML_TEXT_NODE ) {
+		log_debug("Parsing text node.\n");
+		//name = g_strdup(node->content);
+        name = strdup(node->content);
+        //!!!TODO - Strip name
+		//g_strstrip(name);
+		if( *name ) {
+			log_debug("String: '%s'\n", name);
 			//button = gtk_label_new(name);
 			//gtk_widget_show(button);
 			//gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(button), FALSE, FALSE, 0);
+            button = carbon_OptionsNewLabel(box, name);
 		}
+        //!!!TODO - Free name
 		//g_free(name);
 		return;
-	}
-    else
-    {
+	} else {
 		name = get_option_name(info, node, NULL, 0);
 		for(i=0; i < (level*5); i++)
 			text[i] = ' ';
@@ -94,107 +93,134 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
 		strncat(text, name, sizeof(text)-strlen(text));
 	}
 
-	if(GetProductIsMeta(info))
-    {
-        printf("   New button with label (ProductIsMeta) - %s\n", text); 
+	log_debug("Parsing option: '%s'\n", text);
+	if ( GetProductIsMeta(info) ) {
 		//button = gtk_radio_button_new_with_label(radio_list, text);
 		//radio_list = gtk_radio_button_group(GTK_RADIO_BUTTON(button));
-	}
-    else if(exclusive)
-    {
-        printf("   New button with label (exclusive) - %s\n", text); 
-		button = gtk_radio_button_new_with_label(*radio, text);
-		*radio = gtk_radio_button_group(GTK_RADIO_BUTTON(button));
-	}
-    else
-    {
-        printf("   New button with label (else) - %s\n", text); 
+        button = carbon_OptionsNewRadioButton(box, text, &radio_list);
+	} else if ( exclusive ) {
+		//button = gtk_radio_button_new_with_label(*radio, text);
+		//*radio = gtk_radio_button_group(GTK_RADIO_BUTTON(button));
+        button = carbon_OptionsNewRadioButton(box, text, radio);
+	} else {
 		//button = gtk_check_button_new_with_label(text);
+        button = carbon_OptionsNewCheckButton(box, text);
 	}
 
-    // Add tooltip help, if available
+    /* Add tooltip help, if available */
     help = get_option_help(info, node);
-    if(help)
-    {
-        printf("   New tooltip - %s\n", help); 
+    if ( help ) {
         //GtkTooltipsData* group;
+
         //group = gtk_tooltips_data_get(window);
-        //if(group)
+        //if ( group ) {
             //gtk_tooltips_set_tip( group->tooltips, button, help, 0);
-        //else
+            
+        //} else {
             //gtk_tooltips_set_tip( gtk_tooltips_new(), button, help, 0);
+        //}
+        carbon_OptionsSetTooltip(button, help);
     }
 
-    // Set the data associated with the button
-    //!!!TODO - Set data associated with button
-    //gtk_object_set_data(GTK_OBJECT(button), "data", (gpointer)node);
+    /* Set the data associated with the button */
+	if ( button ) {
+		//gtk_object_set_data(GTK_OBJECT(button), "data", (gpointer)node);
+        button->Data = (void *)node;
 
-    // Register the button in the window's private data
-    //window = glade_xml_get_widget(setup_glade, "setup_window");
-    //gtk_object_set_data(GTK_OBJECT(window), name, (gpointer)button);
+		/* Register the button in the window's private data */
+        //!!!TODO - Add name data to the "window"
+		//window = glade_xml_get_widget(setup_glade, "setup_window");
+		//gtk_object_set_data(GTK_OBJECT(window), name, (gpointer)button);
+	}
 
-    // Check for required option
-    if(xmlGetProp(node, "required"))
-    {
-	    xmlSetProp(node, "install", "true");
-        carbon_debug("   Disable button\n"); 
-	    //gtk_widget_set_sensitive(GTK_WIDGET(button), FALSE);
+    /* Check for required option */
+    if ( xmlGetProp(node, "required") ) {
+		xmlSetProp(node, "install", "true");
+		//gtk_widget_set_sensitive(GTK_WIDGET(button), FALSE);
+        DisableControl(button->Control);
     }
 
-    // If this is a sub-option and parent is not active, then disable option
+    /* If this is a sub-option and parent is not active, then disable option */
     wanted = xmlGetProp(node, "install");
-    if(level>0 && !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(parent)))
-    {
+    //if( level>0 && GTK_IS_TOGGLE_BUTTON(parent) && !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(parent)) ) {
+    if( level>0 && parent->Type == ButtonType_Radio && !carbon_OptionsGetValue(parent)) {
 		wanted = "false";
-		gtk_widget_set_sensitive(GTK_WIDGET(button), FALSE);
+		//gtk_widget_set_sensitive(GTK_WIDGET(button), FALSE);
+        DisableControl(button->Control);
     }
-    gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(button), FALSE, FALSE, 0);
-    
-    gtk_signal_connect(GTK_OBJECT(button), "toggled",
-             GTK_SIGNAL_FUNC(setup_checkbox_option_slot), (gpointer)node);
-    gtk_widget_show(button);
-    if(wanted && (strcmp(wanted, "true") == 0))
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
-    else
-    {
-        // Unmark this option for installation
+    //***This functionality is implemented automatically when creating no option***
+    //  buttons and labels
+	//if ( button ) {
+	//	gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(button), FALSE, FALSE, 0);
+	//	gtk_signal_connect(GTK_OBJECT(button), "toggled",
+	//					   GTK_SIGNAL_FUNC(setup_checkbox_option_slot), (gpointer)node);
+	//	gtk_widget_show(button);
+	//}
+
+    if ( wanted && (strcmp(wanted, "true") == 0) ) {
+        //gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
+        carbon_OptionsSetValue(button, true);
+    } else {
+        /* Unmark this option for installation */
         mark_option(info, node, "false", 1);
     }
-    // Recurse down any other options
+    /* Recurse down any other options */
     child = node->childs;
-    while(child)
-    {
-		if(!strcmp(child->name, "option"))
-			parse_option(info, component, child, window, box, level+1, button, 0, NULL);
-		else if(!strcmp(child->name, "exclusive"))
-        {
+    while ( child ) {
+		if ( !strcmp(child->name, "option") ) {
+			//parse_option(info, component, child, window, box, level+1, button, 0, NULL);
+            parse_option(info, component, child, box, level+1, button, 0, NULL);
+		} else if ( !strcmp(child->name, "exclusive") ) {
 			xmlNodePtr exchild;
-			GSList *list = NULL;
-			for(exchild = child->childs; exchild; exchild = exchild->next)
-				parse_option(info, component, exchild, window, box, level+1, button, 1, &list);
+			//GSList *list = NULL;
+            RadioGroup *list = NULL;
+			for ( exchild = child->childs; exchild; exchild = exchild->next) {
+				//parse_option(info, component, exchild, window, box, level+1, button, 1, &list);
+                parse_option(info, component, exchild, box, level+1, button, 1, &list);
+			}
 		}
 		child = child->next;
     }
 
-    // Disable any options that are already installed 
-    if(info->product && ! GetProductReinstall(info))
-    {
+    /* Disable any options that are already installed */
+    if ( info->product && ! GetProductReinstall(info) ) {
         product_component_t *comp;
 
-        if(component)
+        if ( component ) {
             comp = loki_find_component(info->product, component);
-        else
+        } else {
             comp = loki_getdefault_component(info->product);
-
-        if(comp && loki_find_option(comp, name))
-        {
-            // Unmark this option for installation
-            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), FALSE);
-            gtk_widget_set_sensitive(button, FALSE);
+        }
+        if ( comp && loki_find_option(comp, name) ) {
+            /* Unmark this option for installation */
+            //gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), FALSE);
+            //gtk_widget_set_sensitive(button, FALSE);
+            carbon_OptionsSetValue(button, FALSE);
+            DisableControl(button->Control);
             mark_option(info, node, "false", 1);
         }
-    }*/
+    }
 }
+
+static int load_file(const char *file, char *buffer, int BufferLength)
+{
+    FILE *fp;
+    int Count;
+
+    // Attempt to open file
+    fp = fopen(file, "r");
+    if(fp)
+    {
+        // Read BufferLength-1 entries (1 byte each)
+        Count = fread(buffer, 1, BufferLength-1, fp);
+        // Add null terminator to end of buffer
+        buffer[Count - 1] = 0x00;
+        fclose(fp);
+    }
+
+    return (fp != NULL);
+}
+
 
 // Checks if we can enable the "Begin install" button
 static void check_install_button(void)
@@ -206,7 +232,7 @@ static void check_install_button(void)
 
     if(message)
     {
-        //!!!TODO - Temp - carbon_DisableControl(MyRes, OPTION_BEGIN_INSTALL_BUTTON_ID);
+        carbon_DisableControl(MyRes, OPTION_BEGIN_INSTALL_BUTTON_ID);
     }
     else
     {
@@ -307,8 +333,20 @@ static void OnCommandContinue()
 
 static void OnCommandReadme(void)
 {
-    //!!!TODO - Implement
-    carbon_debug("OnCommandReadme() - Not implemented\n");
+    carbon_debug("OnCommandReadme()\n");
+
+    // Load readme file (if it exists)
+    const char *filename = GetProductREADME(cur_info);
+    char buffer[MAX_README_SIZE];
+
+    if(filename)
+    {
+        load_file(filename, buffer, MAX_README_SIZE);
+        carbon_ReadmeOrLicense(MyRes, true, "hello world");
+    }
+
+    else
+        carbon_debug("OnCommandReadme() - Readme file not loaded.\n");
 }
 
 static void OnCommandExit(void)
@@ -585,14 +623,6 @@ static install_state carbonui_readme(install_info *info)
 {
     carbon_debug("***carbonui_readme()\n");
 
-    //!!!TODO - It doesn't look like the readme step really does anything
-    // except move on to the next state?!?!
-    // SP: This is true for the GTK+ backend because the readme is setup
-    // with callbacks from the appropriate buttons by libglade. So there
-    // is no need to do anything at this point, unlike licenses which are very
-    // similar but for which user interaction is not free.
-    // The mechanism to view the Readme may be different on Carbon ?
-    // This state was needed for linear UIs like console or ncurses
     if(GetProductAllowsExpress(info))
         cur_state = SETUP_CLASS;
     else
@@ -620,6 +650,9 @@ static void carbonui_idle(install_info *info)
 
 static install_state carbonui_setup(install_info *info)
 {
+    //GtkWidget *window;
+    //GtkWidget *options;
+    OptionsBox *options;
     xmlNodePtr node;
 
     carbon_debug("***carbonui_setup()\n");
@@ -633,52 +666,59 @@ static install_state carbonui_setup(install_info *info)
     }
 
     // Else, let the user select appropriate options
-
-
-
-    //!!!TODO - Go through install options (see gtk_ui.c)
-    //---options = glade_xml_get_widget(setup_glade, "option_vbox");
-    //---gtk_container_foreach(GTK_CONTAINER(options), empty_container, options);
+    //options = glade_xml_get_widget(setup_glade, "option_vbox");
+    //gtk_container_foreach(GTK_CONTAINER(options), empty_container, options);
+    options = carbon_OptionsNewBox(MyRes);
     info->install_size = 0;
-    in_setup = TRUE;
     node = info->config->root->childs;
-    //radio_list = NULL;
-
-    while(node)
-    {
-	    if(!strcmp(node->name, "option"))
-	        parse_option(info, NULL, node, 0, NULL, 0);
-        else if(!strcmp(node->name, "exclusive"))
-        {
-	        xmlNodePtr child;
-	        for(child = node->childs; child; child = child->next)
-		        parse_option(info, NULL, child, 0, NULL,  1);
-	    }
-        else if(!strcmp(node->name, "component"))
-        {
-            if(match_arch(info, xmlGetProp(node, "arch")) &&
-            match_libc(info, xmlGetProp(node, "libc")) && 
-		    match_distro(info, xmlGetProp(node, "distro")))
-            {
+    radio_list = NULL;
+    in_setup = TRUE;
+    while ( node ) {
+		if ( ! strcmp(node->name, "option") ) {
+			parse_option(info, NULL, node, options, 0, NULL, 0, NULL);
+		} else if ( ! strcmp(node->name, "exclusive") ) {
+			xmlNodePtr child;
+			RadioGroup *list = NULL;
+			for ( child = node->childs; child; child = child->next) {
+				parse_option(info, NULL, child, options, 0, NULL, 1, &list);
+			}
+		} else if ( ! strcmp(node->name, "component") ) {
+            if ( match_arch(info, xmlGetProp(node, "arch")) &&
+                 match_libc(info, xmlGetProp(node, "libc")) && 
+				 match_distro(info, xmlGetProp(node, "distro")) ) {
                 xmlNodePtr child;
-                if(xmlGetProp(node, "showname"))
-                {
-                    carbon_debug("   ***create new separate***\n");
-                    /*GtkWidget *widget = gtk_hseparator_new();
-                    gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 0);
-                    gtk_widget_show(widget);                
-                    widget = gtk_label_new(xmlGetProp(node, "name"));
-                    gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 10);
-                    gtk_widget_show(widget);*/
+                if ( xmlGetProp(node, "showname") ) {
+                    //GtkWidget *widget = gtk_hseparator_new();
+                    //gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 0);
+                    //gtk_widget_show(widget);                
+                    carbon_OptionsNewSeparator(options);
+                    //widget = gtk_label_new(xmlGetProp(node, "name"));
+                    //gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 10);
+                    //gtk_widget_show(widget);
+                    carbon_OptionsNewLabel(options, xmlGetProp(node, "name"));
                 }
-                for(child = node->childs; child; child = child->next)
-                    parse_option(info, xmlGetProp(node, "name"), child, 0, NULL, 0);
+                for ( child = node->childs; child; child = child->next) {
+					if ( ! strcmp(child->name, "option") ) {
+						//parse_option(info, xmlGetProp(node, "name"), child, window, options, 0, NULL, 0, NULL);
+                        parse_option(info, xmlGetProp(node, "name"), child, options, 0, NULL, 0, NULL);
+					} else if ( ! strcmp(child->name, "exclusive") ) {
+						xmlNodePtr child2;
+						RadioGroup *list = NULL;
+						for ( child2 = child->childs; child2; child2 = child2->next) {
+							//parse_option(info, xmlGetProp(node, "name"), child2, window, options, 0, NULL, 1, &list);
+                            parse_option(info, xmlGetProp(node, "name"), child2, options, 0, NULL, 1, &list);
+						}
+					}
+                }
             }
-        }
-
-	    node = node->next;
+		}
+		node = node->next;
     }
 
+    // Render and display options in window
+    carbon_OptionsShowBox(options);
+    // Resize the window if there are too many options to fit
+    carbon_SetProperWindowSize(options, true);
 
     init_install_path();
     init_binary_path();
@@ -688,7 +728,11 @@ static install_state carbonui_setup(install_info *info)
 
     in_setup = FALSE;
 
-    return carbon_IterateForState(MyRes, &cur_state);
+    int TempState = carbon_IterateForState(MyRes, &cur_state);
+    // Return the window back to default size, if necessary
+    carbon_SetProperWindowSize(options, true);
+    // Return the next state as appopriate
+    return TempState;
 }
 
 static int carbonui_update(install_info *info, const char *path, size_t progress, size_t size, const char *current)
@@ -862,31 +906,27 @@ int carbonui_okay(Install_UI *UI, int *argc, char ***argv)
 
     if(!force_console)
     {
-        //!!!TODO - Fill this in with a carbon "check"
-        if(1)
-        {
-            // Resource not loaded by default
-            MyRes = NULL;
+        // Resource not loaded by default
+        MyRes = NULL;
 
-            /* Set up the driver */
-            UI->init = carbonui_init;
-            UI->license = carbonui_license;
-            UI->readme = carbonui_readme;
-            UI->setup = carbonui_setup;
-            UI->update = carbonui_update;
-            UI->abort = carbonui_abort;
-            UI->prompt = carbonui_prompt;
-            UI->website = carbonui_website;
-            UI->complete = carbonui_complete;
-            UI->pick_class = carbonui_pick_class;
-	        UI->idle = carbonui_idle;
-	        UI->exit = NULL;
-	        UI->shutdown = carbonui_shutdown;
-	        UI->is_gui = 1;
+        /* Set up the driver */
+        UI->init = carbonui_init;
+        UI->license = carbonui_license;
+        UI->readme = carbonui_readme;
+        UI->setup = carbonui_setup;
+        UI->update = carbonui_update;
+        UI->abort = carbonui_abort;
+        UI->prompt = carbonui_prompt;
+        UI->website = carbonui_website;
+        UI->complete = carbonui_complete;
+        UI->pick_class = carbonui_pick_class;
+	    UI->idle = carbonui_idle;
+	    UI->exit = NULL;
+	    UI->shutdown = carbonui_shutdown;
+	    UI->is_gui = 1;
 
-            // We're successful
-            okay = 1;
-        }
+        // We're successful
+        okay = 1;
     }
 
     return(okay);

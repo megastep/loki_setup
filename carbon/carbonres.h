@@ -28,7 +28,7 @@
 #define OPTION_ESTSIZE_LABEL_ID             215
 #define OPTION_ESTSIZE_VALUE_LABEL_ID       216
 //#define OPTION_OPTIONS_SEPARATOR_ID         217
-#define OPTION_INNER_OPTIONS_GROUP_ID       217
+//#define OPTION_INNER_OPTIONS_GROUP_ID       217
 #define OPTION_CANCEL_BUTTON_ID             210
 #define OPTION_README_BUTTON_ID             211
 #define OPTION_BEGIN_INSTALL_BUTTON_ID      212
@@ -90,11 +90,23 @@
 #define COMMAND_PROMPT_NO       'no  '
 #define COMMAND_PROMPT_OK       'ok  '
 
+#define COMMAND_README_CANCEL   'canc'
+#define COMMAND_README_CLOSE    'clos'
+#define COMMAND_README_AGREE    'agre'
+
+// Prompt resource IDs
 #define PROMPT_MESSAGE_LABEL_ID     200
 #define PROMPT_YES_BUTTON_ID        201
 #define PROMPT_NO_BUTTON_ID         203
 #define PROMPT_OK_BUTTON_ID         202
 #define PROMPT_SIGNATURE            'prmt'
+
+// Readme/License resource IDs
+#define README_TEXT_ENTRY_ID        300
+#define README_CANCEL_BUTTON_ID     200
+#define README_CLOSE_BUTTON_ID      201
+#define README_AGREE_BUTTON_ID      202
+#define README_SIGNATURE            'read'
 
 // Different screens that we can display
 typedef enum
@@ -116,6 +128,8 @@ typedef struct
     // Object references
     WindowRef Window;
     WindowRef PromptWindow;
+    WindowRef ReadmeWindow;
+    ControlRef MessageLabel;
     ControlRef PageHandles[PAGE_COUNT];
 
     int IsShown;
@@ -145,5 +159,61 @@ void carbon_SetProgress(CarbonRes *, int, float);
 void carbon_SetCheckbox(CarbonRes *, int, int);
 int carbon_GetCheckbox(CarbonRes *, int);
 int carbon_Prompt(CarbonRes *, int, const char *);
+int carbon_ReadmeOrLicense(CarbonRes *, int, const char *);
+
+// Options related functions and data types
+typedef enum
+{
+    ButtonType_Radio,
+    ButtonType_Checkbox,
+    ButtonType_Label,
+    ButtonType_Separator,
+}ButtonType;
+
+#define MAX_OPTIONS 32
+
+typedef struct
+{
+    ControlRef Control;
+    ButtonType Type;
+    void *Data;
+}OptionsButton;
+
+typedef struct
+{
+    
+}RadioGroup;
+
+// Starting ID's for "dynamic" controls
+/*#define START_LABEL_ID  1040
+#define START_CHECK_ID  1000
+#define START_RADIO_ID  1020
+#define START_SEP_ID    1060*/
+typedef struct
+{
+    CarbonRes *Res;
+    OptionsButton *Buttons[MAX_OPTIONS];
+    int ButtonCount;
+
+    // These variables are used to keep track of the current resource ID
+    // of controls (since we're not creating controls dynamically right now
+    // and need to keep track of the next available control in the resource
+    // file.
+    /*int CurLabelID;
+    int CurRadioID;
+    int CurSepID;
+    int CurCheckID;*/
+}OptionsBox;
+
+OptionsButton *carbon_OptionsNewLabel(OptionsBox *, const char *);
+OptionsButton *carbon_OptionsNewCheckButton(OptionsBox *, const char *);
+OptionsButton *carbon_OptionsNewSeparator(OptionsBox *);
+OptionsButton *carbon_OptionsNewRadioButton(OptionsBox *, const char *, RadioGroup **);
+OptionsBox *carbon_OptionsNewBox(CarbonRes *);
+void carbon_OptionsSetTooltip(OptionsButton *, const char *);
+void carbon_OptionsSetValue(OptionsButton *, int);
+int carbon_OptionsGetValue(OptionsButton *);
+void carbon_OptionsShowBox(OptionsBox *);
+void carbon_SetProperWindowSize(OptionsBox *, int);
 
 #endif
