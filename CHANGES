@@ -1,4 +1,6 @@
 Current:
+Ludwig Nussel (ludwig.nussel@web.de) - Tue Jan 13 19:19:15 PST 2004
+ * Various bugfixes for legacy support.
 Stephane Peter (Codehost) - Tue Sep 23 21:00:18 PDT 2003
  * Added post_install_msg element.
 Stephane Peter (Codehost) - Wed Aug 13 17:48:51 PDT 2003

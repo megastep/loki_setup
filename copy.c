@@ -525,25 +525,17 @@ ssize_t copy_list(install_info *info, const char *filedesc, const char *dest,
     return size;
 }
 
-static void check_dynamic(const char *fpat, char *bin, const char *cdrom)
+static void check_dynamic(const char *fpat, char *bin)
 {
     int use_dynamic;
     char test[PATH_MAX], testcmd[PATH_MAX];
 
     use_dynamic = 0;
-    if ( cdrom ) {
-        snprintf(test, sizeof(test), "%s/%s.check-dynamic.sh", cdrom, fpat);
-    } else {
-        snprintf(test, sizeof(test), "%s.check-dynamic.sh", fpat);
-    }
+	snprintf(test, sizeof(test), "%s.check-dynamic.sh", fpat);
     if ( access(test, R_OK) == 0 ) {
         snprintf(testcmd, sizeof(testcmd), "sh %s >/dev/null 2>&1", test);
         if ( system(testcmd) == 0 ) {
-            if( cdrom ) {
-                sprintf(bin, "%s/%s.dynamic", cdrom, fpat);
-            } else {
-                sprintf(bin, "%s.dynamic", fpat);
-            }
+			sprintf(bin, "%s.dynamic", fpat);
             if ( access(bin, R_OK) == 0 ) {
                 use_dynamic = 1;
             }
@@ -580,19 +572,20 @@ ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, c
     os = detect_os();
     copied = 0;
     size = 0;
+
     while ( filedesc && parse_line(&filedesc, final, (sizeof final)) ) {
 		if (! in_rpm) {
+			const char *cdpath = NULL;
+            // the 4 must match max number of locations below
+            char binarylocations[4][PATH_MAX] = {{0}};
+            int numlocations = 0;
+
 			copied = 0;
 		
 			strncpy(fdest, dest, sizeof(fdest));
 
 			strncpy(current_option_txt, final, sizeof(current_option_txt));
 			strncat(current_option_txt, " binary", sizeof(current_option_txt)-strlen(current_option_txt));
-            if ( binpath ) {
-                strncpy(fpat, binpath, sizeof(fpat));
-            } else {
-                snprintf(fpat, sizeof(fpat), "bin/%s/%s/%s/%s", os, arch, libc, final);
-            }
 
 			if ( keepdirs ) { /* Append the subdirectory to the final destination */
 				char *slash = strrchr(final, '/');
@@ -606,72 +599,63 @@ ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, c
 			}
 
 			if ( from_cdrom ) {
-				char fullpath[PATH_MAX];
-                const char *cdpath = get_cdrom(info, from_cdrom);
+				cdpath = get_cdrom(info, from_cdrom);
 
                 if ( ! cdpath ) {
                     return 0;
                 }
-                snprintf(fullpath, sizeof(fullpath), "%s/%s", cdpath, fpat);
-                if ( stat(fullpath, &sb) == 0 ) {
-                    check_dynamic(fpat, bin, cdpath);
-                    copied = copy_file(info, cdpath, bin, fdest, final, 1, 1, node, update, &file);
-                } else if ( ! binpath ) {
-                    snprintf(fullpath, sizeof(fullpath), "%s/bin/%s/%s/%s", cdpath, os, arch, final);
-                    if ( stat(fullpath, &sb) == 0 ) {
-                        snprintf(fullpath, sizeof(fullpath), "bin/%s/%s/%s", os, arch, final);
-                        check_dynamic(fullpath, bin, cdpath);
-                        copied = copy_file(info, cdpath, bin, fdest, final, 1, 1, node, update, &file);
-                    } else {
-                        //!!!TODO - TEMP
-                        char _temp[1024];
-                        getcwd(_temp, sizeof(_temp));
-                        log_warning(_("3 Unable to find file '%s' in '%s'"), fullpath, _temp);
-                        ui_fatal_error(_("3 Unable to find file '%s' in '%s'"), fullpath, _temp);
-                        //!!!TODO - END TEMP
-                        //log_warning(_("Unable to find file '%s'"), fpat);
-                        //ui_fatal_error(_("Unable to find file '%s'"), fpat);
-                    }
-                } else {
-                    //!!!TODO - TEMP
-                    char _temp[1024];
-                    getcwd(_temp, sizeof(_temp));
-                    log_warning(_("4 Unable to find file '%s' in '%s'"), fullpath, _temp);
-                    ui_fatal_error(_("4 Unable to find file '%s' in '%s'"), fullpath, _temp);
-                    //!!!TODO - END TEMP
-                    //log_warning(_("Unable to find file '%s'"), fpat);
-                    //ui_fatal_error(_("Unable to find file '%s'"), fpat);
-                }
-			} else {
-				if ( stat(fpat, &sb) == 0 ) {
-					check_dynamic(fpat, bin, NULL);
-					copied = copy_file(info, NULL, bin, fdest, final, 1, 1, node, update, &file);
-				} else if ( ! binpath ) {
-					snprintf(fpat, sizeof(fpat), "bin/%s/%s/%s", os, arch, final);
-					if ( stat(fpat, &sb) == 0 ) {
-						check_dynamic(fpat, bin, NULL);
-						copied = copy_file(info, NULL, bin, fdest, final, 1, 1, node, update, &file);
-					} else {
-                        //!!!TODO - TEMP
-                        char _temp[1024];
-                        getcwd(_temp, sizeof(_temp));
-                        log_warning(_("5 Unable to find file '%s' in '%s'"), fpat, _temp);
-                        ui_fatal_error(_("5 Unable to find file '%s' in '%s'"), fpat, _temp);
-                        //!!!TODO - END TEMP
-						//log_warning(_("Unable to find file '%s'"), fpat);
-                        //ui_fatal_error(_("Unable to find file '%s'"), fpat);
-					}
-				} else {
-                    //!!!TODO - TEMP
-                    char _temp[1024];
-                    getcwd(_temp, sizeof(_temp));
-                    log_warning(_("6 Unable to find file '%s' in '%s'"), fpat, _temp);
-                    ui_fatal_error(_("6 Unable to find file '%s' in '%s'"), fpat, _temp);
-                    //!!!TODO - END TEMP
-                    //log_warning(_("Unable to find file '%s'"), fpat);
-                    //ui_fatal_error(_("Unable to find file '%s'"), fpat);
-                }
 			}
+
+            if(binpath) {
+                // binary path specified, only try this location
+                strncpy(binarylocations[0], binpath, PATH_MAX);
+                numlocations = 1;
+            }
+            else {
+                // test operating system and libc
+                snprintf(binarylocations[0], PATH_MAX, "bin/%s/%s/%s/%s", os, arch, libc, final);
+                // test only operating system
+                snprintf(binarylocations[1], PATH_MAX, "bin/%s/%s/%s", os, arch, final);
+                // test only libc (compat with older setups)
+                snprintf(binarylocations[2], PATH_MAX, "bin/%s/%s/%s", arch, libc, final);
+                // test no libc, no os (compat with older setups)
+                snprintf(binarylocations[3], PATH_MAX, "bin/%s/%s", arch, final);
+                numlocations = 4;
+            }
+
+            // check each path in turn
+            for ( i = 0; i < numlocations; ++i)
+            {
+				int tryagain = 0;
+
+				strncpy(fpat, binarylocations[i], sizeof(fpat));
+				
+				do {
+					log_debug(_("find '%s'"), fpat);
+					if ( stat(fpat, &sb) == 0 ) {
+						// found it
+						tryagain = 0;
+						i = numlocations;
+					} else if(!tryagain && from_cdrom) {
+						// not found, maybe on cdrom? try again
+						snprintf(fpat, sizeof(fpat), "%s/%s", cdpath, binarylocations[i]);
+						tryagain = 1;
+					} else {
+						// not found
+						fpat[0] = '\0';
+						tryagain = 0;
+					}
+				} while(tryagain);
+            }
+
+            if(fpat[0]) {
+                check_dynamic(fpat, bin);
+                copied = copy_file(info, NULL, bin, fdest, final, 1, 1, node, update, &file);
+            } else {
+                getcwd(bin, sizeof(bin));
+                log_warning(_("Unable to find file '%s' in '%s'"), binarylocations[0], bin);
+                ui_fatal_error(_("Unable to find file '%s' in '%s'"), binarylocations[0], bin);
+            }
 		} else {  /* if inrpm="true" */
 			if (strncmp("$INSTALLDIR", final, 11 ) == 0) {
 				strcpy(fpat, info->install_path);
@@ -740,13 +724,16 @@ ssize_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
     while ( node ) {
         const char *path = xmlGetProp(node, "path");
 		const char *srcpath = xmlGetProp(node, "srcpath");
-        /* "cdrom" tag is redundant now */
 		const char *from_cdrom = xmlGetProp(node, "cdromid");
 		int lang_matched = match_locale(xmlGetProp(node, "lang"));
 		int strip_dirs = 0;
 
+		/* check deprecated cdrom tag */
         if ( !from_cdrom && GetProductCDROMRequired(info) ) {
-            from_cdrom = info->name;
+			const char *tmp = xmlGetProp(node, "cdrom");
+			if (tmp && !strcmp(tmp, "yes")) {
+				from_cdrom = info->name;
+			}
         }
 		
         if (!path)
@@ -1129,3 +1116,4 @@ int has_binaries(install_info *info, xmlNodePtr node)
     }
     return num_binaries;
 }
+

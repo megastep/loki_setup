@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.88 2003-11-28 20:34:50 megastep Exp $
+   $Id: gtk_ui.c,v 1.89 2004-01-14 03:27:49 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -927,7 +927,8 @@ static void init_install_path(void)
     gtk_entry_set_text( GTK_ENTRY(GTK_COMBO(widget)->entry), list->data );
 
     /* cheat. Make the first entry the default for IsReadyToInstall(). */
-    strncpy(cur_info->install_path, list->data, sizeof (cur_info->install_path));
+    if(cur_info->install_path != list->data)
+	strncpy(cur_info->install_path, list->data, sizeof (cur_info->install_path));
 
     gtk_combo_set_use_arrows( GTK_COMBO(widget), 0);
 }
@@ -1227,6 +1228,7 @@ static install_state gtkui_init(install_info *info, int argc, char **argv, int n
     GtkWidget *button;
     GtkWidget *install_path, *install_entry, *binary_path, *binary_entry;
     char title[1024];
+	const char* glade_file = SETUP_GLADE;
 
     cur_state = SETUP_INIT;
     cur_info = info;
@@ -1239,14 +1241,19 @@ static install_state gtkui_init(install_info *info, int argc, char **argv, int n
 	gtk_widget_set_default_visual(gdk_rgb_get_visual());
     glade_init();
 
+	if (getenv("SETUP_GLADE_FILE"))
+	{
+		glade_file = getenv("SETUP_GLADE_FILE");
+	}
+
     /* Glade segfaults if the file can't be read */
-    opened = fopen(SETUP_GLADE, "r");
+    opened = fopen(glade_file, "r");
     if ( opened == NULL ) {
         return SETUP_ABORT;
     }
     fclose(opened);
 
-    setup_glade = glade_xml_new(SETUP_GLADE, "setup_window"); 
+    setup_glade = glade_xml_new(glade_file, "setup_window"); 
 
     /* add signal handlers to manage enabling/disabling the Install button */
     install_path = glade_xml_get_widget(setup_glade, "install_path");
