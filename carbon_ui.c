@@ -372,6 +372,7 @@ void OnKeyboardEvent()
             carbon_GetEntryText(MyRes, OPTION_LINK_PATH_ENTRY_ID, string, 1024);
             set_symlinkspath(cur_info, string);
         }
+        update_space();
         check_install_button();
     }
 }
@@ -465,6 +466,7 @@ static void OnCommandInstallPath(void)
         set_installpath(cur_info, InstallPath);
 
         carbon_SetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, GetSpecialPathName(InstallPath));
+        update_space();
         check_install_button();
     }
 }
