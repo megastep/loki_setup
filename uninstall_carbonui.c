@@ -229,7 +229,7 @@ void OnCommandUninstall()
 	const char *message;
 
     // First switch to the next notebook page
-    carbon_SetProperWindowSize(Box, false);
+    carbon_SetProperWindowSize(Res, Box);
     carbon_ShowInstallScreen(Res, UNINSTALL_STATUS_PAGE);
     // Disable finish button
     carbon_DisableControl(Res, UNINSTALL_STATUS_FINISHED_BUTTON_ID);
@@ -328,7 +328,7 @@ void OnCommandUninstall()
 			    }
 
                 // Remove the component
-                if(!perform_uninstall(component->product, component->info))
+                if(!perform_uninstall(component->product, component->info, 0))
                 {
 				    uninstall_cancelled = 2;
 				    snprintf(text, sizeof(text),

@@ -1313,6 +1313,7 @@ static int carbonui_update(install_info *info, const char *path, size_t progress
 static void carbonui_abort(install_info *info)
 {
     carbon_debug("***carbonui_abort()\n");
+    if (!MyRes) return;
 
     //!!!TODO - I think we can always display the abort screen unlike
     //the GTK version which checks to see if the window is visible.
