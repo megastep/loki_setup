@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.142 2004-09-07 22:40:29 megastep Exp $ */
+/* $Id: install.c,v 1.143 2004-09-21 01:52:42 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -128,6 +128,32 @@ int disable_binary_path = 0;
 
 static int install_updatemenus_script = 0;
 static int uninstall_generated = 0;
+
+typedef struct
+{
+	const char* name;
+	unsigned version;
+} SetupFeature;
+
+/** features supported by this installer */
+static SetupFeature features[] =
+{
+	{ "inline-scripts", 1 },
+	{ NULL, 0 }
+};
+
+static int have_feature(const char* name, unsigned version)
+{
+	SetupFeature* f;
+	
+	for (f = features; f->name; ++f)
+	{
+		if(!strcmp(f->name, name) && f->version >= version)
+			return 1;
+	}
+	
+	return 0;
+}
 
 /* Functions to retrieve attribution information from the XML tree */
 const char *GetProductName(install_info *info)
@@ -1241,13 +1267,15 @@ int CheckRequirements(install_info *info)
 			 match_arch(info, arch) &&
 			 match_libc(info, libc) &&
 			 match_distro(info, distro) ) {
-			char *prop = xmlGetProp(node, "command");
+			char *commandprop = xmlGetProp(node, "command");
+			char *featureprop = xmlGetProp(node, "feature");
 			xmlFree(lang); xmlFree(arch); xmlFree(libc); xmlFree(distro);
-			if ( !prop ) {
-				log_fatal(_("XML: 'require' tag doesn't have a mandatory 'command' attribute"));
-			} else {
+			if ( !commandprop && !featureprop ) {
+				log_fatal(_("XML: 'require' tag doesn't have a mandatory 'command' or 'feature' attribute"));
+			}
+			if(commandprop) {
 				/* Launch the command */
-				if ( run_script(info, prop, 0, 0) != 0 ) {
+				if ( run_script(info, commandprop, 0, 0) != 0 ) {
 					/* We failed: print out error message */
 					text = xmlNodeListGetString(info->config, node->childs, 1);
 					if(text) {
@@ -1259,11 +1287,30 @@ int CheckRequirements(install_info *info)
 						}
 						UI.prompt(buf, RESPONSE_OK);
 					}
-					xmlFree(prop);
+					xmlFree(commandprop);
 					return 0;
 				}
-				xmlFree(prop);
+				xmlFree(commandprop);
+			} else if(featureprop) {
+				char *verprop = xmlGetProp(node, "version");
+				unsigned version = 1;
+				if(verprop) {
+					version = atoi(verprop);
+					xmlFree(verprop);
+				}
+				if(!have_feature(featureprop, version))
+				{
+					char buf[1024];
+					snprintf(buf, sizeof(buf),
+							_("The installer is not suitable for installing this product "
+								"(missing feature '%s' version '%u')"), featureprop, version);
+					UI.prompt(buf, RESPONSE_OK);
+					xmlFree(featureprop);
+					return 0;
+				}
 			}
+
+			xmlFree(featureprop);
 		} else {
 			xmlFree(lang); xmlFree(arch); xmlFree(libc); xmlFree(distro);
 		}
@@ -2624,7 +2671,7 @@ int run_script(install_info *info, const char *script, int arg, int include_tags
        (to avoid problems with 'sh script.sh')
     */
     working_dir[0] = '\0'; 
-    if ( access(script, R_OK) == 0 ) {
+    if ( *script != '/' && access(script, R_OK) == 0 ) {
         if ( getcwd(working_dir, sizeof(working_dir)) == NULL ) {
 			perror("run_script: getcwd");
 		}

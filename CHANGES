@@ -1,4 +1,7 @@
 Current:
+Ludwig Nussel - Mon Sep 20 18:09:29 PDT 2004
+ * Added feature attribute for 'require' tags.
+ * No longer write log to /tmp/uninstall.log when uninstalling.
 Stephane Peter (Codehost) - Tue Aug  3 19:32:48 PDT 2004
  * Added 'args' attribute for binary tags.
 Ryan C. Gordon (icculus.org) - Thu May 27 12:39:23 EDT 2004

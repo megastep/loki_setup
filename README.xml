@@ -325,9 +325,12 @@ are fulfilled.
 are parsed in sequential order. Installation will abort if any of the specified commands return
 a non-nil value.
 
-This element takes one mandatory attribute :
+This element takes either of the following mandatory attributes :
 
  command     Specify the command to be run to determine the condition. A nil value means success.
+
+ feature     Specify the name of a feature that must be present in the
+             installer to be able to process this XML file.
 
 This element takes some optional attributes :
   lang      Specify the language for the message. Used for localization. The command will be executed
@@ -344,12 +347,19 @@ This element takes some optional attributes :
   distro    This component applies only to the specified OS distribution.
             Look at the end of this file for a list of possible values.
 
-The text specified in the element will be displayed to the user if the condition fails.
-Example:
+  version   [only for feature attribute] the minimum integer version number
+            required for the specified feature.
+
+The text specified in the element will be displayed to the user if the
+condition of the command attribute fails. It has no meaning for the feature
+attribute.
+Examples:
 
 <require command="/bin/false">
 This is always failing! Thus this message is always displayed.
 </require>
+
+<require feature="inline-scripts" version="1"/>
 
 The POST_INSTALL_MSG element :
 

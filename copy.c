@@ -898,7 +898,7 @@ ssize_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
                         if (UI.shutdown) UI.shutdown(info);
 						// We spawn a new setup for this product
 #if defined(darwin)
-                        if (fork()) 
+                        if (fork()) {
                             if (UI.is_gui) {
                                 exit(0);
                             } else {
@@ -906,6 +906,7 @@ ssize_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
                                 wait(&status);
                                 exit(WIFEXITED(status) ? WEXITSTATUS(status) : 1);
                             }
+			}
 #endif
 						execlp(argv0, argv0, "-f", product, NULL);
 						perror("execlp");
