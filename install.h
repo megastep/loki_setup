@@ -116,6 +116,9 @@ typedef struct _install_info {
     /* The total install size, in bytes */
     size_t install_size;
 
+	/* Flag indicating if the installation was completed */
+	int install_complete;
+
     struct component_elem {
         char *name;
         char *version;

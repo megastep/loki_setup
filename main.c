@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.54 2002-12-09 22:15:04 megastep Exp $ */
+/* $Id: main.c,v 1.55 2003-01-08 20:20:31 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -76,7 +76,8 @@ void signal_abort(int sig)
     signal(SIGINT, SIG_IGN);
     if ( UI.abort )
         UI.abort(info);
-    uninstall(info);
+	if ( info && ! info->install_complete )
+		uninstall(info);
     exit_setup(3);
 }
 
