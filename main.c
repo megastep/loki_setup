@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.26 2000-05-09 19:50:11 megastep Exp $ */
+/* $Id: main.c,v 1.27 2000-06-28 00:18:40 hercules Exp $ */
 
 /* Modifications by Borland/Inprise Corp.
    04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -19,7 +19,7 @@
 #include "log.h"
 #include "detect.h"
 
-#define SETUP_VERSION "1.2.3"
+#define SETUP_VERSION "1.3.0"
 
 #define SETUP_CONFIG  SETUP_BASE "setup.xml"
 
