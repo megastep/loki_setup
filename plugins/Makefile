@@ -1,6 +1,6 @@
 #
 # Makefile for the setup plugins
-# $Id: Makefile,v 1.5 2000-10-11 02:27:37 megastep Exp $
+# $Id: Makefile,v 1.6 2000-10-14 02:16:39 megastep Exp $
 #
 
 STATICS = cpio.c
@@ -59,3 +59,10 @@ libplugins.a: $(OBJS)
 
 clean:
 	rm -f *.o *.so *.a *~
+
+depend:
+	$(CC) -MM $(CFLAGS) $(OBJS:.o=.c) > .depend
+
+ifeq ($(wildcard .depend),.depend)
+include .depend
+endif

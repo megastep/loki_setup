@@ -120,3 +120,13 @@ update-po: po/setup.po
 		msgmerge po/$$lang/setup.po po/setup.po > po/$$lang/tmp; \
 		mv po/$$lang/tmp po/$$lang/setup.po; \
 	done
+
+dep: depend
+
+depend:
+	$(MAKE) -C plugins DYN_PLUGINS=$(DYN_PLUGINS) USE_RPM=$(USE_RPM) SETUPDB=$(shell pwd)/$(SETUPDB) depend
+	$(CC) -MM $(CFLAGS) $(SRCS) > .depend
+
+ifeq ($(wildcard .depend),.depend)
+include .depend
+endif
