@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.41 2000-11-13 22:37:34 hercules Exp $ */
+/* $Id: main.c,v 1.42 2000-11-16 22:30:51 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -36,7 +36,7 @@ Modifications by Borland/Inprise Corp.:
 #include "detect.h"
 #include "plugins.h"
 
-#define SETUP_VERSION "1.4.0"
+#define SETUP_VERSION "1.5.0"
 
 #define SETUP_CONFIG  SETUP_BASE "setup.xml"
 
