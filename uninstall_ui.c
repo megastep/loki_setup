@@ -335,6 +335,7 @@ int uninstall_ui(int argc, char *argv[])
     GtkWidget *frame;
     GtkWidget *vbox;
     GtkWidget *button;
+    GtkWidget *label;
     const char *product_name;
     product_t *product;
     product_info_t *product_info;
@@ -376,7 +377,7 @@ int uninstall_ui(int argc, char *argv[])
     }
     gtk_container_foreach(GTK_CONTAINER(widget), empty_container, widget);
     for ( product_name=loki_getfirstproduct();
-          product_name && ! uninstall_cancelled;
+          product_name;
           product_name=loki_getnextproduct() ) {
         /* See if we can open the product */
         product = loki_openproduct(product_name);
@@ -439,13 +440,15 @@ int uninstall_ui(int argc, char *argv[])
 
         /* Add this product to our list of open products */
         add_product(product);
-
-        /* See if the user wants to cancel the loading */
-        while( gtk_events_pending() ) {
-            gtk_main_iteration();
-        }
     }
-    uninstall_cancelled = 0;
+
+    /* Check to make sure there's something to uninstall */
+    if ( ! product_list ) {
+        label = gtk_label_new(
+_("No products found.\nAre you the one that installed the software?"));
+        gtk_box_pack_start(GTK_BOX(widget), label, FALSE, TRUE, 0);
+        gtk_widget_show(label);
+    }
 
     /* Run the UI.. */
     gtk_main();
