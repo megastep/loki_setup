@@ -31,8 +31,9 @@
 #include "loki_launchurl.h"
 
 /* The README viewer program - on all Linux sytems */
-#define PAGER_COMMAND   "more"
+#define DEFAULT_PAGER_COMMAND   "more"
 
+static char pagercmd[PATH_MAX];
 static const char *yes_letter = gettext_noop("Y");
 static const char *no_letter  = gettext_noop("N");
 
@@ -203,7 +204,7 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
 			/* See if there is an EULA for this option */
 			name = GetProductEULANode(info, node);
 			if ( name ) {
-				snprintf(prompt, sizeof(prompt), PAGER_COMMAND " \"%s\"", name);
+				snprintf(prompt, sizeof(prompt), "%s \"%s\"", pagercmd, name);
 				system(prompt);
 				if ( console_prompt(_("Do you agree with the license?"), RESPONSE_YES) !=
 					 RESPONSE_YES ) {
@@ -286,7 +287,7 @@ static install_state console_license(install_info *info)
     char command[512];
 
     sleep(1);
-    snprintf(command, sizeof(command), PAGER_COMMAND " \"%s\"", GetProductEULA(info));
+    snprintf(command, sizeof(command), "%s \"%s\"", pagercmd, GetProductEULA(info));
     system(command);
     if ( console_prompt(_("Do you agree with the license?"), RESPONSE_YES) ==
                                                         RESPONSE_YES ) {
@@ -309,7 +310,7 @@ static install_state console_readme(install_info *info)
 	str = readme + strlen(info->setup_path)+1; /* Skip the install path */
         snprintf(prompt, sizeof(prompt), _("Would you like to read the %s file ?"), readme);
         if ( console_prompt(prompt, RESPONSE_YES) == RESPONSE_YES ) {
-            snprintf(prompt, sizeof(prompt), PAGER_COMMAND " \"%s\"", readme);
+            snprintf(prompt, sizeof(prompt), "%s \"%s\"", pagercmd, readme);
             system(prompt);
         }
     }
@@ -604,10 +605,19 @@ static install_state console_website(install_info *info)
  
 int console_okay(Install_UI *UI, int *argc, char ***argv)
 {
+    const char *envr;
+
     if(!isatty(STDIN_FILENO)){
       fprintf(stderr,_("Standard input is not a terminal!\n"));
       return(0);
     }
+
+    envr = getenv("PAGER");
+    if ((envr == NULL) || (strlen(envr) >= sizeof (pagercmd)))
+        envr = DEFAULT_PAGER_COMMAND;
+
+    strcpy(pagercmd, envr);
+
     /* Set up the driver */
     UI->init = console_init;
     UI->license = console_license;
