@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.55 2000-11-09 00:08:15 megastep Exp $
+   $Id: gtk_ui.c,v 1.56 2000-11-10 06:36:26 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1159,9 +1159,11 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
     gtk_notebook_set_page(GTK_NOTEBOOK(notebook), OPTION_PAGE);
 
     /* Disable the "View Readme" button if no README available */
-     button = glade_xml_get_widget(setup_glade, "button_readme");
-     if ( button && ! GetProductREADME(cur_info) ) {
+     if ( ! GetProductREADME(cur_info) ) {
+         button = glade_xml_get_widget(setup_glade, "button_readme");
          gtk_widget_set_sensitive(button, FALSE);
+         button = glade_xml_get_widget(setup_glade, "view_readme_progress_button");
+         gtk_widget_hide(button);
      }
 
     /* Set the text for some blank labels */
@@ -1455,6 +1457,13 @@ static install_state gtkui_complete(install_info *info)
     if ( widget && 
 		 (!info->installed_symlink || !info->symlinks_path || !*info->symlinks_path ) ) {
         gtk_widget_hide(widget);
+    }
+
+    /* Hide the 'View Readme' button if we have no readme... */
+    if ( ! GetProductREADME(info) ) {
+        widget = glade_xml_get_widget(setup_glade, "view_readme_end_button");
+        if(widget)
+            gtk_widget_hide(widget);
     }
 
     /* TODO: Lots of cleanups here (free() mostly) */
