@@ -540,7 +540,7 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
 		if ( strcmp(node->name, "exclusive") == 0 ) {
 			xmlNodePtr child = node->childs;
 			while ( child ) {
-				copy_node(info, node->childs, path, update);
+				copy_tree(info, node->childs, path, update);
 				child = child->next;
 			}
 		}
