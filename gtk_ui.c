@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.69 2002-09-06 23:32:51 megastep Exp $
+   $Id: gtk_ui.c,v 1.70 2002-09-09 10:30:34 icculus Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1490,9 +1490,9 @@ static void gtkui_abort(install_info *info)
     GtkWidget *notebook;
 
     /* No point in waiting for a change of state if the window is not there */
-    w = glade_xml_get_widget(setup_glade, "setup_window");
+    GtkWidget *w = glade_xml_get_widget(setup_glade, "setup_window");
     if ( ! GTK_WIDGET_VISIBLE(w) )
-	return;
+        return;
 
     if ( setup_glade ) {
         notebook = glade_xml_get_widget(setup_glade, "setup_notebook");
