@@ -355,6 +355,19 @@ static pascal OSStatus KeyboardEventHandler(EventHandlerCallRef HandlerRef, Even
     return eventNotHandledErr;
 }
 
+static pascal OSStatus KeyboardDownEventHandler(EventHandlerCallRef HandlerRef, EventRef Event, void *UserData)
+{
+    UInt32 keycode;
+    GetEventParameter(Event, kEventParamKeyCode, typeUInt32, NULL, sizeof(keycode), NULL, &keycode);
+    // If keycode is RETURN or ENTER
+    if(keycode == 36 || keycode == 76)
+    {
+        return noErr;
+    }
+
+    return eventNotHandledErr;
+}
+
 static pascal OSStatus MediaWindowEventHandler(EventHandlerCallRef HandlerRef, EventRef Event, void *UserData)
 {
     OSStatus err = eventNotHandledErr;	// Default is event is not handled by this function
@@ -594,6 +607,12 @@ CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32), void (*Keyb
     //else
         //carbon_debug("Error creating YAST control.\n");
     ShowControl(NewRes->MessageLabel);
+    ControlID CDKeyID = {LOKI_SETUP_SIG, CDKEY_ENTRY_ID};
+    ControlRef CDKeyControl;
+    GetControlByID(NewRes->Window, &CDKeyID, &CDKeyControl);
+    Boolean CDKeySingleLine = true;
+    SetControlData(CDKeyControl, kControlEditTextPart, kControlEditTextSingleLineTag, sizeof(Boolean), &CDKeySingleLine);
+
     ReadmeWindowResizeEventHandler(NULL, NULL, NewRes);
     //EnableControl(DummyControlRef);
 
@@ -631,6 +650,11 @@ CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32), void (*Keyb
        InstallApplicationEventHandler(NewEventHandlerUPP(KeyboardEventHandler),
                                    1, &commKeyboardSpec, (void *)NewRes, NULL);
     }
+
+    EventTypeSpec commKeyboardDownSpec = {kEventClassKeyboard, kEventRawKeyDown};
+    InstallApplicationEventHandler(NewEventHandlerUPP(KeyboardDownEventHandler),
+                                1, &commKeyboardDownSpec, (void *)NewRes, NULL);
+
     // It's all good...return the resource object
     return NewRes;
 
@@ -701,7 +725,7 @@ void carbon_ShowInstallScreen(CarbonRes *Res, InstallPage NewInstallPage)
         if(NewInstallPage != CDKEY_PAGE)
         {
             carbon_DisableControl(Res, CDKEY_ENTRY_ID);
-            carbon_DisableControl(Res, CDKEY_CONFIRM_ENTRY_ID);
+            //carbon_DisableControl(Res, CDKEY_CONFIRM_ENTRY_ID);
         }
         // Refresh window
         DrawControls(Res->Window);
