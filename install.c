@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.96 2002-10-23 05:21:19 megastep Exp $ */
+/* $Id: install.c,v 1.97 2002-12-07 00:57:32 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -65,6 +65,9 @@
 #include <signal.h>
 #include <stdio.h>
 #include <errno.h>
+#ifdef HAVE_LIBGEN_H
+# include <libgen.h>
+#endif
 
 #include "install.h"
 #include "install_log.h"
@@ -1501,9 +1504,7 @@ void generate_uninstall(install_info *info)
                     if ( belem->file ) {
                         product_file_t *file = loki_register_file(option, belem->file->path,
                                                                   get_md5(belem->file->md5sum));
-                        if (file) {
-                            loki_setmode_file(file, 0755); /* Binaries have special permissions */
-                        } else {
+                        if (! file) {
                             log_warning(_("Could not register binary: %s"), belem->file->path);
                         }
                     }
@@ -1582,9 +1583,9 @@ void generate_uninstall(install_info *info)
 	    /* Add a call to the post-uninstall scripts */
 	    loki_registerscript_component(component, LOKI_SCRIPT_POSTUNINSTALL,
 					  "update-menus", 
-					  "if type update-menus 2>&1 >/dev/null || which update-menus 2>&1 > /dev/null; then update-menus 2> /dev/null; fi\n"
-					  "if type kbuildsycoca 2>&1 >/dev/null || which kbuildsycoca 2>&1 > /dev/null; then kbuildsycoca 2>/dev/null; fi\n"
-					  "if type dtaction 2>&1 > /dev/null || which dtaction 2>&1 > /dev/null; then dtaction ReloadActions 2>/dev/null; fi\n");
+					  "if which update-menus 2> /dev/null > /dev/null || type -p update-menus 2> /dev/null >/dev/null; then update-menus 2> /dev/null; fi\n"
+					  "if which kbuildsycoca 2> /dev/null > /dev/null || type -p kbuildsycoca 2> /dev/null >/dev/null; then kbuildsycoca 2>/dev/null; fi\n"
+					  "if which dtaction 2> /dev/null > /dev/null || type -p dtaction 2> /dev/null > /dev/null; then dtaction ReloadActions 2>/dev/null; fi\n");
 	}
 
         /* Register the pre and post uninstall scripts with the default component */
@@ -1783,12 +1784,13 @@ int install_menuitems(install_info *info, desktop_type desktop)
     struct component_elem *comp;
     int ret_val = 0, num_items = 0;
     const char *desk_base;
-    char icon_base[PATH_MAX];
-    const char *app_links[10];
+    char icon_base[PATH_MAX], home_base[PATH_MAX];
+    const char *app_links[15];
     const char *exec_script_name = NULL;
     char exec_script[PATH_MAX*2];
     char exec_command[PATH_MAX*2];
-	int i = 0;
+    int i = 0;
+    int gnome_vfolders = 0;
     FILE *fp;
 
     switch (desktop) {
@@ -1799,7 +1801,8 @@ int install_menuitems(install_info *info, desktop_type desktop)
 		break;
 	case DESKTOP_REDHAT:
 		app_links[0] = "/etc/X11/applnk/";
-		app_links[1] = NULL;
+		app_links[1] = "/usr/share/gnome/apps/"; /* For Ximian stuff */
+		app_links[2] = NULL;
 		break;
 	case DESKTOP_KDE:
 		desk_base = getenv("KDE2DIR");
@@ -1816,14 +1819,25 @@ int install_menuitems(install_info *info, desktop_type desktop)
 		} else {
 			app_links[i++] = "/opt/kde/share/applnk/";
 		}
+		app_links[i++] = "/opt/kde2/share/applnk/";
+		app_links[i++] = "/opt/kde3/share/applnk/";
 		app_links[i++] = "/usr/X11R6/share/applnk/";
 		app_links[i++] = "/usr/share/applnk/";
-		app_links[i++] = "~/.kde2/share/applnk/";
-		app_links[i++] = "~/.kde/share/applnk/";
+		desk_base = getenv("KDEHOME");
+		if (desk_base) {
+			snprintf(home_base, sizeof(home_base), "%s/share/applnk/", desk_base);
+			app_links[i++] = home_base;
+		} else {
+			app_links[i++] = "~/.kde/share/applnk-redhat/"; /* for RH 8.0 KDE */
+			app_links[i++] = "~/.kde2/share/applnk/";
+			app_links[i++] = "~/.kde3/share/applnk/";
+			app_links[i++] = "~/.kde/share/applnk/";
+		}
 		app_links[i++] = NULL;
 		break;
 	case DESKTOP_GNOME:
-		fp = popen("if type gnome-config 2>&1 || which gnome-config 2>&1 > /dev/null; then gnome-config --prefix 2>/dev/null; fi", "r");
+		app_links[i++] = "/usr/share/applications/";
+		fp = popen("if which gnome-config 2>/dev/null > /dev/null || type -p gnome-config 2>/dev/null > /dev/null; then gnome-config --prefix 2>/dev/null; fi", "r");
 		if (fp) {
 			if ( fscanf(fp, "%s", icon_base) ) {
 				strcat(icon_base, "/share/gnome/apps/");
@@ -1834,8 +1848,21 @@ int install_menuitems(install_info *info, desktop_type desktop)
 		app_links[i++] = "/opt/gnome/share/gnome/apps/";
 		app_links[i++] = "/usr/share/gnome/apps/";
 		app_links[i++] = "/usr/local/share/gnome/apps/";
+		app_links[i++] = "~/.gnome2/vfolders/applications/";
 		app_links[i++] = "~/.gnome/apps/";
 		app_links[i++] = NULL;
+        /* crude check for gnome 2 vfolders (www.freedesktop.org) */
+        if (dir_exists("/etc/gnome-vfs-2.0")) {
+            char vfolderBuf[4096];
+            gnome_vfolders = 1;
+
+            /* the following sets up a user menuitem directory
+			   for rh8 gnome 2, it might work for other gnomes as well.
+			   sadly, if this directory is be created, then X must 
+			   be restarted before menuitems will be visible */
+            expand_home(info, "~/.gnome2/vfolders/applications", vfolderBuf);
+            dir_create_hierarchy(info, vfolderBuf, 0755);
+        }
 		break;
 	case DESKTOP_CDE:
 		app_links[0] = "/etc/dt/appconfig/types/C/"; /* FIXME: Expand $LANG */
@@ -1926,8 +1953,13 @@ int install_menuitems(install_info *info, desktop_type desktop)
 		    case DESKTOP_GNOME:
 		    case DESKTOP_KDE:
 		    case DESKTOP_REDHAT:
-			snprintf(finalbuf, PATH_MAX, "%s%s/", buf, elem->menu ? elem->menu : "Games");
-			file_create_hierarchy(info, finalbuf);
+				if (desktop == DESKTOP_GNOME && gnome_vfolders) {
+					// menu paths are embedded in the file, not the pathname
+					snprintf(finalbuf, PATH_MAX, "%s", buf);
+				} else {
+					snprintf(finalbuf, PATH_MAX, "%s%s/", buf, elem->menu ? elem->menu : "Games");
+				}
+				file_create_hierarchy(info, finalbuf);
 
 			strncat(finalbuf, elem->symlink, PATH_MAX-strlen(finalbuf));
 
@@ -1943,12 +1975,13 @@ int install_menuitems(install_info *info, desktop_type desktop)
 				fprintf(fp, "# KDE Config File\n");
 			    }
 			    fprintf(fp, "[%sDesktop Entry]\n"
-				    "Name=%s\n"
-				    "Comment=%s\n"
-				    "Exec=%s\n"
-				    "Icon=%s\n"
-				    "Terminal=0\n"
-				    "Type=Application\n",
+						"Name=%s\n"
+						"Comment=%s\n"
+						"Exec=%s\n"
+						"Icon=%s\n"
+						"Terminal=0\n"
+						"Type=Application\n"
+						"Categories=Application;X-Redhat-Base;\n",
 				    (desktop==DESKTOP_KDE) ? "KDE " : "",
 				    elem->name ? elem->name : info->name,
 				    elem->desc ? elem->desc : info->desc,
@@ -1956,12 +1989,37 @@ int install_menuitems(install_info *info, desktop_type desktop)
 			    fclose(fp);
 			    add_file_entry(info, opt, finalbuf, NULL, 0);
 			    ++ num_items;
-			    // successful REDHAT takes care of KDE/GNOME
-			    // tell caller no need to continue others
-			    // UNLESS we are Redhat 6.1 or earlier, in which case we need to install
-			    // everything else.
+			    if (desktop == DESKTOP_REDHAT && info->distro==DISTRO_REDHAT && info->distro_maj >= 8) {
+					/* try to create a symlink for redhat 8.0 symlink
+					   directory; not strictly necessary but it will
+					   allow menuitem to show up in kde without an x
+					   restart */
+
+					char newlink[4096];
+					char* bname;
+					char* finalbufcopy;
+
+					finalbufcopy = strdup(finalbuf);
+					bname = strrchr(finalbufcopy, '/');
+					if ( bname )
+						bname ++;
+					else
+						bname = finalbufcopy;
+					snprintf(newlink, sizeof(newlink), 
+							 "/usr/share/applnk-redhat/%s/%s", 
+							 elem->menu ? elem->menu : "Games",
+							 bname);
+				
+					file_symlink(info, finalbuf, newlink);
+					free(finalbufcopy);
+			    }
+			    
+			    /* successful REDHAT takes care of KDE/GNOME
+			       tell caller no need to continue others
+			       UNLESS we are Redhat 6.1 or earlier, in which case we need to install
+			       everything else. */
 			    if ( (info->distro != DISTRO_REDHAT) || (info->distro_maj>6) || (info->distro_min>1) ) {
-				ret_val = (desktop == DESKTOP_REDHAT);
+					ret_val = (desktop == DESKTOP_REDHAT);
 			    }
 
 			} else {

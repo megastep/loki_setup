@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.6 2002-10-23 05:21:18 megastep Exp $
+ * $Id: dialog_ui.c,v 1.7 2002-12-07 00:57:31 megastep Exp $
  */
 
 #include <limits.h>
@@ -14,6 +14,7 @@
 
 #include "install.h"
 #include "install_ui.h"
+#include "install_log.h"
 #include "detect.h"
 #include "file.h"
 #include "copy.h"
@@ -73,7 +74,7 @@ install_state dialog_init(install_info *info,int argc, char **argv,
 	dialog_vars.backtitle = title;
 
     snprintf(msg, sizeof(msg),
-			 _("You are running a %s machine with %s\nDistribution: %s %d.%d"),
+			 _("You are running a %s machine with %s\nOperating System: %s %d.%d"),
 			 info->arch, info->libc, distribution_name[info->distro],
 			 info->distro_maj, info->distro_min);
 	
@@ -556,10 +557,15 @@ static void dialog_shutdown(install_info *info)
 
 int dialog_okay(Install_UI *UI, int *argc, char ***argv)
 {
+	if ( getenv("SETUP_NO_DIALOG") )
+		return(0);
+
     if ( !isatty(STDIN_FILENO) )
-	return(0);
-    if ( !init_dialog() )
-	return(0);
+		return(0);
+    if ( !init_dialog() ) {
+		log_debug("init_dialog() failed!");
+		return(0);
+	}
 
     /* Set up the driver */
     UI->init = dialog_init;

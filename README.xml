@@ -566,6 +566,9 @@ There are several optional attributes of the binary element:
             against this checksum. Installation will abort in the case of an invalid
             checksum, indicating corruption.
 
+ mode       Use an octal value to specify the permissions of the file once installed (755
+            is the default for binaries).
+
 The FILES element:
 
 The files element contains a list of files and directories, one per line,
@@ -632,6 +635,13 @@ There are several optional attributes of the files element:
             the output of the 'md5sum' command), and the copied file will be verified
             against this checksum. Installation will abort in the case of an invalid
             checksum, indicating corruption.
+
+ mode       Use an octal value to specify the permissions of the file once installed (644
+            is the default for regular files).
+            When specifying archives handled by a plugin, the plugin may choose to use this
+            mode for all files uncompressed from the archive.
+            NOTE: This doesn't apply to directories, which are currently always created with
+            mode 755.
 
 The SCRIPT element:
 

@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.74 2002-10-23 05:21:19 megastep Exp $
+   $Id: gtk_ui.c,v 1.75 2002-12-07 00:57:31 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1381,9 +1381,8 @@ static install_state gtkui_init(install_info *info, int argc, char **argv, int n
     /* Update the install image */
     update_image(GetProductSplash(info));
 
-    /* Center and show the installer */
+    /* Center the installer, it will be shown later */
     gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
-    gtk_widget_show(window);
 
     return cur_state;
 }
@@ -1427,6 +1426,10 @@ static install_state gtkui_pick_class(install_info *info)
 {
 	/* Enable the Continue button now */
 	GtkWidget *widget = glade_xml_get_widget(setup_glade, "class_continue");
+
+	/* Make sure the window is being shown */
+    gtk_widget_show(glade_xml_get_widget(setup_glade, "setup_window"));
+
 	gtk_widget_set_sensitive(widget, TRUE);
 	return iterate_for_state();
 }
@@ -1444,14 +1447,17 @@ static install_state gtkui_setup(install_info *info)
     GtkWidget *options;
     xmlNodePtr node;
 
+    window = glade_xml_get_widget(setup_glade, "setup_window");
+	/* Make sure the window is being shown */
+    gtk_widget_show(window);
+
     if ( express_setup ) {
-	GtkWidget *notebook = glade_xml_get_widget(setup_glade, "setup_notebook");
-	gtk_notebook_set_page(GTK_NOTEBOOK(notebook), COPY_PAGE);
-	return cur_state = SETUP_INSTALL;
+		GtkWidget *notebook = glade_xml_get_widget(setup_glade, "setup_notebook");
+		gtk_notebook_set_page(GTK_NOTEBOOK(notebook), COPY_PAGE);
+		return cur_state = SETUP_INSTALL;
     }
 
     /* Go through the install options */
-    window = glade_xml_get_widget(setup_glade, "setup_window");
     options = glade_xml_get_widget(setup_glade, "option_vbox");
     gtk_container_foreach(GTK_CONTAINER(options), empty_container, options);
     info->install_size = 0;

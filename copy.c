@@ -243,7 +243,7 @@ int parse_line(const char **srcpp, char *buf, int maxlen)
 }
 
 ssize_t copy_file(install_info *info, const char *cdrom, const char *path, const char *dest, char *final, 
-				  int binary, xmlNodePtr node,
+				  int binary, int strip_dirs, xmlNodePtr node,
 				  int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current),
 				  struct file_elem **elem)
 {
@@ -253,7 +253,7 @@ ssize_t copy_file(install_info *info, const char *cdrom, const char *path, const
     stream *input, *output;
 	struct file_elem *output_elem;
 
-    if ( binary ) {
+    if ( strip_dirs ) {
         /* Get the final pathname (useful for binaries only!) */
         base = strrchr(path, '/');
         if ( base == NULL ) {
@@ -297,6 +297,8 @@ ssize_t copy_file(install_info *info, const char *cdrom, const char *path, const
 		const char *md5 = xmlGetProp(node, "md5sum");
 		const char *mut = xmlGetProp(node, "mutable");
 		const char *uncompress = xmlGetProp(node, "process");
+		const char *mode_str = xmlGetProp(node, "mode");
+		int mode = binary ? 0755 : 0644;
 
 		input = file_open(info, fullpath, "r");
 		if ( input == NULL ) {
@@ -307,6 +309,10 @@ ssize_t copy_file(install_info *info, const char *cdrom, const char *path, const
 			file_close(info, input);
 			return(-1);
 		}
+
+		if ( mode_str ) {
+			mode = (int) strtol(mode_str, NULL, 8);
+		} 
 
 		while ( (copied=file_read(info, buf, BUFSIZ, input)) > 0 ) {
 			if ( file_write(info, buf, copied, output) != copied ) {
@@ -351,6 +357,9 @@ ssize_t copy_file(install_info *info, const char *cdrom, const char *path, const
 						output_elem->path = strdup(remove_root(info, targetpath));
 						strncpy(fullpath, targetpath, sizeof(fullpath));
 					}
+					file_chmod(info, targetpath, mode);
+				} else {
+					file_chmod(info, fullpath, mode);
 				}
 
 				/* Update the MD5 sum for the file */
@@ -363,6 +372,8 @@ ssize_t copy_file(install_info *info, const char *cdrom, const char *path, const
 			}
 			pop_curdir();
 			free(dir);
+		} else {
+			file_chmod(info, final, mode);
 		}
 		if ( md5 ) { /* Verify the output file */
 			strcpy(sum, get_md5(output->md5.buf));
@@ -428,7 +439,7 @@ ssize_t copy_path(install_info *info, const char *path, const char *dest,
 			if (plug) {
 				copied = plug->Copy(info, path, dest, current_option_txt, node, update);
 			} else {
-				copied = copy_file(info, cdrom, path, dest, final, strip_dirs, node, update, NULL);
+				copied = copy_file(info, cdrom, path, dest, final, 0, strip_dirs, node, update, NULL);
 			}
         }
         if ( copied > 0 ) {
@@ -586,13 +597,13 @@ ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, c
                 snprintf(fullpath, sizeof(fullpath), "%s/%s", cdpath, fpat);
                 if ( stat(fullpath, &sb) == 0 ) {
                     check_dynamic(fpat, bin, cdpath);
-                    copied = copy_file(info, cdpath, bin, fdest, final, 1, node, update, &file);
+                    copied = copy_file(info, cdpath, bin, fdest, final, 1, 1, node, update, &file);
                 } else if ( ! binpath ) {
                     snprintf(fullpath, sizeof(fullpath), "%s/bin/%s/%s/%s", cdpath, os, arch, final);
                     if ( stat(fullpath, &sb) == 0 ) {
                         snprintf(fullpath, sizeof(fullpath), "bin/%s/%s/%s", os, arch, final);
                         check_dynamic(fullpath, bin, cdpath);
-                        copied = copy_file(info, cdpath, bin, fdest, final, 1, node, update, &file);
+                        copied = copy_file(info, cdpath, bin, fdest, final, 1, 1, node, update, &file);
                     } else {
                         log_warning(_("Unable to find file '%s'"), fpat);
                         ui_fatal_error(_("Unable to find file '%s'"), fpat);
@@ -604,12 +615,12 @@ ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, c
 			} else {
 				if ( stat(fpat, &sb) == 0 ) {
 					check_dynamic(fpat, bin, NULL);
-					copied = copy_file(info, NULL, bin, fdest, final, 1, node, update, &file);
+					copied = copy_file(info, NULL, bin, fdest, final, 1, 1, node, update, &file);
 				} else if ( ! binpath ) {
 					snprintf(fpat, sizeof(fpat), "bin/%s/%s/%s", os, arch, final);
 					if ( stat(fpat, &sb) == 0 ) {
 						check_dynamic(fpat, bin, NULL);
-						copied = copy_file(info, NULL, bin, fdest, final, 1, node, update, &file);
+						copied = copy_file(info, NULL, bin, fdest, final, 1, 1, node, update, &file);
 					} else {
 						log_warning(_("Unable to find file '%s'"), fpat);
                         ui_fatal_error(_("Unable to find file '%s'"), fpat);
@@ -639,7 +650,6 @@ ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, c
             char sym_to[PATH_MAX];
 
             size += copied;
-            file_chmod(info, final, 0755); /* Fix the permissions */
             /* Create the symlink */
             if ( *info->symlinks_path && symlink ) {
                 snprintf(sym_to, sizeof(sym_to), "%s/%s", info->symlinks_path, symlink);

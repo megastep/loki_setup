@@ -40,8 +40,8 @@ typedef enum {
 /* The types of desktop we support menu items for */
 typedef enum {
     DESKTOP_MENUDEBIAN,
-    DESKTOP_GNOME, /* Gnome before Redhat in case Ximian is also installed */
     DESKTOP_REDHAT,
+    DESKTOP_GNOME,
     DESKTOP_KDE, /* KDE first because RH6.1 does not yet handle KDE well. */
 	DESKTOP_CDE, /* Common Desktop Environment */
 	DESKTOP_IRIX, /* IRIX ToolChest */
@@ -248,7 +248,8 @@ struct component_elem *add_component_entry(install_info *info, const char *name,
 struct option_elem *add_option_entry(struct component_elem *comp, const char *name, const char *tag);
 
 /* Add a file entry to the list of files installed */
-extern struct file_elem *add_file_entry(install_info *info, struct option_elem *opt, const char *path, const char *symlink, int mutable);
+extern struct file_elem *add_file_entry(install_info *info, struct option_elem *opt, const char *path, 
+										const char *symlink, int mutable);
 
 /* Add a script entry for uninstallation of manually installed RPMs */
 extern void add_script_entry(install_info *info, struct option_elem *opt, const char *script, int post);

@@ -507,6 +507,14 @@ int file_exists(const char *path)
 	return stat(path, &st) == 0;
 }
 
+int dir_exists(const char *path)
+{
+	struct stat st;
+
+	return stat(path, &st) == 0 && S_ISDIR(st.st_mode);
+}
+
+
 /* Test the accessibility of a given directory (if the hierarchy can be created by
    the current user). Basically a directory is "accessible" only if the first 
    directory we have found in the hierarchy is writable.

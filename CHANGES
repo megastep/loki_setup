@@ -1,10 +1,13 @@
 Current:
+Stephane Peter (Codehost) - Fri Dec  6 16:31:27 PST 2002
+ * Do not display the main GTK dialog until we're done with the EULAs.
+ * Various fixes for menu items
 Ryan C. Gordon (Epic Games) - Sat Nov 30 12:09:47 EST 2002
  * Significant reduction in bandwidth for console_ui...makes this usable
    on terminals over dialup.
 Ryan C. Gordon (Epic Games) - Sun Nov 10 19:55:35 EST 2002
  * Corrected typo in configure.in (thanks, zakk!)
-Ryan C. Gordon (Epic Games) - Thu Sep 19 17:05:48 EDT 2002
+Ryan C. Gordon (icculus.org) - Thu Sep 19 17:05:48 EDT 2002
  * console_ui.c now respects $PAGER environment var.
 Stephane Peter (Codehost) - Fri Sep 20 15:46:23 PDT 2002
  * Added --disable-dialog flag to configure script to
@@ -12,12 +15,15 @@ Stephane Peter (Codehost) - Fri Sep 20 15:46:23 PDT 2002
 Stephane Peter (Codehost) - Thu Sep 26 18:38:02 PDT 2002
  * Added 'tag' tag for <option>, and have SETUP_OPTIONTAGS environment
    variable in scripts to be able to determine the set of user options.
-Ryan C. Gordon (Epic Games) - Sat Oct  5 18:36:46 EDT 2002
- * Fixed typo in makeself-header.sh ... needed to escape $PATH reference.
 Stephane Peter (Codehost) - Wed Oct  9 17:46:25 PDT 2002
  * Preliminary AIX 5.1 port
 Stephane Peter (Codehost) - Fri Oct 18 16:26:18 PDT 2002
  * Deprecated 'nobinaries' tag.
+Stephane Peter (Codehost) - Mon Nov 11 16:05:01 PST 2002
+ * Added 'mode' attribute to binaries and files tag so that permissions
+   can be explicitly specified.
+John Quigley -  Tue, 19 Nov 2002 19:15:01 -0800
+ * Various fixes for Redhat 8.0 menu items.
 
 1.6.1:
 Stephane Peter (Codehost) - Sun Mar 31 22:46:57 PST 2002
@@ -150,7 +156,7 @@ Stéphane Peter - Tue Oct 10 19:18:24 PDT 2000
  * Moved away from uninstall scripts and use the 'setupdb' API to manage
    a database of installed products and components, managed through XML
    files.
-
+ 
 1.4.0:
 Sam Lantinga - Tue Aug 22 12:32:29 PDT 2000
  * Fixed problem with arrow key actions on main entry boxes
@@ -219,7 +225,7 @@ Stéphane Peter - Tue May  2 19:45:53 PDT 2000
  * Updates to the XML file format: new 'readme' and 'eula' localizable tags that
    supercede the old attributes for the 'install' tag. The 'help' attribute for
    options has also been replaced by the separate sub-element.
- * Added the 'keepdirs' attribute for binaries, that allows to keep the
+ * Added the 'keepdirs' attribute for binaries, that allows to keep the 
    directory structure specified (to have binaries in subdirectories).
 Borland/Inprise Corp. - Tue May  9 12:45:03 PDT 2000
  * Bugfixes in GTK UI for handling the destroy button.
@@ -289,7 +295,7 @@ Bernd Kreimeier - 1999-12-10
    (which failed on glibc-2.0 on our testbox) with new one.
 
 1.2:  Third public release
-SOL -   Set the umask for the installer to: 022
+SOL -   Set the umask for the installer to: 022 
 SOL -   Added "arch" and "libc" attributes to the option element
 SOL -   Added SETUP_ARCH and SETUP_LIBC environment overrides
 

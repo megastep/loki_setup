@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.29 2002-10-23 05:21:19 megastep Exp $ */
+/* $Id: uninstall.c,v 1.30 2002-12-07 00:57:32 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -12,6 +12,7 @@
 #include <errno.h>
 #include <signal.h>
 #include <locale.h>
+#include <sys/stat.h>
 
 #include "arch.h"
 #include "setupdb.h"
@@ -249,11 +250,10 @@ static void init_locale(void)
 	textdomain (PACKAGE);
 }
 
-#ifdef UNINSTALL_UI
-static void goto_installpath(char *argv0)
+const char *get_installpath(char *argv0)
 {
     char temppath[PATH_MAX];
-    char datapath[PATH_MAX];
+    static char datapath[PATH_MAX];
     char *home;
 
     home = getenv("HOME");
@@ -311,28 +311,120 @@ static void goto_installpath(char *argv0)
         /* There should always be '/' in the path */
         *(strrchr(datapath, '/')) = '\0';
     }
-    if ( ! *datapath || (chdir(datapath) < 0) ) {
-        fprintf(stderr, _("Couldn't change to install directory\n"));
-        exit(1);
+    if ( ! *datapath ) {
+		return NULL;
     }
+	return datapath;
 }
-#endif /* UNINSTALL_UI */
 
 int main(int argc, char *argv[])
 {
     product_info_t *info;
     char desc[128];
+#ifdef UNINSTALL_UI
+	const char *p;
+#endif
 	int ret = 0;
 
+#ifdef __hpux
+    const char *env;
+	/* HP-UX wouldn't allow us to uninstall ourselves unless we copy the binary some other place */
+
+	/* See if we have already being run from the script */
+	env = getenv("SETUP_DONT_COPY");
+	if ( env==NULL || atoi(env)==0 ) {
+		char tmpscript[PATH_MAX] = "/tmp/uninstXXXXXX", tmpbin[PATH_MAX] = "/tmp/uninstbinXXXXXX";
+		char source[PATH_MAX], *basename;
+		const char *installpath;
+		FILE *f;
+
+		env = getenv("TMPDIR");
+		if ( env ) {
+			snprintf(tmpscript, sizeof(tmpscript), "%s/uninstXXXXXX", env);
+			snprintf(tmpbin, sizeof(tmpbin), "%s/uninstbinXXXXXX", env);
+		}
+		/* First create the bootstrap script */
+		if ( *mktemp(tmpscript) == '\0' )
+			perror("mktemp(script)");
+		if ( *mktemp(tmpbin) == '\0' )
+			perror("mktemp(bin)");
+
+		/* Copy ourselves to a temporary location */
+		basename = strrchr(argv[0], '/');
+		if ( basename ) {
+			basename ++;
+		} else {
+			basename = argv[0];
+		}
+		installpath = get_installpath(argv[0]);
+		snprintf(source, sizeof(source), "%s/%s", installpath, basename);
+		f = fopen(source, "rb");
+		if ( f ) {
+			FILE *o = fopen(tmpbin, "wb");
+			if ( o ) {
+				char buf[1024];
+				int cnt;
+				while ( (cnt = fread(buf, 1, sizeof(buf), f)) > 0 ) {
+					if ( fwrite(buf, 1, cnt, o) == 0 ) {
+						perror("fwrite");
+						unlink(tmpbin);
+						break;
+					}
+				}
+				fchmod(fileno(o), 0755);
+				fclose(o);
+
+				o = fopen(tmpscript, "w");
+				if ( o ) {
+					fprintf(o,
+							"#!/bin/sh\n\n"
+							"SETUP_DONT_COPY=1\n"
+							"export SETUP_DONT_COPY\n"
+							"cd %s\n"
+							"%s $*\n"
+							"rm -f \"%s\" \"%s\"\n",
+							installpath, tmpbin, tmpbin, tmpscript);
+					fchmod(fileno(o), 0755);
+					fclose(o);
+					
+					/* Finally exit this program and run the script */
+					execv(tmpscript, argv);
+					perror("execv"); /* Something has gone wrong :( */
+					unlink(tmpscript);
+					unlink(tmpbin);
+				} else {
+					fprintf(stderr, _("Warning: Unable to replicate uninstallation program.\n"));
+				}
+
+			} else {
+				fprintf(stderr, _("Unable to open %s for writing.\n"), tmpbin);
+			}
+			fclose(f);
+		} else {
+			fprintf(stderr, _("Unable to open %s for copying.\n"), source);
+		}
+	}
+#endif
+
 #ifdef UNINSTALL_UI
-    goto_installpath(argv[0]);
+#ifdef __hpux
+	if ( env==NULL || atoi(env)==0 ) {
+#endif
+    p = get_installpath(argv[0]);
+	if ( p==NULL || (chdir(p) < 0) ) {
+        fprintf(stderr, _("Couldn't change to install directory\n"));
+        exit(1);
+	}
+#ifdef __hpux
+	}
+#endif
 #endif
 
 	/* Set the locale */
     init_locale();
 
 #ifdef UNINSTALL_UI
-	if ( argc < 2 ) {
+    if ( argc < 2 ) {
         return uninstall_ui(argc, argv);
     }
 #endif

@@ -2,7 +2,7 @@
  * Check and Rescue Tool for Loki Setup packages. Verifies the consistency of the files,
  * and optionally restores them from the original installation medium.
  *
- * $Id: check.c,v 1.6 2002-10-23 05:21:18 megastep Exp $
+ * $Id: check.c,v 1.7 2002-12-07 00:57:31 megastep Exp $
  */
 
 #include <stdlib.h>

@@ -49,6 +49,8 @@
 #define MNTTYPE_CDROM    "cdfs"
 #elif defined(_AIX)
 #define MNTTYPE_CDROM    "cdrfs"
+#elif defined(sco)
+#define MNTTYPE_CDROM    "ISO9660"
 #elif defined(__svr4__)
 #define MNTTYPE_CDROM    "hsfs"
 #else
@@ -151,7 +153,18 @@ int is_fs_mounted(const char *dev)
 		}
         endmntent( mountfp );
 	}
-
+#elif defined(sco)
+	FILE *cmd = popen("/etc/mount", "r");
+	if ( cmd ) {
+		char device[32] = "";
+		while ( fscanf(cmd, "%*s on %32s %*[^\n]", device) > 0 ) {
+			if ( !strcmp(device, dev) ) {
+				found = 1;
+				break;
+			}
+		}
+		pclose(cmd);
+	}
 #elif defined(__svr4__)
 	struct mnttab mnt;
 	FILE *mtab = fopen(MOUNTS_FILE, "r");
@@ -287,39 +300,21 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
 		
 		free(mnts);
     }
-
-#elif defined(__svr4__)
-	struct mnttab mnt;
-
-	FILE *fstab = fopen(SETUP_FSTAB, "r");
-	if ( fstab != NULL ) {
-		while ( getmntent(fstab, &mnt)==0 ) {
-			if ( !strcmp(mnt.mnt_fstype, MNTTYPE_CDROM) ) {
-                char *fsname = strdup(mnt.mnt_special);
-                char *dir = strdup(mnt.mnt_mountp);
-                if ( !is_fs_mounted(fsname)) {
-                    if ( ! run_command(NULL, MOUNT_PATH, fsname, 1) ) {
-                        add_mounted_entry(fsname, dir);
-                        log_normal(_("Mounted device %s"), fsname);
-                    }
-                }
-                free(fsname);
-                free(dir);
+#elif defined(sco)
+	/* Quite horrible. We have to parse mount's output :( */
+	/* And of course, we can't try to mount unmounted filesystems */
+	FILE *cmd = popen("/etc/mount", "r");
+	if ( cmd ) {
+		char device[32] = "", mountp[PATH_MAX] = "";
+		while ( fscanf(cmd, "%s on %32s %*[^\n]", mountp, device) > 0 ) {
+			if ( !strncmp(device, "/dev/cd", 7) ) {
+				path[num_cdroms ++] = strdup(mountp);
 				break;
 			}
 		}
-		fclose(fstab);
-		fstab = fopen(MOUNTS_FILE, "r");
-		if (fstab) {
-			while ( getmntent(fstab, &mnt)==0 && num_cdroms < SETUP_MAX_DRIVES) {
-				if ( !strcmp(mnt.mnt_fstype, MNTTYPE_CDROM) ) {
-					path[num_cdroms ++] = strdup(mnt.mnt_mountp);
-				}
-			}
-			fclose(fstab);
-		}
+		pclose(cmd);
 	}
-    
+
 #elif defined(hpux)
     char mntdevpath[PATH_MAX];
     FILE *mountfp;
@@ -376,6 +371,38 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
         }
         endmntent( mountfp );
     }
+#elif defined(__svr4__)
+	struct mnttab mnt;
+
+	FILE *fstab = fopen(SETUP_FSTAB, "r");
+	if ( fstab != NULL ) {
+		while ( getmntent(fstab, &mnt)==0 ) {
+			if ( !strcmp(mnt.mnt_fstype, MNTTYPE_CDROM) ) {
+                char *fsname = strdup(mnt.mnt_special);
+                char *dir = strdup(mnt.mnt_mountp);
+                if ( !is_fs_mounted(fsname)) {
+                    if ( ! run_command(NULL, MOUNT_PATH, fsname, 1) ) {
+                        add_mounted_entry(fsname, dir);
+                        log_normal(_("Mounted device %s"), fsname);
+                    }
+                }
+                free(fsname);
+                free(dir);
+				break;
+			}
+		}
+		fclose(fstab);
+		fstab = fopen(MOUNTS_FILE, "r");
+		if (fstab) {
+			while ( getmntent(fstab, &mnt)==0 && num_cdroms < SETUP_MAX_DRIVES) {
+				if ( !strcmp(mnt.mnt_fstype, MNTTYPE_CDROM) ) {
+					path[num_cdroms ++] = strdup(mnt.mnt_mountp);
+				}
+			}
+			fclose(fstab);
+		}
+	}
+    
 #else
     char mntdevpath[PATH_MAX];
     FILE *mountfp;
@@ -388,6 +415,7 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
             if ( (!strcmp(mntent->mnt_type, MNTTYPE_CDROM) 
 #ifdef sgi
 				 || !strcmp(mntent->mnt_type, "cdfs")
+				 || !strcmp(mntent->mnt_type, "efs")
 #endif
 				 || !strcmp(mntent->mnt_type, "auto"))
 				 && strncmp(mntent->mnt_fsname, DEVICE_FLOPPY, strlen(DEVICE_FLOPPY)) ) {
@@ -445,7 +473,8 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
 	        path[num_cdroms ++] = strdup(mntent->mnt_dir);		
 	    }
 #ifdef sgi
-            else if ( strcmp(mnt_type, "cdfs") == 0 ) {
+            else if ( strcmp(mnt_type, "cdfs") == 0 ||
+                      strcmp(mnt_type, "efs")  == 0 ) {
 	      path[num_cdroms ++] = strdup(mntent->mnt_dir);
             }
 #endif

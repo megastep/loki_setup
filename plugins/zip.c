@@ -1,5 +1,5 @@
 /* ZIP plugin for setup */
-/* $Id: zip.c,v 1.5 2002-10-19 07:41:11 megastep Exp $ */
+/* $Id: zip.c,v 1.6 2002-12-07 00:57:32 megastep Exp $ */
 
 #include "plugins.h"
 #include "file.h"
@@ -675,9 +675,17 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
     uint32 compressed_position = 0;
     uint32 i;
     int rc;
+	unsigned int user_mode = 0;
+
     /* Optional MD5 sum can be specified in the XML file */
     const char *md5 = xmlGetProp(node, "md5sum");
     const char *mut = xmlGetProp(node, "mutable");
+    const char *mode_str = xmlGetProp(node, "mode");
+
+	if ( mode_str ) {
+		user_mode = (unsigned int) strtol(mode_str, NULL, 8);
+	}
+
 
     memset(&zipinfo, '\0', sizeof (ZIPinfo));
 
@@ -844,6 +852,9 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
         else
         {
             retval += entry->uncompressed_size;
+			if ( user_mode )
+				file_chmod(info, final, user_mode);
+
 			if ( md5 ) { /* Verify the output file */
 			  char sum[CHECKSUM_SIZE+1];
 			  

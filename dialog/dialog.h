@@ -1,5 +1,5 @@
 /*
- *  $Id: dialog.h,v 1.5 2002-10-19 07:41:10 megastep Exp $
+ *  $Id: dialog.h,v 1.6 2002-12-07 00:57:32 megastep Exp $
  *
  *  dialog.h -- common declarations for all dialog modules
  *

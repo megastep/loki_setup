@@ -67,9 +67,15 @@ size_t copy_cpio_stream(install_info *info, stream *input, const char *dest, con
     size_t size = 0;
     char buf[BUFSIZ];
     int count = 0;
+	unsigned int user_mode = 0;
     /* Optional MD5 sum can be specified in the XML file */
     const char *md5 = xmlGetProp(node, "md5sum");
     const char *mut = xmlGetProp(node, "mutable");
+    const char *mode_str = xmlGetProp(node, "mode");
+
+	if ( mode_str ) {
+		user_mode = (unsigned int) strtol(mode_str, NULL, 8);
+	}
 
     memset(&file_hdr, 0, sizeof(file_hdr));
     while ( ! file_eof(info, input) ) {
@@ -175,7 +181,7 @@ size_t copy_cpio_stream(install_info *info, stream *input, const char *dest, con
 							log_fatal(_("File '%s' has an invalid checksum! Aborting."), file_hdr.c_name);
 						}
 					}
-					chmod(file_hdr.c_name, file_hdr.c_mode & C_MODE);
+					file_chmod(info, file_hdr.c_name, user_mode ? user_mode : (file_hdr.c_mode & C_MODE));
 				}else { /* Skip the file data */
 					file_skip(info, file_hdr.c_filesize, input);
 					count += file_hdr.c_filesize;

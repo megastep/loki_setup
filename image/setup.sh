@@ -20,6 +20,10 @@ USE_XHOST=0
 SU_MESSAGE="You need to run this installation as the super user.\nPlease enter the root password."
 
 NULL=/dev/null
+# See if we have the XPG4 utilities (Solaris)
+if test -d /usr/xpg4/bin; then
+	PATH=/usr/xpg4/bin:$PATH
+fi
 
 # Return the appropriate architecture string
 DetectARCH()
@@ -59,7 +63,7 @@ DetectLIBC()
 		  return $status
 	  fi
       if [ -f `echo /lib/libc.so.6* | tail -1` ]; then
-	      if fgrep GLIBC_2.1 /lib/libc.so.6* 2>&1 >> $NULL; then
+	      if fgrep GLIBC_2.1 /lib/libc.so.6* 2> $NULL >> $NULL; then
 	              echo "glibc-2.1"
 	              status=0
 	      else    
@@ -206,11 +210,11 @@ __EOF__
 # if we have not been through the auth yet, and if we need to get root, then prompt
 if [ "$auth" -eq 0 ] && [ "$GET_ROOT" -ne 0 ]
 then
-  GOT_ROOT=`whoami`
-  if [ "$GOT_ROOT" != "root" ]
+  GOT_ROOT=`id -u`
+  if [ "$GOT_ROOT" != "0" ]
   then
 	if [ "$USE_XHOST" -eq 1 ]; then
-		xhost +127.0.0.1 2>&1 > $NULL
+		xhost +127.0.0.1 2> $NULL > $NULL
 	fi
     try_run xsu -e -a -u root -c "sh `pwd`/setup.sh -auth" $XSU_ICON
     status="$?"

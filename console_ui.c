@@ -126,6 +126,11 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
 	int retval = 1;
     yesno_answer response = RESPONSE_INVALID, default_response;
 
+	/* Check if we are on a valid tag */
+	if ( !strcmp(node->name, "text") ) {
+		return retval;
+	}
+
     /* See if this node matches the current architecture */
     wanted = xmlGetProp(node, "arch");
     if ( ! match_arch(info, wanted) ) {

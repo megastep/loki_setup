@@ -1,5 +1,5 @@
 /*
- *  $Id: gauge.c,v 1.4 2002-10-19 07:41:10 megastep Exp $
+ *  $Id: gauge.c,v 1.5 2002-12-07 00:57:32 megastep Exp $
  *
  *  guage.c -- implements the gauge dialog
  *

@@ -1,5 +1,5 @@
 /* TAR plugin for setup */
-/* $Id: tar.c,v 1.7 2002-10-19 07:41:11 megastep Exp $ */
+/* $Id: tar.c,v 1.8 2002-12-07 00:57:32 megastep Exp $ */
 
 #include "config.h"
 #include "plugins.h"
@@ -48,11 +48,16 @@ static size_t TarCopy(install_info *info, const char *path, const char *dest, co
     stream *input, *output;
     size_t size, copied;
     size_t this_size;
-    unsigned int mode;
+    unsigned int mode, user_mode = 0;
     int blocks, left, length;
     /* Optional MD5 sum can be specified in the XML file */
     const char *md5 = xmlGetProp(node, "md5sum");
     const char *mut = xmlGetProp(node, "mutable");
+    const char *mode_str = xmlGetProp(node, "mode");
+
+	if ( mode_str ) {
+		user_mode = (unsigned int) strtol(mode_str, NULL, 8);
+	}
 
 	log_debug("TAR: Copy %s -> %s", path, dest);
 
@@ -115,7 +120,7 @@ static size_t TarCopy(install_info *info, const char *path, const char *dest, co
 								log_fatal(_("File '%s' has an invalid checksum! Aborting."), final);
 							}
 						}
-						chmod(final, mode);
+						file_chmod(info, final, user_mode ? user_mode : mode);
 					}
 				}
                 break;

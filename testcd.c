@@ -1,5 +1,5 @@
 /* Simple program to test the CDROM detection routines */
-/* $Id: testcd.c,v 1.1 2002-10-23 05:21:19 megastep Exp $ */
+/* $Id: testcd.c,v 1.2 2002-12-07 00:57:32 megastep Exp $ */
 
 #include <stdio.h>
 #include <unistd.h>

@@ -1,5 +1,5 @@
 /*
- *  $Id: rc.c,v 1.4 2002-10-19 07:41:11 megastep Exp $
+ *  $Id: rc.c,v 1.5 2002-12-07 00:57:32 megastep Exp $
  *
  *  rc.c -- routines for processing the configuration file
  *
