@@ -183,12 +183,10 @@ case "$target" in
         ARCH=`uname -p 2> /dev/null || uname -m` ;;
 esac
 
-GTK_STATIC=$BSTATIC
 case "$target" in
 	*linux*)
 # Newer glibc's require to depend at least on them
 		STATIC=""
-		GTK_STATIC="\$(BDYNAMIC)" ;;
 esac
 
 CFLAGS="$CFLAGS $REENTRANT"
@@ -210,7 +208,6 @@ if test ! -d "$SETUPDB"; then
 	fi
 fi
 
-
 AC_ARG_WITH(setupdb,
 [  --with-setupdb            with setupdb library at  [default=../loki_setupdb]],
               ,   with_setupdb=$SETUPDB)
@@ -228,8 +225,8 @@ fi
 
 CFLAGS="$CFLAGS -I$SETUPDB"
 
-GUI_LIBS=$GTK_STATIC
-GTK_LIBS=$GTK_STATIC
+GUI_LIBS=
+GTK_LIBS=
 #!!!TODO - Add carbon libs as necessary
 CARBON_LIBS=
 
@@ -333,6 +330,27 @@ AC_ARG_WITH(ncurses,
 	USE_NCURSES=yes
 )	
 
+AC_ARG_ENABLE(libglade-static,
+[  --enable-libglade-static            whether to statically link libglade (default=yes)],,
+enable_libglade_static=yes)
+if test "x$enable_libglade_static" = "xyes"; then
+	GLADE_STATIC="$BSTATIC"
+fi
+
+AC_ARG_ENABLE(libxml-static,
+[  --enable-libxml-static            whether to statically link libxml (default=yes)],,
+enable_libxml_static=yes)
+if test "x$enable_libxml_static" = "xyes"; then
+	XML_STATIC="$BSTATIC"
+fi
+
+AC_ARG_ENABLE(libncurses-static,
+[  --enable-libncurses-static            whether to statically link libncurses (default=yes)],,
+enable_libncurses_static=yes)
+if test "x$enable_libncurses_static" = "xyes"; then
+	NCURSES_STATIC="$BSTATIC"
+fi
+
 AC_CHECK_HEADERS(ncurses/term.h)
 AC_CHECK_HEADERS(ncurses/curses.h)
 AC_CHECK_HEADERS(ncurses.h)
@@ -347,8 +365,8 @@ if test ! -z "$HAVEXML"; then
 
     CFLAGS="$CFLAGS $XML_CFLAGS"
     if test "$STATIC" = ""; then
-        LIBS="$LIBS $BSTATIC -L$XML_PREFIX/lib$LIBSUFFIX -lxml"
-        GUI_LIBS="$GUI_LIBS $BSTATIC -L$XML_PREFIX/lib$LIBSUFFIX -lxml"
+        LIBS="$LIBS $XML_STATIC -L$XML_PREFIX/lib$LIBSUFFIX -lxml $BDYNAMIC"
+        GUI_LIBS="$GUI_LIBS $XML_STATIC -L$XML_PREFIX/lib$LIBSUFFIX -lxml $BDYNAMIC"
         CARBON_LIBS="$CARBON_LIBS -L$XML_PREFIX/lib$LIBSUFFIX -lxml"
     else
         LIBS="$LIBS $XML_PREFIX/lib$LIBSUFFIX/libxml.a"
@@ -367,7 +385,7 @@ if test ! -z "$HAVEGLADE"; then
     GLADE_PREFIX=`$HAVEGLADE --prefix`
 
     CFLAGS="$CFLAGS $GLADE_CFLAGS"
-    GUI_LIBS="$GUI_LIBS $BSTATIC -L$GLADE_PREFIX/lib$LIBSUFFIX -lglade"
+    GUI_LIBS="$GUI_LIBS $GLADE_STATIC -L$GLADE_PREFIX/lib$LIBSUFFIX -lglade $BDYNAMIC"
 else
     AC_MSG_ERROR([*** libglade-config not found. You need a working libglade installation.])
 fi
@@ -393,8 +411,10 @@ if test x$HAVE_BZIP2_SUPPORT = xyes; then
   if test x$BZIP2_DLOPEN = xyes; then
     AC_DEFINE(BZIP2_DLOPEN, 1, open libbz2 using dlopen)
     BZ2LIB="-ldl"
+    BZ2_STATIC=""
   else
     BZ2LIB="-lbz2"
+    BZ2_STATIC="$BSTATIC"
     if test x$LIBBZ2_PREFIX = xyes; then
       AC_DEFINE(LIBBZ2_PREFIX, 1, libbz2 has "BZ_" prefix.)
     fi
@@ -425,8 +445,8 @@ fi
 
 dnl enable ZIP support
 AC_ARG_ENABLE(zip,
-[  --enable-zip              enable ZIP archives support  [default=no]],
-              , enable_zip=no)
+[  --enable-zip              enable ZIP archives support  [default=yes]],
+              , enable_zip=yes)
 if test x$enable_zip = xyes; then
   PLUGINS="$PLUGINS zip.c"
   CFLAGS="$CFLAGS -DZIP_SUPPORT"
@@ -435,8 +455,8 @@ fi
 
 dnl enable UZ2 support
 AC_ARG_ENABLE(uz2,
-[  --enable-uz2              enable UZ2 archives support  [default=no]],
-              , enable_uz2=no)
+[  --enable-uz2              enable UZ2 archives support  [default=yes]],
+              , enable_uz2=yes)
 if test x$enable_uz2 = xyes; then
   PLUGINS="$PLUGINS uz2.c"
   CFLAGS="$CFLAGS -DUZ2_SUPPORT"
@@ -480,7 +500,7 @@ if test x$enable_rpm4 = xyes; then
         AC_DEFINE(ENABLE_RPM, 1, RPM support.)
 fi
 
-LIBS="$LIBS $BSTATIC $BZ2LIB"
+LIBS="$LIBS $BZ2_STATIC $BZ2LIB $BDYNAMIC"
 
 if test ! -z "$USE_LIBINTL"; then
 	LIBINTL="$BSTATIC $LIBINTL -lz \$(BDYNAMIC)"
@@ -500,7 +520,7 @@ fi
 
 if test ! -z "$USE_NCURSES"; then
 	if test "$STATIC" = ""; then
-		CONSOLE_LIBS="$CONSOLE_LIBS $BSTATIC -lncurses \$(BDYNAMIC)"
+		CONSOLE_LIBS="$CONSOLE_LIBS $NCURSES_STATIC -lncurses \$(BDYNAMIC)"
 	else
 		CONSOLE_LIBS="$CONSOLE_LIBS -lncurses"
 	fi
