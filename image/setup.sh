@@ -41,6 +41,9 @@ DetectARCH()
 		    IRIX*)
 			echo "mips"
 			status=0;;
+            AIX*)
+            echo "ppc"
+            status=0;;
 		    *)
 			arch=`uname -p 2> /dev/null || uname -m`
 			if test "$arch" = powerpc; then
@@ -95,6 +98,8 @@ arch=`DetectARCH`
 libc=`DetectLIBC`
 os=`DetectOS`
 
+args=""
+
 # Import preferences from a secondary script
 if [ -f setup.data/config.sh ]; then
     . setup.data/config.sh
@@ -123,12 +128,9 @@ then
     # NOTE TTimo: this causes the following error message in some cases:
     # return: can only `return' from a function or sourced script
     # BUT: in other cases, the return is legit, if you replace by an exit call, it's broken
-    return 1
+    exit 1
   fi
 fi
-
-# Feel free to add some additional command-line arguments for setup here.
-args=""
 
 # Find the installation program
 # try_run [-absolute] [-fatal] INSTALLER_NAME [PARAMETERS_PASSED]
@@ -188,7 +190,8 @@ __EOF__
       setup="$HOME/.setup$$"
       rm -f "$setup"
       cp "$setup_bin" "$setup"    
-      chmod 700 "$setup"    
+      chmod 700 "$setup"
+	  trap "rm -f $setup" 1 2 3 15
     fi
 	# echo Running "$setup" "$@"
     if [ "$fatal" -eq 0 ]; then
@@ -235,6 +238,12 @@ then
       printf "$SU_MESSAGE\n"
       try_run -absolute /bin/su root -c "export DISPLAY=$DISPLAY;sh `pwd`/setup.sh -auth"
       status="$?"
+	  if [ "$status" -eq 0 ]; then
+		# the auth command was properly executed
+		exit 0
+	  else
+	    exit 1
+	  fi
     elif [ "$status" -eq 3 ]
     then
       # the auth failed or was canceled
@@ -249,8 +258,8 @@ fi
 # Try to run the setup program
 try_run setup.gtk $args $*
 status=$?
-if [ $status -ne 0 ] && [ $status -ne 3 ]; then  # setup.gtk couldn't connect to X11 server - ignore
-	try_run -fatal setup $args $* || {
+if [ $status -eq 2 ]; then  # setup.gtk couldn't connect to X11 server - ignore
+	try_run setup $args $* || {
 		if [ $status -ne 2 ]; then
 			echo "The setup program seems to have failed on $arch/$libc"
 			echo

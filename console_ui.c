@@ -241,8 +241,7 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
 			/* See if there is an EULA for this option */
 			name = GetProductEULANode(info, node);
 			if ( name ) {
-				snprintf(prompt, sizeof(prompt), "%s \"%s\"", pagercmd, name);
-				system(prompt);
+				run_command(info, pagercmd, name, 1);
 				if ( console_prompt(_("Do you agree with the license?"), RESPONSE_YES) !=
 					 RESPONSE_YES ) {
 					response = RESPONSE_INVALID;
@@ -325,11 +324,9 @@ static install_state console_init(install_info *info, int argc, char **argv, int
 static install_state console_license(install_info *info)
 {
     install_state state;
-    char command[512];
 
     sleep(1);
-    snprintf(command, sizeof(command), "%s \"%s\"", pagercmd, GetProductEULA(info));
-    system(command);
+	run_command(info, pagercmd, GetProductEULA(info), 1);
     if ( console_prompt(_("Do you agree with the license?"), RESPONSE_YES) ==
                                                         RESPONSE_YES ) {
         state = SETUP_README;
@@ -351,8 +348,7 @@ static install_state console_readme(install_info *info)
 	str = readme + strlen(info->setup_path)+1; /* Skip the install path */
         snprintf(prompt, sizeof(prompt), _("Would you like to read the %s file ?"), str);
         if ( console_prompt(prompt, RESPONSE_YES) == RESPONSE_YES ) {
-            snprintf(prompt, sizeof(prompt), "%s \"%s\"", pagercmd, readme);
-            system(prompt);
+            run_command(info, pagercmd, readme, 1);
         }
     }
 	if ( GetProductAllowsExpress(info) ) {
