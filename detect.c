@@ -31,8 +31,8 @@ const char *detect_arch(void)
 }
 
 /* Function to detect the current version of libc */
-const char *detect_libc(void)
-{
+const char *detect_libc(void) {
+
     static const char *libclist[] = {
         "/lib/libc.so.6",
         "/lib/libc.so.6.1",
@@ -57,42 +57,16 @@ const char *detect_libc(void)
     libcfile = libclist[i];
 
     if ( libcfile ) {
-        FILE* fp;
-        char buf[ 128 ];
-        int n;
-
-        /* Search for the version in the ouput of /lib/libc.so.6.
-         * The first line should look something like this:
-         * GNU C Library stable release version 2.1.1, by Roland McGrath et al.
-         */
-        fp = popen( libcfile, "r" );
-        if( fp ) {
-            n = fread( buf, 1, 128, fp );
-            pclose( fp );
-
-            if( n == 128 ) {
-                char* cp;
-                char* end;
-                int a, b, c;
-
-                cp = buf;
-                end = &cp[ n ];
-                for( ; cp < end; cp++ ) {
-                    if( strncasecmp( "version ", cp, 8 ) == 0 ) {
-                        cp += 8;
-                        n = sscanf( cp, "%d.%d.%d", &a, &b, &c );
-                        if( n == 3 ) {
-                          static char buf[20];
-                          sprintf(buf,"glibc-%d.%d",a,b);
-                          return buf;
-                        }
-                        break;
-                    }
-                }
-            }
-        } else {
-            perror( "libcVersion" );
-        }
+      FILE* fp;
+      char buffer[1024];
+      sprintf( buffer, 
+	       "fgrep GLIBC_2.1 %s 2>&1 >/dev/null",
+	       libcfile );
+      
+      if ( system(buffer)==0 )
+	return "glibc-2.1";
+      else
+	return "glibc-2.0";
     }
     /* Default to version 5 */
     return "libc5";
