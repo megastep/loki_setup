@@ -482,7 +482,7 @@ static install_state console_complete(install_info *info)
 
     new_state = SETUP_EXIT;
     if ( info->installed_symlink &&
-         console_prompt(_("Would you like launch the game now?"), RESPONSE_YES)
+         console_prompt(_("Would you like to launch the game now?"), RESPONSE_YES)
          == RESPONSE_YES ) {
         new_state = SETUP_PLAY;
         if ( getuid() == 0 ) {

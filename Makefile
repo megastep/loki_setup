@@ -111,7 +111,7 @@ dist: clean
 	(cd $(DISTDIR) && tar zcvf $(PACKAGE).tar.gz $(PACKAGE))
 	rm -rf $(DISTDIR)/$(PACKAGE)
 
-po/setup.po: $(SRCS)
+po/setup.po: $(SRCS) image/setup.data/setup.glade
 	libglade-xgettext image/setup.data/setup.glade > po/setup.po
 	xgettext -p po -j -d setup --keyword=_ $(SRCS) plugins/*.c
 
