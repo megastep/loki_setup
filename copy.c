@@ -632,13 +632,16 @@ size_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
             version = xmlGetProp(node, "version");
             if ( !version )
                 log_fatal(info, _("Component element needs to have a version"));
-            current_component = add_component_entry(info, name, version, 
-                                                    xmlGetProp(node, "default") != NULL);
-			/* Recurse in the sub-options */
-			copied = copy_tree(info, node->childs, dest, update);
-			if ( copied > 0 ) {
-				size += copied;
-			}
+            if ( match_arch(info, xmlGetProp(node, "arch")) &&
+                 match_libc(info, xmlGetProp(node, "libc")) ) {
+                current_component = add_component_entry(info, name, version, 
+                                                        xmlGetProp(node, "default") != NULL);
+                /* Recurse in the sub-options */
+                copied = copy_tree(info, node->childs, dest, update);
+                if ( copied > 0 ) {
+                    size += copied;
+                }
+            }
         }
         node = node->next;
     }
@@ -826,8 +829,13 @@ size_t size_tree(install_info *info, xmlNodePtr node)
 				size += size_node(info, node);
 				size += size_tree(info, node->childs);
 			}
-		} else if ( !strcmp(node->name, "exclusive") || !strcmp(node->name, "component") ) {
+		} else if ( !strcmp(node->name, "exclusive") ) {
 			size += size_tree(info, node->childs);
+        } else if ( !strcmp(node->name, "component") ) {
+            if ( match_arch(info, xmlGetProp(node, "arch")) &&
+                 match_libc(info, xmlGetProp(node, "libc")) ) {
+                size += size_tree(info, node->childs);
+            }
 		} else if ( !strcmp(node->name, "readme") || !strcmp(node->name, "eula") ) {
 			size += size_readme(info, node);
 		}

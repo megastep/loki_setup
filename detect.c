@@ -14,6 +14,7 @@
 #include <sys/vfs.h>
 #endif
 
+#include "install.h"
 #include "detect.h"
 
 #ifndef MNTTYPE_CDROM
@@ -181,4 +182,41 @@ int detect_cdrom(const char *unique_file)
     num_cdroms = count;
     return(num_cdroms);
 #endif
+}
+
+int match_arch(install_info *info, const char *wanted)
+{
+    if ( wanted && (strcmp(wanted, "any") != 0) ) {
+        int matched_arch = 0;
+        char *space, *copy;
+
+        copy = strdup(wanted);
+        wanted = copy;
+        space = strchr(wanted, ' ');
+        while ( space ) {
+            *space = '\0';
+            if ( strcmp(wanted, info->arch) == 0 ) {
+                break;
+            }
+            wanted = space+1;
+            space = strchr(wanted, ' ');
+        }
+        if ( strcmp(wanted, info->arch) == 0 ) {
+            matched_arch = 1;
+        }
+        free(copy);
+        return matched_arch;
+    } else {
+        return 1;
+    }
+}
+
+int match_libc(install_info *info, const char *wanted)
+{
+    if ( wanted && ((strcmp(wanted, "any") != 0) &&
+                    (strcmp(wanted, info->libc) != 0)) ) {
+        return 0;
+    } else {
+        return 1;
+    }
 }

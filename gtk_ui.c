@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.54 2000-11-08 23:27:05 megastep Exp $
+   $Id: gtk_ui.c,v 1.55 2000-11-09 00:08:15 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -961,39 +961,19 @@ static void parse_option(install_info *info, xmlNodePtr node, GtkWidget *window,
 
     /* See if this node matches the current architecture */
     wanted = xmlGetProp(node, "arch");
-    if ( wanted && (strcmp(wanted, "any") != 0) ) {
-        char *space, *copy;
-        int matched_arch = 0;
-
-        copy = strdup(wanted);
-        wanted = copy;
-        space = strchr(wanted, ' ');
-        while ( space ) {
-            *space = '\0';
-            if ( strcmp(wanted, info->arch) == 0 ) {
-                break;
-            }
-            wanted = space+1;
-            space = strchr(wanted, ' ');
-        }
-        if ( strcmp(wanted, info->arch) == 0 ) {
-            matched_arch = 1;
-        }
-        free(copy);
-        if ( ! matched_arch ) {
-            return;
-        }
+    if ( ! match_arch(info, wanted) ) {
+        return;
     }
+
     wanted = xmlGetProp(node, "libc");
-    if ( wanted && ((strcmp(wanted, "any") != 0) &&
-                    (strcmp(wanted, info->libc) != 0)) ) {
+    if ( ! match_libc(info, wanted) ) {
         return;
     }
 
     /* See if the user wants this option */
     line = get_option_name(info, node, NULL, 0);
     for(i=0; i < (level*5); i++)
-      text[i] = ' ';
+        text[i] = ' ';
     text[i] = '\0';
     strncat(text, line, sizeof(text));
 
@@ -1318,18 +1298,21 @@ static install_state gtkui_setup(install_info *info)
 				parse_option(info, child, window, options, 0, NULL, 1, &list);
 			}
 		} else if ( ! strcmp(node->name, "component") ) {
-            xmlNodePtr child;
-            if ( xmlGetProp(node, "showname") ) {
-                GtkWidget *widget = gtk_hseparator_new();
-                gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 0);
-                gtk_widget_show(widget);                
-                widget = gtk_label_new(xmlGetProp(node, "name"));
-                gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 10);
-                gtk_widget_show(widget);
+            if ( match_arch(info, xmlGetProp(node, "arch")) &&
+                 match_libc(info, xmlGetProp(node, "libc")) ) {
+                xmlNodePtr child;
+                if ( xmlGetProp(node, "showname") ) {
+                    GtkWidget *widget = gtk_hseparator_new();
+                    gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 0);
+                    gtk_widget_show(widget);                
+                    widget = gtk_label_new(xmlGetProp(node, "name"));
+                    gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 10);
+                    gtk_widget_show(widget);
+                }
+                for ( child = node->childs; child; child = child->next) {
+                    parse_option(info, child, window, options, 0, NULL, 0, NULL);
+                }
             }
-			for ( child = node->childs; child; child = child->next) {
-				parse_option(info, child, window, options, 0, NULL, 0, NULL);
-			}
         }
 		node = node->next;
     }

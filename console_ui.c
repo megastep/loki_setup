@@ -125,32 +125,12 @@ static int parse_option(install_info *info, xmlNodePtr node, int exclusive)
 
     /* See if this node matches the current architecture */
     wanted = xmlGetProp(node, "arch");
-    if ( wanted && (strcmp(wanted, "any") != 0) ) {
-        char *space, *copy;
-        int matched_arch = 0;
-
-        copy = strdup(wanted);
-        wanted = copy;
-        space = strchr(wanted, ' ');
-        while ( space ) {
-            *space = '\0';
-            if ( strcmp(wanted, info->arch) == 0 ) {
-                break;
-            }
-            wanted = space+1;
-            space = strchr(wanted, ' ');
-        }
-        if ( strcmp(wanted, info->arch) == 0 ) {
-            matched_arch = 1;
-        }
-        free(copy);
-        if ( ! matched_arch ) {
-            return retval;
-        }
+    if ( ! match_arch(info, wanted) ) {
+        return retval;
     }
+
     wanted = xmlGetProp(node, "libc");
-    if ( wanted && ((strcmp(wanted, "any") != 0) &&
-                    (strcmp(wanted, info->libc) != 0)) ) {
+    if ( ! match_libc(info, wanted) ) {
         return retval;
     }
 
@@ -439,13 +419,16 @@ static install_state console_setup(install_info *info)
 						parse_option(info, child, 1);
 					}
 				} else if ( ! strcmp(node->name, "component") ) {
-					xmlNodePtr child;
-                    if ( xmlGetProp(node, "showname") ) {
-                        printf(_("\n%s component\n\n"), xmlGetProp(node, "name"));
+                    if ( match_arch(info, xmlGetProp(node, "arch")) &&
+                         match_libc(info, xmlGetProp(node, "libc")) ) {
+                        xmlNodePtr child;
+                        if ( xmlGetProp(node, "showname") ) {
+                            printf(_("\n%s component\n\n"), xmlGetProp(node, "name"));
+                        }
+                        for ( child = node->childs; child; child = child->next) {
+                            parse_option(info, child, 0);
+                        }
                     }
-					for ( child = node->childs; child; child = child->next) {
-						parse_option(info, child, 0);
-					}
                 }
 				node = node->next;
 			}
