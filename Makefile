@@ -114,6 +114,9 @@ endif
 	    cp -v uninstall $(IMAGE)/setup.data/bin/$(os)/$(arch); \
 	    strip $(IMAGE)/setup.data/bin/$(os)/$(arch)/uninstall; \
 	    brandelf -t $(os) $(IMAGE)/setup.data/bin/$(os)/$(arch)/uninstall; \
+	    cp -v uninstall $(CONVERT_IMAGE)/bin/$(os)/$(arch); \
+	    strip $(CONVERT_IMAGE)/bin/$(os)/$(arch)/uninstall; \
+	    brandelf -t $(os) $(CONVERT_IMAGE)/bin/$(os)/$(arch)/uninstall; \
 	    cp -v setup.gtk $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc); \
 	    strip $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk; \
 	    brandelf -t $(os) $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk; \
