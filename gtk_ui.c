@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.25 2000-03-08 22:05:09 megastep Exp $
+   $Id: gtk_ui.c,v 1.26 2000-03-08 22:38:41 megastep Exp $
 */
 
 #include <limits.h>
@@ -493,6 +493,7 @@ static yesno_answer gtkui_prompt(const char *txt, yesno_answer suggest)
 	
     gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->vbox),
                        label);
+	gtk_window_set_title(GTK_WINDOW(dialog), "Setup");
 	gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
     gtk_widget_show_all (dialog);
 

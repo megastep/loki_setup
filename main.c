@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.17 2000-03-08 22:05:09 megastep Exp $ */
+/* $Id: main.c,v 1.18 2000-03-08 22:38:41 megastep Exp $ */
 
 #include <stdio.h>
 #include <setjmp.h>
@@ -166,8 +166,7 @@ int main(int argc, char **argv)
 							"before running this installation program.\n",
 							info->name);
 					UI.prompt(buf, RESPONSE_YES);
-					state = SETUP_ABORT;
-					exit_status = 1;
+					state = SETUP_EXIT;
 				} 
                 break;
             case SETUP_LICENSE:
