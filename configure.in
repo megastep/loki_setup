@@ -124,8 +124,6 @@ case "$target" in
 	LIBDL=""
 	AC_DEFINE(USE_BSD_PTY, 1, Use BSD-style ptys)
         ARCH=x86 ;;
-    *i?86*)
-        ARCH=x86 ;;
     *alpha*)
         CFLAGS="$CFLAGS -mcpu=ev4 -Wa,-mall"
         ARCH=alpha ;;
@@ -149,7 +147,13 @@ case "$target" in
 	BDYNAMIC="-Wl,-a,archive_shared"
 	CONSOLE_LIBS="$LIBDL"
 	ARCH=hppa ;;
-    *solaris*)
+    i?86*solaris*)
+	EXTRA_LIBS="-lsocket -lnsl -lresolv -ldl"
+	STATIC=""
+	RDYNAMIC=""
+	LIBDL=""
+	ARCH=x86 ;;
+    sparc*solaris*)
 	EXTRA_LIBS="-lsocket -lnsl -lresolv -ldl"
 	STATIC=""
 	RDYNAMIC="-Wl,-export-dynamic"
@@ -164,6 +168,8 @@ case "$target" in
 	ARCH=ppc ;;
     *ppc* | *powerpc*)
         ARCH=ppc ;;
+    *i?86*)
+        ARCH=x86 ;;
     *)
         ARCH=`uname -p 2> /dev/null || uname -m` ;;
 esac
@@ -214,7 +220,7 @@ LIBS="$LIBS $EXTRA_LIBS"
 
 AC_CHECK_LIB(iconv, iconv_open, 
 		LIBINTL="-liconv"
-		LIBS="$LIBS $LIBINTL"
+		LIBS="$LIBS $BSTATIC $LIBINTL"
 )
 
 AC_CHECK_LIB(intl, gettext, 

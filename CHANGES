@@ -1,4 +1,6 @@
 Current:
+Stephane Peter (Codehost) - Thu Apr  3 19:31:16 PST 2003
+ * Ported to Solaris 8 on Intel.
 Stephane Peter (Codehost) - Mon Mar 31 19:26:17 PST 2003
  * Added support for per-component uninstall scripts.
  * Added per-component uninstall messages.

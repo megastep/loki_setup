@@ -30,7 +30,7 @@ DetectARCH()
 {
 	status=1
 	case `uname -m` in
-	    i?86)
+	    i?86 | i86*)
 		echo "x86"
 		status=0;;
 	    90*/*) 
