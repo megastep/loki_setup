@@ -59,8 +59,6 @@ AC_CHECK_FUNCS(ttyname_r)
 AC_CHECK_FUNCS(nl_langinfo)
 AC_CHECK_FUNCS(strlcpy)
 AC_CHECK_FUNCS(waitpid)
-AC_CHECK_FUNCS(getopt)
-AC_CHECK_FUNCS(getopt_long)
 AC_PATH_PROG(SU_PATH, su, /bin/su, $PATH:/usr/sbin:/sbin)
 AC_PATH_PROG(MOUNT_PATH, mount, /sbin/mount, $PATH:/usr/sbin:/sbin)
 AC_PATH_PROG(UMOUNT_PATH, umount, /sbin/umount, $PATH:/usr/sbin:/sbin)
@@ -80,6 +78,10 @@ elif test -d /sw/lib; then
 else
 	LIBS="$LIBS -L/usr/local/lib"
 fi
+
+AC_CHECK_FUNCS(getopt)
+AC_CHECK_LIB(gnugetopt, getopt_long, LIBS="$LIBS -lgnugetopt")
+AC_CHECK_FUNCS(getopt_long)
 
 # Build some static binaries by default when possible
 STATIC="-static"
