@@ -762,7 +762,8 @@ There supported attributes for the script element are :
 
  size       If the script handles the installation of some files and you want
             the progress bar to reflect it, indicate the size here. The size
-            is updated when the script finishes. The unit is in bytes.
+            is updated when the script finishes. The syntax of this element is the
+            same as for the size tag for the OPTION element.
 
  message    The message to display to the user. By default this is
             "Running script"
