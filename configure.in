@@ -134,14 +134,14 @@ esac
 AC_CHECK_LIB(util, forkpty, LIBUTIL="-lutil"; LIBS="$LIBS -lutil")
 AC_CHECK_FUNCS(openpty)
 
-SETUPDB="`pwd`/../setupdb-$PACKAGE_VERSION"
+SETUPDB="`pwd`/../loki_setupdb-$PACKAGE_VERSION"
 if test ! -d "$SETUPDB"; then
-    SETUPDB="`pwd`/../setupdb"
+    SETUPDB="`pwd`/../loki_setupdb"
 fi
 
 
 AC_ARG_WITH(setupdb,
-[  --with-setupdb            with setupdb library at  [default=../setupdb]],
+[  --with-setupdb            with setupdb library at  [default=../loki_setupdb]],
               ,   with_setupdb=$SETUPDB)
 if test x$with_setupdb != x$SETUPDB; then
         SETUPDB=$with_setupdb
