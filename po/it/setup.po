@@ -278,7 +278,7 @@ msgstr "Fuori dal range possibile, livello di verbosita' settato a Normale.\n"
 #: main.c:163
 #, c-format
 msgid "XML file does not exist: '%s' (pwd is %s)\n"
-msgstr ""
+msgstr "Il file di XML non esiste:"
 
 # main.c:155
 #: main.c:169
@@ -323,26 +323,26 @@ msgstr "Memoria esaurita"
 
 #: install.c:408
 msgid "You must use a 'symlink' attribute with 'play'"
-msgstr ""
+msgstr "Dovete usare un attributo ' dello symlink ' con ' gioca' "
 
 #: install.c:413
 msgid "There can be only one binary with a 'play' attribute"
-msgstr ""
+msgstr "Ci può essere soltanto uno binario con un attributo ' del gioca ' "
 
 #: install.c:416
 msgid "The only valid values for the 'play' attribute are yes and no"
-msgstr ""
+msgstr " Gli soli valori validi per ' il gioco ' attributo sono sì e no"
 
 # install.c:380
 #: install.c:441
 msgid "Couldn't find your home directory"
-msgstr "Non posso trovare la tua home directory"
+msgstr "Non posso trovare il tuo home directory"
 
 # install.c:398
 #: install.c:459
 #, c-format
 msgid "Couldn't find home directory for %s"
-msgstr "Non posso trovare la home directory dell'utente %s"
+msgstr "Non posso trovare il home directory dell'utente %s"
 
 # install.c:458
 #: install.c:520
@@ -447,7 +447,7 @@ msgstr "Non riesco a trovare il file '%s' su nessun CDROM"
 #: copy.c:976
 #, c-format
 msgid "Suspect size value for option %s\n"
-msgstr ""
+msgstr "Valore dimensioni sospetto per opzione"
 
 # file.c:110
 #: file.c:125
@@ -544,8 +544,7 @@ msgstr "Memoria esaurita, non controllo la presenza della rete"
 # network.c:152
 #: network.c:152
 msgid "Unable to create pipe, no network check"
-msgstr ""
-"Non riesco a creare il collegamento, non controllo la presenza della rete"
+msgstr "Non riesco a creare il collegamento, non controllo la presenza della rete"
 
 # network.c:166
 #: network.c:166
@@ -614,9 +613,7 @@ msgstr "La tua macchine e' %s con %s\n"
 # console_ui.c:192
 #: console_ui.c:212
 msgid "Hit Control-C anytime to cancel this installation program.\n"
-msgstr ""
-"Premere Control-C in qualsiasi momento per interrompere il programma di "
-"installazione.\n"
+msgstr "Premere Control-C in qualsiasi momento per interrompere il programma d'istallazione.\n"
 
 # console_ui.c:210
 #: console_ui.c:230
@@ -631,7 +628,7 @@ msgstr "Vuoi leggere il file %s ?"
 
 #: console_ui.c:297
 msgid "Please choose the product to install, or Q to quit. "
-msgstr ""
+msgstr "Per piacere sceglie il prodotto d'installare o Q per lasciare"
 
 # console_ui.c:245
 #: console_ui.c:325
@@ -654,6 +651,8 @@ msgid ""
 "Binary path must be different than the install path.\n"
 "The binary path must be an existing directory.\n"
 msgstr ""
+"Il percorso binario deve essere differente che l' installazione path.\n "
+"Il percorso binario deve essere un directory.\n attuale " 
 
 # console_ui.c:288
 #: console_ui.c:381
@@ -760,7 +759,7 @@ msgstr "Non si hanno i permessi di scrittura sulla directory di installazione"
 
 #: gtk_ui.c:421
 msgid "Binary path and install path must be different"
-msgstr ""
+msgstr "Il percorso binario ed il percorso installo deve essere differente "
 
 # gtk_ui.c:342
 #: gtk_ui.c:423
@@ -770,8 +769,7 @@ msgstr "Non si hanno i permessi per installare i pacchetti selezionati"
 # gtk_ui.c:345
 #: gtk_ui.c:426
 msgid "No write permissions on the binary directory"
-msgstr ""
-"Non si hanno i permessi di scrittura sulla directory dei binari/eseguibili"
+msgstr "Non si hanno i permessi di scrittura sulla directory dei binari/eseguibili"
 
 # gtk_ui.c:354
 #: gtk_ui.c:435
