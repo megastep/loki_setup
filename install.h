@@ -12,10 +12,10 @@
 #define SETUP_BASE          "setup.data/"
 
 /* The default location of the product */
-#define DEFAULT_PATH        "/usr/games"
+#define DEFAULT_PATH        "/usr/local/games"
 
 /* The default location of the symlinks */
-#define DEFAULT_SYMLINKS    "/usr/bin"
+#define DEFAULT_SYMLINKS    "/usr/local/bin"
 
 /* The different setup states */
 typedef enum {
