@@ -286,7 +286,7 @@ msgstr "Löschen von '%s' fehlgeschlagen"
 #: install.c:528
 #, c-format
 msgid "The '%s' RPM was installed or upgraded (version %s, release %s)"
-msgstr "Das '%s' RPM" wurde installiert oder erneuert (Version %s, Release %s)"
+msgstr "Das '%s' RPM wurde installiert oder erneuert (Version %s, Release %s)"
 
 #: install.c:584
 #, c-format
