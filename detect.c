@@ -736,14 +736,14 @@ const char *get_cdrom(install_info *info, const char *id)
             }
             // end ryan's hack.
 
-            prompt = _("\nPlease insert the %s CDROM.\n"
+            prompt = _("\nPlease insert %s.\n"
                             "Choose Yes to retry, No to cancel");
 #else
             if ( mounted_filesystems() ) { /* We were able to mount at least one CDROM */
-                prompt =  _("\nPlease insert the %s CDROM.\n"
+                prompt =  _("\nPlease insert %s.\n"
                             "Choose Yes to retry, No to cancel");                
             } else {
-                prompt =  _("\nPlease mount the %s CDROM.\n"
+                prompt =  _("\nPlease mount %s.\n"
                             "Choose Yes to retry, No to cancel");
             }
 #endif
