@@ -148,6 +148,13 @@ static install_state console_setup(install_info *info)
         }
         set_installpath(info, path);
 
+        /* Find out where to install the binary symlinks */
+        if ( ! prompt_user("Please enter the path for binary installation",
+                        info->symlinks_path, path, sizeof(path)) ) {
+            return SETUP_ABORT;
+        }
+        set_symlinkspath(info, path);
+
         /* Go through the install options */
         info->install_size = 0;
         node = info->config->root->childs;
@@ -156,6 +163,11 @@ static install_state console_setup(install_info *info)
                 parse_option(info, node);
             }
             node = node->next;
+        }
+
+		/* Ask for desktop menu items */
+        if ( prompt_yesno("Do you want to install desktop items?", RESPONSE_YES) == RESPONSE_YES ) {
+            info->options.install_menuitems = 1;
         }
 
         /* Confirm the install */

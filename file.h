@@ -21,6 +21,6 @@ extern int file_read(install_info *info, void *buf, int len, stream *streamp);
 extern int file_write(install_info *info, void *buf, int len, stream *streamp);
 extern int file_eof(install_info *info, stream *streamp);
 extern int file_close(install_info *info, stream *streamp);
-extern int file_symlink(install_info *info, const char *from, const char *to);
+extern int file_symlink(install_info *info, const char *oldpath, const char *newpath);
 extern int file_mkdir(install_info *info, const char *path, int mode);
 extern int file_chmod(install_info *info, const char *path, int mode);

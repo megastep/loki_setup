@@ -170,19 +170,19 @@ int file_close(install_info *info, stream *streamp)
     }
 }
 
-int file_symlink(install_info *info, const char *from, const char *to)
+int file_symlink(install_info *info, const char *oldpath, const char *newpath)
 {
     int retval;
 
     /* Log the action */
-    log_quiet(info, "Creating symbolic link: %s --> %s\n", from, to);
+    log_quiet(info, "Creating symbolic link: %s --> %s\n", newpath, oldpath);
 
     /* Do the action */
-    retval = symlink(from, to);
+    retval = symlink(oldpath, newpath);
     if ( retval < 0 ) {
-        log_warning(info, "Can't create %s: %s", from, strerror(errno));
+        log_warning(info, "Can't create %s: %s", newpath, strerror(errno));
     } else {
-        add_file_entry(info, from);
+        add_file_entry(info, newpath);
     }
     return(retval);
 }

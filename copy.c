@@ -111,7 +111,7 @@ size_t copy_tarball(install_info *info, const char *path, const char *dest,
                 }
                 break;
             case TF_SYMLINK:
-                file_symlink(info, final, record.hdr.linkname);
+                file_symlink(info, record.hdr.linkname, final);
                 break;
             case TF_DIR:
                 file_mkdir(info, final, mode);
@@ -269,14 +269,21 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
             sprintf(fpat, "bin/%s/%s", info->arch, final);
             if ( stat(fpat, &sb) == 0 ) {
                 copied = copy_file(info, fpat, dest, final, 1, update);
-				file_chmod(info, final, 0755);
             } else {
                 log_warning(info, "Unable to find file %s", fpat);
             }
         }
         if ( copied > 0 ) {
+		    char *symlink = xmlGetProp(node, "symlink");
+			char sym_to[PATH_MAX];
+
             size += copied;
-            add_bin_entry(info, final, xmlGetProp(node, "symlink"),
+			file_chmod(info, final, 0755); /* Fix the permissions */
+			/* Create the symlink */
+			sprintf(sym_to,"%s/%s", info->symlinks_path, symlink);
+			file_symlink(info, final, sym_to);
+
+            add_bin_entry(info, final, symlink,
                                        xmlGetProp(node, "desc"),
                                        xmlGetProp(node, "icon"));
         }
