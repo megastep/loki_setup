@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.46 2000-05-25 00:11:19 megastep Exp $ */
+/* $Id: install.c,v 1.47 2000-06-07 19:22:40 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
    04/12/2000: Modifed run_script function to put the full pathname of the
@@ -974,11 +974,17 @@ int run_script(install_info *info, const char *script, int arg)
     int exitval;
     char *working_dir;
     int cwd_size = PATH_MAX;
+	struct stat st;
     
     /* we need to append the working directory onto the script name so it
-       can always be found */
-    working_dir = (char *) malloc(PATH_MAX);
-    getcwd(working_dir, cwd_size);
+       can always be found. Do this only if the script file exists (to avoid problems with 'sh script.sh') */
+	working_dir = (char *) malloc(PATH_MAX);
+	if ( !stat(script, &st) ) {
+		getcwd(working_dir, cwd_size);
+		strncat(working_dir, "/", PATH_MAX);
+	} else {
+		*working_dir = '\0'; 
+	}
 
     sprintf(template, "%s/tmp_script_XXXXXX", info->install_path);
     script_file = mktemp(template);
@@ -995,7 +1001,7 @@ int run_script(install_info *info, const char *script, int arg)
                 "SETUP_SYMLINKSPATH=\"%s\"\n"
                 "SETUP_CDROMPATH=\"%s\"\n"
                 "export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH\n"
-                "%s/%s\n",
+                "%s%s\n",
                 info->name, info->version,
                 info->install_path,
                 info->symlinks_path,
