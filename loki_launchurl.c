@@ -97,6 +97,15 @@ int loki_launchURL(const char *url)
         char *program;
         char *command;
     } browser_list[] = {
+#ifdef darwin
+	/* Call the default browser in OS X */
+        { RUNNING_X11,
+          "open",
+          "open %s" },
+        { RUNNING_TEXT,
+          "open",
+          "open %s" },
+#endif
         { RUNNING_X11,
           "gnome-moz-remote",
           "gnome-moz-remote --newwin %s &" },
