@@ -785,8 +785,11 @@ void DetectLocale(void)
 	if ( current_locale && (!strcmp(current_locale, "C") || !strcmp(current_locale,"POSIX")) ) {
 		current_locale = NULL;
 	}
-	if ( 0 ) /* log_debug doesn't work here as logging is initialized later */
+#if 0
+	/* log_debug doesn't work here as logging is initialized later */
+	if ( current_locale ) 
 		fprintf(stderr, _("Detected locale is %s\n"), current_locale);
+#endif
 }
 
 /* Matches a locale string against the current one */

@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.140 2004-09-07 22:09:00 megastep Exp $ */
+/* $Id: install.c,v 1.141 2004-09-07 22:16:53 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -2736,20 +2736,23 @@ void pop_curdir(void)
 
 int xmlNodePropIsTrue(xmlNodePtr node, const char* prop)
 {
-    const char* str = xmlGetProp(node, prop);
+    char *str = xmlGetProp(node, prop);
+	int ret = 0;
 
 	if(str && (!strcmp(str, "true") || !strcmp(str, "yes")))
-		return 1;
-
-	return 0;
+		ret = 1;
+	xmlFree(str);
+	return ret;
 }
 
 int xmlNodePropIsFalse(xmlNodePtr node, const char* prop)
 {
-    const char* str = xmlGetProp(node, prop);
+    char *str = xmlGetProp(node, prop);
+	int ret = 0;
 
 	if(str && (!strcmp(str, "false") || !strcmp(str, "no")))
-		return 1;
+		ret = 1;
 
-	return 0;
+	xmlFree(str);
+	return ret;
 }
