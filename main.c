@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.70 2004-06-24 01:01:01 megastep Exp $ */
+/* $Id: main.c,v 1.71 2004-07-23 18:53:37 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -170,6 +170,7 @@ int main(int argc, char **argv)
 #endif
     install_path[0] = '\0';
     binary_path[0] = '\0';
+	argv0 = argv[0];
 
     /* Set a good default umask value (022) */
     umask(DEFAULT_UMASK);
