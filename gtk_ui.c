@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.10 1999-09-15 18:40:42 hercules Exp $
+   $Id: gtk_ui.c,v 1.11 1999-09-16 01:38:57 hercules Exp $
 */
 
 #include <limits.h>
@@ -263,7 +263,7 @@ static void enable_tree(xmlNodePtr node, GtkWidget *window)
   }
 }
 
-void setup_checkbutton_option_slot( GtkWidget* widget, gpointer func_data)
+void setup_checkbox_option_slot( GtkWidget* widget, gpointer func_data)
 {
   GtkWidget *window;
   xmlNodePtr node;
@@ -309,7 +309,7 @@ void setup_checkbutton_option_slot( GtkWidget* widget, gpointer func_data)
   update_size();
 }
 
-void setup_checkbutton_menuitems_slot( GtkWidget* widget, gpointer func_data)
+void setup_checkbox_menuitems_slot( GtkWidget* widget, gpointer func_data)
 {
     cur_info->options.install_menuitems = (GTK_TOGGLE_BUTTON(widget)->active != 0);
 }
@@ -392,6 +392,18 @@ static void init_binary_path(void)
     return;
 }
 
+static void init_menuitems_option(void)
+{
+    GtkWidget* widget;
+
+    widget = glade_xml_get_widget(setup_glade, "setup_menuitems_checkbox");
+    if ( widget ) {
+        setup_checkbox_menuitems_slot(widget, NULL);
+    } else {
+        log_warning(cur_info, "Unable to locate 'setup_menuitems_checkbox'");
+    }
+}
+
 static void parse_option(install_info *info, xmlNodePtr node, GtkWidget *window, GtkWidget *box, int level, GtkWidget *parent)
 {
     char text[1024];
@@ -443,7 +455,7 @@ static void parse_option(install_info *info, xmlNodePtr node, GtkWidget *window,
     gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(button), FALSE, FALSE, 0);
     
     gtk_signal_connect(GTK_OBJECT(button), "toggled",
-             GTK_SIGNAL_FUNC(setup_checkbutton_option_slot), (gpointer)node);
+             GTK_SIGNAL_FUNC(setup_checkbox_option_slot), (gpointer)node);
     gtk_widget_show(button);
     if ( wanted && (strcmp(wanted, "true") == 0) ) {
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
@@ -535,6 +547,7 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
     init_binary_path();
     update_size();
     update_space();
+    init_menuitems_option();
 
     /* Show the installer */
     gtk_widget_show( window );
