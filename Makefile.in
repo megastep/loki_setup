@@ -57,7 +57,7 @@ SRCS = $(OBJS:.o=.c) $(CONSOLE_OBJS:.o=.c) $(GUI_OBJS:.o=.c) $(CARBON_OBJS:.o=.c
 COMMON_LIBS = plugins/libplugins.a @COMMON_LIBS@ \
 	      $(SETUPDB)/$(arch)/libsetupdb.a
 LIBS =  $(COMMON_LIBS) @LIBS@ -lm
-GUI_LIBS = $(COMMON_LIBS) @LIBS@ @GUI_LIBS@
+GUI_LIBS = $(COMMON_LIBS) @GUI_LIBS@ @LIBS@
 CARBON_LIBS = $(COMMON_LIBS) @LIBS@ @CARBON_LIBS@
 CONSOLE_LIBS = $(LIBS) @CONSOLE_LIBS@
 
