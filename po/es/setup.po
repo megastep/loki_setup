@@ -50,7 +50,7 @@ msgstr "Iconos de Escritorio (KDE/Gnome)"
 
 #: image/setup.data/setup.glade:440
 msgid "Estimated size:"
-msgstr "Tamaño Estimado""
+msgstr "Tamaño Estimado"
 
 #: image/setup.data/setup.glade:912 image/setup.data/setup.glade:1148
 #: image/setup.data/setup.glade:1394
