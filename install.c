@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.32 2000-03-03 03:38:41 megastep Exp $ */
+/* $Id: install.c,v 1.33 2000-03-07 22:32:41 megastep Exp $ */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -796,7 +796,18 @@ int run_script(install_info *info, const char *script, int arg)
     if (fp) {
         char cmd[4*PATH_MAX];
 
-        fprintf(fp,"#!/bin/sh\n%s\n", script);
+        fprintf(fp, /* Create the script file, setting environment variables */
+				"#! /bin/sh\n"
+				"SETUP_PRODUCTNAME=\"%s\"\n"
+				"SETUP_PRODUCTVER=\"%s\"\n"
+				"SETUP_INSTALLPATH=\"%s\"\n"
+				"SETUP_SYMLINKSPATH=\"%s\"\n"
+				"export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH\n"
+				"%s\n",
+				info->name, info->version,
+				info->install_path,
+				info->symlinks_path,
+				script);
         fchmod(fileno(fp),0755); /* Turn on executable bit */
         fclose(fp);
         if ( arg >= 0 ) {

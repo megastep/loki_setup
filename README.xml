@@ -43,6 +43,10 @@ There are several optional attributes of the install element:
             are installed.  It is run with the installation destination
             as a command line argument.
 
+            Both the preinstall and postinstall scripts are run with
+            some default environment variables set. Look at the 'SCRIPT'
+            section below for a detailed list.
+
  eula       This is a file which contains a text license agreement that
             must be agreed to by the user before the installation will
             proceed.
@@ -184,6 +188,12 @@ For example:
 
 There are no attributes for the script element.
 
+The following environment variables are defined while in the shell script:
+    SETUP_PRODUCTNAME   : Product name from the XML file
+    SETUP_PRODUCTVER    : Product version from the XML file
+    SETUP_INSTALLPATH   : Installation path of the data files
+    SETUP_SYMLINKSPATH  : Path where symbolic links for the binary files
+                          will be placed.
 
 -------------------------------------------------------------------------
 
