@@ -4,7 +4,7 @@ dnl Define the release numbers here
 
 SETUP_VERSION_MAJOR=1
 SETUP_VERSION_MINOR=5
-SETUP_VERSION_RELEASE=7
+SETUP_VERSION_RELEASE=8
 
 dnl Detect the canonical host and target build environment
 AC_CANONICAL_HOST

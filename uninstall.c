@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.21 2000-11-29 02:05:53 megastep Exp $ */
+/* $Id: uninstall.c,v 1.22 2000-12-05 01:41:33 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -375,7 +375,7 @@ int main(int argc, char *argv[])
                info->description, info->root );
         strncpy(desc, *info->description ? info->description : info->name, sizeof(desc));
 
-        if ( argc == 3 ) {
+        if ( argc == 3 && *argv[2] ) {
             product_component_t *comp;
             if ( !strcmp(argv[2], "-l") ) { /* List components */
                 printf(_("Components:\n"));
