@@ -162,6 +162,9 @@
 /* libbz2 support. */
 #undef HAVE_BZIP2_SUPPORT
 
+/* open libbz2 using dlopen */
+#undef BZIP2_DLOPEN
+
 /* libbz2 has BZ_ prefix. */
 #undef LIBBZ2_PREFIX
 
