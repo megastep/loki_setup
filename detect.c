@@ -66,63 +66,36 @@ const char *detect_libc(void)
 
 
 /* Function to detect the MB of diskspace on a path */
-/* Ripped straight from the Myth II GUI installer */
-/* The upper directory in the path must be valid ! */
 int detect_diskspace(const char *path)
 {
-    int fd[ 2 ];
-    int pid;
-    int len;
-    char *arg[ 4 ];
-    char buf[ 1024 ], path_up[PATH_MAX];
+    FILE *df;
+    int space;
     char *cp;
-    char *end;
+    char buf[PATH_MAX];
+    char cmd[PATH_MAX];
 
-	strcpy(path_up, path);
-	cp = (char*)rindex(path_up, '/');
-	if(cp)
-	  *cp = '\0';
+    space = 0;
 
-    pipe( fd );
-
-    pid = fork();
-    if( pid == -1 )
-        return -1;
-
-    if( pid == 0 ) {
-        arg[ 0 ] = "df";
-        arg[ 1 ] = "-m";
-        arg[ 2 ] = (char*) path_up;
-        arg[ 3 ] = 0;
-
-        close( 1 );         /* close normal stdout */
-        dup( fd[1] );       /* make stdout same as pfds[1] */
-        close( fd[0] );     /* we don't need this */
-        execvp( "df", arg );
-        perror( "exec df" );
-        exit(-1);
-    } else {
-        close( fd[1] );   /* we don't need this */
-        len = read( fd[0], buf, sizeof(buf) );
-        close( fd[0] );
+    /* Get the top valid path and get available diskspace */
+    if ( path[0] == '/' ) {
+        strcpy(buf, path);
+        cp = buf+strlen(buf);
+        while ( buf[0] && (access(buf, F_OK) < 0) ) {
+            while ( (cp > (buf+1)) && (*cp != '/') ) {
+                --cp;
+            }
+            *cp = '\0';
+        }
+        if ( buf[0] ) {
+            sprintf(cmd, "df -k %s\n", buf);
+            df = popen(cmd, "r");
+            if ( df ) {
+                fgets(buf, (sizeof buf)-1, df);
+		        fscanf(df, "%*s %*d %*d %d %*s %*s", &space);
+            }
+        }
     }
 
-    if( len > 0 ) {
-        // Checking if df is reporting an error of some sort.
-        if( strcmp( buf, "df:" ) == 0 ) {
-            fprintf( stderr, buf );
-            return -1;
-        }
-
-        // Skip report header line.
-        cp = buf;
-        end = cp + len;
-        while( (cp < end) && (*cp != '\n') ) {
-            cp++;
-        }
-
-		sscanf( cp, "%*s %*d %*d %d %*s %*s", &len );
-    }
-
-    return len;
+    /* Return space in MB */
+    return (space/1024);
 }

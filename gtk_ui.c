@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.3 1999-09-10 01:27:00 megastep Exp $
+   $Id: gtk_ui.c,v 1.4 1999-09-10 08:09:57 hercules Exp $
 */
 
 #include <limits.h>
@@ -15,12 +15,6 @@
 #include "loki_logo.xpm"
 
 /* Globals */
-
-#define DATA_LOCATIONS   1
-static const char* dataLocation[ DATA_LOCATIONS ] = 
-{
-    "/usr/local/games"
-};
 
 typedef enum
 {
@@ -49,7 +43,6 @@ static GtkWidget* _sizeLabel, *_spaceLabel;
 static GtkWidget* _finishButton;
 static GtkWidget* _installButton;
 static GtkNotebook* _notebook;
-static GtkWidget* _pixmap;
 static GtkWidget* _statusBar;
 
 static int cur_state;
@@ -58,18 +51,15 @@ static char tmpbuf[1024]; /* To do stuff */
 static int diskspace;
 
 /******** Local prototypes **********/
+static void check_install_button(void);
 static void update_space(void);
 static void update_size(void);
 
 static int iterate_for_state(void)
 {
-#if 1
   int start = cur_state;
   while(cur_state == start)
 	gtk_main_iteration();
-#else
-  gtk_main();
-#endif
 
   /*  fprintf(stderr,"New state: %d\n", cur_state); */
   return cur_state;
@@ -141,16 +131,53 @@ static GtkWidget* VBBOX( GtkButtonBoxStyle style, gint spacing )
     return( widget );
 }
 
+GList *gtk_combo_get_popdown_strings( GtkCombo *combo )
+{
+    GList *clist;
+    GList *tlist;
+    gchar *ltext;
+
+    clist = GTK_LIST (combo->list)->children;
+    tlist = 0;
+    while ( clist && clist->data ) {
+        ltext = gtk_object_get_data(GTK_OBJECT(clist->data),
+                                    "gtk-combo-string-value");
+        if ( ltext == NULL ) {
+            GtkWidget *label = GTK_BIN(clist->data)->child;
+
+            if ( label && GTK_IS_LABEL(label) ) {
+                gtk_label_get (GTK_LABEL (label), &ltext);
+            }
+        }
+        tlist = g_list_append(tlist, ltext);
+        clist = g_list_next(clist);
+    }
+    return tlist;
+}
+
 /*********** GTK slots *************/
+
+static void slot_gainfocus_selection( GtkWidget* widget, gpointer func_data )
+{
+    gtk_window_set_focus(GTK_WINDOW(gtk_widget_get_toplevel(widget)), widget);
+}
+static void slot_losefocus_selection( GtkWidget* widget, gpointer func_data )
+{
+    gtk_window_set_focus(GTK_WINDOW(gtk_widget_get_toplevel(widget)), NULL);
+}
 
 static void slot_installpath_selection( GtkWidget* widget, gpointer func_data )
 {
     char* string;
+
     string = gtk_entry_get_text( GTK_ENTRY(widget) );
-	if(string){
-	  set_installpath(cur_info, string);
-	  update_space();
+	if ( string ) {
+        set_installpath(cur_info, string);
+	    update_space();
 	}
+    if ( strcmp(string, cur_info->install_path) != 0 ) {
+        gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(_dataCombo)->entry), cur_info->install_path);
+    }
 }
 
 static void slot_symlinkspath_selection( GtkWidget* widget, gpointer func_data )
@@ -159,6 +186,7 @@ static void slot_symlinkspath_selection( GtkWidget* widget, gpointer func_data )
     string = gtk_entry_get_text( GTK_ENTRY(widget) );
 	if(string)
 	  set_symlinkspath(cur_info, string);
+    check_install_button();
 }
 
 static void slot_readmeDestroy( GtkWidget* widget, gpointer data )
@@ -322,31 +350,43 @@ static void slot_beginInstall( GtkWidget* gtklist, gpointer func_data )
 /* Checks if we can enable the "Begin install" button */
 static void check_install_button(void)
 {
-  char path_up[PATH_MAX], *cp;
-
-  strcpy(path_up, cur_info->install_path);
-  cp = (char*)rindex(path_up, '/');
-  if(cp)
-	*cp = '\0';
+    char path_up[PATH_MAX], *cp;
   
-  if(_installButton && _statusBar){
-	int ok = 1;
-	if(cur_info->install_size <= 0){
-	  ok = 0;
-	  gtk_label_set_text(GTK_LABEL(_statusBar), "Please select at least one option");
-	}else if(cur_info->install_size > diskspace){
-	  ok = 0;
-	  gtk_label_set_text(GTK_LABEL(_statusBar), "Not enough free space for the selected options");
-	}else if(access(cur_info->install_path, W_OK) && access(path_up, W_OK)){
-	  ok = 0;
-	  gtk_label_set_text(GTK_LABEL(_statusBar), "No write permissions on the destination directory");
-	}else if(access(cur_info->symlinks_path, W_OK)){
-	  ok = 0;
-	  gtk_label_set_text(GTK_LABEL(_statusBar), "No write permissions on the symlinks directory");
-	}else /* Erase the status bar, everything is OK */
-	  gtk_label_set_text(GTK_LABEL(_statusBar), "");	  
-	gtk_widget_set_sensitive(_installButton, ok);
-  }
+    /* Get the topmost valid path */
+    strcpy(path_up, cur_info->install_path);
+    if ( path_up[0] == '/' ) {
+        cp = path_up+strlen(path_up);
+        while ( access(path_up, F_OK) < 0 ) {
+            while ( (cp > (path_up+1)) && (*cp != '/') ) {
+                --cp;
+            }
+            *cp = '\0';
+        }
+    }
+ 
+    /* See if we can install yet */
+    if ( _installButton && _statusBar ) {
+        const char *message = "";
+
+        if ( ! *cur_info->install_path ) {
+            message = "No destination directory selected";
+        } else if ( cur_info->install_size <= 0 ) {
+            message = "Please select at least one option";
+        } else if ( cur_info->install_size > diskspace ) {
+            message = "Not enough free space for the selected options";
+        } else if ( access(path_up, W_OK) < 0 ) {
+            message = "No write permissions on the destination directory";
+        } else if ( cur_info->symlinks_path[0] &&
+                   (access(cur_info->symlinks_path, W_OK) < 0) ) {
+  	        message = "No write permissions on the symlinks directory";
+  	    }
+        if ( *message ) {
+  	        gtk_widget_set_sensitive(_installButton, 0);
+        } else {
+  	        gtk_widget_set_sensitive(_installButton, 1);
+        }
+        gtk_label_set_text(GTK_LABEL(_statusBar), message);
+    }
 }
 
 static void update_size(void)
@@ -359,10 +399,11 @@ static void update_size(void)
 
 static void update_space(void)
 {
-  if(!_spaceLabel) return;
-  sprintf(tmpbuf, "%d MB", diskspace = detect_diskspace(cur_info->install_path));
-  gtk_label_set_text(GTK_LABEL(_spaceLabel), tmpbuf);
-  check_install_button();
+    if (!_spaceLabel) return;
+    diskspace = detect_diskspace(cur_info->install_path);
+    sprintf(tmpbuf, "%d MB", diskspace);
+    gtk_label_set_text(GTK_LABEL(_spaceLabel), tmpbuf);
+    check_install_button();
 }
 
 static void enable_tree(xmlNodePtr node)
@@ -436,10 +477,6 @@ static GtkWidget* makeLabel( const char* str )
 
     widget = gtk_label_new( str );
     gtk_misc_set_alignment( GTK_MISC(widget), 1, 0.5 );
-    
-    // set_justify seems to have no effect..
-    //gtk_label_set_justify( GTK_LABEL(widget), GTK_JUSTIFY_RIGHT );
-
     gtk_widget_show( widget );
     
     return widget;
@@ -459,6 +496,41 @@ static GtkWidget* makeSizeOption(void)
     return( _sizeLabel );
 }
 
+static GtkWidget* makePathCombo(void)
+{
+    GtkWidget* widget;
+    GList* list;
+    int i;
+
+    widget = gtk_combo_new();
+    _dataCombo = (GtkCombo*) widget;
+
+#if 0
+    gtk_signal_connect( GTK_OBJECT(GTK_COMBO(widget)->entry), "changed",
+                        GTK_SIGNAL_FUNC(slot_installpath_selection), 0 );
+#else
+    /* Mouse sensitive combo box entry widget */
+    gtk_signal_connect(GTK_OBJECT(GTK_COMBO(widget)->entry),
+                       "enter_notify_event",
+                       GTK_SIGNAL_FUNC(slot_gainfocus_selection), 0 );
+    gtk_signal_connect(GTK_OBJECT(GTK_COMBO(widget)->entry),
+                       "leave_notify_event",
+                       GTK_SIGNAL_FUNC(slot_losefocus_selection), 0 );
+    gtk_signal_connect(GTK_OBJECT(GTK_COMBO(widget)->entry),
+                       "focus_out_event",
+                       GTK_SIGNAL_FUNC(slot_installpath_selection), 0 );
+#endif
+
+    list = 0;
+	list = g_list_append( list, cur_info->install_path);
+    gtk_combo_set_popdown_strings( GTK_COMBO(widget), list );
+    
+    gtk_entry_set_text( GTK_ENTRY(GTK_COMBO(widget)->entry), cur_info->install_path );
+    gtk_widget_show( widget );
+    
+    return widget;
+}
+
 static GtkWidget* makeLinkCombo()
 {
     char pathCopy[ 4069 ];
@@ -470,14 +542,26 @@ static GtkWidget* makeLinkCombo()
     widget = gtk_combo_new();
     _binCombo = (GtkCombo*) widget;
 
-    gtk_signal_connect( GTK_OBJECT(GTK_COMBO(widget)->entry), "activate",
+#if 0
+    gtk_signal_connect( GTK_OBJECT(GTK_COMBO(widget)->entry), "changed",
                         GTK_SIGNAL_FUNC(slot_symlinkspath_selection), 0 );
+#else
+    /* Mouse sensitive combo box entry widget */
+    gtk_signal_connect(GTK_OBJECT(GTK_COMBO(widget)->entry),
+                       "enter_notify_event",
+                       GTK_SIGNAL_FUNC(slot_gainfocus_selection), 0 );
+    gtk_signal_connect(GTK_OBJECT(GTK_COMBO(widget)->entry),
+                       "leave_notify_event",
+                       GTK_SIGNAL_FUNC(slot_losefocus_selection), 0 );
+    gtk_signal_connect(GTK_OBJECT(GTK_COMBO(widget)->entry),
+                       "focus_out_event",
+                       GTK_SIGNAL_FUNC(slot_symlinkspath_selection), 0 );
+#endif
 
     list = 0;
 
-	if(!access(cur_info->symlinks_path, W_OK)){
+	if ( access(cur_info->symlinks_path, W_OK) == 0 ) {
 	  list = g_list_append( list, cur_info->symlinks_path );
-	  gtk_entry_set_text( GTK_ENTRY(GTK_COMBO(widget)->entry), cur_info->symlinks_path );
 	  change_default = FALSE;
 	}
 
@@ -518,14 +602,16 @@ static GtkWidget* makeLinkCombo()
         }
     }
 
-    gtk_combo_set_popdown_strings( GTK_COMBO(widget), list );
+    if ( list ) {
+        gtk_combo_set_popdown_strings( GTK_COMBO(widget), list );
+    }
     gtk_widget_show( widget );
 	if(change_default && g_list_length(list))
 	  set_symlinkspath(cur_info, g_list_nth(list,0)->data);
-
+	gtk_entry_set_text( GTK_ENTRY(GTK_COMBO(widget)->entry), cur_info->symlinks_path );
     
     gtk_tooltips_set_tip( _tooltips, GTK_COMBO(widget)->entry,
-        "Links to the binaries in the install path are put here.", 0 );
+        "Symbolic links to installed binaries are put here", 0 );
     
     return widget;
 }
@@ -557,35 +643,6 @@ static GtkWidget* makeActivateButtons()
     gtk_widget_show( widget );
     
     return( box );
-}
-
-static GtkWidget* makePathCombo(void)
-{
-    GtkWidget* widget;
-    GList* list;
-    int i;
-
-    widget = gtk_combo_new();
-    _dataCombo = (GtkCombo*) widget;
-
-    gtk_signal_connect( GTK_OBJECT(GTK_COMBO(widget)->entry), "activate",
-                        GTK_SIGNAL_FUNC(slot_installpath_selection), 0 );
-
-    list = 0;
-    for( i = 0; i < DATA_LOCATIONS; i++ )
-    {
-		sprintf(tmpbuf,"%s/%s", dataLocation[i], cur_info->name);
-		list = g_list_append( list, tmpbuf);
-    }
-    gtk_combo_set_popdown_strings( GTK_COMBO(widget), list );
-    
-	sprintf(tmpbuf,"%s/%s", dataLocation[0], cur_info->name);
-	
-	set_installpath(cur_info, tmpbuf);
-    gtk_entry_set_text( GTK_ENTRY(GTK_COMBO(widget)->entry), tmpbuf );
-    gtk_widget_show( widget );
-    
-    return widget;
 }
 
 static GtkWidget* makeDesktopOption(void)
@@ -677,12 +734,14 @@ static GtkWidget* makeOptionsPage(install_info *info)
     box0 = gtk_vbox_new( FALSE, 10 );
     gtk_widget_show( box0 );
 
-    pixmap = gdk_pixmap_create_from_xpm_d( _window->window, &mask,
+    pixmap = gdk_pixmap_create_from_xpm( _window->window, &mask,
                                            &style->bg[ GTK_STATE_NORMAL ],
-                                           loki_logo_xpm);
-	widget = gtk_pixmap_new(pixmap,mask);
-    PACKC( box0, widget );
-    gtk_widget_show( widget );
+                                           GetProductSplash(info));
+    if ( pixmap ) {
+	    widget = gtk_pixmap_new(pixmap,mask);
+        PACKC( box0, widget );
+        gtk_widget_show( widget );
+    }
 
     widget = gtk_frame_new( "Global Options" );
     PACKC( box0, widget );
@@ -694,9 +753,9 @@ static GtkWidget* makeOptionsPage(install_info *info)
 
     box3 = VBOX( box1, 1, 0 );
 
-        PACK00( box3, ALIGN(makeLabel( "Install Path" ),0.5,0,0,0), 0 );
+        PACK00( box3, ALIGN(makeLabel( "Game Install Path" ),0.5,0,0,0), 0 );
         PACK00( box3, makePathCombo(), 0 );
-        PACK00( box3, ALIGN(makeLabel( "Symbolic Link Path" ),0.5,0,0,0), 0 );
+        PACK00( box3, ALIGN(makeLabel( "Binary Directory" ),0.5,0,0,0), 0 );
         PACK00( box3, makeLinkCombo(), 0 );
 
 		box2 = VBBOX( GTK_BUTTONBOX_SPREAD, 10 );
@@ -719,6 +778,9 @@ static GtkWidget* makeOptionsPage(install_info *info)
 	  }
 	  node = node->next;
 	}
+
+    /* Create a separator bar */
+	PACK00( box4, ALIGN( gtk_hseparator_new(), 0, 0.5, 0, 0 ), 0 );
 
 	box2 = HBOX(box4, 0,15);
 			PACK00( box2, ALIGN(makeLabel( "Free space:" ),0,0,0,0), 0 );
@@ -893,7 +955,6 @@ static GtkWidget* makeAbortPage()
 static install_state gtkui_init(install_info *info, int argc, char **argv)
 {
     GtkWidget* hbox, *vbox;
-    GtkStyle* style;
 	GtkWidget* label;
 	GdkPixmap* pixmap;
 	GdkBitmap* mask;
@@ -902,10 +963,9 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
 	cur_info = info;
 
 	gtk_init(&argc,&argv);
-	gdk_imlib_init();
 
     _window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
-	sprintf(tmpbuf,"%s installer", info->desc);
+	sprintf(tmpbuf,"%s Setup", info->desc);
     gtk_window_set_title( GTK_WINDOW(_window), tmpbuf);
     gtk_window_set_policy( GTK_WINDOW(_window), 0, 0, 1 );
     gtk_container_set_border_width( GTK_CONTAINER(_window), 20 );
@@ -913,8 +973,6 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
                         GTK_SIGNAL_FUNC(slot_abortInstall), NULL );
 
     _tooltips = gtk_tooltips_new();
-    gtk_widget_show( _window );
-    style = gtk_widget_get_style( _window );
 
 	gtk_window_set_position( GTK_WINDOW(_window), GTK_WIN_POS_CENTER);
 
@@ -941,15 +999,9 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
                               label = gtk_label_new( "Aborted" ) );
 	gtk_widget_show(label);
 
-    pixmap = gdk_pixmap_create_from_xpm( _window->window, &mask,
-                                           &style->bg[ GTK_STATE_NORMAL ],
-                                           GetProductSplash(info));
-    _pixmap = gtk_pixmap_new( pixmap, mask );
-    PACK00( hbox, _pixmap, 0 );
-    gtk_widget_show( _pixmap );
-
     gtk_widget_show( hbox );
 
+    gtk_widget_show( _window );
     return iterate_for_state();
 }
 

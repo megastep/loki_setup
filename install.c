@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.8 1999-09-09 04:02:07 megastep Exp $ */
+/* $Id: install.c,v 1.9 1999-09-10 08:09:57 hercules Exp $ */
 
 #include <sys/types.h>
 #include <stdlib.h>
@@ -133,7 +133,7 @@ void expand_home(install_info *info, const char *path, char *buffer)
     buffer[0] = '\0';
     if ( *path == '~' ) {
         ++path;
-        if ( *path == '/' ) {
+        if ( (*path == '\0') || (*path == '/') ) {
             const char *home;
 
             /* Substitute '~' with our home directory */
@@ -259,7 +259,7 @@ void uninstall(install_info *info)
 
 void generate_uninstall(install_info *info)
 {
-    FILE *fd;
+    FILE *fp;
 	char script[PATH_MAX];
 	struct file_elem *felem;
 	struct dir_elem *delem;
@@ -267,23 +267,23 @@ void generate_uninstall(install_info *info)
 	strncpy(script,info->install_path, PATH_MAX);
 	strncat(script,"/uninstall", PATH_MAX);
 
-	fd = fopen(script, "w");
-	fprintf(fd,
+	fp = fopen(script, "w");
+	fprintf(fp,
 			"#!/bin/sh\n"
 			"# Uninstall script for %s\n", info->desc
 			);
     for ( felem = info->file_list; felem; felem = felem->next ) {
-		fprintf(fd,"rm -f \"%s\"\n", felem->path);
+		fprintf(fp,"rm -f \"%s\"\n", felem->path);
     }
 	/* Don't forget to remove ourselves */
-	fprintf(fd,"rm -f \"%s\"\n", script);
+	fprintf(fp,"rm -f \"%s\"\n", script);
 
     for ( delem = info->dir_list; delem; delem = delem->next ) {
-		fprintf(fd,"rmdir \"%s\"\n", delem->path);
+		fprintf(fp,"rmdir \"%s\"\n", delem->path);
     }
-	fprintf(fd,"echo \"%s has been uninstalled.\"\n", info->desc);
-	fchmod(fileno(fd),0755); /* Turn on executable bit */
-	fclose(fd);
+	fprintf(fp,"echo \"%s has been uninstalled.\"\n", info->desc);
+	fchmod(fileno(fp),0755); /* Turn on executable bit */
+	fclose(fp);
 }
 
 /* Launch the game using the information in the install info */
@@ -292,7 +292,7 @@ install_state launch_game(install_info *info)
   int status, pid;
   char buf[PATH_MAX];
 
-  sprintf(buf,"%s/%s %s",info->symlinks_path,info->name,info->args);
+  sprintf(buf,"%s/%s %s &",info->symlinks_path,info->name,info->args);
   system(buf);
   return SETUP_EXIT;
 }
