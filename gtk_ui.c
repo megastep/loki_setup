@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.99 2004-06-09 21:13:24 megastep Exp $
+   $Id: gtk_ui.c,v 1.100 2004-06-15 03:58:43 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1343,7 +1343,7 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
 		child = child->next;
     }
 
-    /* Disable any options that are already installed */
+    /* Reinstallation - Disable any options that are already installed */
     if ( info->product ) {
 		product_component_t *comp;
 		if ( component ) {
@@ -1351,11 +1351,12 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
 		} else {
 			comp = loki_getdefault_component(info->product);
 		}
-		if ( excl_reinst ) { /* Reinstall an exclusive option - make sure to select the installed one */
+		if ( exclusive ) {
+			/* Reinstall an exclusive option - make sure to select the installed one */
 			gtk_widget_set_sensitive(button, FALSE);
 			if ( comp && loki_find_option(comp, name) ) {
 				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
-				mark_option(info, node, "true", 1);
+				mark_option(info, node, excl_reinst ? "true" : "false", 1);
 			} else {
 				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), FALSE);
 				mark_option(info, node, "false", 1);

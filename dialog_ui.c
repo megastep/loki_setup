@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.23 2004-05-12 02:14:30 megastep Exp $
+ * $Id: dialog_ui.c,v 1.24 2004-06-15 03:58:43 megastep Exp $
  */
 
 #include <limits.h>
@@ -181,9 +181,9 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr pa
 				} else {
 					comp = loki_getdefault_component(info->product);
 				}
-				if ( excl_reinst ) {
+				if ( exclusive ) {
 					if ( comp && loki_find_option(comp, get_option_name(info, node, NULL, 0)) ) {
-						mark_option(info, node, "true", 0);
+						mark_option(info, node, excl_reinst ? "true" : "false", 0);
 					} else {
 						mark_option(info, node, "false", 0);
 					}
