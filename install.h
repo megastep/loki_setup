@@ -366,8 +366,9 @@ extern int install_menuitems(install_info *info, desktop_type d);
 /* Run shell script commands from a string
    If 'arg' is >= 0, it is passed to the script as a numeric argument,
    otherwise the install path is passed as a command line argument.
+   'include_tags' indicates if the SETUP_OPTIONTAGS should be set in the script header.
  */
-extern int run_script(install_info *info, const char *script, int arg);
+extern int run_script(install_info *info, const char *script, int arg, int include_tags);
 
 /* returns true if any deviant paths are not writable */
 char check_deviant_paths(xmlNodePtr node, install_info *info);

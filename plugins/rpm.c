@@ -1,5 +1,5 @@
 /* RPM plugin for setup */
-/* $Id: rpm.c,v 1.9 2002-12-07 00:57:32 megastep Exp $ */
+/* $Id: rpm.c,v 1.10 2003-09-04 02:29:04 megastep Exp $ */
 
 #include "plugins.h"
 #include "file.h"
@@ -185,7 +185,7 @@ static size_t RPMCopy(install_info *info, const char *path, const char *dest, co
         if(headerIsEntry(hd, RPMTAG_PREIN)){      
 			headerGetEntry(hd, RPMTAG_PREIN, &type, &p, &c);
 			if(type==RPM_STRING_TYPE)
-				run_script(info, (char*)p, 1);
+				run_script(info, (char*)p, 1, 1);
         }
 
 		/* Identify the type of compression for the archive */
@@ -213,7 +213,7 @@ static size_t RPMCopy(install_info *info, const char *path, const char *dest, co
         if(headerIsEntry(hd, RPMTAG_POSTIN)){      
 			headerGetEntry(hd, RPMTAG_POSTIN, &type, &p, &c);
 			if(type==RPM_STRING_TYPE)
-				run_script(info, (char*)p, 1);
+				run_script(info, (char*)p, 1, 1);
         }
 
         /* Append the uninstall scripts to the uninstall */

@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.65 2003-08-26 03:33:22 megastep Exp $ */
+/* $Id: main.c,v 1.66 2003-09-04 02:29:04 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -388,7 +388,7 @@ int main(int argc, char **argv)
                 }
                 break;
 	    case SETUP_CLASS:
-		state = UI.pick_class(info);
+			state = UI.pick_class(info);
 		break;
             case SETUP_LICENSE:
                 state = UI.license(info);

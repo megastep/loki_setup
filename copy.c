@@ -347,7 +347,7 @@ ssize_t copy_file(install_info *info, const char *cdrom, const char *path, const
 				*slash = '\0';
 			}
 			push_curdir(dir);
-			if ( run_script(info, buf, 0) == 0 ) {
+			if ( run_script(info, buf, 0, 1) == 0 ) {
 				const char *target = xmlGetProp(node, "target");
 				if ( target ) {
 					char targetpath[PATH_MAX];
@@ -719,7 +719,7 @@ int copy_script(install_info *info, xmlNodePtr node, const char *script, const c
 		if ( ! update(info, _("Running script"), 0, 0, current_option_txt) )
 			return 0;
 	}
-    return(run_script(info, script, -1));
+    return(run_script(info, script, -1, 1));
 }
 
 ssize_t copy_node(install_info *info, xmlNodePtr node, const char *dest,

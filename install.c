@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.120 2003-08-14 01:31:14 megastep Exp $ */
+/* $Id: install.c,v 1.121 2003-09-04 02:29:03 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1045,7 +1045,7 @@ int CheckRequirements(install_info *info)
 				log_fatal(_("XML: 'require' tag doesn't have a mandatory 'command' attribute"));
 			} else {
 				/* Launch the command */
-				if ( run_script(info, prop, 0) != 0 ) {
+				if ( run_script(info, prop, 0, 0) != 0 ) {
 					/* We failed: print out error message */
 					text = xmlNodeListGetString(info->config, node->childs, 1);
 					if(text) {
@@ -1185,7 +1185,7 @@ int get_option_displayed(install_info *info, xmlNodePtr node)
 		return 0;
 
 	    /* Launch the command */
-	    return run_script(info, txt, 0) == 0;
+	    return run_script(info, txt, 0, 0) == 0;
 	}
     }
     return 1;
@@ -1392,7 +1392,7 @@ void uninstall(install_info *info)
 
     if (GetPreUnInstall(info) && info->installed_bytes>0) {
 		snprintf(path, sizeof(path), "sh %s", GetPreUnInstall(info));
-        run_script(info, path, 0);
+        run_script(info, path, 0, 1);
     }
 
     if ( file_exists(info->install_path) ) {
@@ -1409,7 +1409,7 @@ void uninstall(install_info *info)
 			/* Do not run scripts if nothing was installed */
 			if ( info->installed_bytes>0 ) {
 				for ( selem = opt->pre_script_list; selem; selem = selem->next ) { /* RPM pre-uninstall */
-					run_script(info, selem->script, 0);
+					run_script(info, selem->script, 0, 1);
 				}
 			}
 
@@ -1426,7 +1426,7 @@ void uninstall(install_info *info)
             }
 			if ( info->installed_bytes>0 ) {
 				for ( selem = opt->post_script_list; selem; selem = selem->next ) { /* RPM post-uninstall */
-					run_script(info, selem->script, 0);
+					run_script(info, selem->script, 0, 1);
 				}
 			}
 
@@ -1444,7 +1444,7 @@ void uninstall(install_info *info)
     }
     if (GetPostUnInstall(info) && info->installed_bytes>0) {
 		snprintf(path, sizeof(path), "sh %s", GetPostUnInstall(info));
-        run_script(info, path, 0);
+        run_script(info, path, 0, 1);
     }
 
     if ( uninstall_generated ) {
@@ -1454,7 +1454,7 @@ void uninstall(install_info *info)
     pop_curdir();
 }
 
-static char tags[2048];
+static char tags[2048] = "";
 static int tags_left;
 
 static void optionstag_sub(install_info *info, xmlNodePtr node)
@@ -1474,10 +1474,34 @@ static void optionstag_sub(install_info *info, xmlNodePtr node)
 					 match_libc(info, xmlGetProp(node, "libc")) &&
 					 match_distro(info, xmlGetProp(node, "distro"))
 					 ) {
-					strncat(tags, tag, tags_left);
-					tags_left -= strlen(tag);
-					strncat(tags, " ", tags_left);
-					tags_left --;
+					/* Do not add the tag if it's already in */
+					if  ( info->product ) {
+						product_component_t *comp;
+						product_option_t *opt;
+						char optname[BUFSIZ];
+						int found = 0;
+
+						get_option_name(info, node, optname, sizeof(optname));
+
+						for ( comp = loki_getfirst_component(info->product); comp; comp = loki_getnext_component(comp) ) {
+							opt = loki_find_option(comp, optname);
+							if ( opt && loki_gettag_option(opt) ) {
+								found = 1;
+								break;
+							}
+						}
+						if ( !found ) {
+							strncat(tags, tag, tags_left);
+							tags_left -= strlen(tag);
+							strncat(tags, " ", tags_left);
+							tags_left --;
+						}
+					} else {
+						strncat(tags, tag, tags_left);
+						tags_left -= strlen(tag);
+						strncat(tags, " ", tags_left);
+						tags_left --;
+					}
 				}
 			}
 		} else if ( ! strcmp(node->name, "exclusive" ) ) {
@@ -1495,21 +1519,41 @@ static void optionstag_sub(install_info *info, xmlNodePtr node)
 
 static const char *get_optiontags_string(install_info *info)
 {
-	*tags = '\0';
-	tags_left = sizeof(tags)-1;
+	if ( *tags == '\0' ) { /* Cache the results */
+		tags_left = sizeof(tags)-1;
 
-	/* Recursively parse the XML for install="true" tags */
-	optionstag_sub(info, info->config->root->childs);
-
-	if ( tags_left <= 0 ) /* String full */ {
-		log_warning(_("Options tag string maxed out!"));
-	} else {
-		int len = strlen(tags);
-		if ( len > 0 ) { /* Remove the last space */
-			tags[len-1] = '\0';
+		/* First look for already installed tags */
+		if ( info->product ) {
+			product_component_t *comp;
+			product_option_t *opt;
+			const char *tag;
+			
+			for ( comp = loki_getfirst_component(info->product); comp; comp = loki_getnext_component(comp) ) {
+				for ( opt = loki_getfirst_option(comp); opt; opt = loki_getnext_option(opt) ) {
+					tag = loki_gettag_option(opt);
+					if ( tag ) {
+						strncat(tags, tag, tags_left);
+						tags_left -= strlen(tag);
+						strncat(tags, " ", tags_left);
+						tags_left --;
+					}
+				}
+			}
 		}
+		
+		/* Recursively parse the XML for install="true" tags */
+		optionstag_sub(info, info->config->root->childs);
+		
+		if ( tags_left <= 0 ) /* String full */ {
+			log_warning(_("Options tag string maxed out!"));
+		} else {
+			int len = strlen(tags);
+			if ( len > 0 ) { /* Remove the last space */
+				tags[len-1] = '\0';
+			}
+		}
+		log_debug("Options tags is '%s'\n", tags);
 	}
-	/* fprintf(stderr,"Options tags is '%s'\n", tags); */
 	return tags;
 }
 
@@ -1524,7 +1568,7 @@ static void output_script_header(FILE *f, install_info *info, product_component_
             "SETUP_SYMLINKSPATH=\"%s\"\n"
             "SETUP_CDROMPATH=\"%s\"\n"
             "SETUP_DISTRO=\"%s\"\n"
-            "SETUP_OPTIONTAGS=\"%s\"\n"
+			"SETUP_OPTIONTAGS=\"%s\"\n"
             "export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_COMPONENTNAME SETUP_COMPONENTVER\n"
             "export SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH SETUP_DISTRO SETUP_OPTIONTAGS\n",
             info->name, info->version,
@@ -1533,7 +1577,8 @@ static void output_script_header(FILE *f, install_info *info, product_component_
             info->symlinks_path,
             info->cdroms_list ? info->cdroms_list->mounted : "",
 			info->distro ? distribution_symbol[info->distro] : "",
-			get_optiontags_string(info));
+			get_optiontags_string(info)
+			);
 #ifdef RPM_SUPPORT
     if(strcmp(rpm_root,"/")) /* Emulate RPM environment for scripts */
         fprintf(f,"RPM_INSTALL_PREFIX=%s\n", rpm_root);
@@ -1812,7 +1857,7 @@ int install_preinstall(install_info *info)
 	if ( ! restoring_corrupt() ) {
 		script = GetPreInstall(info);
 		if ( script ) {
-			exitval = run_script(info, script, -1);
+			exitval = run_script(info, script, -1, 1);
 		}
 	}
     return exitval;
@@ -1825,7 +1870,7 @@ int install_postinstall(install_info *info)
 	if ( ! restoring_corrupt() ) {
 		script = GetPostInstall(info);
 		if ( script ) {
-			exitval = run_script(info, script, -1);
+			exitval = run_script(info, script, -1, 1);
 		}
 	}
     return exitval;
@@ -1846,7 +1891,7 @@ void mark_cmd_options(install_info *info, xmlNodePtr parent, int exclusive)
 					/* Run the command and set it to "true" if the return value is ok */
 					str = xmlGetProp(child, "command");
 					if ( str ) {
-						cmd = run_script(info, str, 0);
+						cmd = run_script(info, str, 0, 0);
 						xmlSetProp(child, "install", cmd ? "false" : "true");
 						log_debug("Script run: '%s' returned %d\n", str, cmd);
 					} else {
@@ -2286,7 +2331,7 @@ int install_menuitems(install_info *info, desktop_type desktop)
 }
 
 /* Run some shell script commands */
-int run_script(install_info *info, const char *script, int arg)
+int run_script(install_info *info, const char *script, int arg, int include_tags)
 {
     char script_file[PATH_MAX];
     int fd;
@@ -2327,18 +2372,22 @@ int run_script(install_info *info, const char *script, int arg)
 					"SETUP_SYMLINKSPATH=\"%s\"\n"
 					"SETUP_CDROMPATH=\"%s\"\n"
 					"SETUP_DISTRO=\"%s\"\n"
-					"SETUP_OPTIONTAGS=\"%s\"\n"
 					"SETUP_REINSTALL=\"%s\"\n"
-					"export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH SETUP_DISTRO SETUP_OPTIONTAGS SETUP_REINSTALL\n"
+					"export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH SETUP_DISTRO SETUP_REINSTALL\n"
 					"%s%s\n",
 					info->name, info->version,
 					info->install_path,
 					info->symlinks_path,
 					info->cdroms_list ? info->cdroms_list->mounted : "",
 					info->distro ? distribution_symbol[info->distro] : "",
-					get_optiontags_string(info),
 					info->options.reinstalling ? "1" : "0",
 					working_dir, script);     
+			if ( include_tags )
+				fprintf(fp, 
+						"SETUP_OPTIONTAGS=\"%s\"\n"
+						"export SETUP_OPTIONTAGS\n", 
+						get_optiontags_string(info));
+
             fchmod(fileno(fp),0755); /* Turn on executable bit */
             fclose(fp);
 			if ( arg >= 0 ) {
