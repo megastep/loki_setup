@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.49 2004-02-25 23:56:36 megastep Exp $ */
+/* $Id: uninstall.c,v 1.50 2004-04-16 22:27:47 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -42,12 +42,14 @@ void abort_install(void)
 
 static void print_usage(const char *argv0)
 {
-	printf(_("Usage: %s product to uninstall the product\n"
-             "       %s -l      to list all products\n"
-             "       %s product -l        to list all components\n"
-             "       %s product component to uninstall a single component\n"),
-           argv0, argv0, argv0, argv0
-		   );
+	printf( _("Usage: %s [args]\n"
+		  "args can be any of the following:\n\n"
+		  "  -h | --help      : Print this help message.\n"
+		  "  -l | --list      : List all installed products and components.\n"
+		  "  -v | --version   : Get version information.\n"
+		  "  product [component] : Uninstalls the specified product, or its subcomponent.\n"
+		  "  product < -l | --list > : List installed subcomponents of product.\n"
+		  ), argv[0]);
 }
 
 static void log_file(const char *name, const char *reason)
@@ -526,7 +528,7 @@ int main(int argc, char *argv[])
     signal(SIGQUIT, emergency_exit);
     signal(SIGTERM, emergency_exit);
 
-    if ( !strcmp(argv[1], "-l") ) {
+    if ( !strcmp(argv[1], "-l") || !strcmp(argv[1], "--list") ) {
 		if ( loki_getfirstproduct() ) {
 			const char *product;
 			printf(_("Installed products:\n"));
@@ -558,14 +560,7 @@ int main(int argc, char *argv[])
         printf("%d.%d.%d\n", SETUP_VERSION_MAJOR, SETUP_VERSION_MINOR, SETUP_VERSION_RELEASE);
 #endif
     } else if ( !strcmp(argv[1], "-h") || !strcmp(argv[1], "--help") ) {
-		fprintf(stderr, 
-				_("Usage: %s [args]\n"
-				  "args can be any of the following:\n\n"
-				  "  -l               : List all installed products and components.\n"
-				  "  -v | --version   : Get version information.\n"
-				  "  -h | --help      : Print this help message.\n"
-				  "  product [component] : Uninstalls the specified product, or its subcomponent.\n"
-				  ), argv[0]);
+		print_usage(argv[0]);
 		return 0;
     } else {
         prod = loki_openproduct(argv[1]);
@@ -585,7 +580,7 @@ int main(int argc, char *argv[])
 
         if ( argc == 3 && *argv[2] ) {
             product_component_t *comp;
-            if ( !strcmp(argv[2], "-l") ) { /* List components */
+            if ( !strcmp(argv[2], "-l") || !strcmp(argv[1], "--list") ) { /* List components */
                 printf(_("Components:\n"));
                 for ( comp = loki_getfirst_component(prod); comp; 
                       comp = loki_getnext_component(comp) ) {
