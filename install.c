@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.11 1999-09-10 13:08:59 hercules Exp $ */
+/* $Id: install.c,v 1.12 1999-09-11 03:33:34 megastep Exp $ */
 
 #include <sys/types.h>
 #include <stdlib.h>
@@ -383,13 +383,13 @@ void install_menuitems(install_info *info, desktop_type d)
 	break;
   }
   for( ; *app_links; app_links ++){
-	if(access(*app_links, W_OK))
+	expand_home(info, *app_links, buf);
+	if(access(buf, W_OK))
 	  continue;
 
     for(elem = info->bin_list; elem; elem = elem->next ) {	  
 	  FILE *fp;
 
-	  strcpy(buf, *app_links);
 	  strncat(buf, elem->symlink, PATH_MAX);
 	  switch(d){
 	  case DESKTOP_KDE:
