@@ -1167,6 +1167,8 @@
 <widget>
   <class>GtkDialog</class>
   <name>readme_dialog</name>
+  <width>480</width>
+  <height>360</height>
   <visible>False</visible>
   <title>Readme File</title>
   <type>GTK_WINDOW_TOPLEVEL</type>

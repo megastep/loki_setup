@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.9 1999-09-15 01:49:47 hercules Exp $
+   $Id: gtk_ui.c,v 1.10 1999-09-15 18:40:42 hercules Exp $
 */
 
 #include <limits.h>
@@ -108,12 +108,14 @@ static gboolean load_file( GtkEditable* widget, const char* file )
     fp = fopen(file, "r");
     if ( fp ) {
         char line[BUFSIZ];
+        pos = 0;
         while ( fgets(line, BUFSIZ-1, fp) ) {
-            pos = -1;
-            gtk_editable_insert_text( widget, line, strlen(line), &pos );
+            gtk_editable_insert_text(widget, line, strlen(line), &pos);
         }
         fclose(fp);
     }
+    gtk_editable_set_position(widget, 0);
+
     return (fp != NULL);
 }
 
@@ -127,12 +129,16 @@ void setup_close_view_readme_slot( GtkWidget* w, gpointer data )
 
 void setup_button_view_readme_slot( GtkWidget* w, gpointer data )
 {
+    GtkWidget *readme;
     GtkWidget *widget;
 
-    widget = glade_xml_get_widget(setup_glade, "readme_dialog");
-    gtk_widget_show(widget);
+    readme = glade_xml_get_widget(setup_glade, "readme_dialog");
     widget = glade_xml_get_widget(setup_glade, "readme_area");
-    load_file(GTK_EDITABLE(widget), "README");
+    if ( readme && widget ) {
+        gtk_widget_hide(readme);
+        load_file(GTK_EDITABLE(widget), "README");
+        gtk_widget_show(readme);
+    }
 }
 
 void setup_button_play_slot( GtkWidget* widget, gpointer func_data )
@@ -167,6 +173,7 @@ static void check_install_button(void)
     GtkWidget *options_status;
     GtkWidget *button_install;
     char path_up[PATH_MAX], *cp;
+    struct stat st;
   
     /* Get the topmost valid path */
     strcpy(path_up, cur_info->install_path);
@@ -188,11 +195,13 @@ static void check_install_button(void)
         message = "Please select at least one option";
     } else if ( BYTES2MB(cur_info->install_size) > diskspace ) {
         message = "Not enough free space for the selected options";
+    } else if ( (stat(path_up, &st) == 0) && !S_ISDIR(st.st_mode) ) {
+        message = "Install path is not a directory";
     } else if ( access(path_up, W_OK) < 0 ) {
-        message = "No write permissions on the destination directory";
+        message = "No write permissions on the install directory";
     } else if ( cur_info->symlinks_path[0] &&
                (access(cur_info->symlinks_path, W_OK) < 0) ) {
-        message = "No write permissions on the symlinks directory";
+        message = "No write permissions on the binary directory";
     }
 
     /* Get the appropriate widgets and set the new state */
@@ -227,7 +236,8 @@ static void update_space(void)
 
     widget = glade_xml_get_widget(setup_glade, "label_free_space");
     if ( widget ) {
-        sprintf(text, "%d MB", detect_diskspace(cur_info->install_path));
+        diskspace = detect_diskspace(cur_info->install_path);
+        sprintf(text, "%d MB", diskspace);
         gtk_label_set_text(GTK_LABEL(widget), text);
         check_install_button();
     }
@@ -476,6 +486,7 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
     FILE *opened;
     GtkWidget *window;
     GtkWidget *options;
+    GtkWidget *widget;
     char title[1024];
     xmlNodePtr node;
 
@@ -512,10 +523,18 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
       }
       node = node->next;
     }
+    widget = glade_xml_get_widget(setup_glade, "current_option_label");
+    if ( widget ) {
+        gtk_label_set_text( GTK_LABEL(widget), "");
+    }
+    widget = glade_xml_get_widget(setup_glade, "current_file_label");
+    if ( widget ) {
+        gtk_label_set_text( GTK_LABEL(widget), "");
+    }
     init_install_path();
     init_binary_path();
-    update_space();
     update_size();
+    update_space();
 
     /* Show the installer */
     gtk_widget_show( window );
@@ -537,6 +556,7 @@ static void gtkui_update(install_info *info, const char *path, size_t progress, 
     static gfloat last_update = -1;
     GtkWidget *widget;
     char text[1024];
+    char *install_path;
     gfloat new_update;
 
     new_update = (gfloat)progress / (gfloat)size;
@@ -554,6 +574,11 @@ static void gtkui_update(install_info *info, const char *path, size_t progress, 
         widget = glade_xml_get_widget(setup_glade, "current_file_label");
         if ( widget ) {
             sprintf(text, "%s", path);
+            /* Remove the install path from the string */
+            install_path = cur_info->install_path;
+            if ( strncmp(text, install_path, strlen(install_path)) == 0 ) {
+                strcpy(text, &text[strlen(install_path)+1]);
+            }
             gtk_label_set_text( GTK_LABEL(widget), text);
         }
         widget = glade_xml_get_widget(setup_glade, "current_file_progress");

@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.13 1999-09-11 04:00:55 hercules Exp $ */
+/* $Id: install.c,v 1.14 1999-09-15 18:40:42 hercules Exp $ */
 
 #include <sys/types.h>
 #include <stdlib.h>
@@ -319,22 +319,24 @@ void generate_uninstall(install_info *info)
     strncat(script,"/uninstall", PATH_MAX);
 
     fp = fopen(script, "w");
-    fprintf(fp,
+    if ( fp != NULL ) {
+        fprintf(fp,
             "#!/bin/sh\n"
             "# Uninstall script for %s\n", info->desc
             );
-    for ( felem = info->file_list; felem; felem = felem->next ) {
-        fprintf(fp,"rm -f \"%s\"\n", felem->path);
-    }
-    /* Don't forget to remove ourselves */
-    fprintf(fp,"rm -f \"%s\"\n", script);
+        for ( felem = info->file_list; felem; felem = felem->next ) {
+            fprintf(fp,"rm -f \"%s\"\n", felem->path);
+        }
+        /* Don't forget to remove ourselves */
+        fprintf(fp,"rm -f \"%s\"\n", script);
 
-    for ( delem = info->dir_list; delem; delem = delem->next ) {
-        fprintf(fp,"rmdir \"%s\"\n", delem->path);
+        for ( delem = info->dir_list; delem; delem = delem->next ) {
+            fprintf(fp,"rmdir \"%s\"\n", delem->path);
+        }
+        fprintf(fp,"echo \"%s has been uninstalled.\"\n", info->desc);
+        fchmod(fileno(fp),0755); /* Turn on executable bit */
+        fclose(fp);
     }
-    fprintf(fp,"echo \"%s has been uninstalled.\"\n", info->desc);
-    fchmod(fileno(fp),0755); /* Turn on executable bit */
-    fclose(fp);
 }
 
 /* Launch the game using the information in the install info */

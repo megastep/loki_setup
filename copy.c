@@ -39,7 +39,7 @@ int parse_line(const char **srcpp, char *buf, int maxlen)
     }
 
     /* Trim whitespace */
-    while ( (dstp > buf) && isspace(*dstp) ) {
+    while ( (dstp > buf) && isspace(*(dstp-1)) ) {
         --dstp;
     }
     *dstp = '\0';
