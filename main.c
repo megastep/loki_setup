@@ -1,12 +1,19 @@
+/* $Id: main.c,v 1.2 1999-09-09 04:02:07 megastep Exp $ */
 
 #include <stdio.h>
 #include <setjmp.h>
 #include <signal.h>
+#include <getopt.h>
 
 #include "install.h"
 #include "install_ui.h"
+#include "log.h"
 
 #define SETUP_CONFIG  "setup.xml"
+
+/* Global options */
+
+int force_console = 0;
 
 /* A way to jump to the abort handling code */
 jmp_buf abort_jmpbuf;
@@ -15,25 +22,77 @@ void signal_abort(int sig)
 {
     longjmp(abort_jmpbuf, sig);
 }
+
+/* Abort a running installation (to be called from the update function) */
+void abort_install(void)
+{
+    longjmp(abort_jmpbuf, 1);
+}
     
 /* List of UI drivers */
 static int (*GUI_okay[])(Install_UI *UI) = {
+    gtkui_okay,
     console_okay,
     NULL
 };
 
-/* The main installer code */
-main()
+/* List the valid command-line options */
+
+static void print_usage(argv0)
 {
-    int i;
+  printf("Usage: %s [options]\n\n"
+		 "Options can be one or more of the following:\n"
+		 "   -h       Display this help message\n"
+		 "   -f file  Use an alternative XML file (default " SETUP_CONFIG ")\n"
+		 "   -n       Force the text-only user interface\n"
+		 "   -v n     Set verbosity level to n. Available values :\n"
+		 "            0: Debug  1: Quiet  2: Normal 3: Warnings 4: Fatal\n",
+		 argv0);
+  exit(0);
+}
+
+/* The main installer code */
+int main(int argc, char **argv)
+{
+    int i, c;
     Install_UI UI;
     install_info *info;
     install_state state;
+	char *xml_file = SETUP_CONFIG;
+	int log_level = LOG_NORMAL;
+
+	/* Parse the command-line options */
+	while((c=getopt(argc, argv, "hnf:v::")) != EOF){
+	  switch(c){
+	  case 'h':
+		print_usage(argv[0]);
+		break;
+	  case 'f':
+		xml_file = optarg;
+		break;
+	  case 'n':
+		force_console = 1;
+		break;
+	  case 'v':
+		if(optarg){
+		  log_level = atoi(optarg);
+		  if(log_level<LOG_DEBUG || log_level>LOG_FATAL){
+			fprintf(stderr,"Out of range value, setting verbosity level to normal.\n");
+			log_level = LOG_NORMAL;
+		  }
+		}else
+		  log_level = LOG_DEBUG;
+		break;
+	  case '?':
+		print_usage(argv[0]);
+		break;
+	  }
+	}
 
     /* Initialize the XML setup configuration */
-    info = create_install(SETUP_CONFIG);
+    info = create_install(xml_file, log_level);
     if ( info == NULL ) {
-        fprintf(stderr, "Couldn't load '%s'\n", SETUP_CONFIG);
+        fprintf(stderr, "Couldn't load '%s'\n", xml_file);
         exit(1);
     }
 
@@ -56,7 +115,7 @@ main()
     while ( state != SETUP_EXIT ) {
         switch (state) {
             case SETUP_INIT:
-                state = UI.init(info);
+                state = UI.init(info,argc,argv);
                 break;
             case SETUP_OPTIONS:
                 state = UI.setup(info);
@@ -74,7 +133,7 @@ main()
                 state = UI.complete(info);
                 break;
             case SETUP_PLAY:
-                /* Unimplemented */
+			    state = launch_game(info);
             case SETUP_EXIT:
                 /* Only here for completeness */
                 break;
@@ -83,5 +142,5 @@ main()
 
     /* Cleanup afterwards */
     delete_install(info);
-    exit(0);
+    return(0);
 }

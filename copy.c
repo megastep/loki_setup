@@ -16,6 +16,9 @@
 
 #define TAR_EXTENSION   ".tar"
 
+static int global_count = 0;
+static char current_option[200];
+
 int parse_line(const char **srcpp, char *buf, int maxlen)
 {
     const char *srcp;
@@ -44,14 +47,14 @@ int parse_line(const char **srcpp, char *buf, int maxlen)
 
     /* Update line pointer */
     *srcpp = srcp;
-
+	
     /* Return the length of the line */
     return strlen(buf);
 }
 
 
 size_t copy_tarball(install_info *info, const char *path, const char *dest,
-                void (*update)(install_info *info, const char *path, size_t progress, size_t size))
+                void (*update)(install_info *info, const char *path, size_t progress, size_t size, int global_count, const char *current))
 {
     static tar_record zeroes;
     tar_record record;
@@ -103,7 +106,7 @@ size_t copy_tarball(install_info *info, const char *path, const char *dest,
                         this_size += copied;
 
                         if ( update ) {
-                            update(info, final, this_size, cur_size);
+                            update(info, final, this_size, cur_size, global_count, current_option);
                         }
                     }
                     file_close(info, output);
@@ -132,7 +135,7 @@ size_t copy_tarball(install_info *info, const char *path, const char *dest,
 }
 
 size_t copy_file(install_info *info, const char *path, const char *dest, char *final, int binary,
-                void (*update)(install_info *info, const char *path, size_t progress, size_t size))
+                void (*update)(install_info *info, const char *path, size_t progress, size_t size, int global_count, const char *current))
 {
     size_t size, copied;
     const char *base;
@@ -167,7 +170,7 @@ size_t copy_file(install_info *info, const char *path, const char *dest, char *f
         }
         size += copied;
         if ( update ) {
-            update(info, final, size, input->size);
+            update(info, final, size, input->size, global_count, current_option);
         }
     }
     file_close(info, output);
@@ -177,7 +180,7 @@ size_t copy_file(install_info *info, const char *path, const char *dest, char *f
 }
 
 size_t copy_directory(install_info *info, const char *path, const char *dest,
-                void (*update)(install_info *info, const char *path, size_t progress, size_t size))
+                void (*update)(install_info *info, const char *path, size_t progress, size_t size, int global_count, const char *current))
 {
     struct stat sb;
     char fpat[BUFSIZ];
@@ -202,7 +205,7 @@ size_t copy_directory(install_info *info, const char *path, const char *dest,
 }
 
 size_t copy_path(install_info *info, const char *path, const char *dest,
-                void (*update)(install_info *info, const char *path, size_t progress, size_t size))
+                void (*update)(install_info *info, const char *path, size_t progress, size_t size, int global_count, const char *current))
 {
     char final[PATH_MAX];
     struct stat sb;
@@ -229,7 +232,7 @@ size_t copy_path(install_info *info, const char *path, const char *dest,
 }
 
 size_t copy_list(install_info *info, const char *filedesc, const char *dest,
-                void (*update)(install_info *info, const char *path, size_t progress, size_t size))
+                void (*update)(install_info *info, const char *path, size_t progress, size_t size, int global_count, const char *current))
 {
     char fpat[BUFSIZ];
     int i;
@@ -238,6 +241,7 @@ size_t copy_list(install_info *info, const char *filedesc, const char *dest,
 
     size = 0;
     while ( filedesc && parse_line(&filedesc, fpat, (sizeof fpat)) ) {
+	    global_count ++;
         if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
             for ( i=0; i<globbed.gl_pathc; ++i ) {
                 copied = copy_path(info, globbed.gl_pathv[i], dest, update);
@@ -254,7 +258,7 @@ size_t copy_list(install_info *info, const char *filedesc, const char *dest,
 }
 
 size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, const char *dest,
-                void (*update)(install_info *info, const char *path, size_t progress, size_t size))
+                void (*update)(install_info *info, const char *path, size_t progress, size_t size, int global_count, const char *current))
 {
     struct stat sb;
     char fpat[BUFSIZ], final[BUFSIZ];
@@ -262,6 +266,8 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
 
     while ( filedesc && parse_line(&filedesc, final, (sizeof final)) ) {
         copied = 0;
+		strncpy(current_option, final, sizeof(current_option));
+		strncat(current_option, " binary", sizeof(current_option));
         sprintf(fpat, "bin/%s/%s/%s", info->arch, info->libc, final);
         if ( stat(fpat, &sb) == 0 ) {
             copied = copy_file(info, fpat, dest, final, 1, update);
@@ -273,6 +279,7 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
                 log_warning(info, "Unable to find file %s", fpat);
             }
         }
+	    global_count ++;
         if ( copied > 0 ) {
 		    char *symlink = xmlGetProp(node, "symlink");
 			char sym_to[PATH_MAX];
@@ -292,16 +299,17 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
 }
 
 size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
-                void (*update)(install_info *info, const char *path, size_t progress, size_t size))
+                void (*update)(install_info *info, const char *path, size_t progress, size_t size, int global_count, const char *current))
 {
     size_t size, copied;
 
     size = 0;
     node = node->childs;
     while ( node ) {
-printf("Checking node element '%s'\n", node->name);
+/* printf("Checking node element '%s'\n", node->name); */
         if ( strcmp(node->name, "files") == 0 ) {
-printf("Installing file set for '%s'\n", xmlNodeListGetString(info->config, (node->parent)->childs, 1));
+		    const char *str = xmlNodeListGetString(info->config, (node->parent)->childs, 1);
+			parse_line(&str, current_option, sizeof(current_option));
             copied = copy_list(info,
                                xmlNodeListGetString(info->config, node->childs, 1),
                                dest, update);
@@ -310,7 +318,7 @@ printf("Installing file set for '%s'\n", xmlNodeListGetString(info->config, (nod
             }
         }
         if ( strcmp(node->name, "binary") == 0 ) {
-printf("Installing binary\n");
+/* printf("Installing binary\n"); */
             copied = copy_binary(info, node,
                                xmlNodeListGetString(info->config, node->childs, 1),
                                dest, update);
@@ -324,7 +332,7 @@ printf("Installing binary\n");
 }
 
 size_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
-                void (*update)(install_info *info, const char *path, size_t progress, size_t size))
+                void (*update)(install_info *info, const char *path, size_t progress, size_t size, int global_count, const char *current))
 {
     while ( node ) {
         const char *wanted;
@@ -336,4 +344,52 @@ size_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
         }
         node = node->next;
     }
+}
+
+/* Returns the number of lines of a string, skipping empty lines */
+static int count_lines(const char *str)
+{
+  int ret = 0;
+  if(str){
+	char prev = '\n';
+	while(*str){
+	  if(*str == '\n' && prev!='\n'){
+		ret ++;
+	  }
+	  prev = *str ++;
+	}
+  }
+  return ret;
+}
+
+static int parse_node(install_info *info, xmlNodePtr node)
+{
+  int count = 0;
+
+  if ( !strcmp(node->name, "files") || !strcmp(node->name, "binary")) {
+	count = count_lines(xmlNodeListGetString(info->config, node->childs, 1));
+  }
+  node = node->childs;
+  while ( node ) {
+	count += parse_node(info, node);
+	node = node->next;
+  }
+  return count;
+}
+
+/* Get the number of steps in the install */
+int length_install(install_info *info)
+{
+  xmlNodePtr node = info->config->root->childs;
+  const char *wanted;
+  int len = 0;
+  while ( node ) {
+
+	wanted = xmlGetProp(node, "install");
+	if ( wanted  && (strcmp(wanted, "true") == 0) ) {
+	  len += parse_node(info, node);
+	}
+	node = node->next;
+  }
+  return len;
 }

@@ -60,7 +60,7 @@ static yesno_answer prompt_yesno(const char *prompt, yesno_answer suggest)
     }
 }
 
-void mark_option(install_info *info, xmlNodePtr node,
+static void mark_option(install_info *info, xmlNodePtr node,
                  const char *value, int recurse)
 {
     /* Unmark this option for installation */
@@ -123,7 +123,7 @@ static void parse_option(install_info *info, xmlNodePtr node)
     }
 }
 
-static install_state console_init(install_info *info)
+static install_state console_init(install_info *info, int argc, char **argv)
 {
     printf("----====== %s installation program ======----\n", info->desc);
     printf("\n");
@@ -182,8 +182,14 @@ static install_state console_setup(install_info *info)
     return SETUP_INSTALL;
 }
 
-static void console_update(install_info *info, const char *path, size_t progress, size_t size)
+static void console_update(install_info *info, const char *path, size_t progress, size_t size, int global_count, const char *current)
 {
+  static char previous[200] = "";
+
+  if(strcmp(previous, current)){
+	strncpy(previous,current, sizeof(previous));
+	printf("Installing %s ...\n", current);
+  }
   printf(" %3d%% - %s\r", (int) (((float)progress/(float)size)*100.0), path);
   if(progress==size)
 	putchar('\n');
@@ -210,7 +216,10 @@ static install_state console_complete(install_info *info)
     }
     printf("\n");
     printf("Installation complete.\n");
-    return SETUP_EXIT;
+	if ( prompt_yesno("Would you like launch the game now?", RESPONSE_YES)
+		 == RESPONSE_YES )
+	  return SETUP_PLAY;
+	return SETUP_EXIT;
 }
 
 int console_okay(Install_UI *UI)

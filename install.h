@@ -89,6 +89,9 @@ typedef struct {
         struct bin_elem *next;
     } *bin_list;
 
+    /* Arguments to the game when launching it */
+    const char *args;
+
     /* Unspecified UI data */
     struct UI_data *uidata;
 
@@ -96,7 +99,7 @@ typedef struct {
 
 
 /* Create the initial installation information */
-extern install_info *create_install(const char *configfile);
+extern install_info *create_install(const char *configfile, int log_level);
 
 /* Add a file entry to the list of files installed */
 extern void add_file_entry(install_info *info, const char *path);
@@ -122,7 +125,13 @@ extern void delete_install(install_info *info);
 
 /* Actually install the selected filesets */
 extern install_state install(install_info *info,
-            void (*update)(install_info *info, const char *path, size_t progress, size_t size));
+            void (*update)(install_info *info, const char *path, size_t progress, size_t size, int global_count, const char *current));
+
+/* Get the number of steps in the install */
+extern int length_install(install_info *info);
+
+/* Abort a running installation (to be called from the update function) */
+extern void abort_install(void);
 
 /* Remove a partially installed product */
 extern void uninstall(install_info *info);
@@ -132,5 +141,8 @@ extern void generate_uninstall(install_info *info);
 
 /* Install the desktop menu items */
 extern void install_menuitems(install_info *info, desktop_type d);
+
+/* Launch the game using the information in the install info */
+extern install_state launch_game(install_info *info);
 
 #endif /* _install_h */

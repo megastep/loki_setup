@@ -7,13 +7,14 @@
 #include "install.h"
 
 typedef struct {
-    install_state (*init)(install_info *info);
+    install_state (*init)(install_info *info,int argc, char **argv);
     install_state (*setup)(install_info *info);
-    void (*update)(install_info *info, const char *path, size_t progress, size_t size);
+    void (*update)(install_info *info, const char *path, size_t progress, size_t size, int global_count, const char *current);
     void (*abort)(install_info *info);
     install_state (*complete)(install_info *info);
 } Install_UI;
 
 extern int console_okay(Install_UI *UI);
+extern int gtkui_okay(Install_UI *UI);
 
 #endif /* _installui_h */

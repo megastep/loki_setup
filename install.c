@@ -1,13 +1,17 @@
+/* $Id: install.c,v 1.8 1999-09-09 04:02:07 megastep Exp $ */
 
 #include <sys/types.h>
 #include <stdlib.h>
 #include <string.h>
 #include <pwd.h>
 #include <unistd.h>
+#include <signal.h>
 
 #include "install.h"
 #include "detect.h"
 #include "log.h"
+
+static int aborted = 0;
 
 /* Functions to retrieve attribution information from the XML tree */
 static const char *GetProductName(install_info *info)
@@ -21,7 +25,7 @@ static const char *GetProductDesc(install_info *info)
 
 
 /* Create the initial installation information */
-install_info *create_install(const char *configfile)
+install_info *create_install(const char *configfile, int log_level)
 {
     install_info *info;
 
@@ -53,6 +57,9 @@ install_info *create_install(const char *configfile)
     info->desc = GetProductDesc(info);
     info->arch = detect_arch();
     info->libc = detect_libc();
+
+	/* Read the optional default arguments for the game */
+	info->args = xmlGetProp(info->config->root, "args");
 
     /* Add the default install path */
     sprintf(info->install_path, "%s/%s", DEFAULT_PATH, GetProductName(info));
@@ -207,7 +214,7 @@ void delete_install(install_info *info)
 
 /* Actually install the selected filesets */
 install_state install(install_info *info,
-            void (*update)(install_info *info, const char *path, size_t progress, size_t size))
+            void (*update)(install_info *info, const char *path, size_t progress, size_t size, int global_count, const char *current))
 {
     xmlNodePtr node;
 
@@ -277,6 +284,17 @@ void generate_uninstall(install_info *info)
 	fprintf(fd,"echo \"%s has been uninstalled.\"\n", info->desc);
 	fchmod(fileno(fd),0755); /* Turn on executable bit */
 	fclose(fd);
+}
+
+/* Launch the game using the information in the install info */
+install_state launch_game(install_info *info)
+{
+  int status, pid;
+  char buf[PATH_MAX];
+
+  sprintf(buf,"%s/%s %s",info->symlinks_path,info->name,info->args);
+  system(buf);
+  return SETUP_EXIT;
 }
 
 static const char* kde_app_links[] =

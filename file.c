@@ -173,11 +173,19 @@ int file_close(install_info *info, stream *streamp)
 int file_symlink(install_info *info, const char *oldpath, const char *newpath)
 {
     int retval;
+    struct stat st;
 
     /* Log the action */
     log_quiet(info, "Creating symbolic link: %s --> %s\n", newpath, oldpath);
 
     /* Do the action */
+
+    /* If a symbolic link already exists, try to remove it */
+    if( lstat(newpath, &st)==0 && S_ISLNK(st.st_mode) )
+    {
+        if( unlink(newpath) < 0 )
+            log_warning(info, "Can't remove existing symlink %s: %s", newpath, strerror(errno));
+    }
     retval = symlink(oldpath, newpath);
     if ( retval < 0 ) {
         log_warning(info, "Can't create %s: %s", newpath, strerror(errno));
