@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.132 2004-05-01 03:53:10 megastep Exp $ */
+/* $Id: install.c,v 1.133 2004-05-29 02:10:12 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1725,6 +1725,8 @@ static void optionstag_sub(install_info *info, xmlNodePtr node)
 				xmlFree(tag);
 			}
 			xmlFree(wanted);
+			if ( node->childs )  /* Sub-options */
+				optionstag_sub(info, node->childs);
 		} else if ( ! strcmp(node->name, "exclusive" ) ) {
 			optionstag_sub(info, node->childs);
 		} else if ( ! strcmp(node->name, "component" ) ) {

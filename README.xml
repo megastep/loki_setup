@@ -824,7 +824,7 @@ versions of the same major number), and 'exact' (for the exact specification).
 Currently, the recognized distribution names are :
 
 Linux: redhat, mandrake, suse, debian, slackware, caldera, linuxppc, yellowdog,
-       turbo, linux
+       turbo, linux, gentoo
 UNIX:  freebsd, solaris, hpux, irix, sco, aix
 
 'linux' is a special distribution name that can be used to differentiate between a GNU/Linux
