@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-08-07 14:02-0700\n"
+"POT-Creation-Date: 2000-08-10 12:24-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -342,26 +342,31 @@ msgstr ""
 msgid "Unable to create desktop file '%s'"
 msgstr ""
 
-#: copy.c:245
+#: copy.c:203
+#, c-format
+msgid "Unable to create %s symlink pointing to %s"
+msgstr ""
+
+#: copy.c:261
 #, c-format
 msgid "Unable to copy directory '%s'"
 msgstr ""
 
-#: copy.c:274 copy.c:326 copy.c:422 copy.c:434
+#: copy.c:290 copy.c:342 copy.c:438 copy.c:450
 #, c-format
 msgid "Unable to find file '%s'"
 msgstr ""
 
-#: copy.c:313
+#: copy.c:329
 #, c-format
 msgid "Unable to find file '%s' on any of the CDROM drives"
 msgstr ""
 
-#: copy.c:476
+#: copy.c:492
 msgid "Running script"
 msgstr ""
 
-#: copy.c:742
+#: copy.c:758
 #, c-format
 msgid "Suspect size value for option %s\n"
 msgstr ""
@@ -408,32 +413,32 @@ msgstr ""
 msgid "Can't remove existing symlink %s: %s"
 msgstr ""
 
-#: file.c:280 file.c:302 file.c:322 file.c:341
+#: file.c:280 file.c:311 file.c:331 file.c:350
 #, c-format
 msgid "Can't create %s: %s"
 msgstr ""
 
-#: file.c:296
+#: file.c:305
 #, c-format
 msgid "Creating directory: %s\n"
 msgstr ""
 
-#: file.c:315
+#: file.c:324
 #, c-format
 msgid "Creating FIFO: %s\n"
 msgstr ""
 
-#: file.c:334
+#: file.c:343
 #, c-format
 msgid "Creating device: %s\n"
 msgstr ""
 
-#: file.c:354
+#: file.c:363
 #, c-format
 msgid "Can't change permissions for %s: %s"
 msgstr ""
 
-#: file.c:388 file.c:410
+#: file.c:397 file.c:421
 #, c-format
 msgid "Unable to read %s"
 msgstr ""

@@ -718,3 +718,540 @@ diff -Pru setup-1.1.orig/gtk_ui.c setup-1.1/gtk_ui.c
      } else {
          strcpy(text, "");
      }
+**********************************************************************************
+****** Applied
+
+Index: README.xml
+===================================================================
+RCS file: /cvs/setup/README.xml,v
+retrieving revision 1.29
+diff -u -r1.29 README.xml
+--- README.xml	2000/07/31 21:27:08	1.29
++++ README.xml	2000/08/04 03:02:21
+@@ -117,6 +117,12 @@
+             path for binaries. Set this when this installation won't
+             actually install any binary file.
+ 
++ promptbinaries     When set to "yes", setup will create a checkbox
++                    to allow the user whether or not to create 
++                    a symbolic link to the binaries.
++
++                    This setting has no effect if nobinaries is "yes".
++
+  meta       When this attribute is set to "yes", then setup will act as
+             a meta-installer, i.e. it will allow the user to select a
+             product and set-up will respawn itself for the selected
+@@ -145,6 +151,29 @@
+ 
+ There is also no need to have the files designated by those tags explicitly
+ installed in a FILES section, setup will take care of that for you.
++
++
++The INSTALL_DROP_LIST element:
++
++The install_drop_list element makes it possible to override the default
++installation paths supplied in the Installation target drop down box.
++
++Supply a list of drop down paths, space or new line separated.
++An example follows:
++
++    <install_drop_list>
++        /opt /usr/local
++        /var
++        ~
++    </install_drop_list>
++
++If no install_drop_list element is given, it will default to hard coded
++values (see install.c).
++
++Note:  Your paths will not be displayed if they are not valid,
++writable paths.
++
++
+ 
+ The OPTION element:
+ 
+Index: console_ui.c
+===================================================================
+RCS file: /cvs/setup/console_ui.c,v
+retrieving revision 1.36
+diff -u -r1.36 console_ui.c
+--- console_ui.c	2000/08/02 22:37:47	1.36
++++ console_ui.c	2000/08/04 03:02:21
+@@ -37,9 +37,7 @@
+                        char *answer, int maxlen)
+ {
+     printf("%s", prompt);
+-    if ( default_answer && *default_answer ) {
+-        printf(" [%s] ", default_answer);
+-    }
++    printf(" [%s] ", default_answer && *default_answer ? default_answer : "");
+     fflush(stdout);
+     if ( fgets(answer, maxlen, stdin) ) {
+         answer[strlen(answer)-1] = '\0';
+@@ -287,6 +285,7 @@
+     char path[PATH_MAX];
+     xmlNodePtr node;
+ 
++
+ 	if ( GetProductIsMeta(info) ) {
+ 		while ( ! okay ) {
+ 			int index = 1, chosen;
+@@ -363,15 +362,36 @@
+ 				}
+ 			}
+ 
++                        /* Default to empty */
++                        path[0] = '\0';
++
+ 			/* Find out where to install the binary symlinks, unless the binary path
+ 			   was provided as a command line argument */
+-			if ( ! disable_binary_path ) {
+-				if ( ! GetProductHasNoBinaries(info) ) {
+-					if ( ! prompt_user(_("Please enter the path for binary installation"),
+-									   info->symlinks_path, path, sizeof(path)) ) {
+-						return SETUP_ABORT;
+-					}
+-				}
++			if ( ! disable_binary_path ) 
++                        {
++                            int get_path = 1;
++
++                            if (GetProductHasNoBinaries(info))
++                                get_path = 0;
++
++                            if (get_path)
++                            {
++                                /*----------------------------------------
++                                **  Optionally, ask the user whether
++                                **    they want to create a symlink
++                                **    to the path or not.
++                                **--------------------------------------*/
++                                if (GetProductHasPromptBinaries(info))
++                                    if (console_prompt(_("Do you want to install symbolic links to a directory in your path?"), RESPONSE_YES) != RESPONSE_YES)
++                                        get_path = 0;
++                            }
++
++                            if (get_path)
++                                if ( ! prompt_user(_("Please enter the path in which to create the symbolic links"),
++                                                                   info->symlinks_path, path, sizeof(path)) ) {
++                                        return SETUP_ABORT;
++                                }
++
+ 			} else {
+ 				printf(_("Binary path set to: %s\n"), info->symlinks_path);
+ 				strcpy(path, info->symlinks_path);
+@@ -387,14 +407,15 @@
+ 			/* Check permissions on the symlinks path, if the path was 
+ 			   provided as a command-line argument and it invalid, then
+ 			   abort  */
+-			if ( access(info->symlinks_path, W_OK) < 0 ) {
+-				printf(_("No write permission to %s\n"), info->symlinks_path);
+-				if (! disable_binary_path) {
+-					continue;
+-				} else {
+-					return SETUP_ABORT;
+-				}
+-			}
++                        if (strlen(info->symlinks_path) > 0)
++                            if ( access(info->symlinks_path, W_OK) < 0 ) {
++                                    printf(_("No write permission to %s\n"), info->symlinks_path);
++                                    if (! disable_binary_path) {
++                                            continue;
++                                    } else {
++                                            return SETUP_ABORT;
++                                    }
++                            }
+ 
+ 			/* Go through the install options */
+ 			info->install_size = 0;
+Index: gtk_ui.c
+===================================================================
+RCS file: /cvs/setup/gtk_ui.c,v
+retrieving revision 1.44
+diff -u -r1.44 gtk_ui.c
+--- gtk_ui.c	2000/08/02 22:37:47	1.44
++++ gtk_ui.c	2000/08/04 03:02:22
+@@ -109,13 +109,16 @@
+ 
+ /* Globals */
+ 
+-static char *install_paths[] = {
++static char *default_install_paths[] = {
+     "/usr/local/games",
+     "/opt/games",
+     "/usr/games",
+     NULL
+ };
+ 
++#define MAX_INSTALL_PATHS       25      /* Use an arbitrary maximum; the lack of
++                                            flexibility shouldn't be an issue */
++static char *install_paths[MAX_INSTALL_PATHS];
+ 
+ /* Various warning dialogs */
+ static enum {
+@@ -606,6 +609,47 @@
+   }
+ }
+ 
++/*-----------------------------------------------------------------------------
++**  on_use_binary_toggled
++**      Signal function to repsond to a toggle state in the
++** 'Use symbolic link' checkbox.
++**---------------------------------------------------------------------------*/
++void on_use_binary_toggled ( GtkWidget* widget, gpointer func_data)
++{
++    GtkWidget *binary_path_widget;
++    GtkWidget *binary_label_widget;
++    GtkWidget *binary_entry;
++    char *string;
++
++    /*-------------------------------------------------------------------------
++    ** Pick up widget handles
++    **-----------------------------------------------------------------------*/
++    binary_path_widget = glade_xml_get_widget(setup_glade, "binary_path");
++    binary_label_widget = glade_xml_get_widget(setup_glade, "binary_label");
++
++    /*-------------------------------------------------------------------------
++    ** Mark the appropriate widgets active or inactive
++    **-----------------------------------------------------------------------*/
++    gtk_widget_set_sensitive(binary_path_widget, GTK_TOGGLE_BUTTON(widget)->active);
++    gtk_widget_set_sensitive(binary_label_widget, GTK_TOGGLE_BUTTON(widget)->active);
++
++    /*-------------------------------------------------------------------------
++    ** Finally, set the symlinks_path.  If we've made it active
++    **      again, we have to go get the current binary entry box
++    **      value and restash it into the global symlinkspath.
++    **-----------------------------------------------------------------------*/
++    if (GTK_TOGGLE_BUTTON(widget)->active)
++    {
++        binary_entry = glade_xml_get_widget(setup_glade, "entry5");
++        string = gtk_entry_get_text( GTK_ENTRY(binary_entry) );
++    }
++    else
++        string = NULL;
++
++    set_symlinkspath(cur_info, string ? string : "");
++}
++
++
+ void setup_checkbox_option_slot( GtkWidget* widget, gpointer func_data)
+ {
+   GtkWidget *window;
+@@ -740,6 +784,7 @@
+     GList* list;
+     int i;
+     char path[PATH_MAX];
++    xmlNodePtr node;
+ 
+     widget = glade_xml_get_widget(setup_glade, "install_path");
+     
+@@ -750,6 +795,67 @@
+ 
+     list = 0;
+     list = g_list_append( list, cur_info->install_path);
++
++    /*----------------------------------------------------------------------
++    **  Retrieve the list of install paths from the config file, if we can
++    **--------------------------------------------------------------------*/
++    for (i = 0, node = cur_info->config->root->childs; node;  node = node->next)
++    {
++        if (strcmp(node->name, "install_drop_list") == 0) 
++        {
++            /* Retrieve the value - note that it's up to us to free
++                the memory, which means we can use it without copying it */
++            char *content = xmlNodeGetContent(node);
++            char *p;
++            if (content)
++            {
++                for (p = strtok(content, "\n\t \r\b"); p; 
++                        p = strtok(NULL,"\n\t \r\b" ))
++                {
++                    /*--------------------------------------------------------
++                    **  Expand any ~s in the path
++                    **------------------------------------------------------*/
++                    char *temp_buf;
++                    temp_buf = malloc(PATH_MAX);
++                    if (! temp_buf)
++                    {
++                        fprintf(stderr, "Fatal error:  out of memory\n");
++                        return;
++                    }
++                    expand_home(cur_info, p, temp_buf);
++
++                    if (i > sizeof(install_paths) > sizeof(install_paths[0]))
++                    {
++                        fprintf(stderr, 
++                        "Error: maximum of %d install_path entries exceeded\n",
++                            sizeof(install_paths) > sizeof(install_paths[0]));
++                        return; 
++                    }
++
++                    install_paths[i++] = temp_buf;
++                }
++            }
++        }
++    }
++
++    
++    /*----------------------------------------------------------------------
++    **  If no installation paths were specified, use the default
++    **      values that are hard coded in.
++    **--------------------------------------------------------------------*/
++    if (i == 0)
++        for (i = 0; default_install_paths[i]; ++i)
++            install_paths[i] = default_install_paths[i];
++
++    /*----------------------------------------------------------------------
++    **  Terminate the array
++    **--------------------------------------------------------------------*/
++    install_paths[i] = NULL;
++
++    /*----------------------------------------------------------------------
++    **  Now translate the default install paths into the gtk list,
++    **      avoiding the current default value (which is already in the list)
++    **--------------------------------------------------------------------*/
+     for ( i=0; install_paths[i]; ++i ) {
+         snprintf(path, sizeof(path), "%s/%s", install_paths[i], GetProductName(cur_info));
+         if ( strcmp(path, cur_info->install_path) != 0 ) {
+@@ -814,7 +920,9 @@
+             if( len && ((sc =strcmp( pc0, cur_info->symlinks_path)) != 0) && (*pc0 != '.') )
+             {
+               if(!access(pc0, W_OK))
++              {
+                 list = g_list_append( list, pc0 );
++              }
+             }
+ 
+             if( ! end )
+@@ -825,9 +933,15 @@
+     if ( list ) {
+         gtk_combo_set_popdown_strings( GTK_COMBO(widget), list );
+     }
+-    if ( change_default && g_list_length(list) ) {
++    if ( change_default && list && g_list_length(list) ) {
+         set_symlinkspath(cur_info, g_list_nth(list,0)->data);
+     }
++
++    if ((list == NULL || g_list_length(list) == 0) && change_default)
++    {
++        printf("Warning: No writable targets in path...you may want to be root,\n");
++        /* FIXME */
++    }
+     gtk_entry_set_text( GTK_ENTRY(GTK_COMBO(widget)->entry), cur_info->symlinks_path );
+     return;
+ }
+@@ -998,6 +1112,7 @@
+     GtkWidget *widget;
+     GtkWidget *button;
+     GtkWidget *install_path, *install_entry, *binary_path, *binary_entry;
++    GtkWidget *symlink_checkbox;
+     char title[1024];
+ 
+     cur_state = SETUP_INIT;
+@@ -1043,6 +1158,14 @@
+     /* add all the other signal handlers defined in setup.glade */
+     glade_xml_signal_autoconnect(setup_glade);
+ 
++    /*---------------------------------------------------------------------------
++    ** Connect a signal handle to control whether or not the symlink
++    **  should be installed
++    **-------------------------------------------------------------------------*/
++    symlink_checkbox = glade_xml_get_widget(setup_glade, "symlink_checkbox");
++    gtk_signal_connect(GTK_OBJECT(symlink_checkbox), "toggled",
++             GTK_SIGNAL_FUNC(on_use_binary_toggled), NULL);
++
+     /* Set up the window title */
+     window = glade_xml_get_widget(setup_glade, "setup_window");
+     snprintf(title, sizeof(title), _("%s Setup"), info->desc);
+@@ -1118,6 +1241,18 @@
+ 		widget = glade_xml_get_widget(setup_glade, "binary_label");
+ 		if(widget) gtk_widget_hide(widget);
+ 	}
++
++        /*--------------------------------------------------------------------
++        **  Hide the checkbox allowing the user to pick whether or
++        **      not to install a symlink to the binaries if they
++        **      haven't asked for that feature.
++        **------------------------------------------------------------------*/
++	if (GetProductHasNoBinaries(info) || (!GetProductHasPromptBinaries(info)))
++        {
++            widget = glade_xml_get_widget(setup_glade, "symlink_checkbox");
++            if (widget)
++                gtk_widget_hide(widget);
++        }
+ 
+     /* Realize the main window for pixmap loading */
+     gtk_widget_realize(window);
+Index: install.c
+===================================================================
+RCS file: /cvs/setup/install.c,v
+retrieving revision 1.57
+diff -u -r1.57 install.c
+--- install.c	2000/08/02 22:37:47	1.57
++++ install.c	2000/08/04 03:02:22
+@@ -139,6 +139,18 @@
+ {
+ 	return xmlGetProp(info->config->root, "nobinaries") != NULL;
+ }
++
++int GetProductHasPromptBinaries(install_info *info)
++{
++    char *p = xmlGetProp(info->config->root, "promptbinaries");
++    if (p)
++        if (strstr(p, "yes"))
++            return(1);
++        
++    return(0);
++}
++
++
+ const char *GetProductCDROMFile(install_info *info)
+ {
+     return xmlGetProp(info->config->root, "cdromfile");
+Index: install.h
+===================================================================
+RCS file: /cvs/setup/install.h,v
+retrieving revision 1.37
+diff -u -r1.37 install.h
+--- install.h	2000/07/31 21:47:38	1.37
++++ install.h	2000/08/04 03:02:22
+@@ -158,6 +158,7 @@
+ extern int         GetProductCDROMRequired(install_info *info);
+ extern int         GetProductIsMeta(install_info *info);
+ extern int         GetProductHasNoBinaries(install_info *info);
++extern int         GetProductHasPromptBinaries(install_info *info);
+ extern const char *GetProductSplash(install_info *info);
+ extern const char *GetProductCDROMFile(install_info *info);
+ extern const char *GetProductEULA(install_info *info);
+Index: image/setup.data/setup.glade
+===================================================================
+RCS file: /cvs/setup/image/setup.data/setup.glade,v
+retrieving revision 1.16
+diff -u -r1.16 setup.glade
+--- image/setup.data/setup.glade	2000/07/31 21:27:08	1.16
++++ image/setup.data/setup.glade	2000/08/04 03:02:22
+@@ -113,7 +113,7 @@
+ 	    <class>GtkTable</class>
+ 	    <name>table12</name>
+ 	    <border_width>5</border_width>
+-	    <rows>2</rows>
++	    <rows>3</rows>
+ 	    <columns>2</columns>
+ 	    <homogeneous>False</homogeneous>
+ 	    <row_spacing>5</row_spacing>
+@@ -146,32 +146,6 @@
+ 	    </widget>
+ 
+ 	    <widget>
+-	      <class>GtkLabel</class>
+-	      <name>binary_label</name>
+-	      <label>Binary directory:</label>
+-	      <justify>GTK_JUSTIFY_CENTER</justify>
+-	      <wrap>False</wrap>
+-	      <xalign>1</xalign>
+-	      <yalign>0.5</yalign>
+-	      <xpad>0</xpad>
+-	      <ypad>0</ypad>
+-	      <child>
+-		<left_attach>0</left_attach>
+-		<right_attach>1</right_attach>
+-		<top_attach>1</top_attach>
+-		<bottom_attach>2</bottom_attach>
+-		<xpad>0</xpad>
+-		<ypad>0</ypad>
+-		<xexpand>False</xexpand>
+-		<yexpand>False</yexpand>
+-		<xshrink>False</xshrink>
+-		<yshrink>False</yshrink>
+-		<xfill>True</xfill>
+-		<yfill>False</yfill>
+-	      </child>
+-	    </widget>
+-
+-	    <widget>
+ 	      <class>GtkCombo</class>
+ 	      <name>install_path</name>
+ 	      <value_in_list>False</value_in_list>
+@@ -213,6 +187,32 @@
+ 	    </widget>
+ 
+ 	    <widget>
++	      <class>GtkLabel</class>
++	      <name>binary_label</name>
++	      <label>Link path:</label>
++	      <justify>GTK_JUSTIFY_RIGHT</justify>
++	      <wrap>False</wrap>
++	      <xalign>1</xalign>
++	      <yalign>0.5</yalign>
++	      <xpad>0</xpad>
++	      <ypad>0</ypad>
++	      <child>
++		<left_attach>0</left_attach>
++		<right_attach>1</right_attach>
++		<top_attach>2</top_attach>
++		<bottom_attach>3</bottom_attach>
++		<xpad>0</xpad>
++		<ypad>0</ypad>
++		<xexpand>False</xexpand>
++		<yexpand>False</yexpand>
++		<xshrink>False</xshrink>
++		<yshrink>False</yshrink>
++		<xfill>True</xfill>
++		<yfill>False</yfill>
++	      </child>
++	    </widget>
++
++	    <widget>
+ 	      <class>GtkCombo</class>
+ 	      <name>binary_path</name>
+ 	      <value_in_list>False</value_in_list>
+@@ -224,8 +224,8 @@
+ 	      <child>
+ 		<left_attach>1</left_attach>
+ 		<right_attach>2</right_attach>
+-		<top_attach>1</top_attach>
+-		<bottom_attach>2</bottom_attach>
++		<top_attach>2</top_attach>
++		<bottom_attach>3</bottom_attach>
+ 		<xpad>0</xpad>
+ 		<ypad>0</ypad>
+ 		<xexpand>True</xexpand>
+@@ -252,6 +252,36 @@
+ 		<text_max_length>0</text_max_length>
+ 		<text></text>
+ 	      </widget>
++	    </widget>
++
++	    <widget>
++	      <class>GtkCheckButton</class>
++	      <name>symlink_checkbox</name>
++	      <can_default>True</can_default>
++	      <has_default>True</has_default>
++	      <can_focus>True</can_focus>
++	      <signal>
++		<name>toggled</name>
++		<handler>on_use_binary_toggled</handler>
++		<last_modification_time>Thu, 03 Aug 2000 09:53:24 GMT</last_modification_time>
++	      </signal>
++	      <label>Install a symbolic link into the path</label>
++	      <active>True</active>
++	      <draw_indicator>True</draw_indicator>
++	      <child>
++		<left_attach>0</left_attach>
++		<right_attach>2</right_attach>
++		<top_attach>1</top_attach>
++		<bottom_attach>2</bottom_attach>
++		<xpad>0</xpad>
++		<ypad>0</ypad>
++		<xexpand>False</xexpand>
++		<yexpand>False</yexpand>
++		<xshrink>False</xshrink>
++		<yshrink>False</yshrink>
++		<xfill>True</xfill>
++		<yfill>False</yfill>
++	      </child>
+ 	    </widget>
+ 	  </widget>
+ 	</widget>
+
