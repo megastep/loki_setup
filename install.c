@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.50 2000-07-04 00:13:01 megastep Exp $ */
+/* $Id: install.c,v 1.51 2000-07-05 21:15:48 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
    04/12/2000: Modifed run_script function to put the full pathname of the
@@ -968,7 +968,8 @@ char install_menuitems(install_info *info, desktop_type desktop)
                              "Type=Application\n",
                              (desktop==DESKTOP_KDE) ? "KDE " : "",
                              elem->name ? elem->name : info->name,
-                             info->desc, exec, icon);
+                             elem->desc ? elem->desc : info->desc,
+						     exec, icon);
                 fclose(fp);
                 add_file_entry(info, finalbuf);
 

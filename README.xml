@@ -278,6 +278,9 @@ There are several optional attributes of the binary element:
  name       This is an optional name for the menu entry.  By default the
             name of the product is used. 
 
+ desc       This is an optional description for the menu entry.  By default the
+            description of the product is used. 
+
  cdrom      If this attribute has a "yes" value, then setup will look for
             the file on one of the mounted CDROMs on the system.
 

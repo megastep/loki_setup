@@ -10,6 +10,8 @@ Stéphane Peter - Mon Jun 26 18:32:33 PDT 2000
    be created by setup.
 Stéphane Peter - Mon Jul  3 16:30:24 PDT 2000
  * Added support for exclusive options (new encompassing 'exclusive' element).
+Stéphane Peter - Wed Jul  5 14:16:47 PDT 2000
+ * Enabled the 'desc' attribute for the binary elements.
 
 1.3.0:
 Sam Lantinga - Mon Jun 12 16:48:16 PDT 2000
