@@ -327,7 +327,8 @@ static install_state console_complete(install_info *info)
     printf("Installation complete.\n");
 
     new_state = SETUP_EXIT;
-    if ( console_prompt("Would you like launch the game now?", RESPONSE_YES)
+    if ( info->installed_symlink &&
+         console_prompt("Would you like launch the game now?", RESPONSE_YES)
 		 == RESPONSE_YES ) {
         new_state = SETUP_PLAY;
         if ( getuid() == 0 ) {

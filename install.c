@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.36 2000-04-08 00:34:42 hercules Exp $ */
+/* $Id: install.c,v 1.37 2000-04-10 20:28:49 hercules Exp $ */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -22,7 +22,13 @@ extern char *rpm_root;
 /* Functions to retrieve attribution information from the XML tree */
 const char *GetProductName(install_info *info)
 {
-    return xmlGetProp(info->config->root, "product");
+    const char *name;
+
+    name = xmlGetProp(info->config->root, "product");
+    if ( name == NULL ) {
+        name = "";
+    }
+    return name;
 }
 const char *GetProductDesc(install_info *info)
 {
@@ -133,6 +139,10 @@ const char *GetRuntimeArgs(install_info *info)
         args = "";
     }
     return args;
+}
+const char *GetInstallOption(install_info *info, const char *option)
+{
+    return xmlGetProp(info->config->root, option);
 }
 
 /* Create the initial installation information */
@@ -435,7 +445,9 @@ install_state install(install_info *info,
           break;
         }
     }
-    generate_uninstall(info);
+    if ( ! GetInstallOption(info, "nouninstall") ) {
+        generate_uninstall(info);
+    }
 
     /* Return the new install state */
     if ( GetProductURL(info) ) {

@@ -922,7 +922,7 @@
 
 	  <widget>
 	    <class>GtkButton</class>
-	    <name>button17</name>
+	    <name>play_game_button</name>
 	    <can_default>True</can_default>
 	    <can_focus>True</can_focus>
 	    <signal>

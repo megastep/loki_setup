@@ -1,5 +1,11 @@
 
 1.2.2:
+Sam Lantinga - Mon Apr 10 13:27:28 PDT 2000
+ * Limited the number of characters in the "current file" label
+Sam Lantinga - Mon Apr 10 10:44:14 PDT 2000
+ * The play option is only available if a symlink was created by setup
+Sam Lantinga - Mon Apr 10 10:23:42 PDT 2000
+ * Added the "nouninstall" product install option
 Sam Lantinga - Fri Apr  7 16:49:45 PDT 2000
  * The "arch" attribute for options allows multiple architectures
  * Documented the "size" attribute for the option element

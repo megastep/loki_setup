@@ -78,6 +78,9 @@ There are several optional attributes of the install element:
             mounted CDROM to see if it is indeed the product CDROM.
             If this option is not specified, any mounted CDROM is used.
 
+ nouninstall This is an optional flag which, if specified, tells setup
+             not to generate an uninstall script after it runs.
+
 
 The OPTION element:
 

@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.28 2000-04-08 00:34:42 hercules Exp $
+   $Id: gtk_ui.c,v 1.29 2000-04-10 20:28:49 hercules Exp $
 */
 
 #include <limits.h>
@@ -22,6 +22,8 @@
 
 #define LICENSE_FONT            \
         "-misc-fixed-medium-r-semicondensed-*-*-120-*-*-c-*-iso8859-8"
+
+#define MAX_TEXTLEN	40	/* The maximum length of current filename */
 
 /* Globals */
 
@@ -855,6 +857,7 @@ static void gtkui_update(install_info *info, const char *path, size_t progress, 
 {
     static gfloat last_update = -1;
     GtkWidget *widget;
+    int textlen;
     char text[1024];
     char *install_path;
     gfloat new_update;
@@ -868,8 +871,7 @@ static void gtkui_update(install_info *info, const char *path, size_t progress, 
         }
         widget = glade_xml_get_widget(setup_glade, "current_option_label");
         if ( widget ) {
-            sprintf(text, "%s", current);
-            gtk_label_set_text( GTK_LABEL(widget), text);
+            gtk_label_set_text( GTK_LABEL(widget), current);
         }
         widget = glade_xml_get_widget(setup_glade, "current_file_label");
         if ( widget ) {
@@ -878,6 +880,10 @@ static void gtkui_update(install_info *info, const char *path, size_t progress, 
             install_path = cur_info->install_path;
             if ( strncmp(text, install_path, strlen(install_path)) == 0 ) {
                 strcpy(text, &text[strlen(install_path)+1]);
+            }
+            textlen = strlen(text);
+            if ( textlen > MAX_TEXTLEN ) {
+                strcpy(text, text+(textlen-MAX_TEXTLEN));
             }
             gtk_label_set_text( GTK_LABEL(widget), text);
         }
@@ -962,6 +968,12 @@ static install_state gtkui_complete(install_info *info)
         strcpy(text, "");
     }
     gtk_label_set_text(GTK_LABEL(widget), text);
+
+    /* Hide the play game button if there's no game to play. :) */
+    widget = glade_xml_get_widget(setup_glade, "play_game_button");
+    if ( widget && ! info->installed_symlink ) {
+        gtk_widget_hide(widget);
+    }
 
     /* TODO: Lots of cleanups here (free() mostly) */
     return iterate_for_state();

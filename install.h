@@ -154,6 +154,7 @@ extern const char *GetAutoLaunchURL(install_info *info);
 extern const char *GetPreInstall(install_info *info);
 extern const char *GetPostInstall(install_info *info);
 extern const char *GetRuntimeArgs(install_info *info);
+extern const char *GetInstallOption(install_info *info, const char *option);
 
 /* Create the initial installation information */
 extern install_info *create_install(const char *configfile, int log_level);
