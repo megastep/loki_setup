@@ -1,4 +1,6 @@
 Current:
+Ryan C. Gordon (Epic Games) - Fri Mar  5 05:10:50 EST 2004
+ * Put some sanity checking into file i/o code.
 Ryan C. Gordon (Epic Games) - Thu Mar  4 01:18:00 EST 2004
  * Changed "please insert/mount disc" text; please update your setup.xml
    files and localizations!
