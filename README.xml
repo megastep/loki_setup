@@ -212,6 +212,9 @@ The following environment variables are defined while in the shell script:
     SETUP_INSTALLPATH   : Installation path of the data files
     SETUP_SYMLINKSPATH  : Path where symbolic links for the binary files
                           will be placed.
+    SETUP_CDROMPATH     : Path where the install CD-ROM is mounted, if
+                          the XML file designates that some components
+                          are to be installed from CD-ROM.
 
 -------------------------------------------------------------------------
 
