@@ -118,13 +118,11 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
 
     /* See if the user wants this option */
 	if ( node->type == XML_TEXT_NODE ) {
-		printf("Parsing text node.\n");
 		//name = g_strdup(node->content);
         name = strdup(node->content);
         //!!!TODO - Strip name
 		//g_strstrip(name);
 		if( *name ) {
-			printf("String: '%s'\n", name);
 			//button = gtk_label_new(name);
 			//gtk_widget_show(button);
 			//gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(button), FALSE, FALSE, 0);
@@ -141,7 +139,6 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
 		strncat(text, name, sizeof(text)-strlen(text));
 	}
 
-	printf("Parsing option: '%s'\n", text);
 	if ( GetProductIsMeta(info) ) {
 		//button = gtk_radio_button_new_with_label(radio_list, text);
 		//radio_list = gtk_radio_button_group(GTK_RADIO_BUTTON(button));
@@ -1136,19 +1133,25 @@ static int carbonui_update(install_info *info, const char *path, size_t progress
         }
 
         // Set the "current_file" label to the current file being processed
-        snprintf(text, sizeof(text), "%s", path);
+        /*snprintf(text, sizeof(text), "%s", path);
         // Remove the install path from the string
         install_path = cur_info->install_path;
         if(strncmp(text, install_path, strlen(install_path)) == 0)
             strcpy(text, &text[strlen(install_path)+1]);
         textlen = strlen(text);
         if(textlen > MAX_TEXTLEN)
-            strcpy(text, text+(textlen-MAX_TEXTLEN));
-
-        if(strcmp(current, LastText) != 0)
+            strcpy(text, text+(textlen-MAX_TEXTLEN));*/
+        // If current filename has changed
+        if(strcmp(path, LastText) != 0)
         {
-            carbon_SetLabelText(MyRes, COPY_CURRENT_FILE_LABEL_ID, text);
-            strcpy(LastText, text);
+            char *filename = strrchr(path, '/');
+            if(filename == NULL)
+                filename = path;
+            else
+                filename++;     // Increment just after '/' to get filename
+
+            carbon_SetLabelText(MyRes, COPY_CURRENT_FILE_LABEL_ID, filename);
+            strcpy(LastText, path);
         }
 
         // Update total file progress
@@ -1307,11 +1310,11 @@ static install_state carbonui_complete(install_info *info)
         sprintf(cmd, "%s/%s", info->install_path, GetProductCDKey(info)); 
         FILE *cdfile = fopen(cmd, "wt");
         if(cdfile == NULL)
-            printf("CDKey file '%s' could not be opened.\n", cmd);
+            carbon_debug("CDKey file could not be opened.");
         else
         {
-            printf("CDKey file opened\n");
-            fwrite(GetProductCDKey(info), sizeof(char), strlen(GetProductCDKey(info)), cdfile);
+            carbon_debug("CDKey file opened\n");
+            fwrite(CDKeyString, sizeof(char), strlen(CDKeyString), cdfile);
         }
         //run_script(info, cmd, 0);
     }
