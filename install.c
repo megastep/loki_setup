@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.146 2004-11-18 04:36:51 megastep Exp $ */
+/* $Id: install.c,v 1.147 2004-11-18 05:10:55 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1494,7 +1494,7 @@ const char *get_option_warn(install_info *info, xmlNodePtr node)
 		}
 		n = n->next;
 	}
-	return (*buf) ? buf : NULL;
+	return (*buf) ? convert_encoding(buf) : NULL;
 }
 
 
