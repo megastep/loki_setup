@@ -211,7 +211,8 @@ void on_gtk_cancel_button_clicked (GtkButton *button, gpointer user_data)
 #ifdef DEBUG
     printf("on_gtk_cancel_button_clicked (GtkButton *button, gpointer user_data)\n");
 #endif
-    exit(EXIT_ERROR);
+    /* return 2 to tell setup that the user willingly aborted */
+    exit(2);
 }
 
 

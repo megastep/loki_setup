@@ -38,6 +38,9 @@ then
   # this happens if xsu/su execs setup.sh but it still doesn't have root rights
   if [ "$GET_ROOT" -eq 2 ]
   then
+    # NOTE TTimo: this causes the following error message in some cases:
+    # return: can only `return' from a function or sourced script
+    # BUT: in other cases, the return is legit, if you replace by an exit call, it's broken
     return 1
   fi
 fi
@@ -171,12 +174,6 @@ then
   GOT_ROOT=`whoami`
   if [ "$GOT_ROOT" != "root" ]
   then
-    # FIXME TTimo xsu debugging stuff, don't pay attention
-#    try_run xsu -u root -c '/home/timo/foo.sh &>/dev/null'
-#    try_run xsu -u root -c '/home/timo/foo.sh'
-#    status="$?"
-#    echo "got $status"
-#    exit
     try_run xsu -e -a -u root -c "`pwd`/setup.sh -auth" $XSU_ICON
     status="$?"
     # echo "got $status"
@@ -184,17 +181,19 @@ then
     # xsu returns 2 if ran and cancelled (i.e. the user 'doesn't want' to auth)
     # it will return 0 if the command was executed correctly
     # summing up, if we get 1, something failed
+    if [ "$status" -eq 1 ]
+    then
+      # xsu wasn't found, or failed to run
+      # if xsu actually ran and the auth was cancelled, $status is 2
+      # try with su
+      echo -e "$SU_MESSAGE"
+      try_run -absolute /bin/su root -c "export DISPLAY=$DISPLAY;`pwd`/setup.sh -auth"
+      status="$?"
+    fi
     if [ "$status" -eq 0 ]
     then
       # the auth command was properly executed
       exit 0
-	else
-      # xsu wasn't found, or failed to run
-      # if xsu actually ran and the auth was cancelled, $status is 2
-      # try with su
-      echo "$SU_MESSAGE"
-      try_run -absolute /bin/su root -c "export DISPLAY=$DISPLAY;`pwd`/setup.sh -auth"
-      status="$?"
     fi
     # the auth failed or was canceled
     if [ "$GET_ROOT" -eq 2 ]
