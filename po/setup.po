@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-05-02 19:42-0700\n"
+"POT-Creation-Date: 2000-05-04 17:15-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -320,17 +320,17 @@ msgstr ""
 msgid "Tar: '%s' is unknown file type: %c"
 msgstr ""
 
-#: copy.c:509
+#: copy.c:514
 #, c-format
 msgid "Unable to copy directory '%s'"
 msgstr ""
 
-#: copy.c:542 copy.c:591 copy.c:683 copy.c:695
+#: copy.c:547 copy.c:596 copy.c:688 copy.c:700
 #, c-format
 msgid "Unable to find file '%s'"
 msgstr ""
 
-#: copy.c:579
+#: copy.c:584
 #, c-format
 msgid "Unable to find file '%s' on any of the CDROM drives"
 msgstr ""
