@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.44 2000-12-01 22:32:00 megastep Exp $ */
+/* $Id: main.c,v 1.45 2001-01-19 03:48:08 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -55,6 +55,12 @@ const char *argv0 = NULL;
 
 static install_info *info = NULL;
 Install_UI UI;
+
+/* List of options enabled on the command line */
+static struct enabled_option {
+    char *option;
+    struct enabled_option *next;
+} *enabled_options = NULL;
 
 static char *current_locale = NULL;
 
@@ -120,6 +126,8 @@ _("Usage: %s [options]\n\n"
 "   -f file  Use an alternative XML file (default %s)\n"
 "   -m       Force manual extraction of RPM packages, do not update RPM database\n"
 "   -n       Force the text-only user interface\n"
+"   -o opt   Enable the option named \"opt\" from the XML file. Also enables non\n"
+"            interactive operation. Can be used multiple times.\n"
 "   -r root  Set the root directory for extracting RPM files (default is /)\n"
 "   -v n     Set verbosity level to n. Available values :\n"
 "            0: Debug  1: Quiet  2: Normal 3: Warnings 4: Fatal\n"
@@ -133,6 +141,8 @@ _("Usage: %s [options]\n\n"
 "   -c cwd   Use an alternate current directory for the install\n"
 "   -f file  Use an alternative XML file (default %s)\n"
 "   -n       Force the text-only user interface\n"
+"   -o opt   Enable the option named \"opt\" from the XML file. Also enables non\n"
+"            interactive operation. Can be used multiple times.\n"
 "   -v n     Set verbosity level to n. Available values :\n"
 "            0: Debug  1: Quiet  2: Normal 3: Warnings 4: Fatal\n"
 "   -V       Print the version of the setup program and exit\n"),
@@ -206,6 +216,7 @@ int main(int argc, char **argv)
     int log_level = LOG_NORMAL;
     char install_path[PATH_MAX];
     char binary_path[PATH_MAX];
+    struct enabled_option *enabled_opt;
 
     install_path[0] = '\0';
     binary_path[0] = '\0';
@@ -229,9 +240,9 @@ int main(int argc, char **argv)
     /* Parse the command-line options */
     while ( (c=getopt(argc, argv,
 #ifdef RPM_SUPPORT
-					  "hnc:f:r:v:Vi:b:m"
+					  "hnc:f:r:v:Vi:b:mo:"
 #else
-					  "hnc:f:v:Vi:b:"
+					  "hnc:f:v:Vi:b:o:"
 #endif
 					  )) != EOF ) {
         switch (c) {
@@ -275,6 +286,12 @@ int main(int argc, char **argv)
 	        strcpy(binary_path, optarg);
 			disable_binary_path = 1;
 			break;
+        case 'o': /* Store the enabled options for later processing */
+            enabled_opt = (struct enabled_option *)malloc(sizeof(struct enabled_option));
+            enabled_opt->option = strdup(optarg);
+            enabled_opt->next = enabled_options;
+            enabled_options = enabled_opt;
+            break;
 #ifdef RPM_SUPPORT
 	    case 'm':
 	        force_manual = 1;
@@ -325,7 +342,7 @@ int main(int argc, char **argv)
 
         switch (state) {
             case SETUP_INIT:
-                state = UI.init(info,argc,argv);
+                state = UI.init(info,argc,argv, enabled_options != NULL);
                 if ( state == SETUP_ABORT ) {
                     exit_status = 1;
                 }
@@ -367,6 +384,17 @@ int main(int argc, char **argv)
                 } else if ( num_cds > 0) {
                     detect_cdrom(info);
                 }
+
+                if ( enabled_options ) {
+                    enabled_opt = enabled_options;
+                    while ( enabled_opt ) {
+                        if ( enable_option(info, enabled_opt->option) == 0 ) {
+                            log_warning(info, _("Could not enable option: %s"), enabled_opt->option);
+                        }
+                        enabled_opt = enabled_opt->next;
+                    }
+                    state = SETUP_INSTALL;
+                }
                 break;
             case SETUP_LICENSE:
                 state = UI.license(info);
@@ -398,6 +426,14 @@ int main(int argc, char **argv)
                 /* Not reached */
                 break;
         }
+    }
+
+    /* Free enabled_options */
+    while ( enabled_options ) {
+        enabled_opt = enabled_options;
+        enabled_options = enabled_options->next;
+        free(enabled_opt->option);
+        free(enabled_opt);
     }
 
     exit_setup(exit_status);

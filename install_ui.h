@@ -17,7 +17,7 @@ typedef enum {
 } yesno_answer;
 
 typedef struct {
-    install_state (*init)(install_info *info,int argc, char **argv);
+    install_state (*init)(install_info *info,int argc, char **argv, int noninteractive);
     install_state (*license)(install_info *info);
     install_state (*readme)(install_info *info);
     install_state (*setup)(install_info *info);

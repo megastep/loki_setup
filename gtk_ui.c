@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.62 2001-01-16 00:33:05 megastep Exp $
+   $Id: gtk_ui.c,v 1.63 2001-01-19 03:48:08 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1093,7 +1093,7 @@ static void update_image(const char *image_file)
 
 /********** UI functions *************/
 
-static install_state gtkui_init(install_info *info, int argc, char **argv)
+static install_state gtkui_init(install_info *info, int argc, char **argv, int noninteractive)
 {
     FILE *opened;
     GtkWidget *window;
@@ -1175,7 +1175,12 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
         license_okay = 1;
         cur_state = SETUP_README;
     }
-    gtk_notebook_set_page(GTK_NOTEBOOK(notebook), OPTION_PAGE);
+
+    if ( noninteractive ) {
+        gtk_notebook_set_page(GTK_NOTEBOOK(notebook), COPY_PAGE);        
+    } else {
+        gtk_notebook_set_page(GTK_NOTEBOOK(notebook), OPTION_PAGE);
+    }
 
     /* Disable the "View Readme" button if no README available */
      if ( ! GetProductREADME(cur_info) ) {
@@ -1254,6 +1259,10 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
 
     /* Update the install image */
     update_image(GetProductSplash(info));
+
+    /* Center and show the installer */
+    gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
+    gtk_widget_show(window);
 
     return cur_state;
 }
@@ -1343,10 +1352,6 @@ static install_state gtkui_setup(install_info *info)
     update_space();
     init_menuitems_option(info, info->config->root->childs);
 
-    /* Center and show the installer */
-    gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
-    gtk_widget_show(window);
-
     return iterate_for_state();
 }
 
@@ -1359,7 +1364,11 @@ static void gtkui_update(install_info *info, const char *path, size_t progress, 
     char *install_path;
     gfloat new_update;
 
-    new_update = (gfloat)progress / (gfloat)size;
+    if ( progress && size ) {
+        new_update = (gfloat)progress / (gfloat)size;
+    } else { /* "Running script" */
+        new_update = 1.0;
+    }
     if ( (int)(new_update*100) != (int)(last_update*100) ) {
         if ( new_update == 1.0 ) {
             last_update = 0.0;

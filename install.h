@@ -279,6 +279,9 @@ extern void set_symlinkspath(install_info *info, const char *path);
 extern void mark_option(install_info *info, xmlNodePtr node,
                         const char *value, int recurse);
 
+/* Enable an option recursively, given its name */
+extern int enable_option(install_info *info, const char *option);
+
 /* Get the name of an option node */
 extern char *get_option_name(install_info *info, xmlNodePtr node, char *name, int len);
 

@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.87 2000-11-11 08:28:57 megastep Exp $ */
+/* $Id: install.c,v 1.88 2001-01-19 03:48:08 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -775,6 +775,38 @@ void mark_option(install_info *info, xmlNodePtr node,
             node = node->next;
         }
     }
+}
+
+/* Enable an option, given its name */
+
+int enable_option_recurse(install_info *info, xmlNodePtr node, const char *option)
+{
+    int ret = 0;
+    while ( node ) {
+        if ( !strcmp(node->name, "option")) {
+            /* Is this the option we're looking for ? */
+            char name[BUFSIZ];
+            const char *text = xmlNodeListGetString(info->config, node->childs, 1);
+            *name = '\0';
+            while ( (*name == 0) && parse_line(&text, name, sizeof(name)) )
+                ;
+            if ( !strcmp(name, option) ) {
+                mark_option(info, node, "true", 1);
+                ret ++;
+            }
+        } else if ( !strcmp(node->name, "exclusive") ) {
+            ret += enable_option_recurse(info, node->childs, option);
+        } else if ( !strcmp(node->name, "component") ) {
+            ret += enable_option_recurse(info, node->childs, option);            
+        } 
+        node = node->next;
+    }
+    return ret;
+}
+
+int enable_option(install_info *info, const char *option)
+{
+   return enable_option_recurse(info, info->config->root->childs, option);
 }
 
 /* Get the name of an option node */

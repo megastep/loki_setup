@@ -227,7 +227,7 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
 	return retval;
 }
 
-static install_state console_init(install_info *info, int argc, char **argv)
+static install_state console_init(install_info *info, int argc, char **argv, int noninteractive)
 {
     install_state state;
 
@@ -492,7 +492,11 @@ static void console_update(install_info *info, const char *path, size_t progress
         strncpy(previous,current, sizeof(previous));
         printf(_("Installing %s ...\n"), current);
     }
-    printf(" %3d%% - %s\r", (int) (((float)progress/(float)size)*100.0), path);
+    if ( progress && size ) {
+        printf(" %3d%% - %s\r", (int) (((float)progress/(float)size)*100.0), path);
+    } else { /* "Running script" */
+        printf(" %s\r", path);
+    }
     if(progress==size)
         putchar('\n');
     fflush(stdout);

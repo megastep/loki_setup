@@ -1,3 +1,8 @@
+1.5.9:
+Stéphane Peter - Thu Jan 18 18:22:04 PST 2001
+ * Added -o command-line option to enable options and switch to non-interactive
+   installation mode.
+
 1.5.8:
 Stéphane Peter, Sam Lantinga - Tue Jan 16 18:20:02 PST 2001
  * First public release with setupdb support
