@@ -34,6 +34,8 @@ John Quigley -  Tue, 19 Nov 2002 19:15:01 -0800
  * Various fixes for Redhat 8.0 menu items.
 Ryan C. Gordon (icculus.org) - Tue Jan 14 23:46:31 EST 2003
  * Committed initial MacOS X patches to CVS on behalf of Jon C.
+Ryan C. Gordon (icculus.org) - Mon Apr 14 00:26:11 EDT 2003
+ * Fixed DNS lookups and some other stuff in network.c.
 
 
 1.6.1:
