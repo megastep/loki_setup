@@ -438,6 +438,7 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
                         copied = copy_file(info, cdpath, bin, fdest, final, 1, update, &file);
                     } else {
                         log_warning(info, _("Unable to find file '%s'"), fpat);
+                        ui_fatal_error(_("Unable to find file '%s'"), fpat);
                     }
                 }
 			} else {
@@ -451,6 +452,7 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
 						copied = copy_file(info, NULL, bin, fdest, final, 1, update, &file);
 					} else {
 						log_warning(info, _("Unable to find file '%s'"), fpat);
+                        ui_fatal_error(_("Unable to find file '%s'"), fpat);
 					}
 				}
 			}

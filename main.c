@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.43 2000-11-29 02:04:52 megastep Exp $ */
+/* $Id: main.c,v 1.44 2000-12-01 22:32:00 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -28,6 +28,7 @@ Modifications by Borland/Inprise Corp.:
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <stdarg.h>
 
 #include "install_log.h"
 #include "install_ui.h"
@@ -35,8 +36,6 @@ Modifications by Borland/Inprise Corp.:
 #include "file.h"
 #include "detect.h"
 #include "plugins.h"
-
-#define SETUP_VERSION "1.5.0"
 
 #define SETUP_CONFIG  SETUP_BASE "setup.xml"
 
@@ -181,6 +180,20 @@ const char *get_cdrom(install_info *info, const char *id)
         }
     }
     return mounted;
+}
+
+/* Displays a dialog using the UI code and abort the installation */
+void ui_fatal_error(const char *txt, ...)
+{
+    va_list ap;
+    char buf[BUFSIZ];
+
+    va_start(ap, txt);
+    vsnprintf(buf, BUFSIZ, txt, ap);
+    va_end(ap);
+
+    UI.prompt(buf, RESPONSE_OK);
+    abort_install();
 }
 
 /* The main installer code */

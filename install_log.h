@@ -11,4 +11,7 @@ extern void log_normal(install_info *info, const char *fmt, ...);
 extern void log_warning(install_info *info, const char *fmt, ...);
 extern void log_fatal(install_info *info, const char *fmt, ...);
 
+/* Defined in main.c */
+extern void ui_fatal_error(const char *txt, ...);
+
 #endif
