@@ -765,6 +765,9 @@ void carbon_ShowInstallScreen(CarbonRes *Res, InstallPage NewInstallPage)
         Res->IsShown = true;
     }
 
+    if(NewInstallPage == CDKEY_PAGE)
+        carbon_FocusControl(Res, CDKEY_ENTRY_ID);
+
     // Refresh window
     DrawControls(Res->Window);
 }
@@ -803,6 +806,17 @@ void carbon_ShowControl(CarbonRes *Res, int ID)
 
     GetControlByID(Res->Window, &IDStruct, &Ref);
     ShowControl(Ref);
+}
+
+void carbon_FocusControl(CarbonRes *Res, int ID)
+{
+    ControlRef Ref;
+    ControlID IDStruct = {LOKI_SETUP_SIG, ID};
+
+    carbon_debug("carbon_FocusControl()\n");
+
+    GetControlByID(Res->Window, &IDStruct, &Ref);
+    SetKeyboardFocus(Res->Window, Ref, kControlFocusNextPart);
 }
 
 void carbon_DisableControl(CarbonRes *Res, int ID)
