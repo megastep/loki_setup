@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.26 2000-03-08 22:38:41 megastep Exp $
+   $Id: gtk_ui.c,v 1.27 2000-03-09 23:22:19 hercules Exp $
 */
 
 #include <limits.h>
@@ -161,11 +161,11 @@ void setup_button_view_readme_slot( GtkWidget* w, gpointer data )
 {
     GtkWidget *readme;
     GtkWidget *widget;
-	const char *file;
+    const char *file;
 
     readme = glade_xml_get_widget(setup_glade, "readme_dialog");
     widget = glade_xml_get_widget(setup_glade, "readme_area");
-	file = GetProductREADME(cur_info);
+    file = GetProductREADME(cur_info);
     if ( file && readme && widget ) {
         gtk_widget_hide(readme);
         load_file(GTK_TEXT(widget), NULL, file);
@@ -218,14 +218,14 @@ void setup_button_play_slot( GtkWidget* _widget, gpointer func_data )
     GtkWidget *widget;
 
     if ( getuid() == 0 ) {
-	const char *warning_text =
+    const char *warning_text =
 "If you run a game as root, the preferences will be stored in\n"
 "root's home directory instead of your user account directory.";
 
         warning_dialog = WARNING_ROOT;
-    	widget = glade_xml_get_widget(setup_glade, "setup_notebook");
-    	gtk_notebook_set_page(GTK_NOTEBOOK(widget), WARNING_PAGE);
-    	widget = glade_xml_get_widget(setup_glade, "warning_label");
+        widget = glade_xml_get_widget(setup_glade, "setup_notebook");
+        gtk_notebook_set_page(GTK_NOTEBOOK(widget), WARNING_PAGE);
+        widget = glade_xml_get_widget(setup_glade, "warning_label");
         gtk_label_set_text(GTK_LABEL(widget), warning_text);
     } else {
         cur_state = SETUP_PLAY;
@@ -457,18 +457,18 @@ static yesno_answer prompt_response;
 
 static void prompt_yesbutton_slot( GtkWidget* widget, gpointer func_data)
 {
-	prompt_response = RESPONSE_YES;
+    prompt_response = RESPONSE_YES;
 }
 
 static void prompt_nobutton_slot( GtkWidget* widget, gpointer func_data)
 {
-	prompt_response = RESPONSE_NO;
+    prompt_response = RESPONSE_NO;
 }
 
 static yesno_answer gtkui_prompt(const char *txt, yesno_answer suggest)
 {
-	GtkWidget *dialog, *label, *yes_button, *no_button;
-	   
+    GtkWidget *dialog, *label, *yes_button, *no_button;
+       
     /* Create the widgets */
     
     dialog = gtk_dialog_new();
@@ -476,7 +476,7 @@ static yesno_answer gtkui_prompt(const char *txt, yesno_answer suggest)
     yes_button = gtk_button_new_with_label("Yes");
     no_button = gtk_button_new_with_label("No");
 
-	prompt_response = RESPONSE_INVALID;
+    prompt_response = RESPONSE_INVALID;
     
     /* Ensure that the dialog box is destroyed when the user clicks ok. */
     
@@ -488,20 +488,21 @@ static yesno_answer gtkui_prompt(const char *txt, yesno_answer suggest)
                        yes_button);
     gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->action_area),
                        no_button);
-	
+    
     /* Add the label, and show everything we've added to the dialog. */
-	
+    
     gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->vbox),
                        label);
-	gtk_window_set_title(GTK_WINDOW(dialog), "Setup");
-	gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
+    gtk_window_set_title(GTK_WINDOW(dialog), "Setup");
+    gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
+    gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
     gtk_widget_show_all (dialog);
 
-	while ( prompt_response == RESPONSE_INVALID ) {
-		gtk_main_iteration();
-	}
-	gtk_widget_destroy(dialog);
-	return prompt_response;
+    while ( prompt_response == RESPONSE_INVALID ) {
+        gtk_main_iteration();
+    }
+    gtk_widget_destroy(dialog);
+    return prompt_response;
 }
 
 static void init_install_path(void)
@@ -709,11 +710,9 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
     FILE *opened;
     GtkWidget *window;
     GtkWidget *notebook;
-    GtkWidget *options;
     GtkWidget *widget;
- 	GtkWidget *button;
+    GtkWidget *button;
     char title[1024];
-    xmlNodePtr node;
 
     cur_state = SETUP_INIT;
     cur_info = info;
@@ -746,25 +745,15 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
         license_okay = 1;
         cur_state = SETUP_README;
     }
-	gtk_notebook_set_page(GTK_NOTEBOOK(notebook), OPTION_PAGE);
+    gtk_notebook_set_page(GTK_NOTEBOOK(notebook), OPTION_PAGE);
 
-	/* Disable the "View Readme" button if no README available */
- 	button = glade_xml_get_widget(setup_glade, "button_readme");
- 	if ( button && ! GetProductREADME(cur_info) ) {
- 		gtk_widget_set_sensitive(button, FALSE);
- 	}
+    /* Disable the "View Readme" button if no README available */
+     button = glade_xml_get_widget(setup_glade, "button_readme");
+     if ( button && ! GetProductREADME(cur_info) ) {
+         gtk_widget_set_sensitive(button, FALSE);
+     }
 
-    /* Go through the install options */
-    options = glade_xml_get_widget(setup_glade, "option_vbox");
-    gtk_container_foreach(GTK_CONTAINER(options), empty_container, options);
-    info->install_size = 0;
-    node = info->config->root->childs;
-    while ( node ) {
-      if ( strcmp(node->name, "option") == 0 ) {
-        parse_option(info, node, window, options, 0, NULL);
-      }
-      node = node->next;
-    }
+    /* Set the text for some blank labels */
     widget = glade_xml_get_widget(setup_glade, "current_option_label");
     if ( widget ) {
         gtk_label_set_text( GTK_LABEL(widget), "");
@@ -773,21 +762,12 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
     if ( widget ) {
         gtk_label_set_text( GTK_LABEL(widget), "");
     }
-    init_install_path();
-    init_binary_path();
-    update_size();
-    update_space();
-    init_menuitems_option();
 
     /* Realize the main window for pixmap loading */
     gtk_widget_realize(window);
 
     /* Update the install image */
     update_image(SETUP_BASE "splash.xpm");
-
-    /* Center and show the installer */
-    gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
-    gtk_widget_show(window);
 
     return cur_state;
 }
@@ -817,12 +797,38 @@ static install_state gtkui_license(install_info *info)
 
 static install_state gtkui_readme(install_info *info)
 {
-	cur_state = SETUP_OPTIONS;
-	return cur_state;
+    cur_state = SETUP_OPTIONS;
+    return cur_state;
 }
 
 static install_state gtkui_setup(install_info *info)
 {
+    GtkWidget *window;
+    GtkWidget *options;
+    xmlNodePtr node;
+
+    /* Go through the install options */
+    window = glade_xml_get_widget(setup_glade, "setup_window");
+    options = glade_xml_get_widget(setup_glade, "option_vbox");
+    gtk_container_foreach(GTK_CONTAINER(options), empty_container, options);
+    info->install_size = 0;
+    node = info->config->root->childs;
+    while ( node ) {
+      if ( strcmp(node->name, "option") == 0 ) {
+        parse_option(info, node, window, options, 0, NULL);
+      }
+      node = node->next;
+    }
+    init_install_path();
+    init_binary_path();
+    update_size();
+    update_space();
+    init_menuitems_option();
+
+    /* Center and show the installer */
+    gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
+    gtk_widget_show(window);
+
     return iterate_for_state();
 }
 
@@ -959,7 +965,7 @@ int gtkui_okay(Install_UI *UI)
             UI->setup = gtkui_setup;
             UI->update = gtkui_update;
             UI->abort = gtkui_abort;
-			UI->prompt = gtkui_prompt;
+            UI->prompt = gtkui_prompt;
             UI->website = gtkui_website;
             UI->complete = gtkui_complete;
             XCloseDisplay(dpy);

@@ -1,7 +1,9 @@
 
 1.2.1:
+Sam Lantinga - Fri Mar 10 14:49:11 PST 2000
+ * Keep prompting the user if the do not insert the CD-ROM
 Stephane Peter - Wed Mar  8 14:27:11 PST 2000
- * Added "cdrom" attribute to the "install" element to prompt user for the CDROM.
+ * Added "cdrom" attribute to the "install" element to prompt user for CDROM.
 Stephane Peter - Tue Mar  7 14:34:11 PST 2000
  * Added default environment variables for scripts called from within setup.
  * Added support for "arch" and "libc" attributes in the "binary" element.

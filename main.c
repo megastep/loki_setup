@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.18 2000-03-08 22:38:41 megastep Exp $ */
+/* $Id: main.c,v 1.19 2000-03-09 23:22:19 hercules Exp $ */
 
 #include <stdio.h>
 #include <setjmp.h>
@@ -115,9 +115,6 @@ int main(int argc, char **argv)
         }
     }
 
-	/* Detect the available mounted CDROMs */
-	detect_cdrom();
-
     /* Initialize the XML setup configuration */
     info = create_install(xml_file, log_level);
     if ( info == NULL ) {
@@ -158,16 +155,24 @@ int main(int argc, char **argv)
                 if ( state == SETUP_ABORT ) {
                     exit_status = 1;
                 }
-				/* Check for the presence of a CDROM if required */
-				if ( GetProductCDROMRequired(info) && num_cdroms==0 ) {
-					char buf[1024];
-					
-					sprintf(buf,"\nPlease mount the %s CDROM\n"
-							"before running this installation program.\n",
-							info->name);
-					UI.prompt(buf, RESPONSE_YES);
-					state = SETUP_EXIT;
-				} 
+                /* Check for the presence of a CDROM if required */
+                if ( GetProductCDROMRequired(info) ) {
+                    yesno_answer response;
+                    
+                    /* Detect the available mounted CDROMs */
+                    response = RESPONSE_YES;
+                    while ( ! detect_cdrom() && (response == RESPONSE_YES) ) {
+                        char buf[1024];
+            
+                        sprintf(buf,"\nPlease mount the %s CDROM.\n"
+                                "Choose Yes to retry, No to cancel.\n",
+                                info->name);
+                        response = UI.prompt(buf, RESPONSE_NO);
+                    }
+                    if ( num_cdroms == 0 ) {
+                        state = SETUP_EXIT;
+                    }
+                } 
                 break;
             case SETUP_LICENSE:
                 state = UI.license(info);
