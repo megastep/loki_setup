@@ -2,7 +2,7 @@
  * Check and Rescue Tool for Loki Setup packages. Verifies the consistency of the files,
  * and optionally restores them from the original installation medium.
  *
- * $Id: check.c,v 1.11 2003-04-01 04:15:09 megastep Exp $
+ * $Id: check.c,v 1.12 2003-08-16 01:03:55 megastep Exp $
  */
 
 #include <stdlib.h>
@@ -298,11 +298,11 @@ on_media_ok_clicked (GtkButton       *button,
 		/* Install the optional README and EULA files
 		   Warning: those are always installed in the root of the installation directory!
 		*/
-		f = GetProductREADME(install);
+		f = GetProductREADME(install, NULL);
 		if ( f && ! GetProductIsMeta(install) ) {
 			copy_path(install, f, install->install_path, NULL, 1, NULL, NULL);
 		}
-		f = GetProductEULA(install);
+		f = GetProductEULA(install, NULL);
 		if ( f && ! GetProductIsMeta(install) ) {
 			copy_path(install, f, install->install_path, NULL, 1, NULL, NULL);
 		}

@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.44 2003-08-13 22:19:53 megastep Exp $ */
+/* $Id: uninstall.c,v 1.45 2003-08-16 01:03:55 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -553,7 +553,7 @@ int main(int argc, char *argv[])
 		}
     } else if ( !strcmp(argv[1], "-v") || !strcmp(argv[1], "--version") ) {
 #ifdef UNINSTALL_UI
-        printf("Loki Uninstall Tool " VERSION "\n");
+        printf("Uninstall Tool " VERSION "\n");
 #else
         printf("%d.%d.%d\n", SETUP_VERSION_MAJOR, SETUP_VERSION_MINOR, SETUP_VERSION_RELEASE);
 #endif

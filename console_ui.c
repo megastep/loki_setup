@@ -154,12 +154,12 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
     /* Skip any options that are already installed */
     if ( info->product ) {
 		product_component_t *comp;
+		if ( component ) {
+			comp = loki_find_component(info->product, component);
+		} else {
+			comp = loki_getdefault_component(info->product);
+		}
 		if ( excl_reinst ) {
-			if ( component ) {
-				comp = loki_find_component(info->product, component);
-			} else {
-				comp = loki_getdefault_component(info->product);
-			}
 			if ( comp &&
 				 loki_find_option(comp, get_option_name(info,node,NULL,0)) ) {
 				printf(_("Previously installed option '%s' will be installed.\n"), get_option_name(info,node,line,BUFSIZ));
@@ -167,12 +167,7 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
 			} else {
 				response = RESPONSE_NO;
 			}
-		} else if ( ! GetProductReinstall(info) ) {
-			if ( component ) {
-				comp = loki_find_component(info->product, component);
-			} else {
-				comp = loki_getdefault_component(info->product);
-			}
+		} else if ( ! GetProductReinstall(info) || !GetReinstallNode(info, node) ) {
 			if ( comp &&
 				 loki_find_option(comp, get_option_name(info,node,NULL,0)) ) {
 				/* Recurse down any other options */
@@ -192,23 +187,6 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
 					retval = 0;
 				return(retval);
 			}
-		} else if (!GetReinstallNode(info, node)) {
-			/* Recurse down any other options */
-			node = node->childs;
-			while ( node ) {
-				if ( ! strcmp(node->name, "option") ) {
-					parse_option(info, component, node, 0, 0);
-				} else if ( ! strcmp(node->name, "exclusive") ) {
-					xmlNodePtr child;
-					int reinst = ! GetReinstallNode(info, node);
-					for ( child = node->childs; child && parse_option(info, component, child, 1, reinst); child = child->next)
-						;
-				}
-				node = node->next;
-			}
-			if ( exclusive ) /* We stop prompting the user once an option has been chosen */
-				retval = 0;
-			return(retval);
 		}
     }
 

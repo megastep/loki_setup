@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.84 2003-08-14 00:55:35 megastep Exp $
+   $Id: gtk_ui.c,v 1.85 2003-08-16 01:03:55 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1160,13 +1160,13 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
     /* Disable any options that are already installed */
     if ( info->product ) {
 		product_component_t *comp;
+		if ( component ) {
+			comp = loki_find_component(info->product, component);
+		} else {
+			comp = loki_getdefault_component(info->product);
+		}
 		if ( excl_reinst ) { /* Reinstall an exclusive option - make sure to select the installed one */
 			gtk_widget_set_sensitive(button, FALSE);
-			if ( component ) {
-				comp = loki_find_component(info->product, component);
-			} else {
-				comp = loki_getdefault_component(info->product);
-			}
 			if ( comp && loki_find_option(comp, name) ) {
 				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
 				mark_option(info, node, "true", 1);
@@ -1175,11 +1175,6 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
 				mark_option(info, node, "false", 1);
 			}
 		} else if ( ! GetProductReinstall(info) ) {			
-			if ( component ) {
-				comp = loki_find_component(info->product, component);
-			} else {
-				comp = loki_getdefault_component(info->product);
-			}
 			if ( comp && loki_find_option(comp, name) ) {
 				/* Unmark this option for installation */
 				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), FALSE);
@@ -1187,10 +1182,12 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
 				mark_option(info, node, "false", 1);
 			}
 		} else if (!GetReinstallNode(info, node)) {
-			/* Unmark this option for installation */
-			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), FALSE);
+			/* Unmark this option for installation, unless it was not installed already */
 			gtk_widget_set_sensitive(button, FALSE);
-			mark_option(info, node, "false", 1);
+			if ( comp && loki_find_option(comp, name) ) {
+				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), FALSE);
+				mark_option(info, node, "false", 1);
+			}
 		}
     }
 }
