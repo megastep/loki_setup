@@ -1,4 +1,7 @@
 Current:
+Ryan C. Gordon (icculus.org) - Mon Mar  1 22:50:18 EST 2004
+ * Wedged in support for install tag's "cdkey" attribute for
+   GTK, dialog, and console UIs.
 Ryan C. Gordon (icculus.org) - Mon Mar  1 01:30:09 EST 2004
  * Only check for CD on each <files> tag that needs a disc, not each file
    inside that tag.
