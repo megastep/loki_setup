@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.128 2004-03-02 03:50:01 icculus Exp $ */
+/* $Id: install.c,v 1.129 2004-03-31 16:30:39 icculus Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -79,6 +79,44 @@
 #include "file.h"
 #include "network.h"
 #include "loki_launchurl.h"
+
+#if HARDCODE_TRANSLATION
+const char *translation_lookup_table(const char *str)
+{
+    typedef struct
+    {
+        const char *english;
+        const char *translated;
+    } lookup_table_element;
+
+    /*
+     * You can build most of this table from a localized .po with the
+     *  following perl one-liner:
+     *
+     *   perl -w -n -e 'next if not (/msgid (\".*?\")/); print("    { $1, "); while (<>) { next if not (/msgstr (\".*?\")/); print("$1 },\n"); last; }' setup.po
+     *
+     *  You'll still want to tweak it by hand, though.
+     */
+    static lookup_table_element lookup_table[] =
+    {
+        { "this is english", "7h15 1z l337. 3y3 ow|\|z j00! wtfomg." },
+        { NULL, NULL }
+    };
+
+    lookup_table_element *i;
+
+    if (str == NULL)
+        return(NULL);
+
+    for (i = lookup_table; i->english != NULL; i++)
+    {
+        if (strcmp(i->english, str) == 0)
+            return(i->translated);
+    }
+
+    return(str);
+}
+#endif
 
 extern char *rpm_root;
 extern struct component_elem *current_component;
