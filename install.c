@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.119 2003-08-14 01:24:47 megastep Exp $ */
+/* $Id: install.c,v 1.120 2003-08-14 01:31:14 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1345,15 +1345,15 @@ install_state install(install_info *info,
 	}
 	f = GetProductREADME(info, &keepdirs);
 	if ( f && ! GetProductIsMeta(info) ) {
-		if ( strstr(f, info->install_path) == f )
-			f += strlen(info->install_path)+1;
+		if ( strstr(f, info->setup_path) == f )
+			f += strlen(info->setup_path)+1;
 		copy_path(info, f, info->install_path, NULL, !keepdirs, NULL, update);
 	}
 	keepdirs = 0;
 	f = GetProductEULA(info, &keepdirs);
 	if ( f && ! GetProductIsMeta(info) ) {
-		if ( strstr(f, info->install_path) == f )
-			f += strlen(info->install_path)+1;
+		if ( strstr(f, info->setup_path) == f )
+			f += strlen(info->setup_path)+1;
 		copy_path(info, f, info->install_path, NULL, !keepdirs, NULL, update);
 	}
     if(info->options.install_menuitems){
