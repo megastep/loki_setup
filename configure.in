@@ -16,15 +16,17 @@ AC_PROG_INSTALL
 
 AC_PATH_XTRA
 AC_CHECK_HEADERS(unistd.h)
-AC_CHECK_HEADERS(sys/utsname.h)
-AC_CHECK_HEADERS(glob.h)
-AC_CHECK_HEADERS(elf.h)
+AC_CHECK_HEADERS(pwd.h)
+AC_CHECK_HEADERS(gtk.h)
 
 CFLAGS="-fsigned-char -funroll-loops -Wall -g -O2 -I. $X_CFLAGS"
 
-AC_CHECK_LIB(intl, dgettext, LIBS="$LIBS -lintl")
+LIBS="-L/usr/local/lib -L$x_libraries"
+AC_CHECK_LIB(intl, gettext, USE_LIBINTL=yes)
 dnl Check for gtk12 libraries in case those are available (FreeBSD)
-AC_CHECK_LIB(gtk12, gtk_init, GTK12="12")
+AC_CHECK_LIB(gdk12, gdk_init, GTK12="12")
+
+AC_CHECK_LIB(dl, dlopen, USE_LIBDL=yes)
 
 case "$target" in
     *i?86*)
@@ -109,9 +111,16 @@ if test x$enable_rpm = xyes; then
         AC_DEFINE(ENABLE_RPM)
 fi
 
+if test ! -z "USE_LIBINTL"; then
+	LIBS="$LIBS -lintl"
+	GUI_LIBS="$GUI_LIBS -lintl"
+fi
+
 GUI_LIBS="$GUI_LIBS -Wl,-Bdynamic $X_PRE_LIBS $X_LIBS -lXi -lXext -lX11 -lm"
 if test ! -z "$HAVEGTK"; then
-    GUI_LIBS="$GUI_LIBS -ldl"
+    if test ! -z "$USE_LIBDL"; then
+        GUI_LIBS="$GUI_LIBS -ldl"
+    fi
 fi
 
 dnl Check for various options
