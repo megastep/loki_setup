@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /bin/sh
 #
 # Product setup script - Loki Entertainment Software
 
@@ -6,7 +6,8 @@
 cd `dirname $0`
 
 # Return the appropriate architecture string
-function DetectARCH {
+DetectARCH()
+{
 	status=1
 	case `uname -m` in
 		i?86)  echo "x86"
@@ -18,7 +19,8 @@ function DetectARCH {
 }
 
 # Return the appropriate version string
-function DetectLIBC {
+DetectLIBC()
+{
       status=1
       if [ -f `echo /lib/libc.so.6* | tail -1` ]; then
 	      if fgrep GLIBC_2.1 /lib/libc.so.6* 2>&1 >/dev/null; then
@@ -42,7 +44,7 @@ arch=`DetectARCH`
 libc=`DetectLIBC`
 
 # Find the installation program
-function try_run
+try_run()
 {
     setup=$1
     shift
@@ -92,7 +94,7 @@ __EOF__
 # Try to run the setup program
 status=0
 rm -f "$setup"
-if ! try_run setup.gtk && ! try_run setup -fatal; then
+if ! try_run setup.gtk $* && ! try_run setup $* -fatal; then
     echo "The setup program seems to have failed on $arch/$libc"
     echo
     echo "Please contact Loki Technical Support at support@lokigames.com"
