@@ -66,11 +66,11 @@ endif
 CONSOLE_LIBS = $(LIBS)
 GUI_LIBS = plugins/libplugins.a $(SETUPDB)/$(arch)/libsetupdb.a
 GUI_LIBS += -Wl,-Bstatic
-GUI_LIBS += -L$(shell libglade-config --prefix)
+GUI_LIBS += -L$(shell libglade-config --prefix)/lib
 GUI_LIBS +=  -lglade
-GUI_LIBS += -L$(shell gtk-config --prefix)
+GUI_LIBS += -L$(shell gtk-config --prefix)/lib
 GUI_LIBS +=  -lgtk -lgdk -rdynamic -lgmodule -lglib 
-GUI_LIBS += -L$(shell xml-config --prefix)
+GUI_LIBS += -L$(shell xml-config --prefix)/lib
 GUI_LIBS += -lxml -lz
 GUI_LIBS += -Wl,-Bdynamic
 GUI_LIBS += -L/usr/X11R6/lib -lXi -lXext -lX11 -lm -ldl
