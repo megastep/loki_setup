@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2004-11-10 12:11-0800\n"
+"POT-Creation-Date: 2004-11-23 17:13-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -248,26 +248,26 @@ msgstr ""
 msgid "loki_setup: "
 msgstr ""
 
-#: install_log.c:19 install.c:816
+#: install_log.c:19 install.c:813
 msgid "Out of memory\n"
 msgstr ""
 
-#: detect.c:326
+#: detect.c:338
 #, c-format
 msgid "Unmounting device %s"
 msgstr ""
 
-#: detect.c:328
+#: detect.c:340
 #, c-format
 msgid "Failed to unmount device %s mounted on %s"
 msgstr ""
 
-#: detect.c:394 detect.c:486 detect.c:525 detect.c:568
+#: detect.c:406 detect.c:498 detect.c:537 detect.c:580
 #, c-format
 msgid "Mounted device %s"
 msgstr ""
 
-#: detect.c:759 detect.c:763
+#: detect.c:771 detect.c:775
 #, c-format
 msgid ""
 "\n"
@@ -275,7 +275,7 @@ msgid ""
 "Choose Yes to retry, No to cancel"
 msgstr ""
 
-#: detect.c:766
+#: detect.c:778
 #, c-format
 msgid ""
 "\n"
@@ -283,12 +283,12 @@ msgid ""
 "Choose Yes to retry, No to cancel"
 msgstr ""
 
-#: detect.c:791
+#: detect.c:841
 #, c-format
 msgid "Detected locale is %s\n"
 msgstr ""
 
-#: detect.c:865
+#: detect.c:915
 #, c-format
 msgid "Invalid matching policy: %s"
 msgstr ""
@@ -343,401 +343,434 @@ msgstr ""
 msgid "Fork failed, no network check"
 msgstr ""
 
-#: install.c:410
+#: install.c:407
 #, c-format
 msgid ""
 "%s is owned by %s.You may need to run this installer as user %s or choose "
 "another directory."
 msgstr ""
 
-#: install.c:438
+#: install.c:435
 msgid "No destination directory selected"
 msgstr ""
 
-#: install.c:441
+#: install.c:438
 msgid "Please select at least one option"
 msgstr ""
 
-#: install.c:444
+#: install.c:441
 msgid "Not enough free space for the selected options."
 msgstr ""
 
-#: install.c:446
+#: install.c:443
 msgid "Install path is not a directory."
 msgstr ""
 
-#: install.c:447 install.c:468
+#: install.c:444 install.c:465
 msgid "Please choose an existing directory."
 msgstr ""
 
-#: install.c:449
+#: install.c:446
 msgid "No write permissions on the install directory."
 msgstr ""
 
-#: install.c:452
+#: install.c:449
 msgid "Binary path and install path must be different."
 msgstr ""
 
-#: install.c:454
+#: install.c:451
 msgid "No write permissions to install a selected package."
 msgstr ""
 
-#: install.c:459
+#: install.c:456
 msgid "Binary path is not a directory."
 msgstr ""
 
-#: install.c:462
+#: install.c:459
 msgid "No write permissions on the binary directory."
 msgstr ""
 
-#: install.c:467
+#: install.c:464
 msgid "Binary directory does not exist."
 msgstr ""
 
-#: install.c:838
+#: install.c:835
 #, c-format
 msgid "Detected distribution: %s %d.%d"
 msgstr ""
 
-#: install.c:1008
+#: install.c:1005
 msgid ""
 "Could not find default component. Make sure to define components for all "
 "entries."
 msgstr ""
 
-#: install.c:1049 install.c:1071 install.c:1093 install.c:1114 install.c:1129
-#: install.c:1172 file.c:118 file.c:164 file.c:171
+#: install.c:1046 install.c:1068 install.c:1090 install.c:1111 install.c:1126
+#: install.c:1169 file.c:119 file.c:165 file.c:172
 msgid "Out of memory"
 msgstr ""
 
-#: install.c:1154
+#: install.c:1151
 msgid "You must use a 'symlink' attribute with 'play'"
 msgstr ""
 
-#: install.c:1162
+#: install.c:1159
 msgid "There can be only one binary with a 'play' attribute"
 msgstr ""
 
-#: install.c:1165
+#: install.c:1162
 msgid "The only valid values for the 'play' attribute are yes, gui and no"
 msgstr ""
 
-#: install.c:1190
+#: install.c:1187
 msgid "Couldn't find your home directory"
 msgstr ""
 
-#: install.c:1208
+#: install.c:1205
 #, c-format
 msgid "Couldn't find home directory for %s"
 msgstr ""
 
-#: install.c:1329
+#: install.c:1326
 msgid ""
 "XML: 'require' tag doesn't have a mandatory 'command' or 'feature' attribute"
 msgstr ""
 
-#: install.c:1360
+#: install.c:1357
 #, c-format
 msgid ""
 "The installer is not suitable for installing this product (missing feature '%"
 "s' version '%u')"
 msgstr ""
 
-#: install.c:1399
+#: install.c:1396
 msgid "XML: 'lang' tag does not have a mandatory 'lang' attribute"
 msgstr ""
 
-#: install.c:1408
+#: install.c:1405
 #, c-format
 msgid "XML: option listed without translated description for locale '%s'"
 msgstr ""
 
-#: install.c:1416
+#: install.c:1413
 msgid "XML: option listed without description"
 msgstr ""
 
-#: install.c:1671
+#: install.c:1668
 msgid "CDKey file could not be opened."
 msgstr ""
 
-#: install.c:1776 install.c:1782 install.c:1801
+#: install.c:1773 install.c:1779 install.c:1798
 #, c-format
 msgid "Unable to remove '%s'"
 msgstr ""
 
-#: install.c:1792
+#: install.c:1789
 #, c-format
 msgid "The '%s' RPM was installed or upgraded (version %s, release %d)"
 msgstr ""
 
-#: install.c:1921
+#: install.c:1918
 msgid "Options tag string maxed out!"
 msgstr ""
 
-#: install.c:1970 install.c:2114 install.c:2142
+#: install.c:1967 install.c:2111 install.c:2139
 msgid "Could not create temporary script"
 msgstr ""
 
-#: install.c:2091
+#: install.c:2088
 #, c-format
 msgid "Could not register binary: %s"
 msgstr ""
 
-#: install.c:2133
+#: install.c:2130
 #, c-format
 msgid "Could not write temporary pre-uninstall script in %s"
 msgstr ""
 
-#: install.c:2158
+#: install.c:2155
 #, c-format
 msgid "Could not write post-uninstall script in %s"
 msgstr ""
 
-#: install.c:2195
+#: install.c:2192
 msgid "Could not create install log"
 msgstr ""
 
-#: install.c:2222
+#: install.c:2219
 #, c-format
 msgid "Please visit %s"
 msgstr ""
 
-#: install.c:2276
+#: install.c:2273
 msgid "Missing 'command' attribute for an option"
 msgstr ""
 
-#: install.c:2509 install.c:2572
+#: install.c:2506 install.c:2569
 #, c-format
 msgid "Unable to create desktop file '%s'"
 msgstr ""
 
-#: install.c:2635 install.c:2638
+#: install.c:2632 install.c:2635
 #, c-format
 msgid "Unable to create CDE desktop file '%s'"
 msgstr ""
 
-#: install.c:2672
+#: install.c:2669
 #, c-format
 msgid "Unable to create ToolChest menu file '%s'"
 msgstr ""
 
-#: copy.c:292
+#: copy.c:294
 #, c-format
 msgid "Unable to create %s symlink pointing to %s"
 msgstr ""
 
-#: copy.c:370
+#: copy.c:372
 #, c-format
 msgid "Failed to update check sum for %s"
 msgstr ""
 
-#: copy.c:374
+#: copy.c:376
 #, c-format
 msgid "Error while running process command: %s"
 msgstr ""
 
-#: copy.c:384 plugins/cpio.c:181 plugins/tar.c:120 plugins/uz2.c:203
+#: copy.c:386 plugins/cpio.c:181 plugins/tar.c:120 plugins/uz2.c:203
 #: plugins/zip.c:871
 #, c-format
 msgid "File '%s' has an invalid checksum! Aborting."
 msgstr ""
 
-#: copy.c:424
+#: copy.c:426
 #, c-format
 msgid "Unable to copy directory '%s'"
 msgstr ""
 
-#: copy.c:459
+#: copy.c:461
 #, c-format
 msgid "1 Unable to find file '%s' in '%s'"
 msgstr ""
 
-#: copy.c:504
+#: copy.c:506
 #, c-format
 msgid "Unable to find file '%s' on any of the CDROM drives"
 msgstr ""
 
-#: copy.c:522
+#: copy.c:524
 #, c-format
 msgid "2 Unable to find file '%s' in '%s'"
 msgstr ""
 
-#: copy.c:576 copy.c:577
+#: copy.c:578 copy.c:579
 #, c-format
 msgid "Unable to copy man page '%s'"
 msgstr ""
 
-#: copy.c:680
+#: copy.c:622 copy.c:629
+#, c-format
+msgid "Could not create temporary script: %s"
+msgstr ""
+
+#: copy.c:672
+msgid "'binpath' attribute is mandatory for inline 'binary' tag"
+msgstr ""
+
+#: copy.c:677
+msgid "'binpath' attribute must not contain slashes for inline 'binary' tag"
+msgstr ""
+
+#: copy.c:756
 #, c-format
 msgid "find '%s'"
 msgstr ""
 
-#: copy.c:702 copy.c:703
+#: copy.c:778 copy.c:779
 #, c-format
 msgid "Unable to find file '%s' in '%s'"
 msgstr ""
 
-#: copy.c:718 copy.c:719
+#: copy.c:794 copy.c:795
 #, c-format
 msgid "Unable to copy file '%s'"
 msgstr ""
 
-#: copy.c:759
+#: copy.c:844
 msgid "Running script"
 msgstr ""
 
-#: copy.c:955
+#: copy.c:1040
 msgid "The remove_msg element should be within a component!\n"
 msgstr ""
 
-#: copy.c:973
+#: copy.c:1058
 msgid "Component element needs to have a name"
 msgstr ""
 
-#: copy.c:976
+#: copy.c:1061
 msgid "Component element needs to have a version"
 msgstr ""
 
-#: copy.c:998
+#: copy.c:1083
 msgid "Malformed 'environment' element in XML file : missing 'var' property"
 msgstr ""
 
-#: copy.c:1174
+#: copy.c:1259
 #, c-format
 msgid "Suspect size value for option %s\n"
 msgstr ""
 
-#: file.c:143
+#: file.c:144
 #, c-format
 msgid "File '%25s' already exists, overwrite?"
 msgstr ""
 
-#: file.c:148
+#: file.c:149
 #, c-format
 msgid "File exists: '%s'"
 msgstr ""
 
-#: file.c:182
+#: file.c:183
 #, c-format
 msgid "Failed to open file %s"
 msgstr ""
 
-#: file.c:212
+#: file.c:213
 #, c-format
 msgid "File '%s' may be in BZIP2 format, but support was not compiled in!"
 msgstr ""
 
-#: file.c:223
+#: file.c:224
 #, c-format
 msgid "Couldn't read from file: %s"
 msgstr ""
 
-#: file.c:231
+#: file.c:232
 #, c-format
 msgid "Installing file %s"
 msgstr ""
 
-#: file.c:236
+#: file.c:237
 #, c-format
 msgid "Couldn't write to file: %s"
 msgstr ""
 
-#: file.c:262
+#: file.c:263
 msgid "Read on write stream"
 msgstr ""
 
-#: file.c:301
+#: file.c:302
 #, c-format
 msgid "Read failure on %s"
 msgstr ""
 
-#: file.c:372
+#: file.c:373
 msgid "Skip zeroes on write stream"
 msgstr ""
 
-#: file.c:392 file.c:458 file.c:465
+#: file.c:393 file.c:459 file.c:466
 #, c-format
 msgid "Short write on %s"
 msgstr ""
 
-#: file.c:398
+#: file.c:399
 msgid "Write on read stream"
 msgstr ""
 
-#: file.c:428
+#: file.c:429
 #, c-format
 msgid "Write failure on %s"
 msgstr ""
 
-#: file.c:491
+#: file.c:492
 #, c-format
 msgid "Trying to create a symbolic link on the same file: %s\n"
 msgstr ""
 
-#: file.c:496
+#: file.c:497
 #, c-format
 msgid "Creating symbolic link: %s --> %s\n"
 msgstr ""
 
-#: file.c:505
+#: file.c:506
 #, c-format
 msgid "Can't remove existing symlink %s: %s"
 msgstr ""
 
-#: file.c:509 file.c:540 file.c:560 file.c:579
+#: file.c:510 file.c:541 file.c:561 file.c:580
 #, c-format
 msgid "Can't create %s: %s"
 msgstr ""
 
-#: file.c:534
+#: file.c:535
 #, c-format
 msgid "Creating directory: %s\n"
 msgstr ""
 
-#: file.c:553
+#: file.c:554
 #, c-format
 msgid "Creating FIFO: %s\n"
 msgstr ""
 
-#: file.c:572
+#: file.c:573
 #, c-format
 msgid "Creating device: %s\n"
 msgstr ""
 
-#: file.c:592
+#: file.c:593
 #, c-format
 msgid "Can't change permissions for %s: %s"
 msgstr ""
 
-#: file.c:626 file.c:650
+#: file.c:627 file.c:651
 #, c-format
 msgid "Unable to read %s"
 msgstr ""
 
-#: file.c:728
+#: file.c:729
 msgid "BZ2 support not available"
 msgstr ""
 
-#: file.c:753
+#: file.c:754
 #, c-format
 msgid "BZ2: *** Symbol \"%s\" not found, bzip2 support disabled"
 msgstr ""
 
-#: file.c:766
+#: file.c:767
 #, c-format
 msgid "BZ2: Try open %s"
 msgstr ""
 
-#: file.c:772
+#: file.c:773
 msgid "BZ2: *** Unable to open bzip2 library. bzip2 support disabled"
 msgstr ""
 
-#: file.c:776
+#: file.c:777
 #, c-format
 msgid "BZ2: got %s"
 msgstr ""
 
-#: main.c:119
+#: file.c:808
+#, c-format
+msgid "Unable to create temporary directory: %s"
+msgstr ""
+
+#: file.c:827
+#, c-format
+msgid "Can not chdir to temporary directory: %s"
+msgstr ""
+
+#: file.c:834
+#, c-format
+msgid "Can not open temporary directory: %s"
+msgstr ""
+
+#: file.c:845
+#, c-format
+msgid "Can not remove %s/%s: %s"
+msgstr ""
+
+#: main.c:120
 #, c-format
 msgid ""
 "Usage: %s [options]\n"
@@ -761,7 +794,7 @@ msgid ""
 "   -V       Print the version of the setup program and exit\n"
 msgstr ""
 
-#: main.c:136
+#: main.c:137
 #, c-format
 msgid ""
 "Usage: %s [options]\n"
@@ -782,54 +815,54 @@ msgid ""
 "   -V       Print the version of the setup program and exit\n"
 msgstr ""
 
-#: main.c:232
+#: main.c:233
 msgid "Out of range value, setting verbosity level to normal.\n"
 msgstr ""
 
-#: main.c:282
+#: main.c:283
 #, c-format
 msgid "Couldn't load '%s'\n"
 msgstr ""
 
-#: main.c:293
+#: main.c:294
 msgid "No UI drivers available\n"
 msgstr ""
 
-#: main.c:316
+#: main.c:317
 msgid ""
 "The 'cdromfile' attribute is now mandatory when using the 'cdrom' attribute."
 msgstr ""
 
-#: main.c:328
+#: main.c:329
 msgid ""
 "Unable to determine the current directory.\n"
 "Please check the permissions of the parent directories.\n"
 msgstr ""
 
-#: main.c:342
+#: main.c:343
 msgid "You need to run this installer as the super-user.\n"
 msgstr ""
 
-#: main.c:349
+#: main.c:350
 msgid ""
 "\n"
 "This product is already installed.\n"
 "Uninstall it before running this program again.\n"
 msgstr ""
 
-#: main.c:354
+#: main.c:355
 msgid ""
 "Warning: You are about to reinstall\n"
 "on top of an existing installation.\n"
 msgstr ""
 
-#: main.c:366
+#: main.c:367
 msgid ""
 "\n"
 "Illegal installation: do not mix components with a component installation.\n"
 msgstr ""
 
-#: main.c:371
+#: main.c:372
 #, c-format
 msgid ""
 "\n"
@@ -837,7 +870,7 @@ msgid ""
 "Please uninstall it beforehand.\n"
 msgstr ""
 
-#: main.c:379
+#: main.c:380
 #, c-format
 msgid ""
 "\n"
@@ -845,7 +878,7 @@ msgid ""
 "installation program.\n"
 msgstr ""
 
-#: main.c:406
+#: main.c:407
 #, c-format
 msgid "Could not enable option: %s"
 msgstr ""
@@ -1291,22 +1324,22 @@ msgstr ""
 msgid "Unable to locate 'setup_menuitems_checkbox'"
 msgstr ""
 
-#: gtk_ui.c:1516 carbon_ui.c:889
-#, c-format
-msgid "%s / %s Setup"
-msgstr ""
-
-#: gtk_ui.c:1518 carbon_ui.c:891
-#, c-format
-msgid "%s Setup"
-msgstr ""
-
-#: gtk_ui.c:1872
+#: gtk_ui.c:1468 gtk_ui.c:1873
 #, c-format
 msgid "Unable to open %s, aborting!\n"
 msgstr ""
 
-#: gtk_ui.c:1927 carbon_ui.c:1405
+#: gtk_ui.c:1517 carbon_ui.c:889
+#, c-format
+msgid "%s / %s Setup"
+msgstr ""
+
+#: gtk_ui.c:1519 carbon_ui.c:891
+#, c-format
+msgid "%s Setup"
+msgstr ""
+
+#: gtk_ui.c:1928 carbon_ui.c:1405
 #, c-format
 msgid "Type '%s' to start the program"
 msgstr ""

@@ -1,6 +1,6 @@
 /*
  * Isolate the macros related to locale
- * $Id: setup-locale.h,v 1.11 2004-09-08 00:00:39 megastep Exp $
+ * $Id: setup-locale.h,v 1.12 2004-11-24 01:59:12 megastep Exp $
  */
 
 #ifndef _setup_locale_h_
@@ -17,6 +17,7 @@ const char *translation_lookup_table(const char *str);
 #include <libintl.h>
 #define _(String) gettext (String)
 #else
+#warning "Localization subsystem was DISABLED"
 #define _(String) (String)
 #define bindtextdomain(x, y)
 #define textdomain(x)

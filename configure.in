@@ -46,9 +46,6 @@ AC_CHECK_HEADERS(libgen.h)
 AC_CHECK_HEADERS(pty.h)
 AC_CHECK_HEADERS(sys/ptms.h)
 AC_CHECK_HEADERS(sys/stropts.h)
-AC_CHECK_HEADERS(libintl.h)
-AC_CHECK_HEADERS(langinfo.h)
-AC_CHECK_HEADERS(locale.h)
 AC_CHECK_HEADERS(getopt.h)
 AC_CHECK_FILES(/dev/ptmx)
 AC_CHECK_FILES(/dev/pts)
@@ -249,6 +246,7 @@ AC_CHECK_LIB(intl, gettext,
         LIBS="$LIBS $LIBINTL"
         GUILIBS="$GUI_LIBS $LIBINTL"
         CARBONLIBS="$CARBON_LIBS $LIBINTL"
+		CFLAGS="$CFLAGS -I/opt/gettext/include"
     fi
 )
 
@@ -259,8 +257,13 @@ case "$target" in
         LIBS="$LIBS $LIBINTL"
         GUILIBS="$GUI_LIBS $LIBINTL"
         CARBONLIBS="$CARBON_LIBS $LIBINTL"
+		CFLAGS="$CFLAGS -I/sw/include"
     fi		
 esac
+
+AC_CHECK_HEADERS(libintl.h)
+AC_CHECK_HEADERS(langinfo.h)
+AC_CHECK_HEADERS(locale.h)
 
 AC_CHECK_LIB(gpm, Gpm_Open, USE_GPM=yes)
 
