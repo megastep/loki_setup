@@ -1,6 +1,6 @@
 /*
  * Isolate the macros related to locale
- * $Id: setup-locale.h,v 1.10 2004-03-31 16:33:14 icculus Exp $
+ * $Id: setup-locale.h,v 1.11 2004-09-08 00:00:39 megastep Exp $
  */
 
 #ifndef _setup_locale_h_
@@ -20,6 +20,10 @@ const char *translation_lookup_table(const char *str);
 #define _(String) (String)
 #define bindtextdomain(x, y)
 #define textdomain(x)
+#endif
+
+#ifdef HAVE_LOCALE_H
+#  include <locale.h>
 #endif
 
 #define gettext_noop(String) (String)
