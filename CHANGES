@@ -1,4 +1,8 @@
 Current:
+Ryan C. Gordon (icculus.org) - Mon Mar  1 01:30:09 EST 2004
+ * Only check for CD on each <files> tag that needs a disc, not each file
+   inside that tag.
+ * Respect ISOs on loopback devices as mounted CDs.
 Ryan C. Gordon (icculus.org) - Sat Feb 28 10:44:11 EST 2004
  * Total install size is now held in 64-bits and may now exceed 4 gigabytes.
  * uz2 and zip plugins now update total install progress properly.
