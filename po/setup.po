@@ -1,18 +1,19 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR Free Software Foundation, Inc.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2004-06-30 16:57-0700\n"
+"POT-Creation-Date: 2004-07-20 15:05-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
-"Content-Transfer-Encoding: ENCODING\n"
+"Content-Transfer-Encoding: 8bit\n"
 
 # SOME DESCRIPTIVE TITLE
 #: image/setup.data/setup.glade:979 image/setup.data/setup.glade:1028
@@ -46,7 +47,7 @@ msgstr ""
 msgid "Estimated size:"
 msgstr ""
 
-#: dialog_ui.c:628 image/setup.data/setup.glade:129
+#: image/setup.data/setup.glade:129 dialog_ui.c:629
 msgid "Expert"
 msgstr ""
 
@@ -86,7 +87,7 @@ msgstr ""
 msgid "Launching browser, please wait..."
 msgstr ""
 
-#: dialog_ui.c:97 dialog_ui.c:263 image/setup.data/setup.glade:2278
+#: image/setup.data/setup.glade:2278 dialog_ui.c:97 dialog_ui.c:263
 msgid "License Agreement"
 msgstr ""
 
@@ -126,7 +127,7 @@ msgstr ""
 msgid "Readme File"
 msgstr ""
 
-#: dialog_ui.c:627 image/setup.data/setup.glade:112
+#: image/setup.data/setup.glade:112 dialog_ui.c:628
 msgid "Recommended"
 msgstr ""
 
@@ -247,7 +248,7 @@ msgstr ""
 msgid "loki_setup: "
 msgstr ""
 
-#: install.c:714 install_log.c:19
+#: install_log.c:19 install.c:714
 msgid "Out of memory\n"
 msgstr ""
 
@@ -385,8 +386,8 @@ msgid ""
 "entries."
 msgstr ""
 
-#: file.c:117 file.c:138 file.c:145 install.c:947 install.c:969 install.c:991
-#: install.c:1012 install.c:1027 install.c:1069
+#: install.c:947 install.c:969 install.c:991 install.c:1012 install.c:1027
+#: install.c:1069 file.c:117 file.c:138 file.c:145
 msgid "Out of memory"
 msgstr ""
 
@@ -522,11 +523,6 @@ msgstr ""
 #: copy.c:461
 #, c-format
 msgid "1 Unable to find file '%s' in '%s'"
-msgstr ""
-
-#: copy.c:463 copy.c:524
-#, c-format
-msgid "Unable to find file '%s'"
 msgstr ""
 
 #: copy.c:504
@@ -682,6 +678,11 @@ msgstr ""
 
 #: file.c:697
 msgid "BZ2 support not available"
+msgstr ""
+
+#: file.c:722
+#, c-format
+msgid "BZ2: *** Symbol \"%s\" not found, bzip2 support disabled"
 msgstr ""
 
 #: file.c:735
@@ -987,7 +988,7 @@ msgstr ""
 msgid "Installing %s ...\n"
 msgstr ""
 
-#: console_ui.c:628 dialog_ui.c:590
+#: console_ui.c:628 dialog_ui.c:591
 msgid "Install aborted - cleaning up files\n"
 msgstr ""
 
@@ -1009,7 +1010,7 @@ msgstr ""
 msgid "Do you want to proceed with Recommended installation?"
 msgstr ""
 
-#: carbon_ui.c:433 console_ui.c:666 dialog_ui.c:652 gtk_ui.c:318
+#: console_ui.c:666 dialog_ui.c:653 gtk_ui.c:318 carbon_ui.c:433
 #, c-format
 msgid ""
 "Installation could not proceed due to the following error:\n"
@@ -1067,7 +1068,7 @@ msgstr ""
 msgid "Component"
 msgstr ""
 
-#: dialog_ui.c:234 dialog_ui.c:642
+#: dialog_ui.c:234 dialog_ui.c:643
 #, c-format
 msgid "Installation of %s"
 msgstr ""
@@ -1145,46 +1146,46 @@ msgstr ""
 msgid "Problem"
 msgstr ""
 
-#: dialog_ui.c:572
+#: dialog_ui.c:573
 #, c-format
 msgid "Installing %s ..."
 msgstr ""
 
-#: dialog_ui.c:573 dialog_ui.c:575
+#: dialog_ui.c:574 dialog_ui.c:576
 msgid "Installing..."
 msgstr ""
 
-#: dialog_ui.c:590
+#: dialog_ui.c:591
 msgid "Aborting"
 msgstr ""
 
-#: dialog_ui.c:600
+#: dialog_ui.c:601
 msgid "Would you like to launch a Web browser?"
 msgstr ""
 
-#: dialog_ui.c:614
+#: dialog_ui.c:615
 msgid ""
 "Installation complete!\n"
 "Would you like to start now?"
 msgstr ""
 
-#: dialog_ui.c:618
+#: dialog_ui.c:619
 msgid "Finished"
 msgstr ""
 
-#: dialog_ui.c:618
+#: dialog_ui.c:619
 msgid "Installation complete!"
 msgstr ""
 
-#: dialog_ui.c:627
+#: dialog_ui.c:628
 msgid "Express installation using detected defaults"
 msgstr ""
 
-#: dialog_ui.c:628
+#: dialog_ui.c:629
 msgid "Full control over the installation parameters"
 msgstr ""
 
-#: dialog_ui.c:643
+#: dialog_ui.c:644
 msgid "Please select the class of installation"
 msgstr ""
 
@@ -1194,7 +1195,7 @@ msgid ""
 "root's home directory instead of your user account directory."
 msgstr ""
 
-#: carbon_ui.c:479 gtk_ui.c:481
+#: gtk_ui.c:481 carbon_ui.c:479
 msgid ""
 "Are you sure you want to abort\n"
 "this installation?"
@@ -1210,11 +1211,11 @@ msgstr ""
 msgid "Please respond to the license dialog"
 msgstr ""
 
-#: carbon_ui.c:300 gtk_ui.c:598
+#: gtk_ui.c:598 carbon_ui.c:300
 msgid "Ready to install!"
 msgstr ""
 
-#: carbon_ui.c:322 carbon_ui.c:334 gtk_ui.c:611 gtk_ui.c:625
+#: gtk_ui.c:611 gtk_ui.c:625 carbon_ui.c:322 carbon_ui.c:334
 #, c-format
 msgid "%d MB"
 msgstr ""
@@ -1252,12 +1253,12 @@ msgstr ""
 msgid "Unable to locate 'setup_menuitems_checkbox'"
 msgstr ""
 
-#: carbon_ui.c:889 gtk_ui.c:1484
+#: gtk_ui.c:1484 carbon_ui.c:889
 #, c-format
 msgid "%s / %s Setup"
 msgstr ""
 
-#: carbon_ui.c:891 gtk_ui.c:1486
+#: gtk_ui.c:1486 carbon_ui.c:891
 #, c-format
 msgid "%s Setup"
 msgstr ""
@@ -1267,7 +1268,7 @@ msgstr ""
 msgid "Unable to open %s, aborting!\n"
 msgstr ""
 
-#: carbon_ui.c:1404 gtk_ui.c:1878
+#: gtk_ui.c:1878 carbon_ui.c:1404
 #, c-format
 msgid "Type '%s' to start the program"
 msgstr ""
@@ -1289,6 +1290,7 @@ msgid "CD key is invalid!"
 msgstr ""
 
 #: carbon_ui.c:1226
+#, c-format
 msgid "Installing %s : %d%%"
 msgstr ""
 
