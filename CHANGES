@@ -1,4 +1,6 @@
 1.5.9:
+Sam Lantinga - Thu Mar  8 15:01:03 PST 2001
+ * Always use the effective user id for the home directory
 Stéphane Peter - Thu Jan 18 18:22:04 PST 2001
  * Added -o command-line option to enable options and switch to non-interactive
    installation mode.

@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.88 2001-01-19 03:48:08 megastep Exp $ */
+/* $Id: install.c,v 1.89 2001-03-08 23:27:06 hercules Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -714,7 +714,7 @@ void expand_home(install_info *info, const char *path, char *buffer)
             const char *home;
 
             /* Substitute '~' with our home directory */
-            home = getenv("HOME");
+            home = detect_home();
             if ( home ) {
                 strcpy(buffer, home);
             } else {
@@ -1301,7 +1301,7 @@ void generate_uninstall(install_info *info)
 		loki_closeproduct(product);
     } else {
 		log_fatal(info, _("Could not create install log"),
-				  getenv("HOME"), info->name);
+				  detect_home(), info->name);
 	}
 }
 
