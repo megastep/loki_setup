@@ -470,27 +470,28 @@ ssize_t copy_list(install_info *info, const char *filedesc, const char *dest,
     int i;
     glob_t globbed;
     ssize_t size, copied;
+    const char *cdpath = NULL;
 
     size = 0;
 
 	//fprintf(stderr, "copy_list %s\n", srcpath);
 
+    if ( from_cdrom ) {
+        cdpath = get_cdrom(info, from_cdrom);
+        if ( ! cdpath ) {
+            return 0;
+        }
+    }
+
     while ( filedesc && parse_line(&filedesc, fpat, (sizeof fpat)) ) {
         if ( from_cdrom ) {
             char full_cdpath[PATH_MAX];
-            const char *cdpath;
-
-            cdpath = get_cdrom(info, from_cdrom);
-            if ( ! cdpath ) {
-                return 0;
-            }
             snprintf(full_cdpath, sizeof(full_cdpath), "%s/%s", cdpath, srcpath);
-            cdpath = full_cdpath;
-            push_curdir(cdpath);
+            push_curdir(full_cdpath);
             if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
                 for ( i=0; i<globbed.gl_pathc; ++i ) {
                     copied = copy_path(info, globbed.gl_pathv[i], dest, 
-                                       cdpath, strip_dirs, node, update);
+                                       full_cdpath, strip_dirs, node, update);
                     if ( copied > 0 ) {
                         size += copied;
                     }
