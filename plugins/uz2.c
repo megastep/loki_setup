@@ -1,5 +1,5 @@
 /* UnrealEngine2-compressed files (.uz2) plugin for setup */
-/* $Id: uz2.c,v 1.3 2004-03-02 03:49:18 icculus Exp $ */
+/* $Id: uz2.c,v 1.4 2004-03-04 06:15:58 icculus Exp $ */
 
 #include <stdlib.h>
 #include <string.h>
@@ -114,16 +114,15 @@ static size_t UZ2Copy(install_info *info, const char *path, const char *dest, co
     const char *mode_str = xmlGetProp(node, "mode");
     const char *dstrename = xmlGetProp(node, "uz2rename");
 
-    if (dstrename)
-        path = dstrename;
-
 	log_debug("UZ2: Copy %s -> %s", path, dest);
 
 	if ( mode_str ) {
 		user_mode = (unsigned int) strtol(mode_str, NULL, 8);
 	}
 
-    if (!dstrename)
+    if (dstrename)
+        snprintf(final, sizeof(final), "%s/%s", dest, dstrename);
+    else
     {
         if (strlen(path) < 4)
             return 0; /* just in case. */
