@@ -1168,10 +1168,12 @@ int carbon_ReadmeOrLicense(CarbonRes *Res, int ReadmeNotLicense, char *Message)
     IDStruct.signature = README_SIGNATURE; IDStruct.id = README_AGREE_BUTTON_ID;
     GetControlByID(Res->ReadmeWindow, &IDStruct, &AgreeButton);
 
+    Boolean readonly = false;
+    SetControlData(Res->MessageLabel, kControlEntireControl, kYASTControlReadOnlyTag, sizeof(Boolean), &readonly);
     SetControlData(Res->MessageLabel,  kControlLabelPart, kControlStaticTextTextTag, strlen(Message), Message);
     CFStringRef CFMessage = CFStringCreateWithCString(NULL, Message, kCFStringEncodingMacRoman);
     SetControlData(Res->MessageLabel, kControlEntireControl, kYASTControlAllUnicodeTextTag, sizeof(CFMessage), &CFMessage);
-    Boolean readonly = true;
+    readonly = true;
     SetControlData(Res->MessageLabel, kControlEntireControl, kYASTControlReadOnlyTag, sizeof(Boolean), &readonly);
 
     //SetControlTitleWithCFString(Res->MessageLabel, CFMessage);
@@ -1187,6 +1189,7 @@ int carbon_ReadmeOrLicense(CarbonRes *Res, int ReadmeNotLicense, char *Message)
         ShowControl(CloseButton);
         HideControl(CancelButton);
         HideControl(AgreeButton);
+        SetWindowTitleWithCFString(Res->ReadmeWindow, CFSTR("Readme"));
     }
     // If OK prompt requested
     else
@@ -1194,6 +1197,7 @@ int carbon_ReadmeOrLicense(CarbonRes *Res, int ReadmeNotLicense, char *Message)
         HideControl(CloseButton);
         ShowControl(CancelButton);
         ShowControl(AgreeButton);
+        SetWindowTitleWithCFString(Res->ReadmeWindow, CFSTR("End User License Agreement"));
     }
 
     // Show the prompt window...make it happen!!!
