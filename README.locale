@@ -1,0 +1,21 @@
+How to add support for a new locale in setup :
+----------------------------------------------
+
+* Create a new directory for your locale under 'po', i.e if you want to 
+  add Russian translations :
+
+   mkdir po/ru
+
+* Edit the Makefile and add your locale name to the 'LOCALES = ' line.
+
+* Copy the po/setup.po file to your new directory under 'po'. i.e. :
+
+  cp po/setup.po po/ru/
+
+* Edit the setup.po file in your directory and add translations for
+  all of the strings.
+
+* Run 'make gettext' to generate the corresponding MO files in the
+  setup image.
+
+* That's it ! :)
