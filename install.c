@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.100 2003-03-21 07:33:16 megastep Exp $ */
+/* $Id: install.c,v 1.101 2003-03-26 05:03:03 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1633,7 +1633,7 @@ void generate_uninstall(install_info *info)
 					  "update-menus", 
 					  "if which update-menus 2> /dev/null > /dev/null || type -p update-menus 2> /dev/null >/dev/null; then update-menus 2> /dev/null; fi\n"
 					  "if which kbuildsycoca 2> /dev/null > /dev/null || type -p kbuildsycoca 2> /dev/null >/dev/null; then kbuildsycoca 2>/dev/null; fi\n"
-					  "if which dtaction 2> /dev/null > /dev/null || type -p dtaction 2> /dev/null > /dev/null; then dtaction ReloadActions 2>/dev/null; fi\n");
+					  "if which dtaction 2> /dev/null > /dev/null || type -p dtaction 2> /dev/null > /dev/null; then dtaction RestorePanel 2>/dev/null; fi\n");
 	}
 
         /* Register the pre and post uninstall scripts with the default component */
@@ -2075,78 +2075,66 @@ int install_menuitems(install_info *info, desktop_type desktop)
 			}
 			break;
 		    case DESKTOP_CDE:
-			if ( num_items == 0 ) {
-			    /* Create a menu in the front panel */
-			    snprintf(finalbuf, PATH_MAX, "%s%s.fp", buf, info->name);
-			    file_create_hierarchy(info, finalbuf);
-			    fp = fopen(finalbuf, "w");
-			    if (fp) {
-				fprintf(fp,
-					"CONTROL %s\n"
-					"{\n"
-					"  TYPE icon\n"
-					"  CONTAINER_NAME   Top\n"
-					"  CONTAINER_TYPE   BOX\n"
-					"  ICON             %s\n"
-					"  POSITION_HINTS   first\n"
-					"  LABEL            %s\n"
-					"}\n\n", info->name, icon, info->desc
-					);
-
-				fprintf(fp,
-					"SUBPANEL %s_Panel\n"
-					"{\n"
-					"  CONTAINER_NAME %s\n"
-					"  TITLE          %s\n"
-					"}\n\n", info->name, info->name, info->desc
-					);
-				fclose(fp);
-				add_file_entry(info, opt, finalbuf, NULL, 0);
-			    }
-			}
-
 			snprintf(finalbuf, PATH_MAX, "%s%s.dt", buf, elem->symlink);
 			file_create_hierarchy(info, finalbuf);
 
 			fp = fopen(finalbuf, "w");
 			if (fp) {
 			    fprintf(fp,
-				    "ACTION %s\n"
-				    "{\n"
-				    "     LABEL         %s\n"
-				    "     TYPE          COMMAND\n"
-				    "     EXEC_STRING   %s\n"
-				    "     ICON          %s\n"
-				    "     WINDOW_TYPE   NO_STDIO\n"
-				    "     DESCRIPTION   %s\n"
-				    "}\n\n", elem->symlink,
-				    elem->name, exec, icon, elem->desc
-				    );
+						"ACTION %s\n"
+						"{\n"
+						"     LABEL         %s\n"
+						"     TYPE          COMMAND\n"
+						"     EXEC_STRING   %s\n"
+						"     ICON          %s\n"
+						"     WINDOW_TYPE   NO_STDIO\n"
+						"     DESCRIPTION   %s\n"
+						"}\n\n", elem->symlink,
+						elem->name, exec, icon, elem->desc
+						);
 			    fclose(fp);
 			    add_file_entry(info, opt, finalbuf, NULL, 0);
-
+				
 			    snprintf(finalbuf, PATH_MAX, "%s%s.fp", buf, elem->symlink);
 			    fp = fopen(finalbuf, "w");
 			    if ( fp ) {
-				fprintf(fp,
-					"CONTROL %s\n"
-					"{\n"
-					"  TYPE icon\n"
-					"  CONTAINER_NAME	%s_Panel\n"
-					"  CONTAINER_TYPE	SUBPANEL\n"
-					"  ICON				%s\n"
-					"  PUSH_ACTION		%s\n"
-					"  DROP_ACTION		%s\n"
-					"  LABEL			%s\n"
-					"}\n\n", elem->symlink,
-					info->name, icon, elem->symlink, elem->symlink, elem->name
-					);
-				fclose(fp);
-				add_file_entry(info, opt, finalbuf, NULL, 0);
-				++ num_items;
-				ret_val = 1;
+					fprintf(fp,
+							"CONTROL %s\n"
+							"{\n"
+							"  TYPE icon\n", elem->symlink);
+					if ( num_items == 0 ) {
+						fprintf(fp,
+								"  CONTAINER_NAME	Top\n"
+								"  CONTAINER_TYPE	BOX\n");
+					} else {
+						fprintf(fp,
+								"  CONTAINER_NAME	%s_Panel\n"
+								"  CONTAINER_TYPE	SUBPANEL\n", info->name
+								);
+					}
+					fprintf(fp,
+							"  ICON				%s\n"
+							"  PUSH_ACTION		%s\n"
+							"  DROP_ACTION		%s\n"
+							"  LABEL			%s\n"
+							"}\n\n",
+							icon, elem->symlink, elem->symlink, elem->name
+							);
+					if ( num_items == 0 ) {
+						fprintf(fp,
+								"SUBPANEL %s_Panel\n"
+								"{\n"
+								"  CONTAINER_NAME %s\n"
+								"  TITLE          %s\n"
+								"}\n\n", info->name, elem->symlink, info->desc
+								);
+					}
+					fclose(fp);
+					add_file_entry(info, opt, finalbuf, NULL, 0);
+					++ num_items;
+					ret_val = 1;
 			    } else {
-				log_warning(_("Unable to create CDE desktop file '%s'"), finalbuf);
+					log_warning(_("Unable to create CDE desktop file '%s'"), finalbuf);
 			    }
 			} else {
 			    log_warning(_("Unable to create CDE desktop file '%s'"), finalbuf);
@@ -2213,7 +2201,7 @@ int install_menuitems(install_info *info, desktop_type desktop)
 	case DESKTOP_CDE:
 	    /* Run dtaction */
             if ( loki_valid_program("dtaction") )
-	    	run_command(info, "dtaction", "ReloadActions", 0);
+	    	run_command(info, "dtaction", "RestorePanel", 0);
 	    install_updatemenus_script = 1;
 	    break;
 	default:
