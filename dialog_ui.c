@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.16 2003-09-29 22:46:39 megastep Exp $
+ * $Id: dialog_ui.c,v 1.17 2003-10-01 00:16:13 megastep Exp $
  */
 
 #include <limits.h>
@@ -223,7 +223,7 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr pa
 	}
 
 	if ( nb_choices == 0 )
-		return 0;
+		return 1;
 
 	/* TTimo: loop until the selected options are all validated by possible EULA */
 options_loop:  
