@@ -91,8 +91,8 @@
 #include "install.h"
 
 char current_option_txt[200];
-struct option_elem *current_option;
-struct component_elem *current_component;
+struct option_elem *current_option = NULL;
+struct component_elem *current_component = NULL;
 
 void getToken(const char *src, const char **end) {
     *end = 0;
