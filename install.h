@@ -40,9 +40,9 @@ typedef enum {
 /* The types of desktop we support menu items for */
 typedef enum {
     DESKTOP_MENUDEBIAN,
+    DESKTOP_GNOME, /* Gnome before Redhat in case Ximian is also installed */
     DESKTOP_REDHAT,
     DESKTOP_KDE, /* KDE first because RH6.1 does not yet handle KDE well. */
-    DESKTOP_GNOME,
 	DESKTOP_CDE, /* Common Desktop Environment */
 	DESKTOP_IRIX, /* IRIX ToolChest */
     MAX_DESKTOPS

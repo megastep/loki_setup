@@ -10,15 +10,19 @@
 #ifdef HAVE_SYS_MOUNT_H
 # include <sys/mount.h>
 #endif
+#ifdef HAVE_SYS_MNTTAB_H
+# include <sys/mnttab.h>
+#endif
 #include <sys/utsname.h>
 
-#ifdef __FreeBSD__
-#include <sys/ucred.h>
-#include <fstab.h>
-#elif defined(__svr4__)
-#include <sys/mnttab.h>
-#else /* Linux assumed */
-#include <mntent.h>
+#ifdef HAVE_SYS_UCRED_H
+# include <sys/ucred.h>
+#endif
+#ifdef HAVE_FSTAB_H
+# include <fstab.h>
+#endif 
+#ifdef HAVE_MNTENT_H
+# include <mntent.h>
 #endif
 
 #ifdef HAVE_SYS_VFS_H
@@ -72,6 +76,9 @@
 #define SETUP_FSTAB _PATH_MNTTAB
 #endif
 
+/* Ignore devices that begin by this string - we only focus on other removable devices */
+#define DEVICE_FLOPPY "/dev/fd"
+
 /* The filesystems that were mounted by setup */
 static
 struct mounted_elem {
@@ -121,6 +128,30 @@ int is_fs_mounted(const char *dev)
             }
         }
     }
+#elif defined(hpux)
+    const char *mtab, *mnttype;
+    FILE *mountfp;
+    struct mntent *mntent;
+
+    if ( !access("/etc/pfs_mtab", F_OK) ) {
+		mtab = "/etc/pfs_mtab";
+		mnttype = "pfs-rrip";
+    } else {
+		mtab = MOUNTS_FILE;
+		mnttype = MNTTYPE_CDROM;
+    }
+
+    mountfp = setmntent(mtab, "r" );
+	if ( mountfp ) {
+		while( (mntent = getmntent( mountfp )) != NULL ) {
+            if ( !strcmp(mntent->mnt_type, mnttype) ) {
+				found = 1;
+				break;
+			}
+		}
+        endmntent( mountfp );
+	}
+
 #elif defined(__svr4__)
 	struct mnttab mnt;
 	FILE *mtab = fopen(MOUNTS_FILE, "r");
@@ -172,7 +203,7 @@ void unmount_filesystems(void)
     struct mounted_elem *mnt = mounted_list, *oldmnt;
     while ( mnt ) {
         log_normal(_("Unmounting device %s"), mnt->device);
-        if ( run_command(NULL, "umount", mnt->dir, 1) ) {
+        if ( run_command(NULL, UMOUNT_PATH, mnt->dir, 1) ) {
             log_warning(_("Failed to unmount device %s mounted on %s"), mnt->device, mnt->dir);
         }
         free(mnt->device);
@@ -233,7 +264,7 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
     while( (fstab = getfsent()) != NULL ){
         if ( !strcmp(fstab->fs_vfstype, MNTTYPE_CDROM)) {
             if ( !is_fs_mounted(fstab->fs_spec)) {
-                if ( ! run_command(NULL, "mount", fstab->fs_spec, 1) ) {
+                if ( ! run_command(NULL, MOUNT_PATH, fstab->fs_spec, 1) ) {
                     add_mounted_entry(fstab->fs_spec, fstab->fs_file);
                     log_normal(_("Mounted device %s"), fstab->fs_spec);
                 }
@@ -245,20 +276,49 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
     mounted = getfsstat(NULL, 0, MNT_WAIT);
     if ( mounted > 0 ) {
         int i;
-	struct statfs *mnts = (struct statfs *)malloc(sizeof(struct statfs) * mounted);
+		struct statfs *mnts = (struct statfs *)malloc(sizeof(struct statfs) * mounted);
 
-	mounted = getfsstat(mnts, mounted * sizeof(struct statfs), MNT_WAIT);
-	for ( i = 0; i < mounted && num_cdroms < SETUP_MAX_DRIVES; ++ i ) {
-	    if ( ! strcmp(mnts[i].f_fstypename, MNTTYPE_CDROM) ) {
-		path[num_cdroms ++] = strdup(mnts[i].f_mntonname);
-	    }
-	}
+		mounted = getfsstat(mnts, mounted * sizeof(struct statfs), MNT_WAIT);
+		for ( i = 0; i < mounted && num_cdroms < SETUP_MAX_DRIVES; ++ i ) {
+			if ( ! strcmp(mnts[i].f_fstypename, MNTTYPE_CDROM) ) {
+				path[num_cdroms ++] = strdup(mnts[i].f_mntonname);
+			}
+		}
 		
-	free(mnts);
+		free(mnts);
     }
 
 #elif defined(__svr4__)
-    /* TODO: Add CD detection code */
+	struct mnttab mnt;
+
+	FILE *fstab = fopen(SETUP_FSTAB, "r");
+	if ( fstab != NULL ) {
+		while ( getmntent(fstab, &mnt)==0 ) {
+			if ( !strcmp(mnt.mnt_fstype, MNTTYPE_CDROM) ) {
+                char *fsname = strdup(mnt.mnt_special);
+                char *dir = strdup(mnt.mnt_mountp);
+                if ( !is_fs_mounted(fsname)) {
+                    if ( ! run_command(NULL, MOUNT_PATH, fsname, 1) ) {
+                        add_mounted_entry(fsname, dir);
+                        log_normal(_("Mounted device %s"), fsname);
+                    }
+                }
+                free(fsname);
+                free(dir);
+				break;
+			}
+		}
+		fclose(fstab);
+		fstab = fopen(MOUNTS_FILE, "r");
+		if (fstab) {
+			while ( getmntent(fstab, &mnt)==0 && num_cdroms < SETUP_MAX_DRIVES) {
+				if ( !strcmp(mnt.mnt_fstype, MNTTYPE_CDROM) ) {
+					path[num_cdroms ++] = strdup(mnt.mnt_mountp);
+				}
+			}
+			fclose(fstab);
+		}
+	}
     
 #elif defined(hpux)
     char mntdevpath[PATH_MAX];
@@ -268,22 +328,22 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
 
     /* HPUX: We need to support PFS */
     if ( !access("/etc/pfs_fstab", F_OK) ) {
-	fstab = "/etc/pfs_fstab";
-	mtab = "/etc/pfs_mtab";
-	mount_cmd = "/usr/sbin/pfs_mount";
-	mnttype = "pfs-rrip";
+		fstab = "/etc/pfs_fstab";
+		mtab = "/etc/pfs_mtab";
+		mount_cmd = "/usr/sbin/pfs_mount";
+		mnttype = "pfs-rrip";
     } else {
-	fstab = SETUP_FSTAB;
-	mtab = MOUNTS_FILE;
-	mnttype = MNTTYPE_CDROM;
-	mount_cmd = "mount";
+		fstab = SETUP_FSTAB;
+		mtab = MOUNTS_FILE;
+		mnttype = MNTTYPE_CDROM;
+		mount_cmd = MOUNT_PATH;
     }
 
     /* Try to mount unmounted CDROM filesystems */
     mountfp = setmntent( fstab, "r" );
     if( mountfp != NULL ) {
         while( (mntent = getmntent( mountfp )) != NULL ){
-            if ( !strcmp(mntent->mnt_type, MNTTYPE_CDROM) ) {
+            if ( !strcmp(mntent->mnt_type, mnttype) ) {
                 char *fsname = strdup(mntent->mnt_fsname);
                 char *dir = strdup(mntent->mnt_dir);
                 if ( !is_fs_mounted(fsname)) {
@@ -302,7 +362,7 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
     mountfp = setmntent(mtab, "r" );
     if( mountfp != NULL ) {
         while( (mntent = getmntent( mountfp )) != NULL && num_cdroms < SETUP_MAX_DRIVES){
-            char *tmp, mntdev[1024], mnt_type[32];
+            char mntdev[1024], mnt_type[32];
 
             strcpy(mntdev, mntent->mnt_fsname);
             strcpy(mnt_type, mntent->mnt_type);
@@ -310,8 +370,8 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
                 realpath(mntdev, mntdevpath) == NULL ) {
                 continue;
             }
-            if ( strcmp(mnt_type, MNTTYPE_CDROM) == 0 ) {
-		path[num_cdroms ++] = strdup(mntent->mnt_dir);
+            if ( strcmp(mnt_type, mnttype) == 0 ) {
+				path[num_cdroms ++] = strdup(mntent->mnt_dir);
             }
         }
         endmntent( mountfp );
@@ -325,15 +385,16 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
     mountfp = setmntent( SETUP_FSTAB, "r" );
     if( mountfp != NULL ) {
         while( (mntent = getmntent( mountfp )) != NULL ){
-            if ( !strcmp(mntent->mnt_type, MNTTYPE_CDROM) 
+            if ( (!strcmp(mntent->mnt_type, MNTTYPE_CDROM) 
 #ifdef sgi
-		|| !strcmp(mntent->mnt_type, "cdfs")
+				 || !strcmp(mntent->mnt_type, "cdfs")
 #endif
-		|| !strcmp(mntent->mnt_type, "auto") ) {
+				 || !strcmp(mntent->mnt_type, "auto"))
+				 && strncmp(mntent->mnt_fsname, DEVICE_FLOPPY, strlen(DEVICE_FLOPPY)) ) {
                 char *fsname = strdup(mntent->mnt_fsname);
                 char *dir = strdup(mntent->mnt_dir);
                 if ( !is_fs_mounted(fsname)) {
-                    if ( ! run_command(NULL, "mount", fsname, 1) ) {
+                    if ( ! run_command(NULL, MOUNT_PATH, fsname, 1) ) {
                         add_mounted_entry(fsname, dir);
                         log_normal(_("Mounted device %s"), fsname);
                     }
@@ -349,6 +410,9 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
     if( mountfp != NULL ) {
         while( (mntent = getmntent( mountfp )) != NULL && num_cdroms < SETUP_MAX_DRIVES){
             char *tmp, mntdev[1024], mnt_type[32];
+
+			if ( strncmp(mntent->mnt_fsname, DEVICE_FLOPPY, strlen(DEVICE_FLOPPY)) == 0)
+				continue;
 
             strcpy(mntdev, mntent->mnt_fsname);
             strcpy(mnt_type, mntent->mnt_type);
@@ -375,8 +439,16 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
                 continue;
             }
             if ( strcmp(mnt_type, MNTTYPE_CDROM) == 0 ) {
-				path[num_cdroms ++] = strdup(mntent->mnt_dir);
+	        path[num_cdroms ++] = strdup(mntent->mnt_dir);
+            } else if ( strcmp(mnt_type, "auto") == 0 &&
+			strncmp(mntdev, DEVICE_FLOPPY, strlen(DEVICE_FLOPPY))) {
+	        path[num_cdroms ++] = strdup(mntent->mnt_dir);		
+	    }
+#ifdef sgi
+            else if ( strcmp(mnt_type, "cdfs") == 0 ) {
+	      path[num_cdroms ++] = strdup(mntent->mnt_dir);
             }
+#endif
         }
         endmntent( mountfp );
     }
@@ -464,7 +536,7 @@ const char *get_cdrom(install_info *info, const char *id)
         if ( ! mounted ) {
             yesno_answer response;
             char buf[1024];
-            const char *prompt;
+            char *prompt;
 
             if ( mounted_filesystems() ) { /* We were able to mount at least one CDROM */
                 prompt =  _("\nPlease insert the %s CDROM.\n"

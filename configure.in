@@ -34,6 +34,10 @@ AC_CHECK_HEADERS(sys/statfs.h)
 AC_CHECK_HEADERS(sys/statvfs.h)
 AC_CHECK_HEADERS(sys/vfs.h)
 AC_CHECK_HEADERS(sys/mount.h)
+AC_CHECK_HEADERS(sys/mnttab.h)
+AC_CHECK_HEADERS(sys/ucred.h)
+AC_CHECK_HEADERS(mntent.h)
+AC_CHECK_HEADERS(fstab.h)
 AC_CHECK_HEADERS(dir.h)
 AC_CHECK_HEADERS(util.h)
 AC_CHECK_HEADERS(libutil.h)
@@ -52,6 +56,8 @@ AC_CHECK_FUNCS(ttyname_r)
 AC_CHECK_FUNCS(strlcpy)
 AC_CHECK_FUNCS(waitpid)
 AC_PATH_PROG(SU_PATH, su, /bin/su, $PATH:/usr/sbin:/sbin)
+AC_PATH_PROG(MOUNT_PATH, mount, /sbin/mount, $PATH:/usr/sbin:/sbin)
+AC_PATH_PROG(UMOUNT_PATH, umount, /sbin/umount, $PATH:/usr/sbin:/sbin)
 AC_PATH_PROG(BRANDELF, brandelf, true)
 
 CFLAGS="-fsigned-char -funroll-loops -Wall -g -O2 -I. $X_CFLAGS"
@@ -141,6 +147,9 @@ case "$target" in
 	RDYNAMIC="-Wl,-export-dynamic"
 	LIBDL=""
 	ARCH=`uname -p` ;;
+    *ppc* | *powerpc*)
+        CFLAGS="$CFLAGS -Wa,-mall"
+        ARCH=ppc ;;
     *)
         ARCH=`uname -p 2> /dev/null || uname -m` ;;
 esac
@@ -469,6 +478,8 @@ AC_SUBST(STATIC)
 AC_SUBST(LIBUTIL)
 AC_SUBST(LIBINTL)
 AC_SUBST(SU_PATH)
+AC_SUBST(MOUNT_PATH)
+AC_SUBST(UMOUNT_PATH)
 AC_SUBST(SETUP_VERSION_MAJOR)
 AC_SUBST(SETUP_VERSION_MINOR)
 AC_SUBST(SETUP_VERSION_RELEASE)

@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.73 2002-10-19 07:41:10 megastep Exp $
+   $Id: gtk_ui.c,v 1.74 2002-10-23 05:21:19 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.

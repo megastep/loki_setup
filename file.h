@@ -1,4 +1,4 @@
-/* $Id: file.h,v 1.18 2002-10-19 07:41:09 megastep Exp $ */
+/* $Id: file.h,v 1.19 2002-10-23 05:21:19 megastep Exp $ */
 
 #ifndef __LOKI_FILE_H__
 #define __LOKI_FILE_H__
