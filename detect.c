@@ -599,7 +599,8 @@ void DetectLocale(void)
 			current_locale = getenv("LANG");
 		}
 	}
-	log_debug(_("Detected locale is %s"), current_locale);
+	if ( current_locale )
+		log_debug(_("Detected locale is %s"), current_locale);
 }
 
 /* Matches a locale string against the current one */
