@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.33 2000-08-02 22:37:47 megastep Exp $ */
+/* $Id: main.c,v 1.34 2000-09-22 21:04:09 hercules Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -24,7 +24,6 @@ Modifications by Borland/Inprise Corp.:
 #include <stdio.h>
 #include <setjmp.h>
 #include <signal.h>
-#include <getopt.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>

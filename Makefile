@@ -48,7 +48,7 @@ LIBS += -ldl
 endif
 
 CONSOLE_LIBS = $(LIBS)
-GUI_LIBS = $(LIBS) -Wl,-Bdynamic $(shell gtk-config --libs) $(shell libglade-config --prefix)/lib/libglade.a -rdynamic
+GUI_LIBS = $(LIBS) -Wl,-Bdynamic $(shell gtk-config --libs || echo "-lgtk -lgdk") $(shell libglade-config --prefix)/lib/libglade.a -rdynamic
 
 all: do-plugins setup setup.gtk
 
