@@ -1315,7 +1315,7 @@ OptionsButton *carbon_OptionsNewCheckButton(OptionsBox *Box, const char *Name)
     //ControlID ID = {LOKI_SETUP_SIG, Box->CurCheckID++};
     //GetControlByID(Box->Res->Window, &ID, &Button->Control);
     //SetControlTitleWithCFString(Button->Control, CFName);
-    CFRelease(Name);
+    CFRelease(CFName);
     // Add button to options box
     AddOptionsButton(Box, Button);
     // Set button type accordingly
