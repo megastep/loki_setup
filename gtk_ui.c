@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.13 1999-09-24 02:47:32 megastep Exp $
+   $Id: gtk_ui.c,v 1.14 1999-09-25 03:42:57 megastep Exp $
 */
 
 #include <limits.h>
@@ -16,6 +16,7 @@
 #include "install_ui.h"
 #include "install_log.h"
 #include "detect.h"
+#include "copy.h"
 
 #define SETUP_GLADE SETUP_BASE "setup.glade"
 
@@ -410,7 +411,6 @@ static void parse_option(install_info *info, xmlNodePtr node, GtkWidget *window,
     char text[1024];
     const char *help;
     const char *wanted, *line;
-    int size = 0;
     int i;
     GtkWidget *button;
     option_data *dat;

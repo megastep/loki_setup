@@ -99,6 +99,20 @@ typedef struct {
         struct bin_elem *next;
     } *bin_list;
 
+    /* List of post-uninstall scripts to run (from RPM files) */
+    struct script_elem {
+	    char *script;
+        struct script_elem *next;
+    } *pre_script_list, *post_script_list;
+
+    /* List of RPMs installed in the process */
+    struct rpm_elem {
+        char *name;
+	    char *version;
+	    char *release;
+        struct rpm_elem *next;
+    } *rpm_list;
+
     /* Arguments to the game when launching it */
     const char *args;
 
@@ -113,6 +127,12 @@ extern install_info *create_install(const char *configfile, int log_level);
 
 /* Add a file entry to the list of files installed */
 extern void add_file_entry(install_info *info, const char *path);
+
+/* Add a script entry for uninstallation of manually installed RPMs */
+extern void add_script_entry(install_info *info, const char *script, int post);
+
+/* Add a RPM entry to the list of RPMs installed */
+extern void add_rpm_entry(install_info *info, const char *name, const char *version, const char *release);
 
 /* Add a directory entry to the list of directories installed */
 extern void add_dir_entry(install_info *info, const char *path);
@@ -156,7 +176,14 @@ extern void generate_uninstall(install_info *info);
 /* Install the desktop menu items */
 extern void install_menuitems(install_info *info, desktop_type d);
 
+/* Run shell script commands from a string */
+extern void run_script(const char *script, int arg);
+
 /* Launch the game using the information in the install info */
 extern install_state launch_game(install_info *info);
+
+#ifdef RPM_SUPPORT
+extern int check_for_rpm(void);
+#endif
 
 #endif /* _install_h */

@@ -1,9 +1,10 @@
-/* $Id: main.c,v 1.5 1999-09-15 01:49:47 hercules Exp $ */
+/* $Id: main.c,v 1.6 1999-09-25 03:42:57 megastep Exp $ */
 
 #include <stdio.h>
 #include <setjmp.h>
 #include <signal.h>
 #include <getopt.h>
+#include <stdlib.h>
 
 #include "install.h"
 #include "install_ui.h"
@@ -14,6 +15,7 @@
 /* Global options */
 
 int force_console = 0;
+char *rpm_root = "/";
 
 /* A way to jump to the abort handling code */
 jmp_buf abort_jmpbuf;
@@ -38,13 +40,14 @@ static int (*GUI_okay[])(Install_UI *UI) = {
 
 /* List the valid command-line options */
 
-static void print_usage(argv0)
+static void print_usage(const char *argv0)
 {
   printf("Usage: %s [options]\n\n"
 		 "Options can be one or more of the following:\n"
 		 "   -h       Display this help message\n"
 		 "   -f file  Use an alternative XML file (default " SETUP_CONFIG ")\n"
 		 "   -n       Force the text-only user interface\n"
+		 "   -r root  Set the root directory for extracting RPM files (default is /)\n"
 		 "   -v n     Set verbosity level to n. Available values :\n"
 		 "            0: Debug  1: Quiet  2: Normal 3: Warnings 4: Fatal\n",
 		 argv0);
@@ -63,7 +66,7 @@ int main(int argc, char **argv)
 	int log_level = LOG_NORMAL;
 
 	/* Parse the command-line options */
-	while((c=getopt(argc, argv, "hnf:v::")) != EOF){
+	while((c=getopt(argc, argv, "hnf:r:v::")) != EOF){
 	  switch(c){
 	  case 'h':
 		print_usage(argv[0]);
@@ -73,6 +76,9 @@ int main(int argc, char **argv)
 		break;
 	  case 'n':
 		force_console = 1;
+		break;
+	  case 'r':
+		rpm_root = optarg;
 		break;
 	  case 'v':
 		if(optarg){
@@ -96,6 +102,11 @@ int main(int argc, char **argv)
         fprintf(stderr, "Couldn't load '%s'\n", xml_file);
         exit(1);
     }
+
+#ifdef RPM_SUPPORT
+	/* Try to access the RPM database */
+	check_for_rpm();
+#endif
 
     /* Get the appropriate setup UI */
     for ( i=0; GUI_okay[i]; ++i ) {

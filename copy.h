@@ -20,3 +20,5 @@ extern size_t size_node(install_info *info, xmlNodePtr node);
 /* Get the install size of an option tree, in bytes */
 extern size_t size_tree(install_info *info, xmlNodePtr node);
 
+/* Utility function to parse a line in the XML file */
+extern int parse_line(const char **srcpp, char *buf, int maxlen);

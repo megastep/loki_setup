@@ -1,13 +1,19 @@
 
 arch := $(shell ./print_arch)
 libc := $(shell ./print_libc)
+USE_RPM	= true
 
 CC = gcc
 
 #OPTIMIZE = -Wall -g -O2 -funroll-loops
 OPTIMIZE = -Wall -g
 HEADERS = -I/usr/lib/glib/include -I/usr/X11R6/include
-OPTIONS = -DSTUB_UI -DRPM_SUPPORT
+OPTIONS = -DSTUB_UI
+
+ifeq ($(USE_RPM),true)
+OPTIONS += -DRPM_SUPPORT
+endif
+
 CFLAGS += $(OPTIMIZE) $(HEADERS) $(OPTIONS)
 
 OBJS = main.o install.o detect.o copy.o file.o log.o install_log.o
@@ -15,6 +21,9 @@ CONSOLE_OBJS = $(OBJS) console_ui.o
 GUI_OBJS = $(OBJS) gtk_ui.o
 
 LIBS = -lxml -lz
+ifeq ($(USE_RPM),true)
+LIBS += -lrpm -ldb
+endif
 CONSOLE_LIBS = $(LIBS)
 GUI_LIBS = $(LIBS) -Wl,-Bdynamic -lgtk -lgdk -lglade -rdynamic
 
@@ -24,7 +33,7 @@ testxml: testxml.o
 	$(CC) -o $@ $^ $(LIBS)
 
 setup:	$(CONSOLE_OBJS)
-	$(CC) -o $@ $^ $(CONSOLE_LIBS)
+	$(CC) -o $@ $^ $(CONSOLE_LIBS) -static
 
 setup.gtk: $(GUI_OBJS)
 	$(CC) -o $@ $^ $(GUI_LIBS)

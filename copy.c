@@ -5,13 +5,18 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <ctype.h>
 #include <string.h>
-
+#include <errno.h>
+#include <stdlib.h>
 #include <glob.h>
 
 #ifdef RPM_SUPPORT
+#define HAVE_ZLIB_H
+#include <rpm/rpmio.h>
 #include <rpm/rpmlib.h>
+#include <rpm/header.h>
 #endif
 
 #include "file.h"
@@ -27,6 +32,7 @@
 #define makedev(ma, mi) (((ma) << 8) | (mi))
 
 static char current_option[200];
+extern char *rpm_root;
 
 int parse_line(const char **srcpp, char *buf, int maxlen)
 {
@@ -61,19 +67,10 @@ int parse_line(const char **srcpp, char *buf, int maxlen)
     return strlen(buf);
 }
 
-#ifdef RPM_SUPPORT
-size_t copy_rpm(install_info *info, const char *path, const char *dest,
-                void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+size_t copy_cpio_stream(install_info *info, stream *input, const char *dest,
+						void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
-
-  return 0;
-}
-#endif
-
-size_t copy_cpio(install_info *info, const char *path, const char *dest,
-                void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
-{
-    stream *input, *output;
+    stream *output;
 	char magic[6];
 	char ascii_header[112];
 	struct new_cpio_header file_hdr;
@@ -84,7 +81,6 @@ size_t copy_cpio(install_info *info, const char *path, const char *dest,
 	char buf[BUFSIZ];
 
 	memset(&file_hdr, 0, sizeof(file_hdr));
-    input = file_open(info, path, "rb");
     while ( ! file_eof(info, input) ) {
 	  file_read(info, magic, 6, input);
 	  if(!strncmp(magic,"070701",6) || !strncmp(magic,"070702",6)){ /* New format */
@@ -163,7 +159,7 @@ size_t copy_cpio(install_info *info, const char *path, const char *dest,
 			}
 		  }
 		  if(has_crc && file_hdr.c_chksum && file_hdr.c_chksum != chk)
-			fprintf(stderr,"Warning: Bad checksum for file %s!\n", file_hdr.c_name);
+			log_warning(info,"Bad checksum for file '%s'", file_hdr.c_name);
 		  size += file_hdr.c_filesize;
 		  file_close(info, output);
 		  chmod(file_hdr.c_name, file_hdr.c_mode & C_MODE);
@@ -179,6 +175,131 @@ size_t copy_cpio(install_info *info, const char *path, const char *dest,
 
 	return size;
 }
+
+size_t copy_cpio(install_info *info, const char *path, const char *dest,
+                void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+{
+  stream *input = file_open(info, path, "rb");
+  if(input)
+	return copy_cpio_stream(info, input, dest, update);
+  return 0;
+}
+
+#ifdef RPM_SUPPORT
+static int rpm_access = 0;
+
+int check_for_rpm(void)
+{
+  char location[PATH_MAX];
+  if(strcmp(rpm_root, "/"))
+	sprintf(location,"%s/var/lib/rpm/packages.rpm", rpm_root);
+  else
+	strcpy(location,"/var/lib/rpm/packages.rpm");
+  /* Try to get write access to the RPM database */
+  if(!access(location, W_OK)){
+	rpm_access = 1;
+  }
+  return rpm_access;
+}
+
+size_t copy_rpm(install_info *info, const char *path,
+                void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+{
+  FD_t fdi;
+  Header hd;
+  size_t size;
+  int_32 type, c;
+  int rc, isSource;
+  void *p;
+
+  fdi = fdOpen(path, O_RDONLY, 0644);
+  rc = rpmReadPackageHeader(fdi, &hd, &isSource, NULL, NULL);
+  if(rc){
+	log_warning(info,"RPM error: %s", rpmErrorString());
+	return 0;
+  }
+
+  if(rpm_access){ /* We can call RPM directly */
+	char cmd[300];
+	FILE *fp;
+	float percent = 0.0;
+	char *name, *version, *release;
+
+	headerGetEntry(hd, RPMTAG_SIZE, &type, &p, &c);
+	if(type==RPM_INT32_TYPE){
+	  size = *(int_32*) p;
+	}
+	headerGetEntry(hd, RPMTAG_RELEASE, &type, &p, &c);
+	if(type==RPM_STRING_TYPE){
+	  release = (char *) p;
+	}
+	headerGetEntry(hd, RPMTAG_NAME, &type, &p, &c);
+	if(type==RPM_STRING_TYPE){
+	  name = (char*)p;
+	}
+	headerGetEntry(hd, RPMTAG_VERSION, &type, &p, &c);
+	if(type==RPM_STRING_TYPE){
+	  version = (char*)p;
+	}
+	fdClose(fdi);
+
+	sprintf(cmd,"rpm -U --percent --root %s %s", rpm_root, path);
+	fp = popen(cmd, "r");
+	while(percent<100.0){
+	  if(!fp || feof(fp)){
+		pclose(fp);
+		log_warning(info,"Unable to install RPM file: '%s'", path);
+		return 0;
+	  }
+	  fscanf(fp,"%s", cmd);
+	  if(strcmp(cmd,"%%")){
+		pclose(fp);
+		log_warning(info,"Unable to install RPM file: '%s'", path);
+		return 0;
+	  }
+	  fscanf(fp,"%f", &percent);
+	  update(info, path, (percent/100.0)*size, size, current_option);
+	}
+	pclose(fp);
+
+	/* Log the RPM installation */
+	add_rpm_entry(info, name, version, release);
+
+  }else{ /* Manually install the RPM file */
+	FD_t gzdi;
+	stream *cpio;
+	
+	if(headerIsEntry(hd, RPMTAG_PREIN)){	  
+	  headerGetEntry(hd, RPMTAG_PREIN, &type, &p, &c);
+	  if(type==RPM_STRING_TYPE)
+		run_script((char*)p, 1);
+	}
+	gzdi = gzdFdopen(fdi, "r");	/* XXX gzdi == fdi */
+	
+	cpio = file_fdopen(info, path, NULL, (gzFile*)gzdi->fd_gzd, "r");
+	size = copy_cpio_stream(info, cpio, rpm_root, update);
+
+	if(headerIsEntry(hd, RPMTAG_POSTIN)){	  
+	  headerGetEntry(hd, RPMTAG_POSTIN, &type, &p, &c);
+	  if(type==RPM_STRING_TYPE)
+		run_script((char*)p, 1);
+	}
+
+	/* Append the uninstall scripts to the uninstall */
+	if(headerIsEntry(hd, RPMTAG_PREUN)){	  
+	  headerGetEntry(hd, RPMTAG_PREUN, &type, &p, &c);
+	  if(type==RPM_STRING_TYPE)
+		add_script_entry(info, (char*)p, 0);
+	}
+	if(headerIsEntry(hd, RPMTAG_POSTUN)){	  
+	  headerGetEntry(hd, RPMTAG_POSTUN, &type, &p, &c);
+	  if(type==RPM_STRING_TYPE)
+		add_script_entry(info, (char*)p, 1);
+	}
+  }
+  return size;
+}
+#endif
 
 size_t copy_tarball(install_info *info, const char *path, const char *dest,
                 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
@@ -248,7 +369,7 @@ size_t copy_tarball(install_info *info, const char *path, const char *dest,
                 file_mkdir(info, final, mode);
                 break;
             default:
-                log_warning(info, "Tar: %s is unknown file type: %c",
+                log_warning(info, "Tar: '%s' is unknown file type: %c",
                             record.hdr.name, record.hdr.typeflag);
                 break;
         }
@@ -327,7 +448,7 @@ size_t copy_directory(install_info *info, const char *path, const char *dest,
         }
         globfree(&globbed);
     } else {
-        log_warning(info, "Unable to copy directory %s", path);
+        log_warning(info, "Unable to copy directory '%s'", path);
     }
     return size;
 }
@@ -350,7 +471,7 @@ size_t copy_path(install_info *info, const char *path, const char *dest,
                 copied = copy_cpio(info, path, dest, update);
 #ifdef RPM_SUPPORT
 			} else if ( strstr(path, RPM_EXTENSION) != NULL ) {
-                copied = copy_rpm(info, path, dest, update);
+                copied = copy_rpm(info, path, update);
 #endif
             } else {
                 copied = copy_file(info, path, dest, final, 0, update);
@@ -360,7 +481,7 @@ size_t copy_path(install_info *info, const char *path, const char *dest,
             size += copied;
         }
     } else {
-        log_warning(info, "Unable to find file %s", path);
+        log_warning(info, "Unable to find file '%s'", path);
     }
     return size;
 }
@@ -384,7 +505,7 @@ size_t copy_list(install_info *info, const char *filedesc, const char *dest,
             }
             globfree(&globbed);
         } else {
-            log_warning(info, "Unable to find file %s", fpat);
+            log_warning(info, "Unable to find file '%s'", fpat);
         }
     }
     return size;
@@ -409,7 +530,7 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
             if ( stat(fpat, &sb) == 0 ) {
                 copied = copy_file(info, fpat, dest, final, 1, update);
             } else {
-                log_warning(info, "Unable to find file %s", fpat);
+                log_warning(info, "Unable to find file '%s'", fpat);
             }
         }
         if ( copied > 0 ) {

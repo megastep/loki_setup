@@ -9,6 +9,7 @@
 #include "install.h"
 #include "install_ui.h"
 #include "detect.h"
+#include "copy.h"
 
 /* The README viewer program - on all Linux sytems */
 #define PAGER_COMMAND   "more"

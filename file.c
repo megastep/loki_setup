@@ -37,6 +37,28 @@ void file_create_hierarchy(install_info *info, const char *path)
 
 }
 
+/* Generate a valid stream object from an open file */
+stream *file_fdopen(install_info *info, const char *path, FILE *fd, gzFile zfd, const char *mode)
+{
+    stream *streamp;
+	struct stat st;
+
+    /* Allocate a file stream */
+    streamp = (stream *)malloc(sizeof *streamp);
+    if ( streamp == NULL ) {
+        log_warning(info, "Out of memory");
+        return(NULL);
+    }
+    memset(streamp, 0, (sizeof *streamp));
+	streamp->fp = fd;
+	streamp->zfp = zfd;
+	streamp->mode = *mode;
+	if(!stat(path, &st)){
+	  streamp->size = st.st_size;
+	}
+	return streamp;
+}
+
 stream *file_open(install_info *info, const char *path, const char *mode)
 {
     stream *streamp;
@@ -135,17 +157,17 @@ void file_skip(install_info *info, int len, stream *streamp)
 
 void file_skip_zeroes(install_info *info, stream *streamp)
 {
-  int nread;
   char c;
   if ( streamp->mode == 'r' ) {
 	for(;;){
 	  if ( streamp->fp ) {
-		nread = fread(&c, 1, 1, streamp->fp);
+		c = fgetc(streamp->fp);
 	  }else if ( streamp->zfp ) {
-		nread = gzread(streamp->zfp, &c, 1);
+		c = gzgetc(streamp->zfp);
 	  }
-	  if(!nread) break;
-	  if(nread==1 && c!='\0'){
+	  if(c==EOF)
+		break;
+	  if(c!='\0'){
 		/* Go back one byte */
 		if ( streamp->fp ) {
 		  fseek(streamp->fp, -1L, SEEK_CUR);
