@@ -570,13 +570,7 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
                         xmlNodeListGetString(info->config, node->childs, 1),
                         path, update);
         }
-		if ( strcmp(node->name, "exclusive") == 0 ) {
-			xmlNodePtr child = node->childs;
-			while ( child ) {
-				copy_tree(info, node->childs, path, update);
-				child = child->next;
-			}
-		}
+        /* Do not handle exclusive elements here; it gets called multiple times else */
         node = node->next;
     }
     return size;
