@@ -103,7 +103,7 @@ check.carbon: $(CHECK_CARBON_OBJS)  $(COMMON_LIBS)
 testcd: testcd.o $(CORE_OBJS) $(COMMON_OBJS) $(COMMON_LIBS)
 	$(CC) $(LDFLAGS) -o $@ $^ @LIBS@ @CONSOLE_LIBS@ @STATIC@
 
-setup:	$(CONSOLE_OBJS) $(COMMON_LIBS)
+setup: do-plugins @DO_DIALOG@ $(CONSOLE_OBJS) $(COMMON_LIBS)
 	$(CC) $(LDFLAGS) -o $@ $(CONSOLE_OBJS) $(CONSOLE_LIBS) @STATIC@
 
 setup.gtk: $(GUI_OBJS) $(COMMON_LIBS)
