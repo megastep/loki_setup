@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.23 1999-12-01 20:40:25 hercules Exp $ */
+/* $Id: install.c,v 1.24 1999-12-01 22:30:51 hercules Exp $ */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -50,7 +50,21 @@ const char *GetProductURL(install_info *info)
 }
 const char *GetLocalURL(install_info *info)
 {
-    return xmlGetProp(info->config->root, "localurl");
+    const char *file;
+
+    file = xmlGetProp(info->config->root, "localurl");
+    if ( file ) {
+        /* Warning, memory leak */
+        char *path;
+
+        path = (char *)malloc(PATH_MAX);
+        strcpy(path, "file://");
+        getcwd(path+strlen(path), PATH_MAX-strlen(path));
+        strcat(path, "/");
+        strncat(path, file, PATH_MAX-strlen(path));
+        file = path;
+    }
+    return file;
 }
 const char *GetPreInstall(install_info *info)
 {
@@ -493,7 +507,7 @@ void generate_uninstall(install_info *info)
    you are using netscape and it's already open), you should do
    this as the very last stage of the installation.
  */
-int launch_browser(install_info *info)
+int launch_browser(install_info *info, int (*launcher)(const char *url))
 {
     const char *url;
     int retval;
@@ -506,24 +520,11 @@ int launch_browser(install_info *info)
             url = GetLocalURL(info);
         }
     }
-    retval = 0;
+    retval = -1;
     if ( url ) {
-        char command[4096];
-
-#if 0  /* This isn't very helpful in textmode */
-        printf("Launching brower for product URL:\n");
-        printf("\t%s\n", url);
-        sleep(3);
-#endif
-        sprintf(command, "netscape -remote \"openURL(%s,new-window)\"", url);
-        if ( system(command) != 0 ) {
-            sprintf(command, "netscape %s &", url);
-            if ( system(command) != 0 ) {
-                sprintf(command, "lynx %s", url);
-                if ( system(command) != 0 ) {
-                    retval = -1;
-                }
-            }
+        retval = launcher(url);
+        if ( retval < 0 ) {
+            log_warning(info, "Please visit %s", url);
         }
     }
     return retval;

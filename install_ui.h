@@ -13,6 +13,7 @@ typedef struct {
     void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current);
     void (*abort)(install_info *info);
     install_state (*complete)(install_info *info);
+    int (*browser)(const char *url);
 } Install_UI;
 
 extern int console_okay(Install_UI *UI);

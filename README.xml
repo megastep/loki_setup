@@ -53,7 +53,8 @@ There are several optional attributes of the install element:
             using lynx if that fails for some reason.
 
  localurl   This is the local HTML file that is loaded if the network
-            is down, or the web site cannot be reached.
+            is down, or the web site cannot be reached.  It should be
+            specified as a path relative to the setup working directory.
 
 
 The OPTION element:

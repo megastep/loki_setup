@@ -35,7 +35,8 @@ static int prompt_user(const char *prompt, const char *default_answer,
 typedef enum {
     RESPONSE_INVALID = -1,
     RESPONSE_NO,
-    RESPONSE_YES
+    RESPONSE_YES,
+    RESPONSE_HELP
 } yesno_answer;
 
 static yesno_answer prompt_yesno(const char *prompt, yesno_answer suggest)
@@ -63,6 +64,33 @@ static yesno_answer prompt_yesno(const char *prompt, yesno_answer suggest)
             return RESPONSE_INVALID;
     }
 }
+static yesno_answer prompt_yesnohelp(const char *prompt, yesno_answer suggest)
+{
+    char line[BUFSIZ];
+
+    line[0] = '\0';
+    switch (suggest) {
+        case RESPONSE_YES:
+            prompt_user(prompt, "Y/n/?", line, (sizeof line));
+            break;
+        case RESPONSE_NO:
+            prompt_user(prompt, "N/y/?", line, (sizeof line));
+            break;
+        default:
+            fprintf(stderr, "Warning, invalid yesno prompt: %s\n", prompt);
+            return(RESPONSE_INVALID);
+    }
+    switch (toupper(line[0])) {
+        case 'Y':
+            return RESPONSE_YES;
+        case 'N':
+            return RESPONSE_NO;
+        case '?':
+            return RESPONSE_HELP;
+        default:
+            return RESPONSE_INVALID;
+    }
+}
 
 static yesno_answer prompt_warning(const char *warning)
 {
@@ -72,38 +100,59 @@ static yesno_answer prompt_warning(const char *warning)
 
 static void parse_option(install_info *info, xmlNodePtr node)
 {
+    const char *help;
     char line[BUFSIZ];
     char prompt[BUFSIZ];
     const char *wanted;
+    yesno_answer response, default_response;
 
     /* See if the user wants this option */
     sprintf(prompt, "Install %s?", get_option_name(info, node, line, BUFSIZ));
 
     wanted = xmlGetProp(node, "install");
     if ( wanted  && (strcmp(wanted, "true") == 0) ) {
-        prompt_user(prompt, "Y/n", line, BUFSIZ);
+        default_response = RESPONSE_YES;
     } else {
-        prompt_user(prompt, "N/y", line, BUFSIZ);
+        default_response = RESPONSE_NO;
+    }
+    help = xmlGetProp(node, "help");
+    if ( help ) {
+        response = prompt_yesnohelp(prompt, default_response);
+    } else {
+        response = prompt_yesno(prompt, default_response);
     }
 
-    if ( toupper(line[0]) == 'Y' ) {
-        /* Mark this option for installation */
-        mark_option(info, node, "true", 0);
+    switch(response) {
+        case RESPONSE_YES:
+            /* Mark this option for installation */
+            mark_option(info, node, "true", 0);
 
-        /* Add this option size to the total */
-        info->install_size += size_node(info, node);
+            /* Add this option size to the total */
+            info->install_size += size_node(info, node);
 
-        /* Recurse down any other options */
-        node = node->childs;
-        while ( node ) {
-            if ( strcmp(node->name, "option") == 0 ) {
-                parse_option(info, node);
+            /* Recurse down any other options */
+            node = node->childs;
+            while ( node ) {
+                if ( strcmp(node->name, "option") == 0 ) {
+                    parse_option(info, node);
+                }
+                node = node->next;
             }
-            node = node->next;
-        }
-    } else {
-        /* Unmark this option for installation */
-        mark_option(info, node, "false", 1);
+            break;
+
+        case RESPONSE_HELP:
+            if ( help ) {
+                printf("%s\n", help);
+            } else {
+                printf("No help available\n");
+            }
+            parse_option(info, node);
+            break;
+
+        default:
+            /* Unmark this option for installation */
+            mark_option(info, node, "false", 1);
+            break;
     }
 }
 
@@ -261,6 +310,19 @@ static install_state console_complete(install_info *info)
     return new_state;
 }
 
+static int run_lynx(const char *url)
+{
+    char command[2*PATH_MAX];
+    int retval;
+
+    retval = 0;
+    sprintf(command, "lynx \"%s\"", url);
+    if ( system(command) != 0 ) {
+        retval = -1;
+    }
+    return retval;
+}
+ 
 int console_okay(Install_UI *UI)
 {
     if(!isatty(1)){
@@ -274,6 +336,7 @@ int console_okay(Install_UI *UI)
     UI->update = console_update;
     UI->abort = console_abort;
     UI->complete = console_complete;
+    UI->browser = run_lynx;
 
     return(1);
 }

@@ -8,6 +8,7 @@ SOL -   Added network check for URL, and (localurl="...")
 SOL -   Added -c command line option to change working directory
 SOL -   Added the "path" attribute to the install element
 SOL -   The console ui now checks for write permissions on install path
+SOL -   Added '?' help key for console install options
 SOL -   Fixed crash with nameless options
 SOL -   Wrote documentation for XML setup specification file
 

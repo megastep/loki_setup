@@ -201,7 +201,7 @@ extern int install_postinstall(install_info *info);
 extern install_state launch_game(install_info *info);
 
 /* Launch a web browser with the URL specified in the XML file */
-extern int launch_browser(install_info *info);
+extern int launch_browser(install_info *info, int (*browser)(const char *url));
 
 /* Install the desktop menu items */
 extern void install_menuitems(install_info *info, desktop_type d);

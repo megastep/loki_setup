@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.18 1999-11-30 21:34:43 hercules Exp $
+   $Id: gtk_ui.c,v 1.19 1999-12-01 22:30:51 hercules Exp $
 */
 
 #include <limits.h>
@@ -753,6 +753,20 @@ static install_state gtkui_complete(install_info *info)
     return iterate_for_state();
 }
 
+static int run_netscape(const char *url)
+{
+    char command[2*PATH_MAX];
+    int retval;
+
+    retval = 0;
+    sprintf(command, 
+"netscape -remote \"openURL(%s,new-window)\" || netscape \"%s\" &", url, url);
+    if ( system(command) != 0 ) {
+        retval = -1;
+    }
+    return retval;
+}
+
 int gtkui_okay(Install_UI *UI)
 {
     extern int force_console;
@@ -770,6 +784,7 @@ int gtkui_okay(Install_UI *UI)
             UI->update = gtkui_update;
             UI->abort = gtkui_abort;
             UI->complete = gtkui_complete;
+            UI->browser = run_netscape;
             XCloseDisplay(dpy);
 
             okay = 1;
