@@ -1,5 +1,5 @@
 
-The Loki Game Installer 1.2
+The Loki Game Installer 1.2.1
 Written by Sam Lantinga and Stephane Peter
 ------------------------------------------
 
@@ -57,6 +57,9 @@ which can be run when the user wants to uninstall the product.
 Make sure you have included installers for the supported architectures
 on your CD!  We have included x86, ppc, alpha, and sparc64 binaries for
 this version of the installer.
+
+Also included is Stephane Peter's self-extracting archive script in
+the makeself subdirectory.  We use this at Loki to generate patches.
 
 Play with it, and enjoy!
 
