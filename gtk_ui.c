@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.63 2001-01-19 03:48:08 megastep Exp $
+   $Id: gtk_ui.c,v 1.64 2001-03-09 02:10:24 hercules Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1241,6 +1241,8 @@ static install_state gtkui_init(install_info *info, int argc, char **argv, int n
         widget = glade_xml_get_widget(setup_glade, "binary_path");
 		if(widget) gtk_widget_hide(widget);
 		widget = glade_xml_get_widget(setup_glade, "binary_label");
+		if(widget) gtk_widget_hide(widget);
+		widget = glade_xml_get_widget(setup_glade, "setup_menuitems_checkbox");
 		if(widget) gtk_widget_hide(widget);
 	}
 

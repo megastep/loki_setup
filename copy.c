@@ -301,7 +301,8 @@ size_t copy_path(install_info *info, const char *path, const char *dest,
 }
 
 size_t copy_list(install_info *info, const char *filedesc, const char *dest, 
-				 const char *from_cdrom, int strip_dirs, xmlNodePtr node,
+				 const char *from_cdrom, const char *srcpath, int strip_dirs,
+                 xmlNodePtr node,
 				 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     char fpat[BUFSIZ];
@@ -312,12 +313,15 @@ size_t copy_list(install_info *info, const char *filedesc, const char *dest,
     size = 0;
     while ( filedesc && parse_line(&filedesc, fpat, (sizeof fpat)) ) {
         if ( from_cdrom ) {
+            char full_cdpath[PATH_MAX];
             const char *cdpath;
 
             cdpath = get_cdrom(info, from_cdrom);
             if ( ! cdpath ) {
                 return 0;
             }
+            sprintf(full_cdpath, "%s/%s", cdpath, srcpath);
+            cdpath = full_cdpath;
             push_curdir(cdpath);
             if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
                 for ( i=0; i<globbed.gl_pathc; ++i ) {
@@ -333,10 +337,11 @@ size_t copy_list(install_info *info, const char *filedesc, const char *dest,
             }
             pop_curdir();
         } else {
+            push_curdir(srcpath);
             if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
                 for ( i=0; i<globbed.gl_pathc; ++i ) {
-                    copied = copy_path(info, globbed.gl_pathv[i], dest, NULL, 
-									   strip_dirs, node, update);
+                    copied = copy_path(info, globbed.gl_pathv[i], dest, NULL,
+                                       strip_dirs, node, update);
                     if ( copied > 0 ) {
                         size += copied;
                     }
@@ -345,6 +350,7 @@ size_t copy_list(install_info *info, const char *filedesc, const char *dest,
             } else {
                 log_warning(info, _("Unable to find file '%s'"), fpat);
             }
+            pop_curdir();
         }
     }
     return size;
@@ -526,6 +532,7 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
     node = node->childs;
     while ( node ) {
         const char *path = xmlGetProp(node, "path");
+		const char *srcpath = xmlGetProp(node, "srcpath");
 		const char *lang_prop;
         /* "cdrom" tag is redundant now */
 		const char *from_cdrom = xmlGetProp(node, "cdromid");
@@ -556,6 +563,8 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
 			}
             path = tmppath;
         }
+        if (!srcpath)
+            srcpath = ".";
 /* printf("Checking node element '%s'\n", node->name); */
         if ( strcmp(node->name, "files") == 0 && lang_matched ) {
             const char *str = xmlNodeListGetString(info->config, (node->parent)->childs, 1);
@@ -563,7 +572,7 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
             parse_line(&str, current_option_txt, sizeof(current_option_txt));
             copied = copy_list(info,
                                xmlNodeListGetString(info->config, node->childs, 1),
-                               path, from_cdrom, strip_dirs, node,
+                               path, from_cdrom, srcpath, strip_dirs, node,
 							   update);
             if ( copied > 0 ) {
                 size += copied;
@@ -700,9 +709,10 @@ size_t size_binary(install_info *info, const char *from_cdrom, const char *filed
 }
 
 /* Returns the install size of a list of files, in bytes */
-size_t size_list(install_info *info, const char *from_cdrom, const char *filedesc)
+size_t size_list(install_info *info, const char *from_cdrom, const char *srcpath, const char *filedesc)
 {
-    char fpat[BUFSIZ];
+    char fpat[PATH_MAX];
+    char fullpath[PATH_MAX];
     int i;
     glob_t globbed;
     size_t size, count;
@@ -710,13 +720,12 @@ size_t size_list(install_info *info, const char *from_cdrom, const char *filedes
     size = 0;
     if( from_cdrom ) {
         const char *cdpath = get_cdrom(info, from_cdrom);
-        char fullpath[BUFSIZ];
 
         if ( ! cdpath ) {
             return 0;
         }
         while ( filedesc && parse_line(&filedesc, fpat, (sizeof fpat)) ) {
-            snprintf(fullpath, sizeof(fullpath), "%s/%s", cdpath, fpat);
+            snprintf(fullpath, sizeof(fullpath), "%s/%s/%s", cdpath, srcpath, fpat);
             if ( glob(fullpath, GLOB_ERR, NULL, &globbed) == 0 ) {
                 for ( i=0; i<globbed.gl_pathc; ++i ) {
                     const SetupPlugin *plug = FindPluginForFile(globbed.gl_pathv[i]);
@@ -736,7 +745,8 @@ size_t size_list(install_info *info, const char *from_cdrom, const char *filedes
         }
     } else {
         while ( filedesc && parse_line(&filedesc, fpat, (sizeof fpat)) ) {
-            if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
+            snprintf(fullpath, sizeof(fullpath), "%s/%s", srcpath, fpat);
+            if ( glob(fullpath, GLOB_ERR, NULL, &globbed) == 0 ) {
                 for ( i=0; i<globbed.gl_pathc; ++i ) {
 					const SetupPlugin *plug = FindPluginForFile(globbed.gl_pathv[i]);
 					if (plug) {
@@ -762,7 +772,7 @@ size_t size_readme(install_info *info, xmlNodePtr node)
 
     lang_prop = xmlGetProp(node, "lang");
 	if (lang_prop && MatchLocale(lang_prop) ) {
-		return size_list(info, 0, xmlNodeListGetString(info->config, node->childs, 1));
+		return size_list(info, 0, ".", xmlNodeListGetString(info->config, node->childs, 1));
 	}
 	return 0;
 }
@@ -807,15 +817,18 @@ size_t size_node(install_info *info, xmlNodePtr node)
     if ( size == 0 ) {
         node = node->childs;
         while ( node ) {
+            const char *srcpath = xmlGetProp(node, "srcpath");
             const char *from_cdrom = xmlGetProp(node, "cdromid");
 
             if ( !from_cdrom && GetProductCDROMRequired(info) ) {
                 from_cdrom = info->name;
             }
 
+            if (!srcpath)
+                srcpath = ".";
 /* printf("Checking node element '%s'\n", node->name); */
             if ( strcmp(node->name, "files") == 0 && lang_matched ) {
-                size += size_list(info, from_cdrom,
+                size += size_list(info, from_cdrom, srcpath,
 								  xmlNodeListGetString(info->config, node->childs, 1));
             }
             if ( strcmp(node->name, "binary") == 0 && lang_matched ) {

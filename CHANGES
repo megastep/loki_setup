@@ -1,4 +1,8 @@
 1.5.9:
+Sam Lantinga - Thu Mar  8 18:09:29 PST 2001
+ * Don't prompt for menu items if the "nobinaries" option is set
+Sam Lantinga - Thu Mar  8 16:09:28 PST 2001
+ * Added the 'srcpath' attribute to the files element
 Sam Lantinga - Thu Mar  8 15:01:03 PST 2001
  * Always use the effective user id for the home directory
 Stéphane Peter - Thu Jan 18 18:22:04 PST 2001

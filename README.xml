@@ -462,6 +462,9 @@ There are several optional attributes of the files element:
             the product. Thus an empty value ("") can be used to designate
             the installation directory.
 
+ srcpath    This is a directory relative to the top of the CD where the files
+            for this element should be copied from.
+
  cdrom      If this attribute has a "yes" value, then setup will look for
             the files on one of the mounted CDROMs on the system.
             *OBSOLETE: Do not use. Use 'cdromid' instead.*

@@ -465,7 +465,8 @@ static install_state console_setup(install_info *info)
 			}
 
 			/* Ask for desktop menu items */
-			if ( has_binaries(info, info->config->root->childs) &&
+			if ( !GetProductHasNoBinaries(info) &&
+                 has_binaries(info, info->config->root->childs) &&
 				 console_prompt(_("Do you want to install desktop items?"),
 								RESPONSE_YES) == RESPONSE_YES ) {
 				info->options.install_menuitems = 1;
