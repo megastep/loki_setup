@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.29 2000-02-18 03:02:05 hercules Exp $ */
+/* $Id: install.c,v 1.30 2000-03-02 17:36:20 hercules Exp $ */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -676,7 +676,7 @@ char install_menuitems(install_info *info, desktop_type desktop)
             fp = popen("gnome-config --prefix", "r");
             if (fp) {
                 fgets(icon_base, PATH_MAX, fp);
-                icon_base[strlen(icon_base)-1]=0;
+                icon_base[sizeof(icon_base)-1]=0;
                 strcat(icon_base, "/share/gnome/apps/");
                 found_links[0] = icon_base;
                 found_links[1] = "~/.gnome/apps/";
