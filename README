@@ -3,7 +3,7 @@ The Loki Game Installer 1.2.1
 Written by Sam Lantinga and Stephane Peter
 ------------------------------------------
 
-New in 1.2.1:
+New since 1.1:
  * Improved C library detection
  * Support for loading install files from CD-ROM
  * Additional attributes for the binary element
