@@ -17,8 +17,8 @@ CC = @CC@
 # This indicates where the 'setupdb' CVS module is checked out
 SETUPDB	= @SETUPDB@
 
-IMAGE = ../../spp/private/image
-BRAND = codehost
+IMAGE = @IMAGE@
+BRAND = @BRAND@
 UPDATES = /loki/updates/loki_uninstall
 CONVERT_IMAGE = /loki/patch-tools/convert-image
 

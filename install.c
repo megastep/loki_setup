@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.94 2002-09-18 08:34:46 megastep Exp $ */
+/* $Id: install.c,v 1.95 2002-10-19 07:41:10 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -75,6 +75,7 @@
 #include "copy.h"
 #include "file.h"
 #include "network.h"
+#include "loki_launchurl.h"
 
 extern char *rpm_root;
 extern struct component_elem *current_component;
@@ -187,7 +188,7 @@ int GetProductAllowsExpress(install_info *info)
 
 int GetProductHasNoBinaries(install_info *info)
 {
-	return xmlGetProp(info->config->root, "nobinaries") != NULL;
+	return xmlGetProp(info->config->root, "nobinaries") || !has_binaries(info, info->config->root->childs);
 }
 
 int GetProductHasPromptBinaries(install_info *info)
@@ -305,7 +306,7 @@ const char *GetProductEULANode(install_info *info, xmlNodePtr node)
 	while(node) {
 		if(! strcmp(node->name, "eula") ) {
 			const char *prop = xmlGetProp(node, "lang");
-			if ( MatchLocale(prop) ) {
+			if ( match_locale(prop) ) {
 				if (found == 1)
 					log_warning("Duplicate matching EULA entries in XML file!");
 				text = xmlNodeListGetString(info->config, node->childs, 1);
@@ -348,7 +349,7 @@ const char *GetProductREADME(install_info *info)
 	while(node) {
 		if(! strcmp(node->name, "readme") ) {
 			const char *prop = xmlGetProp(node, "lang");
-			if ( MatchLocale(prop) ) {
+			if ( match_locale(prop) ) {
 				if (found == 1) {
 					log_warning("Duplicate matching README entries in XML file!");
 				}
@@ -382,7 +383,7 @@ const char *GetProductMessage(install_info *info)
 	while(node) {
 		if(! strcmp(node->name, "remove_msg") ) {
 			const char *prop = xmlGetProp(node, "lang");
-			if ( MatchLocale(prop) ) {
+			if ( match_locale(prop) ) {
 				text = xmlNodeListGetString(info->config, node->childs, 1);
 				if (text) {
 					*buf = '\0';
@@ -697,7 +698,7 @@ struct component_elem *add_component_entry(install_info *info, const char *name,
     return elem;
 }
 
-struct option_elem *add_option_entry(struct component_elem *comp, const char *name)
+struct option_elem *add_option_entry(struct component_elem *comp, const char *name, const char *tag)
 {
     struct option_elem *elem;
 
@@ -709,6 +710,7 @@ struct option_elem *add_option_entry(struct component_elem *comp, const char *na
     elem = (struct option_elem *)malloc(sizeof *elem);
     if ( elem ) {
         elem->name = strdup(name);
+		elem->tag = tag ? strdup(tag) : NULL;
         elem->file_list = NULL;
         elem->dir_list = NULL;
         elem->bin_list = NULL;
@@ -965,7 +967,7 @@ int CheckRequirements(install_info *info)
     const char *text;
 
 	while ( node ) {
-		if ( !strcmp(node->name, "require") && MatchLocale(xmlGetProp(node, "lang")) &&
+		if ( !strcmp(node->name, "require") && match_locale(xmlGetProp(node, "lang")) &&
 			 match_arch(info, xmlGetProp(node, "arch")) &&
 			 match_libc(info, xmlGetProp(node, "libc")) &&
 			 match_distro(info, xmlGetProp(node, "distro")) ) {
@@ -1018,7 +1020,7 @@ char *get_option_name(install_info *info, xmlNodePtr node, char *name, int len)
 				const char *prop = xmlGetProp(n, "lang");
 				if ( ! prop ) {
 					log_fatal(_("XML: 'lang' tag does not have a mandatory 'lang' attribute"));
-				} else if ( MatchLocale(prop) ) {
+				} else if ( match_locale(prop) ) {
 					text = xmlNodeListGetString(info->config, n->childs, 1);
 					if(text) {
 						*name = '\0';
@@ -1055,7 +1057,7 @@ const char *get_option_help(install_info *info, xmlNodePtr node)
 	while ( n ) {
 		if( strcmp(n->name, "help") == 0 ) {
 			const char *prop = xmlGetProp(n, "lang");
-			if ( MatchLocale(prop) ) {
+			if ( match_locale(prop) ) {
 				text = xmlNodeListGetString(info->config, n->childs, 1);
 				if(text) {
 					*line = '\0';
@@ -1084,7 +1086,7 @@ const char *get_option_warn(install_info *info, xmlNodePtr node)
 	while ( n ) {
 		if( strcmp(n->name, "warn") == 0 ) {
 			const char *prop = xmlGetProp(n, "lang");
-			if ( MatchLocale(prop) ) {
+			if ( match_locale(prop) ) {
 				text = xmlNodeListGetString(info->config, n->childs, 1);
 				if(text) {
 					*line = '\0';
@@ -1197,6 +1199,7 @@ void delete_install(install_info *info)
                 free(elem);
             }
             free(opt->name);
+			free(opt->tag);
             free(opt);
         }
         free(comp->name);
@@ -1338,6 +1341,65 @@ void uninstall(install_info *info)
     pop_curdir();
 }
 
+static char tags[2048];
+static int tags_left;
+
+static void optionstag_sub(install_info *info, xmlNodePtr node)
+{
+	if ( tags_left <= 0 ) /* String full */ {
+		return;
+	}
+
+	while ( node ) {
+		if ( ! strcmp(node->name, "option") ) {
+			const char *wanted = xmlGetProp(node, "install");
+			if ( wanted  && (strcmp(wanted, "true") == 0) ) {
+				const char *tag = xmlGetProp(node, "tag");
+				if ( tag &&
+					 match_locale(xmlGetProp(node, "lang")) &&
+					 match_arch(info, xmlGetProp(node, "arch")) &&
+					 match_libc(info, xmlGetProp(node, "libc")) &&
+					 match_distro(info, xmlGetProp(node, "distro"))
+					 ) {
+					strncat(tags, tag, tags_left);
+					tags_left -= strlen(tag);
+					strncat(tags, " ", tags_left);
+					tags_left --;
+				}
+			}
+		} else if ( ! strcmp(node->name, "exclusive" ) ) {
+			optionstag_sub(info, node->childs);
+		} else if ( ! strcmp(node->name, "component" ) ) {
+            if ( match_arch(info, xmlGetProp(node, "arch")) &&
+                 match_libc(info, xmlGetProp(node, "libc")) &&
+				 match_distro(info, xmlGetProp(node, "distro")) ) {
+				optionstag_sub(info, node->childs);
+			}
+		}
+		node = node->next;
+	}
+}
+
+static const char *get_optiontags_string(install_info *info)
+{
+	*tags = '\0';
+	tags_left = sizeof(tags)-1;
+
+	/* Recursively parse the XML for install="true" tags */
+	optionstag_sub(info, info->config->root->childs);
+
+	if ( tags_left <= 0 ) /* String full */ {
+		log_warning(_("Options tag string maxed out!"));
+	} else {
+		int len = strlen(tags);
+		if ( len > 0 ) { /* Remove the last space */
+			tags[len-1] = '\0';
+		}
+	}
+	/* fprintf(stderr,"Options tags is '%s'\n", tags); */
+	return tags;
+}
+
 static void output_script_header(FILE *f, install_info *info, product_component_t *comp)
 {
     fprintf(f,
@@ -1349,14 +1411,16 @@ static void output_script_header(FILE *f, install_info *info, product_component_
             "SETUP_SYMLINKSPATH=\"%s\"\n"
             "SETUP_CDROMPATH=\"%s\"\n"
             "SETUP_DISTRO=\"%s\"\n"
+            "SETUP_OPTIONTAGS=\"%s\"\n"
             "export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_COMPONENTNAME SETUP_COMPONENTVER\n"
-            "export SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH SETUP_DISTRO\n",
+            "export SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH SETUP_DISTRO SETUP_OPTIONTAGS\n",
             info->name, info->version,
             loki_getname_component(comp), loki_getversion_component(comp),
             info->install_path,
             info->symlinks_path,
             info->cdroms_list ? info->cdroms_list->mounted : "",
-	    info->distro ? distribution_symbol[info->distro] : "");
+			info->distro ? distribution_symbol[info->distro] : "",
+			get_optiontags_string(info));
 #ifdef RPM_SUPPORT
     if(strcmp(rpm_root,"/")) /* Emulate RPM environment for scripts */
         fprintf(f,"RPM_INSTALL_PREFIX=%s\n", rpm_root);
@@ -1421,7 +1485,7 @@ void generate_uninstall(install_info *info)
             for ( opt = comp->options_list; opt; opt = opt->next ) {
                 option = loki_find_option(component, opt->name);
                 if ( ! option ) {
-                    option = loki_create_option(component, opt->name);
+                    option = loki_create_option(component, opt->name, opt->tag);
                 }
                 /* Add files */
                 for ( felem = opt->file_list; felem; felem = felem->next ) {
@@ -1518,9 +1582,9 @@ void generate_uninstall(install_info *info)
 	    /* Add a call to the post-uninstall scripts */
 	    loki_registerscript_component(component, LOKI_SCRIPT_POSTUNINSTALL,
 					  "update-menus", 
-					  "if type update-menus 2>&1 > /dev/null; then update-menus 2> /dev/null; fi\n"
-					  "if type kbuildsycoca 2>&1 > /dev/null; then kbuildsycoca 2>/dev/null; fi\n"
-					  "if type dtaction 2>&1 > /dev/null; then dtaction ReloadActions 2>/dev/null; fi\n");
+					  "if type update-menus 2>&1 >/dev/null || which update-menus 2>&1 > /dev/null; then update-menus 2> /dev/null; fi\n"
+					  "if type kbuildsycoca 2>&1 >/dev/null || which kbuildsycoca 2>&1 > /dev/null; then kbuildsycoca 2>/dev/null; fi\n"
+					  "if type dtaction 2>&1 > /dev/null || which dtaction 2>&1 > /dev/null; then dtaction ReloadActions 2>/dev/null; fi\n");
 	}
 
         /* Register the pre and post uninstall scripts with the default component */
@@ -1759,7 +1823,7 @@ int install_menuitems(install_info *info, desktop_type desktop)
 		app_links[i++] = NULL;
 		break;
 	case DESKTOP_GNOME:
-		fp = popen("gnome-config --prefix 2>/dev/null", "r");
+		fp = popen("if type gnome-config 2>&1 > /dev/null; then gnome-config --prefix 2>/dev/null; fi", "r");
 		if (fp) {
 			if ( fscanf(fp, "%s", icon_base) ) {
 				strcat(icon_base, "/share/gnome/apps/");
@@ -2031,17 +2095,20 @@ int install_menuitems(install_info *info, desktop_type desktop)
 	switch(desktop) {
 	case DESKTOP_MENUDEBIAN:
 	    /* Run update-menus */
-	    run_command(info, "update-menus", NULL, 1);
+            if ( loki_valid_program("update-menus") )
+	    	run_command(info, "update-menus", NULL, 1);
 	    install_updatemenus_script = 1;
 	    break;
 	case DESKTOP_KDE:
 	    /* Run kbuildsycoca */
-	    run_command(info, "kbuildsycoca", NULL, 0);
+            if ( loki_valid_program("kbuildsycoca") )
+	    	run_command(info, "kbuildsycoca", NULL, 0);
 	    install_updatemenus_script = 1;
 	    break;
 	case DESKTOP_CDE:
 	    /* Run dtaction */
-	    run_command(info, "dtaction", "ReloadActions", 0);
+            if ( loki_valid_program("dtaction") )
+	    	run_command(info, "dtaction", "ReloadActions", 0);
 	    install_updatemenus_script = 1;
 	    break;
 	default:
@@ -2093,13 +2160,15 @@ int run_script(install_info *info, const char *script, int arg)
 					"SETUP_SYMLINKSPATH=\"%s\"\n"
 					"SETUP_CDROMPATH=\"%s\"\n"
 					"SETUP_DISTRO=\"%s\"\n"
-					"export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH SETUP_DISTRO\n"
+					"SETUP_OPTIONTAGS=\"%s\"\n"
+					"export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH SETUP_DISTRO SETUP_OPTIONTAGS\n"
 					"%s%s\n",
 					info->name, info->version,
 					info->install_path,
 					info->symlinks_path,
 					info->cdroms_list ? info->cdroms_list->mounted : "",
 					info->distro ? distribution_symbol[info->distro] : "",
+					get_optiontags_string(info),
 					working_dir, script);     
             fchmod(fileno(fp),0755); /* Turn on executable bit */
             fclose(fp);
@@ -2108,7 +2177,7 @@ int run_script(install_info *info, const char *script, int arg)
 			} else {
 				strncpy(cmd, info->install_path, sizeof(cmd));
 			}
-            
+           
             exitval = run_command(info, script_file, cmd, 1);
         }
         close(fd);

@@ -1,6 +1,7 @@
 /* TAR plugin for setup */
-/* $Id: tar.c,v 1.6 2002-09-18 08:34:47 megastep Exp $ */
+/* $Id: tar.c,v 1.7 2002-10-19 07:41:11 megastep Exp $ */
 
+#include "config.h"
 #include "plugins.h"
 #include "tar.h"
 #include "file.h"
@@ -9,6 +10,9 @@
 
 #include <stdlib.h>
 #include <string.h>
+#ifdef HAVE_STRINGS_H
+# include <strings.h>
+#endif
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>

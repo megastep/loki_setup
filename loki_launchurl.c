@@ -33,7 +33,7 @@ typedef enum {
 } environment;
 
 /* This function verifies that a program is in the path and executable */
-static int valid_program(const char *program)
+int loki_valid_program(const char *program)
 {
     char temppath[PATH_MAX];
     char *path;
@@ -155,14 +155,14 @@ int loki_launchURL(const char *url)
     if ( ! command ) {
         for ( i=0; i<(sizeof browser_list)/(sizeof browser_list[0]); ++i ) {
             if ( (running == browser_list[i].running) &&
-                 valid_program(browser_list[i].program) ) {
+                 loki_valid_program(browser_list[i].program) ) {
                 command = browser_list[i].command;
                 break;
             }
         }
     }
     if ( command ) {
-        sprintf(command_string, command, url, url);
+        snprintf(command_string, sizeof(command_string), command, url, url);
         status = system(command_string);
     }
     return status;

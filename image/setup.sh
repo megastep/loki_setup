@@ -38,7 +38,12 @@ DetectARCH()
 			echo "mips"
 			status=0;;
 		    *)
-			echo "`uname -m`"
+			arch=`uname -p 2> /dev/null || uname -m`
+			if test "$arch" = powerpc; then
+				echo "ppc"
+			else
+				echo $arch
+			fi
 			status=0;;
 		esac
 	esac
@@ -205,7 +210,7 @@ then
   if [ "$GOT_ROOT" != "root" ]
   then
 	if [ "$USE_XHOST" -eq 1 ]; then
-		xhost +127.0.0.1 2>> $NULL
+		xhost +127.0.0.1 2>&1 > $NULL
 	fi
     try_run xsu -e -a -u root -c "sh `pwd`/setup.sh -auth" $XSU_ICON
     status="$?"

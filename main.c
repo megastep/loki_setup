@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.50 2002-09-20 22:51:44 megastep Exp $ */
+/* $Id: main.c,v 1.51 2002-10-19 07:41:10 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:

@@ -28,7 +28,7 @@
 #define VERSION         "0.2.3setup"
 #define AUTHOR          "freax"
 #define NAME            "Login Prompt"
-#define SET_DISPL_ENV   "export DISPLAY="
+#define SET_DISPL_ENV   "DISPLAY=%s; export DISPLAY;"
 #define SU_PWD_OUT      "Password:"
 #define SU_PWD_LEN      9
 #define SU_DELAY        30000

@@ -1,5 +1,5 @@
 /* ZIP plugin for setup */
-/* $Id: zip.c,v 1.4 2002-09-18 08:34:47 megastep Exp $ */
+/* $Id: zip.c,v 1.5 2002-10-19 07:41:11 megastep Exp $ */
 
 #include "plugins.h"
 #include "file.h"

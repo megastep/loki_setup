@@ -680,7 +680,7 @@ ssize_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
     if ( !strcmp(node->name, "option") ) {
         str = xmlNodeListGetString(info->config, node->childs, 1);    
         parse_line(&str, tmppath, sizeof(tmppath));
-        current_option = add_option_entry(current_component, tmppath);
+        current_option = add_option_entry(current_component, tmppath, xmlGetProp(node, "tag"));
     }
 
     size = 0;
@@ -688,21 +688,15 @@ ssize_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
     while ( node ) {
         const char *path = xmlGetProp(node, "path");
 		const char *srcpath = xmlGetProp(node, "srcpath");
-		const char *lang_prop;
         /* "cdrom" tag is redundant now */
 		const char *from_cdrom = xmlGetProp(node, "cdromid");
-		int lang_matched = 1;
+		int lang_matched = match_locale(xmlGetProp(node, "lang"));
 		int strip_dirs = 0;
 
         if ( !from_cdrom && GetProductCDROMRequired(info) ) {
             from_cdrom = info->name;
         }
 		
-		lang_prop = xmlGetProp(node, "lang");
-		if (lang_prop) {
-			lang_matched = MatchLocale(lang_prop);
-		}
-
         if (!path)
             path = dest;
         else {
@@ -932,7 +926,7 @@ ssize_t size_readme(install_info *info, xmlNodePtr node)
     const char *lang_prop;
 
     lang_prop = xmlGetProp(node, "lang");
-	if (lang_prop && MatchLocale(lang_prop) ) {
+	if (lang_prop && match_locale(lang_prop) ) {
 		return size_list(info, 0, ".", xmlNodeListGetString(info->config, node->childs, 1));
 	}
 	return 0;
@@ -972,7 +966,7 @@ ssize_t size_node(install_info *info, xmlNodePtr node)
 
     lang_prop = xmlGetProp(node, "lang");
 	if (lang_prop) {
-		lang_matched = MatchLocale(lang_prop);
+		lang_matched = match_locale(lang_prop);
 	}
     /* Now, if necessary, scan all the files to install */
     if ( size == 0 ) {

@@ -73,21 +73,27 @@ static SigFunc *Signal(int signo, SigFunc *func)
 
 void sighandler(int sig)
 {
+#ifdef DEBUG
+  fprintf(stderr, "Signal %d received, term = %d.\n", sig, term);
+#endif
   if ( sig == SIGCHLD && term > 0 ) {
     int status;
-
-/*     pid_t pid =  */
-    wait(&status);
+    pid_t pid = wait(&status);
     if ( WIFEXITED(status) ) {
-/*       fprintf(stderr,"Child %d returned\n", pid); */
+#ifdef DEBUG
+      fprintf(stderr,"Child %d returned\n", pid);
+#endif
       gtk_exit(WEXITSTATUS(status));
     } else if ( WIFSIGNALED(status) ) { 
-/*       printf("Gnome Xsu: subprocess has died "); */
+#ifdef DEBUG
+      fprintf(stderr,"Xsu: subprocess %d has died from signal %d\n", pid, WTERMSIG(status));
+#endif
       gtk_exit(EXIT_ERROR);
     }
     close(term); term = -1;
 
-    while (gtk_events_pending ()) gtk_main_iteration ();
+    while (gtk_events_pending ())
+      gtk_main_iteration ();
     gtk_main_quit ();
   }
 }
@@ -154,7 +160,7 @@ void xsu_perform()
 	widget could not get the child_died signal.
 */
 	if (set_display_env)
-	  buffer = g_strdup_printf("%s%s;%s", SET_DISPL_ENV, displ_host, command);
+	  buffer = g_strdup_printf(SET_DISPL_ENV "%s", displ_host, command);
 	else		
 	  buffer = g_strdup_printf("%s", command);
 /* xsu 0.2.2 *
@@ -183,7 +189,7 @@ void xsu_perform()
 	for (;;)
 	{
 		char buf[80], *ptr;
-		int cnt;
+		int cnt, ret;
 
 		/* We can not use fscanf as there might not be a space
 		   character after the initial prompt, hence hanging */
@@ -191,9 +197,9 @@ void xsu_perform()
 		ptr = buf;
 		cnt = 0;
 		do {
-		  read(term, &c, 1);
+		  ret = read(term, &c, 1);
 
-		  if ( c == EOF || isspace(c) ) {
+		  if ( c == EOF || ret == 0 || isspace((int)c) ) {
 		    *ptr ++ = '\0';
 		    break;
 		  } else {
@@ -206,7 +212,9 @@ void xsu_perform()
 		  }
 		} while ( cnt < sizeof(buf));
 		
- 		//fprintf(stderr,"reading from pty: '%s'\n", buf);
+#ifdef DEBUG
+ 		fprintf(stderr,"reading from pty: '%s'\n", buf);
+#endif
 
 		if (strncmp (buf, SU_PWD_OUT, SU_PWD_LEN) == 0)
 		{
@@ -219,18 +227,25 @@ void xsu_perform()
 		usleep (5);
 	}
 
+#ifdef DEBUG
+	fprintf(stderr, "Got it!\n");
+#endif
+
 	/* Discard any remaining characters on stdin */
 	for(;;) {
 		FD_ZERO(&fds);
 		FD_SET(term, &fds);
 		if ( select(term+1, &fds, NULL, NULL, &delay) ) {
-			read(term, &c, 1);
+		    if ( read(term, &c, 1) <= 0 )
+			break;
 		} else
 			break;
 	}
 
 	password_return = g_strdup_printf ("%s\n", password);
- 	/* fprintf(stderr,"Sending password\n"); */
+#ifdef DEBUG
+ 	fprintf(stderr,"Sending password\n");
+#endif
 /* 0.2.2 *
 	Minor security fix, clear the password from memory
 */  
@@ -242,8 +257,7 @@ void xsu_perform()
 	g_free (password_return); password_return = NULL;
 	g_free (password); password = NULL;
 
-	gtk_main();
-	return;
+	//gtk_main();
 }
 
 

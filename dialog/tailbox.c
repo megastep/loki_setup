@@ -1,5 +1,5 @@
 /*
- *  $Id: tailbox.c,v 1.3 2002-09-17 22:40:46 megastep Exp $
+ *  $Id: tailbox.c,v 1.4 2002-10-19 07:41:11 megastep Exp $
  *
  *  tailbox.c -- implements the tail box
  *

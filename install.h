@@ -123,6 +123,7 @@ typedef struct _install_info {
 
         struct option_elem {
             char *name;
+			char *tag; /* Optional, can be NULL */
 
             /* List of installed files and symlinks */
             struct file_elem {
@@ -244,7 +245,7 @@ void set_cdrom_mounted(struct cdrom_elem *cd, const char *path);
 struct component_elem *add_component_entry(install_info *info, const char *name, const char *version, int def);
 
 /* Create a new option entry */
-struct option_elem *add_option_entry(struct component_elem *comp, const char *name);
+struct option_elem *add_option_entry(struct component_elem *comp, const char *name, const char *tag);
 
 /* Add a file entry to the list of files installed */
 extern struct file_elem *add_file_entry(install_info *info, struct option_elem *opt, const char *path, const char *symlink, int mutable);

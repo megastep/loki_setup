@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.4 2002-09-17 22:40:46 megastep Exp $
+ * $Id: dialog_ui.c,v 1.5 2002-10-19 07:41:09 megastep Exp $
  */
 
 #include <limits.h>
@@ -132,7 +132,8 @@ install_state dialog_readme(install_info *info)
 
 /* This function returns a boolean value that tells if parsing for this node's siblings
    should continue (used for exclusive options) */
-static int parse_option(install_info *info, const char *component, xmlNodePtr parent, int exclusive)
+static int parse_option(install_info *info, const char *component, xmlNodePtr parent, int exclusive,
+						const char *text)
 {
 	const char *choices[MAX_CHOICES*4];
 	char buf[BUFSIZ];
@@ -205,7 +206,7 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr pa
 options_loop:  
 	clear_screen();
 	snprintf(buf, sizeof(buf), _("Installation of %s"), info->desc); 
-	if ( dialog_checklist(buf, _("Please choose the options to install"),
+	if ( dialog_checklist(buf, text,
 						  7+nb_choices, COLS*9/10, nb_choices, nb_choices, choices, 
 						  !exclusive, result) != DLG_EXIT_OK) {
 		return 0;
@@ -268,9 +269,9 @@ options_loop:
 				mark_option(info, nodes[i], "false", 0);
 		    }
 		} else if ( !strcmp(nodes[i]->name, "exclusive") && result[i]) {
-		    parse_option(info, component, nodes[i], 1);
+		    parse_option(info, component, nodes[i], 1, get_option_name(info, nodes[i], NULL, 0));
 		} else if ( !strcmp(nodes[i]->name, "component") && result[i]) {
-		    parse_option(info, xmlGetProp(nodes[i], "name"), nodes[i], 1);
+		    parse_option(info, xmlGetProp(nodes[i], "name"), nodes[i], 1, xmlGetProp(nodes[i], "name"));
 		}
 	}
 	return 1;
@@ -415,7 +416,7 @@ install_state dialog_setup(install_info *info)
 				/* Go through the install options */
 
 				info->install_size = 0;
-				if ( parse_option(info, NULL, info->config->root, 0) ) {
+				if ( parse_option(info, NULL, info->config->root, 0, _("Please choose the options to install")) ) {
 					okay = TRUE;
 				} else {
 					return SETUP_ABORT;
@@ -424,7 +425,6 @@ install_state dialog_setup(install_info *info)
 				clear_screen();
 				/* Ask for desktop menu items */
 				if ( !GetProductHasNoBinaries(info) &&
-					 has_binaries(info, info->config->root->childs) &&
 					 dialog_prompt(_("Do you want to install startup menu entries?"),
 								   RESPONSE_YES) == RESPONSE_YES ) {
 					info->options.install_menuitems = 1;
@@ -435,8 +435,7 @@ install_state dialog_setup(install_info *info)
 		}
 	} else { /* Express setup */
 		/* Install desktop menu items */
-		if ( !GetProductHasNoBinaries(info) &&
-			 has_binaries(info, info->config->root->childs)) {
+		if ( !GetProductHasNoBinaries(info)) {
 			info->options.install_menuitems = 1;
 		}
 	}

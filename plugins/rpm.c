@@ -1,5 +1,5 @@
 /* RPM plugin for setup */
-/* $Id: rpm.c,v 1.7 2002-09-18 08:34:47 megastep Exp $ */
+/* $Id: rpm.c,v 1.8 2002-10-19 07:41:11 megastep Exp $ */
 
 #include "plugins.h"
 #include "file.h"

@@ -313,7 +313,7 @@ void perform_uninstall_slot(GtkWidget* w, gpointer data)
 				if ( message && !display_message(message) ) {
                     clist = clist->next;
 					uninstall_cancelled = 1;
-                    continue;					
+					break;
 				}
 
                 /* Remove the component */
@@ -357,7 +357,8 @@ void perform_uninstall_slot(GtkWidget* w, gpointer data)
 				message = loki_getmessage_component(component->component);
 				if ( message && !display_message(message) ) {
                     clist = clist->next;
-                    continue;					
+					uninstall_cancelled = 1;
+					break;
 				}
 
                 /* Remove the component */

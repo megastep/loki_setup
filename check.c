@@ -2,7 +2,7 @@
  * Check and Rescue Tool for Loki Setup packages. Verifies the consistency of the files,
  * and optionally restores them from the original installation medium.
  *
- * $Id: check.c,v 1.4 2002-09-17 22:40:45 megastep Exp $
+ * $Id: check.c,v 1.5 2002-10-19 07:41:09 megastep Exp $
  */
 
 #include <stdlib.h>
@@ -289,6 +289,8 @@ on_media_ok_clicked (GtkButton       *button,
 	gtk_label_set_text(GTK_LABEL(diag), _("Files successfully restored !"));
 	gtk_widget_set_sensitive(glade_xml_get_widget(check_glade, "rescue_button"), FALSE);
 	gtk_widget_hide(glade_xml_get_widget(rescue_glade, "media_select"));
+
+	message_dialog(_("Files successfully restored !"), _("Success"));
 
 	/* Unmount filesystems that may have been mounted */
 	unmount_filesystems();

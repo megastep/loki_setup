@@ -28,3 +28,6 @@
    WARNING: This function should NOT be called when a video mode is set.
  */
 extern int loki_launchURL(const char *url);
+
+/* Check if the program is in PATH */
+extern int loki_valid_program(const char *program);

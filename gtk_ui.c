@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.72 2002-09-20 22:51:44 megastep Exp $
+   $Id: gtk_ui.c,v 1.73 2002-10-19 07:41:10 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -323,8 +323,7 @@ void on_class_continue_clicked( GtkWidget  *w, gpointer data )
 		}
 	}
 	/* Install desktop menu items */
-	if ( !GetProductHasNoBinaries(cur_info) &&
-		 has_binaries(cur_info, cur_info->config->root->childs)) {
+	if ( !GetProductHasNoBinaries(cur_info)) {
 		cur_info->options.install_menuitems = 1;
 	}
 	widget = glade_xml_get_widget(setup_glade, "setup_notebook");
@@ -1011,13 +1010,13 @@ static void init_binary_path(void)
     gtk_combo_set_use_arrows( GTK_COMBO(widget), 0);
 }
 
-static void init_menuitems_option(install_info *info, xmlNodePtr node)
+static void init_menuitems_option(install_info *info)
 {
     GtkWidget* widget;
 
     widget = glade_xml_get_widget(setup_glade, "setup_menuitems_checkbox");
     if ( widget ) {
-        if ( has_binaries(info, node) ) {
+        if ( ! GetProductHasNoBinaries(info) ) {
             setup_checkbox_menuitems_slot(widget, NULL);
         } else {
             gtk_widget_hide(widget);
@@ -1203,6 +1202,10 @@ static install_state gtkui_init(install_info *info, int argc, char **argv, int n
 
 	gtk_set_locale();
     gtk_init(&argc,&argv);
+	/* Try to get a RGB colormap */
+	gdk_rgb_init();
+	gtk_widget_set_default_colormap(gdk_rgb_get_cmap());
+	gtk_widget_set_default_visual(gdk_rgb_get_visual());
     glade_init();
 
     /* Glade segfaults if the file can't be read */
@@ -1488,7 +1491,7 @@ static install_state gtkui_setup(install_info *info)
     init_binary_path();
     update_size();
     update_space();
-    init_menuitems_option(info, info->config->root->childs);
+    init_menuitems_option(info);
 
     in_setup = FALSE;
 

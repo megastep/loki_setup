@@ -447,7 +447,7 @@
 	<widget>
 	  <class>GtkFrame</class>
 	  <name>frame10</name>
-	  <label>Install Options</label>
+	  <label>Options</label>
 	  <label_xalign>0</label_xalign>
 	  <shadow_type>GTK_SHADOW_ETCHED_IN</shadow_type>
 	  <child>

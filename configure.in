@@ -20,7 +20,7 @@ AC_PROG_RANLIB
 AC_PROG_MAKE_SET
 AC_PROG_INSTALL
 
-AC_PATH_X
+AC_PATH_XTRA
 AC_CHECK_HEADERS(unistd.h)
 AC_CHECK_HEADERS(strings.h)
 AC_CHECK_HEADERS(pwd.h)
@@ -33,6 +33,7 @@ AC_CHECK_HEADERS(sys/dir.h)
 AC_CHECK_HEADERS(sys/statfs.h)
 AC_CHECK_HEADERS(sys/statvfs.h)
 AC_CHECK_HEADERS(sys/vfs.h)
+AC_CHECK_HEADERS(sys/mount.h)
 AC_CHECK_HEADERS(dir.h)
 AC_CHECK_HEADERS(util.h)
 AC_CHECK_HEADERS(libutil.h)
@@ -57,8 +58,11 @@ CFLAGS="-fsigned-char -funroll-loops -Wall -g -O2 -I. $X_CFLAGS"
 CONSOLE_LIBS=""
 if test -d /usr/codehost/lib; then
 	LIBS="-L/usr/codehost/lib"
+elif test -d /opt/codehost/lib; then
+	LIBS="-L/opt/codehost/lib"
+else
+	LIBS="$LIBS -L/usr/local/lib"
 fi
-LIBS="$LIBS -L/usr/local/lib"
 
 # Build some static binaries by default when possible
 STATIC="-static"
@@ -74,6 +78,7 @@ case "$target" in
 	CFLAGS="$CFLAGS -Dsco"
 	RDYNAMIC="-Wl,-Bexport"
 	EXTRA_LIBS="-lsocket -lnsl -lresolv -lcdfs"
+	AC_DEFINE(USE_BSD_PTY, 1, Use BSD-style ptys)
 	AC_DEFINE(NO_XOPEN_SOURCE, 1, XOPEN source breaks)
 	AC_DEFINE(NO_POSIX_C_SOURCE, 1, POSIX C source breaks)
 	AC_DEFINE(NO_POSIX_SOURCE, 1, POSIX source breaks)
@@ -84,12 +89,27 @@ case "$target" in
 	RDYNAMIC="-Wl,-Bexport"
 	LIBDL=""
 	EXTRA_LIBS="-L/udk/usr/lib -lsocket -lnsl -lresolv -lgen"
+	AC_DEFINE(USE_BSD_PTY, 1, Use BSD-style ptys)
 	AC_DEFINE(NO_XOPEN_SOURCE, 1, XOPEN source breaks)
 	AC_DEFINE(NO_POSIX_C_SOURCE, 1, POSIX C source breaks)
 	AC_DEFINE(NO_POSIX_SOURCE, 1, POSIX source breaks)
 	ARCH=x86 ;;
+    *aix*)
+	STATIC=""
+	BSTATIC=""
+	BDYNAMIC=""
+	RDYNAMIC="-Wl,-bexpall"
+	AC_DEFINE(NO_XOPEN_SOURCE, 1, XOPEN source breaks)
+	AC_DEFINE(NO_POSIX_C_SOURCE, 1, POSIX C source breaks)
+	AC_DEFINE(NO_POSIX_SOURCE, 1, POSIX source breaks)
+	ARCH=`uname -p`
+        if test "$ARCH" = powerpc; then
+                ARCH=ppc
+        fi
+	;;
     *i?86*freebsd*)
 	LIBDL=""
+	AC_DEFINE(USE_BSD_PTY, 1, Use BSD-style ptys)
         ARCH=x86 ;;
     *i?86*)
         ARCH=x86 ;;
@@ -120,9 +140,9 @@ case "$target" in
 	STATIC=""
 	RDYNAMIC="-Wl,-export-dynamic"
 	LIBDL=""
-	ARCH=`uname -m` ;;
+	ARCH=`uname -p` ;;
     *)
-        ARCH=`uname -m` ;;
+        ARCH=`uname -p 2> /dev/null || uname -m` ;;
 esac
 
 GTK_STATIC=$BSTATIC
@@ -165,7 +185,14 @@ GTK_LIBS=$GTK_STATIC
 
 LIBS="$LIBS $EXTRA_LIBS"
 
-AC_CHECK_LIB(intl, gettext, USE_LIBINTL=yes,
+AC_CHECK_LIB(iconv, iconv_open, 
+		LIBINTL="-liconv"
+		LIBS="$LIBS $LIBINTL"
+)
+
+AC_CHECK_LIB(intl, gettext, 
+			USE_LIBINTL=yes
+			LIBINTL="-lintl $LIBINTL",
 	if test -f /opt/gettext/lib/libintl.a; then
 		LIBINTL="/opt/gettext/lib/libintl.a /opt/libiconv/lib/libiconv.a"
 		LIBS="$LIBS $LIBINTL"
@@ -348,11 +375,7 @@ fi
 LIBS="$LIBS $BZ2LIB"
 
 if test ! -z "$USE_LIBINTL"; then
-	LIBINTL="$BSTATIC -L/usr/local/lib -lintl"
-	AC_CHECK_LIB(iconv, libiconv, 
-			LIBINTL="$LIBINTL -liconv"
-	)
-	LIBINTL="$LIBINTL -lz $BDYNAMIC"
+	LIBINTL="$BSTATIC $LIBINTL -lz $BDYNAMIC"
 	LIBS="$LIBS $LIBINTL"
 	GUI_LIBS="$GUI_LIBS $LIBINTL"
 else
@@ -406,6 +429,16 @@ if test x$enable_dynamic = xyes; then
         AC_DEFINE(DYNAMIC_PLUGINS, 1, Dynamic plugin support.)
 fi
 
+AC_ARG_WITH(image,
+[  --with-image              specifiy the CD image path  [default=../../spp/private/image]], 
+	,   with_image=../../spp/private/image)
+IMAGE="$with_image"
+
+AC_ARG_WITH(brand,
+[  --with-brand              specifiy the brand prefix  [default=codehost]], 
+	,   with_brand=codehost)
+BRAND="$with_brand"
+
 #dnl enable the Outrage plugin (proprietary)
 #AC_ARG_ENABLE(outrage,
 #[  --enable-outrage          enable the Outrage plugin    [default=no]],
@@ -441,6 +474,8 @@ AC_SUBST(SETUP_VERSION_MINOR)
 AC_SUBST(SETUP_VERSION_RELEASE)
 AC_SUBST(BRANDELF)
 AC_SUBST(DO_DIALOG)
+AC_SUBST(IMAGE)
+AC_SUBST(BRAND)
 
 AC_OUTPUT(Makefile plugins/Makefile dialog/Makefile)
 

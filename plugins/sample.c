@@ -1,5 +1,5 @@
 /* Sample plugin for setup */
-/* $Id: sample.c,v 1.6 2002-09-20 23:46:49 megastep Exp $ */
+/* $Id: sample.c,v 1.7 2002-10-19 07:41:11 megastep Exp $ */
 
 #include "plugins.h"
 #include "file.h"

@@ -131,6 +131,8 @@ There are several optional attributes of the install element:
  nobinaries When set to "yes", then setup won't prompt the user for a
             path for binaries. Set this when this installation won't
             actually install any binary file.
+            *THIS ATTRIBUTE IS DEPRECATED AS OF SETUP 1.6.2*
+            Not putting a 'binary' tag in the XML file will have the same effect.
 
  promptbinaries When set to "yes", setup will create a checkbox
                 to allow the user whether or not to create 
@@ -403,6 +405,10 @@ There are several optional attributes of the option element:
             is ignored if this is not a meta-installation, and required if it is.
             See the section 'About Meta-Installations' below for more details.
 
+ tag        If specified, this string will be included in the SETUP_OPTIONTAGS
+            environment variable that is set before calling any scripts. This allows
+            scripts to know what user selections are active.
+
 The option element support the LANG sub-element, which is used to specify
 translated strings for the option name. The only attribute of this element
 is 'lang', which should be the name of the locale to be matched against
@@ -627,20 +633,6 @@ There are several optional attributes of the files element:
             against this checksum. Installation will abort in the case of an invalid
             checksum, indicating corruption.
 
- process    You can optionally manually uncompress (or otherwise post-process) a
-            file through an arbitrary shell command specified in this tag. %s in the
-            string will be substituted (twice) with the actual file name. The current directory 
-            for the command will be that of the directory containing the file to be processed.
-
- target     Use this optional tag with 'process' above, to specify the resulting file
-            name of the uncompressed/processed file. If this tag is in effect, then the
-            original file will be removed, if it is still present. %s can optionally be used
-            to substitute the original file name (or any other valid %s pattern according to
-            printf).
-
-Use caution when using the "uncompress" as file sizes won't be able to be determined automatically.
-Hence, you are much better off specifying the uncompressed size of the options in the XML file.
-
 The SCRIPT element:
 
 The script element contains shell commands which are executed when the
@@ -681,6 +673,8 @@ The following environment variables are defined while in the shell script:
                           are to be installed from CD-ROM.
     SETUP_DISTRO        : If an OS distribution was detected, this is its
                           name.
+    SETUP_OPTIONTAGS    : A blank-separated list of the option tags for the
+                          <option>'s selected for installation.
 
 About localization :
 
@@ -713,9 +707,9 @@ versions of the same major number), and 'exact' (for the exact specification).
 
 Currently, the recognized distribution names are :
 
-Linux: redhat, mandrake, suse, debian, slackware, caldera, linuxppc, yellowdog, linux
-
-UNIX: freebsd, solaris, hpux, irix, sco, aix
+Linux: redhat, mandrake, suse, debian, slackware, caldera, linuxppc, yellowdog,
+       turbo, linux
+UNIX:  freebsd, solaris, hpux, irix, sco, aix
 
 'linux' is a special distribution name that can be used to differentiate between a GNU/Linux
 system and other UNIX flavors. The 'linux' version numbers correspond to the kernel version.

@@ -7,7 +7,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <sys/param.h>
-#include <sys/mount.h>
+#ifdef HAVE_SYS_MOUNT_H
+# include <sys/mount.h>
+#endif
 #include <sys/utsname.h>
 
 #ifdef __FreeBSD__
@@ -39,10 +41,12 @@
 #ifndef MNTTYPE_CDROM
 #ifdef __FreeBSD__
 #define MNTTYPE_CDROM    "cd9660"
-#elif defined(__svr4__)
-#define MNTTYPE_CDROM    "hsfs"
 #elif defined(hpux)
 #define MNTTYPE_CDROM    "cdfs"
+#elif defined(_AIX)
+#define MNTTYPE_CDROM    "cdrfs"
+#elif defined(__svr4__)
+#define MNTTYPE_CDROM    "hsfs"
 #else
 #define MNTTYPE_CDROM    "iso9660"
 #endif
@@ -63,9 +67,9 @@
 #endif
 
 #ifdef MNTTAB
-#define FSTAB MNTTAB
+#define SETUP_FSTAB MNTTAB
 #else
-#define FSTAB _PATH_MNTTAB
+#define SETUP_FSTAB _PATH_MNTTAB
 #endif
 
 /* The filesystems that were mounted by setup */
@@ -269,7 +273,7 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
 	mount_cmd = "/usr/sbin/pfs_mount";
 	mnttype = "pfs-rrip";
     } else {
-	fstab = FSTAB;
+	fstab = SETUP_FSTAB;
 	mtab = MOUNTS_FILE;
 	mnttype = MNTTYPE_CDROM;
 	mount_cmd = "mount";
@@ -318,7 +322,7 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
     struct mntent *mntent;
 
     /* Try to mount unmounted CDROM filesystems */
-    mountfp = setmntent( FSTAB, "r" );
+    mountfp = setmntent( SETUP_FSTAB, "r" );
     if( mountfp != NULL ) {
         while( (mntent = getmntent( mountfp )) != NULL ){
             if ( !strcmp(mntent->mnt_type, MNTTYPE_CDROM) 
@@ -495,7 +499,7 @@ void DetectLocale(void)
 
 /* Matches a locale string against the current one */
 
-int MatchLocale(const char *str)
+int match_locale(const char *str)
 {
 	if ( ! str )
 		return 1;

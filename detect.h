@@ -28,7 +28,7 @@ extern int match_distro(struct _install_info *info, const char *wanted);
 /* Detect the locale settings */
 extern void DetectLocale(void);
 /* Matches a locale string against the current one */
-extern int MatchLocale(const char *str);
+extern int match_locale(const char *str);
 
 /* Indicates if any filesystems were mounted by setup */
 int mounted_filesystems(void);
