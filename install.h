@@ -70,6 +70,9 @@ typedef struct {
     char symlinks_path[PATH_MAX];
     const char *installed_symlink;
 
+	/* The path to the binary for the 'Play' button */
+	char play_binary[PATH_MAX];
+
     /* The XML installation config */
     xmlDocPtr config;
 

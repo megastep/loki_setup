@@ -265,6 +265,10 @@ There are several optional attributes of the binary element:
             that will be used to optionally launch the game after the
             installation program terminates. There can be only one 'binary'
             element with this attribute in the whole XML file.
+            If this attribute has the 'no' value, and a 'symlink' is defined,
+            then this binary will explicitly not be used to launch after
+            the installation. The default value for this attribute is 'yes'
+            for the first binary with a symlink.
 
  icon       This is an optional icon file that you should install into
             the top level of the install directory.  If both a symlink

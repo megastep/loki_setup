@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.51 2000-07-05 21:15:48 megastep Exp $ */
+/* $Id: install.c,v 1.52 2000-07-06 02:12:21 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
    04/12/2000: Modifed run_script function to put the full pathname of the
@@ -291,6 +291,8 @@ install_info *create_install(const char *configfile, int log_level)
                                          GetProductName(info));
     strcpy(info->symlinks_path, DEFAULT_SYMLINKS);
 
+	*info->play_binary = '\0';
+
     /* If the default path starts with a ~, then expand it to the user's
        home directory */
     temppath = strdup(info->install_path);
@@ -400,15 +402,23 @@ void add_bin_entry(install_info *info, const char *path,
             elem->next = info->bin_list;
             info->bin_list = elem;
         }
-        if ( play && !strcmp(play, "yes")) {
-			if ( !symlink ) {
-				log_fatal(info, _("You must use a 'symlink' attribute with 'play'"));
-			} else if ( !info->installed_symlink ) {
-				info->installed_symlink = symlink;
-			} else {
-				log_fatal(info, _("There can be only one binary with a 'play' attribute"));
+        if ( play ) {
+			if ( !strcmp(play, "yes") ) {
+				if ( !symlink ) {
+					log_fatal(info, _("You must use a 'symlink' attribute with 'play'"));
+				} else if ( !info->installed_symlink ) {
+					info->installed_symlink = symlink;
+					snprintf(info->play_binary, PATH_MAX, "%s/%s", info->symlinks_path, symlink);
+				} else {
+					log_fatal(info, _("There can be only one binary with a 'play' attribute"));
+				}
+			} else if ( strcmp(play, "no") ) {
+				log_fatal(info, _("The only valid values for the 'play' attribute are yes and no"));
 			}
-        }
+        } else if ( symlink && !info->installed_symlink ) { /* Defaults to 'yes' */
+			info->installed_symlink = symlink;
+			snprintf(info->play_binary, PATH_MAX, "%s/%s", info->symlinks_path, symlink);
+		}
     } else {
         log_fatal(info, _("Out of memory"));
     }
@@ -820,7 +830,7 @@ install_state launch_game(install_info *info)
     char cmd[PATH_MAX];
 
     if ( info->installed_symlink ) {
-        sprintf(cmd, "%s/%s %s &", info->symlinks_path, info->installed_symlink, info->args);
+        snprintf(cmd, PATH_MAX, "%s %s &", info->play_binary, info->args);
 		system(cmd);
     }
     return SETUP_EXIT;
