@@ -1,4 +1,4 @@
-AC_INIT
+AC_INIT(uninstall.c)
 AC_CONFIG_HEADER(config.h)
 
 dnl Define the release numbers here
@@ -41,11 +41,12 @@ AC_CHECK_FUNCS(ttyname_r)
 AC_CHECK_FUNCS(strlcpy)
 AC_CHECK_PROG(SU_PATH, su, /bin/su, $PATH:/usr/sbin:/sbin)
 
-CFLAGS="-fsigned-char -funroll-loops -Wall -g -O2 -I. $X_CFLAGS -DSU_PATH=\\\"$SU_PATH\\\""
+CFLAGS="-fsigned-char -funroll-loops -Wall -g -O2 -I. $X_CFLAGS"
 
 LIBS="-L/usr/local/lib -L$x_libraries"
 AC_CHECK_LIB(intl, gettext, USE_LIBINTL=yes)
 AC_CHECK_LIB(ncurses, keypad, USE_NCURSES=yes)
+
 AC_CHECK_LIB(gpm, Gpm_Open, USE_GPM=yes)
 AC_CHECK_LIB(util, forkpty, LIBUTIL="-lutil")
 
@@ -282,7 +283,7 @@ else
     AC_MSG_ERROR([*** Please compile setupdb first!])
 fi
 
-CFLAGS="$CFLAGS -I$SETUPDB"
+CFLAGS="$CFLAGS -I$SETUPDB -DSU_PATH=\\\"$SU_PATH\\\""
 OS=`uname -s`
 
 AC_SUBST(SETUPDB)
