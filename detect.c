@@ -119,7 +119,7 @@ int detect_cdrom(install_info *info)
     int num_cdroms = 0;
     char file[PATH_MAX];
 #ifdef __FreeBSD__
-	int mounted = getfsstat(NULL, 0, MNT_NOWAIT);
+	int mounted;
     struct fstab *fstab;
 #else
     char mntdevpath[PATH_MAX];
@@ -172,6 +172,7 @@ int detect_cdrom(install_info *info)
     }
     endfsent();
 
+    mounted = getfsstat(NULL, 0, MNT_WAIT);
 	if ( mounted > 0 ) {
         int i;
 		struct statfs *mnts = (struct statfs *)malloc(sizeof(struct statfs) * mounted);
