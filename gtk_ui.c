@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.100 2004-06-15 03:58:43 megastep Exp $
+   $Id: gtk_ui.c,v 1.101 2004-06-23 23:38:42 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1334,7 +1334,7 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
 		} else if ( !strcmp(child->name, "exclusive") ) {
 			xmlNodePtr exchild;
 			GSList *list = NULL;
-			int reinst = ! GetReinstallNode(info, node);
+			int reinst = GetReinstallNode(info, child);
 
 			for ( exchild = child->childs; exchild; exchild = exchild->next) {
 				parse_option(info, component, exchild, window, box, level+1, button, 1, reinst, &list);
@@ -1353,10 +1353,10 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
 		}
 		if ( exclusive ) {
 			/* Reinstall an exclusive option - make sure to select the installed one */
-			gtk_widget_set_sensitive(button, FALSE);
+			gtk_widget_set_sensitive(button, excl_reinst);
 			if ( comp && loki_find_option(comp, name) ) {
 				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
-				mark_option(info, node, excl_reinst ? "true" : "false", 1);
+				mark_option(info, node, "true", 1);
 			} else {
 				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), FALSE);
 				mark_option(info, node, "false", 1);
@@ -1699,7 +1699,7 @@ static install_state gtkui_setup(install_info *info)
 		} else if ( ! strcmp(node->name, "exclusive") ) {
 			xmlNodePtr child;
 			GSList *list = NULL;
-			int reinst = ! GetReinstallNode(info, node);
+			int reinst = GetReinstallNode(info, node);
 			for ( child = node->childs; child; child = child->next) {
 				parse_option(info, NULL, child, window, options, 0, NULL, 1, reinst, &list);
 			}
@@ -1722,7 +1722,7 @@ static install_state gtkui_setup(install_info *info)
 					} else if ( ! strcmp(child->name, "exclusive") ) {
 						xmlNodePtr child2;
 						GSList *list = NULL;
-						int reinst = ! GetReinstallNode(info, node);
+						int reinst = GetReinstallNode(info, child);
 						for ( child2 = child->childs; child2; child2 = child2->next) {
 							parse_option(info, xmlGetProp(node, "name"), child2, window, options, 0, NULL, 1, reinst, &list);
 						}

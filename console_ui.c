@@ -123,6 +123,7 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
     char line[BUFSIZ];
     char prompt[BUFSIZ];
     const char *wanted, *warn;
+	xmlNodePtr kid;
 	int retval = 1;
     yesno_answer response = RESPONSE_INVALID, default_response = RESPONSE_INVALID;
 
@@ -159,7 +160,7 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
 		} else {
 			comp = loki_getdefault_component(info->product);
 		}
-		if ( excl_reinst ) {
+		if ( exclusive && ! excl_reinst ) {
 			if ( comp &&
 				 loki_find_option(comp, get_option_name(info,node,NULL,0)) ) {
 				printf(_("Previously installed option '%s' will be installed.\n"), get_option_name(info,node,line,BUFSIZ));
@@ -177,7 +178,7 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
 						parse_option(info, component, node, 0, 0);
 					} else if ( ! strcmp(node->name, "exclusive") ) {
 						xmlNodePtr child;
-						int reinst = ! GetReinstallNode(info, node);
+						int reinst = GetReinstallNode(info, node);
 						for ( child = node->childs; child && parse_option(info, component, child, 1, reinst); child = child->next)
 							;
 					}
@@ -196,7 +197,13 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
 		response = RESPONSE_YES;
 	}
 
+	if ( !strcmp(node->name, "exclusive")) {
+		printf(_("'%s' :\n"), get_option_name(info,node,line,BUFSIZ));
+		response = RESPONSE_YES;
+	}
+
  options_loop:
+
     /* See if the user wants this option */
     while ( response == RESPONSE_INVALID ) {
 		snprintf(prompt, sizeof(prompt), _("Option: '%s' ?"), get_option_name(info,node,line,BUFSIZ));
@@ -229,7 +236,7 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
 
 			if ( default_response != RESPONSE_YES ) {
 				warn = get_option_warn(info, node);
-				if ( warn && ! excl_reinst ) { /* Display a warning message to the user */
+				if ( warn && excl_reinst ) { /* Display a warning message to the user */
 					console_prompt(warn, RESPONSE_OK);
 				}
 			}
@@ -241,17 +248,21 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
             info->install_size += size_node(info, node);
 
             /* Recurse down any other options */
-            node = node->childs;
-            while ( node ) {
-                if ( ! strcmp(node->name, "option") ) {
-                    parse_option(info, component, node, 0, 0);
-                } else if ( ! strcmp(node->name, "exclusive") ) {
+            kid = node->childs;
+            while ( kid ) {
+                if ( ! strcmp(kid->name, "option") ) {
+					if ( !strcmp(node->name, "exclusive") ) {
+						parse_option(info, component, kid, 1, GetReinstallNode(info, node));
+					} else {
+						parse_option(info, component, kid, 0, 0);
+					}
+                } else if ( ! strcmp(kid->name, "exclusive") ) {
 					xmlNodePtr child;
-					int reinst = ! GetReinstallNode(info, node);
-					for ( child = node->childs; child && parse_option(info, component, child, 1, reinst); child = child->next)
+					int reinst = GetReinstallNode(info, kid);
+					for ( child = kid->childs; child && parse_option(info, component, child, 1, reinst); child = child->next)
 						;
 				}
-                node = node->next;
+                kid = kid->next;
             }
 			if ( exclusive ) /* We stop prompting the user once an option has been chosen */
 				retval = 0;
@@ -502,7 +513,7 @@ static install_state console_setup(install_info *info)
 					parse_option(info, NULL, node, 0, 0);
 				} else if ( ! strcmp(node->name, "exclusive") ) {
 					xmlNodePtr child;
-					int reinst = ! GetReinstallNode(info, node);
+					int reinst = GetReinstallNode(info, node);
 					for ( child = node->childs; child; child = child->next) {
 						parse_option(info, NULL, child, 1, reinst);
 					}

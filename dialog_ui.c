@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.24 2004-06-15 03:58:43 megastep Exp $
+ * $Id: dialog_ui.c,v 1.25 2004-06-23 23:38:42 megastep Exp $
  */
 
 #include <limits.h>
@@ -181,9 +181,9 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr pa
 				} else {
 					comp = loki_getdefault_component(info->product);
 				}
-				if ( exclusive ) {
+				if ( exclusive && ! excl_reinst ) {
 					if ( comp && loki_find_option(comp, get_option_name(info, node, NULL, 0)) ) {
-						mark_option(info, node, excl_reinst ? "true" : "false", 0);
+						mark_option(info, node, "true", 0);
 					} else {
 						mark_option(info, node, "false", 0);
 					}
@@ -300,7 +300,7 @@ options_loop:
 				mark_option(info, nodes[i], "false", 0);
 		    }
 		} else if ( !strcmp(nodes[i]->name, "exclusive") && result[i]) {
-		    ret = parse_option(info, component, nodes[i], 1, !GetReinstallNode(info, nodes[i]),
+		    ret = parse_option(info, component, nodes[i], 1, GetReinstallNode(info, nodes[i]),
 							   get_option_name(info, nodes[i], buf, sizeof(buf)));
 		} else if ( !strcmp(nodes[i]->name, "component") && result[i]) {
 			snprintf(buf, sizeof(buf), _("Component: %s"), xmlGetProp(nodes[i], "name"));
