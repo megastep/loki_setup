@@ -264,6 +264,8 @@ extern int         GetProductSplashPosition(install_info *info);
 extern int         GetProductHasManPages(install_info *info);
 extern const char *GetProductCDKey(install_info *info);
 extern const char *GetProductPostInstallMsg(install_info *info);
+/** whether the user should be prompted when files already exist */
+extern int GetProductPromptOverwrite(install_info *info);
 
 extern const char *IsReadyToInstall(install_info *info);
 extern int         CheckRequirements(install_info *info);

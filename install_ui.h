@@ -33,6 +33,8 @@ typedef struct {
     int is_gui; /* Whether an X11 server is available for that UI driver */
 } Install_UI;
 
+extern Install_UI UI;
+
 extern int console_okay(Install_UI *UI, int *argc, char ***argv);
 extern int gtkui_okay(Install_UI *UI, int *argc, char ***argv);
 extern int dialog_okay(Install_UI *UI, int *argc, char ***argv);

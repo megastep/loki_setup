@@ -1,5 +1,5 @@
 /* UnrealEngine2-compressed files (.uz2) plugin for setup */
-/* $Id: uz2.c,v 1.4 2004-03-04 06:15:58 icculus Exp $ */
+/* $Id: uz2.c,v 1.5 2004-09-07 22:40:29 megastep Exp $ */
 
 #include <stdlib.h>
 #include <string.h>
@@ -137,7 +137,7 @@ static size_t UZ2Copy(install_info *info, const char *path, const char *dest, co
     if ((in = file_open(info, path, "rb")) == NULL)
         return 0;
 
-    if ((out = file_open(info, final, (mut && *mut=='y') ? "wm" : "wb"))==NULL)
+    if ((out = file_open_install(info, final, (mut && *mut=='y') ? "wm" : "wb"))==NULL)
     {
         file_close(info, in);
         return 0;

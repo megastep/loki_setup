@@ -1,5 +1,5 @@
 /* TAR plugin for setup */
-/* $Id: tar.c,v 1.10 2004-03-09 15:17:53 icculus Exp $ */
+/* $Id: tar.c,v 1.11 2004-09-07 22:40:29 megastep Exp $ */
 
 #include "config.h"
 #include "plugins.h"
@@ -88,7 +88,7 @@ static size_t TarCopy(install_info *info, const char *path, const char *dest, co
 					file_skip(info, left, input);
 				} else {
 					this_size = 0;
-					output = file_open(info, final, (mut && *mut=='y') ? "wm" : "wb");
+					output = file_open_install(info, final, (mut && *mut=='y') ? "wm" : "wb");
 					if ( output ) {
 						while ( blocks-- > 0 ) {
 							if ( file_read(info, &record, (sizeof record), input)

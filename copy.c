@@ -305,11 +305,8 @@ ssize_t copy_file(install_info *info, const char *cdrom, const char *path, const
 		if ( input == NULL ) {
 			goto copy_file_exit;
 		}
-		/* To avoid problem with busy binary files, remove them first if they exist */
-		if ( binary && file_exists(final) ) {
-			unlink(final);
-		}
-		output = file_open(info, final, (mut && *mut=='y') ? "wm" : "w");
+
+		output = file_open_install(info, final, (mut && *mut=='y') ? "wm" : "w");
 		if ( output == NULL ) {
 			file_close(info, input);
 			goto copy_file_exit;
@@ -898,7 +895,6 @@ ssize_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
 				if ( product ) {
 					if ( GetProductIsMeta(info) ) {
 						extern const char *argv0; // Set in main.c
-                        extern Install_UI UI;
                         if (UI.shutdown) UI.shutdown(info);
 						// We spawn a new setup for this product
 #if defined(darwin)
@@ -1259,4 +1255,5 @@ int has_binaries(install_info *info, xmlNodePtr node)
     }
     return num_binaries;
 }
+
 

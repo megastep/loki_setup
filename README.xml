@@ -188,6 +188,9 @@ There are several optional attributes of the install element:
 
  manpages   If set to "yes", then the user will be prompted for the install pages installation path.
             Should be used when using the MANPAGE element described below.
+ 
+ nopromptoverwrite  If set to 'yes' existing files will be overwritten without
+                    prompting the user. This was the default before setup 1.6.4
 
 The CDROM element:
 

@@ -18,6 +18,7 @@
 
 #include "file.h"
 #include "install_log.h"
+#include "install_ui.h"
 
 #ifdef HAVE_BZIP2_SUPPORT
 
@@ -126,6 +127,30 @@ stream *file_fdopen(install_info *info, const char *path, FILE *fd, gzFile zfd, 
 	  streamp->size = st.st_size;
 	}
 	return streamp;
+}
+
+static int prompt_overwrite = -1;
+
+stream *file_open_install(install_info *info, const char *path, const char *mode)
+{
+	if ( file_exists(path) ) {
+		if( prompt_overwrite == -1 ) {
+			prompt_overwrite = GetProductPromptOverwrite(info);
+		}
+
+		if ( prompt_overwrite ) {
+			char msg[128];
+			snprintf(msg, sizeof(msg), _("File '%25s' already exists, overwrite?"), path);
+			if ( UI.prompt(msg, RESPONSE_YES) != RESPONSE_YES ) {
+				return NULL;
+			}
+		}
+		log_warning(_("File exists: '%s'"), path);
+
+		/* To avoid problem with busy binary files, remove them first if they exist */
+		unlink(path);
+	}
+	return file_open(info, path, mode);
 }
 
 stream *file_open(install_info *info, const char *path, const char *mode)

@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.141 2004-09-07 22:16:53 megastep Exp $ */
+/* $Id: install.c,v 1.142 2004-09-07 22:40:29 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -297,12 +297,33 @@ int GetProductSplashPosition(install_info *info)
     if ( str && !strcasecmp(str, "top") ) {
         ret = 0; /* Top */
     }
+	xmlFree(str);
     return ret;
 }
 
 const char *GetProductCDKey(install_info *info)
 {
     return xmlGetProp(info->config->root, "cdkey");
+}
+
+int GetProductPromptOverwrite(install_info *info)
+{
+	int ret = 1; /* yes */
+	int needfree = 0;
+    char *str = NULL;
+	if(getenv("SETUP_NOPROMPTOVERWRITE")) {
+		str = getenv("SETUP_NOPROMPTOVERWRITE");
+	}
+	else {
+		str = xmlGetProp(info->config->root, "nopromptoverwrite");
+		needfree = 1;
+	}
+    if ( str && (!strcasecmp(str, "yes") || !strcasecmp(str, "true"))) {
+        ret = 0; /* no */
+    }
+	if(needfree)
+		xmlFree(str);
+    return ret;
 }
 
 /* returns true if any deviant paths are not writable */

@@ -149,7 +149,7 @@ size_t copy_cpio_stream(install_info *info, stream *input, const char *dest, con
 			} else {
 				unsigned long chk = 0;
 				/* Open the file for output */
-				output = file_open(info, file_hdr.c_name, (mut && *mut=='y') ? "wm" : "wb"); /* FIXME: Mmh, is the path expanded??? */
+				output = file_open_install(info, file_hdr.c_name, (mut && *mut=='y') ? "wm" : "wb"); /* FIXME: Mmh, is the path expanded??? */
 				if(output){
 					left = file_hdr.c_filesize;
 					while(left && (nread=file_read(info, buf, (left >= BUFSIZ) ? BUFSIZ : left, input))){

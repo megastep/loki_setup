@@ -1,5 +1,5 @@
 /* ZIP plugin for setup */
-/* $Id: zip.c,v 1.7 2004-02-28 15:44:01 icculus Exp $ */
+/* $Id: zip.c,v 1.8 2004-09-07 22:40:29 megastep Exp $ */
 
 #include "plugins.h"
 #include "file.h"
@@ -737,7 +737,7 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
 
         if (!symlnk)
         {
-            out = file_open(info, final, (mut && *mut=='y') ? "wm" : "wb");
+            out = file_open_install(info, final, (mut && *mut=='y') ? "wm" : "wb");
             if (!out)
             {
                 log_debug("ZIP: failed to open [%s] for write.", final);
