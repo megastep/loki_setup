@@ -1595,6 +1595,11 @@
 		<name>button33</name>
 		<can_default>True</can_default>
 		<can_focus>True</can_focus>
+		<signal>
+		  <name>clicked</name>
+		  <handler>setup_button_browser_slot</handler>
+		  <last_modification_time>Sat, 11 Dec 1999 04:35:32 GMT</last_modification_time>
+		</signal>
 		<label>Launch Browser</label>
 	      </widget>
 	    </widget>

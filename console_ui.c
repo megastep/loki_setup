@@ -342,17 +342,24 @@ static int run_lynx(const char *url)
 
 
 
-static  install_state console_website( install_info *info ) {
-  printf("Thank you for installing %s!\n", GetProductDesc(info) );
-  printf("Please register at our website.\n");
-  
-  if ( (strcmp( GetAutoLaunch(info), "true" )==0)
-       || (prompt_yesno("Would you like to launch lynx?", RESPONSE_YES)== RESPONSE_YES ) )
+static install_state console_website(install_info *info)
+{
+    const char *website_text;
 
-  {
-    launch_browser( info, run_lynx );
-  }
-  return SETUP_COMPLETE;
+    printf("Thank you for installing %s!\n", GetProductDesc(info) );
+    website_text = GetWebsiteText(info);
+    if ( website_text ) {
+        printf("%s\n", website_text);
+    } else {
+        printf("Please visit our website for updates and support.\n");
+    }
+    sleep(2);
+
+    if ( (strcmp( GetAutoLaunchURL(info), "true" )==0)
+         || (prompt_yesno("Would you like to launch web browser?",RESPONSE_YES)== RESPONSE_YES ) ) {
+        launch_browser( info, run_lynx );
+    }
+    return SETUP_COMPLETE;
 }
 
 
