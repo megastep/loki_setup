@@ -79,9 +79,6 @@ else
 	LIBS="$LIBS -L/usr/local/lib"
 fi
 
-AC_CHECK_FUNCS(getopt)
-AC_CHECK_LIB(gnugetopt, getopt_long, LIBS="$LIBS -lgnugetopt")
-AC_CHECK_FUNCS(getopt_long)
 
 # Build some static binaries by default when possible
 STATIC="-static"
@@ -195,6 +192,10 @@ case "$target" in
 esac
 
 CFLAGS="$CFLAGS $REENTRANT"
+
+AC_CHECK_FUNCS(getopt)
+AC_CHECK_LIB(gnugetopt, getopt_long, LIBS="$LIBS $BSTATIC -lgnugetopt")
+AC_CHECK_FUNCS(getopt_long)
 
 AC_CHECK_LIB(util, forkpty, LIBUTIL="-lutil"; LIBS="$LIBS -lutil")
 AC_CHECK_FUNCS(openpty)
