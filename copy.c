@@ -928,7 +928,24 @@ size_t size_node(install_info *info, xmlNodePtr node)
     /* First do it the easy way, look for a size attribute */
     size_prop = xmlGetProp(node, "size");
     if ( size_prop ) {
-        size = atol(size_prop)*1024*1024;
+        size = atol(size_prop);
+		switch(size_prop[strlen(size_prop)-1]){
+		case 'k': case 'K':
+			size *= 1024;
+			break;
+		case 'm': case 'M':
+			size *= 1024*1024;
+			break;
+		case 'g': case 'G':
+			size *= 1024*1024*1024;
+			break;
+		case 'b': case 'B':
+			break;
+		default:
+			if ( size < 1024 ) {
+				log_warning(info, _("Suspect size value for option %s\n"), node->name);
+			}
+		}
     }
 
     lang_prop = xmlGetProp(node, "lang");

@@ -12,6 +12,10 @@ Borland/Inprise Corp. - Tue May  9 12:45:03 PDT 2000
  * Bugfixes in GTK UI for handling the destroy button.
  * Expansion of ~ for the installation directory.
  * Fixed other path problems.
+Stéphane Peter - Sun May 14 03:11:38 PDT 2000
+ * Allow the "size" attribute for options to be specified in kilobytes, megabytes
+   and gigabytes, using the 'K', 'M' and 'G' suffixes. WARNING: The default size
+   for this attribute is now in bytes and no longer in MBs !
 
 1.2.3:
 Sam Lantinga - Fri Apr 28 17:17:27 PDT 2000

@@ -151,7 +151,10 @@ There are several optional attributes of the option element:
             The version can be one of:
                libc5, glibc-2.0, glibc-2.1, etc.
 
- size       This is an optional size of the install option in megabytes.
+ size       This is an optional size of the install option. The size can be
+            expressed in megabytes (with a M suffix), kilobytes (K), gigabytes
+            (G), or even bytes (B, or no suffix). Please note that versions of
+            setup earlier than 1.3.0 used to specify the size in MBs only.
             If this element isn't specified, setup  will try to autodetect
             the size of the install option itself.
 
@@ -361,7 +364,7 @@ Example XML product specification:
             sh setup.data/edit-postinst.sh $*
         </script>
     </option>
-    <option>
+    <option size="12M">
         Extra Data  # Option called "Extra Data" contains extra files
         <files>
             extra/*.dat
