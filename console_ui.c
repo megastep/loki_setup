@@ -516,20 +516,19 @@ static install_state console_setup(install_info *info)
 static int console_update(install_info *info, const char *path, size_t progress, size_t size, const char *current)
 {
     static char previous[200] = "";
-    static size_t lastprogress = 0xDEADBEEF;
-    static size_t lastsize = 0xDEADBEEF;
+    static int lastpercentage = -1;
 
     if(strcmp(previous, current)){
         strncpy(previous,current, sizeof(previous));
         printf(_("Installing %s ...\n"), current);
     }
     if ( progress && size ) {
-        if ((lastprogress == progress) && (lastsize == size))
+        int percentage = (int) (((float)progress/(float)size)*100.0);
+        if (percentage == lastpercentage)
             return 1;  /* don't output the same thing again. */
 
-        lastprogress = progress;
-        lastsize = size;
-        printf(" %3d%% - %s\r", (int) (((float)progress/(float)size)*100.0), path);
+        lastpercentage = percentage;
+        printf(" %3d%% - %s\r", percentage, path);
     } else { /* "Running script" */
         printf(" %s\r", path);
     }
