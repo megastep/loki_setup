@@ -218,12 +218,13 @@ stream *file_open(install_info *info, const char *path, const char *mode)
 
 static int file_read_internal(install_info *info, void *buf, int len, stream *streamp)
 {
-    int nread;
-
-    nread = 0;
+    int nread = 0;
     if ( streamp->mode == 'r' ) {
         if ( streamp->fp ) {
             nread = fread(buf, 1, len, streamp->fp);
+            /* fread doesn't differentiate between EOF and error... */
+            if ( (nread == 0) && (ferror(streamp->fp)) )
+                nread = -1;
         } else if ( streamp->zfp ) {
             nread = gzread(streamp->zfp, buf, len);
         #ifdef HAVE_BZIP2_SUPPORT
@@ -242,30 +243,37 @@ int file_read(install_info *info, void *buf, int len, stream *streamp)
 {
     int retval = 0;
     char *ptr = (char *) buf;
-    const int max_tries = 5;
+    const int max_tries = 2;
     const int sleep_time_ms = 1500;
-    int i;
+    int failures = 0;
     
-    for (i = 0; (i < max_tries) && (len > 0); i++)
+    while ((failures < max_tries) && (len > 0))
     {
         int br = file_read_internal(info, ptr, len, streamp);
-        if (br >= 0)
+        if (br > 0)
         {
             ptr += br;
             retval += br;
-            if (br == 0) /* eof? */
-                len = 0;
-            else
-                len -= br;
+            len -= br;
+        }
+        else if (br < 0)
+        {
+            usleep(sleep_time_ms * 1000); /* back off awhile and try again... */
+            failures++;
         }
         else
         {
-            usleep(sleep_time_ms * 1000); /* back off awhile and try again... */
+            break;  /* we're done. */
         }
     }
 
-    if (len > 0)
-        log_fatal(_("Read failure on %s"), streamp->path);
+    if (failures >= max_tries)
+    {
+        /* only flag as an error if no data was read...      */
+        /*  ...we'll catch it on the next read in that case. */
+        if (retval == 0)
+            log_fatal(_("Read failure on %s"), streamp->path);
+    }
 
     return(retval);
 }
