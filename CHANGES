@@ -1,4 +1,8 @@
 Current:
+Ryan C. Gordon (icculus.org) - Thu May 27 12:39:23 EDT 2004
+ * Carbon UI now handles Apple-Q quit hotkey at end of installation correctly.
+Ryan C. Gordon (icculus.org) - Thu 20 May 06:05:23 EDT 2004
+ * Carbon UI no longer blocks installation while README is showing.
 Rob Crittenden - Fri Apr  9 18:03:22 PDT 2004
  * Allow scripts to require CDs and specify a size.
 Ryan C. Gordon (Epic Games) - Thu Apr  8 17:57:37 EDT 2004
