@@ -204,8 +204,24 @@ int file_read(install_info *info, void *buf, int len, stream *streamp)
 
 void file_skip(install_info *info, int len, stream *streamp)
 {
+	if ( streamp->fp ) {  /* uncompressed files can seek instead of read */
+		long pos = ftell(streamp->fp);
+        if (pos != -1) {
+            int rc = 0;
+            if (pos + len >= streamp->size)  /* past EOF? */
+		        rc = fseek(streamp->fp, 0, SEEK_END);  /* clamp to end. */
+            else
+		        rc = fseek(streamp->fp, len, SEEK_CUR);
+
+            if (rc == 0)  
+                return;  /* successful seek */
+        }
+        /* fall back to reading if this fails for any reason... */
+	}
+
 	char buf[BUFSIZ];
 	int nread;
+
 	while(len){
 		nread = file_read(info, buf, (len>BUFSIZ) ? BUFSIZ : len, streamp);
 		if(!nread)
