@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.76 2000-11-03 07:04:35 megastep Exp $ */
+/* $Id: install.c,v 1.77 2000-11-03 07:09:35 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -75,6 +75,7 @@ extern char *rpm_root;
 extern int disable_install_path;
 extern int disable_binary_path;
 extern Install_UI UI;
+extern struct component_elem *current_component;
 
 /* Functions to retrieve attribution information from the XML tree */
 const char *GetProductName(install_info *info)
@@ -830,7 +831,7 @@ install_state install(install_info *info,
 
     /* Check if we need to create a default component entry */
     if ( GetProductNumComponents(info) == 0 ) {
-        add_component_entry(info, "Default", info->version, 1);
+        current_component = add_component_entry(info, "Default", info->version, 1);
     }
 
     /* Walk the install tree */
