@@ -278,7 +278,7 @@ msgstr "Fuori dal range possibile, livello di verbosita' settato a Normale.\n"
 #: main.c:163
 #, c-format
 msgid "XML file does not exist: '%s' (pwd is %s)\n"
-msgstr "Il file di XML non esiste:"
+msgstr "Il file di XML non esiste: '%s' (%s)\n"
 
 # main.c:155
 #: main.c:169
@@ -447,7 +447,7 @@ msgstr "Non riesco a trovare il file '%s' su nessun CDROM"
 #: copy.c:976
 #, c-format
 msgid "Suspect size value for option %s\n"
-msgstr "Valore dimensioni sospetto per opzione"
+msgstr "Valore dimensioni sospetto per opzione %s\n"
 
 # file.c:110
 #: file.c:125
@@ -651,8 +651,8 @@ msgid ""
 "Binary path must be different than the install path.\n"
 "The binary path must be an existing directory.\n"
 msgstr ""
-"Il percorso binario deve essere differente che l' installazione path.\n "
-"Il percorso binario deve essere un directory.\n attuale " 
+"Il percorso binario deve essere differente che l' installazione path.\n"
+"Il percorso binario deve essere un attuale directory.\n" 
 
 # console_ui.c:288
 #: console_ui.c:381
