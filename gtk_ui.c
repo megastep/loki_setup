@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.36 2000-05-25 00:11:19 megastep Exp $
+   $Id: gtk_ui.c,v 1.37 2000-06-28 01:37:53 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -56,6 +56,7 @@
 #include "install_ui.h"
 #include "install_log.h"
 #include "detect.h"
+#include "file.h"
 #include "copy.h"
 
 #define SETUP_GLADE SETUP_BASE "setup.glade"
@@ -102,6 +103,7 @@ static int cur_state;
 static install_info *cur_info;
 static int diskspace;
 static int license_okay;
+static GSList *radio_list = NULL; // Group for the radio buttons
 
 /******** Local prototypes **********/
 static void check_install_button(void);
@@ -373,7 +375,7 @@ char check_deviant_paths(xmlNodePtr node)
                 if ( dpath ) {
                 parse_line(&dpath, deviant_path, PATH_MAX);
                     topmost_valid_path(path_up, deviant_path);
-                    if (access(path_up, W_OK) < 0 )
+                    if ( ! dir_is_accessible(path_up) )
                         return 1;
                 }
                 elements = elements->next;
@@ -406,12 +408,14 @@ static void check_install_button(void)
     } else if ( ! *cur_info->install_path ) {
         message = _("No destination directory selected");
     } else if ( cur_info->install_size <= 0 ) {
-        message = _("Please select at least one option");
+		if ( !GetProductIsMeta(cur_info) ) {
+			message = _("Please select at least one option");
+		}
     } else if ( BYTES2MB(cur_info->install_size) > diskspace ) {
         message = _("Not enough free space for the selected options");
     } else if ( (stat(path_up, &st) == 0) && !S_ISDIR(st.st_mode) ) {
         message = _("Install path is not a directory");
-    } else if ( access(path_up, W_OK) < 0 ) {
+    } else if ( ! dir_is_accessible(path_up) ) {
         message = _("No write permissions on the install directory");
 	} else if (strcmp(cur_info->symlinks_path, cur_info->install_path) == 0) {
 		message = _("Binary path and install path must be different");
@@ -593,6 +597,11 @@ static void init_install_path(void)
 
     widget = glade_xml_get_widget(setup_glade, "install_path");
 
+	if ( GetProductIsMeta(cur_info) ) {
+		gtk_widget_hide(widget);
+		return;
+	}
+
     list = 0;
     list = g_list_append( list, cur_info->install_path);
     for ( i=0; install_paths[i]; ++i ) {
@@ -617,6 +626,11 @@ static void init_binary_path(void)
     int change_default = TRUE;
 
     widget = glade_xml_get_widget(setup_glade, "binary_path");
+
+	if ( GetProductIsMeta(cur_info) ) {
+		gtk_widget_hide(widget);
+		return;
+	}
 
     list = 0;
 
@@ -735,7 +749,12 @@ static void parse_option(install_info *info, xmlNodePtr node, GtkWidget *window,
     text[i] = '\0';
     strncat(text, line, sizeof(text));
 
-    button = gtk_check_button_new_with_label(text);
+	if ( GetProductIsMeta(info) ) {
+		button = gtk_radio_button_new_with_label(radio_list, text);
+		radio_list = gtk_radio_button_group(GTK_RADIO_BUTTON(button));
+	} else {
+		button = gtk_check_button_new_with_label(text);
+	}
 
     /* Add tooltip help, if available */
     help = get_option_help(info, node);
@@ -793,11 +812,14 @@ static void update_image(const char *image_file)
     GtkWidget* frame;
     GdkPixmap* pixmap;
     GtkWidget* image;
+	char image_path[1024] = SETUP_BASE;
+
+	strncat(image_path, image_file, sizeof(image_path));
 
     frame = glade_xml_get_widget(setup_glade, "image_frame");
     gtk_container_remove(GTK_CONTAINER(frame), GTK_BIN(frame)->child);
     window = gtk_widget_get_toplevel(frame);
-    pixmap = gdk_pixmap_create_from_xpm(window->window, NULL, NULL, image_file);
+    pixmap = gdk_pixmap_create_from_xpm(window->window, NULL, NULL, image_path);
     if ( pixmap ) {
         image = gtk_pixmap_new(pixmap, NULL);
         gtk_widget_show(image);
@@ -865,11 +887,39 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
         gtk_label_set_text( GTK_LABEL(widget), "");
     }
 
+	/* Disable useless widgets for meta-installer */
+	if ( GetProductIsMeta(info) ) {
+		widget = glade_xml_get_widget(setup_glade, "global_frame");
+		if ( widget ) {
+			gtk_widget_hide(widget);
+		}
+		widget = glade_xml_get_widget(setup_glade, "label_free_space");
+		if ( widget ) {
+			gtk_widget_hide(widget);
+		}
+		widget = glade_xml_get_widget(setup_glade, "free_space_label");
+		if ( widget ) {
+			gtk_widget_hide(widget);
+		}
+		widget = glade_xml_get_widget(setup_glade, "label_install_size");
+		if ( widget ) {
+			gtk_widget_hide(widget);
+		}
+		widget = glade_xml_get_widget(setup_glade, "estim_size_label");
+		if ( widget ) {
+			gtk_widget_hide(widget);
+		}
+		widget = glade_xml_get_widget(setup_glade, "install_separator");
+		if ( widget ) {
+			gtk_widget_hide(widget);
+		}
+	}
+
     /* Realize the main window for pixmap loading */
     gtk_widget_realize(window);
 
     /* Update the install image */
-    update_image(SETUP_BASE "splash.xpm");
+    update_image(GetProductSplash(info));
 
     return cur_state;
 }
@@ -917,6 +967,7 @@ static install_state gtkui_setup(install_info *info)
     gtk_container_foreach(GTK_CONTAINER(options), empty_container, options);
     info->install_size = 0;
     node = info->config->root->childs;
+	radio_list = NULL;
     while ( node ) {
       if ( strcmp(node->name, "option") == 0 ) {
         parse_option(info, node, window, options, 0, NULL);

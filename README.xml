@@ -60,6 +60,10 @@ There are several optional attributes of the install element:
             *OBSOLETE* DO NOT USE! Starting from version 1.3.0, use the
             README element instead (see below).
 
+ splash     Use this tag to specify an alternate splash image (displayed to
+            the left of the installer in X11). The image must be in XPM format,
+            and the default name for this attribute is "splash.xpm".
+
  url        This is a web site which is launched after the install is
             completed.
 
@@ -89,6 +93,12 @@ There are several optional attributes of the install element:
             'uninstall' script. If not used, the script will always be
             named 'uninstall', which can be a problem if you need to
             install different products in the same directory.
+
+ meta       When this attribute is set to "yes", then setup will act as
+            a meta-installer, i.e. it will allow the user to select a
+            product and set-up will respawn itself for the selected
+            product installation.
+            See the section "About Meta-Installation" below.
 
 The README and EULA elements:
 
@@ -162,6 +172,13 @@ There are several optional attributes of the option element:
             setup earlier than 1.3.0 used to specify the size in MBs only.
             If this element isn't specified, setup  will try to autodetect
             the size of the install option itself.
+
+ product    If this XML file describes a meta-installation (if the 'meta' attribute
+            to the root install element has been specified), then the value of this
+            attribute is used to specify the XML file that will be passed to setup
+            to install the product described by this option element. This attribute
+            is ignored if this is not a meta-installation, and required if it is.
+            See the section 'About Meta-Installations' below for more details.
 
 The option element support the LANG sub-element, which is used to specify
 translated strings for the option name. The only attribute of this element
@@ -260,6 +277,10 @@ You may specify relative paths and shell wildcard patterns for the files.
 There are several optional attributes of the files element:
 
  path       This is a system path that these files should be installed into.
+            If the path is relative (i.e. does not begin with '/'), then it
+            is interpreted as being relative to the installation root for
+            the product. Thus an empty value ("") can be used to designate
+            the installation directory.
 
  cdrom      If this attribute has a "yes" value, then setup will look for
             the files on one of the mounted CDROMs on the system.
@@ -312,6 +333,44 @@ LANG. For example, "fr" will match both the "fr" and "fr_CA" values. In
 order for the more specialized locale values to be matched correctly,
 the longer values should be be specified last (i.e. if you have different
 translations, list "fr" before "fr_CA" in the XML file).
+
+
+About Meta-Installations :
+
+Loki Setup allows you to install several products from the same interface.
+This is achieved by defining a top-level "meta-installation" XML file, that
+will contain a list of products in the "option" elements. The user will then
+be prompted to choose one of the products, and setup will restart itself
+with the actual XML file corresponding to the product.
+
+Here are the rules to write a meta-installation XML file :
+
+- Specify the "meta" attribute in the top-level install attribute (value must
+  be "yes").
+- Do not specify any files for each option. All of the options must have the
+  "product" attribute set to the name of the XML file for the particular product.
+  Note that the file name must be given relative to setup's startup directory, so
+  don't forget to prepend "setup.data" if appropriate.
+- One of the options should have the "install=true" attribute, to specify a default
+  selection.
+- README and EULA files can be specified, but won't be installed.
+
+Here is a sample XML meta-installation specification :
+
+<?xml version="1.0" standalone="yes"?>
+<install product="Meta Install" desc="Loki Demo Disc" version="1.0" meta="yes">
+  <readme>README</readme>
+  <option product="setup.data/civ.xml" install="true">
+  Civ: CTP
+  </option>
+  <option product="setup.data/heroes3.xml">
+  Heroes3
+  </option>
+  <option product="setup.data/myth2.xml">
+  Myth II
+  </option>
+</install>
+
 
 -------------------------------------------------------------------------
 

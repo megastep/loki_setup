@@ -1,3 +1,13 @@
+1.3.1:
+Stéphane Peter - Tue Jun 13 19:30:42 PDT 2000
+ * Added new 'splash' attribute to specify alternate splash image.
+ * Added support for meta-installations.
+Stéphane Peter - Tue Jun 20 17:37:24 PDT 2000
+ * Allow the 'path' attribute in the 'files' element to be interpreted
+   when relative.
+Stéphane Peter - Mon Jun 26 18:32:33 PDT 2000
+ * Better detection of the accessibility of installation paths that can
+   be created by setup.
 
 1.3.0:
 Sam Lantinga - Mon Jun 12 16:48:16 PDT 2000

@@ -101,7 +101,7 @@
 
 	<widget>
 	  <class>GtkFrame</class>
-	  <name>frame9</name>
+	  <name>global_frame</name>
 	  <label>Global Options</label>
 	  <label_xalign>0</label_xalign>
 	  <shadow_type>GTK_SHADOW_ETCHED_IN</shadow_type>
@@ -410,7 +410,7 @@
 
 	    <widget>
 	      <class>GtkLabel</class>
-	      <name>label27</name>
+	      <name>free_space_label</name>
 	      <label>Free space:</label>
 	      <justify>GTK_JUSTIFY_CENTER</justify>
 	      <wrap>False</wrap>
@@ -436,7 +436,7 @@
 
 	    <widget>
 	      <class>GtkLabel</class>
-	      <name>label28</name>
+	      <name>estim_size_label</name>
 	      <label>Estimated size:</label>
 	      <justify>GTK_JUSTIFY_CENTER</justify>
 	      <wrap>False</wrap>
@@ -490,7 +490,7 @@
 
 	    <widget>
 	      <class>GtkHSeparator</class>
-	      <name>hseparator4</name>
+	      <name>install_separator</name>
 	      <child>
 		<left_attach>0</left_attach>
 		<right_attach>4</right_attach>
@@ -1634,6 +1634,10 @@
   <width>480</width>
   <height>360</height>
   <visible>False</visible>
+  <signal>
+    <name>destroy</name>
+    <handler>setup_destroy_view_readme_slot</handler>
+  </signal>
   <title>Readme File</title>
   <type>GTK_WINDOW_TOPLEVEL</type>
   <position>GTK_WIN_POS_NONE</position>
@@ -1641,10 +1645,6 @@
   <allow_shrink>True</allow_shrink>
   <allow_grow>True</allow_grow>
   <auto_shrink>False</auto_shrink>
-  <signal>
-     <name>destroy</name>
-     <handler>setup_destroy_view_readme_slot</handler>
-  </signal> 
 
   <widget>
     <class>GtkVBox</class>
@@ -1716,6 +1716,10 @@
   <width>480</width>
   <height>360</height>
   <visible>False</visible>
+  <signal>
+    <name>destroy</name>
+    <handler>setup_destroy_license_slot</handler>
+  </signal>
   <title>License Agreement</title>
   <type>GTK_WINDOW_TOPLEVEL</type>
   <position>GTK_WIN_POS_CENTER</position>
@@ -1723,10 +1727,6 @@
   <allow_shrink>True</allow_shrink>
   <allow_grow>True</allow_grow>
   <auto_shrink>False</auto_shrink>
-  <signal>
-     <name>destroy</name>
-     <handler>setup_destroy_license_slot</handler>
-  </signal>
 
   <widget>
     <class>GtkVBox</class>

@@ -412,3 +412,36 @@ size_t file_size(install_info *info, const char *path)
     }
     return(size);
 }
+
+/* Returns a boolean value */
+int file_exists(const char *path)
+{
+	struct stat st;
+
+	return stat(path, &st) == 0;
+}
+
+/* Test the accessibility of a given directory (if the hierarchy can be created by
+   the current user). Basically a directory is "accessible" only if the first 
+   directory we have found in the hierarchy is writable.
+*/
+
+int dir_is_accessible(const char *path)
+{
+	int ret = 0;
+	struct stat st;
+	char *str = strdup(path), *ptr = str+strlen(str);
+
+	do {
+		if ( !stat(str, &st) && S_ISDIR(st.st_mode)) {
+			if ( !access(str, W_OK) ) {
+				ret = 1;
+			}
+			break;
+		}
+		*ptr = '\0';
+		ptr = strrchr(str, '/');
+	} while(ptr);
+	free(str);
+	return ret;
+}

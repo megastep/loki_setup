@@ -240,7 +240,7 @@ int check_for_rpm(void)
     char location[PATH_MAX];
 
     if(strcmp(rpm_root, "/")) {
-        sprintf(location,"%s/var/lib/rpm/packages.rpm", rpm_root);
+        snprintf(location, PATH_MAX, "%s/var/lib/rpm/packages.rpm", rpm_root);
     } else {
         strcpy(location,"/var/lib/rpm/packages.rpm");
     }
@@ -294,7 +294,7 @@ size_t copy_rpm(install_info *info, const char *path,
         }
         fdClose(fdi);
 
-        sprintf(cmd,"rpm -U --percent --root %s %s", rpm_root, path);
+        snprintf(cmd,sizeof(cmd),"rpm -U --percent --root %s %s", rpm_root, path);
         fp = popen(cmd, "r");
         while(percent<100.0){
           if(!fp || feof(fp)){
@@ -378,7 +378,7 @@ size_t copy_tarball(install_info *info, const char *path, const char *dest,
         if ( memcmp(&record, &zeroes, (sizeof record)) == 0 ) {
             continue;
         }
-        sprintf(final, "%s/%s", dest, record.hdr.name);
+        snprintf(final, sizeof(final), "%s/%s", dest, record.hdr.name);
         sscanf(record.hdr.mode, "%o", &mode);
         sscanf(record.hdr.size, "%o", &left);
         cur_size = left;
@@ -456,7 +456,7 @@ size_t copy_file(install_info *info, const char *cdrom, const char *path, const 
     sprintf(final, "%s/%s", dest, base);
 
     if ( cdrom ) {
-        sprintf(fullpath, "%s/%s", cdrom, path);
+        snprintf(fullpath, sizeof(fullpath), "%s/%s", cdrom, path);
     } else {
         strcpy(fullpath, path);
     }
@@ -496,18 +496,18 @@ size_t copy_directory(install_info *info, const char *path, const char *dest, co
     size_t size, copied;
 
     size = 0;
-    sprintf(fpat, "%s/*", path);
+    snprintf(fpat, sizeof(fpat), "%s/*", path);
 	err = glob(fpat, GLOB_ERR, NULL, &globbed);
     if ( err == 0 ) {
         for ( i=0; i<globbed.gl_pathc; ++i ) {
-          copied = copy_path(info, globbed.gl_pathv[i], dest, cdrom, update);
+          copied = copy_path(info, globbed.gl_pathv[i], dest, cdrom, 0, update);
           if ( copied > 0 ) {
             size += copied;
           }
         }
         globfree(&globbed);
 	} else if ( err == GLOB_NOMATCH ) { /* Empty directory */
-		sprintf(fpat, "%s/%s", dest, path);
+		snprintf(fpat, sizeof(fpat), "%s/%s", dest, path);
 		file_create_hierarchy(info, fpat);
 		file_mkdir(info, fpat, 0755);
     } else {
@@ -516,7 +516,7 @@ size_t copy_directory(install_info *info, const char *path, const char *dest, co
     return size;
 }
 
-size_t copy_path(install_info *info, const char *path, const char *dest, const char *cdrom,
+size_t copy_path(install_info *info, const char *path, const char *dest, const char *cdrom, int strip_dirs,
                 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     char final[PATH_MAX];
@@ -537,7 +537,7 @@ size_t copy_path(install_info *info, const char *path, const char *dest, const c
                 copied = copy_rpm(info, path, update);
 #endif
             } else {
-                copied = copy_file(info, cdrom, path, dest, final, 0, update);
+                copied = copy_file(info, cdrom, path, dest, final, strip_dirs, update);
             }
         }
         if ( copied > 0 ) {
@@ -549,7 +549,7 @@ size_t copy_path(install_info *info, const char *path, const char *dest, const c
     return size;
 }
 
-size_t copy_list(install_info *info, const char *filedesc, const char *dest, int from_cdrom,
+size_t copy_list(install_info *info, const char *filedesc, const char *dest, int from_cdrom, int strip_dirs,
                 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     char fpat[BUFSIZ];
@@ -570,7 +570,7 @@ size_t copy_list(install_info *info, const char *filedesc, const char *dest, int
                 chdir(cdroms[d]);
                 if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
                     for ( i=0; i<globbed.gl_pathc; ++i ) {
-                        copied = copy_path(info, globbed.gl_pathv[i], dest, cdroms[d], update);
+                        copied = copy_path(info, globbed.gl_pathv[i], dest, cdroms[d], strip_dirs, update);
                         if ( copied > 0 ) {
                             size += copied;
                         }
@@ -586,7 +586,7 @@ size_t copy_list(install_info *info, const char *filedesc, const char *dest, int
         } else {
             if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
                 for ( i=0; i<globbed.gl_pathc; ++i ) {
-                    copied = copy_path(info, globbed.gl_pathv[i], dest, NULL, update);
+                    copied = copy_path(info, globbed.gl_pathv[i], dest, NULL, strip_dirs, update);
                     if ( copied > 0 ) {
                         size += copied;
                     }
@@ -607,12 +607,12 @@ static void check_dynamic(const char *fpat, char *bin, const char *cdrom)
 
     use_dynamic = 0;
     if ( cdrom ) {
-        sprintf(test, "%s/%s.check-dynamic.sh", cdrom, fpat);
+        snprintf(test, sizeof(test), "%s/%s.check-dynamic.sh", cdrom, fpat);
     } else {
-        sprintf(test, "%s.check-dynamic.sh", fpat);
+        snprintf(test, sizeof(test), "%s.check-dynamic.sh", fpat);
     }
     if ( access(test, R_OK) == 0 ) {
-        sprintf(testcmd, "sh %s >/dev/null 2>&1", test);
+        snprintf(testcmd, sizeof(testcmd), "sh %s >/dev/null 2>&1", test);
         if ( system(testcmd) == 0 ) {
             if( cdrom ) {
                 sprintf(bin, "%s/%s.dynamic", cdrom, fpat);
@@ -743,6 +743,7 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
 		const char *lang_prop;
         int from_cdrom = (prop && !strcasecmp(prop, "yes"));
 		int lang_matched = 1;
+		int strip_dirs = 0;
 
 		lang_prop = xmlGetProp(node, "lang");
 		if (lang_prop) {
@@ -753,6 +754,15 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
             path = dest;
         else {
             parse_line(&path, tmppath, PATH_MAX);
+			if ( tmppath[0] != '/' ) {
+				char tmpbuf[PATH_MAX];
+				/* If we are not installing to an absolute directory,
+				   then interpret the path as being relative to the installation
+				   directory */
+				snprintf(tmpbuf, sizeof(tmpbuf), "%s/%s", info->install_path, tmppath);
+				strcpy(tmppath, tmpbuf);
+				strip_dirs = 1;
+			}
             path = tmppath;
         }
 /* printf("Checking node element '%s'\n", node->name); */
@@ -762,15 +772,15 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
             parse_line(&str, current_option, sizeof(current_option));
             copied = copy_list(info,
                                xmlNodeListGetString(info->config, node->childs, 1),
-                               path, from_cdrom, update);
+                               path, from_cdrom, strip_dirs, update);
             if ( copied > 0 ) {
                 size += copied;
             }
         }
         if ( strcmp(node->name, "binary") == 0 && lang_matched ) {
             copied = copy_binary(info, node,
-                               xmlNodeListGetString(info->config, node->childs, 1),
-                               path, from_cdrom, update);
+								 xmlNodeListGetString(info->config, node->childs, 1),
+								 path, from_cdrom, update);
             if ( copied > 0 ) {
                 size += copied;
             }
@@ -798,20 +808,32 @@ size_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
 		if ( ! strcmp(node->name, "option") ) {
 			wanted = xmlGetProp(node, "install");
 			if ( wanted  && (strcmp(wanted, "true") == 0) ) {
-				const char *deviant_path = xmlGetProp(node, "path");
-				if (!deviant_path)
-					deviant_path = info->install_path;
-				else {
-					parse_line(&deviant_path, tmppath, PATH_MAX);
-					deviant_path = tmppath;
-				}
-				copied = copy_node(info, node, deviant_path, update);
-				if ( copied > 0 ) {
-					size += copied;
-				}
-				copied = copy_tree(info, node->childs, dest, update);
-				if ( copied > 0 ) {
-					size += copied;
+				const char *product = xmlGetProp(node, "product");
+				if ( product ) {
+					if ( GetProductIsMeta(info) ) {
+						extern const char *argv0; // Set in main.c
+						// We spawn a new setup for this product
+						execlp(argv0, argv0, "-f", product, NULL);
+						perror("execlp");
+					} else {
+						log_fatal(info, "'product' attributes can only be used in files with the 'meta' attribute.");
+					}
+				} else {
+					const char *deviant_path = xmlGetProp(node, "path");
+					if (!deviant_path) {
+						deviant_path = info->install_path;
+					} else {
+						parse_line(&deviant_path, tmppath, PATH_MAX);
+						deviant_path = tmppath;
+					}
+					copied = copy_node(info, node, deviant_path, update);
+					if ( copied > 0 ) {
+						size += copied;
+					}
+					copied = copy_tree(info, node->childs, dest, update);
+					if ( copied > 0 ) {
+						size += copied;
+					}
 				}
 			}
 		}
@@ -964,11 +986,11 @@ size_t size_node(install_info *info, xmlNodePtr node)
 /* printf("Checking node element '%s'\n", node->name); */
             if ( strcmp(node->name, "files") == 0 && lang_matched ) {
                 size += size_list(info, from_cdrom,
-                          xmlNodeListGetString(info->config, node->childs, 1));
+								  xmlNodeListGetString(info->config, node->childs, 1));
             }
             if ( strcmp(node->name, "binary") == 0 && lang_matched ) {
                 size += size_binary(info, from_cdrom,
-                          xmlNodeListGetString(info->config, node->childs, 1));
+									xmlNodeListGetString(info->config, node->childs, 1));
             }
             node = node->next;
         }

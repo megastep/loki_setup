@@ -18,6 +18,7 @@
 #include "install.h"
 #include "install_ui.h"
 #include "detect.h"
+#include "file.h"
 #include "copy.h"
 
 /* The README viewer program - on all Linux sytems */
@@ -30,7 +31,7 @@ static int prompt_user(const char *prompt, const char *default_answer,
                        char *answer, int maxlen)
 {
     printf("%s", prompt);
-    if ( default_answer ) {
+    if ( default_answer && *default_answer ) {
         printf(" [%s] ", default_answer);
     }
     fflush(stdout);
@@ -261,78 +262,122 @@ void topmost_valid_path(char *target, const char *src) {
 
 static install_state console_setup(install_info *info)
 {
-    int okay;
+    int okay = 0;
     char path[PATH_MAX];
     xmlNodePtr node;
 
-    okay = 0;
-    while ( ! okay ) {
-        /* Find out where to install the game */
-        if ( ! prompt_user(_("Please enter the installation path"),
-                        info->install_path, path, sizeof(path)) ) {
-            return SETUP_ABORT;
-        }
-        set_installpath(info, path);
+	if ( GetProductIsMeta(info) ) {
+		while ( ! okay ) {
+			int index = 1, chosen;
+			const char *wanted;
+			node = info->config->root->childs;
 
-        /* Check permissions on the install path */
-	topmost_valid_path(path, info->install_path);
+			printf("%s\n", GetProductDesc(info));
+			while ( node ) {
+				if ( strcmp(node->name, "option") == 0 ) {
+					printf("%d) %s\n", index, get_option_name(info, node, NULL, 0));
+					wanted = xmlGetProp(node, "install"); /* Look for a default value */
+					if ( wanted  && (strcmp(wanted, "true") == 0) ) {
+						sprintf(path,"%d", index);
+					}
+					++ index;
+				}
+				node = node->next;
+			}
+			if ( ! prompt_user(_("Please choose the product to install, or Q to quit. "),
+							   path, path, sizeof(path)) ) {
+				return SETUP_ABORT;
+			}
+			if ( *path == 'q' || *path == 'Q' ) {
+				return SETUP_ABORT;
+			}
+			chosen = atoi(path);
+			if ( chosen > 0 && chosen < index ) {
+				node = info->config->root->childs;
+				index = 1;
+				while ( node ) {
+					if ( strcmp(node->name, "option") == 0 ) {
+						if ( index == chosen ) {
+							mark_option(info, node, "true", 0);
+						} else {
+							mark_option(info, node, "false", 0);
+						}
+						++ index;
+					}
+					node = node->next;
+				}
+				return SETUP_INSTALL;
+			}
+		}
+	} else {
+		while ( ! okay ) {
+			/* Find out where to install the game */
+			if ( ! prompt_user(_("Please enter the installation path"),
+							   info->install_path, path, sizeof(path)) ) {
+				return SETUP_ABORT;
+			}
+			set_installpath(info, path);
+
+			/* Check permissions on the install path */
+			topmost_valid_path(path, info->install_path);
         
-	if ( access(path, F_OK) < 0 ) {
-            if ( (strcmp(path, "/") != 0) && strrchr(path, '/') ) {
-                *(strrchr(path, '/')+1) = '\0';
-            }
-        }
+			if ( access(path, F_OK) < 0 ) {
+				if ( (strcmp(path, "/") != 0) && strrchr(path, '/') ) {
+					*(strrchr(path, '/')+1) = '\0';
+				}
+			}
 
-        if ( access(path, W_OK) < 0 ) {
-            printf(_("No write permission to %s\n"), path);
-            continue;
-        }
+			if ( ! dir_is_accessible(path) ) {
+				printf(_("No write permission to %s\n"), path);
+				continue;
+			}
 
-        /* Find out where to install the binary symlinks */
-        if ( ! prompt_user(_("Please enter the path for binary installation"),
-                        info->symlinks_path, path, sizeof(path)) ) {
-            return SETUP_ABORT;
-        }
-        set_symlinkspath(info, path);
+			/* Find out where to install the binary symlinks */
+			if ( ! prompt_user(_("Please enter the path for binary installation"),
+							   info->symlinks_path, path, sizeof(path)) ) {
+				return SETUP_ABORT;
+			}
+			set_symlinkspath(info, path);
 
-	/* If the binary and install path are the same, give an error */
-	if (strcmp(info->symlinks_path, info->install_path) == 0) {
-	    printf(_("Binary path must be different than the install path.\nThe binary path must be an existing directory.\n"));
-	    continue;
+			/* If the binary and install path are the same, give an error */
+			if (strcmp(info->symlinks_path, info->install_path) == 0) {
+				printf(_("Binary path must be different than the install path.\nThe binary path must be an existing directory.\n"));
+				continue;
+			}
+		
+			/* Check permissions on the symlinks path */
+			if ( access(info->symlinks_path, W_OK) < 0 ) {
+				printf(_("No write permission to %s\n"), info->symlinks_path);
+				continue;
+			}
+
+			/* Go through the install options */
+			info->install_size = 0;
+			node = info->config->root->childs;
+			while ( node ) {
+				if ( strcmp(node->name, "option") == 0 ) {
+					parse_option(info, node);
+				}
+				node = node->next;
+			}
+
+			/* Ask for desktop menu items */
+			if ( has_binaries(info, info->config->root->childs) &&
+				 console_prompt(_("Do you want to install desktop items?"),
+								RESPONSE_YES) == RESPONSE_YES ) {
+				info->options.install_menuitems = 1;
+			}
+
+			/* Confirm the install */
+			printf(_("Installing to %s\n"), info->install_path);
+			printf(_("%d MB available, %d MB will be installed.\n"),
+				   detect_diskspace(info->install_path), BYTES2MB(info->install_size));
+			printf("\n");
+			if ( console_prompt(_("Continue install?"), RESPONSE_YES) == RESPONSE_YES ) {
+				okay = 1;
+			}
+		}
 	}
-
-        /* Check permissions on the symlinks path */
-        if ( access(info->symlinks_path, W_OK) < 0 ) {
-            printf(_("No write permission to %s\n"), info->symlinks_path);
-            continue;
-        }
-
-        /* Go through the install options */
-        info->install_size = 0;
-        node = info->config->root->childs;
-        while ( node ) {
-            if ( strcmp(node->name, "option") == 0 ) {
-                parse_option(info, node);
-            }
-            node = node->next;
-        }
-
-        /* Ask for desktop menu items */
-        if ( has_binaries(info, info->config->root->childs) &&
-             console_prompt(_("Do you want to install desktop items?"),
-                                     RESPONSE_YES) == RESPONSE_YES ) {
-            info->options.install_menuitems = 1;
-        }
-
-        /* Confirm the install */
-        printf(_("Installing to %s\n"), info->install_path);
-        printf(_("%d MB available, %d MB will be installed.\n"),
-            detect_diskspace(info->install_path), BYTES2MB(info->install_size));
-        printf("\n");
-        if ( console_prompt(_("Continue install?"), RESPONSE_YES) == RESPONSE_YES ) {
-            okay = 1;
-        }
-    }
     return SETUP_INSTALL;
 }
 

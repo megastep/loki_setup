@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.48 2000-06-13 16:29:22 hercules Exp $ */
+/* $Id: install.c,v 1.49 2000-06-28 01:37:53 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
    04/12/2000: Modifed run_script function to put the full pathname of the
@@ -60,6 +60,16 @@ const char *GetProductUninstall(install_info *info)
     }
     return desc;
 }
+const char *GetProductSplash(install_info *info)
+{
+    const char *desc;
+
+    desc = xmlGetProp(info->config->root, "splash");
+    if ( desc == NULL ) {
+        desc = "splash.xpm";
+    }
+    return desc;
+}
 const char *GetProductVersion(install_info *info)
 {
     return xmlGetProp(info->config->root, "version");
@@ -68,6 +78,14 @@ int GetProductCDROMRequired(install_info *info)
 {
     const char *str = xmlGetProp(info->config->root, "cdrom");
     if ( str && !strcasecmp(str, "required") ) {
+        return 1;
+    }
+    return 0;
+}
+int GetProductIsMeta(install_info *info)
+{
+    const char *str = xmlGetProp(info->config->root, "meta");
+    if ( str && !strcasecmp(str, "yes") ) {
         return 1;
     }
     return 0;
@@ -595,14 +613,16 @@ install_state install(install_info *info,
           break;
         }
     }
-	/* Install the optional README and EULA files */
+	/* Install the optional README and EULA files 
+	   Warning: those are always installed in the root of the installation directory!
+	 */
 	f = GetProductREADME(info);
-	if ( f ) {
-		copy_path(info, f, info->install_path, NULL, update);
+	if ( f && ! GetProductIsMeta(info) ) {
+		copy_path(info, f, info->install_path, NULL, 1, update);
 	}
 	f = GetProductEULA(info);
-	if ( f ) {
-		copy_path(info, f, info->install_path, NULL, update);
+	if ( f && ! GetProductIsMeta(info) ) {
+		copy_path(info, f, info->install_path, NULL, 1, update);
 	}
 
     if ( ! GetInstallOption(info, "nouninstall") ) {

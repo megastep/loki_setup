@@ -4,8 +4,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Setup\n"
-"POT-Creation-Date: 2000-05-24 17:09-0700\n"
-"PO-Revision-Date: 2000-05-04 17:48-07:00\n"
+"POT-Creation-Date: 2000-05-19 18:18-0700\n"
+"PO-Revision-Date: 2000-06-23 15:05-07:00\n"
 "Last-Translator: David Hedbor <david@hedbor.org>\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -248,61 +248,53 @@ msgstr ""
 "Var snäll montera cd-romskivan %s.\n"
 "Välj Ja för att försöka igen, Nej för att abryta."
 
-#: install.c:241 install.c:249
+#: install.c:231 install.c:239
 msgid "Out of memory\n"
 msgstr "Slut på minne\n"
 
-#: file.c:49 file.c:69 file.c:76 install.c:306 install.c:324 install.c:345
-#: install.c:362 install.c:395
+#: file.c:49 file.c:69 file.c:76 install.c:296 install.c:314 install.c:335
+#: install.c:352 install.c:379
 msgid "Out of memory"
 msgstr "Slut på minne"
 
-#: install.c:387
-msgid "You must use a 'symlink' attribute with 'play'"
-msgstr ""
-
-#: install.c:391
-msgid "There can be only one binary with a 'play' attribute"
-msgstr ""
-
-#: install.c:413
+#: install.c:397
 msgid "Couldn't find your home directory"
 msgstr "Kunde inte hitta ditt hembibliotek"
 
-#: install.c:431
+#: install.c:415
 #, c-format
 msgid "Couldn't find home directory for %s"
 msgstr "Kunde inte hitta hembiblioteket för %s"
 
-#: install.c:491
+#: install.c:475
 msgid "XML: 'lang' tag does not have a mandatory 'lang' attribute"
 msgstr "XML: 'lang'-taggen saknar det obligatoriska 'lang'-attibutet"
 
-#: install.c:499
+#: install.c:483
 #, c-format
 msgid "XML: option listed without translated description for locale '%s'"
 msgstr "XML: valmöjligheten saknar översatt beskrivning för '%s'"
 
-#: install.c:506
+#: install.c:490
 msgid "XML: option listed without description"
 msgstr "XML: valmöjlighet utan beskrivning"
 
-#: install.c:639 install.c:650
+#: install.c:623 install.c:634
 #, c-format
 msgid "Unable to remove '%s'"
 msgstr "Kan inte ta bort '%s'"
 
-#: install.c:669
+#: install.c:653
 #, c-format
 msgid "The '%s' RPM was installed or upgraded (version %s, release %s)"
 msgstr "'%s'-RPMen installerades eller uppgraderas (version %s, release %s)"
 
-#: install.c:726
+#: install.c:709
 #, c-format
 msgid "echo \"%s has been uninstalled.\"\n"
 msgstr "echo \"%s har avinstallerats.\"\n"
 
-#: install.c:728
+#: install.c:711
 msgid ""
 "echo\n"
 "echo WARNING: The following RPM archives have been installed or upgraded\n"
@@ -315,12 +307,12 @@ msgstr ""
 "echo mjukvaran installerades. Du kanske vill ta bort några av dessa "
 "manuellt:\n"
 
-#: install.c:762
+#: install.c:745
 #, c-format
 msgid "Please visit %s"
 msgstr "Var snäll besök %s"
 
-#: install.c:959
+#: install.c:942
 #, c-format
 msgid "Unable to create desktop file '%s'"
 msgstr "Kan inte skapa skrivbordsfilen '%s'"
@@ -360,10 +352,10 @@ msgstr "Kan inte hitta filen '%s'"
 msgid "Unable to find file '%s' on any of the CDROM drives"
 msgstr "Kan inte hitta filen '%s' i någon av cd-romspelarna"
 
-#: copy.c:948
+#: copy.c:946
 #, c-format
 msgid "Suspect size value for option %s\n"
-msgstr ""
+msgstr "Konstigt storleksvärde för valmöljighet %s\n"
 
 #: file.c:110
 #, c-format
@@ -528,6 +520,8 @@ msgid ""
 "Binary path must be different than the install path.\n"
 "The binary path must be an existing directory.\n"
 msgstr ""
+"Programbiblioteket måste skilja sig från installations-\n"
+"biblioteket och måste vara ett existerande bibliotek.\n"
 
 #: console_ui.c:322
 msgid "Do you want to install desktop items?"
@@ -615,7 +609,7 @@ msgstr "Inga skrivrättigheter i installationsbiblioteket"
 
 #: gtk_ui.c:417
 msgid "Binary path and install path must be different"
-msgstr ""
+msgstr "Programbibliotek och installationsbiblioteken måste vara olika."
 
 #: gtk_ui.c:419
 msgid "No write permissions to install a selected package"

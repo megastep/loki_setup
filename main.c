@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.27 2000-06-28 00:18:40 hercules Exp $ */
+/* $Id: main.c,v 1.28 2000-06-28 01:37:53 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.
    04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -17,6 +17,7 @@
 #include "install_log.h"
 #include "install_ui.h"
 #include "log.h"
+#include "file.h"
 #include "detect.h"
 
 #define SETUP_VERSION "1.3.0"
@@ -24,12 +25,14 @@
 #define SETUP_CONFIG  SETUP_BASE "setup.xml"
 
 #define PACKAGE "setup"
-#define LOCALEDIR "setup.data/locale"
+#define LOCALEDIR SETUP_BASE "locale"
 
 /* Global options */
 
 int force_console = 0;
 char *rpm_root = "/";
+const char *argv0 = NULL;
+
 static char *current_locale = NULL;
 
 /* A way to jump to the abort handling code */
@@ -152,6 +155,13 @@ int main(int argc, char **argv)
                 exit(0);
         }
     }
+
+	argv0 = argv[0];
+
+	if ( ! file_exists(xml_file) ) {
+		char curdir[1024];
+		fprintf(stderr, _("XML file does not exist: '%s' (pwd is %s)\n"), xml_file, getcwd(curdir, sizeof(curdir)));
+	}
 
     /* Initialize the XML setup configuration */
     info = create_install(xml_file, log_level);
