@@ -1,5 +1,5 @@
 /*
- * $Id: mousewget.c,v 1.5 2002-12-07 00:57:32 megastep Exp $
+ * $Id: mousewget.c,v 1.6 2004-12-16 01:05:22 megastep Exp $
  *
  * mousewget.c - mouse_wgetch support for cdialog 0.9a+
  *
@@ -22,7 +22,7 @@
 
 #include "dialog.h"
 
-#ifdef HAVE_LIBGPM
+#ifdef HAVE_GPM_H
 #include <gpm.h>
 #endif
 

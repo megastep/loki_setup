@@ -533,6 +533,7 @@ else
 fi
 
 if test ! -z "$USE_GPM"; then
+	AC_CHECK_HEADERS(gpm.h)
 	CONSOLE_LIBS="$CONSOLE_LIBS -lgpm"
 fi
 
