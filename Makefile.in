@@ -1,21 +1,19 @@
 
 DISTDIR = ..
-PACKAGE = setup-1.5
+PACKAGE = setup-@SETUP_VERSION_MAJOR@.@SETUP_VERSION_MINOR@
 
-arch := $(shell sh print_arch)
-libc := $(shell sh print_libc)
-os   := $(shell uname -s)
-# DYN_PLUGINS = true
-# USE_RPM = true
-# USE_OUTRAGE = true
+@SET_MAKE@
+arch := @ARCH@
+libc := @LIBC@
+os   := @OS@
 
 # If you modify this version, change it's setup.xml and release a new patch.
-UNINSTALL_VERSION = \"1.0c\"
+UNINSTALL_VERSION = \"1.0b\"
 
-CC = gcc
+CC = @CC@
 
 # This indicates where the 'setupdb' CVS module is checked out
-SETUPDB	= ../setupdb
+SETUPDB	= @SETUPDB@
 
 IMAGE = /loki/patch-tools/setup-image
 CONVERT_IMAGE = /loki/patch-tools/convert-image
@@ -23,57 +21,26 @@ CONVERT_IMAGE = /loki/patch-tools/convert-image
 # The supported locales so far
 LOCALES = fr de es sv it nl
 
-OPTIMIZE = -Wall -g -O2 -funroll-loops
-ifeq ($(arch), alpha)
-    OPTIMIZE += -mcpu=ev4 -Wa,-mall
-endif
-HEADERS = -I$(SETUPDB) -I/usr/X11R6/include -I/usr/local/include $(shell glib-config --cflags) $(shell xml-config --cflags) $(shell libglade-config --cflags)
-OPTIONS = -DSTUB_UI
-
-ifeq ($(DYN_PLUGINS),true)
-OPTIONS += -DDYNAMIC_PLUGINS
-endif
-ifeq ($(USE_RPM),true)
-OPTIONS += -DRPM_SUPPORT
-endif
-ifeq ($(USE_OUTRAGE),true)
-OPTIONS += -DOUTRAGE_SUPPORT
-endif
+OPTIMIZE = @CFLAGS@
+HEADERS = -I/usr/X11R6/include -I/usr/local/include
+OPTIONS = -DSTUB_UI -DSETUP_VERSION_MAJOR=@SETUP_VERSION_MAJOR@ \
+		  -DSETUP_VERSION_MINOR=@SETUP_VERSION_MINOR@ \
+		  -DSETUP_VERSION_RELEASE=@SETUP_VERSION_RELEASE@
 
 CFLAGS += $(OPTIMIZE) $(HEADERS) $(OPTIONS)
 
 COMMON_OBJS = log.o install_log.o
-OBJS = $(COMMON_OBJS) main.o detect.o plugins.o network.o install.o copy.o file.o loki_launchurl.o
+OBJS 		= $(COMMON_OBJS) main.o detect.o plugins.o network.o install.o copy.o file.o loki_launchurl.o
 LOKI_UNINSTALL_OBJS = loki_uninstall.o uninstall_ui.o
-UNINSTALL_OBJS = uninstall.o
-CONSOLE_OBJS = $(OBJS) console_ui.o
-GUI_OBJS = $(OBJS) gtk_ui.o
+UNINSTALL_OBJS 		= uninstall.o
+CONSOLE_OBJS 		= $(OBJS) console_ui.o
+GUI_OBJS 			= $(OBJS) gtk_ui.o
 
 SRCS = $(OBJS:.o=.c) $(CONSOLE_OBJS:.o=.c) $(GUI_OBJS:.o=.c)
 
-LIBS = plugins/libplugins.a $(SETUPDB)/$(arch)/libsetupdb.a `xml-config --prefix`/lib/libxml.a -lz
-ifeq ($(os),FreeBSD)
-LIBS += -L/usr/local/lib -lintl
-endif
-
-ifeq ($(USE_RPM),true)
-LIBS += -lrpm -ldb
-endif
-ifeq ($(DYN_PLUGINS),true)
-LIBS += -ldl
-endif
-
+LIBS = plugins/libplugins.a $(SETUPDB)/$(arch)/libsetupdb.a @LIBS@ -lz
+GUI_LIBS = plugins/libplugins.a $(SETUPDB)/$(arch)/libsetupdb.a @GUI_LIBS@ -lz
 CONSOLE_LIBS = $(LIBS)
-GUI_LIBS = plugins/libplugins.a $(SETUPDB)/$(arch)/libsetupdb.a
-GUI_LIBS += -Wl,-Bstatic
-GUI_LIBS += -L$(shell libglade-config --prefix)/lib
-GUI_LIBS +=  -lglade
-GUI_LIBS += -L$(shell gtk-config --prefix)/lib
-GUI_LIBS +=  -lgtk -lgdk -rdynamic -lgmodule -lglib 
-GUI_LIBS += -L$(shell xml-config --prefix)/lib
-GUI_LIBS += -lxml -lz
-GUI_LIBS += -Wl,-Bdynamic
-GUI_LIBS += -L/usr/X11R6/lib -lXi -lXext -lX11 -lm -ldl
 
 all: do-plugins setup setup.gtk uninstall
 
@@ -96,11 +63,11 @@ setup.gtk: $(GUI_OBJS) $(SETUPDB)/$(arch)/libsetupdb.a
 	$(CC) -o $@ $^ $(GUI_LIBS)
 
 do-plugins:
-	$(MAKE) -C plugins DYN_PLUGINS=$(DYN_PLUGINS) USE_RPM=$(USE_RPM) USE_OUTRAGE=$(USE_OUTRAGE) SETUPDB=$(shell pwd)/$(SETUPDB) all
+	$(MAKE) -C plugins all
 
 install.dbg: all
 ifeq ($(DYN_PLUGINS),true)
-	$(MAKE) -C plugins DYN_PLUGINS=true USE_RPM=$(USE_RPM) install.dbg
+	$(MAKE) -C plugins install.dbg
 endif
 	@if [ -d image/setup.data/bin/$(os)/$(arch)/$(libc) ]; then \
 	    cp -v setup image/setup.data/bin/$(os)/$(arch); \
@@ -110,7 +77,7 @@ endif
 
 install: all
 ifeq ($(DYN_PLUGINS),true)
-	$(MAKE) -C plugins DYN_PLUGINS=true USE_RPM=$(USE_RPM) install
+	$(MAKE) -C plugins install
 endif
 	@if [ -d image/setup.data/bin/$(os)/$(arch)/$(libc) ]; then \
 	    cp -v setup image/setup.data/bin/$(os)/$(arch); \
@@ -127,7 +94,7 @@ endif
 
 install-image: all
 ifeq ($(DYN_PLUGINS),true)
-	$(MAKE) -C plugins DYN_PLUGINS=true USE_RPM=$(USE_RPM) install
+	$(MAKE) -C plugins install
 endif
 	@if [ -d $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc) ]; then \
 	    cp -v setup $(IMAGE)/setup.data/bin/$(os)/$(arch); \
@@ -203,7 +170,7 @@ update-po: po/setup.po po/loki-uninstall.po
 dep: depend
 
 depend:
-	$(MAKE) -C plugins DYN_PLUGINS=$(DYN_PLUGINS) USE_RPM=$(USE_RPM) SETUPDB=$(shell pwd)/$(SETUPDB) depend
+	$(MAKE) -C plugins depend
 	$(CC) -MM $(CFLAGS) $(SRCS) > .depend
 
 ifeq ($(wildcard .depend),.depend)

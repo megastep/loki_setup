@@ -25,10 +25,6 @@
 /* The default location of the symlinks */
 #define DEFAULT_SYMLINKS    "/usr/local/bin"
 
-#define SETUP_VERSION_MAJOR 1
-#define SETUP_VERSION_MINOR 5
-#define SETUP_VERSION_RELEASE 6
-
 /* The different setup states */
 typedef enum {
     SETUP_ABORT = -1,
@@ -252,21 +248,21 @@ struct component_elem *add_component_entry(install_info *info, const char *name,
 struct option_elem *add_option_entry(struct component_elem *comp, const char *name);
 
 /* Add a file entry to the list of files installed */
-extern struct file_elem *add_file_entry(install_info *info, struct option_elem *comp, const char *path, const char *symlink);
+extern struct file_elem *add_file_entry(install_info *info, struct option_elem *opt, const char *path, const char *symlink);
 
 /* Add a script entry for uninstallation of manually installed RPMs */
-extern void add_script_entry(install_info *info, struct option_elem *comp, const char *script, int post);
+extern void add_script_entry(install_info *info, struct option_elem *opt, const char *script, int post);
 
 /* Add a RPM entry to the list of RPMs installed */
-extern void add_rpm_entry(install_info *info, struct option_elem *comp, const char *name, 
+extern void add_rpm_entry(install_info *info, struct option_elem *opt, const char *name, 
 			  const char *version, int release,
 			  const int autoremove);
 
 /* Add a directory entry to the list of directories installed */
-extern void add_dir_entry(install_info *info, struct option_elem *comp, const char *path);
+extern void add_dir_entry(install_info *info, struct option_elem *opt, const char *path);
 
 /* Add a binary entry to the list of binaries installed */
-extern void add_bin_entry(install_info *info, struct option_elem *comp, struct file_elem *file,
+extern void add_bin_entry(install_info *info, struct option_elem *opt, struct file_elem *file,
                    const char *symlink, const char *desc, const char *menu,
                    const char *name, const char *icon, const char *play);
 

@@ -1,31 +1,23 @@
 #
 # Makefile for the setup plugins
-# $Id: Makefile,v 1.7 2000-11-03 03:15:33 hercules Exp $
+# $Id: Makefile.in,v 1.1 2000-11-29 02:10:08 megastep Exp $
 #
 
+@SET_MAKE@
 STATICS = cpio.c
-PLUGINS = tar.c # outrage.c # sample.c
-CFLAGS  = -fPIC -Wall -g -O2 -I.. -I. -I$(SETUPDB) -I/usr/local/include $(shell xml-config --cflags)
-CC		= gcc
+PLUGINS = @PLUGINS@
+CFLAGS  = -fPIC @CFLAGS@ -I..
+CC		= @CC@
+DYN_PLUGINS = @DYN_PLUGINS@
 
-ifeq ($(USE_RPM),true)
-PLUGINS += rpm.c
-CFLAGS  += -I/usr/include/rpm
-endif
-ifeq ($(USE_OUTRAGE),true)
-PLUGINS += outrage.c
-endif
-
-arch := $(shell ../print_arch)
-libc := $(shell ../print_libc)
+arch := @ARCH@
+libc := @LIBC@
 
 .SUFFIXES: .so .o .c
 
 OBJS	= $(STATICS:.c=.o)
 
-ifeq ($(DYN_PLUGINS),true)
-
-CFLAGS += -DDYNAMIC_PLUGINS
+ifeq ($DYN_PLUGINS,true)
 
 # Build all plugins as .so files
 SOBJS = $(PLUGINS:.c=.so)
@@ -49,6 +41,12 @@ else
 OBJS += $(PLUGINS:.c=.o)
 
 all: libplugins.a
+
+install:
+	true
+
+install.dbg:
+	true
 
 endif
 

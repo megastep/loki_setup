@@ -1,4 +1,6 @@
 1.5.0:
+Stéphane Peter - Tue Nov 28 17:58:39 PST 2000
+ * Initial autoconf support
 Stéphane Peter - Fri Nov 10 17:57:18 PST 2000
  * Added per-CD environment variables, SETUP_CDROM_xxx.
 Sam Lantinga - Fri Nov 10 17:39:44 PST 2000
