@@ -339,9 +339,15 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
 
 		mounted = getfsstat(mnts, mounted * sizeof(struct statfs), MNT_WAIT);
 		for ( i = 0; i < mounted && num_cdroms < SETUP_MAX_DRIVES; ++ i ) {
-			if ( ! strcmp(mnts[i].f_fstypename, MNTTYPE_CDROM) ) {
+            //!!!TODO - MacOS X has all kinds of CDFS that we need to support.
+            //For now, we're just adding all the mount paths to the list
+            //and we'll scan for the file on all of those mount points.
+            //Eventually this should change, and proper Mac OS X CD detection
+            //system should be put into place.
+
+			//if ( ! strcmp(mnts[i].f_fstypename, MNTTYPE_CDROM) ) {
 				path[num_cdroms ++] = strdup(mnts[i].f_mntonname);
-			}
+			//}
 		}
 		
 		free(mnts);
