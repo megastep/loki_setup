@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.53 2002-12-07 00:57:32 megastep Exp $ */
+/* $Id: main.c,v 1.54 2002-12-09 22:15:04 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -267,40 +267,48 @@ int main(int argc, char **argv)
     exit_status = 0;
     while ( ! get_out ) {
         char buf[1024];
-        int num_cds;
+        int num_cds = 0;
 
         switch (state) {
             case SETUP_INIT:
                 num_cds = GetProductCDROMDescriptions(info);
+                /* Check for the presence of a CDROM if required */
+                if ( GetProductCDROMRequired(info) ) {
+                    if ( ! GetProductCDROMFile(info) ) {
+                        log_fatal(_("The 'cdromfile' attribute is now mandatory when using the 'cdrom' attribute."));
+                    }
+                    add_cdrom_entry(info, info->name, info->desc, GetProductCDROMFile(info));
+					++ num_cds;
+				}
 
                 state = UI.init(info,argc,argv, enabled_options != NULL);
                 if ( state == SETUP_ABORT ) {
                     exit_status = 3;
                 }
-		/* Check if getcwd() works now */
-		if ( getcwd(buf, sizeof(buf)) == NULL ) {
-		    UI.prompt(_("Unable to determine the current directory.\n"
-				"Please check the permissions of the parent directories.\n"), RESPONSE_OK);
-		    state = SETUP_EXIT;
-		    continue;
-		}
-		/* Check if we should be root */
-		if ( GetProductRequireRoot(info) && geteuid()!=0 ) {
-		    UI.prompt(_("You need to run this installer as the super-user.\n"), RESPONSE_OK);
-		    state = SETUP_EXIT;
-		    continue;
-		}
-		if ( info->product && GetProductInstallOnce(info) ) {
-		    UI.prompt(_("\nThis product is already installed.\nUninstall it before running this program again.\n"), RESPONSE_OK);
-		    state = SETUP_EXIT;
-		    continue;
-		}
+				/* Check if getcwd() works now */
+				if ( getcwd(buf, sizeof(buf)) == NULL ) {
+					UI.prompt(_("Unable to determine the current directory.\n"
+								"Please check the permissions of the parent directories.\n"), RESPONSE_OK);
+					state = SETUP_EXIT;
+					continue;
+				}
+				/* Check if we should be root */
+				if ( GetProductRequireRoot(info) && geteuid()!=0 ) {
+					UI.prompt(_("You need to run this installer as the super-user.\n"), RESPONSE_OK);
+					state = SETUP_EXIT;
+					continue;
+				}
+				if ( info->product && GetProductInstallOnce(info) ) {
+					UI.prompt(_("\nThis product is already installed.\nUninstall it before running this program again.\n"), RESPONSE_OK);
+					state = SETUP_EXIT;
+					continue;
+				}
                 /* Check for the presence of the product if we install a component */
                 if ( GetProductComponent(info) ) {
                     if ( GetProductNumComponents(info) > 0 ) {
                         UI.prompt(_("\nIllegal installation: do not mix components with a component installation.\n"), RESPONSE_OK);
                         state = SETUP_EXIT;
-			continue;
+						continue;
                     } else if ( info->product ) {
                         if ( ! info->component ) {
                             snprintf(buf, sizeof(buf), _("\nThe %s component is already installed.\n"
@@ -308,7 +316,7 @@ int main(int argc, char **argv)
                                      GetProductComponent(info));
                             UI.prompt(buf, RESPONSE_OK);
                             state = SETUP_EXIT;
-			    continue;
+							continue;
                         }
                     } else {                        
                         snprintf(buf, sizeof(buf), _("\nYou must install %s before running this\n"
@@ -316,30 +324,23 @@ int main(int argc, char **argv)
                                 info->desc);
                         UI.prompt(buf, RESPONSE_OK);
                         state = SETUP_EXIT;
-			continue;
+						continue;
                     }
                 }
 
                 /* Check for the presence of a CDROM if required */
-                if ( GetProductCDROMRequired(info) ) {
-                    if ( ! GetProductCDROMFile(info) ) {
-                        log_fatal(_("The 'cdromfile' attribute is now mandatory when using the 'cdrom' attribute."));
-                    }
-                    add_cdrom_entry(info, info->name, info->desc, GetProductCDROMFile(info));
-                    detect_cdrom(info);
-
-                    if ( ! get_cdrom(info, info->name) ) {
-                        state = SETUP_EXIT;
-						break;
-                    }
-                } else if ( num_cds > 0) {
+				if ( num_cds > 0) {
                     detect_cdrom(info);
                 }
+                if ( GetProductCDROMRequired(info) && ! get_cdrom(info, info->name) ) {
+					state = SETUP_EXIT;
+					break;
+                }
 
-		if ( ! CheckRequirements(info) ) {
-		    state = SETUP_ABORT;
-		    break;
-		}
+				if ( ! CheckRequirements(info) ) {
+					state = SETUP_ABORT;
+					break;
+				}
 
                 if ( enabled_options ) {
                     enabled_opt = enabled_options;
