@@ -75,7 +75,7 @@ void log_fatal(const char *fmt, ...)
     vsnprintf(buf, BUFSIZ, fmt, ap);
     va_end(ap);
     print_log(log, LOG_FATAL, "%s\n", buf);
-    abort();
+    ui_fatal_error("%s", buf);
 }
 
 /* Displays a dialog using the UI code and abort the installation */
