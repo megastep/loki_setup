@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.5 2000-10-12 03:40:33 megastep Exp $ */
+/* $Id: uninstall.c,v 1.6 2000-10-12 03:42:10 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -27,15 +27,14 @@ static void print_usage(const char *argv0)
 		   );
 }
 
-static FILE *log = NULL;
-
 static void log_file(const char *name, const char *reason)
 {
-    if ( !log ) {
-        log = fopen("uninstall.log", "w");
-    }
+    FILE *log = fopen("uninstall.log", "a");
     fprintf(stderr, "%s : %s", name, reason);
-    if(log) fprintf(log, "%s : %s", name, reason);
+    if(log) {
+        fprintf(log, "%s : %s", name, reason);
+        fclose(log);
+    }
 }
 
 static int perform_uninstall(product_t *prod, product_info_t *info)
@@ -89,10 +88,6 @@ static int perform_uninstall(product_t *prod, product_info_t *info)
         log_file("uninstall", strerror(errno));;
 
     loki_removeproduct(prod);
-
-    if ( log ) {
-        fclose(log);
-    }
 
 	return 1;
 }
