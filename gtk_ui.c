@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.101 2004-06-23 23:38:42 megastep Exp $
+   $Id: gtk_ui.c,v 1.102 2004-06-30 03:21:24 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1746,7 +1746,8 @@ static install_state gtkui_setup(install_info *info)
 
 static int gtkui_update(install_info *info, const char *path, size_t progress, size_t size, const char *current)
 {
-    static gfloat last_update = -1;
+    static gfloat last_update = -1.0;
+    static gdouble last_installed_bytes = -1.0;
     GtkWidget *widget;
     int textlen;
     const char *text;
@@ -1754,7 +1755,7 @@ static int gtkui_update(install_info *info, const char *path, size_t progress, s
     gfloat new_update;
 
     if ( cur_state == SETUP_ABORT ) {
-	return FALSE;
+		return FALSE;
     }
 
     if ( progress && size ) {
@@ -1762,7 +1763,7 @@ static int gtkui_update(install_info *info, const char *path, size_t progress, s
     } else { /* "Running script" */
         new_update = 1.0;
     }
-    if ( (int)(new_update*100) != (int)(last_update*100) ) {
+    if ( ( (int)(new_update*100) != (int)(last_update*100) ) || ( last_installed_bytes !=  (gdouble)info->installed_bytes ) ) {
         if ( new_update == 1.0 ) {
             last_update = 0.0;
         } else {
@@ -1789,12 +1790,12 @@ static int gtkui_update(install_info *info, const char *path, size_t progress, s
         widget = glade_xml_get_widget(setup_glade, "current_file_progress");
         gtk_progress_bar_update(GTK_PROGRESS_BAR(widget), new_update);
         new_update = (gdouble)info->installed_bytes / (gdouble)info->install_size;
-	if (new_update > 1.0) {
-	    new_update = 1.0;
-	}
-	else if (new_update < 0.0) {
-	    new_update = 0.0;
-	}
+		last_installed_bytes=(gdouble)info->installed_bytes;
+		if (new_update > 1.0) {
+			new_update = 1.0;
+		} else if (new_update < 0.0) {
+			new_update = 0.0;
+		}
         widget = glade_xml_get_widget(setup_glade, "total_file_progress");
         gtk_progress_bar_update(GTK_PROGRESS_BAR(widget), new_update);
     }

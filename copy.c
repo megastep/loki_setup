@@ -741,7 +741,7 @@ ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, c
     return size;
 }
 
-int copy_script(install_info *info, xmlNodePtr node, const char *script, const char *dest,
+static int copy_script(install_info *info, xmlNodePtr node, const char *script, const char *dest, size_t size,
 				int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current), const char *from_cdrom, const char *msg)
 {
     struct cdrom_elem *cdrom;
@@ -753,9 +753,9 @@ int copy_script(install_info *info, xmlNodePtr node, const char *script, const c
 	}
 	if ( update ) {
 		if (msg != NULL)
-			rc = update(info, msg, 0, 0, current_option_txt);
+			rc = update(info, msg, size/2, size, current_option_txt);
 		else
-			rc = update(info, _("Running script"), 0, 0, current_option_txt);
+			rc = update(info, _("Running script"), size/2, size, current_option_txt);
 		if ( !rc ) 
 			return 0;
 	}
@@ -856,17 +856,18 @@ ssize_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
 					size += copied;
 				}
 			} else if ( strcmp(node->name, "script") == 0 ) {
-				char *sz= xmlGetProp(node, "size");
+				long long sz = size_node(info, node);
 				char *msg= xmlGetProp(node, "message");
 				int rc;
+
 				rc = copy_script(info, node,
 					    xmlNodeListGetString(info->config, node->childs, 1),
-					    path, update, from_cdrom, msg);
-				if (rc == 0 && sz) {
-					info->installed_bytes += atoi(sz);
-					size += atoi(sz);
+					    path, sz, update, from_cdrom, msg);
+				if (rc==0) {
+					info->installed_bytes += sz;
+					size += sz;
 				}
-				xmlFree(sz); xmlFree(msg);
+				xmlFree(msg);
 			}
 		}
         /* Do not handle exclusive elements here; it gets called multiple times else */
