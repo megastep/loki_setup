@@ -1,4 +1,6 @@
 Current:
+Ryan C. Gordon (Epic Games) - Wed Mar 31 11:30:47 EST 2004
+ * Allow one hardcoded translation instead of using external .po files.
 Ryan C. Gordon (Epic Games) - Tue Mar 30 21:11:52 EST 2004
  * Fixed freeing of bogus pointer in Carbon UI.
 Ryan C. Gordon (Epic Games) - Tue Mar  9 06:49:48 EST 2004
