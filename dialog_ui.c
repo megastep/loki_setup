@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.27 2004-07-06 19:12:06 megastep Exp $
+ * $Id: dialog_ui.c,v 1.28 2004-07-23 01:03:26 megastep Exp $
  */
 
 #include <limits.h>
@@ -318,9 +318,9 @@ static
 install_state dialog_setup(install_info *info)
 {
     xmlNodePtr node;
-	const char *choices[MAX_CHOICES];
+	const char *choices[MAX_CHOICES*4];
 	char buf[BUFSIZ];
-	int i = 0, choice;
+	int i = 0, nb_choices = 0, choice;
 
 	if ( ! express_setup ) {
 
@@ -333,19 +333,29 @@ install_state dialog_setup(install_info *info)
 			/* Build a list of products */
 			node = info->config->root->childs;
 			while ( node ) {
-				if ( strcmp(node->name, "option") == 0 ) {
-					choices[i] = get_option_name(info, node, NULL, 0);
+				const char *str;
+                if ( strcmp(node->name, "option") == 0 ) {
+                    nb_choices++;
+                    sprintf(buf, "%d. ", nb_choices);
+					choices[i++] = strdup(buf);
+                    choices[i] = strdup(get_option_name(info, node, NULL, 0));
 					wanted = xmlGetProp(node, "install"); /* Look for a default value */
 					if ( wanted && !strcmp(wanted, "true") ) {
 						dialog_vars.default_item = choices[i];
 					}
 					i++;
+                    str = get_option_help(info, node);
+                    choices[i++] = str ? strdup(str) : NULL;
 				}
 				node = node->next;
 			}
+            choices[i++] = NULL;
+            choices[i++] = NULL;
+            choices[i++] = NULL;
 			choice = dialog_menu(_("Choose the product"), 
 								 _("Please pick a product to install"),
-								 i + 6, COLS*8/10, i, i, choices);
+								 nb_choices + 6, COLS*8/10, nb_choices,
+                                 nb_choices, choices);
 			if ( choice < 0 ) {
 				return SETUP_ABORT;
 			} else {
