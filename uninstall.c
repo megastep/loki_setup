@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.20 2000-11-17 01:19:36 megastep Exp $ */
+/* $Id: uninstall.c,v 1.21 2000-11-29 02:05:53 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -394,7 +394,10 @@ int main(int argc, char *argv[])
                     fprintf(stderr, _("Unable to find component %s\n"), argv[2]);
                 }
             }
-        } else {            
+        } else if ( argc > 3 ) {
+            fprintf(stderr, _("Too many arguments for the command\n"));
+            ret = 1;
+        } else {        
             /* Uninstall the damn thing */
             if ( ! check_permissions(info, 1) )
                 return 1;
