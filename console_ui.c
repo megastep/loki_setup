@@ -130,7 +130,7 @@ static install_state console_license(install_info *info)
     char command[512];
 
     sleep(1);
-    sprintf(command, "less %s", GetProductEULA(info));
+    sprintf(command, "more %s", GetProductEULA(info));
     system(command);
     if ( prompt_yesno("Do you agree with the license?", RESPONSE_YES) ==
                                                         RESPONSE_YES ) {
