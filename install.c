@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.133 2004-05-29 02:10:12 megastep Exp $ */
+/* $Id: install.c,v 1.134 2004-06-09 18:31:26 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -2664,9 +2664,8 @@ int run_command(install_info *info, const char *cmd, const char *arg, int warn)
         while ( waitpid(child, &exitval, WNOHANG) == 0 ) {
             if ( UI.idle ) {
                 UI.idle(info); /* Run an idle loop while the command is running */
-            } else {
-                usleep(10000);
             }
+			usleep(10000);
         }
         if ( WIFEXITED(exitval) ) {
             exitval = WEXITSTATUS(exitval);
