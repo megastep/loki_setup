@@ -679,3 +679,19 @@ msgstr "Kan inte öppna %s, avslutar!\n"
 #, c-format
 msgid "Type '%s' to start the program"
 msgstr "Skriv '%s' för att starta programmet"
+tta 'setup_menuitems_checkbox'"
+
+#: gtk_ui.c:881
+#, c-format
+msgid "%s Setup"
+msgstr "Installation av %s"
+
+#: gtk_ui.c:1071
+#, c-format
+msgid "Unable to open %s, aborting!\n"
+msgstr "Kan inte öppna %s, avslutar!\n"
+
+#: gtk_ui.c:1126
+#, c-format
+msgid "Type '%s' to start the program"
+msgstr "Skriv '%s' för att starta programmet"
