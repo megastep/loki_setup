@@ -9,8 +9,6 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
-#include <byteswap.h>
-#include <endian.h>
 
 #include <zlib.h>
 
@@ -97,11 +95,14 @@ stream *file_open(install_info *info, const char *path, const char *mode)
             if ( memcmp(magic, gzip_magic, 2) == 0 ) {
 			    unsigned int tmp;
 			    fseek(streamp->fp, (off_t)(-4), SEEK_END);
-				fread(&tmp, 4,1, streamp->fp);
-#if __BYTE_ORDER == __BIG_ENDIAN
-				tmp = bswap_32(tmp);
-#endif
-				streamp->size = tmp;
+                /* Read little-endian value platform independently */
+                streamp->size = (((unsigned int)fgetc(streamp->fp))<<24);
+                streamp->size >>= 8;
+                streamp->size |= (((unsigned int)fgetc(streamp->fp))<<24);
+                streamp->size >>= 8;
+                streamp->size |= (((unsigned int)fgetc(streamp->fp))<<24);
+                streamp->size >>= 8;
+                streamp->size |= (((unsigned int)fgetc(streamp->fp))<<24);
 
 				fprintf(stderr,"Uncompressed size for %s: %d bytes\n", path, streamp->size);
 
