@@ -1,4 +1,6 @@
 Current:
+Ryan C. Gordon (Epic Games) - Tue Mar 30 21:11:52 EST 2004
+ * Fixed freeing of bogus pointer in Carbon UI.
 Ryan C. Gordon (Epic Games) - Tue Mar  9 06:49:48 EST 2004
  * log_fatal() now cleans up, shows explanation via UI.
  * logging prepends "loki_setup: " so it makes sense when text appears in
