@@ -4,13 +4,14 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/param.h>
 
 #ifdef __FreeBSD__
-#include <sys/param.h>
 #include <sys/ucred.h>
 #include <sys/mount.h>
 #else /* Linux assumed */
 #include <mntent.h>
+#include <sys/vfs.h>
 #endif
 
 #include "detect.h"
@@ -106,17 +107,13 @@ const char *detect_libc(void)
 /* Function to detect the MB of diskspace on a path */
 int detect_diskspace(const char *path)
 {
-    FILE *df;
-    int space;
-    char *cp;
-    char buf[PATH_MAX];
-    char cmd[PATH_MAX];
+	long long avail = 0LL;
 
-    space = 0;
+	if ( path[0] == '/' ) {
+		struct statfs fs;
+		char buf[PATH_MAX], *cp;
 
-    /* Get the top valid path and get available diskspace */
-    if ( path[0] == '/' ) {
-        strcpy(buf, path);
+		strcpy(buf, path);
         cp = buf+strlen(buf);
         while ( buf[0] && (access(buf, F_OK) < 0) ) {
             while ( (cp > (buf+1)) && (*cp != '/') ) {
@@ -124,19 +121,15 @@ int detect_diskspace(const char *path)
             }
             *cp = '\0';
         }
-        if ( buf[0] ) {
-            snprintf(cmd, sizeof(cmd), "df -k %s\n", buf);
-            df = popen(cmd, "r");
-            if ( df ) {
-                fgets(buf, (sizeof buf)-1, df);
-                fscanf(df, "%*s %*d %*d %d %*s %*s", &space);
-                pclose(df);
-            }
-        }
-    }
-
-    /* Return space in MB */
-    return (space/1024);
+		if ( buf[0] ) {
+			if ( statfs(buf, &fs) ) {
+				perror("statfs");
+				return 0;
+			}
+			avail = fs.f_bsize * fs.f_bavail;
+		}
+	}
+	return avail / (1024*1024);
 }
 
 /* Function to detect the CDROM drives, returns the number of drives */
