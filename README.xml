@@ -168,6 +168,9 @@ There are several optional attributes of the install element:
  reinstall  If set to 'yes', the install will allow the product to be reinstalled. The default behavior
             is not to let the user install product options twice.
 
+ category   Indicates the product category, used to specify the menu entry on some systems. Defaults
+            to "Games"
+
 The CDROM element:
 
 An installer can fetch the necesary data files from one or more CDROM discs. As of setup 1.5.0,

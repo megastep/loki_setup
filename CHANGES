@@ -1,4 +1,7 @@
 Current:
+Stephane Peter (Codehost) - Mon May 12 15:24:32 PDT 2003
+ * Added the "category" attribute for the root install element, to
+   specify the menu category on newer systems (Gnome 2.0)
 Ryan C. Gordon (icculus.org) - Mon Apr 14 00:26:11 EDT 2003
  * Fixed DNS lookups and some other stuff in network.c.
 Stephane Peter (Codehost) - Thu Apr  3 19:31:16 PST 2003

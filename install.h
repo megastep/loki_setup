@@ -69,6 +69,9 @@ typedef struct _install_info {
     const char *desc;
     const char *version;
 
+	/* The category for menu items */
+	const char *category;
+
     /* The update URL for the product */
     const char *update_url;
 

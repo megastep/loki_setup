@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.107 2003-04-16 06:01:16 zeph Exp $ */
+/* $Id: install.c,v 1.108 2003-05-12 22:26:26 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -141,6 +141,16 @@ const char *GetProductSplash(install_info *info)
 const char *GetProductVersion(install_info *info)
 {
     return xmlGetProp(info->config->root, "version");
+}
+const char *GetProductCategory(install_info *info)
+{
+    const char *cat;
+
+    cat = xmlGetProp(info->config->root, "category");
+    if ( cat == NULL ) {
+        cat = "Games";
+    }
+    return cat;
 }
 
 const char *GetProductDefaultBinaryPath(install_info *info)
@@ -538,6 +548,7 @@ install_info *create_install(const char *configfile,
     info->name = GetProductName(info);
     info->desc = GetProductDesc(info);
     info->version = GetProductVersion(info);
+	info->category = GetProductCategory(info),
     info->update_url = GetProductUpdateURL(info);
     info->arch = detect_arch();
     info->libc = detect_libc();
@@ -2012,11 +2023,11 @@ int install_menuitems(install_info *info, desktop_type desktop)
 						"Icon=%s\n"
 						"Terminal=0\n"
 						"Type=Application\n"
-						"Categories=Application;X-Redhat-Base;\n",
+						"Categories=Application;%s;X-Red-Hat-Base;\n",
 				    (desktop==DESKTOP_KDE) ? "KDE " : "",
 				    elem->name ? elem->name : info->name,
 				    elem->desc ? elem->desc : info->desc,
-				    exec, icon);
+				    exec, icon, info->category);
 			    fclose(fp);
 			    add_file_entry(info, opt, finalbuf, NULL, 0);
 			    ++ num_items;
