@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.60 2000-11-15 23:35:27 megastep Exp $
+   $Id: gtk_ui.c,v 1.61 2000-11-28 22:33:37 hercules Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -309,18 +309,21 @@ void setup_close_view_readme_slot( GtkWidget* w, gpointer data )
 void setup_destroy_view_readme_slot( GtkWidget* w, gpointer data )
 {
     GtkWidget *widget;
-    
-    widget = glade_xml_get_widget(setup_glade_readme, "readme_dialog");
-    gtk_widget_hide(widget);
-    gtk_object_unref(GTK_OBJECT(setup_glade_readme));
-    // re-enable the 'view readme buttons...all 3 of them since we don't
-    // know where we are
-    widget = glade_xml_get_widget(setup_glade, "button_readme");
-    gtk_widget_set_sensitive(widget, 1);
-    widget = glade_xml_get_widget(setup_glade, "view_readme_progress_button");
-    gtk_widget_set_sensitive(widget, 1);
-    widget = glade_xml_get_widget(setup_glade, "view_readme_end_button");
-    gtk_widget_set_sensitive(widget, 1);
+
+    if ( setup_glade_readme ) {
+        widget = glade_xml_get_widget(setup_glade_readme, "readme_dialog");
+        gtk_widget_hide(widget);
+        gtk_object_unref(GTK_OBJECT(setup_glade_readme));
+        setup_glade_readme = NULL;
+        // re-enable the 'view readme buttons...all 3 of them since we don't
+        // know where we are
+        widget = glade_xml_get_widget(setup_glade, "button_readme");
+        gtk_widget_set_sensitive(widget, TRUE);
+        widget = glade_xml_get_widget(setup_glade, "view_readme_progress_button");
+        gtk_widget_set_sensitive(widget, TRUE);
+        widget = glade_xml_get_widget(setup_glade, "view_readme_end_button");
+        gtk_widget_set_sensitive(widget, TRUE);
+    }
 }
 
 void setup_button_view_readme_slot( GtkWidget* w, gpointer data )

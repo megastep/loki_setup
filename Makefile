@@ -10,7 +10,7 @@ os   := $(shell uname -s)
 # USE_OUTRAGE = true
 
 # If you modify this version, change it's setup.xml and release a new patch.
-UNINSTALL_VERSION = \"1.0b\"
+UNINSTALL_VERSION = \"1.0c\"
 
 CC = gcc
 
