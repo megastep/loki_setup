@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.38 2000-07-04 00:13:01 megastep Exp $
+   $Id: gtk_ui.c,v 1.39 2000-07-05 21:01:26 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -473,15 +473,15 @@ static void empty_container(GtkWidget *widget, gpointer data)
 static void enable_tree(xmlNodePtr node, GtkWidget *window)
 {
   if ( strcmp(node->name, "option") == 0 ) {
-    GtkWidget *button = (GtkWidget*)gtk_object_get_data(GTK_OBJECT(window),
-                                     get_option_name(cur_info, node, NULL, 0));
-    if(button)
-      gtk_widget_set_sensitive(button, TRUE);
+	  GtkWidget *button = (GtkWidget*)gtk_object_get_data(GTK_OBJECT(window),
+														  get_option_name(cur_info, node, NULL, 0));
+	  if(button)
+		  gtk_widget_set_sensitive(button, TRUE);
   }
   node = node->childs;
   while ( node ) {
-    enable_tree(node, window);
-    node = node->next;
+	  enable_tree(node, window);
+	  node = node->next;
   }
 }
 
@@ -515,17 +515,29 @@ void setup_checkbox_option_slot( GtkWidget* widget, gpointer func_data)
     /* Recurse down any other options */
     node = data->node->childs;
     while ( node ) {
-      if ( strcmp(node->name, "option") == 0 ) {
-        GtkWidget *button;
-
-        button = (GtkWidget*)gtk_object_get_data(GTK_OBJECT(window),
-                                     get_option_name(cur_info, node, NULL, 0));
-        if(button){ /* This recursively calls this function */
-          gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), FALSE);
-          gtk_widget_set_sensitive(button, FALSE);
-        }
-      }
-      node = node->next;
+		if ( !strcmp(node->name, "option") ) {
+			GtkWidget *button;
+			
+			button = (GtkWidget*)gtk_object_get_data(GTK_OBJECT(window),
+													 get_option_name(cur_info, node, NULL, 0));
+			if(button){ /* This recursively calls this function */
+				gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), FALSE);
+				gtk_widget_set_sensitive(button, FALSE);
+			}
+		} else if ( !strcmp(node->name, "exclusive") ) {
+			xmlNodePtr child;
+			for ( child = node->childs; child; child = child->next) {
+				GtkWidget *button;
+				
+				button = (GtkWidget*)gtk_object_get_data(GTK_OBJECT(window),
+														 get_option_name(cur_info, child, NULL, 0));
+				if(button){ /* This recursively calls this function */
+					gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), FALSE);
+					gtk_widget_set_sensitive(button, FALSE);
+				}
+			}
+		}
+		node = node->next;
     }
   }
   update_size();
