@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.115 2003-08-08 03:14:26 megastep Exp $ */
+/* $Id: install.c,v 1.116 2003-08-13 23:33:42 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -512,7 +512,7 @@ const char *GetProductUpdateURL(install_info *info)
 
     url = xmlGetProp(info->config->root, "update_url");
     if ( url == NULL ) {
-        url = "http://codehost.com/";
+        url = "http://icculus.org/";
     }
     return url;
 }
