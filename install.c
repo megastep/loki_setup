@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.25 1999-12-11 03:43:09 hercules Exp $ */
+/* $Id: install.c,v 1.26 1999-12-11 04:14:01 hercules Exp $ */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -24,7 +24,13 @@ const char *GetProductName(install_info *info)
 }
 const char *GetProductDesc(install_info *info)
 {
-    return xmlGetProp(info->config->root, "desc");
+    const char *desc;
+
+    desc = xmlGetProp(info->config->root, "desc");
+    if ( desc == NULL ) {
+        desc = "";
+    }
+    return desc;
 }
 const char *GetProductVersion(install_info *info)
 {
@@ -43,6 +49,10 @@ const char *GetDefaultPath(install_info *info)
 const char *GetProductEULA(install_info *info)
 {
     return xmlGetProp(info->config->root, "eula");
+}
+const char *GetWebsiteText(install_info *info)
+{
+    return xmlGetProp(info->config->root, "website_text");
 }
 const char *GetProductURL(install_info *info)
 {
@@ -65,6 +75,16 @@ const char *GetLocalURL(install_info *info)
         file = path;
     }
     return file;
+}
+const char *GetAutoLaunchURL(install_info *info)
+{
+    const char *auto_url;
+
+    auto_url = xmlGetProp(info->config->root, "auto_url");
+    if ( auto_url == NULL ) {
+        auto_url = "false";
+    }
+    return auto_url;
 }
 const char *GetPreInstall(install_info *info)
 {

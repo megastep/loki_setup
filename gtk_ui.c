@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.21 1999-12-11 03:43:09 hercules Exp $
+   $Id: gtk_ui.c,v 1.22 1999-12-11 04:14:01 hercules Exp $
 */
 
 #include <limits.h>
@@ -72,6 +72,20 @@ static int iterate_for_state(void)
 
   /*  fprintf(stderr,"New state: %d\n", cur_state); */
   return cur_state;
+}
+
+static int run_netscape(const char *url)
+{
+    char command[2*PATH_MAX];
+    int retval;
+
+    retval = 0;
+    sprintf(command, 
+"netscape -remote \"openURL(%s,new-window)\" || netscape \"%s\" &", url, url);
+    if ( system(command) != 0 ) {
+        retval = -1;
+    }
+    return retval;
 }
 
 /*********** GTK slots *************/
@@ -192,9 +206,9 @@ void setup_button_warning_cancel_slot( GtkWidget* widget, gpointer func_data )
     warning_dialog = WARNING_NONE;
 }
 
-void setup_button_complete( GtkWidget* _widget, gpointer func_data )
+void setup_button_complete_slot( GtkWidget* _widget, gpointer func_data )
 {
-    GtkWidget *widget;
+    cur_state = SETUP_COMPLETE;
 }
 
 void setup_button_play_slot( GtkWidget* _widget, gpointer func_data )
@@ -238,8 +252,9 @@ void setup_button_install_slot( GtkWidget* widget, gpointer func_data )
 
 void setup_button_browser_slot( GtkWidget* widget, gpointer func_data )
 {
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
-    
+    /* Don't let the user accidentally double-launch the browser */
+    gtk_widget_set_sensitive(widget, FALSE);
+
     launch_browser(cur_info, run_netscape);
 }
 
@@ -759,10 +774,40 @@ static void gtkui_abort(install_info *info)
 static install_state gtkui_website(install_info *info)
 {
     GtkWidget *notebook;
+    GtkWidget *widget;
+    GtkWidget *hideme;
+    const char *website_text;
+    int do_launch;
 
     notebook = glade_xml_get_widget(setup_glade, "setup_notebook");
     gtk_notebook_set_page(GTK_NOTEBOOK(notebook), WEBSITE_PAGE);
 
+    /* Add the proper product text */
+    widget = glade_xml_get_widget(setup_glade, "website_product_label");
+    gtk_label_set_text(GTK_LABEL(widget), GetProductDesc(info));
+
+    /* Add special website text if desired */
+    website_text = GetWebsiteText(info);
+    if ( website_text ) {
+        widget = glade_xml_get_widget(setup_glade, "website_text_label");
+        gtk_label_set_text(GTK_LABEL(widget), website_text);
+    }
+
+    /* Hide the proper widget based on the auto_url state */
+    do_launch = 0;
+    if ( strcmp(GetAutoLaunchURL(info), "true") == 0 ) {
+        do_launch = 1;
+        hideme = glade_xml_get_widget(setup_glade, "auto_url_no");
+    } else {
+        do_launch = 0;
+        hideme = glade_xml_get_widget(setup_glade, "auto_url_yes");
+    }
+    gtk_widget_hide(hideme);
+
+    /* Automatically launch the browser if necessary */
+    if ( do_launch ) {
+        launch_browser(info, run_netscape);
+    }
     return iterate_for_state();
 }
 
@@ -788,20 +833,6 @@ static install_state gtkui_complete(install_info *info)
     return iterate_for_state();
 }
 
-static int run_netscape(const char *url)
-{
-    char command[2*PATH_MAX];
-    int retval;
-
-    retval = 0;
-    sprintf(command, 
-"netscape -remote \"openURL(%s,new-window)\" || netscape \"%s\" &", url, url);
-    if ( system(command) != 0 ) {
-        retval = -1;
-    }
-    return retval;
-}
-
 int gtkui_okay(Install_UI *UI)
 {
     extern int force_console;
@@ -818,8 +849,8 @@ int gtkui_okay(Install_UI *UI)
             UI->setup = gtkui_setup;
             UI->update = gtkui_update;
             UI->abort = gtkui_abort;
+            UI->website = gtkui_website;
             UI->complete = gtkui_complete;
-            UI->browser = run_netscape;
             XCloseDisplay(dpy);
 
             okay = 1;

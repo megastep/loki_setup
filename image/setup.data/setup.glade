@@ -76,8 +76,7 @@
       <class>GtkNotebook</class>
       <name>setup_notebook</name>
       <border_width>5</border_width>
-      <can_focus>True</can_focus>
-      <show_tabs>True</show_tabs>
+      <show_tabs>False</show_tabs>
       <show_border>True</show_border>
       <tab_pos>GTK_POS_TOP</tab_pos>
       <scrollable>False</scrollable>
@@ -1410,8 +1409,8 @@
 	    <can_focus>True</can_focus>
 	    <signal>
 	      <name>clicked</name>
-	      <handler>setup_button_play_slot</handler>
-	      <last_modification_time>Tue, 14 Sep 1999 22:35:17 GMT</last_modification_time>
+	      <handler>setup_button_complete_slot</handler>
+	      <last_modification_time>Sat, 11 Dec 1999 04:16:26 GMT</last_modification_time>
 	    </signal>
 	    <label>Continue</label>
 	  </widget>
@@ -1492,7 +1491,7 @@
 
 	      <widget>
 		<class>GtkLabel</class>
-		<name>website_product</name>
+		<name>website_product_label</name>
 		<label>[product]</label>
 		<justify>GTK_JUSTIFY_CENTER</justify>
 		<wrap>False</wrap>
@@ -1510,7 +1509,7 @@
 
 	    <widget>
 	      <class>GtkLabel</class>
-	      <name>url_label</name>
+	      <name>website_text_label</name>
 	      <label>Please visit our website for updates and support.</label>
 	      <justify>GTK_JUSTIFY_CENTER</justify>
 	      <wrap>False</wrap>
