@@ -37,6 +37,8 @@
 #include <sys/statvfs.h>
 #endif
 
+#include <gnome-xml/encoding.h>
+
 #include "install.h"
 #include "install_ui.h"
 #include "install_log.h"
@@ -89,8 +91,8 @@ struct mounted_elem {
 	struct mounted_elem *next;
 } *mounted_list = NULL;
 
-/* The current locale */
-static char *current_locale = NULL;
+/* The current locale and character encoding */
+static char *current_locale = NULL, *current_encoding = NULL;
 
 extern Install_UI UI;
 
@@ -779,11 +781,44 @@ const char *get_cdrom(install_info *info, const char *id)
     return mounted;
 }
 
+char *convert_encoding(char *str)
+{
+	static xmlCharEncodingHandlerPtr handler = NULL;
+	static char buf[1024];
+
+	if ( handler == NULL && current_encoding ) {
+		handler = xmlFindCharEncodingHandler(current_encoding);
+	}
+
+/*  	fprintf(stderr, "convert_encoding(%s) handler=%s\n", str, handler->name); */
+	if ( handler && handler->output ) {
+		if ( handler->output(buf, sizeof(buf), str, strlen(str)+1) < 0 ) {
+			return str;
+		} else {
+/*  			fprintf(stderr, "Converted to %s\n", buf); */
+			return buf;
+		}
+	}
+	return str;
+}
+
 void DetectLocale(void)
 {
 	current_locale = setlocale(LC_MESSAGES, NULL);
 	if ( current_locale && (!strcmp(current_locale, "C") || !strcmp(current_locale,"POSIX")) ) {
 		current_locale = NULL;
+	}
+
+	if ( current_locale ) { /* Try to extract an encoding */
+		char *ptr = strchr(current_locale, '.');
+		if ( ptr ) {
+			current_encoding = ptr+1;
+			/* Special case */
+			if ( !strncasecmp(current_encoding, "iso88591", 9) ) 
+				current_encoding = "ISO-8859-1";
+		} else {
+			current_encoding = "ISO-8859-1"; /* Assume Latin-1 */
+		}
 	}
 #if 0
 	/* log_debug doesn't work here as logging is initialized later */

@@ -30,6 +30,9 @@ extern void DetectLocale(void);
 /* Matches a locale string against the current one */
 extern int match_locale(const char *str);
 
+/* Convert an UTF8 string to the current encoding */
+extern char *convert_encoding(char *str);
+
 /* Indicates if any filesystems were mounted by setup */
 int mounted_filesystems(void);
 /* Unmount and free all filesystems that setup may have mounted if run as root */

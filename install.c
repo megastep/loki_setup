@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.145 2004-11-17 20:17:16 megastep Exp $ */
+/* $Id: install.c,v 1.146 2004-11-18 04:36:51 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1371,7 +1371,7 @@ int CheckRequirements(install_info *info)
 	return 1; /* All requirements passed */
 }
 
-/* Get the name of an option node */
+/* Get the name of an option node in an appropriate encoding */
 char *get_option_name(install_info *info, xmlNodePtr node, char *name, int len)
 {
     static char line[BUFSIZ];
@@ -1412,7 +1412,7 @@ char *get_option_name(install_info *info, xmlNodePtr node, char *name, int len)
     } else {
         log_warning(_("XML: option listed without description"));
     }
-    return name;
+    return convert_encoding(name);
 }
 
 /* Get the optional help of an option node, with localization support */
@@ -1460,7 +1460,7 @@ const char *get_option_help(install_info *info, xmlNodePtr node)
 				;
 		}
 	}
-	return (*line) ? line : NULL;
+	return (*line) ? convert_encoding(line) : NULL;
 }
 
 /* Get the optional selection warning of an option node, with localization support */
