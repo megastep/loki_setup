@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.137 2004-08-04 03:12:34 megastep Exp $ */
+/* $Id: install.c,v 1.138 2004-08-31 02:30:07 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -416,7 +416,7 @@ const char *GetProductEULANode(install_info *info, xmlNodePtr node, int *keepdir
 	}
 	/* Look for EULA elements */
 	node = node->childs;
-	while(node) {
+	while(node && !found) {
 		if(! strcmp(node->name, "eula") ) {
 			char *prop = xmlGetProp(node, "lang");
 			if ( match_locale(prop) ) {
@@ -467,7 +467,7 @@ const char *GetProductREADME(install_info *info, int *keepdirs)
 	}
 	/* Try to find a README that matches the locale */
 	node = info->config->root->childs;
-	while(node) {
+	while(node && !found) {
 		if(! strcmp(node->name, "readme") ) {
 			char *prop = xmlGetProp(node, "lang");
 			if ( match_locale(prop) ) {
