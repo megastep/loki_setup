@@ -1,4 +1,6 @@
 1.5.0:
+Sam Lantinga - Wed Oct 11 16:14:03 PDT 2000
+ * Added URL launching code from the Loki utility functions
 Stéphane Peter - Tue Oct 10 19:18:24 PDT 2000
  * Moved away from uninstall scripts and use the 'setupdb' API to manage
    a database of installed products and components, managed through XML

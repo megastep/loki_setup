@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.48 2000-09-03 02:36:01 megastep Exp $
+   $Id: gtk_ui.c,v 1.49 2000-10-11 23:15:21 hercules Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -99,6 +99,7 @@
 #include "detect.h"
 #include "file.h"
 #include "copy.h"
+#include "loki_launchurl.h"
 
 #define SETUP_GLADE SETUP_BASE "setup.glade"
 
@@ -170,20 +171,6 @@ static int iterate_for_state(void)
 
   /* fprintf(stderr,"New state: %d\n", cur_state); */
   return cur_state;
-}
-
-static int run_netscape(const char *url)
-{
-    char command[2*PATH_MAX];
-    int retval;
-
-    retval = 0;
-    snprintf(command, sizeof(command), 
-			 "netscape -remote \"openURL(%s,new-window)\" || netscape \"%s\" &", url, url);
-    if ( system(command) != 0 ) {
-        retval = -1;
-    }
-    return retval;
 }
 
 /*********** GTK slots *************/
@@ -458,7 +445,7 @@ void setup_button_browser_slot( GtkWidget* widget, gpointer func_data )
     /* Don't let the user accidentally double-launch the browser */
     gtk_widget_set_sensitive(widget, FALSE);
 
-    launch_browser(cur_info, run_netscape);
+    launch_browser(cur_info, loki_launchURL);
 }
 
 
@@ -1439,7 +1426,7 @@ static install_state gtkui_website(install_info *info)
 
     /* Automatically launch the browser if necessary */
     if ( do_launch ) {
-        launch_browser(info, run_netscape);
+        launch_browser(info, loki_launchURL);
     }
     return iterate_for_state();
 }

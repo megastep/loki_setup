@@ -33,7 +33,7 @@ endif
 CFLAGS += $(OPTIMIZE) $(HEADERS) $(OPTIONS)
 
 COMMON_OBJS = log.o install_log.o
-OBJS = $(COMMON_OBJS) main.o detect.o plugins.o network.o install.o copy.o file.o 
+OBJS = $(COMMON_OBJS) main.o detect.o plugins.o network.o install.o copy.o file.o loki_launchurl.o
 UNINSTALL_OBJS = $(COMMON_OBJS) uninstall.o
 CONSOLE_OBJS = $(OBJS) console_ui.o
 GUI_OBJS = $(OBJS) gtk_ui.o

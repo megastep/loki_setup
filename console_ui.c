@@ -23,6 +23,7 @@
 #include "detect.h"
 #include "file.h"
 #include "copy.h"
+#include "loki_launchurl.h"
 
 /* The README viewer program - on all Linux sytems */
 #define PAGER_COMMAND   "more"
@@ -498,22 +499,6 @@ _("If you run a game as root, the preferences will be stored in\n"
 }
 
 
-static int run_lynx(const char *url)
-{
-    char command[2*PATH_MAX];
-    int retval;
-
-    retval = 0;
-    snprintf(command, sizeof(command), "lynx \"%s\"", url);
-    if ( system(command) != 0 ) {
-        retval = -1;
-    }
-    return retval;
-}
-
-
-
-
 static install_state console_website(install_info *info)
 {
     const char *website_text;
@@ -529,7 +514,7 @@ static install_state console_website(install_info *info)
 
     if ( (strcmp( GetAutoLaunchURL(info), "true" )==0)
          || (console_prompt(_("Would you like to launch web browser?"), RESPONSE_YES) == RESPONSE_YES ) ) {
-        launch_browser( info, run_lynx );
+        launch_browser(info, loki_launchURL);
     }
     return SETUP_COMPLETE;
 }
