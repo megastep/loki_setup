@@ -66,32 +66,6 @@ void log_fatal(install_info *info, const char *fmt, ...)
     abort();
 }
 
-static void add_file_entry(install_info *info, const char *path)
-{
-    struct file_elem *elem;
-
-    elem = (struct file_elem *)malloc(sizeof *elem);
-    if ( elem ) {
-        elem->next = info->file_list;
-        info->file_list = elem;
-    } else {
-        log_fatal(info, "Out of memory");
-    }
-}
-
-static void add_dir_entry(install_info *info, const char *path)
-{
-    struct dir_elem *elem;
-
-    elem = (struct dir_elem *)malloc(sizeof *elem);
-    if ( elem ) {
-        elem->next = info->dir_list;
-        info->dir_list = elem;
-    } else {
-        log_fatal(info, "Out of memory");
-    }
-}
-
 stream *file_open(install_info *info, const char *path, const char *mode)
 {
     stream *streamp;

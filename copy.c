@@ -51,7 +51,7 @@ int parse_line(const char **srcpp, char *buf, int maxlen)
 
 
 size_t copy_tarball(install_info *info, const char *path, const char *dest,
-        void (*update)(void *udata, const char *path, int size), void *udata)
+                void (*update)(install_info *info, const char *path, size_t size))
 {
     static tar_record zeroes;
     tar_record record;
@@ -101,7 +101,7 @@ size_t copy_tarball(install_info *info, const char *path, const char *dest,
                         this_size += copied;
 
                         if ( update ) {
-                            update(udata, final, this_size);
+                            update(info, final, this_size);
                         }
                     }
                     file_close(info, output);
@@ -130,7 +130,7 @@ size_t copy_tarball(install_info *info, const char *path, const char *dest,
 }
 
 size_t copy_file(install_info *info, const char *path, const char *dest,
-        void (*update)(void *udata, const char *path, int size), void *udata)
+                void (*update)(install_info *info, const char *path, size_t size))
 {
     size_t size, copied;
     const char *base;
@@ -161,7 +161,7 @@ size_t copy_file(install_info *info, const char *path, const char *dest,
         }
         size += copied;
         if ( update ) {
-            update(udata, final, size);
+            update(info, final, size);
         }
     }
     file_close(info, output);
@@ -171,7 +171,7 @@ size_t copy_file(install_info *info, const char *path, const char *dest,
 }
 
 size_t copy_directory(install_info *info, const char *path, const char *dest,
-        void (*update)(void *udata, const char *path, int size), void *udata)
+                void (*update)(install_info *info, const char *path, size_t size))
 {
     struct stat sb;
     char dirb[BUFSIZ];
@@ -185,7 +185,7 @@ size_t copy_directory(install_info *info, const char *path, const char *dest,
     sprintf(fpat, "%s/*", path);
     if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
         for ( i=0; globbed.gl_pathc; ++i ) {
-            copied = copy_path(info,globbed.gl_pathv[i],dirb,update,udata);
+            copied = copy_path(info, globbed.gl_pathv[i], dirb, update);
             if ( copied > 0 ) {
                 size += copied;
             }
@@ -198,7 +198,7 @@ size_t copy_directory(install_info *info, const char *path, const char *dest,
 }
 
 size_t copy_path(install_info *info, const char *path, const char *dest,
-        void (*update)(void *udata, const char *path, int size), void *udata)
+                void (*update)(install_info *info, const char *path, size_t size))
 {
     struct stat sb;
     size_t size, copied;
@@ -206,12 +206,12 @@ size_t copy_path(install_info *info, const char *path, const char *dest,
     size = 0;
     if ( stat(path, &sb) == 0 ) {
         if ( S_ISDIR(sb.st_mode) ) {
-            copied = copy_directory(info, path, dest, update, udata);
+            copied = copy_directory(info, path, dest, update);
         } else {
             if ( strstr(path, TAR_EXTENSION) != NULL ) {
-                copied = copy_tarball(info, path, dest, update, udata);
+                copied = copy_tarball(info, path, dest, update);
             } else {
-                copied = copy_file(info, path, dest, update, udata);
+                copied = copy_file(info, path, dest, update);
             }
         }
         if ( copied > 0 ) {
@@ -224,7 +224,7 @@ size_t copy_path(install_info *info, const char *path, const char *dest,
 }
 
 size_t copy_list(install_info *info, const char *filedesc, const char *dest,
-        void (*update)(void *udata, const char *path, int size), void *udata)
+                void (*update)(install_info *info, const char *path, size_t size))
 {
     char fpat[BUFSIZ];
     int i;
@@ -235,7 +235,7 @@ size_t copy_list(install_info *info, const char *filedesc, const char *dest,
     while ( filedesc && parse_line(&filedesc, fpat, (sizeof fpat)) ) {
         if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
             for ( i=0; globbed.gl_pathc; ++i ) {
-                copied = copy_path(info,globbed.gl_pathv[i],dest,update,udata);
+                copied = copy_path(info, globbed.gl_pathv[i], dest, update);
                 if ( copied > 0 ) {
                     size += copied;
                 }
@@ -250,7 +250,7 @@ size_t copy_list(install_info *info, const char *filedesc, const char *dest,
 
 size_t copy_node(install_info *info, xmlDocPtr doc, xmlNodePtr cur,
         const char *dest,
-        void (*update)(void *udata, const char *path, int size), void *udata)
+                void (*update)(install_info *info, const char *path, size_t size))
 {
     size_t size, copied;
 
@@ -259,7 +259,7 @@ size_t copy_node(install_info *info, xmlDocPtr doc, xmlNodePtr cur,
 printf("Checking node element '%s'\n", cur->name);
         if ( strcmp(cur->name, "files") == 0 ) {
             copied = copy_list(info, xmlNodeListGetString(doc, cur->childs, 1),
-                               dest, update, udata);
+                               dest, update);
             if ( copied > 0 ) {
                 size += copied;
             }

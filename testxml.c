@@ -52,7 +52,7 @@ void ParseNode(xmlDocPtr doc, xmlNodePtr cur, int level)
         if ( strcmp(cur->name, "option") != 0 ) {
             xmlSetProp(cur, "checked", "true");
         }
-        if ( strcmp(cur->name, "text") != 0 ) {
+        if ( ! xmlNodeIsText(cur) ) {
             PrefixLevel(level);
             printf("Parsing %s node at level %d { \n", cur->name, level);
             data =  xmlNodeListGetString(doc, cur->childs, 1);
@@ -72,6 +72,40 @@ void ParseNode(xmlDocPtr doc, xmlNodePtr cur, int level)
     }
 }
 
+xmlNodePtr FindNode(xmlNodePtr node, const char *name)
+{
+    while ( node ) {
+        /* Did we find the node? */
+        if ( strcmp(node->name, name) == 0 ) {
+            return(node);
+        }
+        /* Look through the children */
+        if ( node->childs ) {
+            xmlNodePtr found;
+
+            found = FindNode(node->childs, name);
+            if ( found ) {
+                return(found);
+            }
+        }
+        /* Keep looking */
+        node = node->next;
+    }
+    return(NULL);
+}
+
+const char *GetNodeText(xmlDocPtr doc, xmlNodePtr node, const char *name)
+{
+    const char *text;
+
+    text = NULL;
+    node = FindNode(node, name);
+    if ( node ) {
+        text = xmlNodeListGetString(doc, node->childs, 1);
+    }
+    return(text);
+}
+
 main()
 {
     xmlDocPtr doc;
@@ -79,6 +113,7 @@ main()
 
     doc = xmlParseFile("setup.xml");
     if ( doc ) {
+        printf("Description: %s\n", GetNodeText(doc, doc->root, "desc"));
         cur = doc->root;
         if ( cur ) {
             printf("Root node name: %s\n", cur->name);

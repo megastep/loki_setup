@@ -8,8 +8,8 @@
 
 /* Copy a path to the destination directory */
 extern size_t copy_path(install_info *info, const char *path, const char *dest,
-        void (*update)(void *udata, const char *path, int size), void *udata);
+           void (*update)(install_info *info, const char *path, size_t size));
 
 extern size_t copy_node(install_info *info, xmlDocPtr doc, xmlNodePtr cur,
-        const char *dest,
-        void (*update)(void *udata, const char *path, int size), void *udata);
+           const char *dest,
+           void (*update)(install_info *info, const char *path, size_t size));
