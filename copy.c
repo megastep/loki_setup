@@ -531,6 +531,10 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
 		const char *from_cdrom = xmlGetProp(node, "cdromid");
 		int lang_matched = 1;
 		int strip_dirs = 0;
+
+        if ( !from_cdrom && GetProductCDROMRequired(info) ) {
+            from_cdrom = info->name;
+        }
 		
 		lang_prop = xmlGetProp(node, "lang");
 		if (lang_prop) {
