@@ -144,8 +144,9 @@ stream *file_open_install(install_info *info, const char *path, const char *mode
 			if ( UI.prompt(msg, RESPONSE_YES) != RESPONSE_YES ) {
 				return NULL;
 			}
+		} else {
+			log_debug(_("File exists: '%s'"), path);
 		}
-		log_warning(_("File exists: '%s'"), path);
 
 		/* To avoid problem with busy binary files, remove them first if they exist */
 		unlink(path);

@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2004-08-03 19:38-0700\n"
+"POT-Creation-Date: 2004-09-08 14:44-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -134,75 +134,75 @@ msgid ""
 "Aborting.\n"
 msgstr ""
 
-#: uninstall.c:499
+#: uninstall.c:514
 msgid "Warning: Unable to replicate uninstallation program.\n"
 msgstr ""
 
-#: uninstall.c:503
+#: uninstall.c:518
 #, c-format
 msgid "Unable to open %s for writing.\n"
 msgstr ""
 
-#: uninstall.c:507
+#: uninstall.c:522
 #, c-format
 msgid "Unable to open %s for copying.\n"
 msgstr ""
 
-#: uninstall.c:519
+#: uninstall.c:534
 msgid "Couldn't change to install directory\n"
 msgstr ""
 
-#: uninstall.c:570
+#: uninstall.c:585
 msgid "Installed products:\n"
 msgstr ""
 
-#: uninstall.c:578
+#: uninstall.c:593
 #, c-format
 msgid ""
 "installed in %s\n"
 "\tComponents:\n"
 msgstr ""
 
-#: uninstall.c:585
+#: uninstall.c:600
 msgid " Error while accessing product info\n"
 msgstr ""
 
-#: uninstall.c:589
+#: uninstall.c:604
 msgid ""
 "No products could be found. Maybe you need to run as a different user?\n"
 msgstr ""
 
-#: uninstall.c:601
+#: uninstall.c:616
 #, c-format
 msgid "Could not open product information for %s\n"
 msgstr ""
 
-#: uninstall.c:609
+#: uninstall.c:624
 #, c-format
 msgid ""
 "Product: %s\n"
 "Installed in %s\n"
 msgstr ""
 
-#: uninstall.c:615
+#: uninstall.c:630
 msgid "Components:\n"
 msgstr ""
 
-#: uninstall.c:637
+#: uninstall.c:652
 #, c-format
 msgid "Failed to properly uninstall component %s\n"
 msgstr ""
 
-#: uninstall.c:640
+#: uninstall.c:655
 #, c-format
 msgid "Unable to find component %s\n"
 msgstr ""
 
-#: uninstall.c:651
+#: uninstall.c:666
 msgid "An error occured during the uninstallation process.\n"
 msgstr ""
 
-#: uninstall.c:655
+#: uninstall.c:670
 #, c-format
 msgid ""
 "%s has been successfully uninstalled.\n"
