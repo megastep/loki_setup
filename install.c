@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.81 2000-11-10 23:04:40 megastep Exp $ */
+/* $Id: install.c,v 1.82 2000-11-10 23:29:59 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -428,7 +428,7 @@ install_info *create_install(const char *configfile, int log_level,
     info->mounted_list = NULL;
 
     /* Set product DB stuff to nothing by default */
-    info->product = NULL;
+    info->product = loki_openproduct(info->name);
     info->component = NULL;
     info->components_list = NULL;
 
@@ -459,23 +459,20 @@ install_info *create_install(const char *configfile, int log_level,
     }
     /* Handle component stuff */
     compname = GetProductComponent(info);
-    if ( compname ) {
-        info->product = loki_openproduct(info->name);
-        if ( info->product ) {
-            info->component = loki_find_component(info->product, compname);
-            if ( info->component ) {
-                info->component = NULL;
-            } else {
-                product_info_t *pinfo = loki_getinfo_product(info->product);
-
-                info->component = loki_create_component(info->product, compname,
-                                                        info->version);
-                disable_install_path = 1;
-                strncpy(info->install_path, pinfo->root, sizeof(info->install_path));
-            }
+    if ( compname && info->product ) {
+        info->component = loki_find_component(info->product, compname);
+        if ( info->component ) {
+            info->component = NULL;
+        } else {
+            product_info_t *pinfo = loki_getinfo_product(info->product);
+            
+            info->component = loki_create_component(info->product, compname,
+                                                    info->version);
+            disable_install_path = 1;
+            strncpy(info->install_path, pinfo->root, sizeof(info->install_path));
         }
     }
-
+    
     /* Start a network lookup for any URL */
     if ( GetProductURL(info) ) {
         info->lookup = open_lookup(info, GetProductURL(info));
@@ -759,7 +756,9 @@ void mark_option(install_info *info, xmlNodePtr node,
                  const char *value, int recurse)
 {
     /* Unmark this option for installation */
-    xmlSetProp(node, "install", value);
+    if ( !strcmp(node->name, "option") ) {
+        xmlSetProp(node, "install", value);
+    }
 
     /* Recurse down any other options */
     if ( recurse ) {

@@ -421,12 +421,25 @@ static install_state console_setup(install_info *info)
 				} else if ( ! strcmp(node->name, "component") ) {
                     if ( match_arch(info, xmlGetProp(node, "arch")) &&
                          match_libc(info, xmlGetProp(node, "libc")) ) {
-                        xmlNodePtr child;
-                        if ( xmlGetProp(node, "showname") ) {
-                            printf(_("\n%s component\n\n"), xmlGetProp(node, "name"));
+                        int enable = 1;
+
+                        if ( info->product ) {
+                            product_component_t *comp = loki_find_component(info->product, xmlGetProp(node, "name"));
+                            /* Check if the installed component is more recent */
+                            if ( comp && loki_newer_version(loki_getversion_component(comp), xmlGetProp(node, "version")) ) {
+                                enable = 0;
+                            }
                         }
-                        for ( child = node->childs; child; child = child->next) {
-                            parse_option(info, child, 0);
+                        if ( enable ) {
+                            xmlNodePtr child;
+                            if ( xmlGetProp(node, "showname") ) {
+                                printf(_("\n%s component\n\n"), xmlGetProp(node, "name"));
+                            }
+                            for ( child = node->childs; child; child = child->next) {
+                                parse_option(info, child, 0);
+                            }
+                        } else {
+                            mark_option(info, node, "false", 1);
                         }
                     }
                 }
@@ -455,16 +468,16 @@ static install_state console_setup(install_info *info)
 
 static void console_update(install_info *info, const char *path, size_t progress, size_t size, const char *current)
 {
-  static char previous[200] = "";
+    static char previous[200] = "";
 
-  if(strcmp(previous, current)){
-	  strncpy(previous,current, sizeof(previous));
-	  printf(_("Installing %s ...\n"), current);
-  }
-  printf(" %3d%% - %s\r", (int) (((float)progress/(float)size)*100.0), path);
-  if(progress==size)
-	  putchar('\n');
-  fflush(stdout);
+    if(strcmp(previous, current)){
+        strncpy(previous,current, sizeof(previous));
+        printf(_("Installing %s ...\n"), current);
+    }
+    printf(" %3d%% - %s\r", (int) (((float)progress/(float)size)*100.0), path);
+    if(progress==size)
+        putchar('\n');
+    fflush(stdout);
 }
 
 static void console_abort(install_info *info)

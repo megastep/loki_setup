@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.56 2000-11-10 06:36:26 megastep Exp $
+   $Id: gtk_ui.c,v 1.57 2000-11-10 23:29:59 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1300,19 +1300,31 @@ static install_state gtkui_setup(install_info *info)
 				parse_option(info, child, window, options, 0, NULL, 1, &list);
 			}
 		} else if ( ! strcmp(node->name, "component") ) {
+            int enable = 1;
             if ( match_arch(info, xmlGetProp(node, "arch")) &&
                  match_libc(info, xmlGetProp(node, "libc")) ) {
-                xmlNodePtr child;
-                if ( xmlGetProp(node, "showname") ) {
-                    GtkWidget *widget = gtk_hseparator_new();
-                    gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 0);
-                    gtk_widget_show(widget);                
-                    widget = gtk_label_new(xmlGetProp(node, "name"));
-                    gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 10);
-                    gtk_widget_show(widget);
+                if ( info->product ) {
+                    product_component_t *comp = loki_find_component(info->product, xmlGetProp(node, "name"));
+                    /* Check if the installed component is more recent */
+                    if ( comp && loki_newer_version(loki_getversion_component(comp), xmlGetProp(node, "version")) ) {
+                        enable = 0;
+                    }
                 }
-                for ( child = node->childs; child; child = child->next) {
-                    parse_option(info, child, window, options, 0, NULL, 0, NULL);
+                if ( enable ) {
+                    xmlNodePtr child;
+                    if ( xmlGetProp(node, "showname") ) {
+                        GtkWidget *widget = gtk_hseparator_new();
+                        gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 0);
+                        gtk_widget_show(widget);                
+                        widget = gtk_label_new(xmlGetProp(node, "name"));
+                        gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 10);
+                        gtk_widget_show(widget);
+                    }
+                    for ( child = node->childs; child; child = child->next) {
+                        parse_option(info, child, window, options, 0, NULL, 0, NULL);
+                    }
+                } else {
+                    mark_option(info, node, "false", 1);
                 }
             }
         }
