@@ -11,8 +11,8 @@
 #include "copy.h"
 #include "loki_launchurl.h"
 
+extern char gCDKeyString[128];
 static int CDKeyOK;
-static char CDKeyString[1024];
 static int cur_state;
 static install_info *cur_info;
 static int diskspace;
@@ -685,7 +685,8 @@ static void OnCommandCDKeyContinue()
                 *p = toupper(*p);
                 p++;
             }
-            strcpy(CDKeyString, CDKey);
+            strncpy(gCDKeyString, CDKey, sizeof (gCDKeyString));
+            gCDKeyString[sizeof (gCDKeyString) - 1] = '\0';
         }
     }
 }
@@ -1335,6 +1336,7 @@ static install_state carbonui_complete(install_info *info)
     //if(carbon_GetCheckbox(MyRes, OPTION_CREATE_DESKTOP_ALIAS_BUTTON_ID))
     //    carbon_AddDesktopAlias(info->install_path);
 
+    #if 0  // this is handled in install.c now. --ryan.
     // If CDKey attribute was specified, run the specified script
     if(GetProductCDKey(info))
     {
@@ -1348,9 +1350,12 @@ static install_state carbonui_complete(install_info *info)
         {
             carbon_debug("CDKey file opened\n");
             fwrite(CDKeyString, sizeof(char), strlen(CDKeyString), cdfile);
+            fclose(cdfile);
         }
         //run_script(info, cmd, 0);
     }
+    #endif
+
     // Show the install complete page
     carbon_ShowInstallScreen(MyRes, DONE_PAGE);
     // Set the install directory label accordingly
