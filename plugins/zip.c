@@ -1,5 +1,5 @@
 /* ZIP plugin for setup */
-/* $Id: zip.c,v 1.6 2002-12-07 00:57:32 megastep Exp $ */
+/* $Id: zip.c,v 1.7 2004-02-28 15:44:01 icculus Exp $ */
 
 #include "plugins.h"
 #include "file.h"
@@ -767,6 +767,7 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
                     w = file_write(info, zip_buf_out, br, out);
                     if (w != br)
                         break;
+                    info->installed_bytes += br;
                 } /* if */
 
                 bw += w;
@@ -818,6 +819,7 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
                     w = file_write(info, zip_buf_out, bytes_to_write, out);
                     if (w != bytes_to_write)
                         break;
+                    info->installed_bytes += w;
 
                     bw += bytes_to_write;
                     update(info, final, bw, entry->uncompressed_size, current_option);

@@ -1,5 +1,5 @@
 /* UnrealEngine2-compressed files (.uz2) plugin for setup */
-/* $Id: uz2.c,v 1.1 2004-02-25 08:15:08 icculus Exp $ */
+/* $Id: uz2.c,v 1.2 2004-02-28 15:44:01 icculus Exp $ */
 
 #include <stdlib.h>
 #include <string.h>
@@ -170,6 +170,7 @@ static size_t UZ2Copy(install_info *info, const char *path, const char *dest, co
             break;
         }
 
+        info->installed_bytes += usize;
         insize += 8 + csize;
     }
 
