@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.124 2003-09-27 01:52:38 megastep Exp $ */
+/* $Id: install.c,v 1.125 2003-11-28 20:34:50 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1663,6 +1663,7 @@ void generate_uninstall(install_info *info)
     product_component_t *component = NULL;
     product_option_t *option;
     struct component_elem *comp;
+	int free_product = 0;
 
     if ( info->component ) { /* Component install, the product has already been opened */
         product = info->product;
@@ -1678,6 +1679,7 @@ void generate_uninstall(install_info *info)
 			loki_setprefix_product(product, info->prefix);
 		}
 		info->product = product;
+		free_product = 1;
     }
 
     if ( product ) {
@@ -1852,7 +1854,8 @@ void generate_uninstall(install_info *info)
 
         snprintf(buf, sizeof(buf), "setup.data/bin/%s/%s/uninstall", detect_os(), detect_arch());
         loki_upgrade_uninstall(product, buf, "setup.data/locale");
-		loki_closeproduct(product);
+		if ( free_product ) 
+			loki_closeproduct(product);
     } else {
 		log_fatal(_("Could not create install log"),
 				  detect_home(), info->name);
@@ -1994,14 +1997,14 @@ static void symlink_desktop_file(install_info *info, const char *file, const cha
 int install_menuitems(install_info *info, desktop_type desktop)
 {
     const char **tmp_links;
-    char buf[PATH_MAX];
+    char buf[PATH_MAX] = "";
     struct bin_elem *elem;
     struct option_elem *opt;
     struct component_elem *comp;
     int ret_val = 0, num_items = 0;
     const char *desk_base;
-    char icon_base[PATH_MAX], home_base[PATH_MAX];
-    const char *app_links[15];
+    char icon_base[PATH_MAX] = "", home_base[PATH_MAX] = "";
+    const char *app_links[15] = { NULL };
     const char *exec_script_name = NULL;
     char exec_script[PATH_MAX*2];
     char exec_command[PATH_MAX*2];

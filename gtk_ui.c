@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.87 2003-10-15 00:08:11 megastep Exp $
+   $Id: gtk_ui.c,v 1.88 2003-11-28 20:34:50 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -539,7 +539,7 @@ static void update_size(void)
 
     widget = glade_xml_get_widget(setup_glade, "label_install_size");
     if ( widget ) {
-        snprintf(text, sizeof(text), _("%ld MB"), BYTES2MB(cur_info->install_size));
+        snprintf(text, sizeof(text), _("%d MB"), BYTES2MB(cur_info->install_size));
         gtk_label_set_text(GTK_LABEL(widget), text);
         check_install_button();
     }
@@ -1552,7 +1552,7 @@ static int gtkui_update(install_info *info, const char *path, size_t progress, s
     static gfloat last_update = -1;
     GtkWidget *widget;
     int textlen;
-    char text[1024];
+    const char *text;
     char *install_path;
     gfloat new_update;
 
@@ -1577,15 +1577,15 @@ static int gtkui_update(install_info *info, const char *path, size_t progress, s
         }
         widget = glade_xml_get_widget(setup_glade, "current_file_label");
         if ( widget ) {
-            snprintf(text, sizeof(text), "%s", path);
+            text = path;
             /* Remove the install path from the string */
             install_path = cur_info->install_path;
             if ( strncmp(text, install_path, strlen(install_path)) == 0 ) {
-                strcpy(text, &text[strlen(install_path)+1]);
+                text+=strlen(install_path)+1;
             }
             textlen = strlen(text);
             if ( textlen > MAX_TEXTLEN ) {
-                strcpy(text, text+(textlen-MAX_TEXTLEN));
+                text+=textlen-MAX_TEXTLEN;
             }
             gtk_label_set_text( GTK_LABEL(widget), text);
         }
