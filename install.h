@@ -54,6 +54,15 @@ typedef struct {
         struct dir_elem *next;
     } *dir_list;
 
+    /* List of installed binaries */
+    struct bin_elem {
+        char *path;
+        const char *symlink;
+        const char *desc;
+        const char *icon;
+        struct bin_elem *next;
+    } *bin_list;
+
     /* Unspecified UI data */
     struct UI_data *uidata;
 
@@ -69,13 +78,17 @@ extern void add_file_entry(install_info *info, const char *path);
 /* Add a directory entry to the list of directories installed */
 extern void add_dir_entry(install_info *info, const char *path);
 
+/* Add a binary entry to the list of binaries installed */
+extern void add_bin_entry(install_info *info, const char *path,
+                const char *symlink, const char *desc, const char *icon);
+
 /* Free the install information structure */
 extern void delete_install(install_info *info);
 
 
 /* Actually install the selected filesets */
 extern install_state install(install_info *info,
-            void (*update)(install_info *info, const char *path, size_t size));
+            void (*update)(install_info *info, const char *path, size_t progress, size_t size));
 
 /* Remove a partially installed product */
 extern void uninstall(install_info *info);

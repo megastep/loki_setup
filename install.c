@@ -82,11 +82,31 @@ void add_dir_entry(install_info *info, const char *path)
     }
 }
 
+/* Add a binary entry to the list of binaries installed */
+void add_bin_entry(install_info *info, const char *path,
+                   const char *symlink, const char *desc, const char *icon)
+{
+    struct bin_elem *elem;
+
+    elem = (struct bin_elem *)malloc(sizeof *elem);
+    if ( elem ) {
+        elem->path = (char *)malloc(strlen(path)+1);
+        if ( elem->path ) {
+            strcpy(elem->path, path);
+            elem->symlink = symlink;
+            elem->desc = desc;
+            elem->icon = icon;
+            elem->next = info->bin_list;
+            info->bin_list = elem;
+        }
+    } else {
+        log_fatal(info, "Out of memory");
+    }
+}
+
 /* Free the install information structure */
 void delete_install(install_info *info)
 {
-    struct dir_elem *elem;
-
     while ( info->file_list ) {
         struct file_elem *elem;
  
@@ -103,6 +123,14 @@ void delete_install(install_info *info)
         free(elem->path);
         free(elem);
     }
+    while ( info->bin_list ) {
+        struct bin_elem *elem;
+ 
+        elem = info->bin_list;
+        info->bin_list = elem->next;
+        free(elem->path);
+        free(elem);
+    }
     if ( info->log ) {
         destroy_log(info->log);
     }
@@ -112,7 +140,7 @@ void delete_install(install_info *info)
 
 /* Actually install the selected filesets */
 install_state install(install_info *info,
-            void (*update)(install_info *info, const char *path, size_t size))
+            void (*update)(install_info *info, const char *path, size_t progress, size_t size))
 {
     xmlNodePtr node;
 

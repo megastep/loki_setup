@@ -131,12 +131,11 @@ size_t copy_tarball(install_info *info, const char *path, const char *dest,
     return size;
 }
 
-size_t copy_file(install_info *info, const char *path, const char *dest,
+size_t copy_file(install_info *info, const char *path, const char *dest, char *final,
                 void (*update)(install_info *info, const char *path, size_t progress, size_t size))
 {
     size_t size, copied;
     const char *base;
-    char final[PATH_MAX];
     char buf[BUFSIZ];
     stream *input, *output;
 
@@ -144,9 +143,9 @@ size_t copy_file(install_info *info, const char *path, const char *dest,
     base = strrchr(path, '/');
     if ( base == NULL ) {
         base = path;
-    }else
-	  base ++;
-
+    } else {
+	    base ++;
+    }
     sprintf(final, "%s/%s", dest, base);
 
     size = 0;
@@ -204,6 +203,7 @@ size_t copy_directory(install_info *info, const char *path, const char *dest,
 size_t copy_path(install_info *info, const char *path, const char *dest,
                 void (*update)(install_info *info, const char *path, size_t progress, size_t size))
 {
+    char final[PATH_MAX];
     struct stat sb;
     size_t size, copied;
 
@@ -215,7 +215,7 @@ size_t copy_path(install_info *info, const char *path, const char *dest,
             if ( strstr(path, TAR_EXTENSION) != NULL ) {
                 copied = copy_tarball(info, path, dest, update);
             } else {
-                copied = copy_file(info, path, dest, update);
+                copied = copy_file(info, path, dest, final, update);
             }
         }
         if ( copied > 0 ) {
@@ -252,6 +252,40 @@ size_t copy_list(install_info *info, const char *filedesc, const char *dest,
     return size;
 }
 
+size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, const char *dest,
+                void (*update)(install_info *info, const char *path, size_t progress, size_t size))
+{
+    const char *arch;
+    const char *libc;
+    struct stat sb;
+    char fpat[BUFSIZ], final[BUFSIZ];
+    size_t size, copied;
+
+    arch = detect_arch();
+    libc = detect_libc();
+    while ( filedesc && parse_line(&filedesc, final, (sizeof final)) ) {
+        copied = 0;
+        sprintf(fpat, "bin/%s/%s/%s", arch, libc, final);
+        if ( stat(fpat, &sb) == 0 ) {
+            copied = copy_file(info, fpat, dest, final, update);
+        } else {
+            sprintf(fpat, "bin/%s/%s", arch, final);
+            if ( stat(fpat, &sb) == 0 ) {
+                copied = copy_file(info, fpat, dest, final, update);
+            } else {
+                log_warning(info, "Unable to find file %s", fpat);
+            }
+        }
+        if ( copied > 0 ) {
+            size += copied;
+            add_bin_entry(info, final, xmlGetProp(node, "symlink"),
+                                       xmlGetProp(node, "desc"),
+                                       xmlGetProp(node, "icon"));
+        }
+    }
+    return size;
+}
+
 size_t copy_node(install_info *info, xmlNodePtr cur, const char *dest,
                 void (*update)(install_info *info, const char *path, size_t progress, size_t size))
 {
@@ -272,6 +306,12 @@ printf("Installing file set for '%s'\n", xmlNodeListGetString(info->config, (cur
         }
         if ( strcmp(cur->name, "binary") == 0 ) {
 printf("Installing binary\n");
+            copied = copy_binary(info, cur,
+                               xmlNodeListGetString(info->config, cur->childs, 1),
+                               dest, update);
+            if ( copied > 0 ) {
+                size += copied;
+            }
         }
         cur = cur->next;
     }
