@@ -1,5 +1,7 @@
 
 1.2.3:
+Stéphane Peter - Mon May  1 16:50:26 PDT 2000
+ * Added i18n support through GNU gettext and the "lang" element and attributes.
 Sam Lantinga - Fri Apr 28 17:17:27 PDT 2000
  * Added the COPYING file to the distribution - GNU General Public License
 Jeroen Janssen - Thu Apr 20 16:33:30 PDT 2000

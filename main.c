@@ -1,15 +1,16 @@
-/* $Id: main.c,v 1.23 2000-05-01 20:40:21 hercules Exp $ */
+/* $Id: main.c,v 1.24 2000-05-02 00:25:47 megastep Exp $ */
 
 #include <stdio.h>
 #include <setjmp.h>
 #include <signal.h>
 #include <getopt.h>
+#include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "install.h"
+#include "install_log.h"
 #include "install_ui.h"
 #include "log.h"
 #include "detect.h"
@@ -18,10 +19,14 @@
 
 #define SETUP_CONFIG  SETUP_BASE "setup.xml"
 
+#define PACKAGE "setup"
+#define LOCALEDIR "setup.data/locale"
+
 /* Global options */
 
 int force_console = 0;
 char *rpm_root = "/";
+static char *current_locale = NULL;
 
 /* A way to jump to the abort handling code */
 jmp_buf abort_jmpbuf;
@@ -44,6 +49,20 @@ static int (*GUI_okay[])(Install_UI *UI) = {
     NULL
 };
 
+/* Matches a locale string against the current one */
+
+int MatchLocale(const char *str)
+{
+	if ( current_locale ) {
+		if ( str && strstr(current_locale, str) == current_locale ) {
+			return 1;
+		}
+	} else if ( !strcmp(str, "none") ) {
+		return 1;
+	}
+	return 0;
+}
+
 /* List the valid command-line options */
 
 static void print_usage(const char *argv0)
@@ -53,13 +72,13 @@ _("Usage: %s [options]\n\n"
 "Options can be one or more of the following:\n"
 "   -h       Display this help message\n"
 "   -c cwd   Use an alternate current directory for the install\n"
-"   -f file  Use an alternative XML file (default " SETUP_CONFIG ")\n"
+"   -f file  Use an alternative XML file (default %s)\n"
 "   -n       Force the text-only user interface\n"
 "   -r root  Set the root directory for extracting RPM files (default is /)\n"
 "   -v n     Set verbosity level to n. Available values :\n"
 "            0: Debug  1: Quiet  2: Normal 3: Warnings 4: Fatal\n"
 "   -V       Print the version of the setup program and exit\n"),
-     argv0);
+     argv0, SETUP_CONFIG);
 }
 
 /* The main installer code */
@@ -75,6 +94,12 @@ int main(int argc, char **argv)
 
     /* Set a good default umask value (022) */
     umask(DEFAULT_UMASK);
+
+	/* Set the locale */
+	setlocale (LC_ALL, "");
+	bindtextdomain (PACKAGE, LOCALEDIR);
+	textdomain (PACKAGE);
+	current_locale = getenv("LANG");
 
     /* Parse the command-line options */
     while ( (c=getopt(argc, argv, "hnc:f:r:v::V")) != EOF ) {
@@ -121,6 +146,8 @@ int main(int argc, char **argv)
         fprintf(stderr, _("Couldn't load '%s'\n"), xml_file);
         exit(1);
     }
+
+	log_debug(info, _("Detected locale is %s"), current_locale);
 
 #ifdef RPM_SUPPORT
     /* Try to access the RPM database */

@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.31 2000-05-01 20:40:20 hercules Exp $
+   $Id: gtk_ui.c,v 1.32 2000-05-02 00:25:47 megastep Exp $
 */
 
 #include <limits.h>
@@ -221,8 +221,8 @@ void setup_button_play_slot( GtkWidget* _widget, gpointer func_data )
 
     if ( getuid() == 0 ) {
     const char *warning_text =
-_("If you run a game as root, the preferences will be stored in\n")
-_("root's home directory instead of your user account directory.");
+_("If you run a game as root, the preferences will be stored in\n"
+  "root's home directory instead of your user account directory.");
 
         warning_dialog = WARNING_ROOT;
         widget = glade_xml_get_widget(setup_glade, "setup_notebook");

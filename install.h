@@ -4,7 +4,9 @@
 
 #include <limits.h>
 #include <gnome-xml/parser.h>
-
+#include <libintl.h>
+#define _(String) gettext (String)
+#define gettext_noop(String) (String)
 
 /* Conversion macro for bytes to megabytes */
 #define BYTES2MB(bytes) ((bytes/(1024*1024))+1)
@@ -138,6 +140,8 @@ typedef struct {
 
 } install_info;
 
+/* Matches a locale string against the current one */
+extern int MatchLocale(const char *str);
 
 /* Functions to retrieve attribution information from the XML tree */
 extern const char *GetProductName(install_info *info);

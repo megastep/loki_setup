@@ -94,8 +94,10 @@ body of that option:
 
     <option>
         Top-level option
+        <lang lang="locale">Translated 'Top-level option'</lang>
         <option>
             First dependent option
+            <lang lang="locale">Translated 'First dependent option'</lang>
         </option>
         <option>
             Second dependent option
@@ -125,6 +127,15 @@ There are several optional attributes of the option element:
             If this element isn't specified, setup  will try to autodetect
             the size of the install option itself.
 
+The option element support the LANG sub-element, which is used to specify
+translated strings for the option name. The only attribute of this element
+is 'lang', which should be the name of the locale to be matched against
+the current locale (i.e. "fr", "de", "it", etc...). See 'About locallization'
+below for more details about locale matching.
+
+If you don't specify translations for alternate locales, then the same
+string will be used for all languages encountered by setup. Of course,
+you can have several 'lang' elements per 'option' element.
 
 The BINARY element:
 
@@ -172,6 +183,10 @@ There are several optional attributes of the binary element:
  cdrom      If this attribute has a "yes" value, then setup will look for
             the file on one of the mounted CDROMs on the system.
 
+ lang       The files are only installed if the current locale matches the
+            string of this attribute. See 'About localization' below for
+            more details.
+
 The FILES element:
 
 The files element contains a list of files and directories, one per line,
@@ -186,6 +201,9 @@ There are several optional attributes of the files element:
  cdrom      If this attribute has a "yes" value, then setup will look for
             the files on one of the mounted CDROMs on the system.
 
+ lang       The files are only installed if the current locale matches the
+            string of this attribute. See 'About localization' below for
+            more details.
 
 The SCRIPT element:
 
@@ -204,7 +222,11 @@ For example:
         sh setup.data/stage1.sh
     </script>
 
-There are no attributes for the script element.
+There only supported attribute for the script element is the 'lang' element:
+
+ lang       The script is only installed if the current locale matches the
+            string of this attribute. See 'About localization' below for
+            more details.
 
 The following environment variables are defined while in the shell script:
     SETUP_PRODUCTNAME   : Product name from the XML file
@@ -215,6 +237,18 @@ The following environment variables are defined while in the shell script:
     SETUP_CDROMPATH     : Path where the install CD-ROM is mounted, if
                           the XML file designates that some components
                           are to be installed from CD-ROM.
+
+About localization :
+
+The 'lang' values are matched against the value of the LANG environment
+variable. The special value 'none' is matched only when there is no LANG
+environment variable set (the default locale).
+
+A locale is matched if the specified value is found at the beginning of
+LANG. For example, "fr" will match both the "fr" and "fr_CA" values. In
+order for the more specialized locale values to be matched correctly,
+the longer values should be be specified last (i.e. if you have different
+translations, list "fr" before "fr_CA" in the XML file).
 
 -------------------------------------------------------------------------
 
@@ -244,8 +278,13 @@ Example XML product specification:
         <binary arch="any" libc="any" symlink="foo" icon="icon.xpm">
             foo
         </binary>
+        <files lang="fr">
+            README.fr
         <files>
+        <files lang="none">
             README
+        <files>
+        <files>
             icon.xpm
             edit.xpm
             data/*.dat

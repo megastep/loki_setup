@@ -60,7 +60,7 @@ int parse_line(const char **srcpp, char *buf, int maxlen)
     char *token = 0;
     const char *end;
 
-    if (!*srcpp) { // assert
+    if (!*srcpp) { /* assert */
         *buf = 0;
         return 0;
     }
@@ -76,22 +76,22 @@ int parse_line(const char **srcpp, char *buf, int maxlen)
         if ( (dstp-buf) >= maxlen ) {
             break;
         }
-        if (!*srcp && subst) { // if we're substituting and done
+        if (!*srcp && subst) { /* if we're substituting and done */
             srcp = subst;
             subst = 0;
         }
         if ((!subst) && (*srcp == '$') && (*(srcp+1) == '{')) {
             getToken(srcp+2, &end);
-            if (end) {    // we've got a good token
+            if (end) {    /* we've got a good token */
                 if (token) free(token);
                 token = calloc((end-(srcp+2))+1, 1);
                 memcpy(token, srcp+2, (end-(srcp+2)));
-                strtok(token, "|"); // in case a default val is specified
+                strtok(token, "|"); /* in case a default val is specified */
                 tokenval = getenv(token);
-                if (!tokenval) // if no env set, check for default
+                if (!tokenval) /* if no env set, check for default */
                     tokenval = strtok(0, "|");
                 if (tokenval) {
-                    subst = end+1;  // where to continue after tokenval
+                    subst = end+1;  /* where to continue after tokenval */
                     srcp = tokenval;
                 }
             }
@@ -721,7 +721,14 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
     while ( node ) {
         const char *path = xmlGetProp(node, "path");
         const char *prop = xmlGetProp(node, "cdrom");
+		const char *lang_prop;
         int from_cdrom = (prop && !strcasecmp(prop, "yes"));
+		int lang_matched = 1;
+
+		lang_prop = xmlGetProp(node, "lang");
+		if (lang_prop) {
+			lang_matched = MatchLocale(lang_prop);
+		}
 
         if (!path)
             path = dest;
@@ -730,7 +737,7 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
             path = tmppath;
         }
 /* printf("Checking node element '%s'\n", node->name); */
-        if ( strcmp(node->name, "files") == 0 ) {
+        if ( strcmp(node->name, "files") == 0 && lang_matched ) {
             const char *str = xmlNodeListGetString(info->config, (node->parent)->childs, 1);
             
             parse_line(&str, current_option, sizeof(current_option));
@@ -741,7 +748,7 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
                 size += copied;
             }
         }
-        if ( strcmp(node->name, "binary") == 0 ) {
+        if ( strcmp(node->name, "binary") == 0 && lang_matched ) {
             copied = copy_binary(info, node,
                                xmlNodeListGetString(info->config, node->childs, 1),
                                path, from_cdrom, update);
@@ -749,7 +756,7 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
                 size += copied;
             }
         }
-        if ( strcmp(node->name, "script") == 0 ) {
+        if ( strcmp(node->name, "script") == 0 && lang_matched ) {
             copy_script(info, node,
                         xmlNodeListGetString(info->config, node->childs, 1),
                         path);
@@ -881,8 +888,9 @@ size_t size_list(install_info *info, int from_cdrom, const char *filedesc)
 /* Get the install size of an option node, in bytes */
 size_t size_node(install_info *info, xmlNodePtr node)
 {
-    const char *size_prop;
+    const char *size_prop, *lang_prop;
     size_t size;
+	int lang_matched = 1;
 
     size = 0;
 
@@ -892,6 +900,10 @@ size_t size_node(install_info *info, xmlNodePtr node)
         size = atol(size_prop)*1024*1024;
     }
 
+    lang_prop = xmlGetProp(node, "lang");
+	if (lang_prop) {
+		lang_matched = MatchLocale(lang_prop);
+	}
     /* Now, if necessary, scan all the files to install */
     if ( size == 0 ) {
         node = node->childs;
@@ -900,11 +912,11 @@ size_t size_node(install_info *info, xmlNodePtr node)
             int from_cdrom = (prop && !strcasecmp(prop, "yes"));
             
 /* printf("Checking node element '%s'\n", node->name); */
-            if ( strcmp(node->name, "files") == 0 ) {
+            if ( strcmp(node->name, "files") == 0 && lang_matched ) {
                 size += size_list(info, from_cdrom,
                           xmlNodeListGetString(info->config, node->childs, 1));
             }
-            if ( strcmp(node->name, "binary") == 0 ) {
+            if ( strcmp(node->name, "binary") == 0 && lang_matched ) {
                 size += size_binary(info, from_cdrom,
                           xmlNodeListGetString(info->config, node->childs, 1));
             }

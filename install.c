@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.40 2000-05-01 20:40:21 hercules Exp $ */
+/* $Id: install.c,v 1.41 2000-05-02 00:25:47 megastep Exp $ */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -382,8 +382,27 @@ char *get_option_name(install_info *info, xmlNodePtr node, char *name, int len)
     text = xmlNodeListGetString(info->config, node->childs, 1);
     *name = '\0';
     if ( text ) {
+		xmlNodePtr n;
         while ( (*name == 0) && parse_line(&text, name, len) )
             ;
+		/* Parse the children and look for a 'lang' element for translated names */
+		n = node->childs;
+		while ( n ) {
+			if( strcmp(n->name, "lang") == 0 ) {
+				const char *prop = xmlGetProp(n, "lang");
+				if ( prop && MatchLocale(prop) ) {
+					text = xmlNodeListGetString(info->config, n->childs, 1);
+					if(text) {
+						*name = '\0';
+						while ( (*name == 0) && parse_line(&text, name, len) )
+							;
+					} else {
+						log_warning(info, _("XML: option listed without translated description for locale '%s'"), prop);
+					}
+				}
+			}
+			n = n->next;
+		}
     } else {
         log_warning(info, _("XML: option listed without description"));
     }
@@ -564,8 +583,8 @@ void generate_uninstall(install_info *info)
         fprintf(fp,"#### END OF UNINSTALL\n");
         fprintf(fp,_("echo \"%s has been uninstalled.\"\n"), info->desc);
         if(info->rpm_list){
-          fprintf(fp,"echo\necho WARNING: The following RPM archives have been installed or upgraded\n"
-                  "echo when this software was installed. You may want to manually remove some of those:\n");
+          fprintf(fp,_("echo\necho WARNING: The following RPM archives have been installed or upgraded\n"
+					   "echo when this software was installed. You may want to manually remove some of those:\n") );
 
           for ( relem = info->rpm_list; relem; relem = relem->next ) {
             fprintf(fp,"echo \"\t%s, version %s, release %s\"\n", relem->name, relem->version, relem->release);

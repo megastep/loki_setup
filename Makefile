@@ -8,6 +8,9 @@ libc := $(shell ./print_libc)
 
 CC = gcc
 
+# The supported locales so far
+LOCALES = fr
+
 OPTIMIZE = -Wall -g -O2 -funroll-loops
 ifeq ($(arch), alpha)
     OPTIMIZE += -mcpu=ev4 -Wa,-mall
@@ -24,6 +27,8 @@ CFLAGS += $(OPTIMIZE) $(HEADERS) $(OPTIONS)
 OBJS = main.o install.o detect.o copy.o file.o network.o log.o install_log.o
 CONSOLE_OBJS = $(OBJS) console_ui.o
 GUI_OBJS = $(OBJS) gtk_ui.o
+
+SRCS = $(OBJS:.o=.c) $(CONSOLE_OBJS:.o=.c) $(GUI_OBJS:.o=.c)
 
 LIBS = `xml-config --prefix`/lib/libxml.a -lz
 ifeq ($(USE_RPM),true)
@@ -59,3 +64,19 @@ dist: clean
 	(cd $(DISTDIR)/$(PACKAGE) && rm -r `find . -name CVS`)
 	(cd $(DISTDIR) && tar zcvf $(PACKAGE).tar.gz $(PACKAGE))
 	rm -rf $(DISTDIR)/$(PACKAGE)
+
+po/setup.po:
+	libglade-xgettext image/setup.data/setup.glade > po/setup.po
+	xgettext -p po -j -d setup --keyword=_ $(SRCS)
+
+gettext: po/setup.po $(SRCS)
+	for lang in $(LOCALES); do \
+		msgfmt po/$$lang/setup.po -o image/setup.data/locale/$$lang/LC_MESSAGES/setup.mo; \
+	done
+
+# This rule merges changes from the newest PO file in all the translated PO files
+update-po: po/setup.po
+	for lang in $(LOCALES); do \
+		msgmerge po/$$lang/setup.po po/setup.po > po/$$lang/tmp; \
+		mv po/$$lang/tmp po/$$lang/setup.po; \
+	done

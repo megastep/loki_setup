@@ -1,7 +1,9 @@
 <?xml version="1.0" standalone="yes"?>
-<install product="RT2" desc="Railroad Tycoon II" version="1.54" readme="README">
+<install product="RT2" desc="Railroad Tycoon II" version="1.54" readme="README" >
   <option install="true" help="Required for play">
     Base Install
+    <lang lang="fr">Installation de base</lang>
+    <lang lang="de">Ich bin ein Berliner</lang>
     <binary arch="any" libc="any" symlink="rt2" icon="icon.xpm">
       rt2
     </binary>

@@ -14,6 +14,9 @@
 /* The README viewer program - on all Linux sytems */
 #define PAGER_COMMAND   "more"
 
+static const char *yes_letter = gettext_noop("Y");
+static const char *no_letter  = gettext_noop("N");
+
 static int prompt_user(const char *prompt, const char *default_answer,
                        char *answer, int maxlen)
 {
@@ -47,14 +50,13 @@ static yesno_answer console_prompt(const char *prompt, yesno_answer suggest)
             fprintf(stderr, _("Warning, invalid yesno prompt: %s\n"), prompt);
             return(RESPONSE_INVALID);
     }
-    switch (toupper(line[0])) {
-        case 'Y':
-            return RESPONSE_YES;
-        case 'N':
-            return RESPONSE_NO;
-        default:
-            return RESPONSE_INVALID;
-    }
+	if(!strncasecmp(line, gettext (yes_letter), 1)) {
+		return RESPONSE_YES;
+	} else if(!strncasecmp(line, gettext (no_letter), 1)) {
+		return RESPONSE_NO;
+	} else {
+		return RESPONSE_INVALID;
+	}
 }
 
 
@@ -74,22 +76,21 @@ static yesno_answer prompt_yesnohelp(const char *prompt, yesno_answer suggest)
             fprintf(stderr, _("Warning, invalid yesno prompt: %s\n"), prompt);
             return(RESPONSE_INVALID);
     }
-    switch (toupper(line[0])) {
-        case 'Y':
-            return RESPONSE_YES;
-        case 'N':
-            return RESPONSE_NO;
-        case '?':
-            return RESPONSE_HELP;
-        default:
-            return RESPONSE_INVALID;
-    }
+	if(!strncasecmp(line, gettext (yes_letter), 1)) {
+		return RESPONSE_YES;
+	} else if(!strncasecmp(line, gettext (no_letter), 1)) {
+		return RESPONSE_NO;
+	} else if(!strncasecmp(line, "?", 1)) {
+		return RESPONSE_HELP;
+	} else {
+		return RESPONSE_INVALID;
+	}
 }
 
 static yesno_answer prompt_warning(const char *warning)
 {
-        printf("%s\n", warning);
-        return (console_prompt(_("Continue?"), RESPONSE_NO));
+	printf("%s\n", warning);
+	return (console_prompt(_("Continue?"), RESPONSE_NO));
 }
 
 static void parse_option(install_info *info, xmlNodePtr node)
@@ -335,8 +336,8 @@ static install_state console_complete(install_info *info)
         new_state = SETUP_PLAY;
         if ( getuid() == 0 ) {
             const char *warning_text = 
-_("If you run a game as root, the preferences will be stored in\n")
-_("root's home directory instead of your user account directory.");
+_("If you run a game as root, the preferences will be stored in\n"
+  "root's home directory instead of your user account directory.");
 
             if ( prompt_warning(warning_text) != RESPONSE_YES ) {
                 new_state = SETUP_EXIT;
