@@ -4,12 +4,23 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+
+#ifdef __FreeBSD__
+#include <sys/param.h>
+#include <sys/ucred.h>
+#include <sys/mount.h>
+#else /* Linux assumed */
 #include <mntent.h>
+#endif
 
 #include "detect.h"
 
 #ifndef MNTTYPE_CDROM
+#ifdef __FreeBSD__
+#define MNTTYPE_CDROM    "cd9660"
+#else
 #define MNTTYPE_CDROM    "iso9660"
+#endif
 #endif
 #ifndef MNTTYPE_SUPER
 #define MNTTYPE_SUPER    "supermount"
@@ -47,8 +58,11 @@ const char *detect_arch(void)
 }
 
 /* Function to detect the current version of libc */
-const char *detect_libc(void) {
-
+const char *detect_libc(void)
+{
+#ifdef __FreeBSD__
+	return "glibc-2.1";
+#else
     static const char *libclist[] = {
         "/lib/libc.so.6",
         "/lib/libc.so.6.1",
@@ -79,12 +93,13 @@ const char *detect_libc(void) {
            libcfile );
       
       if ( system(buffer) == 0 )
-    return "glibc-2.1";
+		  return "glibc-2.1";
       else
-    return "glibc-2.0";
+		  return "glibc-2.0";
     }
     /* Default to version 5 */
     return "libc5";
+#endif
 }
 
 
@@ -127,10 +142,35 @@ int detect_diskspace(const char *path)
 /* Function to detect the CDROM drives, returns the number of drives */
 int detect_cdrom(const char *unique_file)
 {
+    int count = 0, i;
+
+#ifdef __FreeBSD__
+	int mounted = getfsstat(NULL, 0, MNT_NOWAIT);
+
+	for( i = 0; i < num_cdroms; ++ i ) {
+		if(cdroms[i])
+			free(cdroms[i]);
+	}
+	
+	if ( mounted > 0 ) {
+		struct statfs *mnts = (struct statfs *)malloc(sizeof(struct statfs) * mounted);
+
+		mounted = getfsstat(mnts, mounted * sizeof(struct statfs), MNT_WAIT);
+		for ( i = 0; i < mounted && count < MAX_DRIVES; ++ i ) {
+			if ( ! strcmp(mnts[i].f_fstypename, MNTTYPE_CDROM) ) {
+				cdroms[count ++] = strdup(mnts[i].f_mntonname);
+			}
+		}
+		
+		free(mnts);
+		return num_cdroms = count;
+	} else {
+		return num_cdroms = 0;
+	}
+#else
     char mntdevpath[PATH_MAX];
     FILE * mountfp;
     struct mntent *mntent;
-    int count = 0, i;
 
     for( i = 0; i < num_cdroms; ++ i ) {
         if(cdroms[i])
@@ -182,4 +222,5 @@ int detect_cdrom(const char *unique_file)
     }
     num_cdroms = count;
     return(num_cdroms);
+#endif
 }
