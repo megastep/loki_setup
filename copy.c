@@ -804,7 +804,11 @@ size_t size_node(install_info *info, xmlNodePtr node)
         node = node->childs;
         while ( node ) {
             const char *from_cdrom = xmlGetProp(node, "cdromid");
-            
+
+            if ( !from_cdrom && GetProductCDROMRequired(info) ) {
+                from_cdrom = info->name;
+            }
+
 /* printf("Checking node element '%s'\n", node->name); */
             if ( strcmp(node->name, "files") == 0 && lang_matched ) {
                 size += size_list(info, from_cdrom,

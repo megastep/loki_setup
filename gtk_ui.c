@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.61 2000-11-28 22:33:37 hercules Exp $
+   $Id: gtk_ui.c,v 1.62 2001-01-16 00:33:05 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -141,7 +141,6 @@ typedef enum
 
 typedef struct {
   xmlNodePtr node;
-  int size;
 } option_data;
 
 static GladeXML *setup_glade;
@@ -653,7 +652,6 @@ void setup_checkbox_option_slot( GtkWidget* widget, gpointer func_data)
 	window = glade_xml_get_widget(setup_glade, "setup_window");
 
 	if ( GTK_TOGGLE_BUTTON(widget)->active ) {
-		cur_info->install_size += data->size;
 		/* Mark this option for installation */
 		mark_option(cur_info, data->node, "true", 0);
 		
@@ -664,7 +662,6 @@ void setup_checkbox_option_slot( GtkWidget* widget, gpointer func_data)
 			node = node->next;
 		}
 	} else {
-		cur_info->install_size -= data->size;
 		/* Unmark this option for installation */
 		mark_option(cur_info, data->node, "false", 1);
 		
@@ -696,6 +693,7 @@ void setup_checkbox_option_slot( GtkWidget* widget, gpointer func_data)
 			node = node->next;
 		}
 	}
+    cur_info->install_size = size_tree(cur_info, cur_info->config->root->childs);
 	update_size();
 }
 
@@ -1008,7 +1006,6 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
     /* Set the data associated with the button */
     dat = (option_data *)malloc(sizeof(option_data));
     dat->node = node;
-    dat->size = size_node(info, node);
     gtk_object_set_data(GTK_OBJECT(button), "data", (gpointer)dat);
 
     /* Register the button in the window's private data */
