@@ -193,7 +193,7 @@ install-check: check
 
 # Copy loki_uninstall and the required files
 
-copy-image: all loki_uninstall install-image install-check po-image
+copy-image: all loki_uninstall install-image po-image
 	@if [ -d $(IMAGE)/bin/$(os)/$(arch)/ ]; then \
 	    cp loki_uninstall $(IMAGE)/bin/$(os)/$(arch)/bin/$(BRAND)-uninstall; \
 	    strip $(IMAGE)/bin/$(os)/$(arch)/bin/$(BRAND)-uninstall; \
