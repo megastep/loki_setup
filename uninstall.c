@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.9 2000-10-17 05:08:27 megastep Exp $ */
+/* $Id: uninstall.c,v 1.10 2000-10-17 08:26:41 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -37,6 +37,63 @@ static void log_file(const char *name, const char *reason)
     }
 }
 
+struct dir_entry {
+    product_file_t *dir;
+    int depth;
+    struct dir_entry *next;
+};
+
+static int get_depth(const char *path)
+{
+    int depth = 1;
+    for(; *path; ++path) {
+        if ( *path == '/') {
+            depth++;
+        }
+    }
+    return depth;
+}
+
+static struct dir_entry *add_directory_entry(product_file_t *dir, struct dir_entry *list)
+{
+    int depth = get_depth(loki_getpath_file(dir));
+    struct dir_entry *node;
+
+    node = (struct dir_entry *) malloc(sizeof(struct dir_entry));
+    if ( ! node ) {
+        log_file(loki_getpath_file(dir), "Warning: Out of memory!");
+        return list;
+    }
+    node->dir = dir;
+    node->depth = depth;
+
+    if ( list ) { /* Look for insert point */
+        struct dir_entry *ptr, *prev = NULL;
+
+        for ( ptr = list; ptr; ptr = ptr->next ) {
+            if ( depth > ptr->depth ) {
+                if ( prev ) {
+                    prev->next = node;
+                    node->next = ptr;
+                } else {
+                    node->next = list;
+                    list = node;
+                }
+                break;
+            }
+            prev = ptr;
+        }
+        if ( !ptr ) { /* Insert at the end */
+            node->next = NULL;
+            prev->next = node;
+        }
+    } else {
+        node->next = NULL;
+        list = node;
+    }
+    return list;
+}
+
 static int perform_uninstall(product_t *prod, product_info_t *info)
 {
     product_component_t *comp;
@@ -51,9 +108,12 @@ static int perform_uninstall(product_t *prod, product_info_t *info)
         loki_runscripts(comp, LOKI_SCRIPT_PREUNINSTALL);
         for ( opt = loki_getfirst_option(comp); opt; opt = loki_getnext_option(opt)){
             product_file_t *file = loki_getfirst_file(opt), *nextfile;
+            struct dir_entry *list = NULL, *freeable;
+
             while ( file ) {
                 file_type_t t = loki_gettype_file(file);
                 if ( t == LOKI_FILE_DIRECTORY ) {
+                    list = add_directory_entry(file, list);
                     file = loki_getnext_file(file);
                 } else {
                     switch( t ) {
@@ -75,18 +135,18 @@ static int perform_uninstall(product_t *prod, product_info_t *info)
                     file = nextfile;
                 }
             }
-            /* Remove directories after all files */
-            file = loki_getfirst_file(opt);
-            while ( file ) {
-                if ( loki_gettype_file(file) == LOKI_FILE_DIRECTORY ) {
-                    // printf("Removing directory: %s\n", loki_getpath_file(file));
-                    if ( rmdir(loki_getpath_file(file)) < 0 ) {
-                        log_file(loki_getpath_file(file), strerror(errno));  
-                    }
+
+            /* Remove directories after all files */            
+            while ( list ) {
+                freeable = list;
+                list = list->next;
+
+                // printf("Removing directory: %s\n", loki_getpath_file(freeable->dir));
+                if ( rmdir(loki_getpath_file(freeable->dir)) < 0 ) {
+                    log_file(loki_getpath_file(freeable->dir), strerror(errno));  
                 }
-                nextfile = loki_getnext_file(file);
-                loki_unregister_file(file);
-                file = nextfile;
+                loki_unregister_file(freeable->dir);
+                free(freeable);
             }
         }
 
