@@ -62,7 +62,7 @@ AC_PATH_PROG(MOUNT_PATH, mount, /sbin/mount, $PATH:/usr/sbin:/sbin)
 AC_PATH_PROG(UMOUNT_PATH, umount, /sbin/umount, $PATH:/usr/sbin:/sbin)
 AC_PATH_PROG(BRANDELF, brandelf, true)
 
-CFLAGS="-fsigned-char -funroll-loops -Wall -g -O2 -I. -D_REENTRANT $X_CFLAGS"
+CFLAGS="-fsigned-char -funroll-loops -Wall -g -O2 -I. $X_CFLAGS"
 CONSOLE_LIBS=""
 if test -d /usr/codehost/lib; then
 	LIBS="-L/usr/codehost/lib"
@@ -84,6 +84,7 @@ BSTATIC="-Wl,-Bstatic"
 BDYNAMIC="-Wl,-Bdynamic"
 LIBDL="-ldl"
 EXTRA_LIBS=""
+REENTRANT="-D_REENTRANT"
 
 case "$target" in
     *i?86*OpenUNIX*)
@@ -164,7 +165,8 @@ case "$target" in
 	RDYNAMIC="-Wl,-Sn"
 	BSTATIC=""
 	BDYNAMIC=""
-	CFLAGS="$CFLAGS -I/sw/include -Ddarwin"
+	REENTRANT=""
+	CFLAGS="$CFLAGS -I/sw/include -Ddarwin -DMACOS"
 	ARCH=ppc ;;
     *ppc* | *powerpc*)
         ARCH=ppc ;;
@@ -179,6 +181,8 @@ case "$target" in
 	*linux*)
 		GTK_STATIC="\$(BDYNAMIC)" ;;
 esac
+
+CFLAGS="$CFLAGS $REENTRANT"
 
 AC_CHECK_LIB(util, forkpty, LIBUTIL="-lutil"; LIBS="$LIBS -lutil")
 AC_CHECK_FUNCS(openpty)

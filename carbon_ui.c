@@ -1,3 +1,6 @@
+#include "carbon/carbonres.h"
+#include "carbon/carbondebug.h"
+
 #include "install.h"
 #include "install_ui.h"
 #include "install_log.h"
@@ -6,8 +9,6 @@
 #include "copy.h"
 #include "loki_launchurl.h"
 
-#include "carbon/carbonres.h"
-#include "carbon/carbondebug.h"
 
 static int cur_state;
 static install_info *cur_info;
