@@ -1,4 +1,6 @@
 Current:
+Ryan C. Gordon (Epic Games) - Fri Apr  2 00:00:51 EST 2004
+ * Check for "cd9660" file systems so FreeBSD with binary compat layer works.
 Ryan C. Gordon (Epic Games) - Wed Mar 31 11:30:47 EST 2004
  * Allow one hardcoded translation instead of using external .po files.
 Ryan C. Gordon (Epic Games) - Tue Mar 30 21:11:52 EST 2004
