@@ -417,7 +417,7 @@ size_t copy_tarball(install_info *info, const char *path, const char *dest,
                 file_symlink(info, record.hdr.linkname, final);
                 break;
             case TF_DIR:
-                file_mkdir(info, final, mode);
+                dir_create_hierarchy(info, final, mode);
                 break;
             default:
                 log_warning(info, _("Tar: '%s' is unknown file type: %c"),

@@ -34,7 +34,22 @@ void file_create_hierarchy(install_info *info, const char *path)
 	  *bufp = '/';
 	}
   }
-
+}
+void dir_create_hierarchy(install_info *info, const char *path, int mode)
+{
+  /* Create higher-level directories as needed */
+  char buf[PATH_MAX], *bufp;
+  
+  strncpy(buf, path, PATH_MAX);
+  buf[PATH_MAX-1] = '\0';
+  for ( bufp = &buf[1]; *bufp; ++bufp ) {
+	if ( *bufp == '/' ) {
+	  *bufp = '\0';
+	  file_mkdir(info, buf, 0755);
+	  *bufp = '/';
+	}
+  }
+  file_mkdir(info, path, mode);
 }
 
 /* Generate a valid stream object from an open file */

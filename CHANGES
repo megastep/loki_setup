@@ -1,13 +1,15 @@
 
 1.3.0:
+Sam Lantinga - Fri Jun  2 15:25:15 PDT 2000
+ * Directories are now created recursively when extracting tar archives
 Stéphane Peter - Mon May  1 16:50:26 PDT 2000
  * Added i18n support through GNU gettext and the "lang" element and attributes.
 Stéphane Peter - Tue May  2 19:45:53 PDT 2000
  * Updates to the XML file format: new 'readme' and 'eula' localizable tags that
    supercede the old attributes for the 'install' tag. The 'help' attribute for
    options has also been replaced by the separate sub-element.
- * Added the 'keepdirs' attribute for binaries, that allows to keep the directory
-   structure specified (to have binaries in subdirectories).
+ * Added the 'keepdirs' attribute for binaries, that allows to keep the 
+   directory structure specified (to have binaries in subdirectories).
 Borland/Inprise Corp. - Tue May  9 12:45:03 PDT 2000
  * Bugfixes in GTK UI for handling the destroy button.
  * Expansion of ~ for the installation directory.
