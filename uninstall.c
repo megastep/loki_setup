@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.35 2003-05-02 22:54:49 zeph Exp $ */
+/* $Id: uninstall.c,v 1.36 2003-06-06 20:48:06 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -125,6 +125,7 @@ static void emergency_exit(int sig)
         /* Try to save the XML file */
         loki_closeproduct(prod);
     }
+	exit(2);
 }
 
 int uninstall_component(product_component_t *comp, product_info_t *info)
@@ -204,7 +205,27 @@ int uninstall_component(product_component_t *comp, product_info_t *info)
 	return 1;
 }
 
-int perform_uninstall(product_t *prod, product_info_t *info)
+static int check_for_message(product_component_t *comp)
+{
+	const char *message = loki_getmessage_component(comp);
+	
+	if ( message ) {
+		puts(message);
+		if ( isatty(0) ) { /* If we have a TTY, try to get user input */
+			int c;
+			printf(_("Uninstall ? [Y/n] "));
+			fflush(stdin);
+			c = getchar();
+			if ( c == 'n' || c == 'N' ) {
+				printf(_("Aborted.\n"));
+				return 0;
+			}
+		}
+	}
+	return 1;
+}
+
+int perform_uninstall(product_t *prod, product_info_t *info, int console)
 {
     product_component_t *comp, *next;
 	int ret = 1;
@@ -213,13 +234,21 @@ int perform_uninstall(product_t *prod, product_info_t *info)
     while ( comp && ret ) {
         next = loki_getnext_component(comp);
         if ( ! loki_isdefault_component(comp) ) {
+			if ( console && ! check_for_message(comp) ) {
+				ret = 0;
+				break;
+			}
             ret = uninstall_component(comp, info);
         }
         comp = next;
     }
     comp = loki_getdefault_component(prod);
     if ( comp && ret ) {
-        ret = uninstall_component(comp, info);
+		if ( !console || check_for_message(comp) ) {
+			ret = uninstall_component(comp, info);
+		} else {
+			ret = 0;
+		}
     }
 
 	if ( ret ) {
@@ -485,8 +514,14 @@ printf("\n\n");
             prod = loki_openproduct(product);
             printf("\t%s: ", product);
             if ( prod ) {
+				product_component_t *comp;
+
                 info = loki_getinfo_product(prod);
-                printf(_("installed in %s\n"), info->root);
+                printf(_("installed in %s\n\tComponents:\n"), info->root);
+				/* List components */
+				for ( comp = loki_getfirst_component(prod); comp; comp = loki_getnext_component(comp)) {
+					printf("\t\t%s\n", loki_getname_component(comp));
+				}
                 loki_closeproduct(prod);
             } else {
                 printf(_(" Error while accessing product info\n"));
@@ -498,6 +533,16 @@ printf("\n\n");
 #else
         printf("%d.%d.%d\n", SETUP_VERSION_MAJOR, SETUP_VERSION_MINOR, SETUP_VERSION_RELEASE);
 #endif
+    } else if ( !strcmp(argv[1], "-h") || !strcmp(argv[1], "--help") ) {
+		fprintf(stderr, 
+				_("Usage: %s [args]\n"
+				  "args can be any of the following:\n\n"
+				  "  -l               : List all installed products and components.\n"
+				  "  -v | --version   : Get version information.\n"
+				  "  -h | --help      : Print this help message.\n"
+				  "  product [component] : Uninstalls the specified product, or its subcomponent.\n"
+				  ), argv[0]);
+		return 0;
     } else {
         prod = loki_openproduct(argv[1]);
         if ( ! prod ) {
@@ -522,11 +567,11 @@ printf("\n\n");
             } else { /* Uninstall a single component */
                 comp = loki_find_component(prod, argv[2]);
                 if ( comp ) {
-					const char *message = loki_getmessage_component(comp);
+
                     if ( ! check_permissions(info, 1) )
                         return 1;
-					if ( message ) {
-						puts(message);
+					if ( ! check_for_message(comp) ) {
+						return 1;
 					}
                     if ( ! uninstall_component(comp, info) ) {
 						fprintf(stderr, _("Failed to properly uninstall component %s\n"), argv[2]);
@@ -543,7 +588,7 @@ printf("\n\n");
             /* Uninstall the damn thing */
             if ( ! check_permissions(info, 1) )
                 return 1;
-            if ( ! perform_uninstall(prod, info) ) {
+            if ( ! perform_uninstall(prod, info, 1) ) {
                 fprintf(stderr, _("An error occured during the uninstallation process.\n"));
                 ret = 1;
                 loki_closeproduct(prod);

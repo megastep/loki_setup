@@ -373,7 +373,7 @@ void perform_uninstall_slot(GtkWidget* w, gpointer data)
 				}
 
                 /* Remove the component */
-                if ( ! perform_uninstall(component->product, component->info) ) {
+                if ( ! perform_uninstall(component->product, component->info, 0) ) {
 					uninstall_cancelled = 2;
 					snprintf(text, sizeof(text), _("Uninstallation of product %s has failed!\n"
 												   "Aborting the rest of the uninstallation.\n"),
