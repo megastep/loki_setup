@@ -11,13 +11,12 @@
     <lang lang="fr">Installation de base</lang>
     <help>Required for play</help>
     <help lang="fr">Requis pour jouer</help>
-    <lang lang="de">Ich bin ein Berliner</lang>
     <binary arch="any" libc="any" symlink="rt2" icon="icon.xpm">
       rt2
     </binary>
     <files>
       main.tar.gz
-      icon.bmp
+      icon.xpm
       splash.bmp
       Manual
       maps.tar.gz
