@@ -506,11 +506,13 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
 {
     size_t size, copied;
     char tmppath[PATH_MAX];
-    struct option_elem *option;
-    const char *str = xmlNodeListGetString(info->config, node->childs, 1);
-    
-    parse_line(&str, tmppath, sizeof(tmppath));
-    current_option = option = add_option_entry(info, tmppath);
+    const char *str;
+
+    if ( !strcmp(node->name, "option") ) {
+        str = xmlNodeListGetString(info->config, node->childs, 1);    
+        parse_line(&str, tmppath, sizeof(tmppath));
+        current_option = add_option_entry(info, tmppath);
+    }
 
     size = 0;
     node = node->childs;

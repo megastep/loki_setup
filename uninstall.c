@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.11 2000-10-17 22:49:53 megastep Exp $ */
+/* $Id: uninstall.c,v 1.12 2000-10-18 04:56:08 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -23,7 +23,11 @@ static char *current_locale = NULL;
 
 static void print_usage(const char *argv0)
 {
-	printf(_("Usage: %s product or %s -l to list all products\n"), argv0, argv0
+	printf(_("Usage: %s product to uninstall the product\n"
+             "       %s -l      to list all products\n"
+             "       %s product -l        to list all components\n"
+             "       %s product component to uninstall a single component\n"),
+           argv0, argv0, argv0, argv0
 		   );
 }
 
@@ -94,76 +98,102 @@ static struct dir_entry *add_directory_entry(product_file_t *dir, struct dir_ent
     return list;
 }
 
+static void uninstall_component(product_component_t *comp, product_info_t *info)
+{
+    product_option_t *opt;
+    struct dir_entry *list = NULL, *freeable;
+
+    /* Run pre-uninstall scripts */
+    loki_runscripts(comp, LOKI_SCRIPT_PREUNINSTALL);
+
+    for ( opt = loki_getfirst_option(comp); opt; opt = loki_getnext_option(opt)){
+        product_file_t *file = loki_getfirst_file(opt), *nextfile;
+
+        while ( file ) {
+            file_type_t t = loki_gettype_file(file);
+            if ( t == LOKI_FILE_DIRECTORY ) {
+                list = add_directory_entry(file, list);
+                file = loki_getnext_file(file);
+            } else {
+                switch( t ) {
+                case LOKI_FILE_SCRIPT: /* Ignore scripts */
+                    break;
+                case LOKI_FILE_RPM:
+                    printf(_("Notice: the %s RPM was installed for this product.\n"),
+                           loki_getpath_file(file));
+                    break;
+                default:
+                    // printf("Removing file: %s\n", loki_getpath_file(file));
+                    if ( unlink(loki_getpath_file(file)) < 0 ) {
+                        log_file(loki_getpath_file(file), strerror(errno));
+                    }
+                    break;
+                }
+                    
+                nextfile = loki_getnext_file(file);
+                loki_unregister_file(file);
+                file = nextfile;
+            }
+        }
+    }
+
+    /* Remove directories after all files from all options */
+    while ( list ) {
+        freeable = list;
+        list = list->next;
+        
+        // printf("Removing directory: %s\n", loki_getpath_file(freeable->dir));
+        if ( rmdir(loki_getpath_file(freeable->dir)) < 0 ) {
+            log_file(loki_getpath_file(freeable->dir), strerror(errno));  
+        }
+        loki_unregister_file(freeable->dir);
+        free(freeable);
+    }
+
+    /* Run post-uninstall scripts */
+    loki_runscripts(comp, LOKI_SCRIPT_POSTUNINSTALL);
+
+    loki_remove_component(comp);
+}
+
 static int perform_uninstall(product_t *prod, product_info_t *info)
 {
-    product_component_t *comp;
-    product_option_t *opt;
+    product_component_t *comp, *next;
 
     if ( chdir(info->root) < 0) {
         fprintf(stderr, _("Could not change to directory: %s\n"), info->root);
     }
 
-    for ( comp = loki_getfirst_component(prod); comp; comp = loki_getnext_component(comp) ) {
-        /* Run pre-uninstall scripts */
-        loki_runscripts(comp, LOKI_SCRIPT_PREUNINSTALL);
-
-        for ( opt = loki_getfirst_option(comp); opt; opt = loki_getnext_option(opt)){
-            product_file_t *file = loki_getfirst_file(opt), *nextfile;
-            struct dir_entry *list = NULL, *freeable;
-
-            while ( file ) {
-                file_type_t t = loki_gettype_file(file);
-                if ( t == LOKI_FILE_DIRECTORY ) {
-                    list = add_directory_entry(file, list);
-                    file = loki_getnext_file(file);
-                } else {
-                    switch( t ) {
-                    case LOKI_FILE_SCRIPT: /* Ignore scripts */
-                        break;
-                    case LOKI_FILE_RPM:
-                        printf("Notice: the %s RPM was installed for this product.\n", loki_getpath_file(file));
-                        break;
-                    default:
-                        // printf("Removing file: %s\n", loki_getpath_file(file));
-                        if ( unlink(loki_getpath_file(file)) < 0 ) {
-                            log_file(loki_getpath_file(file), strerror(errno));  
-                        }
-                        break;
-                    }
-                    
-                    nextfile = loki_getnext_file(file);
-                    loki_unregister_file(file);
-                    file = nextfile;
-                }
-            }
-
-            /* Remove directories after all files */            
-            while ( list ) {
-                freeable = list;
-                list = list->next;
-
-                // printf("Removing directory: %s\n", loki_getpath_file(freeable->dir));
-                if ( rmdir(loki_getpath_file(freeable->dir)) < 0 ) {
-                    log_file(loki_getpath_file(freeable->dir), strerror(errno));  
-                }
-                loki_unregister_file(freeable->dir);
-                free(freeable);
-            }
-        }
-
-        /* Run post-uninstall scripts */
-        loki_runscripts(comp, LOKI_SCRIPT_POSTUNINSTALL);
-
+    comp = loki_getfirst_component(prod);
+    while ( comp ) {
+        next = loki_getnext_component(comp);
+        uninstall_component(comp, info);
+        comp = next;
     }
 
 	/* Remove all product-related files from the manifest, i.e. the XML file and associated scripts
      */
     if ( unlink("uninstall") < 0 )
-        log_file("uninstall", strerror(errno));;
+        log_file("uninstall", strerror(errno));
 
     loki_removeproduct(prod);
 
 	return 1;
+}
+
+static int check_permissions(product_info_t *info)
+{
+    if ( access(info->root, W_OK) < 0 ) {
+        fprintf(stderr, _("No write access to the installation directory.\nAborting.\n"));
+        return 0;
+    }
+    
+    if ( access(info->registry_path, W_OK) < 0 ) {
+        fprintf(stderr, _("No write access to the registry file: %s.\nAborting.\n"),
+                info->registry_path);
+        return 0;
+    }
+    return 1;
 }
 
 int main(int argc, char **argv)
@@ -219,25 +249,37 @@ int main(int argc, char **argv)
         printf(_("Product name: %s\nInstalled in %s\n"),
                info->name, info->root );
         strncpy(desc, *info->description ? info->description : info->name, sizeof(desc));
-        
-        if ( access(info->root, W_OK) < 0 ) {
-            fprintf(stderr, _("No write access to the installation directory.\nAborting.\n"));
-            return 1;
-        }
 
-        if ( access(info->registry_path, W_OK) < 0 ) {
-            fprintf(stderr, _("No write access to the registry file: %s.\nAborting.\n"),
-                    info->registry_path);
-            return 1;
-        }
-
-        /* Uninstall the damn thing */
-        if ( ! perform_uninstall(prod, info) ) {
-            fprintf(stderr, _("An error occured during the uninstallation process.\n"));
-            ret = 1;
-            loki_closeproduct(prod);
-        } else {
-            printf(_("%s has been successfully uninstalled.\n"), desc);
+        if ( argc == 3 ) {
+            product_component_t *comp;
+            if ( !strcmp(argv[2], "-l") ) { /* List components */
+                printf(_("Components:\n"));
+                for ( comp = loki_getfirst_component(prod); comp; 
+                      comp = loki_getnext_component(comp) ) {
+                    printf("\t%s\n", loki_getname_component(comp));
+                }                
+            } else { /* Uninstall a single component */
+                comp = loki_find_component(prod, argv[2]);
+                if ( comp ) {
+                    if ( ! check_permissions(info) )
+                        return 1;
+                    uninstall_component(comp, info);
+                    loki_closeproduct(prod);
+                } else {
+                    fprintf(stderr, _("Unable to find component %s\n"), argv[2]);
+                }
+            }
+        } else {            
+            /* Uninstall the damn thing */
+            if ( ! check_permissions(info) )
+                return 1;
+            if ( ! perform_uninstall(prod, info) ) {
+                fprintf(stderr, _("An error occured during the uninstallation process.\n"));
+                ret = 1;
+                loki_closeproduct(prod);
+            } else {
+                printf(_("%s has been successfully uninstalled.\n"), desc);
+            }
         }
     }
 	return ret;

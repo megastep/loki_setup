@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.72 2000-10-17 23:37:24 megastep Exp $ */
+/* $Id: install.c,v 1.73 2000-10-18 04:56:08 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -53,6 +53,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
 #include <pwd.h>
@@ -885,7 +886,8 @@ static void output_script_header(FILE *f, install_info *info, product_component_
             "SETUP_INSTALLPATH=\"%s\"\n"
             "SETUP_SYMLINKSPATH=\"%s\"\n"
             "SETUP_CDROMPATH=\"%s\"\n"
-            "export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH\n",
+            "export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_COMPONENTNAME SETUP_COMPONENTVER\n"
+            "export SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH\n",
             info->name, info->version,
             loki_getname_component(comp), loki_getversion_component(comp),
             info->install_path,
@@ -895,6 +897,7 @@ static void output_script_header(FILE *f, install_info *info, product_component_
     if(strcmp(rpm_root,"/")) /* Emulate RPM environment for scripts */
         fprintf(f,"RPM_INSTALL_PREFIX=%s\n", rpm_root);
 #endif
+    fseek(f, 0L, SEEK_CUR);
 }
 
 void generate_uninstall(install_info *info)
@@ -922,15 +925,17 @@ void generate_uninstall(install_info *info)
             
             FILE *pre = fopen(tmp, "w");
             if ( pre ) {
-                FILE *script_file = fopen(GetPreUnInstall(info), "r");
+                int script_file = open(GetPreUnInstall(info), O_RDONLY);
                 output_script_header(pre, info, component);
-                if (script_file) {
-                    while (! feof(script_file)) {
-                        count = fread(buf, sizeof(char), PATH_MAX, script_file);
+                if (script_file > 0) {
+                    for(;;) {
+                        count = read(script_file, buf, sizeof(buf));
                         if(count>0)
-                            fwrite(buf, sizeof(char), count, pre);
+                            fwrite(buf, 1, count, pre);
+                        else
+                            break;
                     }
-                    fclose(script_file);
+                    close(script_file);
                 }
                 fchmod(fileno(pre), 0755);
                 fclose(pre);
@@ -945,15 +950,17 @@ void generate_uninstall(install_info *info)
             
             FILE *post = fopen(tmp, "w");
             if ( post ) {
-                FILE *script_file = fopen(GetPostUnInstall(info), "r");
+                int script_file = open(GetPostUnInstall(info), O_RDONLY);
                 output_script_header(post, info, component);
-                if (script_file) {
-                    while (! feof(script_file)) {
-                        count = fread(buf, sizeof(char), PATH_MAX, script_file);
+                if (script_file > 0) {
+                    for(;;) {
+                        count = read(script_file, buf, sizeof(buf));
                         if(count>0)
-                            fwrite(buf, sizeof(char), count, post);
+                            fwrite(buf, 1, count, post);
+                        else
+                            break;
                     }
-                    fclose(script_file);
+                    close(script_file);
                 }
                 fchmod(fileno(post), 0755);
                 fclose(post);
