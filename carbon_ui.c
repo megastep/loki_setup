@@ -92,13 +92,13 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
 
     /* See if the user wants this option */
 	if ( node->type == XML_TEXT_NODE ) {
-		log_debug("Parsing text node.\n");
+		printf("Parsing text node.\n");
 		//name = g_strdup(node->content);
         name = strdup(node->content);
         //!!!TODO - Strip name
 		//g_strstrip(name);
 		if( *name ) {
-			log_debug("String: '%s'\n", name);
+			printf("String: '%s'\n", name);
 			//button = gtk_label_new(name);
 			//gtk_widget_show(button);
 			//gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(button), FALSE, FALSE, 0);
@@ -115,7 +115,7 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
 		strncat(text, name, sizeof(text)-strlen(text));
 	}
 
-	log_debug("Parsing option: '%s'\n", text);
+	printf("Parsing option: '%s'\n", text);
 	if ( GetProductIsMeta(info) ) {
 		//button = gtk_radio_button_new_with_label(radio_list, text);
 		//radio_list = gtk_radio_button_group(GTK_RADIO_BUTTON(button));
@@ -901,7 +901,7 @@ static install_state carbonui_setup(install_info *info)
 
     int TempState = carbon_IterateForState(MyRes, &cur_state);
     // Return the window back to default size, if necessary
-    carbon_SetProperWindowSize(options, true);
+    carbon_SetProperWindowSize(options, false);
     // Return the next state as appopriate
     return TempState;
 }

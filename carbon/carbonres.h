@@ -202,6 +202,9 @@ typedef struct
     CarbonRes *Res;
     OptionsButton *Buttons[MAX_OPTIONS];
     int ButtonCount;
+    
+    // Keeps track of the largest button width (for use in resizing later)
+    int MaxButtonWidth;
 
     // Callback for application to handle command events (buttons)
     int (*OptionClickCallback)(OptionsButton *Button);

@@ -19,6 +19,32 @@ static int PromptResponse;
 static int PromptResponseValid;
 static Rect DefaultBounds = {BUTTON_MARGIN, BUTTON_MARGIN, BUTTON_HEIGHT, BUTTON_WIDTH};
 
+static void HResize(OptionsBox *Box, int ID, int Offset)
+{
+    printf("HResize() - Offset = %d\n", Offset);
+
+    ControlID IDStruct = {LOKI_SETUP_SIG, ID};
+    ControlRef TempControl;
+    Rect TempRect;
+    GetControlByID(Box->Res->Window, &IDStruct, &TempControl);
+    GetControlBounds(TempControl, &TempRect);
+    TempRect.right += Offset;
+    SetControlBounds(TempControl, &TempRect);
+    MoveControl(TempControl, TempRect.left, TempRect.top);
+}
+
+static void HMove(OptionsBox *Box, int ID, int Offset)
+{
+    printf("HResize() - Offset = %d\n", Offset);
+
+    ControlID IDStruct = {LOKI_SETUP_SIG, ID};
+    ControlRef TempControl;
+    Rect TempRect;
+    GetControlByID(Box->Res->Window, &IDStruct, &TempControl);
+    GetControlBounds(TempControl, &TempRect);
+    MoveControl(TempControl, TempRect.left + Offset, TempRect.top);
+}
+
 static int OptionsSetRadioButton(OptionsButton *Button)
 {
     RadioGroup *Group = (RadioGroup *)Button->Group;
@@ -844,9 +870,10 @@ OptionsBox *carbon_OptionsNewBox(CarbonRes *Res, int (*OptionClickCallback)(Opti
 void carbon_OptionsShowBox(OptionsBox *Box)
 {
     ControlRef BoxControlRef;
-    Rect ButtonRect = {BUTTON_MARGIN, BUTTON_MARGIN, BUTTON_HEIGHT, BUTTON_WIDTH};
+    Rect ButtonRect = {0, 0, BUTTON_HEIGHT, BUTTON_WIDTH};
     int Offset;     // Offset to move or resize controls to accomodate options
     int i;
+    Rect TempRect;
 
     carbon_debug("carbon_OptionsShowBox()\n");
 
@@ -877,14 +904,48 @@ void carbon_OptionsShowBox(OptionsBox *Box)
     Rect BoxControlBounds;
     GetControlBounds(BoxControlRef, &BoxControlBounds);
 
+    // No max button yet
+    Box->MaxButtonWidth = 0;
+
     // Add controls to inner options box
     for(i = 0; i < Box->ButtonCount; i++)
     {
+        SInt16 TempOffset;
+        // Extract best width for the button (so all the text will fit)
+        GetBestControlRect(Box->Buttons[i]->Control, &TempRect, &TempOffset);
+        // Set button width to button width calculated by GetBestControlRect
+        ButtonRect.right = TempRect.right - TempRect.left;
+        // Save as max if applicable
+        if(ButtonRect.right > Box->MaxButtonWidth)
+            Box->MaxButtonWidth = ButtonRect.right;
+        printf("carbon_OptionsShowBox() - Button width = %d\n", ButtonRect.right);
+
         //printf("EmbedControl returned: %d\n", EmbedControl(Box->Buttons[i]->Control, BoxControlRef));
         //!!!TODO - Might have to change height for separators (always be 1)
         SetControlBounds(Box->Buttons[i]->Control, &ButtonRect);
         MoveControl(Box->Buttons[i]->Control, BoxControlBounds.left + BUTTON_MARGIN, BoxControlBounds.top + BUTTON_TOP_MARGIN + i * BUTTON_HEIGHT);
         ShowControl(Box->Buttons[i]->Control);
+    }
+
+    // Apply horizontal changes to controls as necessary
+    if(Box->MaxButtonWidth > BUTTON_WIDTH)
+    {
+        // How much to we have to offset stuff
+        int HOffset = Box->MaxButtonWidth - BUTTON_WIDTH;
+
+        HResize(Box, OPTION_GROUP_ID, HOffset);
+        HResize(Box, OPTION_OPTIONS_GROUP_ID, HOffset);
+        HResize(Box, OPTION_GLOBAL_OPTIONS_GROUP_ID, HOffset);
+        HResize(Box, OPTION_STATUS_LABEL_ID, HOffset);
+        HResize(Box, OPTION_LINK_PATH_ENTRY_ID, HOffset);
+        HResize(Box, OPTION_INSTALL_PATH_ENTRY_ID, HOffset);
+
+        HMove(Box, OPTION_README_BUTTON_ID, HOffset / 2);
+        HMove(Box, OPTION_BEGIN_INSTALL_BUTTON_ID, HOffset);
+        HMove(Box, OPTION_ESTSIZE_LABEL_ID, HOffset);
+        HMove(Box, OPTION_ESTSIZE_VALUE_LABEL_ID, HOffset);
+        HMove(Box, OPTION_LINK_PATH_BUTTON_ID, HOffset);
+        HMove(Box, OPTION_INSTALL_PATH_BUTTON_ID, HOffset);
     }
 
     // Refresh all of the controls
@@ -925,6 +986,7 @@ int carbon_OptionsGetValue(OptionsButton *Button)
 void carbon_SetProperWindowSize(OptionsBox *Box, int OptionsNotOther)
 {
     int NewHeight;
+    int NewWidth;
 
     // If true (and there are more options than can fit in default size,
     // then set window size based on OPTIONS screen
@@ -934,8 +996,18 @@ void carbon_SetProperWindowSize(OptionsBox *Box, int OptionsNotOther)
     else
         NewHeight = WINDOW_HEIGHT;
 
+    if(OptionsNotOther && Box->MaxButtonWidth > BUTTON_WIDTH)
+        NewWidth = WINDOW_WIDTH + (Box->MaxButtonWidth - BUTTON_WIDTH);
+    else
+        NewWidth = WINDOW_WIDTH;
+
     // Resize window
-    SizeWindow(Box->Res->Window, WINDOW_WIDTH, NewHeight, true);
+    printf("carbon_SetProperWindowSize - Box->MaxButtonWidth = %d", Box->MaxButtonWidth);
+    SizeWindow(Box->Res->Window, NewWidth, NewHeight, true);
+
+    // When size changes, we have to reposition it to the center
+    RepositionWindow(Box->Res->Window, NULL, kWindowCenterOnMainScreen);
+
     // Redraw it
     DrawControls(Box->Res->Window);
 }
