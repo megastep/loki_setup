@@ -366,7 +366,11 @@ int detect_diskspace(const char *path)
 				perror("statfs");
 				return 0;
 			}
+#ifdef HAVE_SYS_STATVFS_H
+			avail = fs.f_frsize;
+#else
 			avail = fs.f_bsize;
+#endif
 			avail *= fs.f_bavail;
 		}
 	}
