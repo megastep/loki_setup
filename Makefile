@@ -2,8 +2,8 @@
 DISTDIR = ..
 PACKAGE = setup-1.5
 
-arch := $(shell ./print_arch)
-libc := $(shell ./print_libc)
+arch := $(shell sh print_arch)
+libc := $(shell sh print_libc)
 os   := $(shell uname -s)
 # USE_RPM = true
 # DYN_PLUGINS = true
@@ -40,7 +40,7 @@ GUI_OBJS = $(OBJS) gtk_ui.o
 
 SRCS = $(OBJS:.o=.c) $(CONSOLE_OBJS:.o=.c) $(GUI_OBJS:.o=.c)
 
-LIBS = plugins/libplugins.a $(SETUPDB)/libsetupdb.a `xml-config --prefix`/lib/libxml.a -lz
+LIBS = plugins/libplugins.a $(SETUPDB)/$(arch)/libsetupdb.a `xml-config --prefix`/lib/libxml.a -lz
 ifeq ($(os),FreeBSD)
 LIBS += -L/usr/local/lib -lintl
 endif
@@ -60,20 +60,17 @@ all: do-plugins setup setup.gtk uninstall
 testxml: testxml.o
 	$(CC) -o $@ $^ $(LIBS)
 
-uninstall: $(UNINSTALL_OBJS) $(SETUPDB)/libsetupdb.a
+uninstall: $(UNINSTALL_OBJS) $(SETUPDB)/$(arch)/libsetupdb.a
 	$(CC) -o $@ $^ $(CONSOLE_LIBS) -static
 
-setup:	$(CONSOLE_OBJS) $(SETUPDB)/libsetupdb.a
+setup:	$(CONSOLE_OBJS) $(SETUPDB)/$(arch)/libsetupdb.a
 	$(CC) -o $@ $^ $(CONSOLE_LIBS) -static
 
-setup.gtk: $(GUI_OBJS) $(SETUPDB)/libsetupdb.a
+setup.gtk: $(GUI_OBJS) $(SETUPDB)/$(arch)/libsetupdb.a
 	$(CC) -o $@ $^ $(GUI_LIBS)
 
 do-plugins:
 	$(MAKE) -C plugins DYN_PLUGINS=$(DYN_PLUGINS) USE_RPM=$(USE_RPM) SETUPDB=$(shell pwd)/$(SETUPDB) all
-
-$(SETUPDB)/brandelf:
-	$(MAKE) -C $(SETUPDB) brandelf
 
 install.dbg: all
 ifeq ($(DYN_PLUGINS),true)
@@ -85,20 +82,20 @@ endif
 	    cp -v setup.gtk image/setup.data/bin/$(os)/$(arch)/$(libc); \
 	fi
 
-install: all $(SETUPDB)/brandelf
+install: all
 ifeq ($(DYN_PLUGINS),true)
 	$(MAKE) -C plugins DYN_PLUGINS=true USE_RPM=$(USE_RPM) install
 endif
 	@if [ -d image/setup.data/bin/$(os)/$(arch)/$(libc) ]; then \
 	    cp -v setup image/setup.data/bin/$(os)/$(arch); \
 	    strip image/setup.data/bin/$(os)/$(arch)/setup; \
-	    $(SETUPDB)/brandelf -t $(os) image/setup.data/bin/$(os)/$(arch)/setup; \
+	    brandelf -t $(os) image/setup.data/bin/$(os)/$(arch)/setup; \
 	    cp -v uninstall image/setup.data/bin/$(os)/$(arch); \
 	    strip image/setup.data/bin/$(os)/$(arch)/uninstall; \
-	    $(SETUPDB)/brandelf -t $(os) image/setup.data/bin/$(os)/$(arch)/uninstall; \
+	    brandelf -t $(os) image/setup.data/bin/$(os)/$(arch)/uninstall; \
 	    cp -v setup.gtk image/setup.data/bin/$(os)/$(arch)/$(libc); \
 	    strip image/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk; \
-	    $(SETUPDB)/brandelf -t $(os) image/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk; \
+	    brandelf -t $(os) image/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk; \
 	fi
 
 clean:
