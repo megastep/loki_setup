@@ -249,7 +249,7 @@ fi
 # Try to run the setup program
 try_run setup.gtk $args $*
 status=$?
-if [ $status -eq 2 ]; then  # setup.gtk couldn't connect to X11 server - ignore
+if [ $status -ne 0 ] && [ $status -ne 3 ]; then  # setup.gtk couldn't connect to X11 server - ignore
 	try_run -fatal setup $args $* || {
 		# NOTE TTimo: with -fatal working correctly, this never happens
 		echo "The setup program seems to have failed on $arch/$libc"
