@@ -43,7 +43,7 @@
 #include "detect.h"
 
 #ifndef MNTTYPE_CDROM
-#if defined(__FreeBSD__) || defined(darwin)
+#if defined(__FreeBSD__)
 #define MNTTYPE_CDROM    "cd9660"
 #elif defined(hpux)
 #define MNTTYPE_CDROM    "cdfs"
@@ -93,6 +93,97 @@ struct mounted_elem {
 static char *current_locale = NULL;
 
 extern Install_UI UI;
+
+
+#if defined(darwin)
+/*
+ * Code based on sample from Apple Developer Connection:
+ *  http://developer.apple.com/samplecode/Sample_Code/Devices_and_Hardware/Disks/VolumeToBSDNode/VolumeToBSDNode.c.htm
+ */
+#    include <CoreFoundation/CoreFoundation.h>
+#    include <CoreServices/CoreServices.h>
+#    include <IOKit/IOKitLib.h>
+#    include <IOKit/storage/IOMedia.h>
+#    include <IOKit/storage/IOCDMedia.h>
+#    include <IOKit/storage/IODVDMedia.h>
+
+static int darwinIsWholeMedia(io_service_t service)
+{
+    int retval = 0;
+    CFTypeRef wholeMedia;
+
+    if (!IOObjectConformsTo(service, kIOMediaClass))
+        return(0);
+        
+    wholeMedia = IORegistryEntryCreateCFProperty(service,
+                                                 CFSTR(kIOMediaWholeKey),
+                                                 kCFAllocatorDefault, 0);
+    if (wholeMedia == NULL)
+        return(0);
+
+    retval = CFBooleanGetValue(wholeMedia);
+    CFRelease(wholeMedia);
+
+    return retval;
+} /* darwinIsWholeMedia */
+
+
+static int darwinIsMountedDisc(char *bsdName, mach_port_t masterPort)
+{
+    int retval = 0;
+    CFMutableDictionaryRef matchingDict;
+    kern_return_t rc;
+    io_iterator_t iter;
+    io_service_t service;
+
+    if ((matchingDict = IOBSDNameMatching(masterPort, 0, bsdName)) == NULL)
+        return(0);
+
+    rc = IOServiceGetMatchingServices(masterPort, matchingDict, &iter);
+    if ((rc != KERN_SUCCESS) || (!iter))
+        return(0);
+
+    service = IOIteratorNext(iter);
+    IOObjectRelease(iter);
+    if (!service)
+        return(0);
+
+    rc = IORegistryEntryCreateIterator(service, kIOServicePlane,
+             kIORegistryIterateRecursively | kIORegistryIterateParents, &iter);
+    
+    if (!iter)
+        return(0);
+
+    if (rc != KERN_SUCCESS)
+    {
+        IOObjectRelease(iter);
+        return(0);
+    } /* if */
+
+    IOObjectRetain(service);  /* add an extra object reference... */
+
+    do
+    {
+        if (darwinIsWholeMedia(service))
+        {
+            if ( (IOObjectConformsTo(service, kIOCDMediaClass)) ||
+                 (IOObjectConformsTo(service, kIODVDMediaClass)) )
+            {
+                retval = 1;
+            } /* if */
+        } /* if */
+        IOObjectRelease(service);
+    } while ((service = IOIteratorNext(iter)) && (!retval));
+                
+    IOObjectRelease(iter);
+    IOObjectRelease(service);
+
+    return(retval);
+} /* darwinIsMountedDisc */
+
+#endif  /* defined(darwin) */
+
+
 
 struct mounted_elem *add_mounted_entry(const char *device, const char *dir)
 {
@@ -225,14 +316,29 @@ void topmost_valid_path(char *target, const char *src)
     }
 }
 
+
 void unmount_filesystems(void)
 {
     struct mounted_elem *mnt = mounted_list, *oldmnt;
     while ( mnt ) {
         log_normal(_("Unmounting device %s"), mnt->device);
+
+        // !!! TODO: do this right. I just hacked this in. --ryan.
+        #if defined(darwin)
+        {
+            char cmd[128];
+            strcpy(cmd, "/usr/sbin/disktool -e ");
+            if (strncmp(mnt->device, "/dev/", 5) == 0)
+                strcat(cmd, mnt->device + 5);
+            else
+                strcat(cmd, mnt->device);
+            system(cmd);
+        }
+        #else
         if ( run_command(NULL, UMOUNT_PATH, mnt->dir, 1) ) {
             log_warning(_("Failed to unmount device %s mounted on %s"), mnt->device, mnt->dir);
         }
+        #endif
         free(mnt->device);
         free(mnt->dir);
         oldmnt = mnt;
@@ -314,44 +420,33 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
 		
 		free(mnts);
     }
-// Copied from FREEBSD version (since it should be the same)
 #elif defined(darwin)
-	int mounted;
-    struct fstab *fstab;
+{
+    const char *devPrefix = "/dev/";
+    int prefixLen = strlen(devPrefix);
+    mach_port_t masterPort = 0;
+    struct statfs *mntbufp;
+    int i, mounts;
 
-    /* Try to mount unmounted CDROM filesystems */
-    while( (fstab = getfsent()) != NULL ){
-        if ( !strcmp(fstab->fs_vfstype, MNTTYPE_CDROM)) {
-            if ( !is_fs_mounted(fstab->fs_spec)) {
-                if ( ! run_command(NULL, MOUNT_PATH, fstab->fs_spec, 1) ) {
-                    add_mounted_entry(fstab->fs_spec, fstab->fs_file);
-                    log_normal(_("Mounted device %s"), fstab->fs_spec);
-                }
+    if (IOMasterPort(MACH_PORT_NULL, &masterPort) == KERN_SUCCESS)
+    {
+        mounts = getmntinfo(&mntbufp, MNT_WAIT);  /* NOT THREAD SAFE! */
+        for (i = 0; i < mounts && num_cdroms < SETUP_MAX_DRIVES; i++)
+        {
+            char *dev = mntbufp[i].f_mntfromname;
+            char *mnt = mntbufp[i].f_mntonname;
+            if (strncmp(dev, devPrefix, prefixLen) != 0)  /* virtual device? */
+                continue;
+
+            /* darwinIsMountedDisc needs to skip "/dev/" part of string... */
+            if (darwinIsMountedDisc(dev + prefixLen, masterPort))
+            {
+                path[num_cdroms ++] = strdup(mnt);
+                add_mounted_entry(dev, mnt);
             }
         }
     }
-    endfsent();
-
-    mounted = getfsstat(NULL, 0, MNT_WAIT);
-    if ( mounted > 0 ) {
-        int i;
-		struct statfs *mnts = (struct statfs *)malloc(sizeof(struct statfs) * mounted);
-
-		mounted = getfsstat(mnts, mounted * sizeof(struct statfs), MNT_WAIT);
-		for ( i = 0; i < mounted && num_cdroms < SETUP_MAX_DRIVES; ++ i ) {
-            //!!!TODO - MacOS X has all kinds of CDFS that we need to support.
-            //For now, we're just adding all the mount paths to the list
-            //and we'll scan for the file on all of those mount points.
-            //Eventually this should change, and proper Mac OS X CD detection
-            //system should be put into place.
-
-			//if ( ! strcmp(mnts[i].f_fstypename, MNTTYPE_CDROM) ) {
-				path[num_cdroms ++] = strdup(mnts[i].f_mntonname);
-			//}
-		}
-		
-		free(mnts);
-    }
+}
 #elif defined(sco)
 	/* Quite horrible. We have to parse mount's output :( */
 	/* And of course, we can't try to mount unmounted filesystems */
@@ -620,7 +715,10 @@ const char *get_cdrom(install_info *info, const char *id)
             yesno_answer response;
             char buf[1024];
             char *prompt;
-
+#if defined(darwin)
+            prompt = _("\nPlease insert the %s CDROM.\n"
+                            "Choose Yes to retry, No to cancel");
+#else
             if ( mounted_filesystems() ) { /* We were able to mount at least one CDROM */
                 prompt =  _("\nPlease insert the %s CDROM.\n"
                             "Choose Yes to retry, No to cancel");                
@@ -628,6 +726,7 @@ const char *get_cdrom(install_info *info, const char *id)
                 prompt =  _("\nPlease mount the %s CDROM.\n"
                             "Choose Yes to retry, No to cancel");
             }
+#endif
             unmount_filesystems();
             snprintf(buf, sizeof(buf), prompt, desc);
             response = UI.prompt(buf, RESPONSE_NO);
