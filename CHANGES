@@ -1,4 +1,8 @@
 
+1.2.3:
+Jeroen Janssen - Thu Apr 20 16:33:30 PDT 2000
+ * Added the CDROM data path to the script environment variables
+
 1.2.2:
 Sam Lantinga - Mon Apr 10 14:50:41 PDT 2000
  * Use portable code generation (for EV4) on Linux/Alpha

@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.38 2000-04-10 21:51:36 hercules Exp $ */
+/* $Id: install.c,v 1.39 2000-04-20 23:57:33 hercules Exp $ */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -825,12 +825,15 @@ int run_script(install_info *info, const char *script, int arg)
                 "SETUP_PRODUCTVER=\"%s\"\n"
                 "SETUP_INSTALLPATH=\"%s\"\n"
                 "SETUP_SYMLINKSPATH=\"%s\"\n"
-                "export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH\n"
+                "SETUP_CDROMPATH=\"%s\"\n"
+                "export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH\n"
                 "%s\n",
                 info->name, info->version,
                 info->install_path,
                 info->symlinks_path,
-                script);
+                num_cdroms > 0 ? cdroms[0] : "",
+                script); 
+                
         fchmod(fileno(fp),0755); /* Turn on executable bit */
         fclose(fp);
         if ( arg >= 0 ) {

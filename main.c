@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.21 2000-04-08 00:35:16 hercules Exp $ */
+/* $Id: main.c,v 1.22 2000-04-20 23:57:33 hercules Exp $ */
 
 #include <stdio.h>
 #include <setjmp.h>
@@ -14,7 +14,7 @@
 #include "log.h"
 #include "detect.h"
 
-#define SETUP_VERSION "1.2.2"
+#define SETUP_VERSION "1.2.3"
 
 #define SETUP_CONFIG  SETUP_BASE "setup.xml"
 

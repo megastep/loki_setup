@@ -1,5 +1,50 @@
 *************************************************************************
 *** Applied ***
+Date: Tue, 18 Apr 2000 07:54:24 +0200
+From: "Jeroen Janssen" <japj@oce.nl>
+Subject: getting the install source path (cdrom) from within (pre/post)
+         installation scripts?
+
+Hello,
+
+I'm working on an updated OpenUT setup and I need access to the source path
+(of the installation cdrom) in order to apply some xdelta based patches
+during the install (xdelta needs the original files from cdrom and applies a
+binary diff to it). Since the destination path & symlink path are already
+put in the scripts environment I was wondering if it's also possible to add
+the install source path to the environment.
+
+I attached a simple patch that *should* do the trick (unfortunately I can't
+test it here, so I hope it doesn't break anything), you might want to think
+about a different environment variable name & mupltiple/no CDROM support.
+
+Best regards,
+
+Jeroen Janssen
+
+diff -u -r setup-1.2/install.c setup-1.2-jeroenj/install.c
+--- setup-1.2/install.c	Fri Mar 10 02:20:38 2000
++++ setup-1.2-jeroenj/install.c	Tue Apr 18 13:21:06 2000
+@@ -814,12 +814,15 @@
+                 "SETUP_PRODUCTVER=\"%s\"\n"
+                 "SETUP_INSTALLPATH=\"%s\"\n"
+                 "SETUP_SYMLINKSPATH=\"%s\"\n"
+-                "export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH\n"
++                "SETUP_CDROMPATH=\"%s\"\n"
++                "export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH\n"
+                 "%s\n",
+                 info->name, info->version,
+                 info->install_path,
+                 info->symlinks_path,
+-                script);
++                cdroms[0],  // return first available CDROM (check? do we HAVE a CDROM?)
++                script); 
++                
+         fchmod(fileno(fp),0755); /* Turn on executable bit */
+         fclose(fp);
+         if ( arg >= 0 ) {
+*************************************************************************
+*** Applied ***
 Date: Mon, 14 Feb 2000 12:24:32 -0700
 From: "Troy A. Griffitts" <scribe@crosswire.org>
 Subject: desktops, icons, etc.
