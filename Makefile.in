@@ -24,7 +24,7 @@ UPDATES = /loki/updates/loki_uninstall
 CONVERT_IMAGE = /loki/patch-tools/convert-image
 
 # The supported locales so far
-LOCALES = fr de es sv it nl ru en_UK
+LOCALES = fr de es sv it nl ru en_GB
 
 OPTIMIZE = @CFLAGS@
 LDFLAGS = @LDFLAGS@
