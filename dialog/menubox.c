@@ -1,5 +1,5 @@
 /*
- *  $Id: menubox.c,v 1.6 2004-12-11 06:28:01 megastep Exp $
+ *  $Id: menubox.c,v 1.7 2004-12-15 05:04:47 megastep Exp $
  *
  *  menubox.c -- implements the menu box
  *
@@ -259,6 +259,8 @@ dialog_menu(const char *title, const char *cprompt, int height, int width,
 			if (i != choice) {
 				getyx(dialog, cur_y, cur_x);
 				if (i < 0 || i >= max_choice) {
+#if 0
+					/* do nothing, if i exceeds the option number listed on the menubox, installer should sit idle */
 #if defined(NCURSES_VERSION_MAJOR) && NCURSES_VERSION_MAJOR < 5
 					/*
 					 * Using wscrl to assist ncurses scrolling is not needed
@@ -290,8 +292,7 @@ dialog_menu(const char *title, const char *cprompt, int height, int width,
 								   max_choice - 1, TRUE);
 					} else
 #endif
-                //do nothing, if i exceeds the option number listed on the menubox, installer should sit idle
-				/*		{
+						{
 							if (i < 0) {
 								scrollamt += i;
 								choice = 0;
@@ -311,7 +312,7 @@ dialog_menu(const char *title, const char *cprompt, int height, int width,
 									box_x + tag_x + 1,
 									box_y,
 									box_y + menu_height + 1);
-                */
+#endif
 				} else {
 					/* De-highlight current item */
 					print_item(menu,

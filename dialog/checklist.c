@@ -1,5 +1,5 @@
 /*
- *  $Id: checklist.c,v 1.6 2004-12-12 22:39:37 megastep Exp $
+ *  $Id: checklist.c,v 1.7 2004-12-15 05:04:47 megastep Exp $
  *
  *  checklist.c -- implements the checklist box
  *
@@ -300,6 +300,7 @@ dialog_checklist(const char *title, const char *cprompt, int height, int width,
 			if (i != choice) {
 				getyx(dialog, cur_y, cur_x);
 				if (i < 0 || i >= max_choice) {
+#if 0
 #if defined(NCURSES_VERSION_MAJOR) && NCURSES_VERSION_MAJOR < 5
 					/*
 					 * Using wscrl to assist ncurses scrolling is not needed
@@ -337,7 +338,7 @@ dialog_checklist(const char *title, const char *cprompt, int height, int width,
 								   max_choice - 1, TRUE);
 					} else
 #endif
-/*						{
+						{
 							if (i < 0) {
 								scrollamt += i;
 								choice = 0;
@@ -357,7 +358,8 @@ dialog_checklist(const char *title, const char *cprompt, int height, int width,
 									box_x + check_x + 5,
 									box_y,
 									box_y + list_height + 1);
-*/				} else {
+#endif
+				} else {
 					/* De-highlight current item */
 					print_item(list,
 							   ItemData(scrollamt + choice),
