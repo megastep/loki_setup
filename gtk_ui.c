@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.29 2000-04-10 20:28:49 hercules Exp $
+   $Id: gtk_ui.c,v 1.30 2000-04-10 21:51:36 hercules Exp $
 */
 
 #include <limits.h>
@@ -595,13 +595,17 @@ static void init_binary_path(void)
     return;
 }
 
-static void init_menuitems_option(void)
+static void init_menuitems_option(install_info *info, xmlNodePtr node)
 {
     GtkWidget* widget;
 
     widget = glade_xml_get_widget(setup_glade, "setup_menuitems_checkbox");
     if ( widget ) {
-        setup_checkbox_menuitems_slot(widget, NULL);
+        if ( has_binaries(info, node) ) {
+            setup_checkbox_menuitems_slot(widget, NULL);
+        } else {
+            gtk_widget_hide(widget);
+        }
     } else {
         log_warning(cur_info, "Unable to locate 'setup_menuitems_checkbox'");
     }
@@ -844,7 +848,7 @@ static install_state gtkui_setup(install_info *info)
     init_binary_path();
     update_size();
     update_space();
-    init_menuitems_option();
+    init_menuitems_option(info, info->config->root->childs);
 
     /* Center and show the installer */
     gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);

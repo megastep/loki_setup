@@ -217,18 +217,18 @@ static install_state console_license(install_info *info)
 
 static install_state console_readme(install_info *info)
 {
-	const char *readme;
+    const char *readme;
 
-	readme = GetProductREADME(info);
-	if ( readme && ! access(readme, R_OK) ) {
-		char prompt[256];
+    readme = GetProductREADME(info);
+    if ( readme && ! access(readme, R_OK) ) {
+        char prompt[256];
 
-		sprintf(prompt, "Would you like to read the %s file ?", readme);
-		if ( console_prompt(prompt, RESPONSE_YES) == RESPONSE_YES ) {
-			sprintf(prompt, PAGER_COMMAND " \"%s\"", readme);
-			system(prompt);
-		}
-	}
+        sprintf(prompt, "Would you like to read the %s file ?", readme);
+        if ( console_prompt(prompt, RESPONSE_YES) == RESPONSE_YES ) {
+            sprintf(prompt, PAGER_COMMAND " \"%s\"", readme);
+            system(prompt);
+        }
+    }
     return SETUP_OPTIONS;
 }
 
@@ -282,8 +282,10 @@ static install_state console_setup(install_info *info)
             node = node->next;
         }
 
-		/* Ask for desktop menu items */
-        if ( console_prompt("Do you want to install desktop items?", RESPONSE_YES) == RESPONSE_YES ) {
+        /* Ask for desktop menu items */
+        if ( has_binaries(info, info->config->root->childs) &&
+             console_prompt("Do you want to install desktop items?",
+                                     RESPONSE_YES) == RESPONSE_YES ) {
             info->options.install_menuitems = 1;
         }
 
@@ -304,12 +306,12 @@ static void console_update(install_info *info, const char *path, size_t progress
   static char previous[200] = "";
 
   if(strcmp(previous, current)){
-	strncpy(previous,current, sizeof(previous));
-	printf("Installing %s ...\n", current);
+    strncpy(previous,current, sizeof(previous));
+    printf("Installing %s ...\n", current);
   }
   printf(" %3d%% - %s\r", (int) (((float)progress/(float)size)*100.0), path);
   if(progress==size)
-	putchar('\n');
+    putchar('\n');
   fflush(stdout);
 }
 
@@ -329,7 +331,7 @@ static install_state console_complete(install_info *info)
     new_state = SETUP_EXIT;
     if ( info->installed_symlink &&
          console_prompt("Would you like launch the game now?", RESPONSE_YES)
-		 == RESPONSE_YES ) {
+         == RESPONSE_YES ) {
         new_state = SETUP_PLAY;
         if ( getuid() == 0 ) {
             const char *warning_text = 
@@ -386,8 +388,8 @@ static install_state console_website(install_info *info)
 int console_okay(Install_UI *UI)
 {
     if(!isatty(1)){
-	  fprintf(stderr,"Standard input is not a terminal!\n");
-	  return(0);
+      fprintf(stderr,"Standard input is not a terminal!\n");
+      return(0);
     }
     /* Set up the driver */
     UI->init = console_init;
@@ -396,7 +398,7 @@ int console_okay(Install_UI *UI)
     UI->setup = console_setup;
     UI->update = console_update;
     UI->abort = console_abort;
-	UI->prompt = console_prompt;
+    UI->prompt = console_prompt;
     UI->website = console_website;
     UI->complete = console_complete;
 

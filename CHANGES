@@ -1,5 +1,13 @@
 
 1.2.2:
+Sam Lantinga - Mon Apr 10 14:50:41 PDT 2000
+ * Use portable code generation (for EV4) on Linux/Alpha
+Sam Lantinga - Mon Apr 10 14:32:17 PDT 2000
+ * Catch the case when gnome-config isn't available or executable
+Sam Lantinga - Mon Apr 10 13:58:56 PDT 2000
+ * Added an extras directory containing the "makedesktop.sh" script
+Sam Lantinga - Mon Apr 10 13:54:04 PDT 2000
+ * Only offer the desktop menu option if there is a "binary" option
 Sam Lantinga - Mon Apr 10 13:27:28 PDT 2000
  * Limited the number of characters in the "current file" label
 Sam Lantinga - Mon Apr 10 10:44:14 PDT 2000

@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.37 2000-04-10 20:28:49 hercules Exp $ */
+/* $Id: install.c,v 1.38 2000-04-10 21:51:36 hercules Exp $ */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -704,20 +704,18 @@ char install_menuitems(install_info *info, desktop_type desktop)
             }
             break;
         case DESKTOP_GNOME:
-#warning What happens when gnome-config is not available?
-            fp = popen("gnome-config --prefix", "r");
+            app_links = gnome_app_links;
+            fp = popen("gnome-config --prefix 2>/dev/null", "r");
             if (fp) {
-                fgets(icon_base, PATH_MAX, fp);
-                icon_base[sizeof(icon_base)-1]=0;
-                strcat(icon_base, "/share/gnome/apps/");
-                found_links[0] = icon_base;
-                found_links[1] = "~/.gnome/apps/";
-                found_links[2] = 0;
-                app_links = found_links;
+                if ( fgets(icon_base, PATH_MAX-1, fp) ) {
+                    icon_base[sizeof(icon_base)-1]=0;
+                    strcat(icon_base, "/share/gnome/apps/");
+                    found_links[0] = icon_base;
+                    found_links[1] = "~/.gnome/apps/";
+                    found_links[2] = 0;
+                    app_links = found_links;
+                }
                 pclose(fp);
-            }
-            else {
-                app_links = gnome_app_links;
             }
             break;
         default:

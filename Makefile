@@ -9,7 +9,9 @@ libc := $(shell ./print_libc)
 CC = gcc
 
 OPTIMIZE = -Wall -g -O2 -funroll-loops
-#OPTIMIZE = -Wall -g
+ifeq ($(arch), alpha)
+    OPTIMIZE += -mcpu=ev4 -Wa,-mall
+endif
 HEADERS = -I/usr/lib/glib/include -I/usr/X11R6/include -I/usr/local/include
 OPTIONS = -DSTUB_UI
 

@@ -932,3 +932,18 @@ size_t size_tree(install_info *info, xmlNodePtr node)
     }
     return size;
 }
+
+int has_binaries(install_info *info, xmlNodePtr node)
+{
+    int num_binaries;
+
+    num_binaries = 0;
+    while ( node ) {
+        if ( strcmp(node->name, "binary") == 0 ) {
+            ++num_binaries;
+        }
+        num_binaries += has_binaries(info, node->childs);
+        node = node->next;
+    }
+    return num_binaries;
+}
