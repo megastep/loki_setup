@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.47 2000-06-07 19:22:40 megastep Exp $ */
+/* $Id: install.c,v 1.48 2000-06-13 16:29:22 hercules Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
    04/12/2000: Modifed run_script function to put the full pathname of the
@@ -968,33 +968,37 @@ char install_menuitems(install_info *info, desktop_type desktop)
 /* Run some shell script commands */
 int run_script(install_info *info, const char *script, int arg)
 {
-    char template[PATH_MAX];
-    char *script_file;
-    FILE *fp;
+    char script_file[PATH_MAX];
+    int fd;
     int exitval;
-    char *working_dir;
-    int cwd_size = PATH_MAX;
-	struct stat st;
+    char working_dir[PATH_MAX];
     
-    /* we need to append the working directory onto the script name so it
-       can always be found. Do this only if the script file exists (to avoid problems with 'sh script.sh') */
-	working_dir = (char *) malloc(PATH_MAX);
-	if ( !stat(script, &st) ) {
-		getcwd(working_dir, cwd_size);
-		strncat(working_dir, "/", PATH_MAX);
-	} else {
-		*working_dir = '\0'; 
-	}
+    /* We need to append the working directory onto the script name so
+       it can always be found. Do this only if the script file exists
+       (to avoid problems with 'sh script.sh')
+    */
+    working_dir[0] = '\0'; 
+    if ( access(script, R_OK) == 0 ) {
+        getcwd(working_dir, sizeof(working_dir));
+        strncat(working_dir, "/", sizeof(working_dir));
+    }
 
-    sprintf(template, "%s/tmp_script_XXXXXX", info->install_path);
-    script_file = mktemp(template);
-
-    fp = fopen(script_file, "wb");
-    if (fp) {
+    sprintf(script_file, "%s/tmp_script_XXXXXX", info->install_path);
+    fd = mkstemp(script_file);
+    if ( fd < 0 ) { /* Maybe the install directory didn't exist? */
+        /* This is necessary for some multi-package installs */
+        sprintf(script_file, "/tmp/tmp_script_XXXXXX");
+        fd = mkstemp(script_file);
+    }
+    exitval = -1;
+    if ( fd >= 0 ) {
+        FILE *fp;
         char cmd[4*PATH_MAX];
 
-        fprintf(fp, /* Create the script file, setting environment variables */
-                "#! /bin/sh\n"
+        fp = fdopen(fd, "w");
+        if ( fp ) {
+            fprintf(fp, /* Create script file, setting environment variables */
+                "#!/bin/sh\n"
                 "SETUP_PRODUCTNAME=\"%s\"\n"
                 "SETUP_PRODUCTVER=\"%s\"\n"
                 "SETUP_INSTALLPATH=\"%s\"\n"
@@ -1007,18 +1011,17 @@ int run_script(install_info *info, const char *script, int arg)
                 info->symlinks_path,
                 num_cdroms > 0 ? cdroms[0] : "",
                 working_dir, script);     
-        fchmod(fileno(fp),0755); /* Turn on executable bit */
-        fclose(fp);
-        if ( arg >= 0 ) {
-            sprintf(cmd, "%s %d", script_file, arg);
-        } else {
-            sprintf(cmd, "%s %s", script_file, info->install_path);
+            fchmod(fileno(fp),0755); /* Turn on executable bit */
+            fclose(fp);
+            if ( arg >= 0 ) {
+                sprintf(cmd, "%s %d", script_file, arg);
+            } else {
+                sprintf(cmd, "%s %s", script_file, info->install_path);
+            }
+            exitval = system(cmd);
         }
-        exitval = system(cmd);
+        close(fd);
         unlink(script_file);
-    } else {
-        exitval = -1;
     }
-    free(working_dir);
     return(exitval);
 }

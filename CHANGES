@@ -1,5 +1,8 @@
 
 1.3.0:
+Sam Lantinga - Mon Jun 12 16:48:16 PDT 2000
+ * Fixed security problem using mktemp()
+ * Run the install script even if the install directory doesn't exist
 Sam Lantinga - Fri Jun  2 15:25:15 PDT 2000
  * Directories are now created recursively when extracting tar archives
 Stéphane Peter - Mon May  1 16:50:26 PDT 2000
@@ -15,9 +18,9 @@ Borland/Inprise Corp. - Tue May  9 12:45:03 PDT 2000
  * Expansion of ~ for the installation directory.
  * Fixed other path problems.
 Stéphane Peter - Sun May 14 03:11:38 PDT 2000
- * Allow the "size" attribute for options to be specified in kilobytes, megabytes
-   and gigabytes, using the 'K', 'M' and 'G' suffixes. WARNING: The default size
-   for this attribute is now in bytes and no longer in MBs !
+ * Allow the "size" attribute for options to be specified in kilobytes,
+   megabytes and gigabytes, using the 'K', 'M' and 'G' suffixes.
+   WARNING: The default size for this attribute is now in bytes, not MBs!
 Stéphane Peter - Tue May 23 15:59:12 PDT 2000
  * Added the 'uninstall' attribute to the install element, to allow renaming
    of the generated uninstall script.
