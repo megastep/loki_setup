@@ -151,18 +151,19 @@ stream *file_open(install_info *info, const char *path, const char *mode)
 
 int file_read(install_info *info, void *buf, int len, stream *streamp)
 {
-    int nread;
+    int nread, eof;
 
     nread = 0;
     if ( streamp->mode == 'r' ) {
+        if ( file_eof(info, streamp) ) {
+            log_warning(info, "Short read on %s", streamp->path);
+            return(0);
+        }
         if ( streamp->fp ) {
             nread = fread(buf, 1, len, streamp->fp);
         }
         if ( streamp->zfp ) {
             nread = gzread(streamp->zfp, buf, len);
-        }
-        if ( nread <= 0 ) {
-            log_warning(info, "Short read on %s", streamp->path);
         }
     } else {
         log_warning(info, "Read on write stream");
@@ -211,14 +212,14 @@ int file_close(install_info *info, stream *streamp)
         if ( streamp->fp ) {
             if ( fclose(streamp->fp) != 0 ) {
                 if ( streamp->mode == 'w' ) {
-                    log_warning(info, "Short write on %s\n", streamp->path);
+                    log_warning(info, "Short write on %s", streamp->path);
                 }
             }
         }
         if ( streamp->zfp ) {
             if ( gzclose(streamp->zfp) != 0 ) {
                 if ( streamp->mode == 'w' ) {
-                    log_warning(info, "Short write on %s\n", streamp->path);
+                    log_warning(info, "Short write on %s", streamp->path);
                 }
             }
         }
@@ -237,7 +238,7 @@ int file_symlink(install_info *info, const char *from, const char *to)
     /* Do the action */
     retval = symlink(from, to);
     if ( retval < 0 ) {
-        log_warning(info, "Can't create %s: %s\n", from, strerror(errno));
+        log_warning(info, "Can't create %s: %s", from, strerror(errno));
     } else {
         add_file_entry(info, from);
     }
@@ -259,7 +260,7 @@ int file_mkdir(install_info *info, const char *path, int mode)
         retval = mkdir(path, mode);
         if ( retval < 0 ) {
 		  if(errno != EEXIST)
-            log_warning(info, "Can't create %s: %s\n", path, strerror(errno));
+            log_warning(info, "Can't create %s: %s", path, strerror(errno));
         } else {
             add_dir_entry(info, path);
         }
