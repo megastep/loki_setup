@@ -1047,7 +1047,7 @@ ssize_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
 						strcat(buf, line);
 						strcat(buf, "\n");
 					}
-					current_component->message = strdup(buf);
+					current_component->message = strdup(convert_encoding(buf));
 				}
 			}
 			xmlFree(prop);

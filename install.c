@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.147 2004-11-18 05:10:55 megastep Exp $ */
+/* $Id: install.c,v 1.148 2004-11-18 05:15:19 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -636,7 +636,7 @@ const char *GetProductPostInstallMsg(install_info *info)
 						strcat(buf, "\n");
 					}
 					xmlFree(prop);
-					return buf;
+					return convert_encoding(buf);
 				}
 			}
 			xmlFree(prop);
@@ -1337,7 +1337,7 @@ int CheckRequirements(install_info *info)
 							strcat(buf, line);
 							strcat(buf, "\n");
 						}
-						UI.prompt(buf, RESPONSE_OK);
+						UI.prompt(convert_encoding(buf), RESPONSE_OK);
 					}
 					xmlFree(commandprop);
 					return 0;
