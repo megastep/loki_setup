@@ -71,6 +71,9 @@ There are several optional attributes of the install element:
             The default behavior is to prompt the user as to whether or
             not to launch the web browser.
 
+ cdrom      If this attribute has the value "required", then the installer
+            will abort if no CDROM is currently mounted on the system.
+
 
 The OPTION element:
 

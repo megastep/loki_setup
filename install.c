@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.33 2000-03-07 22:32:41 megastep Exp $ */
+/* $Id: install.c,v 1.34 2000-03-08 22:05:09 megastep Exp $ */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -37,6 +37,14 @@ const char *GetProductDesc(install_info *info)
 const char *GetProductVersion(install_info *info)
 {
     return xmlGetProp(info->config->root, "version");
+}
+int GetProductCDROMRequired(install_info *info)
+{
+	const char *str = xmlGetProp(info->config->root, "cdrom");
+	if ( str && !strcasecmp(str, "required") ) {
+		return 1;
+	}
+	return 0;
 }
 const char *GetDefaultPath(install_info *info)
 {

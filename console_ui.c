@@ -31,16 +31,7 @@ static int prompt_user(const char *prompt, const char *default_answer,
     return answer[0];
 }
 
-/* Boolean answer */
-typedef enum {
-    RESPONSE_INVALID = -1,
-    RESPONSE_NO,
-    RESPONSE_YES,
-    RESPONSE_HELP
-} yesno_answer;
-
-
-static yesno_answer prompt_yesno(const char *prompt, yesno_answer suggest)
+static yesno_answer console_prompt(const char *prompt, yesno_answer suggest)
 {
     char line[BUFSIZ];
 
@@ -98,7 +89,7 @@ static yesno_answer prompt_yesnohelp(const char *prompt, yesno_answer suggest)
 static yesno_answer prompt_warning(const char *warning)
 {
         printf("%s\n", warning);
-        return (prompt_yesno("Continue?", RESPONSE_NO));
+        return (console_prompt("Continue?", RESPONSE_NO));
 }
 
 static void parse_option(install_info *info, xmlNodePtr node)
@@ -134,7 +125,7 @@ static void parse_option(install_info *info, xmlNodePtr node)
     if ( help ) {
         response = prompt_yesnohelp(prompt, default_response);
     } else {
-        response = prompt_yesno(prompt, default_response);
+        response = console_prompt(prompt, default_response);
     }
 
     switch(response) {
@@ -196,7 +187,7 @@ static install_state console_license(install_info *info)
     sleep(1);
     sprintf(command, PAGER_COMMAND " \"%s\"", GetProductEULA(info));
     system(command);
-    if ( prompt_yesno("Do you agree with the license?", RESPONSE_YES) ==
+    if ( console_prompt("Do you agree with the license?", RESPONSE_YES) ==
                                                         RESPONSE_YES ) {
         state = SETUP_README;
     } else {
@@ -214,7 +205,7 @@ static install_state console_readme(install_info *info)
 		char prompt[256];
 
 		sprintf(prompt, "Would you like to read the %s file ?", readme);
-		if ( prompt_yesno(prompt, RESPONSE_YES) == RESPONSE_YES ) {
+		if ( console_prompt(prompt, RESPONSE_YES) == RESPONSE_YES ) {
 			sprintf(prompt, PAGER_COMMAND " \"%s\"", readme);
 			system(prompt);
 		}
@@ -273,7 +264,7 @@ static install_state console_setup(install_info *info)
         }
 
 		/* Ask for desktop menu items */
-        if ( prompt_yesno("Do you want to install desktop items?", RESPONSE_YES) == RESPONSE_YES ) {
+        if ( console_prompt("Do you want to install desktop items?", RESPONSE_YES) == RESPONSE_YES ) {
             info->options.install_menuitems = 1;
         }
 
@@ -282,7 +273,7 @@ static install_state console_setup(install_info *info)
         printf("%d MB available, %d MB will be installed.\n",
             detect_diskspace(info->install_path), BYTES2MB(info->install_size));
         printf("\n");
-        if ( prompt_yesno("Continue install?", RESPONSE_YES) == RESPONSE_YES ) {
+        if ( console_prompt("Continue install?", RESPONSE_YES) == RESPONSE_YES ) {
             okay = 1;
         }
     }
@@ -317,7 +308,7 @@ static install_state console_complete(install_info *info)
     printf("Installation complete.\n");
 
     new_state = SETUP_EXIT;
-    if ( prompt_yesno("Would you like launch the game now?", RESPONSE_YES)
+    if ( console_prompt("Would you like launch the game now?", RESPONSE_YES)
 		 == RESPONSE_YES ) {
         new_state = SETUP_PLAY;
         if ( getuid() == 0 ) {
@@ -364,7 +355,7 @@ static install_state console_website(install_info *info)
     sleep(2);
 
     if ( (strcmp( GetAutoLaunchURL(info), "true" )==0)
-         || (prompt_yesno("Would you like to launch web browser?",RESPONSE_YES)== RESPONSE_YES ) ) {
+         || (console_prompt("Would you like to launch web browser?",RESPONSE_YES)== RESPONSE_YES ) ) {
         launch_browser( info, run_lynx );
     }
     return SETUP_COMPLETE;
@@ -385,6 +376,7 @@ int console_okay(Install_UI *UI)
     UI->setup = console_setup;
     UI->update = console_update;
     UI->abort = console_abort;
+	UI->prompt = console_prompt;
     UI->website = console_website;
     UI->complete = console_complete;
 

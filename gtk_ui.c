@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.24 2000-02-14 20:39:06 hercules Exp $
+   $Id: gtk_ui.c,v 1.25 2000-03-08 22:05:09 megastep Exp $
 */
 
 #include <limits.h>
@@ -451,6 +451,56 @@ void setup_checkbox_option_slot( GtkWidget* widget, gpointer func_data)
 void setup_checkbox_menuitems_slot( GtkWidget* widget, gpointer func_data)
 {
     cur_info->options.install_menuitems = (GTK_TOGGLE_BUTTON(widget)->active != 0);
+}
+
+static yesno_answer prompt_response;
+
+static void prompt_yesbutton_slot( GtkWidget* widget, gpointer func_data)
+{
+	prompt_response = RESPONSE_YES;
+}
+
+static void prompt_nobutton_slot( GtkWidget* widget, gpointer func_data)
+{
+	prompt_response = RESPONSE_NO;
+}
+
+static yesno_answer gtkui_prompt(const char *txt, yesno_answer suggest)
+{
+	GtkWidget *dialog, *label, *yes_button, *no_button;
+	   
+    /* Create the widgets */
+    
+    dialog = gtk_dialog_new();
+    label = gtk_label_new (txt);
+    yes_button = gtk_button_new_with_label("Yes");
+    no_button = gtk_button_new_with_label("No");
+
+	prompt_response = RESPONSE_INVALID;
+    
+    /* Ensure that the dialog box is destroyed when the user clicks ok. */
+    
+    gtk_signal_connect_object (GTK_OBJECT (yes_button), "clicked",
+                               GTK_SIGNAL_FUNC (prompt_yesbutton_slot), GTK_OBJECT(dialog));
+    gtk_signal_connect_object (GTK_OBJECT (no_button), "clicked",
+                               GTK_SIGNAL_FUNC (prompt_nobutton_slot), GTK_OBJECT(dialog));
+    gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->action_area),
+                       yes_button);
+    gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->action_area),
+                       no_button);
+	
+    /* Add the label, and show everything we've added to the dialog. */
+	
+    gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->vbox),
+                       label);
+	gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
+    gtk_widget_show_all (dialog);
+
+	while ( prompt_response == RESPONSE_INVALID ) {
+		gtk_main_iteration();
+	}
+	gtk_widget_destroy(dialog);
+	return prompt_response;
 }
 
 static void init_install_path(void)
@@ -908,6 +958,7 @@ int gtkui_okay(Install_UI *UI)
             UI->setup = gtkui_setup;
             UI->update = gtkui_update;
             UI->abort = gtkui_abort;
+			UI->prompt = gtkui_prompt;
             UI->website = gtkui_website;
             UI->complete = gtkui_complete;
             XCloseDisplay(dpy);

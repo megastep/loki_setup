@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.16 2000-03-03 03:38:41 megastep Exp $ */
+/* $Id: main.c,v 1.17 2000-03-08 22:05:09 megastep Exp $ */
 
 #include <stdio.h>
 #include <setjmp.h>
@@ -158,6 +158,17 @@ int main(int argc, char **argv)
                 if ( state == SETUP_ABORT ) {
                     exit_status = 1;
                 }
+				/* Check for the presence of a CDROM if required */
+				if ( GetProductCDROMRequired(info) && num_cdroms==0 ) {
+					char buf[1024];
+					
+					sprintf(buf,"\nPlease mount the %s CDROM\n"
+							"before running this installation program.\n",
+							info->name);
+					UI.prompt(buf, RESPONSE_YES);
+					state = SETUP_ABORT;
+					exit_status = 1;
+				} 
                 break;
             case SETUP_LICENSE:
                 state = UI.license(info);
