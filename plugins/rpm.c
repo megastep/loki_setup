@@ -1,5 +1,5 @@
 /* RPM plugin for setup */
-/* $Id: rpm.c,v 1.4 2002-02-15 02:20:57 megastep Exp $ */
+/* $Id: rpm.c,v 1.5 2002-04-03 08:10:25 megastep Exp $ */
 
 #include "plugins.h"
 #include "file.h"
@@ -13,7 +13,6 @@
 #include <fcntl.h>
 
 #include <zlib.h>
-#include <bzlib.h>
 
 #ifdef LIBBZ2_PREFIX
 #define BZDOPEN BZ2_bzdopen
@@ -85,7 +84,7 @@ static size_t RPMSize(install_info *info, const char *path)
 
 /* Extract the file */
 static size_t RPMCopy(install_info *info, const char *path, const char *dest, const char *current_option_name, xmlNodePtr node,
-			void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+			int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     FD_t fdi;
     Header hd;
@@ -167,7 +166,8 @@ static size_t RPMCopy(install_info *info, const char *path, const char *dest, co
 			bytes_copied = (percent/100.0)*size - previous_bytes;
 			previous_bytes += bytes_copied;
 			info->installed_bytes += bytes_copied;
-			update(info, path, (percent/100.0)*size, size, current_option_name);
+			if ( ! update(info, path, (percent/100.0)*size, size, current_option_name) )
+				break;
 		}
 		pclose(fp);
 		free (options);

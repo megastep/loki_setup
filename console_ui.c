@@ -137,7 +137,7 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
     }
 
     /* Skip any options that are already installed */
-    if ( info->product ) {
+    if ( info->product && ! GetProductReinstall(info) ) {
         product_component_t *comp;
 
         if ( component ) {
@@ -488,7 +488,7 @@ static install_state console_setup(install_info *info)
     return SETUP_INSTALL;
 }
 
-static void console_update(install_info *info, const char *path, size_t progress, size_t size, const char *current)
+static int console_update(install_info *info, const char *path, size_t progress, size_t size, const char *current)
 {
     static char previous[200] = "";
 
@@ -504,6 +504,7 @@ static void console_update(install_info *info, const char *path, size_t progress
     if(progress==size)
         putchar('\n');
     fflush(stdout);
+	return 1;
 }
 
 static void console_abort(install_info *info)

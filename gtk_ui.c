@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.67 2002-03-10 17:46:22 icculus Exp $
+   $Id: gtk_ui.c,v 1.68 2002-04-03 08:10:24 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -162,12 +162,15 @@ static void update_space(void);
 static void update_size(void);
 void setup_destroy_view_readme_slot(GtkWidget*, gpointer);
 static yesno_answer gtkui_prompt(const char*, yesno_answer);
+static void gtkui_abort(install_info *info);
 
 static int iterate_for_state(void)
 {
 	int start = cur_state;
-	while(cur_state == start)
-		gtk_main_iteration();
+	while(cur_state == start) {
+		if ( !gtk_main_iteration() )
+			break;
+	}
 
 	/* fprintf(stderr,"New state: %d\n", cur_state); */
 	return cur_state;
@@ -456,16 +459,29 @@ void setup_button_play_slot( GtkWidget* _widget, gpointer func_data )
 
 void setup_button_exit_slot( GtkWidget* widget, gpointer func_data )
 {
-    cur_state = SETUP_EXIT;
+	cur_state = SETUP_EXIT;
+}
+
+void setup_button_abort_slot( GtkWidget* widget, gpointer func_data )
+{
+	cur_state = SETUP_EXIT;
 }
 
 void setup_button_cancel_slot( GtkWidget* widget, gpointer func_data )
 {
-	if ( (cur_state != SETUP_COMPLETE) && (cur_state != SETUP_OPTIONS) ) {
-		cur_state = SETUP_ABORT;
-		abort_install();
-	} else {
+	switch(cur_state) {
+	case SETUP_COMPLETE:
+	case SETUP_OPTIONS:
+	case SETUP_ABORT:
+	case SETUP_EXIT:
 		cur_state = SETUP_EXIT;
+		break;
+	default:
+		if ( gtkui_prompt(_("Are you sure you want to abort\nthis installation?"), RESPONSE_NO) == RESPONSE_YES ) {
+			cur_state = SETUP_ABORT;
+			abort_install();
+		}
+		break;
 	}
 }
 
@@ -690,7 +706,7 @@ static yesno_answer gtkui_prompt(const char *txt, yesno_answer suggest)
     
     dialog = gtk_dialog_new();
     label = gtk_label_new (txt);
-    ok_button = gtk_button_new_with_label("OK");
+    ok_button = gtk_button_new_with_label(_("OK"));
 
     prompt_response = RESPONSE_INVALID;
     
@@ -1067,7 +1083,7 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
     }
 
     /* Disable any options that are already installed */
-    if ( info->product ) {
+    if ( info->product && ! GetProductReinstall(info) ) {
         product_component_t *comp;
 
         if ( component ) {
@@ -1361,7 +1377,7 @@ static install_state gtkui_setup(install_info *info)
 	if ( express_setup ) {
 		GtkWidget *notebook = glade_xml_get_widget(setup_glade, "setup_notebook");
 		gtk_notebook_set_page(GTK_NOTEBOOK(notebook), COPY_PAGE);
-		return SETUP_INSTALL;
+		return cur_state = SETUP_INSTALL;
 	}
 
     /* Go through the install options */
@@ -1409,7 +1425,7 @@ static install_state gtkui_setup(install_info *info)
     return iterate_for_state();
 }
 
-static void gtkui_update(install_info *info, const char *path, size_t progress, size_t size, const char *current)
+static int gtkui_update(install_info *info, const char *path, size_t progress, size_t size, const char *current)
 {
     static gfloat last_update = -1;
     GtkWidget *widget;
@@ -1417,6 +1433,10 @@ static void gtkui_update(install_info *info, const char *path, size_t progress, 
     char text[1024];
     char *install_path;
     gfloat new_update;
+
+	if ( cur_state == SETUP_ABORT ) {
+		return FALSE;
+	}
 
     if ( progress && size ) {
         new_update = (gfloat)progress / (gfloat)size;
@@ -1462,6 +1482,7 @@ static void gtkui_update(install_info *info, const char *path, size_t progress, 
     while( gtk_events_pending() ) {
         gtk_main_iteration();
     }
+	return TRUE;
 }
 
 static void gtkui_abort(install_info *info)
@@ -1573,10 +1594,10 @@ int gtkui_okay(Install_UI *UI)
             UI->prompt = gtkui_prompt;
             UI->website = gtkui_website;
             UI->complete = gtkui_complete;
-	    UI->pick_class = gtkui_pick_class;
-	    UI->idle = gtkui_idle;
-	    UI->exit = NULL;
-	    UI->is_gui = 1;
+			UI->pick_class = gtkui_pick_class;
+			UI->idle = gtkui_idle;
+			UI->exit = NULL;
+			UI->is_gui = 1;
             XCloseDisplay(dpy);
 
             okay = 1;

@@ -81,7 +81,7 @@ int connect_url(const char *url)
     printf("Resolving %s port %d\n", host, portnum);
 #endif
     socka.sin_addr.s_addr = inet_addr(host);
-    if ( socka.sin_addr.s_addr == INADDR_NONE ) {
+    if ( inet_aton(host, &socka.sin_addr) != 0 ) {
         struct hostent *hp;
 
         hp = gethostbyname(host);

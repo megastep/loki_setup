@@ -180,12 +180,17 @@
 	    <name>button1</name>
 	    <can_default>True</can_default>
 	    <can_focus>True</can_focus>
+	    <accelerator>
+	      <modifiers>0</modifiers>
+	      <key>GDK_Escape</key>
+	      <signal>clicked</signal>
+	    </accelerator>
 	    <signal>
 	      <name>clicked</name>
 	      <handler>main_quit_slot</handler>
 	      <last_modification_time>Tue, 14 Nov 2000 19:30:53 GMT</last_modification_time>
 	    </signal>
-	    <label>Exit</label>
+	    <label>_Exit</label>
 	    <relief>GTK_RELIEF_NORMAL</relief>
 	  </widget>
 
@@ -199,7 +204,7 @@
 	      <handler>perform_uninstall_slot</handler>
 	      <last_modification_time>Tue, 14 Nov 2000 19:55:13 GMT</last_modification_time>
 	    </signal>
-	    <label>Uninstall</label>
+	    <label>_Uninstall</label>
 	    <relief>GTK_RELIEF_NORMAL</relief>
 	  </widget>
 	</widget>

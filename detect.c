@@ -7,10 +7,15 @@
 #include <ctype.h>
 #include <sys/param.h>
 #include <sys/mount.h>
+#include <sys/utsname.h>
 
 #ifdef __FreeBSD__
 #include <sys/ucred.h>
 #include <fstab.h>
+#elif defined(__svr4__)
+#include <sys/mnttab.h>
+#include <sys/vfs.h>
+#include <sys/statvfs.h>
 #else /* Linux assumed */
 #include <mntent.h>
 #include <sys/vfs.h>
@@ -24,6 +29,8 @@
 #ifndef MNTTYPE_CDROM
 #ifdef __FreeBSD__
 #define MNTTYPE_CDROM    "cd9660"
+#elif defined(__svr4__)
+#define MNTTYPE_CDROM    "hsfs"
 #else
 #define MNTTYPE_CDROM    "iso9660"
 #endif
@@ -33,7 +40,11 @@
 #endif
 
 /* #define MOUNTS_FILE "/proc/mounts" */
+#ifdef __svr4__
+#define MOUNTS_FILE MNTTAB
+#else
 #define MOUNTS_FILE _PATH_MOUNTED
+#endif
 
 /* The filesystems that were mounted by setup */
 static
@@ -84,6 +95,18 @@ int is_fs_mounted(const char *dev)
             }
         }
     }
+#elif defined(__svr4__)
+	struct mnttab mnt;
+	FILE *mtab = fopen(MOUNTS_FILE, "r");
+	if ( mtab != NULL ) {
+		while ( getmntent(mtab, &mnt)==0 ) {
+			if ( !strcmp(mnt.mnt_special, dev) ) {
+				found = 1;
+				break;
+			}
+		}
+		fclose(mtab);
+	}
 #else
     struct mntent *mnt;
     FILE *mtab = setmntent(MOUNTS_FILE, "r" );
@@ -123,7 +146,7 @@ void unmount_filesystems(void)
     struct mounted_elem *mnt = mounted_list, *oldmnt;
     while ( mnt ) {
         log_normal(_("Unmounting device %s"), mnt->device);
-        if ( run_command(NULL, "umount", mnt->dir) ) {
+        if ( run_command(NULL, "umount", mnt->dir, 1) ) {
             log_warning(_("Failed to unmount device %s mounted on %s"), mnt->device, mnt->dir);
         }
         free(mnt->device);
@@ -141,7 +164,11 @@ int detect_diskspace(const char *path)
 	long long avail = 0LL;
 
 	if ( path[0] == '/' ) {
+#ifdef __svr4__
+		struct statvfs fs;
+#else
 		struct statfs fs;
+#endif
 		char buf[PATH_MAX], *cp;
 
 		strcpy(buf, path);
@@ -153,7 +180,11 @@ int detect_diskspace(const char *path)
             *cp = '\0';
         }
 		if ( buf[0] ) {
+#ifdef __svr4__
+			if ( statvfs(buf, &fs) ) {
+#else
 			if ( statfs(buf, &fs) ) {
+#endif
 				perror("statfs");
 				return 0;
 			}
@@ -176,7 +207,7 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
     while( (fstab = getfsent()) != NULL ){
         if ( !strcmp(fstab->fs_vfstype, MNTTYPE_CDROM)) {
             if ( !is_fs_mounted(fstab->fs_spec)) {
-                if ( ! run_command(NULL, "mount", fstab->fs_spec) ) {
+                if ( ! run_command(NULL, "mount", fstab->fs_spec, 1) ) {
                     add_mounted_entry(fstab->fs_spec, fstab->fs_file);
                     log_normal(_("Mounted device %s"), fstab->fs_spec);
                 }
@@ -200,6 +231,8 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
 		free(mnts);
 	}
 
+#elif defined(__svr4__)
+	/* TODO */
 #else
     char mntdevpath[PATH_MAX];
     FILE *mountfp;
@@ -213,7 +246,7 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
                 char *fsname = strdup(mntent->mnt_fsname);
                 char *dir = strdup(mntent->mnt_dir);
                 if ( !is_fs_mounted(fsname)) {
-                    if ( ! run_command(NULL, "mount", fsname) ) {
+                    if ( ! run_command(NULL, "mount", fsname, 1) ) {
                         add_mounted_entry(fsname, dir);
                         log_normal(_("Mounted device %s"), fsname);
                     }
@@ -471,113 +504,4 @@ int match_distro(install_info *info, const char *wanted)
 		}
 	}
 	return match;
-}
-
-/* Locate a version number in the string */
-static void find_version(const char *file,  int *maj, int *min)
-{
-	char line[256], *str, *s;
-	FILE *f = fopen(file, "r");
-
-	*maj = *min = 0;
-	if ( f ) {
-		for(;;) { /* Get the first non-blank line */
-			s = str = fgets(line, sizeof(line), f);
-			if ( s ) {
-				while( *s ) {
-					if ( ! isspace(*s) )
-						goto outta_here; /* Ugly, but gets us out of 2 loops */
-					s ++;
-				}
-			} else {
-				break;
-			}
-		}
-		
-	outta_here:
-		if ( str ) {
-			/* Skip anything that's not a number */
-			while ( *str && !isdigit(*str) ) {
-				++str;
-			}
-			
-			if ( *str ) {
-				sscanf(str, "%d.%d", maj, min);
-			}
-		}
-		fclose(f);
-	}
-}
-
-/* Locate a string in the file */
-static int find_string(const char *file, const char *tofind)
-{
-	int ret = 0;
-	FILE *f = fopen(file, "r");
-
-	if ( f ) {
-		char line[256], *str;
-		/* Read line by line */
-		while ( (str = fgets(line, sizeof(line), f)) != NULL ) {
-			if ( strstr(str, tofind) ) {
-				ret = 1;
-				break;
-			}
-		}
-		fclose(f);
-	}
-	return ret;
-}
-
-const char *distribution_name[NUM_DISTRIBUTIONS] = {
-	"N/A",
-	"RedHat Linux (or similar)",
-	"Mandrake Linux",
-	"SuSE Linux",
-	"Debian GNU/Linux (or similar)",
-	"Slackware",
-	"Caldera OpenLinux",
-	"Linux/PPC"
-};
-
-const char *distribution_symbol[NUM_DISTRIBUTIONS] = {
-	"none",
-	"redhat",
-	"mandrake",
-	"suse",
-	"debian",
-	"slackware",
-	"caldera",
-	"linuxppc"
-};
-
-/* Detect the distribution type and version */
-distribution detect_distro(int *maj_ver, int *min_ver)
-{
-	if ( !access("/etc/mandrake-release", F_OK) ) {
-		find_version("/etc/mandrake-release", maj_ver, min_ver); 
-		return DISTRO_MANDRAKE;
-	} else if ( !access("/etc/SuSE-release", F_OK) ) {
-		find_version("/etc/SuSE-release", maj_ver, min_ver); 
-		return DISTRO_SUSE;
-	} else if ( !access("/etc/redhat-release", F_OK) ) {
-		find_version("/etc/redhat-release", maj_ver, min_ver); 
-#if defined(PPC) || defined(powerpc)
-		/* Look for Linux/PPC */
-		if ( find_string("/etc/redhat-release", "Linux/PPC") ) {
-			return DISTRO_LINUXPPC;
-		}
-#endif
-		return DISTRO_REDHAT;
-	} else if ( !access("/etc/debian_version", F_OK) ) {
-		find_version("/etc/debian_version", maj_ver, min_ver); 
-		return DISTRO_DEBIAN;
-	} else if ( !access("/etc/slackware-version", F_OK) ) {
-		find_version("/etc/slackware-version", maj_ver, min_ver);
-		return DISTRO_SLACKWARE;
-	} else if ( find_string("/etc/issue", "OpenLinux") ) {
-		find_version("/etc/issue", maj_ver, min_ver);
-		return DISTRO_CALDERA;
-	}
-	return DISTRO_NONE; /* Couldn't recognize anything */
 }

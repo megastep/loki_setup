@@ -110,19 +110,23 @@ stream *file_open(install_info *info, const char *path, const char *mode)
         return(NULL);
     }
     memset(streamp, 0, (sizeof *streamp));
-    streamp->path = (char *)malloc(strlen(path)+1);
+    streamp->path = strdup(path);
     if ( streamp->path == NULL ) {
         file_close(info, streamp);
         log_warning(_("Out of memory"));
         return(NULL);
     }
-    strcpy(streamp->path, path);
     streamp->mode = *mode;
 
     if ( streamp->mode == 'r' ) {
         char magic[2];
 
         streamp->fp = fopen(path, "rb");
+		if ( ! streamp->fp ) {
+			file_close(info, streamp);
+			log_warning(_("Failed to open file %s"), path);
+			return(NULL);
+		}
         if ( fread(magic, 1, 2, streamp->fp) == 2 ) {
             if ( memcmp(magic, gzip_magic, 2) == 0 ) {
 			    fseek(streamp->fp, (off_t)(-4), SEEK_END);
@@ -190,7 +194,7 @@ int file_read(install_info *info, void *buf, int len, stream *streamp)
         #ifdef HAVE_BZIP2_SUPPORT
         } else if ( streamp->bzfp ) {
 			nread = BZREAD(streamp->bzfp, buf, len);
-        #endif
+		#endif
 		}
     } else {
         log_warning(_("Read on write stream"));

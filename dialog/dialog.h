@@ -1,5 +1,5 @@
 /*
- *  $Id: dialog.h,v 1.2 2002-03-12 15:46:18 icculus Exp $
+ *  $Id: dialog.h,v 1.3 2002-04-03 08:10:25 megastep Exp $
  *
  *  dialog.h -- common declarations for all dialog modules
  *
@@ -259,7 +259,7 @@ typedef struct {
     int begin_y;
     int sleep_secs;
     int tab_len;
-	int wrap_width; /* wrap at the given width, this is a state variable for read_high wrap hack (TTimo) */
+    int wrap_width; /* wrap at the given width, this is a state variable for read_high wrap hack (TTimo) */
 } DIALOG_VARS;
 
 #define CHECKBOX_TAGS (dialog_vars.item_help ? 4 : 3)

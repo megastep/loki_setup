@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.2 2002-03-12 15:46:18 icculus Exp $
+ * $Id: dialog_ui.c,v 1.3 2002-04-03 08:10:24 megastep Exp $
  */
 
 #include <limits.h>
@@ -139,6 +139,17 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr pa
 		const char *set = xmlGetProp(node, "install");
 		if ( ! strcmp(node->name, "option") ) {
 			/* Skip options that are already installed */
+			if ( info->product && ! GetProductReinstall(info) ) {
+				product_component_t *comp;
+				
+				if ( component ) {
+					comp = loki_find_component(info->product, component);
+				} else {
+					comp = loki_getdefault_component(info->product);
+				}
+				if ( comp && loki_find_option(comp, get_option_name(info, node, NULL, 0)) ) {
+				}
+			}
 			nodes[nb_choices] = node;
 			choices[i++] = "";
 			choices[i++] = strdup(get_option_name(info, node, NULL, 0));
@@ -365,8 +376,8 @@ install_state dialog_setup(install_info *info)
 }
 
 static
-void dialog_update(install_info *info, const char *path, size_t progress, 
-		   size_t size, const char *current)
+int dialog_update(install_info *info, const char *path, size_t progress, 
+				  size_t size, const char *current)
 {
 	char buf[PATH_MAX];
     static char previous[200] = "";
@@ -383,6 +394,7 @@ void dialog_update(install_info *info, const char *path, size_t progress,
     } else { /* Script */
 		dialog_gauge_update(_("Installing..."), path, 100);
 	}
+	return 1;
 }
 
 static

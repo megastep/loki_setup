@@ -2,7 +2,7 @@
  * Check and Rescue Tool for Loki Setup packages. Verifies the consistency of the files,
  * and optionally restores them from the original installation medium.
  *
- * $Id: check.c,v 1.2 2002-02-23 21:29:43 icculus Exp $
+ * $Id: check.c,v 1.3 2002-04-03 08:10:24 megastep Exp $
  */
 
 #include <stdlib.h>
@@ -15,6 +15,7 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <locale.h>
 
 #include <gtk/gtk.h>
 #include <glade/glade.h>
@@ -25,6 +26,7 @@
 #include "install.h"
 #include "copy.h"
 
+#undef PACKAGE
 #define PACKAGE "loki-uninstall"
 
 product_t *product = NULL;
@@ -233,10 +235,11 @@ on_media_ok_clicked (GtkButton       *button,
 	if ( gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(radio)) ) {
 		/* Directory */
 		const gchar *str = gtk_entry_get_text(GTK_ENTRY(glade_xml_get_widget(rescue_glade, "dir_entry")));
+		/* We ignore the CDROM prefix in that case */
 		snprintf(path, sizeof(path), "%s/setup.data/setup.xml", str);
 		if ( access( path, R_OK) ) {
 			/* Doesn't look like a setup archive */
-			gtk_label_set_text(GTK_LABEL(diag), _("Unable to indentify an installation media."));
+			gtk_label_set_text(GTK_LABEL(diag), _("Unable to identify an installation media."));
 			gtk_widget_hide(glade_xml_get_widget(rescue_glade, "media_select"));
 			return;
 		}
@@ -247,9 +250,9 @@ on_media_ok_clicked (GtkButton       *button,
 		int nb_drives = detect_and_mount_cdrom(cds), i;
 
 		for(i = 0; i < nb_drives; ++i ) {
-			snprintf(path, sizeof(path), "%s/setup.data/setup.xml", cds[i]);
+			snprintf(path, sizeof(path), "%s/%s/setup.data/setup.xml", cds[i], info->prefix);
 			if ( !access( path, R_OK) ) {
-				strncpy(root, cds[i], sizeof(root));
+				snprintf(root, sizeof(root), "%s/%s", cds[i], info->prefix);
 				break; /* FIXME: What if there are many setup CDs ? */
 			}
 		}
@@ -264,9 +267,10 @@ on_media_ok_clicked (GtkButton       *button,
 	}
 
 	gtk_label_set_text(GTK_LABEL(diag), _("Restoring files..."));
+	gtk_widget_realize(diag);
 	
 	/* Fetch the files to be refreshed, i.e install with a restricted set of files  */
-	install = create_install(path, info->root, NULL);
+	install = create_install(path, info->root, NULL, info->prefix);
 	if ( install ) {
 		if ( chdir(root) < 0 ) {
 			fprintf(stderr, _("Unable to change to directory %s\n"), root);
@@ -282,6 +286,9 @@ on_media_ok_clicked (GtkButton       *button,
 	gtk_label_set_text(GTK_LABEL(diag), _("Files successfully restored !"));
 	gtk_widget_set_sensitive(glade_xml_get_widget(check_glade, "rescue_button"), FALSE);
 	gtk_widget_hide(glade_xml_get_widget(rescue_glade, "media_select"));
+
+	/* Unmount filesystems that may have been mounted */
+	unmount_filesystems();
 }
 
 void store_filename(GtkButton *but, GtkWidget *entry)

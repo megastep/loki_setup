@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.91 2002-02-15 05:44:57 megastep Exp $ */
+/* $Id: install.c,v 1.92 2002-04-03 08:10:24 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -363,6 +363,34 @@ const char *GetProductREADME(install_info *info)
 	return NULL;
 }
 
+const char *GetProductMessage(install_info *info)
+{
+	xmlNodePtr node;
+	const char *text;
+	static char line[BUFSIZ], buf[BUFSIZ];
+
+	node = info->config->root->childs;
+	while(node) {
+		if(! strcmp(node->name, "remove_msg") ) {
+			const char *prop = xmlGetProp(node, "lang");
+			if ( MatchLocale(prop) ) {
+				text = xmlNodeListGetString(info->config, node->childs, 1);
+				if (text) {
+					*buf = '\0';
+					while ( *text ) {
+						parse_line(&text, line, sizeof(line));
+						strcat(buf, line);
+						strcat(buf, "\n");
+					}
+					return buf;
+				}
+			}
+		}
+		node = node->next;
+	}
+	return NULL;
+}
+
 int GetProductNumComponents(install_info *info)
 {
     int count = 0;
@@ -414,6 +442,13 @@ const char *GetProductURL(install_info *info)
 {
     return xmlGetProp(info->config->root, "url");
 }
+
+int GetProductReinstall(install_info *info)
+{
+	const char *str = xmlGetProp(info->config->root, "reinstall");
+	return str && (*str=='t' || *str=='y');
+}
+
 const char *GetLocalURL(install_info *info)
 {
     const char *file;
@@ -490,7 +525,8 @@ const char *GetInstallOption(install_info *info, const char *option)
 /* Create the initial installation information */
 install_info *create_install(const char *configfile,
                              const char *install_path,
-                             const char *binary_path)
+                             const char *binary_path,
+							 const char *product_prefix)
 {
     install_info *info;
 	char *temppath;
@@ -555,6 +591,12 @@ install_info *create_install(const char *configfile,
         strncpy(info->symlinks_path, binary_path, sizeof(info->symlinks_path));
     } else if ( GetProductDefaultBinaryPath(info) ) {
         strncpy(info->symlinks_path, GetProductDefaultBinaryPath(info), sizeof(info->symlinks_path));
+	}
+
+	if ( product_prefix ) {
+		strncpy(info->prefix, product_prefix, sizeof(info->prefix));
+	} else {
+		info->prefix[0] = '\0';
 	}
 
     if ( info->product ) {
@@ -905,7 +947,7 @@ int enable_option(install_info *info, const char *option)
 int CheckRequirements(install_info *info)
 {
 	xmlNodePtr node = info->config->root->childs;
-	char line[BUFSIZ];
+	char line[BUFSIZ], buf[BUFSIZ];
     const char *text;
 
 	while ( node ) {
@@ -922,10 +964,13 @@ int CheckRequirements(install_info *info)
 					/* We failed: print out error message */
 					text = xmlNodeListGetString(info->config, node->childs, 1);
 					if(text) {
-						*line = '\0';
-						while ( (*line == 0) && parse_line(&text, line, sizeof(line)) )
-							;
-						UI.prompt(line, RESPONSE_OK);
+						*buf = '\0';
+						while ( *text ) {
+							parse_line(&text, line, sizeof(line));
+							strcat(buf, line);
+							strcat(buf, "\n");
+						}
+						UI.prompt(buf, RESPONSE_OK);
 					}
 					return 0;
 				}
@@ -1102,8 +1147,8 @@ void delete_install(install_info *info)
 
 /* Actually install the selected filesets */
 install_state install(install_info *info,
-					  void (*update)(install_info *info, const char *path, 
-									 size_t progress, size_t size, const char *current))
+					  int (*update)(install_info *info, const char *path, 
+									size_t progress, size_t size, const char *current))
 {
     xmlNodePtr node;
     install_state state;
@@ -1159,7 +1204,7 @@ void uninstall(install_info *info)
     struct option_elem *opt;
     struct component_elem *comp;
 
-    if (GetPreUnInstall(info)) {
+    if (GetPreUnInstall(info) && info->installed_bytes>0) {
         run_script(info, GetPreUnInstall(info), 0);
     }
 
@@ -1173,10 +1218,13 @@ void uninstall(install_info *info)
             struct file_elem *felem;
             struct dir_elem *delem;
             struct rpm_elem *relem;
- 
-            for ( selem = opt->pre_script_list; selem; selem = selem->next ) { /* RPM pre-uninstall */
-                run_script(info, selem->script, 0);
-            }
+
+			/* Do not run scripts if nothing was installed */
+			if ( info->installed_bytes>0 ) {
+				for ( selem = opt->pre_script_list; selem; selem = selem->next ) { /* RPM pre-uninstall */
+					run_script(info, selem->script, 0);
+				}
+			}
 
             for ( felem = opt->file_list; felem; felem = felem->next ) {
                 if ( unlink(felem->path) < 0 ) {
@@ -1189,9 +1237,11 @@ void uninstall(install_info *info)
                     log_warning(_("Unable to remove '%s'"), delem->path);
                 }
             }
-            for ( selem = opt->post_script_list; selem; selem = selem->next ) { /* RPM post-uninstall */
-                run_script(info, selem->script, 0);
-            }
+			if ( info->installed_bytes>0 ) {
+				for ( selem = opt->post_script_list; selem; selem = selem->next ) { /* RPM post-uninstall */
+					run_script(info, selem->script, 0);
+				}
+			}
 
             for ( relem = opt->rpm_list; relem; relem = relem->next ) {
                 log_warning(_("The '%s' RPM was installed or upgraded (version %s, release %d)"),
@@ -1205,7 +1255,7 @@ void uninstall(install_info *info)
     if ( file_exists(path) && unlink(path) < 0 ) {
         log_warning(_("Unable to remove '%s'"), path);
     }
-    if (GetPostUnInstall(info)) {
+    if (GetPostUnInstall(info) && info->installed_bytes>0) {
         run_script(info, GetPostUnInstall(info), 0);
     }
 
@@ -1254,11 +1304,15 @@ void generate_uninstall(install_info *info)
         if ( ! product ) {
             product = loki_create_product(info->name, info->install_path, info->desc,
                                           info->update_url);
+			if ( *info->prefix ) {
+				loki_setprefix_product(product, info->prefix);
+			}
         }
     }
 
 	if ( product ) {
         char buf[PATH_MAX];
+		const char *msg;
         int count;
 
         for ( comp = info->components_list; comp; comp = comp->next ) {
@@ -1327,17 +1381,17 @@ void generate_uninstall(install_info *info)
 
                 if(opt->pre_script_list){
                     FILE *pre;
-		    char tmp_name[] = "/tmp/setupXXXXXX";
+					char tmp_name[] = "/tmp/setupXXXXXX";
                     int tmp = mkstemp(tmp_name);
-		    if ( tmp < 0 ) {
+					if ( tmp < 0 ) {
                         log_fatal(_("Could not create temporary script"));
-		    }
+					}
 
                     pre = fdopen(tmp, "w");
                     if ( pre ) {
                         output_script_header(pre, info, component);
 
-                        fprintf(pre, "function pre()\n{\n");
+                        fprintf(pre, "pre()\n{\n");
                         for ( selem = opt->pre_script_list; selem; selem = selem->next ) {
                             fprintf(pre, "%s\n", selem->script);
                         }
@@ -1355,16 +1409,16 @@ void generate_uninstall(install_info *info)
 
                 if(opt->post_script_list){
                     FILE *post;
-		    char tmp_name[] = "/tmp/setupXXXXXX";
+					char tmp_name[] = "/tmp/setupXXXXXX";
                     int tmp = mkstemp(tmp_name);
-		    if ( tmp < 0 ) {
+					if ( tmp < 0 ) {
                         log_fatal(_("Could not create temporary script"));
-		    }
-
+					}
+					
                     post = fdopen(tmp, "w");
                     if ( post ) {
                         output_script_header(post, info, component);
-                        fprintf(post, "function post()\n{\n");
+                        fprintf(post, "post()\n{\n");
                         for ( selem = opt->post_script_list; selem; selem = selem->next ) {
                             fprintf(post, "%s\n", selem->script);
                         }
@@ -1384,19 +1438,26 @@ void generate_uninstall(install_info *info)
 		if ( install_updatemenus_script ) {
 			/* Add a call to the post-uninstall scripts */
 			loki_registerscript_component(component, LOKI_SCRIPT_POSTUNINSTALL,
-										  "update-menus", "update-menus");
+										  "update-menus", "update-menus 2> /dev/null\nkbuildsycoca 2>/dev/null");
 		}
 
         /* Register the pre and post uninstall scripts with the default component */
         component = loki_getdefault_component(product);
 
+		/* And the uninstall message as well */
+		/* FIXME: Allow real per-component messages */
+		msg = GetProductMessage(info);
+		if ( msg ) {
+			loki_setmessage_component(component, msg);
+		}
+
         if (GetPreUnInstall(info)) {
-	    FILE *pre;
-	    char tmp_name[] = "/tmp/setupXXXXXX";
-	    int tmp = mkstemp(tmp_name);
-	    if ( tmp < 0 ) {
-		log_fatal(_("Could not create temporary script"));
-	    }
+			FILE *pre;
+			char tmp_name[] = "/tmp/setupXXXXXX";
+			int tmp = mkstemp(tmp_name);
+			if ( tmp < 0 ) {
+				log_fatal(_("Could not create temporary script"));
+			}
             
             pre = fdopen(tmp, "w");
             if ( pre ) {
@@ -1421,12 +1482,12 @@ void generate_uninstall(install_info *info)
         }
 
         if (GetPostUnInstall(info)) {
-	    FILE *post;
-	    char tmp_name[] = "/tmp/setupXXXXXX";
-	    int tmp = mkstemp(tmp_name);
-	    if ( tmp < 0 ) {
-		log_fatal(_("Could not create temporary script"));
-	    }
+			FILE *post;
+			char tmp_name[] = "/tmp/setupXXXXXX";
+			int tmp = mkstemp(tmp_name);
+			if ( tmp < 0 ) {
+				log_fatal(_("Could not create temporary script"));
+			}
             
             post = fdopen(tmp, "w");
             if ( post ) {
@@ -1600,14 +1661,15 @@ int install_menuitems(install_info *info, desktop_type desktop)
 			snprintf(icon_base, PATH_MAX, "%s/share/applnk/", desk_base); 
 			app_links[i++] = icon_base;
 		} else {
-			desk_base = getenv("KDEDIR");
-			if (desk_base) {
-				snprintf(icon_base, PATH_MAX, "%s/share/applnk/", desk_base); 
-				app_links[i++] = icon_base;
-			}
+			app_links[i++] = "/opt/kde2/share/applnk/";
 		}
-		app_links[i++] = "/opt/kde2/share/applnk/";
-		app_links[i++] = "/opt/kde/share/applnk/";
+		desk_base = getenv("KDEDIR");
+		if (desk_base) {
+			snprintf(icon_base, PATH_MAX, "%s/share/applnk/", desk_base); 
+			app_links[i++] = icon_base;
+		} else {
+			app_links[i++] = "/opt/kde/share/applnk/";
+		}
 		app_links[i++] = "/usr/X11R6/share/applnk/";
 		app_links[i++] = "/usr/share/applnk/";
 		app_links[i++] = "~/.kde2/share/applnk/";
@@ -1754,7 +1816,13 @@ int install_menuitems(install_info *info, desktop_type desktop)
 
 	if ( desktop == DESKTOP_MENUDEBIAN && num_items > 0 ) {
 		/* Run update-menus */
-		run_command(info, "update-menus", NULL);
+		run_command(info, "update-menus", NULL, 1);
+		install_updatemenus_script = 1;
+	}
+
+	if ( desktop == DESKTOP_KDE && num_items > 0 ) {
+		/* Run update-menus */
+		run_command(info, "kbuildsycoca", NULL, 0);
 		install_updatemenus_script = 1;
 	}
     return ret_val;
@@ -1816,15 +1884,15 @@ int run_script(install_info *info, const char *script, int arg)
 				strncpy(cmd, info->install_path, sizeof(cmd));
 			}
             
-            exitval = run_command(info, script_file, cmd);
+            exitval = run_command(info, script_file, cmd, 1);
         }
         close(fd);
-        unlink(script_file);
     }
+	unlink(script_file);
     return(exitval);
 }
 
-int run_command(install_info *info, const char *cmd, const char *arg)
+int run_command(install_info *info, const char *cmd, const char *arg, int warn)
 {
     int exitval = 0;
     pid_t child;
@@ -1836,11 +1904,14 @@ int run_command(install_info *info, const char *cmd, const char *arg)
         argv[1] = arg ? strdup(arg) : NULL;
         argv[2] = NULL;
         execvp(cmd, argv);
-        perror("execv");
+		if ( warn ) {
+			perror("execv");
+			fprintf(stderr, "Command: %s\n", cmd);
+		}
         free(argv[0]);
 		if(arg)
 			free(argv[1]);
-        break;
+		_exit(1);
     }
     case -1: /* Error */
         perror("fork");

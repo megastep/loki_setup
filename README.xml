@@ -159,6 +159,9 @@ There are several optional attributes of the install element:
  once       If set to 'yes', the installer won't allow to install the same product twice, and will ask
             the user to uninstall manually a previous instance if it could be detected.
 
+ reinstall  If set to 'yes', the install will allow the product to be reinstalled. The default behavior
+            is not to let the user install product options twice.
+
 The CDROM element:
 
 An installer can fetch the necesary data files from one or more CDROM discs. As of setup 1.5.0,
@@ -278,6 +281,18 @@ Example:
 <require command="/bin/false">
 This is always failing! Thus this message is always displayed.
 </require>
+
+
+The REMOVE_MSG element :
+
+This element is used to prompt the user in the Uninstaller tool with a message upon uninstalling
+the component. The user can then choose to abort the uninstallation. This element is a simple
+text that can be localized.
+
+This element takes one optional attribute :
+  lang      Specify the language for the message. Used for localization. The message will be showed
+            only if the locale settings match.
+
 
 The INSTALL_DROP_LIST element:
 

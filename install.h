@@ -4,18 +4,14 @@
 
 #include "setupdb.h"
 #include "detect.h"
+#include "arch.h"
+#include "setup-locale.h"
 
 #include <limits.h>
 #include <parser.h>		/* From gnome-xml */
-#include <libintl.h>
-#define _(String) gettext (String)
-#define gettext_noop(String) (String)
 
 /* Conversion macro for bytes to megabytes */
 #define BYTES2MB(bytes) ((bytes/(1024*1024))+1)
-
-/* The prefix for all our setup data files */
-#define SETUP_BASE          "setup.data/"
 
 /* The default permissions mask for creating files */
 #define DEFAULT_UMASK       022
@@ -83,6 +79,9 @@ typedef struct _install_info {
 
 	/* The path from which setup is run */
 	char setup_path[PATH_MAX];
+
+	/* The optional path prefix for the product */
+	char prefix[PATH_MAX];
 
     /* The XML installation config */
     xmlDocPtr config;
@@ -193,6 +192,7 @@ extern const char *GetProductDesc(install_info *info);
 extern const char *GetProductComponent(install_info *info);
 extern const char *GetProductUninstall(install_info *info);
 extern const char *GetProductVersion(install_info *info);
+extern const char *GetProductMessage(install_info *info);
 extern int         GetProductCDROMRequired(install_info *info);
 extern int         GetProductCDROMDescriptions(install_info *info);
 extern int         GetProductIsMeta(install_info *info);
@@ -218,6 +218,7 @@ extern int         GetProductNumComponents(install_info *info);
 extern int         GetProductRequireRoot(install_info *info);
 extern int         GetProductAllowsExpress(install_info *info);
 extern int         GetProductInstallOnce(install_info *info);
+extern int         GetProductReinstall(install_info *info);
 
 extern const char *IsReadyToInstall(install_info *info);
 extern int         CheckRequirements(install_info *info);
@@ -225,7 +226,8 @@ extern int         CheckRequirements(install_info *info);
 /* Create the initial installation information */
 extern install_info *create_install(const char *configfile,
                                     const char *install_path,
-                                    const char *binary_path);
+                                    const char *binary_path,
+									const char *product_prefix);
 
 /* Create a new CDROM description entry */
 struct cdrom_elem *add_cdrom_entry(install_info *info, const char *id, const char *name,
@@ -288,7 +290,7 @@ extern void delete_cdrom_install(install_info *info);
 
 /* Actually install the selected filesets */
 extern install_state install(install_info *info,
-							 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current));
+							 int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current));
 
 /* Abort a running installation (to be called from the update function) */
 extern void abort_install(void);
@@ -334,7 +336,7 @@ extern void push_curdir(const char *path);
 extern void pop_curdir(void);
 
 /* Run a program in the background */
-int run_command(install_info *info, const char *cmd, const char *arg);
+int run_command(install_info *info, const char *cmd, const char *arg, int warn);
 
 /* Manage the list of corrupt files if we're restoring */
 extern void add_corrupt_file(const char *path, const char *option);

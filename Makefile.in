@@ -17,6 +17,7 @@ CC = @CC@
 SETUPDB	= @SETUPDB@
 
 IMAGE = ../../spp/image
+BRAND = codehost
 UPDATES = /loki/updates/loki_uninstall
 CONVERT_IMAGE = /loki/patch-tools/convert-image
 
@@ -40,16 +41,17 @@ UNINSTALL_OBJS 		= uninstall.o
 CHECK_OBJS			= $(COMMON_OBJS) $(CORE_OBJS) check.o
 CONSOLE_OBJS 		= $(OBJS) console_ui.o dialog_ui.o
 GUI_OBJS 			= $(OBJS) gtk_ui.o
+XSU_OBJS			= xsu.o pseudo.o
 
-SRCS = $(OBJS:.o=.c) $(CONSOLE_OBJS:.o=.c) $(GUI_OBJS:.o=.c)
+SRCS = $(OBJS:.o=.c) $(CONSOLE_OBJS:.o=.c) $(GUI_OBJS:.o=.c) $(XSU_OBJS:.o=.c)
 
 COMMON_LIBS = plugins/libplugins.a dialog/libdialog.a \
-	      $(SETUPDB)/$(arch)/libsetupdb.a @BZ2LIB@
+	      $(SETUPDB)/$(arch)/libsetupdb.a
 LIBS =  $(COMMON_LIBS) @LIBS@ -lz -lm
-GUI_LIBS = $(COMMON_LIBS) @GUI_LIBS@ -lz
-CONSOLE_LIBS = $(LIBS) -lncurses -lgpm
+GUI_LIBS = $(COMMON_LIBS) @LIBS@ @GUI_LIBS@ -lz
+CONSOLE_LIBS = $(LIBS) @CONSOLE_LIBS@
 
-all: do-plugins do-dialog setup setup.gtk uninstall
+all: do-plugins do-dialog setup setup.gtk uninstall xsu
 
 testxml: testxml.o
 	$(CC) -o $@ $^ $(LIBS)
@@ -61,16 +63,19 @@ loki_uninstall: $(LOKI_UNINSTALL_OBJS) $(SETUPDB)/$(arch)/libsetupdb.a
 	$(CC) -o $@ $^ $(GUI_LIBS)
 
 uninstall: $(UNINSTALL_OBJS) $(COMMON_LIBS)
-	$(CC) -o $@ $^ $(CONSOLE_LIBS) -static
+	$(CC) -o $@ $^ $(CONSOLE_LIBS) @STATIC@
 
 check: $(CHECK_OBJS)  $(COMMON_LIBS)
 	$(CC) -o $@ $^ $(GUI_LIBS)
 
 setup:	$(CONSOLE_OBJS) $(COMMON_LIBS)
-	$(CC) -o $@ $^ $(CONSOLE_LIBS) -static
+	$(CC) -o $@ $^ $(CONSOLE_LIBS) @STATIC@
 
 setup.gtk: $(GUI_OBJS) $(COMMON_LIBS)
 	$(CC) -o $@ $^ $(GUI_LIBS)
+
+xsu: $(XSU_OBJS)
+	$(CC) -o $@ $^ @GTK_LIBS@ @LIBUTIL@ @X11_LIBS@
 
 do-plugins:
 	$(MAKE) -C plugins all
@@ -83,9 +88,9 @@ ifeq ($(DYN_PLUGINS),true)
 	$(MAKE) -C plugins install.dbg
 endif
 	@if [ -d image/setup.data/bin/$(os)/$(arch)/$(libc) ]; then \
-	    cp -v setup image/setup.data/bin/$(os)/$(arch); \
-	    cp -v uninstall image/setup.data/bin/$(os)/$(arch); \
-	    cp -v setup.gtk image/setup.data/bin/$(os)/$(arch)/$(libc); \
+	    cp setup image/setup.data/bin/$(os)/$(arch); \
+	    cp uninstall image/setup.data/bin/$(os)/$(arch); \
+	    cp setup.gtk image/setup.data/bin/$(os)/$(arch)/$(libc); \
 	fi
 
 install: all
@@ -93,13 +98,16 @@ ifeq ($(DYN_PLUGINS),true)
 	$(MAKE) -C plugins install
 endif
 	@if [ -d image/setup.data/bin/$(os)/$(arch)/$(libc) ]; then \
-	    cp -v setup image/setup.data/bin/$(os)/$(arch); \
+	    cp setup image/setup.data/bin/$(os)/$(arch); \
 	    strip image/setup.data/bin/$(os)/$(arch)/setup; \
 	    brandelf -t $(os) image/setup.data/bin/$(os)/$(arch)/setup; \
-	    cp -v uninstall image/setup.data/bin/$(os)/$(arch); \
+	    cp uninstall image/setup.data/bin/$(os)/$(arch); \
 	    strip image/setup.data/bin/$(os)/$(arch)/uninstall; \
 	    brandelf -t $(os) image/setup.data/bin/$(os)/$(arch)/uninstall; \
-	    cp -v setup.gtk image/setup.data/bin/$(os)/$(arch)/$(libc); \
+	    cp xsu image/setup.data/bin/$(os)/$(arch)/$(libc); \
+	    strip image/setup.data/bin/$(os)/$(arch)/$(libc)/xsu; \
+	    brandelf -t $(os) image/setup.data/bin/$(os)/$(arch)/$(libc)/xsu; \
+	    cp setup.gtk image/setup.data/bin/$(os)/$(arch)/$(libc); \
 	    strip image/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk; \
 	    brandelf -t $(os) image/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk; \
 	else \
@@ -111,18 +119,21 @@ ifeq ($(DYN_PLUGINS),true)
 	$(MAKE) -C plugins install
 endif
 	@if [ -d $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc) ]; then \
-	    cp -v setup $(IMAGE)/setup.data/bin/$(os)/$(arch); \
+	    cp setup $(IMAGE)/setup.data/bin/$(os)/$(arch); \
 	    strip $(IMAGE)/setup.data/bin/$(os)/$(arch)/setup; \
 	    brandelf -t $(os) $(IMAGE)/setup.data/bin/$(os)/$(arch)/setup; \
-	    cp -v uninstall $(IMAGE)/setup.data/bin/$(os)/$(arch); \
+	    cp uninstall $(IMAGE)/setup.data/bin/$(os)/$(arch); \
 	    strip $(IMAGE)/setup.data/bin/$(os)/$(arch)/uninstall; \
 	    brandelf -t $(os) $(IMAGE)/setup.data/bin/$(os)/$(arch)/uninstall; \
+	    cp xsu $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc); \
+	    strip $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc)/xsu; \
+	    brandelf -t $(os) $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc)/xsu; \
 		if [ $(os) = Linux -a -d $(CONVERT_IMAGE) ]; then \
-	    	cp -v uninstall $(CONVERT_IMAGE)/bin/$(os)/$(arch); \
+	    	cp uninstall $(CONVERT_IMAGE)/bin/$(os)/$(arch); \
 	    	strip $(CONVERT_IMAGE)/bin/$(os)/$(arch)/uninstall; \
 	    	brandelf -t $(os) $(CONVERT_IMAGE)/bin/$(os)/$(arch)/uninstall; \
 		fi; \
-	    cp -v setup.gtk $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc); \
+	    cp setup.gtk $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc); \
 	    strip $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk; \
 	else \
 		echo No directory to copy the binary files to.; \
@@ -131,9 +142,9 @@ endif
 # Pretty LPP-specific
 install-check: check
 	@if [ -d $(IMAGE)/bin/$(arch)/ ]; then \
-	    cp -v check $(IMAGE)/bin/$(arch)/; \
+	    cp check $(IMAGE)/bin/$(arch)/; \
 	    strip $(IMAGE)/bin/$(arch)/check; \
-	    cp -v check.glade $(IMAGE)/misc/; \
+	    cp check.glade $(IMAGE)/misc/; \
 	else \
 		echo No directory to copy the binary files to.; \
 	fi
@@ -142,12 +153,12 @@ install-check: check
 
 spp: all loki_uninstall install-image install-check
 	@if [ -d $(IMAGE)/bin/$(arch)/ ]; then \
-	    cp -v loki_uninstall $(IMAGE)/bin/$(arch)/bin/codehost-uninstall; \
-	    strip $(IMAGE)/bin/$(arch)/bin/codehost-uninstall; \
+	    cp loki_uninstall $(IMAGE)/bin/$(arch)/bin/$(BRAND)-uninstall; \
+	    strip $(IMAGE)/bin/$(arch)/bin/$(BRAND)-uninstall; \
 	    for file in `find image/setup.data -name loki-uninstall.mo -print`; \
 	    do  path="$(IMAGE)/`dirname $$file | sed 's,image/setup.data/,,'`"; \
 	        mkdirhier $$path; \
-	        cp -v $$file $$path; \
+	        cp $$file $$path; \
 	    done; \
 	else \
 		echo No directory to copy the binary files to.; \
@@ -155,14 +166,14 @@ spp: all loki_uninstall install-image install-check
 
 install-loki_uninstall: loki_uninstall
 	@if [ -d $(IMAGE)/loki_uninstall/bin/$(arch)/$(libc)/ ]; then \
-	    cp -v loki_uninstall $(IMAGE)/loki_uninstall/bin/$(arch)/$(libc)/; \
+	    cp loki_uninstall $(IMAGE)/loki_uninstall/bin/$(arch)/$(libc)/; \
 	    strip $(IMAGE)/loki_uninstall/bin/$(arch)/$(libc)/loki_uninstall; \
-	    cp -v README.loki_uninstall $(IMAGE)/loki_uninstall/README; \
-	    cp -v icon.xpm uninstall.glade $(IMAGE)/loki_uninstall/; \
+	    cp README.loki_uninstall $(IMAGE)/loki_uninstall/README; \
+	    cp icon.xpm uninstall.glade $(IMAGE)/loki_uninstall/; \
 	    for file in `find image/setup.data -name loki-uninstall.mo -print`; \
 	    do  path="$(IMAGE)/loki_uninstall/`dirname $$file | sed 's,image/setup.data/,,'`"; \
 	        mkdirhier $$path; \
-	        cp -v $$file $$path; \
+	        cp $$file $$path; \
 	    done; \
 	else \
 		echo No directory to copy the binary files to.; \
@@ -170,16 +181,16 @@ install-loki_uninstall: loki_uninstall
 	@if [ -d $(UPDATES) ]; then \
 	    rm -rf $(UPDATES)/bin-$(arch)-$(UNINSTALL_VERSION)/; \
 	    mkdir $(UPDATES)/bin-$(arch)-$(UNINSTALL_VERSION)/; \
-	    cp -v loki_uninstall $(UPDATES)/bin-$(arch)-$(UNINSTALL_VERSION)/; \
+	    cp loki_uninstall $(UPDATES)/bin-$(arch)-$(UNINSTALL_VERSION)/; \
 	    strip $(UPDATES)/bin-$(arch)-$(UNINSTALL_VERSION)/loki_uninstall; \
 	    rm -rf $(UPDATES)/data-$(UNINSTALL_VERSION)/; \
 	    mkdir $(UPDATES)/data-$(UNINSTALL_VERSION)/; \
-	    cp -v README.loki_uninstall $(UPDATES)/data-$(UNINSTALL_VERSION)/README; \
-	    cp -v icon.xpm uninstall.glade $(UPDATES)/data-$(UNINSTALL_VERSION)/; \
+	    cp README.loki_uninstall $(UPDATES)/data-$(UNINSTALL_VERSION)/README; \
+	    cp icon.xpm uninstall.glade $(UPDATES)/data-$(UNINSTALL_VERSION)/; \
 	    for file in `find image/setup.data -name loki-uninstall.mo -print`; \
 	    do  path="$(UPDATES)/data-$(UNINSTALL_VERSION)/`dirname $$file | sed 's,image/setup.data/,,'`"; \
 	        mkdirhier $$path; \
-	        cp -v $$file $$path; \
+	        cp $$file $$path; \
 	    done; \
 	fi
 	@echo "Don't forget to update the version in setup.xml to $(UNINSTALL_VERSION)"

@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.25 2002-01-28 01:13:30 megastep Exp $ */
+/* $Id: uninstall.c,v 1.26 2002-04-03 08:10:24 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -11,6 +11,7 @@
 #include <limits.h>
 #include <errno.h>
 #include <signal.h>
+#include <locale.h>
 
 #include "arch.h"
 #include "setupdb.h"
@@ -20,6 +21,9 @@
 #endif
 #include "uninstall.h"
 
+#ifdef PACKAGE
+#undef PACKAGE
+#endif
 #define PACKAGE "loki-uninstall"
 
 product_t *prod = NULL;
@@ -387,8 +391,12 @@ int main(int argc, char *argv[])
             } else { /* Uninstall a single component */
                 comp = loki_find_component(prod, argv[2]);
                 if ( comp ) {
+					const char *message = loki_getmessage_component(comp);
                     if ( ! check_permissions(info, 1) )
                         return 1;
+					if ( message ) {
+						puts(message);
+					}
                     uninstall_component(comp, info);
                     loki_closeproduct(prod);
                 } else {

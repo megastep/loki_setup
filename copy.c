@@ -189,7 +189,7 @@ int parse_line(const char **srcpp, char *buf, int maxlen)
     }
     /* Skip leading whitespace */
     srcp = *srcpp;
-    while ( *srcp && isspace(*srcp) ) {
+    while ( *srcp && isspace((int)*srcp) ) {
         ++srcp;
     }
 
@@ -224,7 +224,7 @@ int parse_line(const char **srcpp, char *buf, int maxlen)
     if (token) free(token);
 
     /* Trim whitespace */
-    while ( (dstp > buf) && isspace(*(dstp-1)) ) {
+    while ( (dstp > buf) && isspace((int) *(dstp-1)) ) {
         --dstp;
     }
     *dstp = '\0';
@@ -237,7 +237,7 @@ int parse_line(const char **srcpp, char *buf, int maxlen)
 }
 
 size_t copy_file(install_info *info, const char *cdrom, const char *path, const char *dest, char *final, int binary,
-				 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current),
+				 int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current),
                  struct file_elem **elem)
 {
 	size_t size = 0;
@@ -300,7 +300,9 @@ size_t copy_file(install_info *info, const char *cdrom, const char *path, const 
 			info->installed_bytes += copied;
 			size += copied;
 			if ( update ) {
-				update(info, final, size, input->size, current_option_txt);
+				if ( ! update(info, final, size, input->size, current_option_txt) ) {
+					break; /* Abort */
+				}
 			}
 		}
         if ( elem ) { /* Give the pointer to the element, for what it's worth (binaries mostly) */
@@ -314,7 +316,7 @@ size_t copy_file(install_info *info, const char *cdrom, const char *path, const 
 
 size_t copy_directory(install_info *info, const char *path, const char *dest, 
 					  const char *cdrom, xmlNodePtr node,
-					  void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+					  int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     char fpat[PATH_MAX];
     int i, err;
@@ -347,7 +349,7 @@ size_t copy_directory(install_info *info, const char *path, const char *dest,
 
 size_t copy_path(install_info *info, const char *path, const char *dest, 
 				 const char *cdrom, int strip_dirs, xmlNodePtr node,
-				 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+				 int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     char final[PATH_MAX];
     struct stat sb;
@@ -377,7 +379,7 @@ size_t copy_path(install_info *info, const char *path, const char *dest,
 size_t copy_list(install_info *info, const char *filedesc, const char *dest, 
 				 const char *from_cdrom, const char *srcpath, int strip_dirs,
                  xmlNodePtr node,
-				 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+				 int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     char fpat[BUFSIZ];
     int i;
@@ -460,7 +462,7 @@ static void check_dynamic(const char *fpat, char *bin, const char *cdrom)
 }
 
 size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, const char *dest, const char *from_cdrom,
-                void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+                int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     struct stat sb;
     char fpat[PATH_MAX], bin[PATH_MAX], final[PATH_MAX], fdest[PATH_MAX];
@@ -587,19 +589,20 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
 }
 
 int copy_script(install_info *info, xmlNodePtr node, const char *script, const char *dest,
-				void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+				int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
 	if ( corrupts ) { /* Don't run any scripts while restoring files */
 		return 0;
 	}
 	if ( update ) {
-		update(info, _("Running script"), 0, 0, current_option_txt);
+		if ( ! update(info, _("Running script"), 0, 0, current_option_txt) )
+			return 0;
 	}
     return(run_script(info, script, -1));
 }
 
 size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
-                void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+                int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     size_t size, copied;
     char tmppath[PATH_MAX];
@@ -684,7 +687,7 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
 }
 
 size_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
-                void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+                int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     size_t size, copied;
     char tmppath[PATH_MAX];

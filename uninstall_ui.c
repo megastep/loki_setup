@@ -43,6 +43,61 @@ void gtk_button_set_sensitive(GtkWidget *button, gboolean sensitive)
     }
 }
 
+static int dialog_done;
+
+static void prompt_okbutton_slot( GtkWidget* widget, gpointer func_data)
+{
+    dialog_done = 1;
+}
+
+static void prompt_nobutton_slot( GtkWidget* widget, gpointer func_data)
+{
+    dialog_done = 2;
+}
+
+static int display_message(const char *txt)
+{
+    GtkWidget *dialog, *label, *ok_button, *abort_button;
+       
+    /* Create the widgets */
+	dialog_done = 0;
+    
+    dialog = gtk_dialog_new();
+    label = gtk_label_new (txt);
+    ok_button = gtk_button_new_with_label(_("OK"));
+    abort_button = gtk_button_new_with_label(_("Abort"));
+
+    /* Ensure that the dialog box is destroyed when the user clicks ok. */
+    
+    gtk_signal_connect_object (GTK_OBJECT (ok_button), "clicked",
+                               GTK_SIGNAL_FUNC (prompt_okbutton_slot), GTK_OBJECT(dialog));
+    gtk_signal_connect_object (GTK_OBJECT (abort_button), "clicked",
+                               GTK_SIGNAL_FUNC (prompt_nobutton_slot), GTK_OBJECT(dialog));
+
+	gtk_signal_connect_object(GTK_OBJECT(dialog), "delete-event",
+							  GTK_SIGNAL_FUNC(prompt_nobutton_slot), GTK_OBJECT(dialog));
+
+	gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->action_area),
+					   ok_button);
+	gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->action_area),
+					   abort_button);
+    
+    /* Add the label, and show everything we've added to the dialog. */
+    
+    gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->vbox),
+                       label);
+    gtk_window_set_title(GTK_WINDOW(dialog), _("Message"));
+    gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
+    gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
+    gtk_widget_show_all (dialog);
+
+    while ( ! dialog_done ) {
+        gtk_main_iteration();
+    }
+    gtk_widget_destroy(dialog);
+	return  dialog_done == 1;
+}
+
 /* List of open products that need closing */
 struct product_list {
     product_t *product;
@@ -212,6 +267,7 @@ void perform_uninstall_slot(GtkWidget* w, gpointer data)
     component_list *component;
     size_t size, total;
     char text[1024];
+	const char *message;
 
     /* First switch to the next notebook page */
     notebook = glade_xml_get_widget(uninstall_glade, "uninstall_notebook");
@@ -251,6 +307,14 @@ void perform_uninstall_slot(GtkWidget* w, gpointer data)
                 while( gtk_events_pending() ) {
                     gtk_main_iteration();
                 }
+				
+				/* Display an optional message to the user */
+				message = loki_getmessage_component(component->component);
+				if ( message && !display_message(message) ) {
+                    clist = clist->next;
+					uninstall_cancelled = 1;
+                    continue;					
+				}
 
                 /* Remove the component */
                 uninstall_component(component->component, component->info);
@@ -288,6 +352,13 @@ void perform_uninstall_slot(GtkWidget* w, gpointer data)
                 while( gtk_events_pending() ) {
                     gtk_main_iteration();
                 }
+
+				/* Display an optional message to the user */
+				message = loki_getmessage_component(component->component);
+				if ( message && !display_message(message) ) {
+                    clist = clist->next;
+                    continue;					
+				}
 
                 /* Remove the component */
                 perform_uninstall(component->product, component->info);

@@ -1,16 +1,3 @@
-1.6.1:
-Ryan C. Gordon
- * makeself now uses the md5sum program for MD5 calculation.
- * bzip2 fixes/enhancements.
- * installation/symlink paths in GTK+ combo boxes should be more sane now.
- * autoconf warning cleanups.
- * Now looks for setupdb at ../loki_setupdb by default.
- * Required CD-ROM detection works now.
- * VERY preliminary BeOS support.
-
-TTimo:
- * EULA can now word wrap with text-based setup.
-
 1.6.0:
 Stephane Peter (Codehost) - Tue Aug 21 20:22:10 PDT 2001
  * Added distribution detection: "distro" attribute, SETUP_DISTRO environment
@@ -45,6 +32,29 @@ Stephane Peter (Codehost) - Tue Dec  4 22:49:21 PST 2001
 Stéphane Peter (Codehost) - Thu Dec  6 02:30:28 PST 2001
  * Added support for the Debian menus systems (update-menus command) that is also
    used in Mandrake to install desktop menu entries.
+Stephane Peter (Codehost) - Tue Feb  5 15:38:56 PST 2002
+ * Added keyboard accelerators in the GTK+ UI for increased usability.
+Stephane Peter (Codehost) - Wed Feb  6 16:02:01 PST 2002
+ * Support product path prefixes so that the check & rescue tool can locate a product
+   on its installation media if it is not at the root (i.e. in a 'linux' subdirectory).
+ * Introduced the 'remove_msg' element for uninstallation messages.
+Stephane Peter (Codehost) - Wed Feb 27 16:24:36 PST 2002
+ * Initial Solaris / SVR4 port.
+Ryan C. Gordon
+ * makeself now uses the md5sum program for MD5 calculation.
+ * bzip2 fixes/enhancements.
+ * installation/symlink paths in GTK+ combo boxes should be more sane now.
+ * autoconf warning cleanups.
+ * Required CD-ROM detection works now.
+ * VERY preliminary BeOS support.
+Timothée Besset
+ * EULA can now word wrap with text-based setup.
+Stephane Peter (Codehost) - Sun Mar 31 22:46:57 PST 2002
+ * Added the 'reinstall' tag to allow multiple reinstallations
+ * Rewrote xsu 0.2.3 to eliminate all dependencies on Gnome, and also added
+   proper i18n support to it.
+ * Imported the updated setup.sh from TTimo's branch, with very slight changes.
+   The setup.data/config.sh script is now officially recognized as well.
 
 1.5.9:
 Sam Lantinga - Thu Mar  8 18:09:29 PST 2001

@@ -1,6 +1,6 @@
 #define TRACE
 /*
- *  $Id: util.c,v 1.1 2002-01-28 01:13:32 megastep Exp $
+ *  $Id: util.c,v 1.2 2002-04-03 08:10:25 megastep Exp $
  *
  *  util.c
  *

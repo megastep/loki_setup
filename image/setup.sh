@@ -5,6 +5,43 @@
 # Go to the proper setup directory (if not already there)
 cd `dirname $0`
 
+# defaults
+FATAL_ERROR="Fatal error, no tech support email configured in this setup"
+# try to get root prior to running setup?
+# 0: no
+# 1: prompt, but run anyway if fails
+# 2: require, abort if root fails
+GET_ROOT=0
+XSU_ICON=""
+# this is the message for su call, echo -e
+SU_MESSAGE="You need to run this installation as the super user.\nPlease enter the root password."
+
+# Import preferences from a secondary script
+if [ -f setup.data/config.sh ]; then
+    . setup.data/config.sh
+fi
+
+# Add some standard paths for compatibility
+PATH=$PATH:/usr/ucb
+
+# call setup with -auth when ran through su/xsu
+auth=0
+if [ "$1" = "-auth" ]
+then
+  auth=1
+  shift
+fi
+
+if [ "$auth" -eq 1 ]
+then
+  # if root is absolutely required
+  # this happens if xsu/su execs setup.sh but it still doesn't have root rights
+  if [ "$GET_ROOT" -eq 2 ]
+  then
+    return 1
+  fi
+fi
+
 # Feel free to add some additional command-line arguments for setup here.
 args=""
 
@@ -24,7 +61,7 @@ DetectARCH()
 # Return the appropriate version string
 DetectLIBC()
 {
-      status=1
+    status=1
 	  if [ `uname -s` != Linux ]; then
 		  echo "glibc-2.1"
 		  return $status
@@ -52,59 +89,131 @@ libc=`DetectLIBC`
 os=`uname -s`
 
 # Find the installation program
+# try_run [-absolute] [-fatal] INSTALLER_NAME [PARAMETERS_PASSED]
+#   -absolute option: if what you are trying to execute has an absolute path
+#   NOTE: maybe try_run_absolute would be easier
+#   -fatal option: if you want verbose messages in case
+#      - the script could not be found
+#      - it's execution would fail
+#   INSTALLER_NAME: setup.gtk or setup
+#   PARAMETERS_PASSED: additional arguments passed to the setup script
 try_run()
 {
+    absolute=0
+    if [ "$1" = "-absolute" ]; then
+      absolute=1
+      shift
+    fi
+
+    fatal=0
+    # older bash < 2.* don't like == operator, using =
+    if [ "$1" = "-fatal" ]; then
+      # got fatal
+      fatal=1
+      shift
+    fi
+
     setup=$1
     shift
-    fatal=$1
-    if [ "$1" != "" ]; then
-        shift
-    fi
-
+    
     # First find the binary we want to run
     failed=0
-    setup_bin="setup.data/bin/$os/$arch/$libc/$setup"
-    if [ ! -f "$setup_bin" ]; then
-        setup_bin="setup.data/bin/$os/$arch/$setup"
-        if [ ! -f "$setup_bin" ]; then
-            failed=1
-        fi
-    fi
-    if [ "$failed" -eq 1 ]; then
-        if [ "$fatal" != "" ]; then
-            cat <<__EOF__
+    if [ "$absolute" -eq 0 ]
+    then
+      setup_bin="setup.data/bin/$os/$arch/$libc/$setup"
+      # trying $setup_bin
+      if [ ! -f "$setup_bin" ]; then
+          setup_bin="setup.data/bin/$os/$arch/$setup"
+        	# libc dependant version failed, trying again
+          if [ ! -f "$setup_bin" ]; then
+              failed=1
+          fi
+      fi
+      if [ "$failed" -eq 1 ]; then
+          if [ "$fatal" -eq 1 ]; then
+              cat <<__EOF__
 This installation doesn't support $libc on $os / $arch
-
+(tried to run $setup)
+$FATAL_ERROR
 __EOF__
-            exit 1
-        fi
-        return $failed
-    fi
+          fi
+          return $failed
+      fi
 
-    # Try to run the binary
-    # The executable is here but we can't execute it from CD
-    setup="$HOME/.setup$$"
-    cp "$setup_bin" "$setup"
-    chmod 700 "$setup"
-    if [ "$fatal" != "" ]; then
-        "$setup" $*
-        failed=$?
-    else
-        "$setup" $* 2>/dev/null
-        failed=$?
+      # Try to run the binary ($setup_bin)
+      # The executable is here but we can't execute it from CD
+      # NOTE TTimo: this is dangerous, we also use $setup to store the name of the try_run
+      setup="$HOME/.setup$$"
+      rm -f "$setup"
+      cp "$setup_bin" "$setup"    
+      chmod 700 "$setup"    
     fi
-    rm -f "$setup"
-    return $failed
+	# echo Running "$setup" "$@"
+    if [ "$fatal" -eq 0 ]; then
+        "$setup" "$@"
+        failed="$?"
+    else
+        "$setup" "$@" 2>/dev/null
+        failed="$?"
+    fi
+    if [ "$absolute" -eq 0 ]
+    then
+      # don't attempt removal when we are passed an absolute path
+      # no, I don't want to imagine a faulty try_run as root on /bin/su
+      rm -f "$setup"
+    fi
+    return "$failed"
 }
 
+# if we have not been through the auth yet, and if we need to get root, then prompt
+if [ "$auth" -eq 0 ] && [ "$GET_ROOT" -ne 0 ]
+then
+  GOT_ROOT=`whoami`
+  if [ "$GOT_ROOT" != "root" ]
+  then
+    # FIXME TTimo xsu debugging stuff, don't pay attention
+#    try_run xsu -u root -c '/home/timo/foo.sh &>/dev/null'
+#    try_run xsu -u root -c '/home/timo/foo.sh'
+#    status="$?"
+#    echo "got $status"
+#    exit
+    try_run xsu -e -a -u root -c "`pwd`/setup.sh -auth" $XSU_ICON
+    status="$?"
+    # echo "got $status"
+    # if try_run successfully executed xsu, it will return xsu's exit code
+    # xsu returns 2 if ran and cancelled (i.e. the user 'doesn't want' to auth)
+    # it will return 0 if the command was executed correctly
+    # summing up, if we get 1, something failed
+    if [ "$status" -eq 0 ]
+    then
+      # the auth command was properly executed
+      exit 0
+	else
+      # xsu wasn't found, or failed to run
+      # if xsu actually ran and the auth was cancelled, $status is 2
+      # try with su
+      echo "$SU_MESSAGE"
+      try_run -absolute /bin/su root -c "export DISPLAY=$DISPLAY;`pwd`/setup.sh -auth"
+      status="$?"
+    fi
+    # the auth failed or was canceled
+    if [ "$GET_ROOT" -eq 2 ]
+    then
+      # we don't want to even start the setup if not root
+      echo "Please run this installation as the super user"
+      exit 1
+    fi
+    # continue running as is
+  fi
+fi
 
 # Try to run the setup program
 status=0
-rm -f "$setup"
-try_run setup.gtk $args $* || try_run setup $args $* -fatal || {
+try_run setup.gtk $args $* || try_run -fatal setup $args $* || {
+    # NOTE TTimo: with -fatal working correctly, this never happens
     echo "The setup program seems to have failed on $arch/$libc"
     echo
-    echo "Please contact Loki Technical Support at support@lokigames.com"
+    echo $FATAL_ERROR
     status=1
 }
 exit $status

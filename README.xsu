@@ -1,0 +1,133 @@
+This is the original README file from the xsu 0.2.3 distribution.
+------------------
+
+XSU - SU for Gnome
+------------------
+
+* Introduction
+    xsu Is an interface for the command `su - username -c command` in Gnome. When 
+    the user executes xsu, he will be prompted for a command, a username and a 
+    password. If the username and password are correct xsu will execute the command 
+    as the entered user. So if the username was root, then the command will be 
+    executed as root.
+    
+    Of course it's also possible to predefine the username and the command by 
+    using the [-u,--username] and [-c,--command] arguments at the command line
+    of xsu. This can be very useful when using xsu in for example gmenu or the
+    panel.
+
+    
+* Security
+    Gnome Xsu 0.2.0 uses the standard su binary to gain it's root access. This
+    way, all security issues should be solved.
+
+    The security of all older xsu versions was very bad. With xsu version 0.1.0
+    I introduced the use of a pipe to a secured non-Gnome SUID application. This
+    has been replaced with a special type of pipe to the standard su application.
+    For example the one from GNU sh-utils.
+
+
+*  Little manual
+    - Commandline parameters for xsu
+	* [-u|--username] "username"            Sets the username
+        * [-c|--command] "command line"         Sets the command
+        * [-m|--message] "Message^line"         Sets the message
+	* [-t|--title] "Window title"		Sets the window title
+	* [-i|--icon] "pixmap file"		Loads another icon
+	* [-a|--set-display] "hostname:port"    Sets the DISPLAY
+                                                environment variable
+                                                to :0 before starting
+                                                the command if no 2e
+						argument is given. Else
+						use the Xserver at 
+						hostname:p
+
+	* [-e|--hide]				Hides the username
+						and command textboxes
+						if possible
+        * [-d|--unadaptable]                    Disables the username
+                                                and command textboxes
+                                                if possible.
+        * [-h|--help]                           Displays help
+
+
+	
+	ps. When using -m or --message you can use the character ^
+	in your message if you want to use a new line, and the character 
+	~ if you want to use a tabulation. If no message is set, then
+	the default message will be used :
+
+	    The action you requested requires root
+	    priveleges.
+	    Please enter the correct password for it
+	    below and press [Return] or click OK.
+
+	Example :
+
+	    xsu --message "The action you requested requires root^priveleges.^Please enter the correct password for it^below and press [Return] or click OK."
+	
+    - Using xsu in gmenu (Menu Editor)
+	At the "Command:" textbox just use for example
+	xsu -c "The command line" -u "root" -m "Enter the root password^please."
+
+	* Example :
+	    Command: xsu -c "gmenu" -u "root" -m "To start the Menu Editor^you have to enter^the root password^here."
+
+
+
+*  Tested and compiled on
+    - RedHat 6.0, Gnome-libs 1.0.8
+    - RedHat 6.1, Gnome-libs 1.0.40
+    - RedHat 6.2, Gnome-libs 1.?.?
+    - RedHat 7.0, Gnome-libs 1.2.4
+    - Debian, Gnome-libs 1.?.?
+    - FreeBSD, Gnome-libs 1.2.4
+    - Mandrake 8.0, Gnome-libs 1.2.13
+    - Mandrake 8.0 (Ximian), Gnome-libs 1.4.1.2
+
+* Latest version and reference
+    http://xsu.freax.eu.org
+
+* Documentation
+    http://xsu.freax.eu.org/xsu_doc/xsu_doc.html
+    man xsu
+      
+* Installation
+    ! You need the Gnome (And GTK+, GDK) development packages (gnome-libs-devel)
+
+    ./configure
+    make
+    make install
+   
+* Special options for ./configure
+	Usage: configure [--option=value]
+
+	Help:
+ 	 --help                  	print this message
+  
+	Directory and file names:
+  	--man-base=PATH	        	Set path to man pages [/usr/share/man]
+  	--doc-path=PATH           	Set path for documentation [/usr/share/doc]
+  	--gnome-config-prefix=PATH	Where to find gnome-config []
+	--prefix=PATH			Installation base
+	--su-pwd-out=STRVALUE		Set what su outputs while waiting for password.
+					Gnome Xsu will wait for this string to send the
+					password through the faked terminal. So this string
+					MUST be correct ! (test with "su - root -c test") 
+					[Password: ]
+	--max-su-delay=INTVALUE		Delay before su fails [$max_su_delay]
+	--debug				Enables debugging mode (only for developpers)
+
+
+* Uninstallation (dont remove the Makefile nor do make distclean)
+    make uninstall
+
+
+* Doing a distclean
+    make distclean
+
+
+* Doing a clean
+    make clean
+
+

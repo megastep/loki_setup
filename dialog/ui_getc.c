@@ -1,5 +1,5 @@
 /*
- *  $Id: ui_getc.c,v 1.1 2002-01-28 01:13:31 megastep Exp $
+ *  $Id: ui_getc.c,v 1.2 2002-04-03 08:10:25 megastep Exp $
  *
  *  ui_getc.c
  *

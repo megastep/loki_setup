@@ -2,32 +2,8 @@
 #ifndef _detect_h
 #define _detect_h
 
-/*
- * List of currently recognized distributions
- */
-typedef enum {
-	DISTRO_NONE = 0, /* Unrecognized */
-	DISTRO_REDHAT,
-	DISTRO_MANDRAKE,
-	DISTRO_SUSE,
-	DISTRO_DEBIAN,
-	DISTRO_SLACKWARE,
-	DISTRO_CALDERA,
-	DISTRO_LINUXPPC,
-	NUM_DISTRIBUTIONS
-} distribution;
-
 /* Forward type declarations */
 struct _install_info;
-
-/* Map between the distro code and its real name */
-extern const char *distribution_name[NUM_DISTRIBUTIONS], *distribution_symbol[NUM_DISTRIBUTIONS];
-
-/* Detect the distribution type and version */
-extern distribution detect_distro(int *maj_ver, int *min_ver);
-
-/* Function to detect the current version of libc */
-extern const char *detect_libc(void);
 
 /* Function to detect the MB of diskspace on a path */
 extern int detect_diskspace(const char *path);

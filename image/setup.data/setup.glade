@@ -2,8 +2,8 @@
 <GTK-Interface>
 
 <project>
-  <name>Project1</name>
-  <program_name>project1</program_name>
+  <name>Setup</name>
+  <program_name>setup</program_name>
   <directory></directory>
   <source_directory>src</source_directory>
   <pixmaps_directory>pixmaps</pixmaps_directory>
@@ -106,7 +106,8 @@
 	<widget>
 	  <class>GtkRadioButton</class>
 	  <name>recommended_but</name>
-	  <border_width>20</border_width>
+	  <border_width>9</border_width>
+	  <tooltip>This will install the product with the default options and paths</tooltip>
 	  <can_focus>True</can_focus>
 	  <label>Recommended</label>
 	  <active>True</active>
@@ -122,7 +123,8 @@
 	<widget>
 	  <class>GtkRadioButton</class>
 	  <name>expert_but</name>
-	  <border_width>20</border_width>
+	  <border_width>10</border_width>
+	  <tooltip>This will allow you to pick the installation paths and options to be installed </tooltip>
 	  <can_focus>True</can_focus>
 	  <label>Expert</label>
 	  <active>False</active>
@@ -150,7 +152,13 @@
 	  <widget>
 	    <class>GtkButton</class>
 	    <name>class_cancel</name>
+	    <can_default>True</can_default>
 	    <can_focus>True</can_focus>
+	    <accelerator>
+	      <modifiers>0</modifiers>
+	      <key>GDK_Escape</key>
+	      <signal>clicked</signal>
+	    </accelerator>
 	    <signal>
 	      <name>clicked</name>
 	      <handler>setup_button_exit_slot</handler>
@@ -168,13 +176,19 @@
 	  <widget>
 	    <class>GtkButton</class>
 	    <name>class_readme</name>
+	    <can_default>True</can_default>
 	    <can_focus>True</can_focus>
+	    <accelerator>
+	      <modifiers>0</modifiers>
+	      <key>GDK_F1</key>
+	      <signal>clicked</signal>
+	    </accelerator>
 	    <signal>
 	      <name>clicked</name>
 	      <handler>setup_button_view_readme_slot</handler>
 	      <last_modification_time>Thu, 13 Sep 2001 23:23:42 GMT</last_modification_time>
 	    </signal>
-	    <label>View Readme</label>
+	    <label>_View Readme</label>
 	    <relief>GTK_RELIEF_NORMAL</relief>
 	    <child>
 	      <padding>0</padding>
@@ -186,13 +200,20 @@
 	  <widget>
 	    <class>GtkButton</class>
 	    <name>class_continue</name>
+	    <can_default>True</can_default>
+	    <has_default>True</has_default>
 	    <can_focus>True</can_focus>
+	    <accelerator>
+	      <modifiers>0</modifiers>
+	      <key>GDK_Return</key>
+	      <signal>clicked</signal>
+	    </accelerator>
 	    <signal>
 	      <name>clicked</name>
 	      <handler>on_class_continue_clicked</handler>
 	      <last_modification_time>Thu, 13 Sep 2001 23:39:48 GMT</last_modification_time>
 	    </signal>
-	    <label>Continue</label>
+	    <label>_Continue</label>
 	    <relief>GTK_RELIEF_NORMAL</relief>
 	    <child>
 	      <padding>0</padding>
@@ -206,8 +227,8 @@
       <widget>
 	<class>GtkLabel</class>
 	<child_name>Notebook:tab</child_name>
-	<name>label68</name>
-	<label>label68</label>
+	<name>setup_class</name>
+	<label></label>
 	<justify>GTK_JUSTIFY_CENTER</justify>
 	<wrap>False</wrap>
 	<xalign>0.5</xalign>
@@ -674,6 +695,11 @@
 	    <name>button_cancel</name>
 	    <can_default>True</can_default>
 	    <can_focus>True</can_focus>
+	    <accelerator>
+	      <modifiers>0</modifiers>
+	      <key>GDK_Escape</key>
+	      <signal>clicked</signal>
+	    </accelerator>
 	    <signal>
 	      <name>clicked</name>
 	      <handler>setup_button_exit_slot</handler>
@@ -688,12 +714,17 @@
 	    <name>button_readme</name>
 	    <can_default>True</can_default>
 	    <can_focus>True</can_focus>
+	    <accelerator>
+	      <modifiers>0</modifiers>
+	      <key>GDK_F1</key>
+	      <signal>clicked</signal>
+	    </accelerator>
 	    <signal>
 	      <name>clicked</name>
 	      <handler>setup_button_view_readme_slot</handler>
 	      <last_modification_time>Wed, 15 Sep 1999 01:10:59 GMT</last_modification_time>
 	    </signal>
-	    <label>View Readme</label>
+	    <label>_View Readme</label>
 	    <relief>GTK_RELIEF_NORMAL</relief>
 	  </widget>
 
@@ -707,7 +738,7 @@
 	      <handler>setup_button_install_slot</handler>
 	      <last_modification_time>Tue, 14 Sep 1999 22:36:50 GMT</last_modification_time>
 	    </signal>
-	    <label>Begin Install</label>
+	    <label>_Begin Install</label>
 	    <relief>GTK_RELIEF_NORMAL</relief>
 	  </widget>
 	</widget>
@@ -969,6 +1000,11 @@
 	    <name>button12</name>
 	    <can_default>True</can_default>
 	    <can_focus>True</can_focus>
+	    <accelerator>
+	      <modifiers>0</modifiers>
+	      <key>GDK_Escape</key>
+	      <signal>clicked</signal>
+	    </accelerator>
 	    <signal>
 	      <name>clicked</name>
 	      <handler>setup_button_cancel_slot</handler>
@@ -983,12 +1019,17 @@
 	    <name>view_readme_progress_button</name>
 	    <can_default>True</can_default>
 	    <can_focus>True</can_focus>
+	    <accelerator>
+	      <modifiers>0</modifiers>
+	      <key>GDK_F1</key>
+	      <signal>clicked</signal>
+	    </accelerator>
 	    <signal>
 	      <name>clicked</name>
 	      <handler>setup_button_view_readme_slot</handler>
 	      <last_modification_time>Wed, 15 Sep 1999 01:11:10 GMT</last_modification_time>
 	    </signal>
-	    <label>View Readme</label>
+	    <label>_View Readme</label>
 	    <relief>GTK_RELIEF_NORMAL</relief>
 	  </widget>
 	</widget>
@@ -1045,12 +1086,17 @@
 	    <name>button15</name>
 	    <can_default>True</can_default>
 	    <can_focus>True</can_focus>
+	    <accelerator>
+	      <modifiers>0</modifiers>
+	      <key>GDK_Escape</key>
+	      <signal>clicked</signal>
+	    </accelerator>
 	    <signal>
 	      <name>clicked</name>
 	      <handler>setup_button_exit_slot</handler>
 	      <last_modification_time>Tue, 14 Sep 1999 22:58:23 GMT</last_modification_time>
 	    </signal>
-	    <label>Exit</label>
+	    <label>_Exit</label>
 	    <relief>GTK_RELIEF_NORMAL</relief>
 	  </widget>
 
@@ -1059,12 +1105,17 @@
 	    <name>view_readme_end_button</name>
 	    <can_default>True</can_default>
 	    <can_focus>True</can_focus>
+	    <accelerator>
+	      <modifiers>0</modifiers>
+	      <key>GDK_F1</key>
+	      <signal>clicked</signal>
+	    </accelerator>
 	    <signal>
 	      <name>clicked</name>
 	      <handler>setup_button_view_readme_slot</handler>
 	      <last_modification_time>Wed, 15 Sep 1999 01:11:23 GMT</last_modification_time>
 	    </signal>
-	    <label>View Readme</label>
+	    <label>_View Readme</label>
 	    <relief>GTK_RELIEF_NORMAL</relief>
 	  </widget>
 
@@ -1073,12 +1124,22 @@
 	    <name>play_game_button</name>
 	    <can_default>True</can_default>
 	    <can_focus>True</can_focus>
+	    <accelerator>
+	      <modifiers>0</modifiers>
+	      <key>GDK_Return</key>
+	      <signal>clicked</signal>
+	    </accelerator>
+	    <accelerator>
+	      <modifiers>0</modifiers>
+	      <key>GDK_space</key>
+	      <signal>enter</signal>
+	    </accelerator>
 	    <signal>
 	      <name>clicked</name>
 	      <handler>setup_button_play_slot</handler>
 	      <last_modification_time>Tue, 14 Sep 1999 22:35:17 GMT</last_modification_time>
 	    </signal>
-	    <label>Start</label>
+	    <label>_Start</label>
 	    <relief>GTK_RELIEF_NORMAL</relief>
 	  </widget>
 	</widget>
@@ -1284,12 +1345,22 @@
 	    <name>button18</name>
 	    <can_default>True</can_default>
 	    <can_focus>True</can_focus>
+	    <accelerator>
+	      <modifiers>0</modifiers>
+	      <key>GDK_Return</key>
+	      <signal>clicked</signal>
+	    </accelerator>
+	    <accelerator>
+	      <modifiers>0</modifiers>
+	      <key>GDK_Escape</key>
+	      <signal>clicked</signal>
+	    </accelerator>
 	    <signal>
 	      <name>clicked</name>
-	      <handler>setup_button_exit_slot</handler>
-	      <last_modification_time>Tue, 14 Sep 1999 22:58:34 GMT</last_modification_time>
+	      <handler>setup_button_abort_slot</handler>
+	      <last_modification_time>Wed, 06 Feb 2002 01:32:49 GMT</last_modification_time>
 	    </signal>
-	    <label>Exit</label>
+	    <label>_Exit</label>
 	    <relief>GTK_RELIEF_NORMAL</relief>
 	  </widget>
 	</widget>
@@ -1410,6 +1481,11 @@
 	    <name>button21</name>
 	    <can_default>True</can_default>
 	    <can_focus>True</can_focus>
+	    <accelerator>
+	      <modifiers>0</modifiers>
+	      <key>GDK_Escape</key>
+	      <signal>clicked</signal>
+	    </accelerator>
 	    <signal>
 	      <name>clicked</name>
 	      <handler>setup_button_warning_cancel_slot</handler>
@@ -1423,7 +1499,13 @@
 	    <class>GtkButton</class>
 	    <name>button22</name>
 	    <can_default>True</can_default>
+	    <has_default>True</has_default>
 	    <can_focus>True</can_focus>
+	    <accelerator>
+	      <modifiers>0</modifiers>
+	      <key>GDK_Return</key>
+	      <signal>clicked</signal>
+	    </accelerator>
 	    <signal>
 	      <name>clicked</name>
 	      <handler>setup_button_warning_continue_slot</handler>
@@ -1533,12 +1615,17 @@
 	    <name>button30</name>
 	    <can_default>True</can_default>
 	    <can_focus>True</can_focus>
+	    <accelerator>
+	      <modifiers>0</modifiers>
+	      <key>GDK_Escape</key>
+	      <signal>clicked</signal>
+	    </accelerator>
 	    <signal>
 	      <name>clicked</name>
 	      <handler>setup_button_exit_slot</handler>
 	      <last_modification_time>Tue, 14 Sep 1999 22:58:23 GMT</last_modification_time>
 	    </signal>
-	    <label>Exit</label>
+	    <label>_Exit</label>
 	    <relief>GTK_RELIEF_NORMAL</relief>
 	  </widget>
 
@@ -1547,12 +1634,17 @@
 	    <name>button31</name>
 	    <can_default>True</can_default>
 	    <can_focus>True</can_focus>
+	    <accelerator>
+	      <modifiers>0</modifiers>
+	      <key>GDK_F1</key>
+	      <signal>clicked</signal>
+	    </accelerator>
 	    <signal>
 	      <name>clicked</name>
 	      <handler>setup_button_view_readme_slot</handler>
 	      <last_modification_time>Wed, 15 Sep 1999 01:11:23 GMT</last_modification_time>
 	    </signal>
-	    <label>View Readme</label>
+	    <label>_View Readme</label>
 	    <relief>GTK_RELIEF_NORMAL</relief>
 	  </widget>
 
@@ -1560,6 +1652,7 @@
 	    <class>GtkButton</class>
 	    <name>button32</name>
 	    <can_default>True</can_default>
+	    <has_default>True</has_default>
 	    <can_focus>True</can_focus>
 	    <signal>
 	      <name>clicked</name>
@@ -1755,7 +1848,7 @@
 		  <handler>setup_button_browser_slot</handler>
 		  <last_modification_time>Sat, 11 Dec 1999 04:35:32 GMT</last_modification_time>
 		</signal>
-		<label>Launch Browser</label>
+		<label>Launch _Browser</label>
 		<relief>GTK_RELIEF_NORMAL</relief>
 	      </widget>
 	    </widget>
@@ -1823,12 +1916,22 @@
 	<name>button20</name>
 	<can_default>True</can_default>
 	<can_focus>True</can_focus>
+	<accelerator>
+	  <modifiers>0</modifiers>
+	  <key>GDK_Return</key>
+	  <signal>clicked</signal>
+	</accelerator>
+	<accelerator>
+	  <modifiers>0</modifiers>
+	  <key>GDK_Escape</key>
+	  <signal>clicked</signal>
+	</accelerator>
 	<signal>
 	  <name>clicked</name>
 	  <handler>setup_close_view_readme_slot</handler>
 	  <last_modification_time>Wed, 15 Sep 1999 01:10:31 GMT</last_modification_time>
 	</signal>
-	<label>Close</label>
+	<label>_Close</label>
 	<relief>GTK_RELIEF_NORMAL</relief>
 	<child>
 	  <padding>0</padding>
@@ -1921,12 +2024,17 @@
 	  <name>button28</name>
 	  <can_default>True</can_default>
 	  <can_focus>True</can_focus>
+	  <accelerator>
+	    <modifiers>0</modifiers>
+	    <key>GDK_Escape</key>
+	    <signal>clicked</signal>
+	  </accelerator>
 	  <signal>
 	    <name>clicked</name>
 	    <handler>setup_button_exit_slot</handler>
 	    <last_modification_time>Tue, 14 Sep 1999 22:58:10 GMT</last_modification_time>
 	  </signal>
-	  <label>Cancel</label>
+	  <label>_Cancel</label>
 	  <relief>GTK_RELIEF_NORMAL</relief>
 	</widget>
 
@@ -1935,12 +2043,27 @@
 	  <name>button29</name>
 	  <can_default>True</can_default>
 	  <can_focus>True</can_focus>
+	  <accelerator>
+	    <modifiers>0</modifiers>
+	    <key>GDK_Y</key>
+	    <signal>clicked</signal>
+	  </accelerator>
+	  <accelerator>
+	    <modifiers>0</modifiers>
+	    <key>GDK_y</key>
+	    <signal>clicked</signal>
+	  </accelerator>
+	  <accelerator>
+	    <modifiers>0</modifiers>
+	    <key>GDK_Return</key>
+	    <signal>clicked</signal>
+	  </accelerator>
 	  <signal>
 	    <name>clicked</name>
 	    <handler>setup_button_license_agree_slot</handler>
 	    <last_modification_time>Tue, 30 Nov 1999 01:28:20 GMT</last_modification_time>
 	  </signal>
-	  <label>I Agree</label>
+	  <label>_I Agree</label>
 	  <relief>GTK_RELIEF_NORMAL</relief>
 	</widget>
       </widget>

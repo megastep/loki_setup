@@ -29,7 +29,7 @@ typedef struct {
 
 	/* Extract the file */
 	size_t (*Copy)(install_info *info, const char *path, const char *dest, const char *current_option, xmlNodePtr node,
-				   void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current));
+				   int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current));
 
 } SetupPlugin;
 

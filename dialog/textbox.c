@@ -1,5 +1,5 @@
 /*
- *  $Id: textbox.c,v 1.2 2002-03-12 15:46:18 icculus Exp $
+ *  $Id: textbox.c,v 1.3 2002-04-03 08:10:25 megastep Exp $
  *
  *  textbox.c -- implements the text box
  *
@@ -80,7 +80,7 @@ xalloc(long size)
 /*
  * read_high() substitutes read() for tab->spaces conversion
  * or does line wrapping conversion
- * TTim oNOTE: doesn't do both, it could with more changes
+ * TTimo NOTE: doesn't do both, it could with more changes
  *
  * buffer_len, fd_bytes_read, bytes_read are modified
  * buf is allocated

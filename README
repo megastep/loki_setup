@@ -53,6 +53,7 @@ setup.data/
    setup.xml            (XML file defining the install options)
    setup.glade          (XML file defining the GTk UI)
    splash.xpm           (Optional splash image for the GTk UI)
+   config.sh            (Optional bootstrap configuration script)
    bin/
    bin/<OS>/<arch>/setup		    (Statically linked console version)
    bin/<OS>/<arch>/<libc>/setup.gtk	(Dynamically linked GTk version)

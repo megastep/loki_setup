@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.47 2002-02-17 05:54:58 megastep Exp $ */
+/* $Id: main.c,v 1.48 2002-04-03 08:10:24 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -29,6 +29,7 @@ Modifications by Borland/Inprise Corp.:
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdarg.h>
+#include <locale.h>
 
 #include "install_log.h"
 #include "install_ui.h"
@@ -36,11 +37,6 @@ Modifications by Borland/Inprise Corp.:
 #include "file.h"
 #include "detect.h"
 #include "plugins.h"
-
-#define SETUP_CONFIG  SETUP_BASE "setup.xml"
-
-#define PACKAGE "setup"
-#define LOCALEDIR SETUP_BASE "locale"
 
 /* Global options */
 
@@ -115,6 +111,7 @@ _("Usage: %s [options]\n\n"
 "   -n       Force the text-only user interface\n"
 "   -o opt   Enable the option named \"opt\" from the XML file. Also enables non\n"
 "            interactive operation. Can be used multiple times.\n"
+"   -p pref  Specify a path prefix in the installation media.\n"
 "   -r root  Set the root directory for extracting RPM files (default is /)\n"
 "   -v n     Set verbosity level to n. Available values :\n"
 "            0: Debug  1: Quiet  2: Normal 3: Warnings 4: Fatal\n"
@@ -130,6 +127,7 @@ _("Usage: %s [options]\n\n"
 "   -n       Force the text-only user interface\n"
 "   -o opt   Enable the option named \"opt\" from the XML file. Also enables non\n"
 "            interactive operation. Can be used multiple times.\n"
+"   -p pref  Specify a path prefix in the installation media.\n"
 "   -v n     Set verbosity level to n. Available values :\n"
 "            0: Debug  1: Quiet  2: Normal 3: Warnings 4: Fatal\n"
 "   -V       Print the version of the setup program and exit\n"),
@@ -147,6 +145,7 @@ int main(int argc, char **argv)
     int log_level = LOG_NORMAL;
     char install_path[PATH_MAX];
     char binary_path[PATH_MAX];
+	const char *product_prefix = NULL;
     struct enabled_option *enabled_opt;
 
     install_path[0] = '\0';
@@ -165,9 +164,9 @@ int main(int argc, char **argv)
     /* Parse the command-line options */
     while ( (c=getopt(argc, argv,
 #ifdef RPM_SUPPORT
-					  "hnc:f:r:v:Vi:b:mo:"
+					  "hnc:f:r:v:Vi:b:mo:p:"
 #else
-					  "hnc:f:v:Vi:b:o:"
+					  "hnc:f:v:Vi:b:o:p:"
 #endif
 					  )) != EOF ) {
         switch (c) {
@@ -204,12 +203,15 @@ int main(int argc, char **argv)
 			printf("Loki Setup version " SETUP_VERSION ", built on "__DATE__"\n");
 			exit(0);
 	    case 'i':
-	        strcpy(install_path, optarg);
+	        strncpy(install_path, optarg, sizeof(install_path));
 			disable_install_path = 1;
  			break;
 	    case 'b':
-	        strcpy(binary_path, optarg);
+	        strncpy(binary_path, optarg, sizeof(binary_path));
 			disable_binary_path = 1;
+			break;
+		case 'p':
+			product_prefix = optarg;
 			break;
         case 'o': /* Store the enabled options for later processing */
             enabled_opt = (struct enabled_option *)malloc(sizeof(struct enabled_option));
@@ -236,7 +238,7 @@ int main(int argc, char **argv)
 	log_init(log_level);
 
     /* Initialize the XML setup configuration */
-    info = create_install(xml_file, install_path, binary_path);
+    info = create_install(xml_file, install_path, binary_path, product_prefix);
     if ( info == NULL ) {
         fprintf(stderr, _("Couldn't load '%s'\n"), xml_file);
         exit(1);

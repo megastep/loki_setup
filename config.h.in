@@ -1,40 +1,44 @@
 /* config.h.in.  Generated automatically from configure.in by autoheader.  */
 
-/* Dynamic plugin support. */
-#undef DYNAMIC_PLUGINS
+/* Define if you have the strcasecmp function.  */
+#undef HAVE_STRCASECMP
 
-/* RPM support. */
-#undef ENABLE_RPM
+/* Define if you have the <dirent.h> header file.  */
+#undef HAVE_DIRENT_H
+
+/* Define if you have the <dir.h> header file.  */
+#undef HAVE_DIR_H
+
+/* Define if you have the <gtk.h> header file.  */
+#undef HAVE_GTK_H
+
+/* Define if you have the <ncurses/term.h> header file.  */
+#undef HAVE_NCURSES_TERM_H
+
+/* Define if you have the <ndir.h> header file.  */
+#undef HAVE_NDIR_H
+
+/* Define if you have the <pwd.h> header file.  */
+#undef HAVE_PWD_H
+
+/* Define if you have the <sys/ndir.h> header file.  */
+#undef HAVE_SYS_NDIR_H
+
+/* Define if you have the <unistd.h> header file.  */
+#undef HAVE_UNISTD_H
 
 /* libbz2 support. */
 #undef HAVE_BZIP2_SUPPORT
 
-/* Define if you have the <dirent.h> header file. */
-#undef HAVE_DIRENT_H
-
-/* Define if you have the <dir.h> header file. */
-#undef HAVE_DIR_H
-
-/* Define if you have the <gtk.h> header file. */
-#undef HAVE_GTK_H
-
-/* Define if you have the <ncurses/term.h> header file. */
-#undef HAVE_NCURSES_TERM_H
-
-/* Define if you have the <ndir.h> header file. */
-#undef HAVE_NDIR_H
-
-/* Define if you have the <pwd.h> header file. */
-#undef HAVE_PWD_H
-
-/* Define if you have the `strcasecmp' function. */
-#undef HAVE_STRCASECMP
-
-/* Define if you have the <sys/ndir.h> header file. */
-#undef HAVE_SYS_NDIR_H
-
-/* Define if you have the <unistd.h> header file. */
-#undef HAVE_UNISTD_H
-
-/* libbz2 has "BZ_" prefix. */
+/* libbz2 has BZ_ prefix. */
 #undef LIBBZ2_PREFIX
+
+/* RPM support. */
+#undef ENABLE_RPM
+
+/* RPM support. */
+#undef ENABLE_RPM
+
+/* Dynamic plugin support. */
+#undef DYNAMIC_PLUGINS
+

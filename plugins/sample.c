@@ -1,5 +1,5 @@
 /* Sample plugin for setup */
-/* $Id: sample.c,v 1.2 2002-01-28 01:13:33 megastep Exp $ */
+/* $Id: sample.c,v 1.3 2002-04-03 08:10:25 megastep Exp $ */
 
 #include "plugins.h"
 #include "file.h"
@@ -33,7 +33,7 @@ static size_t Size(install_info *info, const char *path)
 
 /* Extract the file */
 static size_t Copy(install_info *info, const char *path, const char *dest, const char *current_option, xmlNodePtr node,
-				   void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+				   int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
 	/* TODO: Extract the files, calling the update function as often as possible */
 	return 0;

@@ -53,7 +53,7 @@ static size_t CPIOSize(install_info *info, const char *path)
 
 /* Exported so that the RPM plugin can access it */
 size_t copy_cpio_stream(install_info *info, stream *input, const char *dest, const char *current_option,
-                        void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+                        int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     stream *output;
     char magic[6];
@@ -153,7 +153,9 @@ size_t copy_cpio_stream(install_info *info, stream *input, const char *dest, con
 				
 						info->installed_bytes += copied;
 						if(update){
-							update(info, file_hdr.c_name, file_hdr.c_filesize-left, file_hdr.c_filesize, current_option);
+							if ( !update(info, file_hdr.c_name, file_hdr.c_filesize-left, file_hdr.c_filesize, current_option) ) {
+								break; /* Abort */
+							}
 						}
 					}
 					if(has_crc && file_hdr.c_chksum && file_hdr.c_chksum != chk)
@@ -179,7 +181,7 @@ size_t copy_cpio_stream(install_info *info, stream *input, const char *dest, con
 
 /* Extract the file */
 static size_t CPIOCopy(install_info *info, const char *path, const char *dest, const char *current_option, xmlNodePtr node,
-			void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+			int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
 	stream *input = file_open(info, path, "rb");
 	if(input)

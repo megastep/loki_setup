@@ -1,5 +1,5 @@
 /* TAR plugin for setup */
-/* $Id: tar.c,v 1.3 2002-02-15 02:20:57 megastep Exp $ */
+/* $Id: tar.c,v 1.4 2002-04-03 08:10:25 megastep Exp $ */
 
 #include "plugins.h"
 #include "tar.h"
@@ -34,7 +34,7 @@ static size_t TarSize(install_info *info, const char *path)
 
 /* Extract the file */
 static size_t TarCopy(install_info *info, const char *path, const char *dest, const char *current_option, xmlNodePtr node,
-			void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+			int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     static tar_record zeroes;
     tar_record record;
@@ -93,7 +93,8 @@ static size_t TarCopy(install_info *info, const char *path, const char *dest, co
 							this_size += copied;
 
 							if ( update ) {
-								update(info, final, this_size, cur_size, current_option);
+								if ( ! update(info, final, this_size, cur_size, current_option) )
+									break;
 							}
 						}
 						file_close(info, output);
