@@ -1133,8 +1133,7 @@ static int carbonui_update(install_info *info, const char *path, size_t progress
     char *install_path;
     double new_update;
 
-    char LastText[1024] = "";
-    char LastCurrent[1024] = "";
+    static char LastCurrent[1024] = "";
 
     //carbon_debug("***carbonui_update()\n");
  
@@ -1149,6 +1148,9 @@ static int carbonui_update(install_info *info, const char *path, size_t progress
 
     if((int)(new_update * 100) != (int)(last_update * 100))
     {
+        static int last_decimal = -10;
+        int this_decimal = (int)(new_update * 10.0f);
+
         if(new_update == 1.0)
             last_update = 0.0;
         else
@@ -1170,17 +1172,19 @@ static int carbonui_update(install_info *info, const char *path, size_t progress
         textlen = strlen(text);
         if(textlen > MAX_TEXTLEN)
             strcpy(text, text+(textlen-MAX_TEXTLEN));*/
-        // If current filename has changed
-        if(strcmp(path, LastText) != 0)
+
+        if (this_decimal != last_decimal)
         {
+            static char buf[1024];
             char *filename = strrchr(path, '/');
             if(filename == NULL)
                 filename = path;
             else
                 filename++;     // Increment just after '/' to get filename
 
-            carbon_SetLabelText(MyRes, COPY_CURRENT_FILE_LABEL_ID, filename);
-            strcpy(LastText, path);
+            last_decimal = this_decimal;
+            snprintf(buf, sizeof (buf), "Installing %s : %d%%", filename, (int) (new_update * 100.0f));
+            carbon_SetLabelText(MyRes, COPY_CURRENT_FILE_LABEL_ID, buf);
         }
 
         // Update total file progress
