@@ -1,4 +1,7 @@
 
+DISTDIR = ..
+PACKAGE = setup-1.0
+
 arch := $(shell ./print_arch)
 libc := $(shell ./print_libc)
 #USE_RPM = true
@@ -48,3 +51,9 @@ install: all
 
 clean:
 	rm -f setup setup.gtk testxml foo.xml *.o
+
+dist: clean
+	cp -r . $(DISTDIR)/$(PACKAGE)
+	(cd $(DISTDIR)/$(PACKAGE) && rm -r `find . -name CVS`)
+	(cd $(DISTDIR) && tar zcvf $(PACKAGE).tar.gz $(PACKAGE))
+	rm -rf $(DISTDIR)/$(PACKAGE)
