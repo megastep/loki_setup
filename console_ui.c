@@ -114,14 +114,14 @@ static yesno_answer prompt_warning(const char *warning)
 
 /* This function returns a boolean value that tells if parsing for this node's siblings
    should continue (used for exclusive options) */
-static int parse_option(install_info *info, xmlNodePtr node, int exclusive)
+static int parse_option(install_info *info, const char *component, xmlNodePtr node, int exclusive)
 {
 	const char *help = "";
     char line[BUFSIZ];
     char prompt[BUFSIZ];
     const char *wanted;
 	int retval = 1;
-    yesno_answer response, default_response;
+    yesno_answer response = RESPONSE_INVALID, default_response;
 
     /* See if this node matches the current architecture */
     wanted = xmlGetProp(node, "arch");
@@ -134,12 +134,43 @@ static int parse_option(install_info *info, xmlNodePtr node, int exclusive)
         return retval;
     }
 
+    /* Skip any options that are already installed */
+    if ( info->product ) {
+        product_component_t *comp;
+
+        if ( component ) {
+            comp = loki_find_component(info->product, component);
+        } else {
+            comp = loki_getdefault_component(info->product);
+        }
+        if ( comp &&
+             loki_find_option(comp, get_option_name(info,node,NULL,0)) ) {
+            /* Recurse down any other options */
+            node = node->childs;
+            while ( node ) {
+                if ( ! strcmp(node->name, "option") ) {
+                    parse_option(info, component, node, 0);
+                } else if ( ! strcmp(node->name, "exclusive") ) {
+					xmlNodePtr child;
+					for ( child = node->childs; child && parse_option(info, component, child, 1); child = child->next)
+						;
+				}
+                node = node->next;
+            }
+			if ( exclusive ) /* We stop prompting the user once an option has been chosen */
+				retval = 0;
+            return(retval);
+        }
+    }
+
 	/* Check for required option */
 	if ( xmlGetProp(node, "required") ) {
 		printf(_("'%s' option will be installed.\n"), get_option_name(info,node,line,BUFSIZ));
 		response = RESPONSE_YES;
-	} else {
-		/* See if the user wants this option */
+	}
+
+    /* See if the user wants this option */
+    while ( response == RESPONSE_INVALID ) {
 		snprintf(prompt, sizeof(prompt), _("Install %s?"), get_option_name(info,node,line,BUFSIZ));
 		wanted = xmlGetProp(node, "install");
 		if ( wanted  && (strcmp(wanted, "true") == 0) ) {
@@ -167,10 +198,10 @@ static int parse_option(install_info *info, xmlNodePtr node, int exclusive)
             node = node->childs;
             while ( node ) {
                 if ( ! strcmp(node->name, "option") ) {
-                    parse_option(info, node, 0);
+                    parse_option(info, component, node, 0);
                 } else if ( ! strcmp(node->name, "exclusive") ) {
 					xmlNodePtr child;
-					for ( child = node->childs; child && parse_option(info, child, 1); child = child->next)
+					for ( child = node->childs; child && parse_option(info, component, child, 1); child = child->next)
 						;
 				}
                 node = node->next;
@@ -185,7 +216,7 @@ static int parse_option(install_info *info, xmlNodePtr node, int exclusive)
             } else {
                 printf(_("No help available\n"));
             }
-            parse_option(info, node, exclusive);
+            parse_option(info, component, node, exclusive);
             break;
 
         default:
@@ -412,34 +443,21 @@ static install_state console_setup(install_info *info)
 			node = info->config->root->childs;
 			while ( node ) {
 				if ( ! strcmp(node->name, "option") ) {
-					parse_option(info, node, 0);
+					parse_option(info, NULL, node, 0);
 				} else if ( ! strcmp(node->name, "exclusive") ) {
 					xmlNodePtr child;
 					for ( child = node->childs; child; child = child->next) {
-						parse_option(info, child, 1);
+						parse_option(info, NULL, child, 1);
 					}
 				} else if ( ! strcmp(node->name, "component") ) {
                     if ( match_arch(info, xmlGetProp(node, "arch")) &&
                          match_libc(info, xmlGetProp(node, "libc")) ) {
-                        int enable = 1;
-
-                        if ( info->product ) {
-                            product_component_t *comp = loki_find_component(info->product, xmlGetProp(node, "name"));
-                            /* Check if the installed component is more recent */
-                            if ( comp && loki_newer_version(loki_getversion_component(comp), xmlGetProp(node, "version")) ) {
-                                enable = 0;
-                            }
+                        xmlNodePtr child;
+                        if ( xmlGetProp(node, "showname") ) {
+                            printf(_("\n%s component\n\n"), xmlGetProp(node, "name"));
                         }
-                        if ( enable ) {
-                            xmlNodePtr child;
-                            if ( xmlGetProp(node, "showname") ) {
-                                printf(_("\n%s component\n\n"), xmlGetProp(node, "name"));
-                            }
-                            for ( child = node->childs; child; child = child->next) {
-                                parse_option(info, child, 0);
-                            }
-                        } else {
-                            mark_option(info, node, "false", 1);
+                        for ( child = node->childs; child; child = child->next) {
+                            parse_option(info, xmlGetProp(node, "name"), child, 0);
                         }
                     }
                 }

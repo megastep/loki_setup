@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.57 2000-11-10 23:29:59 megastep Exp $
+   $Id: gtk_ui.c,v 1.58 2000-11-11 01:40:20 hercules Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -950,11 +950,13 @@ static void init_menuitems_option(install_info *info, xmlNodePtr node)
     }
 }
 
-static void parse_option(install_info *info, xmlNodePtr node, GtkWidget *window, GtkWidget *box, int level, GtkWidget *parent, int exclusive, GSList **radio)
+static void parse_option(install_info *info, const char *component, xmlNodePtr node, GtkWidget *window, GtkWidget *box, int level, GtkWidget *parent, int exclusive, GSList **radio)
 {
+    xmlNodePtr child;
     char text[1024];
     const char *help;
-    const char *wanted, *line;
+    const char *wanted;
+    const char *name;
     int i;
     GtkWidget *button;
     option_data *dat;
@@ -971,11 +973,11 @@ static void parse_option(install_info *info, xmlNodePtr node, GtkWidget *window,
     }
 
     /* See if the user wants this option */
-    line = get_option_name(info, node, NULL, 0);
+    name = get_option_name(info, node, NULL, 0);
     for(i=0; i < (level*5); i++)
         text[i] = ' ';
     text[i] = '\0';
-    strncat(text, line, sizeof(text));
+    strncat(text, name, sizeof(text)-strlen(text));
 
 	if ( GetProductIsMeta(info) ) {
 		button = gtk_radio_button_new_with_label(radio_list, text);
@@ -1008,7 +1010,7 @@ static void parse_option(install_info *info, xmlNodePtr node, GtkWidget *window,
 
     /* Register the button in the window's private data */
     window = glade_xml_get_widget(setup_glade, "setup_window");
-    gtk_object_set_data(GTK_OBJECT(window), line, (gpointer)button);
+    gtk_object_set_data(GTK_OBJECT(window), name, (gpointer)button);
 
 	/* Check for required option */
 	if ( xmlGetProp(node, "required") ) {
@@ -1034,18 +1036,35 @@ static void parse_option(install_info *info, xmlNodePtr node, GtkWidget *window,
         mark_option(info, node, "false", 1);
     }
     /* Recurse down any other options */
-    node = node->childs;
-    while ( node ) {
-		if ( !strcmp(node->name, "option") ) {
-			parse_option(info, node, window, box, level+1, button, 0, NULL);
-		} else if ( !strcmp(node->name, "exclusive") ) {
-			xmlNodePtr child;
+    child = node->childs;
+    while ( child ) {
+		if ( !strcmp(child->name, "option") ) {
+			parse_option(info, component, child, window, box, level+1, button, 0, NULL);
+		} else if ( !strcmp(child->name, "exclusive") ) {
+			xmlNodePtr exchild;
 			GSList *list = NULL;
-			for ( child = node->childs; child; child = child->next) {
-				parse_option(info, child, window, box, level+1, button, 1, &list);
+			for ( exchild = child->childs; exchild; exchild = exchild->next) {
+				parse_option(info, component, exchild, window, box, level+1, button, 1, &list);
 			}
 		}
-		node = node->next;
+		child = child->next;
+    }
+
+    /* Disable any options that are already installed */
+    if ( info->product ) {
+        product_component_t *comp;
+
+        if ( component ) {
+            comp = loki_find_component(info->product, component);
+        } else {
+            comp = loki_getdefault_component(info->product);
+        }
+        if ( comp && loki_find_option(comp, name) ) {
+            /* Unmark this option for installation */
+            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), FALSE);
+            gtk_widget_set_sensitive(button, FALSE);
+            mark_option(info, node, "false", 1);
+        }
     }
 }
 
@@ -1292,39 +1311,27 @@ static install_state gtkui_setup(install_info *info)
     radio_list = NULL;
     while ( node ) {
 		if ( ! strcmp(node->name, "option") ) {
-			parse_option(info, node, window, options, 0, NULL, 0, NULL);
+			parse_option(info, NULL, node, window, options, 0, NULL, 0, NULL);
 		} else if ( ! strcmp(node->name, "exclusive") ) {
 			xmlNodePtr child;
 			GSList *list = NULL;
 			for ( child = node->childs; child; child = child->next) {
-				parse_option(info, child, window, options, 0, NULL, 1, &list);
+				parse_option(info, NULL, child, window, options, 0, NULL, 1, &list);
 			}
 		} else if ( ! strcmp(node->name, "component") ) {
-            int enable = 1;
             if ( match_arch(info, xmlGetProp(node, "arch")) &&
                  match_libc(info, xmlGetProp(node, "libc")) ) {
-                if ( info->product ) {
-                    product_component_t *comp = loki_find_component(info->product, xmlGetProp(node, "name"));
-                    /* Check if the installed component is more recent */
-                    if ( comp && loki_newer_version(loki_getversion_component(comp), xmlGetProp(node, "version")) ) {
-                        enable = 0;
-                    }
+                xmlNodePtr child;
+                if ( xmlGetProp(node, "showname") ) {
+                    GtkWidget *widget = gtk_hseparator_new();
+                    gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 0);
+                    gtk_widget_show(widget);                
+                    widget = gtk_label_new(xmlGetProp(node, "name"));
+                    gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 10);
+                    gtk_widget_show(widget);
                 }
-                if ( enable ) {
-                    xmlNodePtr child;
-                    if ( xmlGetProp(node, "showname") ) {
-                        GtkWidget *widget = gtk_hseparator_new();
-                        gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 0);
-                        gtk_widget_show(widget);                
-                        widget = gtk_label_new(xmlGetProp(node, "name"));
-                        gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 10);
-                        gtk_widget_show(widget);
-                    }
-                    for ( child = node->childs; child; child = child->next) {
-                        parse_option(info, child, window, options, 0, NULL, 0, NULL);
-                    }
-                } else {
-                    mark_option(info, node, "false", 1);
+                for ( child = node->childs; child; child = child->next) {
+                    parse_option(info, xmlGetProp(node, "name"), child, window, options, 0, NULL, 0, NULL);
                 }
             }
         }

@@ -1,4 +1,6 @@
 1.5.0:
+Sam Lantinga - Fri Nov 10 17:39:44 PST 2000
+ * Don't allow the user to install options that are already installed.
 Stéphane Peter - Fri Nov 10 14:31:29 PDT 2000
  * Do not overwrite the product XML file if it already exists; just update it.
 Stéphane Peter - Thu Nov  9 16:14:03 PDT 2000
