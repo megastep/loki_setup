@@ -8,6 +8,10 @@ Stéphane Peter - Tue May  2 19:45:53 PDT 2000
    options has also been replaced by the separate sub-element.
  * Added the 'keepdirs' attribute for binaries, that allows to keep the directory
    structure specified (to have binaries in subdirectories).
+Borland/Inprise Corp. - Tue May  9 12:45:03 PDT 2000
+ * Bugfixes in GTK UI for handling the destroy button.
+ * Expansion of ~ for the installation directory.
+ * Fixed other path problems.
 
 1.2.3:
 Sam Lantinga - Fri Apr 28 17:17:27 PDT 2000

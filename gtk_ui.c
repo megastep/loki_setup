@@ -1,5 +1,45 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.34 2000-05-02 01:06:42 megastep Exp $
+   $Id: gtk_ui.c,v 1.35 2000-05-09 19:50:10 megastep Exp $
+*/
+
+/* Modifications by Borland/Inprise Corp.
+   04/11/2000: Added check in check_install_button to see if install and
+               binary path are the same. If so, leave install button
+	       disabled and give user a message.
+
+   04/17/2000: Created two new GladeXML objects, one for the readme dialog,
+               the other for the license dialog and modified gtkui_init,
+	       setup_button_view_readme_slot and gtkui_license to create &
+	       use these new objects. Created 2 new handlers for destroy
+	       events on the readme and license dialogs. This was done to fix
+	       problems when the user uses the 'X' button in the upper
+	       right corner instead of the Close, Cancel or Agree buttons.
+	       For the readme, setup would seg fault if the user tried to open
+	       the readme dialog a second time. For the license, setup would
+	       stop responding.
+
+	       The setup.glade file was  modified to include destroy
+	       handlers for the readme_dialog and license_dialog widgets.
+
+	       Added code to gtkui_complete to clean up the GladeXML objects.
+
+  04/21/2000:  Cleaned up a bit too much, too soon in gtkui_complete. 
+               Removed the gtk_object_unref for setup_glade because it's 
+	       still in use by the Play Now button if uid is root...
+
+  04/28/2000:  More cleanup problems. Can't unref the gtk objects in 
+               gtkui_complete...too much is still in use. Maybe make a cleanup
+	       routine that gets called by the exit and play button handlers.
+	       
+	       Added code to disable the View Readme button (all 3 of them)
+	       when it is clicked. That way, the user can have only 1 instance
+	       of the readme dialog. Multiple instances was causing a problem
+	       for the destroy routine. Destroying the latest instance 
+	       worked OK. Destroying the others caused a seg fault. Readme
+	       buttons are re-enabled when the dialog is closed.
+
+	       Cleaned up close_view_readme_slot to avoid the duplication with
+	       destroy_view_readme. close now just calls destroy.
 */
 
 #include <limits.h>
@@ -56,6 +96,8 @@ typedef struct {
 } option_data;
 
 static GladeXML *setup_glade;
+static GladeXML *setup_glade_readme;
+static GladeXML *setup_glade_license;
 static int cur_state;
 static install_info *cur_info;
 static int diskspace;
@@ -65,6 +107,7 @@ static int license_okay;
 static void check_install_button(void);
 static void update_space(void);
 static void update_size(void);
+void setup_destroy_view_readme_slot(GtkWidget*, gpointer);
 
 static int iterate_for_state(void)
 {
@@ -152,11 +195,25 @@ static gboolean load_file( GtkText *widget, GdkFont *font, const char *file )
 }
 
 void setup_close_view_readme_slot( GtkWidget* w, gpointer data )
+{  
+    setup_destroy_view_readme_slot(w, data);
+}
+
+void setup_destroy_view_readme_slot( GtkWidget* w, gpointer data )
 {
     GtkWidget *widget;
-
-    widget = glade_xml_get_widget(setup_glade, "readme_dialog");
+    
+    widget = glade_xml_get_widget(setup_glade_readme, "readme_dialog");
     gtk_widget_hide(widget);
+    gtk_object_unref(GTK_OBJECT(setup_glade_readme));
+    // re-enable the 'view readme buttons...all 3 of them since we don't
+    // know where we are
+    widget = glade_xml_get_widget(setup_glade, "button_readme");
+    gtk_widget_set_sensitive(widget, 1);
+    widget = glade_xml_get_widget(setup_glade, "button13");
+    gtk_widget_set_sensitive(widget, 1);
+    widget = glade_xml_get_widget(setup_glade, "button16");
+    gtk_widget_set_sensitive(widget, 1);
 }
 
 void setup_button_view_readme_slot( GtkWidget* w, gpointer data )
@@ -164,14 +221,23 @@ void setup_button_view_readme_slot( GtkWidget* w, gpointer data )
     GtkWidget *readme;
     GtkWidget *widget;
     const char *file;
-
-    readme = glade_xml_get_widget(setup_glade, "readme_dialog");
-    widget = glade_xml_get_widget(setup_glade, "readme_area");
+    
+    setup_glade_readme = glade_xml_new(SETUP_GLADE, "readme_dialog");
+    glade_xml_signal_autoconnect(setup_glade_readme);
+    readme = glade_xml_get_widget(setup_glade_readme, "readme_dialog");
+    widget = glade_xml_get_widget(setup_glade_readme, "readme_area");
     file = GetProductREADME(cur_info);
     if ( file && readme && widget ) {
         gtk_widget_hide(readme);
         load_file(GTK_TEXT(widget), NULL, file);
         gtk_widget_show(readme);
+	// there are 3 'view readme' buttons...disable all of them
+	widget = glade_xml_get_widget(setup_glade, "button_readme");
+	gtk_widget_set_sensitive(widget, 0);
+	widget = glade_xml_get_widget(setup_glade, "button13");
+	gtk_widget_set_sensitive(widget, 0);
+	widget = glade_xml_get_widget(setup_glade, "button16");
+	gtk_widget_set_sensitive(widget, 0);
     }
 }
 
@@ -179,12 +245,21 @@ void setup_button_license_agree_slot( GtkWidget* widget, gpointer func_data )
 {
     GtkWidget *license;
 
-    license = glade_xml_get_widget(setup_glade, "license_dialog");
+    license = glade_xml_get_widget(setup_glade_license, "license_dialog");
     gtk_widget_hide(license);
     license_okay = 1;
     check_install_button();
-
     cur_state = SETUP_OPTIONS;
+}
+
+void setup_destroy_license_slot( GtkWidget* w, gpointer data )
+{
+    GtkWidget *widget;
+    
+    widget = glade_xml_get_widget(setup_glade_license, "license_dialog");
+    gtk_widget_hide(widget);
+    cur_state = SETUP_EXIT;
+    gtk_object_unref(GTK_OBJECT(setup_glade_license));
 }
 
 void setup_button_warning_continue_slot( GtkWidget* widget, gpointer func_data )
@@ -323,7 +398,7 @@ static void check_install_button(void)
   
     /* Get the topmost valid path */
     topmost_valid_path(path_up, cur_info->install_path);
- 
+  
     /* See if we can install yet */
     message = "";
     if ( ! license_okay ) {
@@ -338,7 +413,9 @@ static void check_install_button(void)
         message = _("Install path is not a directory");
     } else if ( access(path_up, W_OK) < 0 ) {
         message = _("No write permissions on the install directory");
-    } else if ( check_deviant_paths(cur_info->config->root->childs) ) {
+	} else if (strcmp(cur_info->symlinks_path, cur_info->install_path) == 0) {
+		message = _("Binary path and install path must be different");
+	} else if ( check_deviant_paths(cur_info->config->root->childs) ) {
         message = _("No write permissions to install a selected package");
     } else if ( cur_info->symlinks_path[0] &&
                (access(cur_info->symlinks_path, W_OK) < 0) ) {
@@ -752,7 +829,7 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
     }
     fclose(opened);
 
-    setup_glade = glade_xml_new(SETUP_GLADE, NULL);
+    setup_glade = glade_xml_new(SETUP_GLADE, "setup_window"); //2nd param was NULL
 
     glade_xml_signal_autoconnect(setup_glade);
 
@@ -802,8 +879,10 @@ static install_state gtkui_license(install_info *info)
     GtkWidget *license;
     GtkWidget *widget;
 
-    license = glade_xml_get_widget(setup_glade, "license_dialog");
-    widget = glade_xml_get_widget(setup_glade, "license_area");
+    setup_glade_license = glade_xml_new(SETUP_GLADE, "license_dialog");
+    glade_xml_signal_autoconnect(setup_glade_license);
+    license = glade_xml_get_widget(setup_glade_license, "license_dialog");
+    widget = glade_xml_get_widget(setup_glade_license, "license_area");
     if ( license && widget ) {
         GdkFont *font;
 
@@ -962,7 +1041,6 @@ static install_state gtkui_complete(install_info *info)
 
     widget = glade_xml_get_widget(setup_glade, "setup_notebook");
     gtk_notebook_set_page(GTK_NOTEBOOK(widget), DONE_PAGE);
-
     widget = glade_xml_get_widget(setup_glade, "install_directory_label");
     gtk_label_set_text(GTK_LABEL(widget), info->install_path);
     widget = glade_xml_get_widget(setup_glade, "play_game_label");
@@ -980,6 +1058,7 @@ static install_state gtkui_complete(install_info *info)
     }
 
     /* TODO: Lots of cleanups here (free() mostly) */
+
     return iterate_for_state();
 }
 
@@ -1017,3 +1096,7 @@ int console_okay(Install_UI *UI)
     return(0);
 }
 #endif
+
+
+
+

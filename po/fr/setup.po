@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: setup 1.0\n"
-"POT-Creation-Date: 2000-05-02 19:42-0700\n"
+"POT-Creation-Date: 2000-05-09 12:45-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Stéphane Peter <megastep@lokigames.com>\n"
 "Language-Team: French <LI@li.org>\n"
@@ -32,11 +32,11 @@ msgid "Binary directory:"
 msgstr "Répertoire binaires:"
 
 #: image/setup.data/setup.glade:546 image/setup.data/setup.glade:838
-#: image/setup.data/setup.glade:1273 image/setup.data/setup.glade:1791
+#: image/setup.data/setup.glade:1273 image/setup.data/setup.glade:1799
 msgid "Cancel"
 msgstr "Annuler"
 
-#: image/setup.data/setup.glade:1698
+#: image/setup.data/setup.glade:1702
 msgid "Close"
 msgstr "Fermer"
 
@@ -69,7 +69,7 @@ msgstr "Espace libre:"
 msgid "Global Options"
 msgstr "Options Globales"
 
-#: image/setup.data/setup.glade:1804
+#: image/setup.data/setup.glade:1812
 msgid "I Agree"
 msgstr "J'accepte"
 
@@ -101,7 +101,7 @@ msgstr "Lancer le brouteur"
 msgid "Launching browser, please wait..."
 msgstr "Lancement du brouteur, veuillez patienter..."
 
-#: image/setup.data/setup.glade:1715
+#: image/setup.data/setup.glade:1719
 msgid "License Agreement"
 msgstr "Accord de licence"
 
@@ -196,7 +196,7 @@ msgstr "[produit]"
 msgid "[warning text]"
 msgstr "[texte d'avertissement]"
 
-#: main.c:73
+#: main.c:77
 #, c-format
 msgid ""
 "Usage: %s [options]\n"
@@ -224,25 +224,25 @@ msgstr ""
 "            0: Debug 1: Tranquille 2: Normal 3: Avertissements 4: Fatal\n"
 "   -V       Affiche la version de setup et sort\n"
 
-#: main.c:136
+#: main.c:140
 msgid "Out of range value, setting verbosity level to normal.\n"
 msgstr "Valeur invalide, le niveau de verbosité est normal.\n"
 
-#: main.c:155
+#: main.c:159
 #, c-format
 msgid "Couldn't load '%s'\n"
 msgstr "Ne peut pas charger '%s'\n"
 
-#: main.c:159
+#: main.c:163
 #, c-format
 msgid "Detected locale is %s"
 msgstr "La localisation détectée est %s"
 
-#: main.c:173
+#: main.c:177
 msgid "No UI drivers available\n"
 msgstr "Aucun pilote d'interface disponible\n"
 
-#: main.c:205
+#: main.c:209
 #, c-format
 msgid ""
 "\n"
@@ -253,54 +253,54 @@ msgstr ""
 "Veuillez monter le CDROM %s.\n"
 "Choisissez Oui pour réessayer, Non pour annuler"
 
-#: install.c:220 install.c:228
+#: install.c:231 install.c:239
 msgid "Out of memory\n"
 msgstr "A cours de mémoire\n"
 
-#: file.c:49 file.c:69 file.c:76 install.c:279 install.c:297 install.c:318
-#: install.c:335 install.c:362
+#: file.c:49 file.c:69 file.c:76 install.c:296 install.c:314 install.c:335
+#: install.c:352 install.c:379
 msgid "Out of memory"
 msgstr "A cours de mémoire"
 
-#: install.c:380
+#: install.c:397
 msgid "Couldn't find your home directory"
 msgstr "Ne peut pas trouver votre répertoire utilisateur"
 
-#: install.c:398
+#: install.c:415
 #, c-format
 msgid "Couldn't find home directory for %s"
 msgstr "Ne peut pas trouver le répertoire de l'utilisateur %s"
 
-#: install.c:458
+#: install.c:475
 msgid "XML: 'lang' tag does not have a mandatory 'lang' attribute"
 msgstr "XML: l'élément 'lang' n'a pas d'attribut 'lang' obligatoire"
 
-#: install.c:466
+#: install.c:483
 #, fuzzy, c-format
 msgid "XML: option listed without translated description for locale '%s'"
 msgstr "XML: option listée sans description traduite"
 
-#: install.c:473
+#: install.c:490
 msgid "XML: option listed without description"
 msgstr "XML: option listée sans description"
 
-#: install.c:606 install.c:617
+#: install.c:623 install.c:634
 #, c-format
 msgid "Unable to remove '%s'"
 msgstr "Impossible de supprimer '%s'"
 
-#: install.c:636
+#: install.c:653
 #, c-format
 msgid "The '%s' RPM was installed or upgraded (version %s, release %s)"
 msgstr ""
 "L'archive RPM '%s' a été installé ou mis à jour (version %s, release %s)"
 
-#: install.c:692
+#: install.c:709
 #, c-format
 msgid "echo \"%s has been uninstalled.\"\n"
 msgstr "echo \"%s a été désinstallé.\"\n"
 
-#: install.c:694
+#: install.c:711
 msgid ""
 "echo\n"
 "echo WARNING: The following RPM archives have been installed or upgraded\n"
@@ -313,12 +313,12 @@ msgstr ""
 "en\n"
 "echo supprimer certains:\n"
 
-#: install.c:728
+#: install.c:745
 #, c-format
 msgid "Please visit %s"
 msgstr "Veuillez visiter %s"
 
-#: install.c:925
+#: install.c:942
 #, c-format
 msgid "Unable to create desktop file '%s'"
 msgstr "Impossible de créer le fichier de bureau '%s'"
@@ -343,17 +343,17 @@ msgstr "Impossible d'installer le fichier RPM: '%s'"
 msgid "Tar: '%s' is unknown file type: %c"
 msgstr "Tar: '%s' a un type de fichier inconnu: %c"
 
-#: copy.c:509
+#: copy.c:514
 #, c-format
 msgid "Unable to copy directory '%s'"
 msgstr "Incapable de copier le répertoire '%s'"
 
-#: copy.c:542 copy.c:591 copy.c:683 copy.c:695
+#: copy.c:547 copy.c:596 copy.c:688 copy.c:700
 #, c-format
 msgid "Unable to find file '%s'"
 msgstr "Incapable de trouver le fichier '%s'"
 
-#: copy.c:579
+#: copy.c:584
 #, c-format
 msgid "Unable to find file '%s' on any of the CDROM drives"
 msgstr "Incapable de trouver le fichier '%s' sur aucun des lecteurs de cédérom"
@@ -442,119 +442,127 @@ msgstr "Ne peut créer de tube, pas de vérification réseau"
 msgid "Fork failed, no network check"
 msgstr "Création de processus échouée, pas de vérification réseau"
 
-#: console_ui.c:17
+#: console_ui.c:26
 msgid "Y"
 msgstr "O"
 
-#: console_ui.c:18
+#: console_ui.c:27
 #, fuzzy
 msgid "N"
 msgstr "N"
 
-#: console_ui.c:44
+#: console_ui.c:53
 msgid "Y/n"
 msgstr "O/n"
 
-#: console_ui.c:47
+#: console_ui.c:56
 msgid "N/y"
 msgstr "N/o"
 
-#: console_ui.c:50 console_ui.c:76
+#: console_ui.c:59 console_ui.c:85
 #, c-format
 msgid "Warning, invalid yesno prompt: %s\n"
 msgstr "Avertissement, invite yesno invalide: %s\n"
 
-#: console_ui.c:70
+#: console_ui.c:79
 msgid "Y/n/?"
 msgstr "O/n/?"
 
-#: console_ui.c:73
+#: console_ui.c:82
 msgid "N/y/?"
 msgstr "N/o/?"
 
-#: console_ui.c:93
+#: console_ui.c:102
 msgid "Continue?"
 msgstr "Continuer?"
 
-#: console_ui.c:136
+#: console_ui.c:145
 #, c-format
 msgid "Install %s?"
 msgstr "Installer %s?"
 
-#: console_ui.c:189
+#: console_ui.c:198
 #, c-format
 msgid "----====== %s installation program ======----\n"
 msgstr "----====== Programme d'installation %s ======----\n"
 
-#: console_ui.c:191
+#: console_ui.c:200
 #, c-format
 msgid "You are running a %s machine with %s\n"
 msgstr "Vous avez une machine %s avec %s\n"
 
-#: console_ui.c:192
+#: console_ui.c:201
 msgid "Hit Control-C anytime to cancel this installation program.\n"
 msgstr ""
 "Appuyez sur Control-C à tout moment pour annuler ce programme "
 "d'installation.\n"
 
-#: console_ui.c:210
+#: console_ui.c:219
 msgid "Do you agree with the license?"
 msgstr "Acceptez-vous cette licence?"
 
-#: console_ui.c:227
+#: console_ui.c:236
 #, c-format
 msgid "Would you like to read the %s file ?"
 msgstr "Voudriez-vous lire le fichier %s ?"
 
-#: console_ui.c:245
+#: console_ui.c:271
 msgid "Please enter the installation path"
 msgstr "Veuillez entrer le chemin d'installation"
 
-#: console_ui.c:259 console_ui.c:272
+#: console_ui.c:287 console_ui.c:306
 #, c-format
 msgid "No write permission to %s\n"
 msgstr "Pas de permissions en écriture pour %s\n"
 
-#: console_ui.c:264
+#: console_ui.c:292
 msgid "Please enter the path for binary installation"
 msgstr "Veuillez entrer le chemin d'installation pour les binaires"
 
-#: console_ui.c:288
+#: console_ui.c:300
+msgid ""
+"Binary path must be different than the install path.\n"
+"The binary path must be an existing directory.\n"
+msgstr ""
+"Le répertoire des binaires doit être différent du répertoire d'installation.\n"
+"Le répertoire des binaires doit exister.\n"
+
+#: console_ui.c:322
 msgid "Do you want to install desktop items?"
 msgstr "Voulez-vous installer des entrées de menu pour les bureaux?"
 
-#: console_ui.c:294
+#: console_ui.c:328
 #, c-format
 msgid "Installing to %s\n"
 msgstr "Installation dans %s\n"
 
-#: console_ui.c:295
+#: console_ui.c:329
 #, c-format
 msgid "%d MB available, %d MB will be installed.\n"
 msgstr "%d Mo disponibles, %d Mo seront installés.\n"
 
-#: console_ui.c:298
+#: console_ui.c:332
 msgid "Continue install?"
 msgstr "Continuer l'installation?"
 
-#: console_ui.c:311
+#: console_ui.c:345
 #, c-format
 msgid "Installing %s ...\n"
 msgstr "Installation de %s ...\n"
 
-#: console_ui.c:322
+#: console_ui.c:356
 msgid "Install aborted - cleaning up files\n"
 msgstr "Installation annulée - nettoyage des fichiers\n"
 
-#: console_ui.c:330
+#: console_ui.c:364
 msgid "Installation complete.\n"
 msgstr "Installation terminée.\n"
 
-#: console_ui.c:334
+#: console_ui.c:368
 msgid "Would you like launch the game now?"
 msgstr "Voulez-vous lancer le jeu maintenant?"
 
-#: console_ui.c:339 gtk_ui.c:224
+#: console_ui.c:373 gtk_ui.c:299
 msgid ""
 "If you run a game as root, the preferences will be stored in\n"
 "root's home directory instead of your user account directory."
@@ -563,93 +571,97 @@ msgstr ""
 "sauvées dans le répertoire utilisateur de root au lieu de celui\n"
 "de votre utilisateur."
 
-#: console_ui.c:371
+#: console_ui.c:405
 #, c-format
 msgid "Thank you for installing %s!\n"
 msgstr "Merci d'avoir installé %s!\n"
 
-#: console_ui.c:376
+#: console_ui.c:410
 msgid "Please visit our website for updates and support.\n"
 msgstr ""
 "Veuillez visiter notre site Web pour les mises à jours et le support "
 "technique.\n"
 
-#: console_ui.c:381
+#: console_ui.c:415
 msgid "Would you like to launch web browser?"
 msgstr "Voulez-vous lancer un brouteur?"
 
-#: console_ui.c:392
+#: console_ui.c:426
 msgid "Standard input is not a terminal!\n"
 msgstr "L'entrée standard n'est pas un terminal!\n"
 
-#: gtk_ui.c:330
+#: gtk_ui.c:405
 msgid "Please respond to the license dialog"
 msgstr "Veuillez répondre au dialogue de la licence"
 
-#: gtk_ui.c:332
+#: gtk_ui.c:407
 msgid "No destination directory selected"
 msgstr "Aucun répertoire destination n'a été sélectionné"
 
-#: gtk_ui.c:334
+#: gtk_ui.c:409
 msgid "Please select at least one option"
 msgstr "Veuillez choisir au moins une option"
 
-#: gtk_ui.c:336
+#: gtk_ui.c:411
 msgid "Not enough free space for the selected options"
 msgstr "Pas assez d'espace disque disponible pour les options choisies"
 
-#: gtk_ui.c:338
+#: gtk_ui.c:413
 msgid "Install path is not a directory"
 msgstr "Le chemin d'installation n'est pas un répertoire"
 
-#: gtk_ui.c:340
+#: gtk_ui.c:415
 msgid "No write permissions on the install directory"
 msgstr "Pas d'accès en écriture pour le répertoire d'installation"
 
-#: gtk_ui.c:342
+#: gtk_ui.c:417
+msgid "Binary path and install path must be different"
+msgstr "Le chemin des binaires et de l'installation doivent être différents"
+
+#: gtk_ui.c:419
 msgid "No write permissions to install a selected package"
 msgstr "Pas d'accès en écriture pour installer un package sélectionné"
 
-#: gtk_ui.c:345
+#: gtk_ui.c:422
 msgid "No write permissions on the binary directory"
 msgstr "Pas d'accès en écriture sur le répertoire des binaires"
 
-#: gtk_ui.c:354
+#: gtk_ui.c:431
 msgid "Ready to install!"
 msgstr "Prêt à installer!"
 
-#: gtk_ui.c:367 gtk_ui.c:381
+#: gtk_ui.c:444 gtk_ui.c:458
 #, fuzzy, c-format
 msgid "%d MB"
 msgstr "%d Mo"
 
-#: gtk_ui.c:478
+#: gtk_ui.c:555
 msgid "Yes"
 msgstr "Oui"
 
-#: gtk_ui.c:479
+#: gtk_ui.c:556
 msgid "No"
 msgstr "Non"
 
-#: gtk_ui.c:498
+#: gtk_ui.c:575
 msgid "Setup"
 msgstr "Installation"
 
-#: gtk_ui.c:610
+#: gtk_ui.c:687
 msgid "Unable to locate 'setup_menuitems_checkbox'"
 msgstr "Impossible de localiser 'setup_menuitems_checkbox'"
 
-#: gtk_ui.c:761
+#: gtk_ui.c:838
 #, c-format
 msgid "%s Setup"
 msgstr "Installation de %s"
 
-#: gtk_ui.c:914
+#: gtk_ui.c:993
 #, c-format
 msgid "Unable to open %s, aborting!\n"
 msgstr "Impossible d'ouvrir %s, annulation!\n"
 
-#: gtk_ui.c:970
+#: gtk_ui.c:1048
 #, c-format
 msgid "Type '%s' to start the program"
 msgstr "Entrez '%s' pour démarrer le programme"

@@ -1,4 +1,14 @@
-/* $Id: install.c,v 1.43 2000-05-03 03:22:21 megastep Exp $ */
+/* $Id: install.c,v 1.44 2000-05-09 19:50:11 megastep Exp $ */
+
+/* Modifications by Borland/Inprise Corp.:
+   04/12/2000: Modifed run_script function to put the full pathname of the
+               script into the temp script file. In some cases, setup was
+	       having trouble finding the script.
+
+   04/21/2000: Setup could not launch the game if the bin dir isn't in the
+               user's path. Changed launch_game so it references the full
+	       pathname for the symlink.
+*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -213,6 +223,7 @@ const char *GetInstallOption(install_info *info, const char *option)
 install_info *create_install(const char *configfile, int log_level)
 {
     install_info *info;
+	char *temppath;
 
     /* Allocate the installation info block */
     info = (install_info *)malloc(sizeof *info);
@@ -251,6 +262,12 @@ install_info *create_install(const char *configfile, int log_level)
     sprintf(info->install_path, "%s/%s", GetDefaultPath(info),
                                          GetProductName(info));
     strcpy(info->symlinks_path, DEFAULT_SYMLINKS);
+
+    /* If the default path starts with a ~, then expand it to the user's
+       home directory */
+    temppath = strdup(info->install_path);
+    expand_home(info, temppath, info->install_path);
+    free(temppath);
     
     /* Start a network lookup for any URL */
     if ( GetProductURL(info) ) {
@@ -765,8 +782,8 @@ install_state launch_game(install_info *info)
     char cmd[PATH_MAX];
 
     if ( info->installed_symlink ) {
-        sprintf(cmd, "%s %s &", info->installed_symlink, info->args);
-        system(cmd);
+        sprintf(cmd, "%s/%s %s &", info->symlinks_path, info->installed_symlink, info->args);
+	system(cmd);
     }
     return SETUP_EXIT;
 }
@@ -938,6 +955,13 @@ int run_script(install_info *info, const char *script, int arg)
     char *script_file;
     FILE *fp;
     int exitval;
+    char *working_dir;
+    int cwd_size = PATH_MAX;
+    
+    /* we need to append the working directory onto the script name so it
+       can always be found */
+    working_dir = (char *) malloc(PATH_MAX);
+    getcwd(working_dir, cwd_size);
 
     sprintf(template, "%s/tmp_script_XXXXXX", info->install_path);
     script_file = mktemp(template);
@@ -954,13 +978,12 @@ int run_script(install_info *info, const char *script, int arg)
                 "SETUP_SYMLINKSPATH=\"%s\"\n"
                 "SETUP_CDROMPATH=\"%s\"\n"
                 "export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH\n"
-                "%s\n",
+                "%s/%s\n",
                 info->name, info->version,
                 info->install_path,
                 info->symlinks_path,
                 num_cdroms > 0 ? cdroms[0] : "",
-                script); 
-                
+                working_dir, script);     
         fchmod(fileno(fp),0755); /* Turn on executable bit */
         fclose(fp);
         if ( arg >= 0 ) {
@@ -973,5 +996,6 @@ int run_script(install_info *info, const char *script, int arg)
     } else {
         exitval = -1;
     }
+    free(working_dir);
     return(exitval);
 }

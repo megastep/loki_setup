@@ -1,5 +1,9 @@
-/* $Id: main.c,v 1.25 2000-05-03 03:22:21 megastep Exp $ */
+/* $Id: main.c,v 1.26 2000-05-09 19:50:11 megastep Exp $ */
 
+/* Modifications by Borland/Inprise Corp.
+   04/10/2000: Added code to expand ~ in a default path immediately after 
+               XML is loaded 
+*/
 #include <stdio.h>
 #include <setjmp.h>
 #include <signal.h>

@@ -1,3 +1,12 @@
+/* Modifications by Borland/Inprise Corp.
+   04/11/2000: copied topmost_valid_path function from gtk_ui.c and added 
+               code to install_state function to use the topmost path for
+	       checking write access.
+
+	       added check in install_state to make sure install and binary
+	       paths are different. If not give an error and ask for paths
+	       again.
+*/
 
 #include <limits.h>
 #include <stdio.h>
@@ -233,6 +242,23 @@ static install_state console_readme(install_info *info)
     return SETUP_OPTIONS;
 }
 
+/* stolen from gtk_ui.c to validate write access to install directory */
+void topmost_valid_path(char *target, const char *src) {
+    char *cp;
+  
+    /* Get the topmost valid path */
+    strcpy(target, src);
+    if ( target[0] == '/' ) {
+        cp = target+strlen(target);
+        while ( access(target, F_OK) < 0 ) {
+            while ( (cp > (target+1)) && (*cp != '/') ) {
+                --cp;
+            }
+            *cp = '\0';
+        }
+    }
+}
+
 static install_state console_setup(install_info *info)
 {
     int okay;
@@ -249,12 +275,14 @@ static install_state console_setup(install_info *info)
         set_installpath(info, path);
 
         /* Check permissions on the install path */
-        strcpy(path, info->install_path);
-        if ( access(path, F_OK) < 0 ) {
+	topmost_valid_path(path, info->install_path);
+        
+	if ( access(path, F_OK) < 0 ) {
             if ( (strcmp(path, "/") != 0) && strrchr(path, '/') ) {
                 *(strrchr(path, '/')+1) = '\0';
             }
         }
+
         if ( access(path, W_OK) < 0 ) {
             printf(_("No write permission to %s\n"), path);
             continue;
@@ -266,6 +294,12 @@ static install_state console_setup(install_info *info)
             return SETUP_ABORT;
         }
         set_symlinkspath(info, path);
+
+	/* If the binary and install path are the same, give an error */
+	if (strcmp(info->symlinks_path, info->install_path) == 0) {
+	    printf(_("Binary path must be different than the install path.\nThe binary path must be an existing directory.\n"));
+	    continue;
+	}
 
         /* Check permissions on the symlinks path */
         if ( access(info->symlinks_path, W_OK) < 0 ) {
