@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.8 2003-02-27 06:16:01 megastep Exp $
+ * $Id: dialog_ui.c,v 1.9 2003-04-12 01:46:01 megastep Exp $
  */
 
 #include <limits.h>
@@ -207,6 +207,11 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr pa
 options_loop:  
 	clear_screen();
 	snprintf(buf, sizeof(buf), _("Installation of %s"), info->desc); 
+	if ( nb_choices == 0 ) {
+		dialog_prompt(_("No installation options detected. If the product is already\n"
+						"installed, please uninstall it before reinstalling.\n"), RESPONSE_OK);
+		return 0;
+	}
 	if ( dialog_checklist(buf, text,
 						  7+nb_choices, COLS*9/10, nb_choices, nb_choices, choices, 
 						  !exclusive, result) != DLG_EXIT_OK) {
