@@ -291,18 +291,18 @@ ssize_t copy_file(install_info *info, const char *cdrom, const char *path, const
 			log_warning(_("Unable to create %s symlink pointing to %s"), final, buf);
 		}
 	} else {
-		size_t copied;
+		ssize_t copied = -1;
 		char sum[CHECKSUM_SIZE+1];
 		/* Optional MD5 sum can be specified in the XML file */
-		const char *md5 = xmlGetProp(node, "md5sum");
-		const char *mut = xmlGetProp(node, "mutable");
-		const char *uncompress = xmlGetProp(node, "process");
-		const char *mode_str = xmlGetProp(node, "mode");
+		char *md5 = xmlGetProp(node, "md5sum");
+		char *mut = xmlGetProp(node, "mutable");
+		char *uncompress = xmlGetProp(node, "process");
+		char *mode_str = xmlGetProp(node, "mode");
 		int mode = binary ? 0755 : 0644;
 
 		input = file_open(info, fullpath, "r");
 		if ( input == NULL ) {
-			return(-1);
+			goto copy_file_exit;
 		}
 		/* To avoid problem with busy binary files, remove them first if they exist */
 		if ( binary && file_exists(final) ) {
@@ -311,7 +311,7 @@ ssize_t copy_file(install_info *info, const char *cdrom, const char *path, const
 		output = file_open(info, final, (mut && *mut=='y') ? "wm" : "w");
 		if ( output == NULL ) {
 			file_close(info, input);
-			return(-1);
+			goto copy_file_exit;
 		}
 
 		if ( mode_str ) {
@@ -348,7 +348,7 @@ ssize_t copy_file(install_info *info, const char *cdrom, const char *path, const
 			}
 			push_curdir(dir);
 			if ( run_script(info, buf, 0, 1) == 0 ) {
-				const char *target = xmlGetProp(node, "target");
+				char *target = xmlGetProp(node, "target");
 				if ( target ) {
 					char targetpath[PATH_MAX];
 					/* Substitute the original file name */
@@ -362,6 +362,7 @@ ssize_t copy_file(install_info *info, const char *cdrom, const char *path, const
 						snprintf(fullpath, sizeof(fullpath), "%s/%s", dir, targetpath);
 					}
 					file_chmod(info, targetpath, mode);
+					xmlFree(target);
 				} else {
 					file_chmod(info, fullpath, mode);
 				}
@@ -385,6 +386,8 @@ ssize_t copy_file(install_info *info, const char *cdrom, const char *path, const
 				log_fatal(_("File '%s' has an invalid checksum! Aborting."), base);
 			}
 		}
+	copy_file_exit:
+		xmlFree(md5); xmlFree(mut); xmlFree(uncompress); xmlFree(mode_str);
 	}
     return size;
 }
@@ -553,14 +556,16 @@ ssize_t copy_manpage(install_info *info, xmlNodePtr node, const char *dest,
 {
     ssize_t copied = 0;
 	char fpat[PATH_MAX], final[PATH_MAX];
-	const char *section = xmlGetProp(node, "section"), *name = xmlGetProp(node, "name");
+	char *section = xmlGetProp(node, "section"), *name = xmlGetProp(node, "name");
 	struct file_elem *file = NULL;
 
 	snprintf(fpat, sizeof(fpat), "man/man%s/%s.%s", section, name, section);
 	if ( from_cdrom ) {
         const char *cdpath = get_cdrom(info, from_cdrom);
-        if ( !cdpath )
+        if ( !cdpath ) {
+			xmlFree(section); xmlFree(name);
             return 0;
+		}
 
 		copied = copy_file(info, cdpath, fpat, dest, final, 0, 0, node, update, &file);
 	} else {
@@ -578,6 +583,7 @@ ssize_t copy_manpage(install_info *info, xmlNodePtr node, const char *dest,
 		}
 		add_man_entry(info, current_option, file, section);
 	}
+	xmlFree(section); xmlFree(name);
 	return copied;
 }
 
@@ -587,13 +593,18 @@ ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, c
 {
     struct stat sb;
     char fpat[PATH_MAX], bin[PATH_MAX], final[PATH_MAX], fdest[PATH_MAX];
-    const char *arch, *libc, *keepdirs, *binpath, *os;
+    char *keepdirs, *binpath;
+	const char *arch, *libc, *os;
     ssize_t size, copied;
-    const char *inrpm = xmlGetProp(node, "inrpm");
-    int in_rpm = (inrpm && !strcasecmp(inrpm, "true"));
+    char *inrpm = xmlGetProp(node, "inrpm");
+    int in_rpm;
     int count, i;
     struct file_elem *file = NULL;
 
+	in_rpm = (inrpm && !strcasecmp(inrpm, "true"));
+	xmlFree(inrpm);
+
+	/* FIXME: This leaks */
     arch = xmlGetProp(node, "arch");
     if ( !arch || !strcasecmp(arch,"any") ) {
         arch = info->arch;
@@ -637,7 +648,7 @@ ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, c
 				cdpath = get_cdrom(info, from_cdrom);
 
                 if ( ! cdpath ) {
-                    return 0;
+					goto copy_binary_exit;
                 }
 			}
 
@@ -708,7 +719,7 @@ ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, c
 			ui_fatal_error(_("Unable to copy file '%s'"), fpat);
         } else if ( copied > 0 || in_rpm ) {
             char *symlink = xmlGetProp(node, "symlink");
-            char sym_to[PATH_MAX];
+            char sym_to[PATH_MAX], *desc, *menu, *name, *icon, *play;
 
             size += copied;
             /* Create the symlink */
@@ -717,14 +728,18 @@ ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, c
                 file_symlink(info, final, sym_to);
             }
             add_bin_entry(info, current_option, file, symlink,
-						  xmlGetProp(node, "desc"),
-						  xmlGetProp(node, "menu"),
-						  xmlGetProp(node, "name"),
-						  xmlGetProp(node, "icon"),
-						  xmlGetProp(node, "play")
+						  desc = xmlGetProp(node, "desc"),
+						  menu = xmlGetProp(node, "menu"),
+						  name = xmlGetProp(node, "name"),
+						  icon = xmlGetProp(node, "icon"),
+						  play = xmlGetProp(node, "play")
 						  );
+			xmlFree(desc); xmlFree(menu); xmlFree(name); xmlFree(icon); xmlFree(play);
+			xmlFree(symlink);
         }
     }
+ copy_binary_exit:
+	xmlFree(keepdirs); xmlFree(binpath);
     return size;
 }
 
@@ -765,30 +780,34 @@ ssize_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
                 int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     ssize_t size, copied;
-    char tmppath[PATH_MAX];
+    char tmppath[PATH_MAX], *tmp;
     const char *str;
 
     if ( !strcmp(node->name, "option") ) {
         str = xmlNodeListGetString(info->config, node->childs, 1);    
         parse_line(&str, tmppath, sizeof(tmppath));
-        current_option = add_option_entry(current_component, tmppath, xmlGetProp(node, "tag"));
+        current_option = add_option_entry(current_component, tmppath, tmp = xmlGetProp(node, "tag"));
+		xmlFree(tmp);
     }
 
     size = 0;
     node = node->childs;
     while ( node ) {
         const char *path = xmlGetProp(node, "path");
-		const char *srcpath = xmlGetProp(node, "srcpath");
+		char *srcpath = xmlGetProp(node, "srcpath");
 		const char *from_cdrom = xmlGetProp(node, "cdromid");
-		int lang_matched = match_locale(xmlGetProp(node, "lang"));
+		int lang_matched = match_locale(tmp = xmlGetProp(node, "lang"));
 		int strip_dirs = 0;
+
+		xmlFree(tmp);
 
 		/* check deprecated cdrom tag */
         if ( !from_cdrom && GetProductCDROMRequired(info) ) {
-			const char *tmp = xmlGetProp(node, "cdrom");
+			tmp = xmlGetProp(node, "cdrom");
 			if (tmp && !strcmp(tmp, "yes")) {
 				from_cdrom = info->name;
 			}
+			xmlFree(tmp);
         }
 		
         if (!path)
@@ -839,8 +858,8 @@ ssize_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
 					size += copied;
 				}
 			} else if ( strcmp(node->name, "script") == 0 ) {
-				const char *sz= xmlGetProp(node, "size");
-				const char *msg= xmlGetProp(node, "message");
+				char *sz= xmlGetProp(node, "size");
+				char *msg= xmlGetProp(node, "message");
 				int rc;
 				rc = copy_script(info, node,
 					    xmlNodeListGetString(info->config, node->childs, 1),
@@ -849,10 +868,12 @@ ssize_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
 					info->installed_bytes += atoi(sz);
 					size += atoi(sz);
 				}
+				xmlFree(sz); xmlFree(msg);
 			}
 		}
         /* Do not handle exclusive elements here; it gets called multiple times else */
         node = node->next;
+		xmlFree(srcpath);
     }
     return size;
 }
@@ -907,7 +928,7 @@ ssize_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
 		} else if ( ! strcmp(node->name, "remove_msg" ) ) {
 			const char *text;
 			static char line[BUFSIZ], buf[BUFSIZ];
-			const char *prop = xmlGetProp(node, "lang");
+			char *prop = xmlGetProp(node, "lang");
 			if ( match_locale(prop) ) {
 				if ( ! current_component ) {
 					log_fatal(_("The remove_msg element should be within a component!\n"));
@@ -926,8 +947,9 @@ ssize_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
 					current_component->message = strdup(buf);
 				}
 			}
+			xmlFree(prop);
 		} else if ( ! strcmp(node->name, "component" ) ) {
-            const char *name, *version;
+            char *name, *version;
             name = xmlGetProp(node, "name");
             if ( !name )
                 log_fatal(_("Component element needs to have a name"));
@@ -948,13 +970,16 @@ ssize_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
                 }
 				current_component = NULL; /* Out of the component */
             }
+			xmlFree(name);
+			xmlFree(version);
         } else if ( ! strcmp(node->name, "environment") ) {
-			const char *prop = xmlGetProp(node, "var");
+			char *prop = xmlGetProp(node, "var");
 			if ( prop ) {
 				add_envvar_entry(info, current_component, prop);
 			} else {
 				log_fatal(_("Malformed 'environment' element in XML file : missing 'var' property"));
 			}
+			xmlFree(prop);
 		}
         node = node->next;
     }
@@ -965,14 +990,16 @@ ssize_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
 ssize_t size_manpage(install_info *info, xmlNodePtr node, const char *from_cdrom)
 {
     struct stat sb;
-    char fpat[BUFSIZ], final[BUFSIZ];
-	const char *section = xmlGetProp(node, "section"), *name = xmlGetProp(node, "name");
+    char fpat[BUFSIZ];
+	char *section = xmlGetProp(node, "section"), *name = xmlGetProp(node, "name");
     ssize_t size = 0;
 
 	if ( from_cdrom ) {
         const char *cdpath = get_cdrom(info, from_cdrom);
-        if ( !cdpath )
+        if ( !cdpath ) {
+			xmlFree(section); xmlFree(name);
             return 0;
+		}
 
 		snprintf(fpat, sizeof(fpat), "%s/man/man%s/%s.%s", cdpath, section, name, section);
 		if ( stat(fpat, &sb) == 0 ) {
@@ -985,6 +1012,7 @@ ssize_t size_manpage(install_info *info, xmlNodePtr node, const char *from_cdrom
 			size += sb.st_size;
 		}
 	}
+	xmlFree(section); xmlFree(name);
 	return size;
 }
 
@@ -1088,19 +1116,21 @@ ssize_t size_list(install_info *info, const char *from_cdrom, const char *srcpat
 /* Get the install size of an option node, in bytes */
 ssize_t size_readme(install_info *info, xmlNodePtr node)
 {
-    const char *lang_prop;
+    char *lang_prop;
+	int ret = 0;
 
     lang_prop = xmlGetProp(node, "lang");
 	if (lang_prop && match_locale(lang_prop) ) {
-		return size_list(info, 0, ".", xmlNodeListGetString(info->config, node->childs, 1));
+		ret = size_list(info, 0, ".", xmlNodeListGetString(info->config, node->childs, 1));
 	}
-	return 0;
+	xmlFree(lang_prop);
+	return ret;
 }
 
 /* Get the install size of an option node, in bytes */
 unsigned long long size_node(install_info *info, xmlNodePtr node)
 {
-    const char *size_prop, *lang_prop;
+    char *size_prop, *lang_prop;
     unsigned long long size = 0;
 	int lang_matched = 1;
 
@@ -1125,11 +1155,13 @@ unsigned long long size_node(install_info *info, xmlNodePtr node)
 				log_warning(_("Suspect size value for option %s\n"), node->name);
 			}
 		}
+		xmlFree(size_prop);
     }
 
     lang_prop = xmlGetProp(node, "lang");
 	if (lang_prop) {
 		lang_matched = match_locale(lang_prop);
+		xmlFree(lang_prop);
 	}
     /* Now, if necessary, scan all the files to install */
     if ( size == 0 ) {
@@ -1171,7 +1203,7 @@ unsigned long long size_tree(install_info *info, xmlNodePtr node)
     unsigned long long size = 0;
 
     while ( node ) {
-        const char *wanted;
+        char *wanted;
 
 		if ( ! strcmp(node->name, "option") ) {
 			wanted = xmlGetProp(node, "install");
@@ -1179,6 +1211,7 @@ unsigned long long size_tree(install_info *info, xmlNodePtr node)
 				size += size_node(info, node);
 				size += size_tree(info, node->childs);
 			}
+			xmlFree(wanted);
 		} else if ( !strcmp(node->name, "exclusive") ) {
 			size += size_tree(info, node->childs);
         } else if ( !strcmp(node->name, "component") ) {

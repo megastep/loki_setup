@@ -10,6 +10,7 @@
 
 #include <limits.h>
 #include <parser.h>		/* From gnome-xml */
+#include <xmlmemory.h>
 
 /* Conversion macro for bytes to megabytes */
 #define BYTES2MB(bytes) ((bytes/(1024*1024))+1)
