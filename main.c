@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.56 2003-02-27 06:16:01 megastep Exp $ */
+/* $Id: main.c,v 1.57 2003-03-24 00:48:26 zeph Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -90,6 +90,7 @@ void abort_install(void)
 /* List of UI drivers */
 static int (*GUI_okay[])(Install_UI *UI, int *argc, char ***argv) = {
     gtkui_okay,
+    carbonui_okay,
 #ifdef ENABLE_DIALOG
     dialog_okay,
 #endif

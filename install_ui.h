@@ -36,6 +36,7 @@ typedef struct {
 extern int console_okay(Install_UI *UI, int *argc, char ***argv);
 extern int gtkui_okay(Install_UI *UI, int *argc, char ***argv);
 extern int dialog_okay(Install_UI *UI, int *argc, char ***argv);
+extern int carbonui_okay(Install_UI *UI, int *argc, char ***argv);
 
 #endif /* _installui_h */
 
