@@ -8,6 +8,9 @@ extern SetupPlugin tar_plugin;
 #ifdef RPM_SUPPORT
 extern SetupPlugin rpm_plugin;
 #endif
+#ifdef ZIP_SUPPORT
+extern SetupPlugin zip_plugin;
+#endif
 #ifdef OUTRAGE_SUPPORT
 extern SetupPlugin opkg_plugin;
 #endif
@@ -23,6 +26,9 @@ SetupPlugin *static_plugins[] = {
 	&tar_plugin,
 #ifdef RPM_SUPPORT
 	&rpm_plugin,
+#endif
+#ifdef ZIP_SUPPORT
+	&zip_plugin,
 #endif
 #ifdef OUTRAGE_SUPPORT
  	&opkg_plugin,

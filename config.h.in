@@ -1,44 +1,76 @@
 /* config.h.in.  Generated automatically from configure.in by autoheader.  */
 
-/* Define if you have the strcasecmp function.  */
-#undef HAVE_STRCASECMP
+/* Dynamic plugin support. */
+#undef DYNAMIC_PLUGINS
 
-/* Define if you have the <dirent.h> header file.  */
-#undef HAVE_DIRENT_H
+/* RPM support. */
+#undef ENABLE_RPM
 
-/* Define if you have the <dir.h> header file.  */
-#undef HAVE_DIR_H
-
-/* Define if you have the <gtk.h> header file.  */
-#undef HAVE_GTK_H
-
-/* Define if you have the <ncurses/term.h> header file.  */
-#undef HAVE_NCURSES_TERM_H
-
-/* Define if you have the <ndir.h> header file.  */
-#undef HAVE_NDIR_H
-
-/* Define if you have the <pwd.h> header file.  */
-#undef HAVE_PWD_H
-
-/* Define if you have the <sys/ndir.h> header file.  */
-#undef HAVE_SYS_NDIR_H
-
-/* Define if you have the <unistd.h> header file.  */
-#undef HAVE_UNISTD_H
+/* ZIP support. */
+#undef ENABLE_ZIP
 
 /* libbz2 support. */
 #undef HAVE_BZIP2_SUPPORT
 
-/* libbz2 has BZ_ prefix. */
+/* Define if you have the <dirent.h> header file. */
+#undef HAVE_DIRENT_H
+
+/* Define if you have the <dir.h> header file. */
+#undef HAVE_DIR_H
+
+/* Define if you have the <gtk.h> header file. */
+#undef HAVE_GTK_H
+
+/* Define if you have the <libutil.h> header file. */
+#undef HAVE_LIBUTIL_H
+
+/* Define if you have the <ncurses/term.h> header file. */
+#undef HAVE_NCURSES_TERM_H
+
+/* Define if you have the <ndir.h> header file. */
+#undef HAVE_NDIR_H
+
+/* Define if you have the `openpty' function. */
+#undef HAVE_OPENPTY
+
+/* Define if you have the `ptsname_r' function. */
+#undef HAVE_PTSNAME_R
+
+/* Define if you have the <pty.h> header file. */
+#undef HAVE_PTY_H
+
+/* Define if you have the <pwd.h> header file. */
+#undef HAVE_PWD_H
+
+/* Define if you have the `strcasecmp' function. */
+#undef HAVE_STRCASECMP
+
+/* Define if you have the `strlcpy' function. */
+#undef HAVE_STRLCPY
+
+/* Define if you have the <sys/ndir.h> header file. */
+#undef HAVE_SYS_NDIR_H
+
+/* Define if you have the <sys/stropts.h> header file. */
+#undef HAVE_SYS_STROPTS_H
+
+/* Define if you have the `ttyname_r' function. */
+#undef HAVE_TTYNAME_R
+
+/* Define if you have the <unistd.h> header file. */
+#undef HAVE_UNISTD_H
+
+/* Define if you have the <util.h> header file. */
+#undef HAVE_UTIL_H
+
+/* Define if you have the `vhangup' function. */
+#undef HAVE_VHANGUP
+
+/* Define if you have the file `AC_File'. */
+#undef HAVE__DEV_PTS
+
+/* Define if you have the `_getpty' function. */
+#undef HAVE__GETPTY
+
+/* libbz2 has "BZ_" prefix. */
 #undef LIBBZ2_PREFIX
-
-/* RPM support. */
-#undef ENABLE_RPM
-
-/* RPM support. */
-#undef ENABLE_RPM
-
-/* Dynamic plugin support. */
-#undef DYNAMIC_PLUGINS
-

@@ -177,6 +177,17 @@ if test x$HAVE_BZIP2_SUPPORT = xyes; then
 fi
 
 
+dnl enable ZIP support
+AC_ARG_ENABLE(zip,
+[  --enable-zip              enable ZIP archives support  [default=no]],
+              , enable_zip=no)
+if test x$enable_zip = xyes; then
+  PLUGINS="$PLUGINS zip.c"
+  CFLAGS="$CFLAGS -DZIP_SUPPORT"
+  AC_DEFINE(ENABLE_ZIP, 1, ZIP support.)
+fi
+
+
 dnl enable RPM support
 AC_ARG_ENABLE(rpm,
 [  --enable-rpm              enable RPM archives support  [default=no]],
@@ -192,7 +203,7 @@ if test x$enable_rpm = xyes; then
 fi
 dnl RPM 4.x support, needs additional libraries
 AC_ARG_ENABLE(rpm4,
-[  --enable-rpm4             enable RPM4 archives support  [default=no]],
+[  --enable-rpm4             enable RPM4 archives support [default=no]],
               , enable_rpm=no)
 if test x$enable_rpm4 = xyes; then
         if test x$HAVE_BZIP2_SUPPORT != xyes; then
