@@ -301,6 +301,7 @@ msgid "Invalid matching policy: %s"
 msgstr "Ogiltig: %s"
 
 #: plugins.c:96
+#, c-format
 msgid ""
 "Registered plugins :\n"
 "\n"
@@ -320,6 +321,7 @@ msgstr ""
 "\tFörfattare: %s\n"
 
 #: plugins.c:101
+#, c-format
 msgid "\tPlugin is statically linked.\n"
 msgstr "\tPluginen är statiskt länkad.\n"
 
@@ -602,7 +604,7 @@ msgstr "Konstigt storleksvärde för valmöljlighet %s\n"
 #: file.c:143
 #, c-format
 msgid "File '%25s' already exists, overwrite?"
-msgstr "Filen '%25s finns, skriv över?"
+msgstr "Filen '%25s' finns, skriv över?"
 
 #: file.c:148
 #, c-format
@@ -612,7 +614,7 @@ msgstr "Filen finns: '%s'"
 #: file.c:182
 #, c-format
 msgid "Failed to open file %s"
-msgstr "Kan inte öppna filen '%s'"
+msgstr "Kan inte öppna filen %s"
 
 #: file.c:212
 #, c-format
@@ -763,8 +765,8 @@ msgstr ""
 "   -m       Använd manual uppacking av RPM-paket. Updatera inte "
 "RPM-databasen\n"
 "   -n       Använd textgränssnittet\n"
-"   -o opt   Aktivera option \"opt\" från XML filen aktiverar också icke\n"
-"            interaktiva operationer. Kan användas flera gånger.\n"
+"   -o opt   Aktivera option \"opt\" från XML filen aktiverar också icke "
+"interaktiva operationer. Kan användas flera gånger.\n"
 "   -p pref  Specificera en sökvägsprefix i installations mediet.\n"
 "   -r root  Sätt root-biblioteket för RPM-uppackning (förval är /)\n"
 "   -v n     Sätt verbosity level till n. Godkända värden:\n"
@@ -800,8 +802,8 @@ msgstr ""
 "   -c cwd   Använd ett alternativt cwd för installationen\n"
 "   -f file  Använd en alternativ XML-fil (förval är %s)\n"
 "   -n       Använd textgränssnittet\n"
-"   -o opt   Aktivera option \"opt\" från XML filen aktiverar också icke\n"
-"            interaktiva operationer. Kan användas flera gånger.\n"
+"   -o opt   Aktivera option \"opt\" från XML filen aktiverar också icke "
+"interaktiva operationer. Kan användas flera gånger.\n"
 "   -p pref  Specificera en sökvägsprefix i installations mediet.\n"
 "   -v n     Sätt verbosity level till n. Godkända värden:\n"
 "            0: Debug  1: Tyst  2: Normalt 3: Varningar 4: Fatala\n"
@@ -972,6 +974,7 @@ msgid "You are running a %s machine with %s\n"
 msgstr "Du har en %s-dator med %s\n"
 
 #: console_ui.c:300
+#, c-format
 msgid "Hit Control-C anytime to cancel this installation program.\n"
 msgstr "Tryck Control-C närsomhelst för att avbryta installationsprocessen.\n"
 
@@ -1016,6 +1019,7 @@ msgid "Please enter the path in which to install manual pages for this product"
 msgstr "Ange biblioteket där du vill installera mansidorna for produkten"
 
 #: console_ui.c:490 dialog_ui.c:455
+#, c-format
 msgid ""
 "Binary path must be different than the install path.\n"
 "The binary path must be an existing directory.\n"
@@ -1061,6 +1065,7 @@ msgid "ERROR: vcdk is missing. Installation aborted.\n"
 msgstr "FEL: vcdk saknas. Installationen avbryts.\n"
 
 #: console_ui.c:582 dialog_ui.c:540
+#, c-format
 msgid ""
 "CD key is invalid!\n"
 "Please double check your key and enter it again.\n"
@@ -1074,6 +1079,7 @@ msgid "Installing %s ...\n"
 msgstr "Installerar %s ...\n"
 
 #: console_ui.c:627 dialog_ui.c:601
+#, c-format
 msgid "Install aborted - cleaning up files\n"
 msgstr "Installationen avbruten - tar bort temporärfiler\n"
 
@@ -1114,6 +1120,7 @@ msgid "Thank you for installing %s!\n"
 msgstr "Tack för att du installerade %s!\n"
 
 #: console_ui.c:682
+#, c-format
 msgid "Please visit our website for updates and support.\n"
 msgstr "Besök gärna vår webbplats för uppdateringar och support.\n"
 
@@ -1122,6 +1129,7 @@ msgid "Would you like to launch web browser?"
 msgstr "Vill du starta en webbläsare?"
 
 #: console_ui.c:698
+#, c-format
 msgid "Standard input is not a terminal!\n"
 msgstr "Standard input är inte en terminal!\n"
 

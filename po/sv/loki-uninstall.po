@@ -116,8 +116,9 @@ msgstr "Komponenten %s har avinstallerats.\n"
 "\n"
 
 #: uninstall.c:227
+#, c-format
 msgid "Uninstall ? [Y/n] "
-msgstr "Avinstallera ? [Y/n] "
+msgstr "Avinstallera ? [J/n] "
 
 #: uninstall.c:231
 msgid "n"
@@ -128,10 +129,12 @@ msgid "N"
 msgstr "N"
 
 #: uninstall.c:232
+#, c-format
 msgid "Aborted.\n"
 msgstr "Avbruten.\n"
 
 #: uninstall.c:282
+#, c-format
 msgid ""
 "No write access to the installation directory.\n"
 "Aborting.\n"
@@ -276,6 +279,7 @@ msgid "Uninstall complete"
 msgstr "Avinstallation klar"
 
 #: uninstall_ui.c:515
+#, c-format
 msgid "No uninstall_vbox in glade file!\n"
 msgstr "Ingen uninstall_vbox i glade-filen!\n"
 
