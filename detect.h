@@ -4,9 +4,6 @@
 
 #define MAX_DRIVES 32
 
-/* Function to detect the current architecture */
-extern const char *detect_arch(void);
-
 /* Function to detect the current version of libc */
 extern const char *detect_libc(void);
 

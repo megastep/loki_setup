@@ -32,32 +32,6 @@
 char *cdroms[MAX_DRIVES];
 int  num_cdroms = 0;
 
-
-/* Function to detect the current architecture */
-const char *detect_arch(void)
-{
-    const char *arch;
-
-    /* See if there is an environment override */
-    arch = getenv("SETUP_ARCH");
-    if ( arch == NULL ) {
-#ifdef __i386
-        arch = "x86";
-#elif defined(powerpc)
-        arch = "ppc";
-#elif defined(__alpha__)
-        arch = "alpha";
-#elif defined(__sparc__)
-        arch = "sparc64";
-#elif defined(__arm__)
-        arch = "arm";
-#else
-        arch = "unknown";
-#endif
-    }
-    return arch;
-}
-
 /* Function to detect the current version of libc */
 const char *detect_libc(void)
 {

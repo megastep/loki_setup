@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.68 2000-10-16 22:12:43 megastep Exp $ */
+/* $Id: install.c,v 1.69 2000-10-17 03:33:57 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -53,7 +53,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
-#include <sys/utsname.h>
 #include <stdlib.h>
 #include <string.h>
 #include <pwd.h>
@@ -65,6 +64,7 @@
 #include "install_log.h"
 #include "install_ui.h"
 #include "detect.h"
+#include "arch.h"
 #include "log.h"
 #include "copy.h"
 #include "file.h"
