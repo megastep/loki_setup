@@ -137,6 +137,9 @@ AC_CHECK_FUNCS(openpty)
 SETUPDB="`pwd`/../loki_setupdb-$PACKAGE_VERSION"
 if test ! -d "$SETUPDB"; then
     SETUPDB="`pwd`/../loki_setupdb"
+	if test ! -d "$SETUPDB"; then
+	    SETUPDB="`pwd`/../setupdb"
+	fi
 fi
 
 
