@@ -430,7 +430,9 @@ ssize_t copy_path(install_info *info, const char *path, const char *dest,
     ssize_t size, copied;
 
     size = 0;
+    
 	//fprintf(stderr, "copy_path %s\n", path);
+
     if ( ! stat(path, &sb) ) {
         if ( S_ISDIR(sb.st_mode) ) {
             copied = copy_directory(info, path, dest, cdrom, node, update);
@@ -446,7 +448,12 @@ ssize_t copy_path(install_info *info, const char *path, const char *dest,
             size += copied;
         }
     } else {
-        log_warning(_("Unable to find file '%s'"), path);
+        //!!!TODO - TEMP
+        char _temp[1024];
+        getcwd(_temp, sizeof(_temp));
+        log_warning(_("1 Unable to find file '%s' in '%s'"), path, _temp);
+        //!!!TODO - END TEMP
+        //log_warning(_("Unable to find file '%s'"), path);
     }
     return size;
 }
@@ -461,7 +468,9 @@ ssize_t copy_list(install_info *info, const char *filedesc, const char *dest,
     ssize_t size, copied;
 
     size = 0;
+
 	//fprintf(stderr, "copy_list %s\n", srcpath);
+
     while ( filedesc && parse_line(&filedesc, fpat, (sizeof fpat)) ) {
         if ( from_cdrom ) {
             char full_cdpath[PATH_MAX];
@@ -499,7 +508,12 @@ ssize_t copy_list(install_info *info, const char *filedesc, const char *dest,
                 }
                 globfree(&globbed);
             } else {
-                log_warning(_("Unable to find file '%s'"), fpat);
+                //!!!TODO - TEMP
+                char _temp[1024];
+                getcwd(_temp, sizeof(_temp));
+                log_warning(_("2 Unable to find file '%s' in '%s'"), fpat, _temp);
+                //!!!TODO - END TEMP
+                //log_warning(_("Unable to find file '%s'"), fpat);
             }
             pop_curdir();
         }
@@ -605,12 +619,24 @@ ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, c
                         check_dynamic(fullpath, bin, cdpath);
                         copied = copy_file(info, cdpath, bin, fdest, final, 1, 1, node, update, &file);
                     } else {
-                        log_warning(_("Unable to find file '%s'"), fpat);
-                        ui_fatal_error(_("Unable to find file '%s'"), fpat);
+                        //!!!TODO - TEMP
+                        char _temp[1024];
+                        getcwd(_temp, sizeof(_temp));
+                        log_warning(_("3 Unable to find file '%s' in '%s'"), fullpath, _temp);
+                        ui_fatal_error(_("3 Unable to find file '%s' in '%s'"), fullpath, _temp);
+                        //!!!TODO - END TEMP
+                        //log_warning(_("Unable to find file '%s'"), fpat);
+                        //ui_fatal_error(_("Unable to find file '%s'"), fpat);
                     }
                 } else {
-                    log_warning(_("Unable to find file '%s'"), fpat);
-                    ui_fatal_error(_("Unable to find file '%s'"), fpat);
+                    //!!!TODO - TEMP
+                    char _temp[1024];
+                    getcwd(_temp, sizeof(_temp));
+                    log_warning(_("4 Unable to find file '%s' in '%s'"), fullpath, _temp);
+                    ui_fatal_error(_("4 Unable to find file '%s' in '%s'"), fullpath, _temp);
+                    //!!!TODO - END TEMP
+                    //log_warning(_("Unable to find file '%s'"), fpat);
+                    //ui_fatal_error(_("Unable to find file '%s'"), fpat);
                 }
 			} else {
 				if ( stat(fpat, &sb) == 0 ) {
@@ -622,12 +648,24 @@ ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, c
 						check_dynamic(fpat, bin, NULL);
 						copied = copy_file(info, NULL, bin, fdest, final, 1, 1, node, update, &file);
 					} else {
-						log_warning(_("Unable to find file '%s'"), fpat);
-                        ui_fatal_error(_("Unable to find file '%s'"), fpat);
+                        //!!!TODO - TEMP
+                        char _temp[1024];
+                        getcwd(_temp, sizeof(_temp));
+                        log_warning(_("5 Unable to find file '%s' in '%s'"), fpat, _temp);
+                        ui_fatal_error(_("5 Unable to find file '%s' in '%s'"), fpat, _temp);
+                        //!!!TODO - END TEMP
+						//log_warning(_("Unable to find file '%s'"), fpat);
+                        //ui_fatal_error(_("Unable to find file '%s'"), fpat);
 					}
 				} else {
-                    log_warning(_("Unable to find file '%s'"), fpat);
-                    ui_fatal_error(_("Unable to find file '%s'"), fpat);
+                    //!!!TODO - TEMP
+                    char _temp[1024];
+                    getcwd(_temp, sizeof(_temp));
+                    log_warning(_("6 Unable to find file '%s' in '%s'"), fpat, _temp);
+                    ui_fatal_error(_("6 Unable to find file '%s' in '%s'"), fpat, _temp);
+                    //!!!TODO - END TEMP
+                    //log_warning(_("Unable to find file '%s'"), fpat);
+                    //ui_fatal_error(_("Unable to find file '%s'"), fpat);
                 }
 			}
 		} else {  /* if inrpm="true" */

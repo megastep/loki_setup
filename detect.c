@@ -45,6 +45,8 @@
 #ifndef MNTTYPE_CDROM
 #ifdef __FreeBSD__
 #define MNTTYPE_CDROM    "cd9660"
+#elif defined(darwin)
+#define MNTTYPE_CDROM    "cd9660"
 #elif defined(hpux)
 #define MNTTYPE_CDROM    "cdfs"
 #elif defined(_AIX)
@@ -178,7 +180,19 @@ int is_fs_mounted(const char *dev)
 		fclose(mtab);
 	}
 #elif defined(darwin)
-        /* FIXME: *mntent not available on darwin */
+    // Taken from FreeBSD section (since Darwin is based on FreeBSD)
+    int count, i;
+    struct statfs *mntbuf;
+
+    count = getmntinfo(&mntbuf, 0);
+    if ( count > 0 ) {
+        for ( i = 0; i < count; ++i ) {
+            if ( !strcmp(mntbuf[i].f_mntfromname, dev) ) {
+                found = 1;
+                break;
+            }
+        }
+    }
 #else
     struct mntent *mnt;
     FILE *mtab = setmntent(MOUNTS_FILE, "r" );
@@ -272,6 +286,38 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
 	int num_cdroms = 0;
 
 #ifdef __FreeBSD__
+	int mounted;
+    struct fstab *fstab;
+
+    /* Try to mount unmounted CDROM filesystems */
+    while( (fstab = getfsent()) != NULL ){
+        if ( !strcmp(fstab->fs_vfstype, MNTTYPE_CDROM)) {
+            if ( !is_fs_mounted(fstab->fs_spec)) {
+                if ( ! run_command(NULL, MOUNT_PATH, fstab->fs_spec, 1) ) {
+                    add_mounted_entry(fstab->fs_spec, fstab->fs_file);
+                    log_normal(_("Mounted device %s"), fstab->fs_spec);
+                }
+            }
+        }
+    }
+    endfsent();
+
+    mounted = getfsstat(NULL, 0, MNT_WAIT);
+    if ( mounted > 0 ) {
+        int i;
+		struct statfs *mnts = (struct statfs *)malloc(sizeof(struct statfs) * mounted);
+
+		mounted = getfsstat(mnts, mounted * sizeof(struct statfs), MNT_WAIT);
+		for ( i = 0; i < mounted && num_cdroms < SETUP_MAX_DRIVES; ++ i ) {
+			if ( ! strcmp(mnts[i].f_fstypename, MNTTYPE_CDROM) ) {
+				path[num_cdroms ++] = strdup(mnts[i].f_mntonname);
+			}
+		}
+		
+		free(mnts);
+    }
+// Copied from FREEBSD version (since it should be the same)
+#elif defined(darwin)
 	int mounted;
     struct fstab *fstab;
 
@@ -406,7 +452,7 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
 	}
     
 #else
-#ifndef darwin
+//#ifndef darwin
     char mntdevpath[PATH_MAX];
     FILE *mountfp;
     struct mntent *mntent;
@@ -484,7 +530,7 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
         }
         endmntent( mountfp );
     }
-#endif
+//#endif
 #endif
 	return num_cdroms;
 }

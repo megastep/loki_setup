@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.80 2003-04-01 03:04:14 megastep Exp $
+   $Id: gtk_ui.c,v 1.81 2003-04-02 00:09:36 zeph Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1729,6 +1729,11 @@ int gtkui_okay(Install_UI *UI, int *argc, char ***argv)
 
 #ifdef STUB_UI
 int console_okay(Install_UI *UI, int *argc, char ***argv)
+{
+    return(0);
+}
+
+int carbonui_okay(Install_UI *UI, int *argc, char ***argv)
 {
     return(0);
 }

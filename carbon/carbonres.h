@@ -14,11 +14,11 @@
 
 // OPTION_GROUP_ID controls
 #define OPTION_INSTALL_PATH_LABEL_ID        200
-#define OPTION_INSTALL_PATH_ENTRY_ID        201
-#define OPTION_INSTALL_PATH_COMBO_ID        207
+#define OPTION_INSTALL_PATH_BUTTON_ID       201
+#define OPTION_INSTALL_PATH_ENTRY_ID        207
 #define OPTION_LINK_PATH_LABEL_ID           203
-#define OPTION_LINK_PATH_ENTRY_ID           204
-#define OPTION_LINK_PATH_COMBO_ID           208
+#define OPTION_LINK_PATH_BUTTON_ID          204
+#define OPTION_LINK_PATH_ENTRY_ID           208
 #define OPTION_SYMBOLIC_LINK_CHECK_ID       202
 #define OPTION_OPTIONS_GROUP_ID             205
 #define OPTION_GLOBAL_OPTIONS_GROUP_ID      209
@@ -27,10 +27,11 @@
 #define OPTION_FREESPACE_VALUE_LABEL_ID     214
 #define OPTION_ESTSIZE_LABEL_ID             215
 #define OPTION_ESTSIZE_VALUE_LABEL_ID       216
-#define OPTION_OPTIONS_SEPARATOR_ID         217
+//#define OPTION_OPTIONS_SEPARATOR_ID         217
+#define OPTION_INNER_OPTIONS_GROUP_ID       217
 #define OPTION_CANCEL_BUTTON_ID             210
 #define OPTION_README_BUTTON_ID             211
-#define OPTION_CONTINUE_BUTTON_ID           212
+#define OPTION_BEGIN_INSTALL_BUTTON_ID      212
 
 // CLASS_GROUP_ID controls
 #define CLASS_TEXT_LABEL_ID                 301
@@ -76,10 +77,24 @@
 #define LOKI_SETUP_SIG      'loki'
 
 // Possible command events that are raised
-#define COMMAND_EXIT        'exit'
-#define COMMAND_CANCEL      'cncl'
-#define COMMAND_CONTINUE    'cont'
-#define COMMAND_README      'read'
+#define COMMAND_EXIT            'exit'
+#define COMMAND_CANCEL          'cncl'
+#define COMMAND_CONTINUE        'cont'
+#define COMMAND_README          'read'
+#define COMMAND_INSTALLPATH     'inst'
+#define COMMAND_BEGIN_INSTALL   'begn'
+#define COMMAND_RECOMMENDED     'recc'
+#define COMMAND_EXPERT          'expr'
+
+#define COMMAND_PROMPT_YES      'yes '
+#define COMMAND_PROMPT_NO       'no  '
+#define COMMAND_PROMPT_OK       'ok  '
+
+#define PROMPT_MESSAGE_LABEL_ID     200
+#define PROMPT_YES_BUTTON_ID        201
+#define PROMPT_NO_BUTTON_ID         203
+#define PROMPT_OK_BUTTON_ID         202
+#define PROMPT_SIGNATURE            'prmt'
 
 // Different screens that we can display
 typedef enum
@@ -100,6 +115,7 @@ typedef struct
 {
     // Object references
     WindowRef Window;
+    WindowRef PromptWindow;
     ControlRef PageHandles[PAGE_COUNT];
 
     int IsShown;
@@ -109,18 +125,25 @@ typedef struct
 } CarbonRes;
 
 // Function declarations
-CarbonRes *carbon_LoadCarbonRes(void (*CommandEventCallback)(UInt32));
+CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32));
 void carbon_UnloadCarbonRes(CarbonRes *);
-int carbon_IterateForState(int *);
+int carbon_IterateForState(CarbonRes *, int *);
 void carbon_ShowInstallScreen(CarbonRes *, InstallPage);
 void carbon_SetWindowTitle(CarbonRes *, char *);
 void carbon_HideControl(CarbonRes *, int);
 void carbon_DisableControl(CarbonRes *, int);
 void carbon_EnableControl(CarbonRes *, int);
 void carbon_SetInstallClass(CarbonRes *, int);
+int carbon_GetInstallClass(CarbonRes *);
 void carbon_UpdateImage(CarbonRes *, const char *, const char *);
-void carbon_HandlePendingEvents();
+void carbon_HandlePendingEvents(CarbonRes *);
 void carbon_SetLabelText(CarbonRes *, int, const char *);
+void carbon_GetLabelText(CarbonRes *, int, char *, int);
+void carbon_SetEntryText(CarbonRes *, int, const char *);
+void carbon_GetEntryText(CarbonRes *, int, char *, int);
 void carbon_SetProgress(CarbonRes *, int, float);
+void carbon_SetCheckbox(CarbonRes *, int, int);
+int carbon_GetCheckbox(CarbonRes *, int);
+int carbon_Prompt(CarbonRes *, int, const char *);
 
 #endif

@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.58 2003-03-30 04:37:07 megastep Exp $ */
+/* $Id: main.c,v 1.59 2003-04-02 00:09:36 zeph Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -295,6 +295,7 @@ int main(int argc, char **argv)
 					state = SETUP_EXIT;
 					continue;
 				}
+                
 				/* Check if we should be root */
 				if ( GetProductRequireRoot(info) && geteuid()!=0 ) {
 					UI.prompt(_("You need to run this installer as the super-user.\n"), RESPONSE_OK);
