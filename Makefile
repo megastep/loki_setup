@@ -4,7 +4,8 @@ libc := $(shell ./print_libc)
 
 CC = gcc
 
-OPTIMIZE = -g -O2 -funroll-loops
+#OPTIMIZE = -g -O2 -funroll-loops
+OPTIMIZE = -g
 HEADERS = -I/usr/lib/glib/include -I/usr/X11R6/include
 OPTIONS = -DSTUB_UI
 CFLAGS += $(OPTIMIZE) $(HEADERS) $(OPTIONS)
@@ -15,7 +16,7 @@ GUI_OBJS = $(OBJS) gtk_ui.o
 
 LIBS = -Wl,-Bstatic -lxml -lz
 CONSOLE_LIBS = $(LIBS)
-GUI_LIBS = $(LIBS) -Wl,-Bdynamic -lgtk -lgdk
+GUI_LIBS = $(LIBS) -Wl,-Bdynamic -lgtk -lgdk -lglade -rdynamic
 
 all: setup setup.gtk
 

@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.4 1999-09-11 02:15:38 hercules Exp $ */
+/* $Id: main.c,v 1.5 1999-09-15 01:49:47 hercules Exp $ */
 
 #include <stdio.h>
 #include <setjmp.h>
@@ -54,6 +54,7 @@ static void print_usage(argv0)
 /* The main installer code */
 int main(int argc, char **argv)
 {
+    int exit_status;
     int i, c;
     Install_UI UI;
     install_info *info;
@@ -116,10 +117,14 @@ int main(int argc, char **argv)
     signal(SIGINT, signal_abort);
 
     /* Run the little state machine */
+    exit_status = 0;
     while ( state != SETUP_EXIT ) {
         switch (state) {
             case SETUP_INIT:
                 state = UI.init(info,argc,argv);
+                if ( state == SETUP_ABORT ) {
+                    exit_status = 1;
+                }
                 break;
             case SETUP_OPTIONS:
                 state = UI.setup(info);
@@ -139,12 +144,11 @@ int main(int argc, char **argv)
             case SETUP_PLAY:
 			    state = launch_game(info);
             case SETUP_EXIT:
-                /* Only here for completeness */
                 break;
         }
     }
 
     /* Cleanup afterwards */
     delete_install(info);
-    return(0);
+    return(exit_status);
 }
