@@ -364,6 +364,7 @@ const char *get_cdrom(install_info *info, const char *id)
     struct cdrom_elem *cd;
 
     while ( ! mounted ) {
+        detect_cdrom(info);
         for ( cd = info->cdroms_list; cd; cd = cd->next ) {
             if ( !strcmp(id, cd->id) ) {
                 desc = cd->name;
@@ -392,7 +393,6 @@ const char *get_cdrom(install_info *info, const char *id)
                 abort_install();
                 return NULL;
             }
-            detect_cdrom(info);
         }
     }
     return mounted;
