@@ -1,4 +1,15 @@
-1.3.1:
+1.4.0:
+Stéphane Peter - Tue Jul 25 19:49:06 PDT 2000
+ * Rewrote the extractor backend to use a plugin subsystem. Plugins can
+   either be compiled in or used as shared library objects (.so files).
+Ryan C. Gordon - Wed Jul 26 16:10:29 PDT 2000
+ * Added plugin for the Outrage PKG format.
+Stéphane Peter - Thu Jul 27 14:02:27 PDT 2000
+ * Added new 'nobinaries' tag for the product element, so that installations
+   that don't install new binaries won't prompt the user for a path.
+Stéphane Peter - Fri Jul 28 18:39:28 PDT 2000
+ * Added new 'required' attribute for the 'option' element, for options that
+   have to be always installed.
 Stéphane Peter - Tue Jun 13 19:30:42 PDT 2000
  * Added new 'splash' attribute to specify alternate splash image.
  * Added support for meta-installations.

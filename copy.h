@@ -8,13 +8,13 @@
 
 /* Copy a path to the destination directory */
 extern size_t copy_path(install_info *info, const char *path, 
-			const char *dest, const char *cdrom, int strip_dirs,
-			int relocate, int autoremove, int nodeps, 
-           void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current));
+						const char *dest, const char *cdrom, int strip_dirs,
+						xmlNodePtr node,
+						void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current));
 
 /* Copy an option tree to the destination directory */
 extern size_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
-           void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current));
+						void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current));
 
 /* Get the install size of an option node, in bytes */
 extern size_t size_node(install_info *info, xmlNodePtr node);

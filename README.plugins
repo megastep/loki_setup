@@ -1,0 +1,30 @@
+         How to write extractor plugins for setup
+         ========================================
+
+Starting from version 1.4.0, setup can be easily extended to recognize
+some additional archive formats through a plugin system. This document
+describes the basic guidelines to write such a plugin.
+
+- Use the sample plugin as a basis for the new plugin (sample.c). You
+  should probably copy this file in the plugins directory to a relevant
+  name.
+
+- Look at other plugins to get an idea of what the implementation of the
+  Copy() and Size() functions should be like. The most important is probably
+  that you MUST use the I/O functions from file.h in order for the files
+  created by your plugin to be registered in setup (for uninstallation purposes).
+  Also it will give you transparent access to compressed files through Zlib, so
+  you may want to register additional extensions for your plugin (i.e. .ext.gz).
+  Also you must call explicitly the 'update' function given to you whenever you
+  can, to update the installation status that the user is presented with.
+
+- Add your plugin on the 'PLUGINS = ...' line in the Makefile in the plugins
+  directory.
+
+- Edit plugins/plugindefs.h and add declarations for your plugin's SetupPlugin
+  structure in there (this will allow it to be statically linked if desired).
+
+- Test it! It's done...
+
+
+Stéphane Peter <megastep@lokigames.com>

@@ -74,7 +74,7 @@ const char *detect_libc(void) {
 
     if ( libcfile ) {
       char buffer[1024];
-      sprintf( buffer, 
+      snprintf( buffer, sizeof(buffer), 
            "fgrep GLIBC_2.1 %s 2>&1 >/dev/null",
            libcfile );
       
@@ -110,7 +110,7 @@ int detect_diskspace(const char *path)
             *cp = '\0';
         }
         if ( buf[0] ) {
-            sprintf(cmd, "df -k %s\n", buf);
+            snprintf(cmd, sizeof(cmd), "df -k %s\n", buf);
             df = popen(cmd, "r");
             if ( df ) {
                 fgets(buf, (sizeof buf)-1, df);
@@ -153,7 +153,7 @@ int detect_cdrom(const char *unique_file)
                         *tmp = '\0';
                     }
                 }
-                 tmp = strstr(mntent->mnt_opts, "dev=");
+				tmp = strstr(mntent->mnt_opts, "dev=");
                 if ( tmp ) {
                     strcpy(mntdev, tmp+strlen("dev="));
                     tmp = strchr(mntdev, ',');
@@ -170,7 +170,7 @@ int detect_cdrom(const char *unique_file)
                 if ( unique_file ) {
                     char file[PATH_MAX];
 
-                    sprintf(file, "%s/%s", mntent->mnt_dir, unique_file);
+                    snprintf(file, sizeof(file), "%s/%s", mntent->mnt_dir, unique_file);
                     if ( access(file, F_OK) < 0 ) {
                         continue;
                     }

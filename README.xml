@@ -113,6 +113,10 @@ There are several optional attributes of the install element:
             named 'uninstall', which can be a problem if you need to
             install different products in the same directory.
 
+ nobinaries When set to "yes", then setup won't prompt the user for a
+            path for binaries. Set this when this installation won't
+            actually install any binary file.
+
  meta       When this attribute is set to "yes", then setup will act as
             a meta-installer, i.e. it will allow the user to select a
             product and set-up will respawn itself for the selected
@@ -171,6 +175,9 @@ There are several optional attributes of the option element:
 
  install    If this attribute is set to "true", then the option will
             be installed by default.  It may be deselected by the user.
+
+ required   If this attribute is set to "true", the option will always
+            be installed. The user won't be able to disable it.
 
  help       This attribute is a help string which is displayed to the
             user if the user requests more information about the option.

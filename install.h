@@ -73,6 +73,9 @@ typedef struct {
 	/* The path to the binary for the 'Play' button */
 	char play_binary[PATH_MAX];
 
+	/* The path from which setup is run */
+	char setup_path[PATH_MAX];
+
     /* The XML installation config */
     xmlDocPtr config;
 
@@ -154,6 +157,7 @@ extern const char *GetProductUninstall(install_info *info);
 extern const char *GetProductVersion(install_info *info);
 extern int         GetProductCDROMRequired(install_info *info);
 extern int         GetProductIsMeta(install_info *info);
+extern int         GetProductHasNoBinaries(install_info *info);
 extern const char *GetProductSplash(install_info *info);
 extern const char *GetProductCDROMFile(install_info *info);
 extern const char *GetProductEULA(install_info *info);
@@ -217,7 +221,7 @@ extern void delete_install(install_info *info);
 
 /* Actually install the selected filesets */
 extern install_state install(install_info *info,
-            void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current));
+							 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current));
 
 /* Abort a running installation (to be called from the update function) */
 extern void abort_install(void);
@@ -246,10 +250,6 @@ extern char install_menuitems(install_info *info, desktop_type d);
    otherwise the install path is passed as a command line argument.
  */
 extern int run_script(install_info *info, const char *script, int arg);
-
-#ifdef RPM_SUPPORT
-extern int check_for_rpm(void);
-#endif
 
 #endif /* _install_h */
 

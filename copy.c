@@ -83,35 +83,13 @@
 #include <stdlib.h>
 #include <glob.h>
 
-#ifdef RPM_SUPPORT
-#define HAVE_ZLIB_H
-#include <rpm/rpmio.h>
-#include <rpm/rpmlib.h>
-#include <rpm/header.h>
-#endif
-
 #include "file.h"
 #include "copy.h"
-#include "tar.h"
-#include "cpio.h"
 #include "detect.h"
+#include "plugins.h"
 #include "install_log.h"
 
-#define TAR_EXTENSION   ".tar"
-#define CPIO_EXTENSION  ".cpio"
-#define RPM_EXTENSION   ".rpm"
-
-#define device(ma, mi) (((ma) << 8) | (mi))
-#ifndef major
-#define major(dev) ((int)(((dev) >> 8) & 0xff))
-#endif
-#ifndef minor
-#define minor(dev) ((int)((dev) & 0xff))
-#endif
-
 static char current_option[200];
-extern char *rpm_root;
-extern int force_manual;
 
 void getToken(const char *src, const char **end) {
     *end = 0;
@@ -185,374 +163,8 @@ int parse_line(const char **srcpp, char *buf, int maxlen)
     return strlen(buf);
 }
 
-/* calculates and skips the zeros after the filename and after the file data
-   when reading from a cpio archive. */
-void skip_zeros(install_info *info, stream *input, int *count, int modulo)
-{
-    int buf[10];
-    int amount;
-    
-    amount = (modulo - *count % modulo) % modulo;
-    file_read(info, buf, amount, input);
-    *count += amount;
-}
-
-size_t copy_cpio_stream(install_info *info, stream *input, const char *dest,
-                        void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
-{
-    stream *output;
-    char magic[6];
-    char ascii_header[112];
-    struct new_cpio_header file_hdr;
-    int has_crc;
-    int dir_len = strlen(dest) + 1;
-    size_t nread, left, copied;
-    size_t size = 0;
-    char buf[BUFSIZ];
-    int count = 0;
-
-    memset(&file_hdr, 0, sizeof(file_hdr));
-    while ( ! file_eof(info, input) ) {
-      has_crc = 0;
-      file_read(info, magic, 6, input);
-      count += 6;
-      if(!strncmp(magic,"070701",6) || !strncmp(magic,"070702",6)){ /* New format */
-        has_crc = (magic[5] == '2');
-        file_read(info, ascii_header, 104, input);
-	count += 104;
-        ascii_header[104] = '\0';
-        sscanf (ascii_header,
-                "%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx",
-                &file_hdr.c_ino, &file_hdr.c_mode, &file_hdr.c_uid,
-                &file_hdr.c_gid, &file_hdr.c_nlink, &file_hdr.c_mtime,
-                &file_hdr.c_filesize, &file_hdr.c_dev_maj, &file_hdr.c_dev_min,
-                &file_hdr.c_rdev_maj, &file_hdr.c_rdev_min, &file_hdr.c_namesize,
-                &file_hdr.c_chksum);
-      }else if(!strncmp(magic,"070707",6)){ /* Old format */
-        unsigned long dev, rdev;
-        file_read(info, ascii_header, 70, input);
-	count += 70;
-        ascii_header[70] = '\0';
-        sscanf (ascii_header,
-                "%6lo%6lo%6lo%6lo%6lo%6lo%6lo%11lo%6lo%11lo",
-                &dev, &file_hdr.c_ino,
-                &file_hdr.c_mode, &file_hdr.c_uid, &file_hdr.c_gid,
-                &file_hdr.c_nlink, &rdev, &file_hdr.c_mtime,
-                &file_hdr.c_namesize, &file_hdr.c_filesize);
-        file_hdr.c_dev_maj = major (dev);
-        file_hdr.c_dev_min = minor (dev);
-        file_hdr.c_rdev_maj = major (rdev);
-        file_hdr.c_rdev_min = minor (rdev);
-      }
-      if(file_hdr.c_name != NULL)
-        free(file_hdr.c_name);
-      file_hdr.c_name = (char *) malloc(file_hdr.c_namesize + dir_len);
-      strcpy(file_hdr.c_name, dest);
-      strcat(file_hdr.c_name, "/");
-      file_read(info, file_hdr.c_name + dir_len, file_hdr.c_namesize, input);
-      count += file_hdr.c_namesize;
-      if(!strncmp(file_hdr.c_name + dir_len,"TRAILER!!!",10)) /* End of archive marker */
-        break;
-      /* Skip padding zeros after the file name */
-      skip_zeros(info, input, &count, 4);     
-      if(S_ISDIR(file_hdr.c_mode)){
-        file_create_hierarchy(info, file_hdr.c_name);
-        file_mkdir(info, file_hdr.c_name, file_hdr.c_mode & C_MODE);
-      }else if(S_ISFIFO(file_hdr.c_mode)){
-        file_mkfifo(info, file_hdr.c_name, file_hdr.c_mode & C_MODE);
-      }else if(S_ISBLK(file_hdr.c_mode)){
-        file_mknod(info, file_hdr.c_name, S_IFBLK|(file_hdr.c_mode & C_MODE), 
-                   device(file_hdr.c_rdev_maj,file_hdr.c_rdev_min));
-      }else if(S_ISCHR(file_hdr.c_mode)){
-        file_mknod(info, file_hdr.c_name, S_IFCHR|(file_hdr.c_mode & C_MODE), 
-                   device(file_hdr.c_rdev_maj,file_hdr.c_rdev_min));
-      }else if(S_ISSOCK(file_hdr.c_mode)){
-        // TODO: create Unix socket
-      }else if(S_ISLNK(file_hdr.c_mode)){
-        char *lnk = (char *)malloc(file_hdr.c_filesize+1);
-        file_read(info, lnk, file_hdr.c_filesize, input);
-	count += file_hdr.c_filesize;
-        lnk[file_hdr.c_filesize] = '\0';
-        file_symlink(info, lnk, file_hdr.c_name);
-        free(lnk);
-      }else{
-        unsigned long chk = 0;
-        /* Open the file for output */
-        output = file_open(info, file_hdr.c_name, "wb");
-        if(output){
-          left = file_hdr.c_filesize;
-          while(left && (nread=file_read(info, buf, (left >= BUFSIZ) ? BUFSIZ : left, input))){
-	    count += nread;
-            copied = file_write(info, buf, nread, output);
-            left -= nread;
-            if(has_crc && file_hdr.c_chksum){
-              int i;
-              for(i=0; i<BUFSIZ; i++)
-                chk += buf[i];
-            }
-          
-            info->installed_bytes += copied;
-            if(update){
-              update(info, file_hdr.c_name, file_hdr.c_filesize-left, file_hdr.c_filesize, current_option);
-            }
-          }
-          if(has_crc && file_hdr.c_chksum && file_hdr.c_chksum != chk)
-            log_warning(info,_("Bad checksum for file '%s'"), file_hdr.c_name);
-          size += file_hdr.c_filesize;
-          file_close(info, output);
-          chmod(file_hdr.c_name, file_hdr.c_mode & C_MODE);
-        }else { /* Skip the file data */
-          file_skip(info, file_hdr.c_filesize, input);
-  	  count += file_hdr.c_filesize;
-	}
-      }
-      /* More padding zeroes after the data */
-      skip_zeros(info, input, &count, 4);
-    }
-    file_close(info, input);  
-    if(file_hdr.c_name != NULL)
-      free(file_hdr.c_name);
-
-    return size;
-}
-
-size_t copy_cpio(install_info *info, const char *path, const char *dest,
-                void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
-{
-  stream *input = file_open(info, path, "rb");
-  if(input)
-    return copy_cpio_stream(info, input, dest, update);
-  return 0;
-}
-
-#ifdef RPM_SUPPORT
-static int rpm_access = 0;
-
-int check_for_rpm(void)
-{
-    char location[PATH_MAX];
-
-    if(strcmp(rpm_root, "/")) {
-        snprintf(location, PATH_MAX, "%s/var/lib/rpm/packages.rpm", rpm_root);
-    } else {
-        strcpy(location,"/var/lib/rpm/packages.rpm");
-    }
-
-    /* Try to get write access to the RPM database */
-    if(!access(location, W_OK)){
-        rpm_access = 1;
-    }
-    return rpm_access;
-}
-
-size_t copy_rpm(install_info *info, const char *path, const char *dest,
-		int relocate, int autoremove, int nodeps, 
-                void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
-{
-    FD_t fdi;
-    Header hd;
-    size_t size;
-    int_32 type, c;
-    int rc, isSource;
-    void *p;
-
-    fdi = fdOpen(path, O_RDONLY, 0644);
-    rc = rpmReadPackageHeader(fdi, &hd, &isSource, NULL, NULL);
-    if ( rc ) {
-        log_warning(info,_("RPM error: %s"), rpmErrorString());
-        return 0;
-    }
-
-    size = 0;
-    if ( rpm_access && ! force_manual ) { /* We can call RPM directly */
-        char cmd[300];
-        FILE *fp;
-        float percent = 0.0;
-	double bytes_copied = 0.0;
-	double previous_bytes = 0.0;
-        char *name = "", *version = "", *release = "";
-	char *options = (char *) malloc(PATH_MAX);
-	options[0] = '\0';
-
-        headerGetEntry(hd, RPMTAG_SIZE, &type, &p, &c);
-        if(type==RPM_INT32_TYPE){
-          size = *(int_32*) p;
-        }
-        headerGetEntry(hd, RPMTAG_RELEASE, &type, &p, &c);
-        if(type==RPM_STRING_TYPE){
-          release = (char *) p;
-        }
-        headerGetEntry(hd, RPMTAG_NAME, &type, &p, &c);
-        if(type==RPM_STRING_TYPE){
-          name = (char*)p;
-        }
-        headerGetEntry(hd, RPMTAG_VERSION, &type, &p, &c);
-        if(type==RPM_STRING_TYPE){
-          version = (char*)p;
-        }
-        fdClose(fdi);
-
-	if (relocate) { /* force relocating RPM to install directory */
-	  sprintf(options, " --relocate /=%s --badreloc ", dest);
-	}
-
-	if (nodeps) {
-	  strcat(options, " --nodeps ");
-	}
-
-	snprintf(cmd,sizeof(cmd),"rpm -U --percent --root %s %s %s", rpm_root,
-		 options, path);
-
-        fp = popen(cmd, "r");
-        while(percent<100.0){
-          if(!fp || feof(fp)){
-            pclose(fp);
-            log_warning(info,_("Unable to install RPM file: '%s'"), path);
-            return 0;
-          }
-          fscanf(fp,"%s", cmd);
-          if(strcmp(cmd,"%%")){
-            pclose(fp);
-            log_warning(info,_("Unable to install RPM file: '%s'"), path);
-            return 0;
-          }
-          fscanf(fp,"%f", &percent);
-	  /* calculate the bytes installed in this pass of the loop */
-	  bytes_copied = (percent/100.0)*size - previous_bytes;
-	  previous_bytes += bytes_copied;
-	  info->installed_bytes += bytes_copied;
-          update(info, path, (percent/100.0)*size, size, current_option);
-        }
-        pclose(fp);
-	free (options);
-        /* Log the RPM installation */
-        add_rpm_entry(info, name, version, release, autoremove);
-    } else { /* Manually install the RPM file */
-        FD_t gzdi;
-        stream *cpio;
-    
-        if(headerIsEntry(hd, RPMTAG_PREIN)){      
-          headerGetEntry(hd, RPMTAG_PREIN, &type, &p, &c);
-          if(type==RPM_STRING_TYPE)
-            run_script(info, (char*)p, 1);
-        }
-        gzdi = gzdFdopen(fdi, "r");    /* XXX gzdi == fdi */
-    
-        cpio = file_fdopen(info, path, NULL, (gzFile*)gzdi->fd_gzd, "r");
-
-        /* if relocate="true", copy the files into dest instead of rpm_root */
-	if (relocate) {
-	  size = copy_cpio_stream(info, cpio, dest, update);
-	} else {
-	  size = copy_cpio_stream(info, cpio, rpm_root, update);
-	}
-
-        if(headerIsEntry(hd, RPMTAG_POSTIN)){      
-          headerGetEntry(hd, RPMTAG_POSTIN, &type, &p, &c);
-          if(type==RPM_STRING_TYPE)
-            run_script(info, (char*)p, 1);
-        }
-
-        /* Append the uninstall scripts to the uninstall */
-        if(headerIsEntry(hd, RPMTAG_PREUN)){      
-          headerGetEntry(hd, RPMTAG_PREUN, &type, &p, &c);
-          if(type==RPM_STRING_TYPE)
-            add_script_entry(info, (char*)p, 0);
-        }
-        if(headerIsEntry(hd, RPMTAG_POSTUN)){      
-          headerGetEntry(hd, RPMTAG_POSTUN, &type, &p, &c);
-          if(type==RPM_STRING_TYPE)
-            add_script_entry(info, (char*)p, 1);
-        }
-    }
-    return size;
-}
-#endif
-
-size_t copy_tarball(install_info *info, const char *path, const char *dest,
-                void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
-{
-    static tar_record zeroes;
-    tar_record record;
-    char final[BUFSIZ];
-    stream *input, *output;
-    size_t size, copied;
-    size_t this_size;
-    unsigned int mode;
-    int blocks, left, length;
-
-    size = 0;
-    input = file_open(info, path, "rb");
-    if ( input == NULL ) {
-        return(-1);
-    }
-    while ( ! file_eof(info, input) ) {
-        int cur_size;
-        if ( file_read(info, &record, (sizeof record), input)
-                                            != (sizeof record) ) {
-            break;
-        }
-        if ( memcmp(&record, &zeroes, (sizeof record)) == 0 ) {
-            continue;
-        }
-        snprintf(final, sizeof(final), "%s/%s", dest, record.hdr.name);
-        sscanf(record.hdr.mode, "%o", &mode);
-        sscanf(record.hdr.size, "%o", &left);
-        cur_size = left;
-        blocks = (left+RECORDSIZE-1)/RECORDSIZE;
-        switch (record.hdr.typeflag) {
-            case TF_OLDNORMAL:
-            case TF_NORMAL:
-                this_size = 0;
-                output = file_open(info, final, "wb");
-                if ( output ) {
-                    while ( blocks-- > 0 ) {
-                        if ( file_read(info, &record, (sizeof record), input)
-                                                        != (sizeof record) ) {
-                            break;
-                        }
-                        if ( left < (sizeof record) ) {
-                            length = left;
-                        } else {
-                            length = (sizeof record);
-                        }
-                        copied = file_write(info, &record, length, output);
-                        info->installed_bytes += copied;
-                        size += copied;
-                        left -= copied;
-                        this_size += copied;
-
-                        if ( update ) {
-                            update(info, final, this_size, cur_size, current_option);
-                        }
-                    }
-                    file_close(info, output);
-                    chmod(final, mode);
-                }
-                break;
-            case TF_SYMLINK:
-                file_symlink(info, record.hdr.linkname, final);
-                break;
-            case TF_DIR:
-                dir_create_hierarchy(info, final, mode);
-                break;
-            default:
-                log_warning(info, _("Tar: '%s' is unknown file type: %c"),
-                            record.hdr.name, record.hdr.typeflag);
-                break;
-        }
-        while ( blocks-- > 0 ) {
-            file_read(info, &record, (sizeof record), input);
-        }
-        size += left;
-    }
-    file_close(info, input);
-
-    return size;
-}
-
 size_t copy_file(install_info *info, const char *cdrom, const char *path, const char *dest, char *final, int binary,
-                void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+				 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     size_t size, copied;
     const char *base;
@@ -605,9 +217,8 @@ size_t copy_file(install_info *info, const char *cdrom, const char *path, const 
 }
 
 size_t copy_directory(install_info *info, const char *path, const char *dest, 
-		      const char *cdrom, int relocate, int autoremove, 
-		      int nodeps, 
-                void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+					  const char *cdrom, xmlNodePtr node,
+					  void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     char fpat[PATH_MAX];
     int i, err;
@@ -620,7 +231,7 @@ size_t copy_directory(install_info *info, const char *path, const char *dest,
     if ( err == 0 ) {
         for ( i=0; i<globbed.gl_pathc; ++i ) {
 	    copied = copy_path(info, globbed.gl_pathv[i], dest, cdrom, 0, 
-			       relocate, autoremove, nodeps, update);
+			       node, update);
           if ( copied > 0 ) {
             size += copied;
           }
@@ -637,29 +248,21 @@ size_t copy_directory(install_info *info, const char *path, const char *dest,
 }
 
 size_t copy_path(install_info *info, const char *path, const char *dest, 
-		 const char *cdrom, int strip_dirs, int relocate, 
-		 int autoremove, int nodeps,  
-                void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+				 const char *cdrom, int strip_dirs, xmlNodePtr node,
+				 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     char final[PATH_MAX];
     struct stat sb;
     size_t size, copied;
 
     size = 0;
-    if ( stat(path, &sb) == 0 ) {
+    if ( ! stat(path, &sb) ) {
         if ( S_ISDIR(sb.st_mode) ) {
-            copied = copy_directory(info, path, dest, cdrom, relocate,
-				    autoremove, nodeps, update);
+            copied = copy_directory(info, path, dest, cdrom, node, update);
         } else {
-            if ( strstr(path, TAR_EXTENSION) != NULL ) {
-                copied = copy_tarball(info, path, dest, update);
-            } else if ( strstr(path, CPIO_EXTENSION) != NULL ) {
-                copied = copy_cpio(info, path, dest, update);
-#ifdef RPM_SUPPORT
-            } else if ( strstr(path, RPM_EXTENSION) != NULL ) {
-                copied = copy_rpm(info, path, dest, relocate, 
-				  autoremove, nodeps, update);
-#endif
+			const SetupPlugin *plug = FindPluginForFile(path);
+			if (plug) {
+				copied = plug->Copy(info, path, dest, current_option, node, update);
             } else {
                 copied = copy_file(info, cdrom, path, dest, final, strip_dirs, update);
             }
@@ -674,9 +277,8 @@ size_t copy_path(install_info *info, const char *path, const char *dest,
 }
 
 size_t copy_list(install_info *info, const char *filedesc, const char *dest, 
-		 int from_cdrom, int strip_dirs, int relocate, int autoremove, 
-		 int nodeps, 
-		 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+				 int from_cdrom, int strip_dirs, xmlNodePtr node,
+				 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     char fpat[BUFSIZ];
     int i;
@@ -697,8 +299,7 @@ size_t copy_list(install_info *info, const char *filedesc, const char *dest,
                 if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
                     for ( i=0; i<globbed.gl_pathc; ++i ) {
                         copied = copy_path(info, globbed.gl_pathv[i], dest, 
-					   cdroms[d], strip_dirs, relocate,
-					   autoremove, nodeps, update);
+										   cdroms[d], strip_dirs, node, update);
                         if ( copied > 0 ) {
                             size += copied;
                         }
@@ -715,8 +316,7 @@ size_t copy_list(install_info *info, const char *filedesc, const char *dest,
             if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
                 for ( i=0; i<globbed.gl_pathc; ++i ) {
                     copied = copy_path(info, globbed.gl_pathv[i], dest, NULL, 
-				       strip_dirs, relocate, autoremove, nodeps,
-				       update);
+									   strip_dirs, node, update);
                     if ( copied > 0 ) {
                         size += copied;
                     }
@@ -789,7 +389,7 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
 
         strncpy(current_option, final, sizeof(current_option));
         strncat(current_option, " binary", sizeof(current_option));
-        sprintf(fpat, "bin/%s/%s/%s", arch, libc, final);
+        snprintf(fpat, sizeof(fpat), "bin/%s/%s/%s", arch, libc, final);
 		if ( keepdirs ) { /* Append the subdirectory to the final destination */
 			char *slash = strrchr(final, '/');
 			if(slash) {
@@ -803,15 +403,15 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
             char fullpath[PATH_MAX];
             
             for( d = 0; d < num_cdroms; ++d ) {
-                sprintf(fullpath, "%s/%s", cdroms[d], fpat);
+                snprintf(fullpath, sizeof(fullpath), "%s/%s", cdroms[d], fpat);
                 if ( stat(fullpath, &sb) == 0 ) {
                     check_dynamic(fpat, bin, cdroms[d]);
                     copied = copy_file(info, cdroms[d], bin, fdest, final, 1, update);
                     break;
                 } else {
-                    sprintf(fullpath, "%s/bin/%s/%s", cdroms[d], arch, final);
+                    snprintf(fullpath, sizeof(fullpath), "%s/bin/%s/%s", cdroms[d], arch, final);
                     if ( stat(fullpath, &sb) == 0 ) {
-                        sprintf(fullpath, "bin/%s/%s", arch, final);
+                        snprintf(fullpath, sizeof(fullpath), "bin/%s/%s", arch, final);
                         check_dynamic(fullpath, bin, cdroms[d]);
                         copied = copy_file(info, cdroms[d], bin, fdest, final, 1, update);
                         break;
@@ -826,7 +426,7 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
                 check_dynamic(fpat, bin, NULL);
                 copied = copy_file(info, NULL, bin, fdest, final, 1, update);
             } else {
-                sprintf(fpat, "bin/%s/%s", arch, final);
+                snprintf(fpat, sizeof(fpat), "bin/%s/%s", arch, final);
                 if ( stat(fpat, &sb) == 0 ) {
                     check_dynamic(fpat, bin, NULL);
                     copied = copy_file(info, NULL, bin, fdest, final, 1, update);
@@ -855,7 +455,7 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
             file_chmod(info, final, 0755); /* Fix the permissions */
             /* Create the symlink */
             if ( *info->symlinks_path && symlink ) {
-                sprintf(sym_to, "%s/%s", info->symlinks_path, symlink);
+                snprintf(sym_to, sizeof(sym_to), "%s/%s", info->symlinks_path, symlink);
                 file_symlink(info, final, sym_to);
             }
             add_bin_entry(info, final, symlink,
@@ -886,21 +486,15 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
     while ( node ) {
         const char *path = xmlGetProp(node, "path");
         const char *prop = xmlGetProp(node, "cdrom");
-	const char *lang_prop;
-        const char *reloc = xmlGetProp(node, "relocate");
-	const char *autorm = xmlGetProp(node, "autoremove");
-	const char *depsoff = xmlGetProp(node, "nodeps");
-	int from_cdrom = (prop && !strcasecmp(prop, "yes"));
-	int lang_matched = 1;
-	int strip_dirs = 0;
-	int relocate = (reloc && !strcasecmp(reloc, "true"));
-	int autoremove = (autorm && !strcasecmp(autorm, "true"));
-	int nodeps = (depsoff && !strcasecmp(depsoff, "true"));
-	
-	lang_prop = xmlGetProp(node, "lang");
-	if (lang_prop) {
-	    lang_matched = MatchLocale(lang_prop);
-	}
+		const char *lang_prop;
+		int from_cdrom = (prop && !strcasecmp(prop, "yes"));
+		int lang_matched = 1;
+		int strip_dirs = 0;
+		
+		lang_prop = xmlGetProp(node, "lang");
+		if (lang_prop) {
+			lang_matched = MatchLocale(lang_prop);
+		}
 
         if (!path)
             path = dest;
@@ -924,16 +518,16 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
             parse_line(&str, current_option, sizeof(current_option));
             copied = copy_list(info,
                                xmlNodeListGetString(info->config, node->childs, 1),
-                               path, from_cdrom, strip_dirs, relocate, 
-			       autoremove, nodeps, update);
+                               path, from_cdrom, strip_dirs, node,
+							   update);
             if ( copied > 0 ) {
                 size += copied;
             }
         }
         if ( strcmp(node->name, "binary") == 0 && lang_matched ) {
             copied = copy_binary(info, node,
-				 xmlNodeListGetString(info->config, node->childs, 1),
-				 path, from_cdrom, update);
+								 xmlNodeListGetString(info->config, node->childs, 1),
+								 path, from_cdrom, update);
             if ( copied > 0 ) {
                 size += copied;
             }
@@ -943,6 +537,13 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
                         xmlNodeListGetString(info->config, node->childs, 1),
                         path);
         }
+		if ( strcmp(node->name, "exclusive") == 0 ) {
+			xmlNodePtr child = node->childs;
+			while ( child ) {
+				copy_node(info, node->childs, path, update);
+				child = child->next;
+			}
+		}
         node = node->next;
     }
     return size;
@@ -1013,12 +614,12 @@ size_t size_binary(install_info *info, int from_cdrom, const char *filedesc)
         int d;
         for( d = 0; d < num_cdroms; ++d ) {
             while ( filedesc && parse_line(&filedesc, final, (sizeof final)) ) {
-                sprintf(fpat, "%s/bin/%s/%s/%s", cdroms[d], info->arch, info->libc, final);
+                snprintf(fpat, sizeof(fpat), "%s/bin/%s/%s/%s", cdroms[d], info->arch, info->libc, final);
                 if ( stat(fpat, &sb) == 0 ) {
                     size += sb.st_size;
                     break;
                 } else {
-                    sprintf(fpat, "%s/bin/%s/%s", cdroms[d], info->arch, final);
+                    snprintf(fpat, sizeof(fpat), "%s/bin/%s/%s", cdroms[d], info->arch, final);
                     if ( stat(fpat, &sb) == 0 ) {
                         size += sb.st_size;
                         break;
@@ -1028,11 +629,11 @@ size_t size_binary(install_info *info, int from_cdrom, const char *filedesc)
         }
     } else {
         while ( filedesc && parse_line(&filedesc, final, (sizeof final)) ) {
-            sprintf(fpat, "bin/%s/%s/%s", info->arch, info->libc, final);
+            snprintf(fpat, sizeof(fpat), "bin/%s/%s/%s", info->arch, info->libc, final);
             if ( stat(fpat, &sb) == 0 ) {
                 size += sb.st_size;
             } else {
-                sprintf(fpat, "bin/%s/%s", info->arch, final);
+                snprintf(fpat, sizeof(fpat), "bin/%s/%s", info->arch, final);
                 if ( stat(fpat, &sb) == 0 ) {
                     size += sb.st_size;
                 }
@@ -1056,10 +657,15 @@ size_t size_list(install_info *info, int from_cdrom, const char *filedesc)
         char fullpath[BUFSIZ];
         for( d = 0; d < num_cdroms; ++d ) {
             while ( filedesc && parse_line(&filedesc, fpat, (sizeof fpat)) ) {
-                sprintf(fullpath,"%s/%s", cdroms[d], fpat);
+                snprintf(fullpath, sizeof(fullpath), "%s/%s", cdroms[d], fpat);
                 if ( glob(fullpath, GLOB_ERR, NULL, &globbed) == 0 ) {
                     for ( i=0; i<globbed.gl_pathc; ++i ) {
-                        count = file_size(info, globbed.gl_pathv[i]);
+						const SetupPlugin *plug = FindPluginForFile(globbed.gl_pathv[i]);
+						if (plug) {
+							count = plug->Size(info, globbed.gl_pathv[i]);
+						} else {
+							count = file_size(info, globbed.gl_pathv[i]);
+						}
                         if ( count > 0 ) {
                             size += count;
                         }
@@ -1075,12 +681,17 @@ size_t size_list(install_info *info, int from_cdrom, const char *filedesc)
         while ( filedesc && parse_line(&filedesc, fpat, (sizeof fpat)) ) {
             if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
                 for ( i=0; i<globbed.gl_pathc; ++i ) {
-                    count = file_size(info, globbed.gl_pathv[i]);
+					const SetupPlugin *plug = FindPluginForFile(globbed.gl_pathv[i]);
+					if (plug) {
+						count = plug->Size(info, globbed.gl_pathv[i]);
+					} else {
+						count = file_size(info, globbed.gl_pathv[i]);
+					}
                     if ( count > 0 ) {
                         size += count;
                     }
                 }
-            globfree(&globbed);
+				globfree(&globbed);
             }
         }
     }

@@ -113,7 +113,7 @@ static yesno_answer prompt_warning(const char *warning)
    should continue (used for exclusive options) */
 static int parse_option(install_info *info, xmlNodePtr node, int exclusive)
 {
-    const char *help;
+	const char *help = "";
     char line[BUFSIZ];
     char prompt[BUFSIZ];
     const char *wanted;
@@ -151,21 +151,26 @@ static int parse_option(install_info *info, xmlNodePtr node, int exclusive)
         return retval;
     }
 
-    /* See if the user wants this option */
-    sprintf(prompt, _("Install %s?"), get_option_name(info,node,line,BUFSIZ));
-
-    wanted = xmlGetProp(node, "install");
-    if ( wanted  && (strcmp(wanted, "true") == 0) ) {
-        default_response = RESPONSE_YES;
-    } else {
-        default_response = RESPONSE_NO;
-    }
-    help = get_option_help(info, node);
-    if ( help ) {
-        response = prompt_yesnohelp(prompt, default_response);
-    } else {
-        response = console_prompt(prompt, default_response);
-    }
+	/* Check for required option */
+	if ( xmlGetProp(node, "required") ) {
+		printf(_("'%s' option will be installed.\n"), get_option_name(info,node,line,BUFSIZ));
+		response = RESPONSE_YES;
+	} else {
+		/* See if the user wants this option */
+		snprintf(prompt, sizeof(prompt), _("Install %s?"), get_option_name(info,node,line,BUFSIZ));
+		wanted = xmlGetProp(node, "install");
+		if ( wanted  && (strcmp(wanted, "true") == 0) ) {
+			default_response = RESPONSE_YES;
+		} else {
+			default_response = RESPONSE_NO;
+		}
+		help = get_option_help(info, node);
+		if ( help ) {
+			response = prompt_yesnohelp(prompt, default_response);
+		} else {
+			response = console_prompt(prompt, default_response);
+		}
+	}
 
     switch(response) {
         case RESPONSE_YES:
@@ -195,7 +200,7 @@ static int parse_option(install_info *info, xmlNodePtr node, int exclusive)
             if ( help ) {
                 printf("%s\n", help);
             } else {
-                printf("No help available\n");
+                printf(_("No help available\n"));
             }
             parse_option(info, node, exclusive);
             break;
@@ -231,7 +236,7 @@ static install_state console_license(install_info *info)
     char command[512];
 
     sleep(1);
-    sprintf(command, PAGER_COMMAND " \"%s\"", GetProductEULA(info));
+    snprintf(command, sizeof(command), PAGER_COMMAND " \"%s\"", GetProductEULA(info));
     system(command);
     if ( console_prompt(_("Do you agree with the license?"), RESPONSE_YES) ==
                                                         RESPONSE_YES ) {
@@ -250,9 +255,9 @@ static install_state console_readme(install_info *info)
     if ( readme && ! access(readme, R_OK) ) {
         char prompt[256];
 
-        sprintf(prompt, _("Would you like to read the %s file ?"), readme);
+        snprintf(prompt, sizeof(prompt), _("Would you like to read the %s file ?"), readme);
         if ( console_prompt(prompt, RESPONSE_YES) == RESPONSE_YES ) {
-            sprintf(prompt, PAGER_COMMAND " \"%s\"", readme);
+            snprintf(prompt, sizeof(prompt), PAGER_COMMAND " \"%s\"", readme);
             system(prompt);
         }
     }
@@ -294,7 +299,7 @@ static install_state console_setup(install_info *info)
 					printf("%d) %s\n", index, get_option_name(info, node, NULL, 0));
 					wanted = xmlGetProp(node, "install"); /* Look for a default value */
 					if ( wanted  && (strcmp(wanted, "true") == 0) ) {
-						sprintf(path,"%d", index);
+						snprintf(path, sizeof(path), "%d", index);
 					}
 					++ index;
 				}
@@ -361,9 +366,11 @@ static install_state console_setup(install_info *info)
 			/* Find out where to install the binary symlinks, unless the binary path
 			   was provided as a command line argument */
 			if ( ! disable_binary_path ) {
-				if ( ! prompt_user(_("Please enter the path for binary installation"),
-								   info->symlinks_path, path, sizeof(path)) ) {
-					return SETUP_ABORT;
+				if ( ! GetProductHasNoBinaries(info) ) {
+					if ( ! prompt_user(_("Please enter the path for binary installation"),
+									   info->symlinks_path, path, sizeof(path)) ) {
+						return SETUP_ABORT;
+					}
 				}
 			} else {
 				printf(_("Binary path set to: %s\n"), info->symlinks_path);
@@ -476,7 +483,7 @@ static int run_lynx(const char *url)
     int retval;
 
     retval = 0;
-    sprintf(command, "lynx \"%s\"", url);
+    snprintf(command, sizeof(command), "lynx \"%s\"", url);
     if ( system(command) != 0 ) {
         retval = -1;
     }

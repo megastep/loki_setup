@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.30 2000-07-15 00:45:54 megastep Exp $ */
+/* $Id: main.c,v 1.31 2000-07-31 21:27:08 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -36,8 +36,9 @@ Modifications by Borland/Inprise Corp.:
 #include "log.h"
 #include "file.h"
 #include "detect.h"
+#include "plugins.h"
 
-#define SETUP_VERSION "1.3.0"
+#define SETUP_VERSION "1.4.0"
 
 #define SETUP_CONFIG  SETUP_BASE "setup.xml"
 
@@ -49,11 +50,13 @@ Modifications by Borland/Inprise Corp.:
 int force_console = 0;
 int disable_install_path = 0;
 int disable_binary_path = 0;
+#ifdef RPM_SUPPORT
 char *rpm_root = "/";
+int force_manual = 0;
+#endif
 const char *argv0 = NULL;
 
 static char *current_locale = NULL;
-int force_manual = 0;
 
 /* A way to jump to the abort handling code */
 jmp_buf abort_jmpbuf;
@@ -97,6 +100,7 @@ int MatchLocale(const char *str)
 static void print_usage(const char *argv0)
 {
     printf(
+#ifdef RPM_SUPPORT
 _("Usage: %s [options]\n\n"
 "Options can be one or more of the following:\n"
 "   -b path  Set the binary path to <path>\n"
@@ -110,6 +114,19 @@ _("Usage: %s [options]\n\n"
 "   -v n     Set verbosity level to n. Available values :\n"
 "            0: Debug  1: Quiet  2: Normal 3: Warnings 4: Fatal\n"
 "   -V       Print the version of the setup program and exit\n"),
+#else
+_("Usage: %s [options]\n\n"
+"Options can be one or more of the following:\n"
+"   -b path  Set the binary path to <path>\n"
+"   -h       Display this help message\n"
+"   -i path  Set the install path to <path>\n"
+"   -c cwd   Use an alternate current directory for the install\n"
+"   -f file  Use an alternative XML file (default %s)\n"
+"   -n       Force the text-only user interface\n"
+"   -v n     Set verbosity level to n. Available values :\n"
+"            0: Debug  1: Quiet  2: Normal 3: Warnings 4: Fatal\n"
+"   -V       Print the version of the setup program and exit\n"),
+#endif
      argv0, SETUP_CONFIG);
 }
 
@@ -146,54 +163,69 @@ int main(int argc, char **argv)
 	}
 
     /* Parse the command-line options */
-    while ( (c=getopt(argc, argv, "hnc:f:r:v::Vi:b:m")) != EOF ) {
+    while ( (c=getopt(argc, argv,
+#ifdef RPM_SUPPORT
+					  "hnc:f:r:v:Vi:b:m"
+#else
+					  "hnc:f:v:Vi:b:"
+#endif
+					  )) != EOF ) {
         switch (c) {
-            case 'c':
-                if ( chdir(optarg) < 0 ) {
-                    perror(optarg);
-                    exit(-1);
-                }
-                break;
-            case 'f':
-                xml_file = optarg;
-                break;
-            case 'n':
-                force_console = 1;
-                break;
-            case 'r':
-                rpm_root = optarg;
-                break;
-            case 'v':
-                if ( optarg ) {
-                    log_level = atoi(optarg);
-                    if ( (log_level < LOG_DEBUG) || (log_level > LOG_FATAL) ){
-                        fprintf(stderr,
-                _("Out of range value, setting verbosity level to normal.\n"));
-                        log_level = LOG_NORMAL;
-                    }
-                } else {
-                    log_level = LOG_DEBUG;
-                }
-                break;
-            case 'V':
-                printf("Loki Setup version " SETUP_VERSION ", built on "__DATE__"\n");
-                exit(0);
+		case 'c':
+			if ( chdir(optarg) < 0 ) {
+				perror(optarg);
+				exit(-1);
+			}
+			break;
+		case 'f':
+			xml_file = optarg;
+			break;
+		case 'n':
+			force_console = 1;
+			break;
+#ifdef RPM_SUPPORT
+		case 'r':
+			rpm_root = optarg;
+			break;
+#endif
+		case 'v':
+			if ( optarg ) {
+				log_level = atoi(optarg);
+				if ( (log_level < LOG_DEBUG) || (log_level > LOG_FATAL) ){
+					fprintf(stderr,
+							_("Out of range value, setting verbosity level to normal.\n"));
+					log_level = LOG_NORMAL;
+				}
+			} else {
+				log_level = LOG_DEBUG;
+			}
+			break;
+		case 'V':
+			printf("Loki Setup version " SETUP_VERSION ", built on "__DATE__"\n");
+			exit(0);
 	    case 'i':
 	        strcpy(install_path, optarg);
 			disable_install_path = 1;
-		break;
+			break;
 	    case 'b':
 	        strcpy(binary_path, optarg);
 			disable_binary_path = 1;
-		break;
+			break;
+#ifdef RPM_SUPPORT
 	    case 'm':
 	        force_manual = 1;
-		break;
-            default:
-                print_usage(argv[0]);
-                exit(0);
+			break;
+#endif
+		default:
+			print_usage(argv[0]);
+			exit(0);
         }
     }
+
+	InitPlugins();
+	if ( log_level == LOG_DEBUG ) {
+		DumpPlugins(stderr);
+	}
 
     /* Initialize the XML setup configuration */
     info = create_install(xml_file, log_level, install_path, binary_path);
@@ -203,11 +235,6 @@ int main(int argc, char **argv)
     }
 
 	log_debug(info, _("Detected locale is %s"), current_locale);
-
-#ifdef RPM_SUPPORT
-    /* Try to access the RPM database */
-    check_for_rpm();
-#endif
 
     /* Get the appropriate setup UI */
     for ( i=0; GUI_okay[i]; ++i ) {
@@ -248,8 +275,8 @@ int main(int argc, char **argv)
                     while ( !detect_cdrom(tag) && (response == RESPONSE_YES) ) {
                         char buf[1024];
             
-                        sprintf(buf,_("\nPlease mount the %s CDROM.\n"
-                                "Choose Yes to retry, No to cancel"),
+                        snprintf(buf, sizeof(buf), _("\nPlease mount the %s CDROM.\n"
+													 "Choose Yes to retry, No to cancel"),
                                 info->name);
                         response = UI.prompt(buf, RESPONSE_NO);
                     }
@@ -294,5 +321,6 @@ int main(int argc, char **argv)
 
     /* Cleanup afterwards */
     delete_install(info);
+	FreePlugins();
     return(exit_status);
 }

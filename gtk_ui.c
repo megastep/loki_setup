@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.42 2000-07-15 00:45:54 megastep Exp $
+   $Id: gtk_ui.c,v 1.43 2000-07-31 21:27:08 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -173,8 +173,8 @@ static int run_netscape(const char *url)
     int retval;
 
     retval = 0;
-    sprintf(command, 
-"netscape -remote \"openURL(%s,new-window)\" || netscape \"%s\" &", url, url);
+    snprintf(command, sizeof(command), 
+			 "netscape -remote \"openURL(%s,new-window)\" || netscape \"%s\" &", url, url);
     if ( system(command) != 0 ) {
         retval = -1;
     }
@@ -566,7 +566,7 @@ static void update_size(void)
 
     widget = glade_xml_get_widget(setup_glade, "label_install_size");
     if ( widget ) {
-        sprintf(text, _("%d MB"), BYTES2MB(cur_info->install_size));
+        snprintf(text, sizeof(text), _("%d MB"), BYTES2MB(cur_info->install_size));
         gtk_label_set_text(GTK_LABEL(widget), text);
         check_install_button();
     }
@@ -580,7 +580,7 @@ static void update_space(void)
     widget = glade_xml_get_widget(setup_glade, "label_free_space");
     if ( widget ) {
         diskspace = detect_diskspace(cur_info->install_path);
-        sprintf(text, _("%d MB"), diskspace);
+        snprintf(text, sizeof(text), _("%d MB"), diskspace);
         gtk_label_set_text(GTK_LABEL(widget), text);
         check_install_button();
     }
@@ -751,7 +751,7 @@ static void init_install_path(void)
     list = 0;
     list = g_list_append( list, cur_info->install_path);
     for ( i=0; install_paths[i]; ++i ) {
-        sprintf(path, "%s/%s", install_paths[i], GetProductName(cur_info));
+        snprintf(path, sizeof(path), "%s/%s", install_paths[i], GetProductName(cur_info));
         if ( strcmp(path, cur_info->install_path) != 0 ) {
             if ( access(install_paths[i], R_OK) == 0 ) {
                 list = g_list_append( list, strdup(path));
@@ -895,7 +895,7 @@ static void parse_option(install_info *info, xmlNodePtr node, GtkWidget *window,
     text[i] = '\0';
     strncat(text, line, sizeof(text));
 
-        if ( GetProductIsMeta(info) ) {
+	if ( GetProductIsMeta(info) ) {
 		button = gtk_radio_button_new_with_label(radio_list, text);
 		radio_list = gtk_radio_button_group(GTK_RADIO_BUTTON(button));
 	} else if ( exclusive ) {
@@ -927,6 +927,12 @@ static void parse_option(install_info *info, xmlNodePtr node, GtkWidget *window,
     /* Register the button in the window's private data */
     window = glade_xml_get_widget(setup_glade, "setup_window");
     gtk_object_set_data(GTK_OBJECT(window), line, (gpointer)button);
+
+	/* Check for required option */
+	if ( xmlGetProp(node, "required") ) {
+		xmlSetProp(node, "install", "true");
+		gtk_widget_set_sensitive(GTK_WIDGET(button), FALSE);
+	}
 
     /* If this is a sub-option and parent is not active, then disable option */
     wanted = xmlGetProp(node, "install");
@@ -1039,7 +1045,7 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
 
     /* Set up the window title */
     window = glade_xml_get_widget(setup_glade, "setup_window");
-    sprintf(title, _("%s Setup"), info->desc);
+    snprintf(title, sizeof(title), _("%s Setup"), info->desc);
     gtk_window_set_title(GTK_WINDOW(window), title);
 
     /* Set the initial state */
@@ -1100,12 +1106,18 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
     /* Disable the path fields if they were provided via command line args */
     if (disable_install_path) {
         widget = glade_xml_get_widget(setup_glade, "install_path");
-	gtk_widget_set_sensitive(widget, FALSE);
+		gtk_widget_set_sensitive(widget, FALSE);
     }
     if (disable_binary_path) {
         widget = glade_xml_get_widget(setup_glade, "binary_path");
-	gtk_widget_set_sensitive(widget, FALSE);
+		gtk_widget_set_sensitive(widget, FALSE);
     }
+	if (GetProductHasNoBinaries(info)) {
+        widget = glade_xml_get_widget(setup_glade, "binary_path");
+		if(widget) gtk_widget_hide(widget);
+		widget = glade_xml_get_widget(setup_glade, "binary_label");
+		if(widget) gtk_widget_hide(widget);
+	}
 
     /* Realize the main window for pixmap loading */
     gtk_widget_realize(window);
@@ -1208,7 +1220,7 @@ static void gtkui_update(install_info *info, const char *path, size_t progress, 
         }
         widget = glade_xml_get_widget(setup_glade, "current_file_label");
         if ( widget ) {
-            sprintf(text, "%s", path);
+            snprintf(text, sizeof(text), "%s", path);
             /* Remove the install path from the string */
             install_path = cur_info->install_path;
             if ( strncmp(text, install_path, strlen(install_path)) == 0 ) {
@@ -1301,9 +1313,9 @@ static install_state gtkui_complete(install_info *info)
     gtk_label_set_text(GTK_LABEL(widget), info->install_path);
     widget = glade_xml_get_widget(setup_glade, "play_game_label");
     if ( info->installed_symlink ) {
-        sprintf(text, _("Type '%s' to start the program"), info->installed_symlink);
+        snprintf(text, sizeof(text), _("Type '%s' to start the program"), info->installed_symlink);
     } else {
-        strcpy(text, "");
+		*text = '\0';
     }
     gtk_label_set_text(GTK_LABEL(widget), text);
 

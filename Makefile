@@ -1,10 +1,11 @@
 
 DISTDIR = ..
-PACKAGE = setup-1.0
+PACKAGE = setup-1.3
 
 arch := $(shell ./print_arch)
 libc := $(shell ./print_libc)
-#USE_RPM = true
+# USE_RPM = true
+# DYN_PLUGINS = true
 
 CC = gcc
 
@@ -21,23 +22,31 @@ OPTIONS = -DSTUB_UI
 ifeq ($(USE_RPM),true)
 OPTIONS += -DRPM_SUPPORT
 endif
+ifeq ($(DYN_PLUGINS),true)
+OPTIONS += -DDYNAMIC_PLUGINS
+endif
 
 CFLAGS += $(OPTIMIZE) $(HEADERS) $(OPTIONS)
 
-OBJS = main.o install.o detect.o copy.o file.o network.o log.o install_log.o
+OBJS = main.o install.o detect.o copy.o file.o network.o log.o install_log.o plugins.o
 CONSOLE_OBJS = $(OBJS) console_ui.o
 GUI_OBJS = $(OBJS) gtk_ui.o
 
 SRCS = $(OBJS:.o=.c) $(CONSOLE_OBJS:.o=.c) $(GUI_OBJS:.o=.c)
 
-LIBS = `xml-config --prefix`/lib/libxml.a -lz
+LIBS = plugins/libplugins.a `xml-config --prefix`/lib/libxml.a -lz
+
 ifeq ($(USE_RPM),true)
 LIBS += -lrpm -ldb
 endif
+ifeq ($(DYN_PLUGINS),true)
+LIBS += -ldl
+endif
+
 CONSOLE_LIBS = $(LIBS)
 GUI_LIBS = $(LIBS) -Wl,-Bdynamic $(shell gtk-config --libs) $(shell libglade-config --prefix)/lib/libglade.a -rdynamic
 
-all: setup setup.gtk
+all: do-plugins setup setup.gtk
 
 testxml: testxml.o
 	$(CC) -o $@ $^ $(LIBS)
@@ -48,13 +57,22 @@ setup:	$(CONSOLE_OBJS)
 setup.gtk: $(GUI_OBJS)
 	$(CC) -o $@ $^ $(GUI_LIBS)
 
+do-plugins:
+	$(MAKE) -C plugins DYN_PLUGINS=$(DYN_PLUGINS) USE_RPM=$(USE_RPM) all
+
 install.dbg: all
+ifeq ($(DYN_PLUGINS),true)
+	$(MAKE) -C plugins DYN_PLUGINS=true USE_RPM=$(USE_RPM) install.dbg
+endif
 	@if [ -d image/setup.data/bin/$(arch)/$(libc) ]; then \
 	    cp -v setup image/setup.data/bin/$(arch); \
 	    cp -v setup.gtk image/setup.data/bin/$(arch)/$(libc); \
 	fi
 
 install: all
+ifeq ($(DYN_PLUGINS),true)
+	$(MAKE) -C plugins DYN_PLUGINS=true USE_RPM=$(USE_RPM) install
+endif
 	@if [ -d image/setup.data/bin/$(arch)/$(libc) ]; then \
 	    cp -v setup image/setup.data/bin/$(arch); \
 	    strip image/setup.data/bin/$(arch)/setup; \
@@ -63,6 +81,7 @@ install: all
 	fi
 
 clean:
+	$(MAKE) -C plugins clean
 	rm -f setup setup.gtk testxml foo.xml *.o
 
 dist: clean
@@ -73,7 +92,7 @@ dist: clean
 
 po/setup.po: $(SRCS)
 	libglade-xgettext image/setup.data/setup.glade > po/setup.po
-	xgettext -p po -j -d setup --keyword=_ $(SRCS)
+	xgettext -p po -j -d setup --keyword=_ $(SRCS) plugins/*.c
 
 gettext: po/setup.po
 	for lang in $(LOCALES); do \

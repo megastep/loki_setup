@@ -6,7 +6,7 @@
   <eula>
    license.txt
   </eula>
-  <option install="true">
+  <option install="true" required="true">
     Base Install
     <lang lang="fr">Installation de base</lang>
     <help>Required for play</help>
@@ -15,6 +15,7 @@
       rt2
     </binary>
     <files>
+      test.tar
       main.tar.gz
       icon.xpm
       icon.bmp

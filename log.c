@@ -38,7 +38,7 @@ int print_log(install_log *log, log_level level, const char *fmt, ...)
 
     /* Get the message text */
     va_start(ap, fmt);
-    vsprintf(text, fmt, ap);
+    vsnprintf(text, BUFSIZ, fmt, ap);
     va_end(ap);
 
     if ( log ) {

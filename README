@@ -57,6 +57,10 @@ You should edit the setup.data/setup.xml file to match your product,
 and add a new splash.xpm which will be displayed during the install.
 There is documentation for the XML setup specification in README.xml
 
+Make sure to copy over the setup.glade file in your setup.data directory
+every time you update 'setup', because the interface definition may
+change between revisions and be incompatible with earlier versions.
+
 The binaries for your product are expected to be in bin/<arch>/<libc>/
 on the CD.  The appropriate binary for the current architecture will
 be chosen at install time.  The <libc> portion of the path is optional.

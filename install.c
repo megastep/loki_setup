@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.54 2000-07-15 00:45:54 megastep Exp $ */
+/* $Id: install.c,v 1.55 2000-07-31 21:27:08 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -132,6 +132,10 @@ int GetProductIsMeta(install_info *info)
     }
     return 0;
 }
+int GetProductHasNoBinaries(install_info *info)
+{
+	return xmlGetProp(info->config->root, "nobinaries") != NULL;
+}
 const char *GetProductCDROMFile(install_info *info)
 {
     return xmlGetProp(info->config->root, "cdromfile");
@@ -190,14 +194,14 @@ const char *GetProductREADME(install_info *info)
 {
     const char *ret = xmlGetProp(info->config->root, "readme");
 	const char *text;
-	static char name[BUFSIZ];
+	static char name[BUFSIZ], matched_name[BUFSIZ];
 	xmlNodePtr node;
 	int found = 0;
 
     if ( ! ret ) {
-        strcpy(name, "README");
+        strcpy(matched_name, "README");
     } else {
-		strncpy(name, ret, BUFSIZ);
+		strncpy(matched_name, ret, BUFSIZ);
 		found = 1;
 		log_warning(info, "The 'readme' attribute is deprecated, please use the 'readme' element from now on.");
 	}
@@ -207,12 +211,13 @@ const char *GetProductREADME(install_info *info)
 		if(! strcmp(node->name, "readme") ) {
 			const char *prop = xmlGetProp(node, "lang");
 			if ( MatchLocale(prop) ) {
-				if (found == 1)
+				if (found == 1) {
 					log_warning(info, "Duplicate matching README entries in XML file!");
+				}
 				text = xmlNodeListGetString(info->config, node->childs, 1);
-				if(text) {
-					*name = '\0';
-					while ( (*name == 0) && parse_line(&text, name, sizeof(name)) )
+				if (text) {
+					*matched_name = '\0';
+					while ( (*matched_name == 0) && parse_line(&text, matched_name, sizeof(matched_name)) )
 						;
 					found = 2;
 				}
@@ -220,11 +225,13 @@ const char *GetProductREADME(install_info *info)
 		}
 		node = node->next;
 	}
-    if ( found && ! access(name, R_OK) ) {
-        return name;
-    } else {
-        return NULL;
+    if ( found  ) {
+		snprintf(name, sizeof(name), "%s/%s", info->setup_path, matched_name);
+		if ( !access(name, R_OK) ) {
+			return name;
+		}
     }
+	return NULL;
 }
 const char *GetWebsiteText(install_info *info)
 {
@@ -335,12 +342,14 @@ install_info *create_install(const char *configfile, int log_level,
     info->arch = detect_arch();
     info->libc = detect_libc();
 
+	getcwd(info->setup_path, PATH_MAX);
+
     /* Read the optional default arguments for the game */
     info->args = GetRuntimeArgs(info);
 
     /* Add the default install path */
-    sprintf(info->install_path, "%s/%s", GetDefaultPath(info),
-                                         GetProductName(info));
+    snprintf(info->install_path, PATH_MAX, "%s/%s", GetDefaultPath(info),
+			 GetProductName(info));
     strcpy(info->symlinks_path, DEFAULT_SYMLINKS);
 
 	*info->play_binary = '\0';
@@ -351,7 +360,7 @@ install_info *create_install(const char *configfile, int log_level,
     expand_home(info, temppath, info->install_path);
     free(temppath);
 
-    /* if paths wre passed in as command line args, set them here */
+    /* if paths were passed in as command line args, set them here */
     if (disable_install_path) {
         strcpy(info->install_path, install_path);
     }
@@ -401,7 +410,7 @@ void add_rpm_entry(install_info *info, const char *name, const char *version,
             elem->next = info->rpm_list;
             info->rpm_list = elem;
         }
-	elem->autoremove = autoremove;
+		elem->autoremove = autoremove;
     } else {
         log_fatal(info, _("Out of memory"));
     }
@@ -669,8 +678,8 @@ void delete_install(install_info *info)
 
 /* Actually install the selected filesets */
 install_state install(install_info *info,
-            void (*update)(install_info *info, const char *path, 
-			   size_t progress, size_t size, const char *current))
+					  void (*update)(install_info *info, const char *path, 
+									 size_t progress, size_t size, const char *current))
 {
     xmlNodePtr node;
     install_state state;
@@ -681,10 +690,10 @@ install_state install(install_info *info,
     info->install_size = size_tree(info, node);
     copy_tree(info, node, info->install_path, update);
     if(info->options.install_menuitems){
-      int i;
-      for(i = 0; i<MAX_DESKTOPS; i++) {
-        if (install_menuitems(info, i))
-          break;
+		int i;
+		for(i = 0; i<MAX_DESKTOPS; i++) {
+			if (install_menuitems(info, i))
+				break;
         }
     }
 	/* Install the optional README and EULA files
@@ -692,11 +701,11 @@ install_state install(install_info *info,
 	 */
 	f = GetProductREADME(info);
 	if ( f && ! GetProductIsMeta(info) ) {
-		copy_path(info, f, info->install_path, NULL, 1, 0, 0, 0, update);
+		copy_path(info, f, info->install_path, NULL, 1, NULL, update);
 	}
 	f = GetProductEULA(info);
 	if ( f && ! GetProductIsMeta(info) ) {
-		copy_path(info, f, info->install_path, NULL, 1, 0, 0, 0, update);
+		copy_path(info, f, info->install_path, NULL, 1, NULL, update);
 	}
 
     if ( ! GetInstallOption(info, "nouninstall") ) {
@@ -804,10 +813,10 @@ void generate_uninstall(install_info *info)
     fp = fopen(script, "w");
     if ( fp != NULL ) {
         fprintf(fp,
-            "#!/bin/sh\n"
-            "# Uninstall script for %s\n", info->desc
-            );
-	fprintf(fp, /* Add environment variables to beginning of script */
+				"#!/bin/sh\n"
+				"# Uninstall script for %s\n", info->desc
+				);
+		fprintf(fp, /* Add environment variables to beginning of script */
                 "SETUP_PRODUCTNAME=\"%s\"\n"
                 "SETUP_PRODUCTVER=\"%s\"\n"
                 "SETUP_INSTALLPATH=\"%s\"\n"
@@ -819,29 +828,33 @@ void generate_uninstall(install_info *info)
                 info->symlinks_path,
                 num_cdroms > 0 ? cdroms[0] : "");
 
-	/* If there is a preuninstall script on the <install> tag, then stream
-	   it in here */
-	if (GetPreUnInstall(info)) {
-	    script_file = fopen(GetPreUnInstall(info), "r");
-	    if (script_file) {
-	        while (! feof(script_file)) {
-		    count = fread(buf, sizeof(char), PATH_MAX, script_file);
-		    fwrite(buf, sizeof(char), count, fp);
-	        }
-	        fclose(script_file);
-	    }
-	}
+		fprintf(fp,_("echo \"Uninstalling %s, please wait...\"\n"), info->desc);
 
+		/* If there is a preuninstall script on the <install> tag, then stream
+		   it in here */
+		if (GetPreUnInstall(info)) {
+			script_file = fopen(GetPreUnInstall(info), "r");
+			if (script_file) {
+				while (! feof(script_file)) {
+					count = fread(buf, sizeof(char), PATH_MAX, script_file);
+					fwrite(buf, sizeof(char), count, fp);
+				}
+				fclose(script_file);
+			}
+		}
+
+#ifdef RPM_SUPPORT
         if(strcmp(rpm_root,"/")) /* Emulate RPM environment for scripts */
-          fprintf(fp,"RPM_INSTALL_PREFIX=%s\n", rpm_root);
+			fprintf(fp,"RPM_INSTALL_PREFIX=%s\n", rpm_root);
+#endif
 
         /* Merge the pre-uninstall scripts */
         if(info->pre_script_list){
-          fprintf(fp,"function pre()\n{\n");
-          for ( selem = info->pre_script_list; selem; selem = selem->next ) {
-            fprintf(fp,"%s\n",selem->script);
-          }
-          fprintf(fp,"}\npre 0\n");
+			fprintf(fp,"function pre()\n{\n");
+			for ( selem = info->pre_script_list; selem; selem = selem->next ) {
+				fprintf(fp,"%s\n",selem->script);
+			}
+			fprintf(fp,"}\npre 0\n");
         }
         for ( felem = info->file_list; felem; felem = felem->next ) {
             fprintf(fp,"rm -f \"%s\"\n", felem->path);
@@ -854,50 +867,50 @@ void generate_uninstall(install_info *info)
         }
         /* Merge the post-uninstall scripts */
         if(info->post_script_list){
-          fprintf(fp,"function post()\n{\n");
-          for ( selem = info->post_script_list; selem; selem = selem->next ) {
-            fprintf(fp,"%s\n",selem->script);
-          }
-          fprintf(fp,"}\npost 0\n");
+			fprintf(fp,"function post()\n{\n");
+			for ( selem = info->post_script_list; selem; selem = selem->next ) {
+				fprintf(fp,"%s\n",selem->script);
+			}
+			fprintf(fp,"}\npost 0\n");
         }
 
-	/* Remove any RPMs marked as autoremove */
-	if (info->rpm_list) {
-	    for ( relem = info->rpm_list; relem; relem = relem->next ) {
-	        if (relem->autoremove) {
-		    fprintf(fp,"rpm -e \"%s-%s-%s\"\n", relem->name, 
-			    relem->version, relem->release);
+		/* Remove any RPMs marked as autoremove */
+		if (info->rpm_list) {
+			for ( relem = info->rpm_list; relem; relem = relem->next ) {
+				if (relem->autoremove) {
+					fprintf(fp,"rpm -e \"%s-%s-%s\"\n", relem->name, 
+							relem->version, relem->release);
+				}
+			}
 		}
-            }
-	}
 	
-	/* If a post-uninstall script is defined, stream it into the file */
-	if (GetPostUnInstall(info)) {
-	    script_file = fopen(GetPostUnInstall(info), "r");
-	    if (script_file) {
-	        while (! feof(script_file)) {
-		    count = fread(buf, sizeof(char), PATH_MAX, script_file );
-		    fwrite(buf, sizeof(char), count, fp);
-	        }
-	        fclose(script_file);
-	    }
-	}
-
-        fprintf(fp,"#### END OF UNINSTALL\n");
-        fprintf(fp,_("echo \"%s has been uninstalled.\"\n"), info->desc);
-        if(info->rpm_list){
-          fprintf(fp,_("echo\necho WARNING: The following RPM archives have been installed or upgraded\n"
-					   "echo when this software was installed. You may want to manually remove some of those:\n") );
-
-          for ( relem = info->rpm_list; relem; relem = relem->next ) {
-	      if (! relem->autoremove) {
-		  fprintf(fp,"echo \"\t%s, version %s, release %s\"\n", 
-			  relem->name, relem->version, relem->release);
-	      }
-          }
-        }
-        fchmod(fileno(fp),0755); /* Turn on executable bit */
-        fclose(fp);
+		/* If a post-uninstall script is defined, stream it into the file */
+		if (GetPostUnInstall(info)) {
+			script_file = fopen(GetPostUnInstall(info), "r");
+			if (script_file) {
+				while (! feof(script_file)) {
+					count = fread(buf, sizeof(char), PATH_MAX, script_file );
+					fwrite(buf, sizeof(char), count, fp);
+				}
+				fclose(script_file);
+			}
+		}
+	
+		fprintf(fp,"#### END OF UNINSTALL\n");
+		fprintf(fp,_("echo \"%s has been uninstalled.\"\n"), info->desc);
+		if(info->rpm_list){
+			fprintf(fp,_("echo\necho WARNING: The following RPM archives have been installed or upgraded\n"
+						 "echo when this software was installed. You may want to manually remove some of those:\n") );
+		
+			for ( relem = info->rpm_list; relem; relem = relem->next ) {
+				if (! relem->autoremove) {
+					fprintf(fp,"echo \"\t%s, version %s, release %s\"\n", 
+							relem->name, relem->version, relem->release);
+				}
+			}
+		}
+		fchmod(fileno(fp),0755); /* Turn on executable bit */
+		fclose(fp);
     }
     free(buf);
 }
@@ -1019,7 +1032,7 @@ char install_menuitems(install_info *info, desktop_type desktop)
         case DESKTOP_KDE:
             desk_base = getenv("KDEDIR");
             if (desk_base) {
-                sprintf(icon_base, "%s/share/applnk/", desk_base); 
+                snprintf(icon_base, PATH_MAX, "%s/share/applnk/", desk_base); 
                 found_links[0] = icon_base;
                 found_links[1] = "~/.kde/share/applnk/";
                 found_links[2] = 0;
@@ -1070,7 +1083,7 @@ char install_menuitems(install_info *info, desktop_type desktop)
             if ( access(buf, W_OK) < 0 )
                 continue;
 
-            sprintf(finalbuf,"%s%s/", buf, (elem->menu) ? elem->menu : "Games");
+            snprintf(finalbuf, PATH_MAX, "%s%s/", buf, (elem->menu) ? elem->menu : "Games");
             file_create_hierarchy(info, finalbuf);
 
             /* Presumably if there is no icon, no desktop entry */
@@ -1095,11 +1108,11 @@ char install_menuitems(install_info *info, desktop_type desktop)
                 char exec[PATH_MAX*2], icon[PATH_MAX];
 
                 if (exec_command[0] != 0) {
-                    snprintf(exec, PATH_MAX*2, "%s", exec_command);
+                    snprintf(exec, sizeof(exec), "%s", exec_command);
                 } else {
-                    sprintf(exec, "%s", elem->path);
+                    snprintf(exec, sizeof(exec), "%s", elem->path);
                 }
-                sprintf(icon, "%s/%s", info->install_path, elem->icon);
+                snprintf(icon, PATH_MAX, "%s/%s", info->install_path, elem->icon);
                 if (desktop == DESKTOP_KDE) {
                         fprintf(fp, "# KDE Config File\n");
                 }
@@ -1149,11 +1162,11 @@ int run_script(install_info *info, const char *script, int arg)
         strncat(working_dir, "/", sizeof(working_dir));
     }
 
-    sprintf(script_file, "%s/tmp_script_XXXXXX", info->install_path);
+    snprintf(script_file, PATH_MAX, "%s/tmp_script_XXXXXX", info->install_path);
     fd = mkstemp(script_file);
     if ( fd < 0 ) { /* Maybe the install directory didn't exist? */
         /* This is necessary for some multi-package installs */
-        sprintf(script_file, "/tmp/tmp_script_XXXXXX");
+        snprintf(script_file, PATH_MAX, "/tmp/tmp_script_XXXXXX");
         fd = mkstemp(script_file);
     }
     exitval = -1;
@@ -1180,9 +1193,9 @@ int run_script(install_info *info, const char *script, int arg)
             fchmod(fileno(fp),0755); /* Turn on executable bit */
             fclose(fp);
             if ( arg >= 0 ) {
-                sprintf(cmd, "%s %d", script_file, arg);
+                snprintf(cmd, sizeof(cmd), "%s %d", script_file, arg);
             } else {
-                sprintf(cmd, "%s %s", script_file, info->install_path);
+                snprintf(cmd, sizeof(cmd), "%s %s", script_file, info->install_path);
             }
             exitval = system(cmd);
         }

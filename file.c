@@ -376,7 +376,7 @@ size_t file_size(install_info *info, const char *path)
                 size = 0;
                 while ( (entry=readdir(dir)) != NULL ) {
                     if ( entry->d_name[0] != '.' ) {
-                        sprintf(newpath, "%s/%s", path, entry->d_name);
+                        snprintf(newpath, PATH_MAX, "%s/%s", path, entry->d_name);
                         count = file_size(info, newpath);
                         if ( count > 0 ) {
                             size += count;
