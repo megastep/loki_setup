@@ -23,12 +23,12 @@ OBJS = main.o install.o detect.o copy.o file.o network.o log.o install_log.o
 CONSOLE_OBJS = $(OBJS) console_ui.o
 GUI_OBJS = $(OBJS) gtk_ui.o
 
-LIBS = -lxml -lz
+LIBS = `xml-config --prefix`/lib/libxml.a -lz
 ifeq ($(USE_RPM),true)
 LIBS += -lrpm -ldb
 endif
 CONSOLE_LIBS = $(LIBS)
-GUI_LIBS = $(LIBS) -Wl,-Bdynamic -lgtk -lgdk -lglade -rdynamic
+GUI_LIBS = $(LIBS) -Wl,-Bdynamic -lgtk -lgdk `libglade-config --prefix`/lib/libglade.a -rdynamic
 
 all: setup setup.gtk
 
