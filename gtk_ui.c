@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.39 2000-07-05 21:01:26 megastep Exp $
+   $Id: gtk_ui.c,v 1.40 2000-07-11 19:48:14 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -373,9 +373,13 @@ char check_deviant_paths(xmlNodePtr node)
             while ( elements ) {
                 dpath = xmlGetProp(elements, "path");
                 if ( dpath ) {
-                parse_line(&dpath, deviant_path, PATH_MAX);
+					parse_line(&dpath, deviant_path, PATH_MAX);
                     topmost_valid_path(path_up, deviant_path);
-                    if ( ! dir_is_accessible(path_up) )
+					if ( path_up[0] != '/' ) { /* Not an absolute path */
+						char buf[PATH_MAX];
+						snprintf(buf, PATH_MAX, "%s/%s", cur_info->install_path, path_up);
+						return ! dir_is_accessible(buf);
+					} else if ( ! dir_is_accessible(path_up) )
                         return 1;
                 }
                 elements = elements->next;
