@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.49 2000-10-11 23:15:21 hercules Exp $
+   $Id: gtk_ui.c,v 1.50 2000-10-19 00:29:02 hercules Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1087,6 +1087,8 @@ static void update_image(const char *image_file)
         image = gtk_pixmap_new(pixmap, NULL);
         gtk_widget_show(image);
         gtk_container_add(GTK_CONTAINER(frame), image);
+    } else {
+        gtk_widget_hide(frame);
     }
 }
 

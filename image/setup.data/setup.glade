@@ -1027,7 +1027,7 @@
 	    <widget>
 	      <class>GtkLabel</class>
 	      <name>label55</name>
-	      <label>The game was installed in:</label>
+	      <label>The product was installed in:</label>
 	      <justify>GTK_JUSTIFY_CENTER</justify>
 	      <wrap>False</wrap>
 	      <xalign>0</xalign>
