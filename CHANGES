@@ -1,4 +1,7 @@
 1.4.0:
+Sam Lantinga - Tue Aug 22 12:32:29 PDT 2000
+ * Fixed problem with arrow key actions on main entry boxes
+ * Removed duplicate entries from the list of symlink paths
 Stéphane Peter - Mon Aug  7 17:50:41 PDT 2000
  * Symlinks are now copied as symlinks instead of the files that they
    point to.

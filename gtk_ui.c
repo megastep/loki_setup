@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.46 2000-08-11 20:25:01 megastep Exp $
+   $Id: gtk_ui.c,v 1.47 2000-08-22 19:47:13 hercules Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -210,7 +210,7 @@ gint path_entry_keypress_slot(GtkWidget *widget, GdkEvent *event,
         }
         update_space();
     }
-    return(FALSE);
+    return(TRUE);
 }
 
 gint path_combo_change_slot(GtkWidget *widget, GdkEvent *event, 
@@ -219,7 +219,7 @@ gint path_combo_change_slot(GtkWidget *widget, GdkEvent *event,
     char* string;
     GtkWidget *install_entry;
     
-    install_entry = glade_xml_get_widget(setup_glade, "entry4");
+    install_entry = glade_xml_get_widget(setup_glade, "install_entry");
     string = gtk_entry_get_text( GTK_ENTRY(install_entry) );
     if ( string ) {
         set_installpath(cur_info, string);
@@ -257,7 +257,7 @@ gint binary_path_entry_keypress_slot(GtkWidget *widget, GdkEvent *event,
         }
         check_install_button();
     }    
-    return(FALSE);
+    return(TRUE);
 }
 
 gint binary_path_combo_change_slot(GtkWidget *widget, GdkEvent *event, 
@@ -266,7 +266,7 @@ gint binary_path_combo_change_slot(GtkWidget *widget, GdkEvent *event,
     char* string;
     GtkWidget *binary_entry;
     
-    binary_entry = glade_xml_get_widget(setup_glade, "entry5");
+    binary_entry = glade_xml_get_widget(setup_glade, "symlink_entry");
     string = gtk_entry_get_text( GTK_ENTRY(binary_entry) );
     if ( string ) {
         set_symlinkspath(cur_info, string);
@@ -641,7 +641,7 @@ void on_use_binary_toggled ( GtkWidget* widget, gpointer func_data)
     **      value and restash it into the global symlinkspath.
     **-----------------------------------------------------------------------*/
     if (GTK_TOGGLE_BUTTON(widget)->active) {
-        binary_entry = glade_xml_get_widget(setup_glade, "entry5");
+        binary_entry = glade_xml_get_widget(setup_glade, "symlink_entry");
         string = gtk_entry_get_text( GTK_ENTRY(binary_entry) );
     } else {
         string = NULL;
@@ -862,6 +862,7 @@ static void init_install_path(void)
     gtk_combo_set_popdown_strings( GTK_COMBO(widget), list );
     
     gtk_entry_set_text( GTK_ENTRY(GTK_COMBO(widget)->entry), cur_info->install_path );
+    gtk_combo_set_use_arrows( GTK_COMBO(widget), 0);
 }
 
 static void init_binary_path(void)
@@ -910,8 +911,16 @@ static void init_binary_path(void)
             else
                 *pc = '\0';
 
-            if( len && ((sc =strcmp( pc0, cur_info->symlinks_path)) != 0) && (*pc0 != '.') ) {
-				if(!access(pc0, W_OK)) {
+            if( len && ((sc=strcmp( pc0, cur_info->symlinks_path)) != 0) && (*pc0 != '.') ) {
+                /* See if the item is already in our list */
+                int i, not_in_list = 1;
+                char *path_elem;
+                for ( i=0; not_in_list && (path_elem=g_list_nth_data(list, i));
+                      ++i ) {
+                    if ( strcmp(path_elem, pc0) == 0 )
+                        not_in_list = 0;
+                }
+				if (not_in_list && !access(pc0, W_OK)) {
 					list = g_list_append( list, pc0 );
 				}
             }
@@ -934,7 +943,7 @@ static void init_binary_path(void)
         /* FIXME */
     }
     gtk_entry_set_text( GTK_ENTRY(GTK_COMBO(widget)->entry), cur_info->symlinks_path );
-    return;
+    gtk_combo_set_use_arrows( GTK_COMBO(widget), 0);
 }
 
 static void init_menuitems_option(install_info *info, xmlNodePtr node)
@@ -1103,7 +1112,6 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
     GtkWidget *widget;
     GtkWidget *button;
     GtkWidget *install_path, *install_entry, *binary_path, *binary_entry;
-    GtkWidget *symlink_checkbox;
     char title[1024];
 
     cur_state = SETUP_INIT;
@@ -1124,7 +1132,7 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
     /* add signal handlers to manage enabling/disabling the Install button */
     install_path = glade_xml_get_widget(setup_glade, "install_path");
     install_path = GTK_COMBO(install_path)->list;
-    install_entry = glade_xml_get_widget(setup_glade, "entry4");
+    install_entry = glade_xml_get_widget(setup_glade, "install_entry");
     gtk_signal_connect_after(GTK_OBJECT (install_path),
 			     "button_release_event",
 			     GTK_SIGNAL_FUNC (path_combo_change_slot),
@@ -1136,7 +1144,7 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
 
     binary_path = glade_xml_get_widget(setup_glade, "binary_path");
     binary_path = GTK_COMBO(binary_path)->list;
-    binary_entry = glade_xml_get_widget(setup_glade, "entry5");
+    binary_entry = glade_xml_get_widget(setup_glade, "binary_entry");
     gtk_signal_connect_after(GTK_OBJECT (binary_path),
 			     "button_release_event",
 			     GTK_SIGNAL_FUNC (binary_path_combo_change_slot),
@@ -1149,13 +1157,16 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
     /* add all the other signal handlers defined in setup.glade */
     glade_xml_signal_autoconnect(setup_glade);
 
-    /*---------------------------------------------------------------------------
+#if 0 /* Sam 8/22 - I don't think this is necessary */
+    GtkWidget *symlink_checkbox;
+    /*-------------------------------------------------------------------------
     ** Connect a signal handle to control whether or not the symlink
     **  should be installed
-    **-------------------------------------------------------------------------*/
+    **------------------------------------------------------------------------*/
     symlink_checkbox = glade_xml_get_widget(setup_glade, "symlink_checkbox");
     gtk_signal_connect(GTK_OBJECT(symlink_checkbox), "toggled",
-					   GTK_SIGNAL_FUNC(on_use_binary_toggled), NULL);
+			   GTK_SIGNAL_FUNC(on_use_binary_toggled), NULL);
+#endif //0
 
     /* Set up the window title */
     window = glade_xml_get_widget(setup_glade, "setup_window");
