@@ -794,7 +794,8 @@ ssize_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
     node = node->childs;
     while ( node ) {
         const char *path = xmlGetProp(node, "path");
-		char *srcpath = xmlGetProp(node, "srcpath");
+		char *xmlsrcpath = xmlGetProp(node, "srcpath");
+        char *srcpath = ((xmlsrcpath != NULL) ? xmlsrcpath : ".");
 		const char *from_cdrom = xmlGetProp(node, "cdromid");
 		int lang_matched = match_locale(tmp = xmlGetProp(node, "lang"));
 		int strip_dirs = 0;
@@ -825,8 +826,6 @@ ssize_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
 			strip_dirs = 1;
             path = tmppath;
         }
-        if (!srcpath)
-            srcpath = ".";
 /* printf("Checking node element '%s'\n", node->name); */
 		if ( lang_matched &&
 			 match_arch(info, xmlGetProp(node, "arch")) &&
@@ -873,7 +872,8 @@ ssize_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
 		}
         /* Do not handle exclusive elements here; it gets called multiple times else */
         node = node->next;
-		xmlFree(srcpath);
+		if (xmlsrcpath != NULL)
+			xmlFree(xmlsrcpath);
     }
     return size;
 }
