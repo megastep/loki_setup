@@ -36,6 +36,9 @@ GUI_OBJS = $(OBJS) gtk_ui.o
 SRCS = $(OBJS:.o=.c) $(CONSOLE_OBJS:.o=.c) $(GUI_OBJS:.o=.c)
 
 LIBS = plugins/libplugins.a `xml-config --prefix`/lib/libxml.a -lz
+ifeq ($(os),FreeBSD)
+LIBS += -L/usr/local/lib -lintl
+endif
 
 ifeq ($(USE_RPM),true)
 LIBS += -lrpm -ldb

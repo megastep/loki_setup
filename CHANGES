@@ -1,4 +1,6 @@
 1.4.0:
+Stéphane Peter - Tue Aug  1 20:34:56 PDT 2000
+ * Fixes for multiple operating systems support, and FreeBSD support.
 Stéphane Peter - Tue Jul 25 19:49:06 PDT 2000
  * Rewrote the extractor backend to use a plugin subsystem. Plugins can
    either be compiled in or used as shared library objects (.so files).

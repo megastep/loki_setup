@@ -44,8 +44,8 @@ setup.data/
    setup.glade          (XML file defining the GTk UI)
    splash.xpm           (Optional splash image for the GTk UI)
    bin/
-   bin/<arch>/setup		(Statically linked console version)
-   bin/<arch>/<libc>/setup.gtk	(Dynamically linked GTk version)
+   bin/<OS>/<arch>/setup		    (Statically linked console version)
+   bin/<OS>/<arch>/<libc>/setup.gtk	(Dynamically linked GTk version)
 
 autorun.inf             (Windows CD autorun file that runs win32/autorun.exe)
 win32/
@@ -61,13 +61,13 @@ Make sure to copy over the setup.glade file in your setup.data directory
 every time you update 'setup', because the interface definition may
 change between revisions and be incompatible with earlier versions.
 
-The binaries for your product are expected to be in bin/<arch>/<libc>/
+The binaries for your product are expected to be in bin/<OS>/<arch>/<libc>/
 on the CD.  The appropriate binary for the current architecture will
 be chosen at install time.  The <libc> portion of the path is optional.
 For example, if your binary is called 'rt2', you could have both x86
-and PPC versions as:
-	bin/x86/glibc-2.1/rt2
-	bin/ppc/rt2
+and PPC versions for Linux as:
+	bin/Linux/x86/glibc-2.1/rt2
+	bin/Linux/ppc/rt2
 and the appropriate binary would be chosen.
 
 The install process creates an uninstall script in the install directory
