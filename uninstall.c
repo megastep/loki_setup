@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.12 2000-10-18 04:56:08 megastep Exp $ */
+/* $Id: uninstall.c,v 1.13 2000-10-25 19:10:42 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <limits.h>
 #include <errno.h>
+#include <signal.h>
 
 #include "setupdb.h"
 #include "install.h"
@@ -18,6 +19,7 @@
 #define LOCALEDIR SETUP_BASE "locale"
 
 static char *current_locale = NULL;
+static product_t *prod = NULL;
 
 /* List the valid command-line options */
 
@@ -98,6 +100,16 @@ static struct dir_entry *add_directory_entry(product_file_t *dir, struct dir_ent
     return list;
 }
 
+/* Signal handler for interrupted uninstalls */
+static void emergency_exit(int sig)
+{
+    fprintf(stderr, _("Signal %s caught. Aborting.\n"), sig);
+    if ( prod ) {
+        /* Try to save the XML file */
+        loki_closeproduct(prod);
+    }
+}
+
 static void uninstall_component(product_component_t *comp, product_info_t *info)
 {
     product_option_t *opt;
@@ -110,8 +122,10 @@ static void uninstall_component(product_component_t *comp, product_info_t *info)
         product_file_t *file = loki_getfirst_file(opt), *nextfile;
 
         while ( file ) {
+            const char *fname = loki_getpath_file(file);
             file_type_t t = loki_gettype_file(file);
-            if ( t == LOKI_FILE_DIRECTORY ) {
+
+            if ( t == LOKI_FILE_DIRECTORY && strncmp(fname, info->root, strlen(fname))!=0 ) {
                 list = add_directory_entry(file, list);
                 file = loki_getnext_file(file);
             } else {
@@ -177,6 +191,7 @@ static int perform_uninstall(product_t *prod, product_info_t *info)
         log_file("uninstall", strerror(errno));
 
     loki_removeproduct(prod);
+    prod = NULL;
 
 	return 1;
 }
@@ -198,7 +213,6 @@ static int check_permissions(product_info_t *info)
 
 int main(int argc, char **argv)
 {
-	product_t *prod;
     product_info_t *info;
     char desc[128];
 	int ret = 0;
@@ -220,7 +234,12 @@ int main(int argc, char **argv)
 		print_usage(argv[0]);
 		return 1;
 	}
-    
+
+    signal(SIGINT, emergency_exit);
+    signal(SIGTERM, emergency_exit);
+    signal(SIGHUP, emergency_exit);
+    signal(SIGQUIT, emergency_exit);
+
     if ( !strcmp(argv[1], "-l") ) {
         const char *product;
         printf(_("Installed products:\n"));
