@@ -209,7 +209,6 @@ typedef struct
     int (*CommandEventCallback)(UInt32);
     void (*KeyboardEventCallback)();
 
-    CGImageRef SplashImage;
     ControlRef SplashImageView;
     size_t ImageWidth;
     size_t ImageHeight;

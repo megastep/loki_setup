@@ -549,7 +549,6 @@ CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32), void (*Keyb
     // Set defaults for resource object members
     NewRes->IsShown = false;
     NewRes->CurInstallPage = NONE_PAGE;
-    NewRes->SplashImage = NULL;
     NewRes->SplashImageView = NULL;
     NewRes->ImageWidth = 0;
     NewRes->ImageHeight = 0;
@@ -885,6 +884,7 @@ void carbon_UpdateImage(CarbonRes *Res, const char *Filename, const char *Path, 
     CFURLRef url;
     HIRect bounds;
     HIViewRef WindowViewRef;
+    CGImageRef SplashImage;
 
     // Get application path
     carbon_GetAppPath(AppPath, CARBON_MAX_APP_PATH);
@@ -917,22 +917,23 @@ void carbon_UpdateImage(CarbonRes *Res, const char *Filename, const char *Path, 
         else
         {
             // Open data as a JPEG image
-            Res->SplashImage = CGImageCreateWithJPEGDataProvider(Provider, NULL,
-                false, kCGRenderingIntentDefault);
-            if(Res->SplashImage == NULL)
+            SplashImage = CGImageCreateWithJPEGDataProvider(Provider, NULL,
+                TRUE, kCGRenderingIntentDefault);
+            if(SplashImage == NULL)
                 carbon_debug("carbon_UpdateImage() - File could not be loaded as a JPEG.\n");
             else
             {
                 carbon_debug("carbon_UpdateImage() - Image loaded successfully.\n");
-                if(HIImageViewCreate(Res->SplashImage, &Res->SplashImageView) == noErr)
+                if(HIImageViewCreate(SplashImage, &Res->SplashImageView) == noErr)
                 {
                     // Set size of image container to fit the image
+                    HIViewSetDrawingEnabled(Res->SplashImageView, TRUE);
                     bounds.origin.x = 0;
                     bounds.origin.y = 0;
-                    Res->ImageWidth = bounds.size.width = CGImageGetWidth(Res->SplashImage);
-                    Res->ImageHeight = bounds.size.height = CGImageGetHeight(Res->SplashImage);
+                    Res->ImageWidth = bounds.size.width = CGImageGetWidth(SplashImage);
+                    Res->ImageHeight = bounds.size.height = CGImageGetHeight(SplashImage);
                     HIViewSetFrame(Res->SplashImageView, &bounds);
-                    HIViewSetVisible(Res->SplashImageView, true);
+                    HIViewSetVisible(Res->SplashImageView, TRUE);
                     // Add image view to the window at the default position
                     HIViewFindByID(HIViewGetRoot(Res->Window), kHIViewWindowContentID, &WindowViewRef);
                     HIViewAddSubview(WindowViewRef, Res->SplashImageView);
@@ -943,6 +944,8 @@ void carbon_UpdateImage(CarbonRes *Res, const char *Filename, const char *Path, 
                 }
                 else
                     carbon_debug("carbon_UpdateImage() - Imageview creation failed.\n");
+
+                CGImageRelease(SplashImage);
             }
             CGDataProviderRelease(Provider);
         }
@@ -998,6 +1001,7 @@ void carbon_GetLabelText(CarbonRes *Res, int LabelID, char *Buffer, int BufferSi
     // Get control reference
     GetControlByID(Res->Window, &IDStruct, &Ref);
     GetControlData(Ref, kControlEditTextPart, kControlStaticTextTextTag, BufferSize, Buffer, &DummySize);
+
     // Add null terminator to end of string
     Buffer[DummySize] = 0x00;
 }
@@ -1917,3 +1921,4 @@ void carbon_AuthorizeUser()
     //if (myStatus) printf("Status: %i\n", myStatus);
     //return myStatus;
 }
+
