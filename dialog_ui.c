@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.19 2004-02-18 03:56:55 megastep Exp $
+ * $Id: dialog_ui.c,v 1.20 2004-03-02 03:50:01 icculus Exp $
  */
 
 #include <limits.h>
@@ -306,6 +306,10 @@ options_loop:
 	return ret;
 }
 
+/* hacked in cdkey support.  --ryan. */
+extern char gCDKeyString[128];
+
+
 static
 install_state dialog_setup(install_info *info)
 {
@@ -487,6 +491,52 @@ install_state dialog_setup(install_info *info)
 		}
 	}
 	dialog_vars.default_item = NULL;
+
+    /* HACK: Use external cd key validation program, if it exists. --ryan. */
+    if(GetProductCDKey(info))
+    {
+        char *p;
+        int cdkey_is_okay = 0;
+        while (!cdkey_is_okay)
+        {
+    	    clear_screen();
+    	    if ( dialog_inputbox(_("CD Key"),
+    		                     _("Please enter your CD key"),
+    							 10, 50, "", 0) < 0 ) {
+	    	    return SETUP_ABORT;
+            }
+
+    	    clear_screen();
+
+            strncpy(gCDKeyString, dialog_vars.input_result, sizeof(gCDKeyString));
+            gCDKeyString[sizeof (gCDKeyString) - 1] = '\0';
+
+            #define CDKEYCHECK_PROGRAM "./vcdk"
+            if (access(CDKEYCHECK_PROGRAM, X_OK) != 0)
+            {
+    		    dialog_msgbox(_("Error"), _("vcdk is missing. Installation aborted.\n"), 10, 40, 1);
+	    	    return SETUP_ABORT;
+            }
+            else
+            {
+                char cmd[sizeof (gCDKeyString) + sizeof (CDKEYCHECK_PROGRAM) + 1];
+                strcpy(cmd, CDKEYCHECK_PROGRAM);
+                strcat(cmd, " ");
+                strcat(cmd, gCDKeyString);
+                if (system(cmd) == 0)  /* binary ran and reported key invalid? */
+    			    dialog_msgbox(_("Problem"), _("CD key is invalid!\nPlease double check your key and enter it again.\n"), 10, 40, 1);
+                else
+                    cdkey_is_okay = 1;
+            }
+        }
+
+        p = gCDKeyString;
+        while(*p)
+        {
+            *p = toupper(*p);
+            p++;
+        }
+    }
 
 	clear_screen();
 	dialog_gauge_begin(10, COLS*8/10, 0);

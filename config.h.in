@@ -45,6 +45,9 @@
 /* Define if you have the <libgen.h> header file.  */
 #undef HAVE_LIBGEN_H
 
+/* Define if you have the <libintl.h> header file.  */
+#undef HAVE_LIBINTL_H
+
 /* Define if you have the <libutil.h> header file.  */
 #undef HAVE_LIBUTIL_H
 

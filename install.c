@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.127 2004-02-18 03:56:55 megastep Exp $ */
+/* $Id: install.c,v 1.128 2004-03-02 03:50:01 icculus Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1380,6 +1380,9 @@ void delete_install(install_info *info)
 }
 
 
+/* hacked in cdkey support.  --ryan. */
+char gCDKeyString[128];
+
 /* Actually install the selected filesets */
 install_state install(install_info *info,
 					  int (*update)(install_info *info, const char *path, 
@@ -1395,6 +1398,26 @@ install_state install(install_info *info,
     /* Check if we need to create a default component entry */
     if ( GetProductNumComponents(info) == 0 ) {
         current_component = add_component_entry(info, "Default", info->version, 1, NULL, NULL);
+    }
+
+    if (GetProductCDKey(info))
+    {
+        stream *cdfile;
+        char final[1024];
+        snprintf(final, sizeof (final), "%s/%s", info->install_path, GetProductCDKey(info));
+        current_component = add_component_entry(info, "__CDKEY__", info->version, 1, NULL, NULL);
+        current_option = add_option_entry(current_component, "__CDKEY__", "__CDKEY__");
+        cdfile = file_open(info, final, "wt");
+        if(cdfile == NULL)
+        {
+            log_fatal(_("CDKey file could not be opened."));
+        }
+        else
+        {
+            log_debug("CDKey file opened\n");
+            file_write(info, gCDKeyString, strlen(gCDKeyString), cdfile);
+            file_close(info, cdfile);
+        }
     }
 
     /* Walk the install tree */

@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.94 2004-02-28 18:38:06 icculus Exp $
+   $Id: gtk_ui.c,v 1.95 2004-03-02 03:50:01 icculus Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -137,7 +137,8 @@ typedef enum
     DONE_PAGE,
     ABORT_PAGE,
     WARNING_PAGE,
-    WEBSITE_PAGE
+    WEBSITE_PAGE,
+    CDKEY_PAGE
 } InstallPages;
 
 static GladeXML *setup_glade = NULL;
@@ -485,11 +486,79 @@ void setup_button_cancel_slot( GtkWidget* widget, gpointer func_data )
 	}
 }
 
+static void message_dialog(const char *txt, const char *title);
+
+/* hacked in cdkey support.  --ryan. */
+extern char gCDKeyString[128];
+
+void setup_cdkey_entry_changed_slot(GtkEntry *entry, gpointer user_data)
+{
+    gchar *CDKey = gtk_entry_get_text( GTK_ENTRY(entry) );
+    GtkWidget *button;
+    button = glade_xml_get_widget(setup_glade, "setup_button_cdkey_continue");
+
+    gtk_widget_set_sensitive(button, (*CDKey) ? TRUE : FALSE);
+}
+
+void setup_button_cdkey_continue_slot( GtkWidget* widget, gpointer func_data )
+{
+    GtkWidget *entry = glade_xml_get_widget(setup_glade, "setup_cdkey_entry");
+    char *CDKey = (char *) gtk_entry_get_text( GTK_ENTRY(entry) );
+    char *p;
+
+    /* HACK: Use external cd key validation program, if it exists. --ryan. */
+    #define CDKEYCHECK_PROGRAM "./vcdk"
+    if (access(CDKEYCHECK_PROGRAM, X_OK) != 0)
+    {
+        message_dialog(_("ERROR: vcdk is missing. Installation aborted.\n"), _("Problem"));
+        cur_state = SETUP_ABORT;
+    }
+    else
+    {
+        char cmd[sizeof (CDKey) + sizeof (CDKEYCHECK_PROGRAM) + 1];
+        strcpy(cmd, CDKEYCHECK_PROGRAM);
+        strcat(cmd, " ");
+        strcat(cmd, CDKey);
+        if (system(cmd) == 0)  /* binary ran and reported key invalid? */
+        {
+            message_dialog(_("CD key is invalid!\nPlease double check your key and enter it again."), _("Problem"));
+            return;
+        }
+    }
+
+    strncpy(gCDKeyString, CDKey, sizeof (gCDKeyString));
+    gCDKeyString[sizeof (gCDKeyString) - 1] = '\0';
+    p = gCDKeyString;
+    while(*p)
+    {
+        *p = toupper(*p);
+        p++;
+    }
+
+    cur_state = SETUP_INSTALL;
+}
+
 void setup_button_install_slot( GtkWidget* widget, gpointer func_data )
 {
     GtkWidget *notebook;
-
     notebook = glade_xml_get_widget(setup_glade, "setup_notebook");
+
+    /* If CDKEY attribute was specified, show the CDKEY screen */
+    if(GetProductCDKey(cur_info))
+    {
+        GtkWidget *button = glade_xml_get_widget(setup_glade, "setup_button_cdkey_continue");
+        GtkWidget *entry = glade_xml_get_widget(setup_glade, "setup_cdkey_entry");
+
+		gtk_notebook_set_page(GTK_NOTEBOOK(notebook), CDKEY_PAGE);
+        gtk_entry_set_text(GTK_ENTRY(entry), "");
+        gtk_widget_set_sensitive(button, FALSE);
+
+        cur_state = SETUP_CDKEY;
+        iterate_for_state();
+        if (cur_state != SETUP_INSTALL)
+            return;
+    }
+
     gtk_notebook_set_page(GTK_NOTEBOOK(notebook), COPY_PAGE);
     cur_state = SETUP_INSTALL;
 }
@@ -539,7 +608,7 @@ static void update_size(void)
 
     widget = glade_xml_get_widget(setup_glade, "label_install_size");
     if ( widget ) {
-        snprintf(text, sizeof(text), _("%d MB"), BYTES2MB(cur_info->install_size));
+        snprintf(text, sizeof(text), _("%d MB"), (int) BYTES2MB(cur_info->install_size));
         gtk_label_set_text(GTK_LABEL(widget), text);
         check_install_button();
     }
@@ -762,6 +831,11 @@ void setup_checkbox_menuitems_slot( GtkWidget* widget, gpointer func_data)
 
 static yesno_answer prompt_response;
 
+static void prompt_button_slot( GtkWidget* widget, gpointer func_data)
+{
+    prompt_response = RESPONSE_YES;
+}
+
 static void prompt_yesbutton_slot( GtkWidget* widget, gpointer func_data)
 {
     prompt_response = RESPONSE_YES;
@@ -832,6 +906,45 @@ static yesno_answer gtkui_prompt(const char *txt, yesno_answer suggest)
     gtk_widget_destroy(dialog);
     return prompt_response;
 }
+
+
+static void message_dialog(const char *txt, const char *title)
+{
+    GtkWidget *dialog, *label, *ok_button;
+       
+    /* Create the widgets */
+    
+    dialog = gtk_dialog_new();
+    label = gtk_label_new (txt);
+    ok_button = gtk_button_new_with_label("OK");
+
+    prompt_response = RESPONSE_NO;
+
+    /* Ensure that the dialog box is destroyed when the user clicks ok. */
+    
+    gtk_signal_connect_object (GTK_OBJECT (ok_button), "clicked",
+                               GTK_SIGNAL_FUNC (prompt_button_slot), GTK_OBJECT(dialog));
+
+	gtk_signal_connect_object(GTK_OBJECT(dialog), "delete-event",
+							  GTK_SIGNAL_FUNC(prompt_button_slot), GTK_OBJECT(dialog));
+	gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->action_area),
+					   ok_button);
+
+    /* Add the label, and show everything we've added to the dialog. */
+    
+    gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->vbox),
+                       label);
+    gtk_window_set_title(GTK_WINDOW(dialog), title);
+    gtk_window_set_modal(GTK_WINDOW(dialog), TRUE);
+    gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
+    gtk_widget_show_all (dialog);
+	while ( prompt_response != RESPONSE_YES ) {
+	    gtk_main_iteration();
+	}
+
+    gtk_widget_destroy(dialog);	
+}
+
 
 static inline int str_in_g_list(const char *str, GList *list)
 {
