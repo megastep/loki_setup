@@ -15,9 +15,12 @@
 #define BUTTON_HEIGHT       20
 #define BOX_START_COUNT     3       // Number of buttons box can hold without resize
 
+#define CARBON_MAX_APP_PATH 1024
+#define ASCENT_COUNT       4       // Number of directories to ascend to for app path
+
 static int PromptResponse;
 static int PromptResponseValid;
-static Rect DefaultBounds = {BUTTON_MARGIN, BUTTON_MARGIN, BUTTON_HEIGHT, BUTTON_WIDTH};
+//static Rect DefaultBounds = {BUTTON_MARGIN, BUTTON_MARGIN, BUTTON_HEIGHT, BUTTON_WIDTH};
 
 static void HResize(OptionsBox *Box, int ID, int Offset)
 {
@@ -50,7 +53,7 @@ static int OptionsSetRadioButton(OptionsButton *Button)
     RadioGroup *Group = (RadioGroup *)Button->Group;
     int Value;
     int i;
-    int ReturnValue;
+    int ReturnValue = false;
 
     carbon_debug("OptionsSetRadioButton()\n");
 
@@ -110,8 +113,6 @@ static int OptionsSetRadioButton(OptionsButton *Button)
 static pascal OSStatus MouseDownEventHandler(EventHandlerCallRef HandlerRef, EventRef Event, void *UserData)
 {
     OSStatus err = eventNotHandledErr;	// Default is event is not handled by this function
-    HICommand command;
-    CarbonRes *Res = (CarbonRes *)UserData;
     WindowRef DummyWindow;
     Point ThePoint;
 
@@ -560,8 +561,28 @@ int carbon_GetInstallClass(CarbonRes *Res)
 
 void carbon_UpdateImage(CarbonRes *Res, const char *Filename, const char *Path)
 {
-    //!!!TODO
-    carbon_debug("carbon_UpdateImage() - Not implemented.\n");
+    /*char FullPath[1024];
+    CGImageRef Image;
+    CFBundleRef Bundle;
+    CGDataProviderRef Provider;
+    CFURLRef url;
+    CFStringRef CFExePath;
+
+    Bundle = CFBundleGetMainBundle();
+    url = CFBundleCopyExecutableURL(Bundle);
+    CFExePath = CFURLCopyPath(url);
+    CFRelease(url);
+    CFStringGetCString(CFExePath, FullPath, 1024, kCFStringEncodingMacRoman);
+    strcpy(FullPath, Path);
+    strcat(FullPath, Filename);
+    printf("carbon_UpdateImage() - specified path: '%s'\n", FullPath);
+    url = CFBundleCopyResourceURL(Bundle, FullPath, NULL, NULL);
+    //url = CFURLCreateWithBytes(kCFAllocatorDefault, FullPath, 1024, kCFStringEncodingASCII, NULL);
+    Provider = CGDataProviderCreateWithURL(url);
+    Image = CGImageCreateWithJPEGDataProvider(Provider, NULL, false, kCGRenderingIntentDefault);
+    //strrchr(
+    CGDataProviderRelease(Provider);
+    CFRelease(url);*/
 }
 
 void carbon_HandlePendingEvents(CarbonRes *Res)
@@ -1100,4 +1121,53 @@ int carbon_LaunchURL(const char *url)
 
     CFRelease(theCFURL);
     return ReturnValue;
+}
+
+// This function returns the path where the .APP folder is stored
+void carbon_GetAppPath(const char *Dest, int Length)
+{
+    CFURLRef url;
+    CFStringRef CFExePath;
+    char EXEPath[CARBON_MAX_APP_PATH];
+    char *p;
+    CFBundleRef Bundle;
+    int i;
+
+    // Clear destination string
+    strcpy(Dest, "");
+
+    // Get URL of executable path
+    Bundle = CFBundleGetMainBundle();
+    url = CFBundleCopyExecutableURL(Bundle);
+    // Get EXE path as a CFString
+    CFExePath = CFURLCopyPath(url);
+    // Convert it to a char *
+    CFStringGetCString(CFExePath, EXEPath, CARBON_MAX_APP_PATH, kCFStringEncodingASCII);
+    printf("carbon_GetAppPath() - Executable path = '%s'\n", EXEPath);
+
+    CFRelease(url);
+    CFRelease(CFExePath);
+
+    for(i = 1; i <= ASCENT_COUNT; i ++)
+    {
+        // Search for next path separator
+        p = strrchr(EXEPath, '/');
+        if(p == NULL)
+        {
+            carbon_debug("carbon_GetAppPath() - Couldn't parse path!!!!\n");
+            break;
+        }
+        else if(i == ASCENT_COUNT)
+        {
+            // We want to keep the last slash, so move the pointer one ahead
+            *(++p) = 0x00;
+        }
+        else
+        {
+            // Reposition end of path to the current '/'
+            *p = 0x00;
+        }
+    }
+    printf("carbon_GetAppPath() - AppPath = '%s'\n", EXEPath);
+    strcpy(Dest, EXEPath);
 }

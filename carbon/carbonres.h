@@ -2,6 +2,7 @@
 #define __carbonres_h__
 
 #include <carbon/carbon.h>
+#include <CoreServices/CoreServices.h>
 
 // Constants used to identify Carbon resources
 #define OPTION_GROUP_ID         128
@@ -237,5 +238,6 @@ void carbon_OptionsShowBox(OptionsBox *);
 void carbon_SetProperWindowSize(OptionsBox *, int);
 OptionsButton *carbon_GetButtonByName(OptionsBox *, const char *);
 int carbon_LaunchURL(const char *);
+void carbon_GetAppPath(const char *, int);
 
 #endif

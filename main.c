@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.59 2003-04-02 00:09:36 zeph Exp $ */
+/* $Id: main.c,v 1.60 2003-04-14 04:17:21 zeph Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -21,6 +21,10 @@ Modifications by Borland/Inprise Corp.:
 		work as if RPM was not present.
 
  */
+#if defined(darwin)
+#include "carbon/carbonres.h"
+#endif
+
 #include <stdio.h>
 #include <signal.h>
 #include <string.h>
@@ -151,7 +155,15 @@ int main(int argc, char **argv)
     char binary_path[PATH_MAX];
 	const char *product_prefix = NULL;
     struct enabled_option *enabled_opt;
-
+#if defined(darwin)
+    // If we're on Mac OS, we need to make sure the current working directoy
+    //  is the same directoy as the .APP is in.  With Mac OS X, running from
+    //  the finder and most other places makes the current directory to root.
+#define CARBON_MAX_PATH 1024
+    char carbon_app_path[CARBON_MAX_PATH];
+    carbon_GetAppPath(carbon_app_path, CARBON_MAX_PATH);
+    chdir(carbon_app_path);
+#endif
     install_path[0] = '\0';
     binary_path[0] = '\0';
 
