@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.3 2000-10-11 23:47:04 megastep Exp $ */
+/* $Id: uninstall.c,v 1.4 2000-10-12 03:13:49 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -107,7 +107,7 @@ int main(int argc, char **argv)
             product_t *prod = loki_openproduct(product);
             printf("\t%s: ", product);
             if ( prod ) {
-                info = loki_getproductinfo(prod);
+                info = loki_getinfo_product(prod);
                 printf(_("installed in %s\n"), info->root);
                 loki_closeproduct(prod);
             } else {
@@ -123,7 +123,7 @@ int main(int argc, char **argv)
             return 1;
         }
 
-        info = loki_getproductinfo(prod);
+        info = loki_getinfo_product(prod);
         /* Dump information about the program being uninstalled */
         printf(_("Product name: %s\nInstalled in %s\n"),
                info->name, info->root );

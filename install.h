@@ -2,6 +2,8 @@
 #ifndef _install_h
 #define _install_h
 
+#include "setupdb.h"
+
 #include <limits.h>
 #include <parser.h>		/* From gnome-xml */
 #include <libintl.h>
@@ -255,7 +257,7 @@ extern void uninstall(install_info *info);
 extern void generate_uninstall(install_info *info);
 
 /* Updates the 'uninstall' binary in ~/.loki/installed/bin and creates a shell script */
-extern int update_uninstall(install_info *info);
+extern int update_uninstall(install_info *info, product_t *product);
 
 /* Run pre/post install scripts */
 extern int install_preinstall(install_info *info);
