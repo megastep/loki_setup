@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.15 2003-08-16 01:03:55 megastep Exp $
+ * $Id: dialog_ui.c,v 1.16 2003-09-29 22:46:39 megastep Exp $
  */
 
 #include <limits.h>
@@ -147,7 +147,7 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr pa
 	char buf[BUFSIZ];
 	int result[MAX_CHOICES];
 	xmlNodePtr nodes[MAX_CHOICES];
-	int i = 0, nb_choices = 0;
+	int i = 0, nb_choices = 0, ret = 1;
 
 	xmlNodePtr node = parent->childs;
 	for ( ; node && nb_choices<MAX_CHOICES; node = node->next ) {
@@ -208,9 +208,14 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr pa
 			choices[i++] = get_option_help(info, node);
 			nb_choices++;
 	    } else if ( ! strcmp(node->name, "component") ) {
+			const char *str = xmlGetProp(node, "name");
 			nodes[nb_choices] = node;
 			choices[i++] = _("Component");
-			choices[i++] = xmlGetProp(node, "name");
+			if ( !str || !strcmp(str, "Default") ) { /* Show the name of the product instead */
+				choices[i++] = info->desc;
+			} else {
+				choices[i++] = str;
+			}
 			choices[i++] = "on"; /* Components are always selected by default  */
 			choices[i++] = get_option_help(info, node);
 			nb_choices++;
@@ -236,7 +241,7 @@ options_loop:
 	}
 
 	/* Now parse the results */
-	for ( i = 0; i < nb_choices; ++i ) {
+	for ( i = 0; ret && i < nb_choices; ++i ) {
 		if ( !strcmp(nodes[i]->name, "option") ) {
 		    if ( result[i] ) {
 				const char *warn = get_option_warn(info, nodes[i]);
@@ -292,13 +297,13 @@ options_loop:
 				mark_option(info, nodes[i], "false", 0);
 		    }
 		} else if ( !strcmp(nodes[i]->name, "exclusive") && result[i]) {
-		    parse_option(info, component, nodes[i], 1, !GetReinstallNode(info, nodes[i]), get_option_name(info, nodes[i], NULL, 0));
+		    ret = parse_option(info, component, nodes[i], 1, !GetReinstallNode(info, nodes[i]), get_option_name(info, nodes[i], NULL, 0));
 		} else if ( !strcmp(nodes[i]->name, "component") && result[i]) {
 			snprintf(buf, sizeof(buf), _("Component: %s"), xmlGetProp(nodes[i], "name"));
-		    parse_option(info, xmlGetProp(nodes[i], "name"), nodes[i], 1, 0, buf);
+		    ret = parse_option(info, xmlGetProp(nodes[i], "name"), nodes[i], 0, 0, buf);
 		}
 	}
-	return 1;
+	return ret;
 }
 
 static

@@ -499,7 +499,11 @@ static install_state console_setup(install_info *info)
 						 match_distro(info, xmlGetProp(node, "distro")) ) {
                         xmlNodePtr child;
                         if ( xmlGetProp(node, "showname") ) {
-                            printf(_("\n%s component\n\n"), xmlGetProp(node, "name"));
+							const char *str = xmlGetProp(node, "name");
+							if ( !str || !strcmp(str, "Default") ) { /* Show the name of the product instead */
+								str = info->desc;
+							}
+							printf(_("\n%s component\n\n"), str);
                         }
                         for ( child = node->childs; child; child = child->next) {
                             parse_option(info, xmlGetProp(node, "name"), child, 0, 0);
