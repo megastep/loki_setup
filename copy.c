@@ -382,71 +382,71 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
     copied = 0;
     size = 0;
     while ( filedesc && parse_line(&filedesc, final, (sizeof final)) ) {
-      if (! in_rpm) {
-        copied = 0;
+		if (! in_rpm) {
+			copied = 0;
 		
-		strncpy(fdest, dest, sizeof(fdest));
+			strncpy(fdest, dest, sizeof(fdest));
 
-        strncpy(current_option, final, sizeof(current_option));
-        strncat(current_option, " binary", sizeof(current_option));
-        snprintf(fpat, sizeof(fpat), "bin/%s/%s/%s", arch, libc, final);
-		if ( keepdirs ) { /* Append the subdirectory to the final destination */
-			char *slash = strrchr(final, '/');
-			if(slash) {
-				*slash = '\0';
-				strncat(fdest, "/", sizeof(fdest));
-				strncat(fdest, final, sizeof(fdest));
+			strncpy(current_option, final, sizeof(current_option));
+			strncat(current_option, " binary", sizeof(current_option));
+			snprintf(fpat, sizeof(fpat), "bin/%s/%s/%s", arch, libc, final);
+			if ( keepdirs ) { /* Append the subdirectory to the final destination */
+				char *slash = strrchr(final, '/');
+				if(slash) {
+					*slash = '\0';
+					strncat(fdest, "/", sizeof(fdest));
+					strncat(fdest, final, sizeof(fdest));
+				}
+			}
+			if ( from_cdrom ) {
+				int d;
+				char fullpath[PATH_MAX];
+            
+				for( d = 0; d < num_cdroms; ++d ) {
+					snprintf(fullpath, sizeof(fullpath), "%s/%s", cdroms[d], fpat);
+					if ( stat(fullpath, &sb) == 0 ) {
+						check_dynamic(fpat, bin, cdroms[d]);
+						copied = copy_file(info, cdroms[d], bin, fdest, final, 1, update);
+						break;
+					} else {
+						snprintf(fullpath, sizeof(fullpath), "%s/bin/%s/%s", cdroms[d], arch, final);
+						if ( stat(fullpath, &sb) == 0 ) {
+							snprintf(fullpath, sizeof(fullpath), "bin/%s/%s", arch, final);
+							check_dynamic(fullpath, bin, cdroms[d]);
+							copied = copy_file(info, cdroms[d], bin, fdest, final, 1, update);
+							break;
+						}
+					}
+				}
+				if ( d == num_cdroms ) {
+					log_warning(info, _("Unable to find file '%s'"), fpat);
+				}
+			} else {
+				if ( stat(fpat, &sb) == 0 ) {
+					check_dynamic(fpat, bin, NULL);
+					copied = copy_file(info, NULL, bin, fdest, final, 1, update);
+				} else {
+					snprintf(fpat, sizeof(fpat), "bin/%s/%s", arch, final);
+					if ( stat(fpat, &sb) == 0 ) {
+						check_dynamic(fpat, bin, NULL);
+						copied = copy_file(info, NULL, bin, fdest, final, 1, update);
+					} else {
+						log_warning(info, _("Unable to find file '%s'"), fpat);
+					}
+				}
+			}
+		} else {  /* if inrpm="true" */
+			if (strncmp("$INSTALLDIR", final, 11 ) == 0) {
+				strcpy(fpat, info->install_path);
+				i = strlen(fpat);
+				for (count=11; count <= strlen(final); count++) {
+					fpat[i++] = final[count];
+				}
+				strcat(fpat, "\0");
+				final[0] = '\0';
+				strcpy(final, fpat);
 			}
 		}
-        if ( from_cdrom ) {
-            int d;
-            char fullpath[PATH_MAX];
-            
-            for( d = 0; d < num_cdroms; ++d ) {
-                snprintf(fullpath, sizeof(fullpath), "%s/%s", cdroms[d], fpat);
-                if ( stat(fullpath, &sb) == 0 ) {
-                    check_dynamic(fpat, bin, cdroms[d]);
-                    copied = copy_file(info, cdroms[d], bin, fdest, final, 1, update);
-                    break;
-                } else {
-                    snprintf(fullpath, sizeof(fullpath), "%s/bin/%s/%s", cdroms[d], arch, final);
-                    if ( stat(fullpath, &sb) == 0 ) {
-                        snprintf(fullpath, sizeof(fullpath), "bin/%s/%s", arch, final);
-                        check_dynamic(fullpath, bin, cdroms[d]);
-                        copied = copy_file(info, cdroms[d], bin, fdest, final, 1, update);
-                        break;
-                    }
-                }
-            }
-            if ( d == num_cdroms ) {
-                log_warning(info, _("Unable to find file '%s'"), fpat);
-            }
-        } else {
-            if ( stat(fpat, &sb) == 0 ) {
-                check_dynamic(fpat, bin, NULL);
-                copied = copy_file(info, NULL, bin, fdest, final, 1, update);
-            } else {
-                snprintf(fpat, sizeof(fpat), "bin/%s/%s", arch, final);
-                if ( stat(fpat, &sb) == 0 ) {
-                    check_dynamic(fpat, bin, NULL);
-                    copied = copy_file(info, NULL, bin, fdest, final, 1, update);
-                } else {
-                    log_warning(info, _("Unable to find file '%s'"), fpat);
-                }
-            }
-        }
-      } else {  /* if inrpm="true" */
-	  if (strncmp("$INSTALLDIR", final, 11 ) == 0) {
-	      strcpy(fpat, info->install_path);
-	      i = strlen(fpat);
-	      for (count=11; count <= strlen(final); count++) {
-		  fpat[i++] = final[count];
-	      }
-	      strcat(fpat, "\0");
-	      final[0] = '\0';
-	      strcpy(final, fpat);
-	  }
-      }
         if ( copied > 0 || in_rpm ) {
             char *symlink = xmlGetProp(node, "symlink");
             char sym_to[PATH_MAX];
@@ -459,19 +459,21 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
                 file_symlink(info, final, sym_to);
             }
             add_bin_entry(info, final, symlink,
-                                       xmlGetProp(node, "desc"),
-                                       xmlGetProp(node, "menu"),
-                                       xmlGetProp(node, "name"),
-                                       xmlGetProp(node, "icon"),
-                                       xmlGetProp(node, "play")
+						  xmlGetProp(node, "desc"),
+						  xmlGetProp(node, "menu"),
+						  xmlGetProp(node, "name"),
+						  xmlGetProp(node, "icon"),
+						  xmlGetProp(node, "play")
 						  );
         }
     }
     return size;
 }
 
-int copy_script(install_info *info, xmlNodePtr node, const char *script, const char *dest)
+int copy_script(install_info *info, xmlNodePtr node, const char *script, const char *dest,
+				void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
+	update(info, _("Running script"), 0, 0, current_option);
     return(run_script(info, script, -1));
 }
 
@@ -535,7 +537,7 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
         if ( strcmp(node->name, "script") == 0 && lang_matched ) {
             copy_script(info, node,
                         xmlNodeListGetString(info->config, node->childs, 1),
-                        path);
+                        path, update);
         }
 		if ( strcmp(node->name, "exclusive") == 0 ) {
 			xmlNodePtr child = node->childs;
