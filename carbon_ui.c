@@ -458,7 +458,7 @@ static void OnCommandReadme(void)
     if(filename)
     {
         load_file(filename, buffer, MAX_README_SIZE);
-        carbon_ReadmeOrLicense(MyRes, true, buffer);
+        carbon_ReadmeOrLicense(MyRes, true, buffer, true);
     }
 
     else
@@ -587,7 +587,7 @@ int OnOptionClickEvent(OptionsButton *ButtonWithEventClick)
 				{
                     char buffer[MAX_README_SIZE];
                     load_file(name, buffer, MAX_README_SIZE);
-                    if(!carbon_ReadmeOrLicense(MyRes, false, buffer))
+                    if(!carbon_ReadmeOrLicense(MyRes, false, buffer, false))
                     {
                         carbon_OptionsSetValue(ButtonWithEventClick, false);
 					    return true;
@@ -998,7 +998,7 @@ static install_state carbonui_license(install_info *info)
     // If license is accepted
     char buffer[MAX_README_SIZE];
     load_file(GetProductEULA(info, NULL), buffer, MAX_README_SIZE);
-    if(carbon_ReadmeOrLicense(MyRes, false, buffer))
+    if(carbon_ReadmeOrLicense(MyRes, false, buffer, false))
         cur_state = SETUP_README;
     else
         cur_state = SETUP_EXIT;

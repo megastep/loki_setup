@@ -34,8 +34,10 @@
 #define CARBON_MAX_APP_PATH 1024
 #define ASCENT_COUNT       4       // Number of directories to ascend to for app path
 
-static int PromptResponse;
-static int PromptResponseValid;
+static volatile int PromptResponse = 0;
+static volatile int PromptResponseValid = 0;
+static volatile int ReadmeWindowOpen = 0;
+
 static Rect DefaultBounds = {BUTTON_MARGIN, BUTTON_MARGIN, BUTTON_HEIGHT, BUTTON_WIDTH};
 static char EXEPath[CARBON_MAX_APP_PATH];
 
@@ -983,6 +985,15 @@ void carbon_HandlePendingEvents(CarbonRes *Res)
         SendEventToEventTarget (theEvent, theTarget);
         ReleaseEvent(theEvent);
     }
+
+    // readme/eula window was opened non-blocking. Handle.
+    if ((ReadmeWindowOpen) && (PromptResponseValid))
+    {
+        Cursor arrow;
+        ReadmeWindowOpen = false;
+        HideWindow(Res->ReadmeWindow);
+        SetCursor(GetQDGlobalsArrow(&arrow));
+    }
 }
 
 void carbon_SetLabelText(CarbonRes *Res, int LabelID, const char *Text)
@@ -1196,7 +1207,7 @@ int carbon_Prompt(CarbonRes *Res, PromptType Type, const char *Message, char *In
     return PromptResponse;
 }
 
-int carbon_ReadmeOrLicense(CarbonRes *Res, int ReadmeNotLicense, char *Message)
+int carbon_ReadmeOrLicense(CarbonRes *Res, int ReadmeNotLicense, char *Message, int dontblock)
 {
     CFStringRef cfstr;
     ControlRef CancelButton;
@@ -1271,6 +1282,10 @@ int carbon_ReadmeOrLicense(CarbonRes *Res, int ReadmeNotLicense, char *Message)
 
     // Prompt response hasn't been gotten yet...so it's invalid
     PromptResponseValid = false;
+    ReadmeWindowOpen = true;
+
+    if (dontblock)
+        return 0;
 
     // Wait for the prompt window to close
     theTarget = GetEventDispatcherTarget();
@@ -1289,6 +1304,7 @@ int carbon_ReadmeOrLicense(CarbonRes *Res, int ReadmeNotLicense, char *Message)
 
     // We're done with the prompt window...be gone!!!  Thus sayeth me.
     HideWindow(Res->ReadmeWindow);
+    ReadmeWindowOpen = false;
 
     Cursor arrow;
     SetCursor(GetQDGlobalsArrow(&arrow));

@@ -239,7 +239,7 @@ void carbon_SetProgress(CarbonRes *, int, float);
 void carbon_SetCheckbox(CarbonRes *, int, int);
 int carbon_GetCheckbox(CarbonRes *, int);
 int carbon_Prompt(CarbonRes *, PromptType, const char *, char *, int);
-int carbon_ReadmeOrLicense(CarbonRes *, int, char *);
+int carbon_ReadmeOrLicense(CarbonRes *, int, char *, int);
 int carbon_LaunchURL(const char *);
 void carbon_GetAppPath(char *, int);
 int carbon_PromptForPath(char *, int);
