@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.2 1999-09-09 18:19:23 megastep Exp $
+   $Id: gtk_ui.c,v 1.3 1999-09-10 01:27:00 megastep Exp $
 */
 
 #include <limits.h>
@@ -12,6 +12,7 @@
 #include "install.h"
 #include "install_ui.h"
 #include "detect.h"
+#include "loki_logo.xpm"
 
 /* Globals */
 
@@ -49,6 +50,7 @@ static GtkWidget* _finishButton;
 static GtkWidget* _installButton;
 static GtkNotebook* _notebook;
 static GtkWidget* _pixmap;
+static GtkWidget* _statusBar;
 
 static int cur_state;
 static install_info *cur_info;
@@ -71,6 +73,11 @@ static int iterate_for_state(void)
 
   /*  fprintf(stderr,"New state: %d\n", cur_state); */
   return cur_state;
+}
+
+static const char *GetProductSplash(install_info *info)
+{
+    return xmlGetProp(cur_info->config->root, "splash");
 }
 
 /* GTK Utility Functions */
@@ -322,17 +329,29 @@ static void check_install_button(void)
   if(cp)
 	*cp = '\0';
   
-  if(_installButton)
-	gtk_widget_set_sensitive(_installButton, 
-							 /* Size requirements */
-							 (cur_info->install_size > 0) && (cur_info->install_size < diskspace)
-							 /* Permissions requirements on the destination directory */
-							 && (!access(cur_info->install_path, W_OK) || !access(path_up, W_OK))
-							 );
+  if(_installButton && _statusBar){
+	int ok = 1;
+	if(cur_info->install_size <= 0){
+	  ok = 0;
+	  gtk_label_set_text(GTK_LABEL(_statusBar), "Please select at least one option");
+	}else if(cur_info->install_size > diskspace){
+	  ok = 0;
+	  gtk_label_set_text(GTK_LABEL(_statusBar), "Not enough free space for the selected options");
+	}else if(access(cur_info->install_path, W_OK) && access(path_up, W_OK)){
+	  ok = 0;
+	  gtk_label_set_text(GTK_LABEL(_statusBar), "No write permissions on the destination directory");
+	}else if(access(cur_info->symlinks_path, W_OK)){
+	  ok = 0;
+	  gtk_label_set_text(GTK_LABEL(_statusBar), "No write permissions on the symlinks directory");
+	}else /* Erase the status bar, everything is OK */
+	  gtk_label_set_text(GTK_LABEL(_statusBar), "");	  
+	gtk_widget_set_sensitive(_installButton, ok);
+  }
 }
 
 static void update_size(void)
 {
+  if(!_sizeLabel) return;
   sprintf(tmpbuf, "%d MB", cur_info->install_size);
   gtk_label_set_text(GTK_LABEL(_sizeLabel), tmpbuf);
   check_install_button();
@@ -340,6 +359,7 @@ static void update_size(void)
 
 static void update_space(void)
 {
+  if(!_spaceLabel) return;
   sprintf(tmpbuf, "%d MB", diskspace = detect_diskspace(cur_info->install_path));
   gtk_label_set_text(GTK_LABEL(_spaceLabel), tmpbuf);
   check_install_button();
@@ -650,9 +670,19 @@ static GtkWidget* makeOptionsPage(install_info *info)
     GtkWidget* box3;
     GtkWidget* box4;
     xmlNodePtr node;
+	GdkPixmap* pixmap;
+	GdkBitmap* mask;
+    GtkStyle*  style = gtk_widget_get_style( _window );
 
     box0 = gtk_vbox_new( FALSE, 10 );
     gtk_widget_show( box0 );
+
+    pixmap = gdk_pixmap_create_from_xpm_d( _window->window, &mask,
+                                           &style->bg[ GTK_STATE_NORMAL ],
+                                           loki_logo_xpm);
+	widget = gtk_pixmap_new(pixmap,mask);
+    PACKC( box0, widget );
+    gtk_widget_show( widget );
 
     widget = gtk_frame_new( "Global Options" );
     PACKC( box0, widget );
@@ -662,23 +692,15 @@ static GtkWidget* makeOptionsPage(install_info *info)
     box1 = VBOX( widget, 0, 0 );
     gtk_container_set_border_width( GTK_CONTAINER(box1), 10 );
 
-        box2 = HBOX( box1, 0, 10 );
+    box3 = VBOX( box1, 1, 0 );
 
-            box3 = VBOX( box2, 1, 0 );
+        PACK00( box3, ALIGN(makeLabel( "Install Path" ),0.5,0,0,0), 0 );
+        PACK00( box3, makePathCombo(), 0 );
+        PACK00( box3, ALIGN(makeLabel( "Symbolic Link Path" ),0.5,0,0,0), 0 );
+        PACK00( box3, makeLinkCombo(), 0 );
 
-                PACK00( box3, makeLabel( "Install Path" ), 0 );
-                PACK00( box3, makeLabel( "Free space:" ), 0 );
-                PACK00( box3, makeLabel( "Symbolic Link Path" ), 0 );
-                PACK00( box3, makeLabel( "Estimated size:" ), 0 );
-
-            box3 = VBOX( box2, 1, 0 );
-                PACK00( box3, ALIGN( makePathCombo(), 0, 0.5, 0, 0 ), 0 );
-                PACK00( box3, ALIGN( makeFreeSpace(), 0, 0.5, 0, 0 ), 0 );
-                PACK00( box3, ALIGN( makeLinkCombo(), 0, 0.5, 0, 0 ), 0 );
-                PACK00( box3, ALIGN( makeSizeOption(), 0, 0.5, 0, 0 ), 0 );
-
-				box2 = VBBOX( GTK_BUTTONBOX_SPREAD, 10 );
-        PACKC( box1, box2 );
+		box2 = VBBOX( GTK_BUTTONBOX_SPREAD, 10 );
+    PACKC( box1, box2 );
 
     widget = gtk_frame_new( "Install Options" );
     PACKC( box0, widget );
@@ -697,10 +719,20 @@ static GtkWidget* makeOptionsPage(install_info *info)
 	  }
 	  node = node->next;
 	}
-	
-	PACK00( box4, ALIGN( makeDesktopOption(), 0, 0.5, 0, 0 ), 0 );
 
-    PACKC( box0, makeActivateButtons() );
+	box2 = HBOX(box4, 0,15);
+			PACK00( box2, ALIGN(makeLabel( "Free space:" ),0,0,0,0), 0 );
+            PACK00( box2, ALIGN( makeFreeSpace(), 0, 0.5, 0, 0 ), 0 );
+			PACK00( box2, ALIGN(makeLabel( "Estimated size:" ),0,0,0,0), 0 );
+            PACK00( box2, ALIGN( makeSizeOption(), 0, 0.5, 0, 0 ), 0 );
+
+	PACK00( box4, ALIGN( makeDesktopOption(), 0, 0.5, 0, 0 ), 10 );
+
+    _statusBar = gtk_label_new( "" );
+	PACKC( box0, _statusBar );
+    gtk_widget_show( _statusBar );
+
+    PACK00( box0, makeActivateButtons(), 20);
 
     update_space();
 	update_size();
@@ -860,14 +892,18 @@ static GtkWidget* makeAbortPage()
 
 static install_state gtkui_init(install_info *info, int argc, char **argv)
 {
-    GtkWidget* hbox;
+    GtkWidget* hbox, *vbox;
     GtkStyle* style;
 	GtkWidget* label;
+	GdkPixmap* pixmap;
+	GdkBitmap* mask;
 
 	cur_state = SETUP_INIT;
 	cur_info = info;
 
 	gtk_init(&argc,&argv);
+	gdk_imlib_init();
+
     _window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 	sprintf(tmpbuf,"%s installer", info->desc);
     gtk_window_set_title( GTK_WINDOW(_window), tmpbuf);
@@ -878,12 +914,12 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
 
     _tooltips = gtk_tooltips_new();
     gtk_widget_show( _window );
+    style = gtk_widget_get_style( _window );
+
 	gtk_window_set_position( GTK_WINDOW(_window), GTK_WIN_POS_CENTER);
 
     hbox = gtk_hbox_new( 0, 10 );
-    PACKC( _window, hbox );
-
-    style = gtk_widget_get_style( _window );
+    PACKC( _window, hbox);
 
     _notebook = GTK_NOTEBOOK(gtk_notebook_new());
     PACK00( hbox, _notebook, 10 );
@@ -904,6 +940,13 @@ static install_state gtkui_init(install_info *info, int argc, char **argv)
 	gtk_notebook_append_page( GTK_NOTEBOOK(_notebook), makeAbortPage(),
                               label = gtk_label_new( "Aborted" ) );
 	gtk_widget_show(label);
+
+    pixmap = gdk_pixmap_create_from_xpm( _window->window, &mask,
+                                           &style->bg[ GTK_STATE_NORMAL ],
+                                           GetProductSplash(info));
+    _pixmap = gtk_pixmap_new( pixmap, mask );
+    PACK00( hbox, _pixmap, 0 );
+    gtk_widget_show( _pixmap );
 
     gtk_widget_show( hbox );
 
