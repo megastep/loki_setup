@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.38 2003-06-20 19:55:15 megastep Exp $ */
+/* $Id: uninstall.c,v 1.39 2003-06-23 22:35:09 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -513,25 +513,30 @@ printf("\n\n");
     signal(SIGTERM, emergency_exit);
 
     if ( !strcmp(argv[1], "-l") ) {
-        const char *product;
-        printf(_("Installed products:\n"));
-        for( product = loki_getfirstproduct(); product; product = loki_getnextproduct() ) {
-            prod = loki_openproduct(product);
-            printf("\t%s: ", product);
-            if ( prod ) {
-				product_component_t *comp;
-
-                info = loki_getinfo_product(prod);
-                printf(_("installed in %s\n\tComponents:\n"), info->root);
-				/* List components */
-				for ( comp = loki_getfirst_component(prod); comp; comp = loki_getnext_component(comp)) {
-					printf("\t\t%s\n", loki_getname_component(comp));
+		if ( loki_getfirstproduct() ) {
+			const char *product;
+			printf(_("Installed products:\n"));
+			for( product = loki_getfirstproduct(); product; product = loki_getnextproduct() ) {
+				prod = loki_openproduct(product);
+				printf("\t%s: ", product);
+				if ( prod ) {
+					product_component_t *comp;
+					
+					info = loki_getinfo_product(prod);
+					printf(_("installed in %s\n\tComponents:\n"), info->root);
+					/* List components */
+					for ( comp = loki_getfirst_component(prod); comp; comp = loki_getnext_component(comp)) {
+						printf("\t\t%s\n", loki_getname_component(comp));
+					}
+					loki_closeproduct(prod);
+				} else {
+					printf(_(" Error while accessing product info\n"));
 				}
-                loki_closeproduct(prod);
-            } else {
-                printf(_(" Error while accessing product info\n"));
-            }
-        }
+			}
+		} else {
+			fprintf(stderr, _("No products could be found. Maybe you need to run as a different user?\n"));
+			ret = 1;
+		}
     } else if ( !strcmp(argv[1], "-v") || !strcmp(argv[1], "--version") ) {
 #ifdef UNINSTALL_UI
         printf("Loki Uninstall Tool " VERSION "\n");
