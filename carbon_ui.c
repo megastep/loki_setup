@@ -778,8 +778,14 @@ int OnCommandEvent(UInt32 CommandID)
             break;
         case COMMAND_CANCEL:
         case COMMAND_CDKEY_CANCEL:
-        case 'quit':
             OnCommandCancel();
+            ReturnValue = true;
+            break;
+        case 'quit':
+            if (cur_state == SETUP_COMPLETE)
+                cur_state = SETUP_EXIT;
+            else
+                OnCommandCancel();
             ReturnValue = true;
             break;
         case COMMAND_EXIT:
