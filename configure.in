@@ -512,10 +512,10 @@ AC_ARG_WITH(image,
 	,   with_image=../../spp/private/image)
 IMAGE="$with_image"
 
-AC_ARG_WITH(brand,
-[  --with-brand              specifiy the brand prefix  [default=loki]], 
-	,   with_brand=loki)
-BRAND="$with_brand"
+AC_ARG_WITH(vendor,
+[  --with-vendor             specify the vendor prefix  [default=loki]], 
+	,   with_vendor=loki)
+BRAND="$with_vendor"
 
 #dnl enable the Outrage plugin (proprietary)
 #AC_ARG_ENABLE(outrage,
