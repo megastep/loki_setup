@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.83 2000-11-11 01:42:12 megastep Exp $ */
+/* $Id: install.c,v 1.84 2000-11-11 03:14:02 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -901,6 +901,8 @@ void delete_install(install_info *info)
         free(oldcd);
     }
     unmount_filesystems(info);
+    info->cdroms_list = NULL;
+    info->components_list = NULL;
     if ( info->lookup ) {
         close_lookup(info->lookup);
     }

@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.38 2000-11-10 06:38:00 megastep Exp $ */
+/* $Id: main.c,v 1.39 2000-11-11 03:14:02 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -380,6 +380,6 @@ int main(int argc, char **argv)
 
     /* Cleanup afterwards */
     delete_install(info);
-	FreePlugins();
+    FreePlugins();
     return(exit_status);
 }
