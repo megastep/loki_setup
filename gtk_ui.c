@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.81 2003-04-02 00:09:36 zeph Exp $
+   $Id: gtk_ui.c,v 1.82 2003-07-29 02:58:43 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1037,7 +1037,7 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
     const char *help;
     const char *wanted;
     gchar *name;
-    int i;
+    int i, reinstall;
     GtkWidget *button = NULL;
 
     /* See if this node matches the current architecture */
@@ -1155,7 +1155,8 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
     }
 
     /* Disable any options that are already installed */
-    if ( info->product && ! GetProductReinstall(info) ) {
+	reinstall = GetProductReinstall(info);
+    if ( info->product && (!reinstall || (reinstall && !GetReinstallNode(info, node)) ) ) {
         product_component_t *comp;
 
         if ( component ) {

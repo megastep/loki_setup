@@ -123,7 +123,7 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
     char line[BUFSIZ];
     char prompt[BUFSIZ];
     const char *wanted, *warn;
-	int retval = 1;
+	int retval = 1, reinstall;
     yesno_answer response = RESPONSE_INVALID, default_response = RESPONSE_INVALID;
 
 	/* Check if we are on a valid tag */
@@ -152,7 +152,8 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
     }
 
     /* Skip any options that are already installed */
-    if ( info->product && ! GetProductReinstall(info) ) {
+	reinstall = GetProductReinstall(info);
+    if ( info->product && (!reinstall || (reinstall && !GetReinstallNode(info, node)) ) ) {
         product_component_t *comp;
 
         if ( component ) {

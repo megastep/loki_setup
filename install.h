@@ -103,8 +103,9 @@ typedef struct _install_info {
 
     /* Bitfields of install options */
     struct {
-        int install_menuitems:1;
-        int unused:31;
+        unsigned install_menuitems: 1;
+		unsigned reinstalling: 1;
+        unsigned unused:30;
     } options;
 
     /* The CDROM descriptions */
@@ -243,6 +244,7 @@ extern int         GetProductRequireRoot(install_info *info);
 extern int         GetProductAllowsExpress(install_info *info);
 extern int         GetProductInstallOnce(install_info *info);
 extern int         GetProductReinstall(install_info *info);
+extern int         GetReinstallNode(install_info *info, xmlNodePtr node);
 extern int         GetProductIsAppBundle(install_info *info);
 extern int         GetProductSplashPosition(install_info *info);
 extern const char *GetProductCDKey(install_info *info);

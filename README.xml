@@ -457,6 +457,9 @@ There are several optional attributes of the option element:
             environment variable that is set before calling any scripts. This allows
             scripts to know what user selections are active.
 
+ reinstall  If this is a reinstallation, you can individually disable options that can
+            be reinstalled with this attribute set to "false".
+
 The option element support the LANG sub-element, which is used to specify
 translated strings for the option name. The only attribute of this element
 is 'lang', which should be the name of the locale to be matched against

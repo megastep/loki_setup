@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.113 2003-07-10 23:08:54 megastep Exp $ */
+/* $Id: install.c,v 1.114 2003-07-29 02:58:43 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -465,6 +465,15 @@ int GetProductReinstall(install_info *info)
 {
 	const char *str = xmlGetProp(info->config->root, "reinstall");
 	return str && (*str=='t' || *str=='y');
+}
+
+int GetReinstallNode(install_info *info, xmlNodePtr node)
+{
+	const char *str = xmlGetProp(node, "reinstall");
+	if ( str ) {
+		return (*str=='t' || *str=='y');
+	}
+	return 1; /* Default to yes */
 }
 
 const char *GetLocalURL(install_info *info)
@@ -2296,7 +2305,8 @@ int run_script(install_info *info, const char *script, int arg)
 					"SETUP_CDROMPATH=\"%s\"\n"
 					"SETUP_DISTRO=\"%s\"\n"
 					"SETUP_OPTIONTAGS=\"%s\"\n"
-					"export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH SETUP_DISTRO SETUP_OPTIONTAGS\n"
+					"SETUP_REINSTALL=\"%s\"\n"
+					"export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH SETUP_DISTRO SETUP_OPTIONTAGS SETUP_REINSTALL\n"
 					"%s%s\n",
 					info->name, info->version,
 					info->install_path,
@@ -2304,6 +2314,7 @@ int run_script(install_info *info, const char *script, int arg)
 					info->cdroms_list ? info->cdroms_list->mounted : "",
 					info->distro ? distribution_symbol[info->distro] : "",
 					get_optiontags_string(info),
+					info->options.reinstalling ? "1" : "0",
 					working_dir, script);     
             fchmod(fileno(fp),0755); /* Turn on executable bit */
             fclose(fp);

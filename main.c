@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.63 2003-07-25 19:12:26 megastep Exp $ */
+/* $Id: main.c,v 1.64 2003-07-29 02:58:43 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -330,6 +330,10 @@ int main(int argc, char **argv)
 					UI.prompt(_("\nThis product is already installed.\nUninstall it before running this program again.\n"), RESPONSE_OK);
 					state = SETUP_EXIT;
 					continue;
+				}
+				if ( info->product && GetProductReinstall(info) ) {
+					UI.prompt(_("Warning: You are about to reinstall\non top of an existing installation.\n"), RESPONSE_OK);
+					info->options.reinstalling = 1;
 				}
                 /* Check for the presence of the product if we install a component */
                 if ( GetProductComponent(info) ) {

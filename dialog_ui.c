@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.11 2003-06-19 01:33:56 megastep Exp $
+ * $Id: dialog_ui.c,v 1.12 2003-07-29 02:58:43 megastep Exp $
  */
 
 #include <limits.h>
@@ -158,7 +158,8 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr pa
 			set = xmlGetProp(node, "required");
 		}
 	    if ( ! strcmp(node->name, "option") ) {
-		    
+		    int reinstall;
+
 			if ( ! match_arch(info, xmlGetProp(node, "arch")) )
 				continue;
 		
@@ -173,7 +174,8 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr pa
 			}
 
 			/* Skip options that are already installed */
-			if ( info->product && ! GetProductReinstall(info) ) {
+			reinstall = GetProductReinstall(info);
+			if ( info->product && (!reinstall || (reinstall && !GetReinstallNode(info, node)) ) ) {
 				product_component_t *comp;
 				
 				if ( component ) {
