@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.41 2000-07-11 21:11:51 megastep Exp $
+   $Id: gtk_ui.c,v 1.42 2000-07-15 00:45:54 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -431,8 +431,12 @@ void setup_button_exit_slot( GtkWidget* widget, gpointer func_data )
 
 void setup_button_cancel_slot( GtkWidget* widget, gpointer func_data )
 {
-    cur_state = SETUP_ABORT;
-    abort_install();
+	if ( (cur_state != SETUP_COMPLETE) && (cur_state != SETUP_OPTIONS) ) {
+		cur_state = SETUP_ABORT;
+		abort_install();
+	} else {
+		cur_state = SETUP_EXIT;
+	}
 }
 
 void setup_button_install_slot( GtkWidget* widget, gpointer func_data )

@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.53 2000-07-11 21:11:51 megastep Exp $ */
+/* $Id: install.c,v 1.54 2000-07-15 00:45:54 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -715,6 +715,7 @@ install_state install(install_info *info,
 /* Remove a partially installed product */
 void uninstall(install_info *info)
 {
+	char path[PATH_MAX];
 
     if (GetPreUnInstall(info)) {
         run_script(info, GetPreUnInstall(info), 0);
@@ -740,6 +741,12 @@ void uninstall(install_info *info)
         free(elem->path);
         free(elem);
     }
+	/* Check for uninstall script and remove it if present */
+	snprintf(path, PATH_MAX, "%s/%s", info->install_path, GetProductUninstall(info));
+	if ( file_exists(path) && unlink(path) < 0 ) {
+		log_warning(info, _("Unable to remove '%s'"), path);
+	}
+	
     while ( info->dir_list ) {
         struct dir_elem *elem;
  

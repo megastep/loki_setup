@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.29 2000-07-11 21:11:51 megastep Exp $ */
+/* $Id: main.c,v 1.30 2000-07-15 00:45:54 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -180,11 +180,11 @@ int main(int argc, char **argv)
                 exit(0);
 	    case 'i':
 	        strcpy(install_path, optarg);
-		disable_install_path = 1;
+			disable_install_path = 1;
 		break;
 	    case 'b':
 	        strcpy(binary_path, optarg);
-		disable_binary_path = 1;
+			disable_binary_path = 1;
 		break;
 	    case 'm':
 	        force_manual = 1;
