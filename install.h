@@ -8,8 +8,11 @@
 /* Conversion macro for bytes to megabytes */
 #define BYTES2MB(bytes) ((bytes/(1024*1024))+1)
 
+/* The prefix for all our setup data files */
+#define SETUP_BASE          "setup.data/"
+
 /* The default location of the product */
-#define DEFAULT_PATH    "/usr/local/games"
+#define DEFAULT_PATH        "/usr/local/games"
 
 /* The default location of the symlinks */
 #define DEFAULT_SYMLINKS    "/usr/local/bin"
@@ -45,6 +48,7 @@ typedef struct {
     /* The product name and description */
     const char *name;
     const char *desc;
+    const char *version;
 
     /* The product install destination */
     char install_path[PATH_MAX];

@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.2 1999-09-09 04:02:07 megastep Exp $ */
+/* $Id: main.c,v 1.3 1999-09-10 13:08:59 hercules Exp $ */
 
 #include <stdio.h>
 #include <setjmp.h>
@@ -9,7 +9,7 @@
 #include "install_ui.h"
 #include "log.h"
 
-#define SETUP_CONFIG  "setup.xml"
+#define SETUP_CONFIG  SETUP_BASE "setup.xml"
 
 /* Global options */
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="yes"?>
-<install product="rt2" desc="Railroad Tycoon II" splash="rt2.xpm">
-  <option install="true">
+<install product="rt2" desc="Railroad Tycoon II" version="1.54" splash="rt2.xpm">
+  <option install="true" help="Required for play">
     Base Install
     <binary arch="any" libc="any" symlink="rt2" icon="icon.xpm">
       rt2

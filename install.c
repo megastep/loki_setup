@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.10 1999-09-10 11:26:30 hercules Exp $ */
+/* $Id: install.c,v 1.11 1999-09-10 13:08:59 hercules Exp $ */
 
 #include <sys/types.h>
 #include <stdlib.h>
@@ -68,6 +68,7 @@ install_info *create_install(const char *configfile, int log_level)
     /* Add information about install */
     info->name = GetProductName(info);
     info->desc = GetProductDesc(info);
+    info->version = GetProductVersion(info);
     info->arch = detect_arch();
     info->libc = detect_libc();
 
