@@ -11,11 +11,8 @@ function DetectARCH {
 	case `uname -m` in
 		i?86)  echo "x86"
 			status=0;;
-		ppc)   echo "ppc"
+		*)     echo "`uname -m`"
 			status=0;;
-		alpha) echo "alpha"
-			status=0;;
-		*)     echo "unknown";;
 	esac
 	return $status
 }
