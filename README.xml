@@ -110,13 +110,17 @@ There are several optional attributes of the option element:
  help       This attribute is a help string which is displayed to the
             user if the user requests more information about the option.
 
- arch       This option is only available on the specified architecture.
-            The architecture can be one of:
+ arch       This option is only available on the specified architectures.
+            The architecture can be any of:
                x86, ppc, alpha, sparc64, etc.
 
  libc       This option is only available with the specified version of libC.
             The version can be one of:
                libc5, glibc-2.0, glibc-2.1, etc.
+
+ size       This is an optional size of the install option in megabytes.
+            If this element isn't specified, setup  will try to autodetect
+            the size of the install option itself.
 
 
 The BINARY element:

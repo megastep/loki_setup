@@ -102,9 +102,28 @@ static void parse_option(install_info *info, xmlNodePtr node)
 
     /* See if this node matches the current architecture */
     wanted = xmlGetProp(node, "arch");
-    if ( wanted && ((strcmp(wanted, "any") != 0) &&
-                    (strcmp(wanted, info->arch) != 0)) ) {
-        return;
+    if ( wanted && (strcmp(wanted, "any") != 0) ) {
+        char *space, *copy;
+        int matched_arch = 0;
+
+        copy = strdup(wanted);
+        wanted = copy;
+        space = strchr(wanted, ' ');
+        while ( space ) {
+            *space = '\0';
+            if ( strcmp(wanted, info->arch) == 0 ) {
+                break;
+            }
+            wanted = space+1;
+            space = strchr(wanted, ' ');
+        }
+        if ( strcmp(wanted, info->arch) == 0 ) {
+            matched_arch = 1;
+        }
+        free(copy);
+        if ( ! matched_arch ) {
+            return;
+        }
     }
     wanted = xmlGetProp(node, "libc");
     if ( wanted && ((strcmp(wanted, "any") != 0) &&

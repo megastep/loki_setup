@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.35 2000-03-10 01:18:47 hercules Exp $ */
+/* $Id: install.c,v 1.36 2000-04-08 00:34:42 hercules Exp $ */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -692,6 +692,7 @@ char install_menuitems(install_info *info, desktop_type desktop)
             }
             break;
         case DESKTOP_GNOME:
+#warning What happens when gnome-config is not available?
             fp = popen("gnome-config --prefix", "r");
             if (fp) {
                 fgets(icon_base, PATH_MAX, fp);
@@ -757,11 +758,11 @@ char install_menuitems(install_info *info, desktop_type desktop)
             if (fp) {
                 char exec[PATH_MAX*2], icon[PATH_MAX];
 
-        if (exec_command[0] != 0) {
-            snprintf(exec, PATH_MAX*2, "%s", exec_command);
-        } else {
-            sprintf(exec, "%s", elem->path);
-        }
+                if (exec_command[0] != 0) {
+                    snprintf(exec, PATH_MAX*2, "%s", exec_command);
+                } else {
+                    sprintf(exec, "%s", elem->path);
+                }
                 sprintf(icon, "%s/%s", info->install_path, elem->icon);
                 if (desktop == DESKTOP_KDE) {
                         fprintf(fp, "# KDE Config File\n");

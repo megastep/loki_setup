@@ -1,4 +1,9 @@
 
+1.2.2:
+Sam Lantinga - Fri Apr  7 16:49:45 PDT 2000
+ * The "arch" attribute for options allows multiple architectures
+ * Documented the "size" attribute for the option element
+
 1.2.1:
 Sam Lantinga - Fri Mar 10 15:45:31 PST 2000
  * Added "cdromfile" attribute to specify a unique file on the install CDROM.
