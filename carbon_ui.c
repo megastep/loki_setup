@@ -338,18 +338,22 @@ void OnKeyboardEvent()
 {
     carbon_debug("OnKeyboardEvent()\n");
 
-    // Set install and binary paths accordingly
-    char string[1024];
-    carbon_GetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, string, 1024);
-    set_installpath(cur_info, string);
-    // Only set binary path if symbolic link checkbox is set
-    if(carbon_GetCheckbox(MyRes, OPTION_SYMBOLIC_LINK_CHECK_ID))
+    // If we're an app bundle, this field is disabled
+    if(!GetProductIsAppBundle(cur_info))
     {
-        carbon_debug("OnCommandBeginInstall() - Setting binary path\n");
-        carbon_GetEntryText(MyRes, OPTION_LINK_PATH_ENTRY_ID, string, 1024);
-        set_symlinkspath(cur_info, string);
+        // Set install and binary paths accordingly
+        char string[1024];
+        carbon_GetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, string, 1024);
+        set_installpath(cur_info, string);
+        // Only set binary path if symbolic link checkbox is set
+        if(carbon_GetCheckbox(MyRes, OPTION_SYMBOLIC_LINK_CHECK_ID))
+        {
+            carbon_debug("OnCommandBeginInstall() - Setting binary path\n");
+            carbon_GetEntryText(MyRes, OPTION_LINK_PATH_ENTRY_ID, string, 1024);
+            set_symlinkspath(cur_info, string);
+        }
+        check_install_button();
     }
-    check_install_button();
 }
 
 static void OnCommandContinue()
@@ -439,7 +443,12 @@ static void OnCommandInstallPath(void)
     {
         // If user hit OK
         set_installpath(cur_info, InstallPath);
-        carbon_SetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, cur_info->install_path);
+        // If we find /Desktop, then we'll show just "Desktop".
+        //  Otherwise, it'll show /Users/joeshmo/Desktop.
+        if(strstr(InstallPath, "/Desktop") != NULL)
+            carbon_SetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, "Desktop");
+        else
+            carbon_SetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, cur_info->install_path);
     }
 }
 
@@ -465,25 +474,12 @@ void OnCommandBeginInstall()
     char string[1024];
     char appstring[1024];
 
-    carbon_GetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, string, 1024);
-
-    /*// Create path with ".app" at the end
-    strcpy(appstring, string);
-    strcat(appstring, ".app");
-    // If product is an application bundle
-    if(GetProductIsAppBundle(cur_info))
+    if(!GetProductIsAppBundle(cur_info))
     {
-        // If user created the destination (when choosing a folder with the
-        //  nav dialog.
-        if(access(string, F_OK) == 0)
-        {
-            rename(string, appstring);
-        }
+        carbon_GetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, string, 1024);
+        set_installpath(cur_info, string);
     }
-    // Set our original string to the new app bundle string
-    strcpy(string, appstring);*/
 
-    set_installpath(cur_info, string);
     // Only set binary path if symbolic link checkbox is set
     if(carbon_GetCheckbox(MyRes, OPTION_SYMBOLIC_LINK_CHECK_ID))
     {
@@ -855,6 +851,11 @@ static install_state carbonui_init(install_info *info, int argc, char **argv, in
         carbon_debug("carbonui_init() - disable_binary_path != 0\n");
         carbon_DisableControl(MyRes, OPTION_LINK_PATH_BUTTON_ID);
         carbon_DisableControl(MyRes, OPTION_LINK_PATH_ENTRY_ID);
+    }
+    // Path entry is always disabled when appbundle is set
+    if(GetProductIsAppBundle(cur_info))
+    {
+        carbon_DisableControl(MyRes, OPTION_INSTALL_PATH_ENTRY_ID);
     }
 
     // Disable dock option if not requested in dockoption attribute
