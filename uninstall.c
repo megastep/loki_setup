@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.56 2004-08-20 01:05:10 megastep Exp $ */
+/* $Id: uninstall.c,v 1.57 2004-09-02 03:19:59 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -297,25 +297,30 @@ int check_permissions(product_info_t *info, int verbose)
 
 static void init_locale(const char *product)
 {
-    char locale[PATH_MAX];
+	char locale[PATH_MAX] = "";
 
 	setlocale (LC_ALL, "");
 
-	if ( product ) { /* Use the installation directory from the product */
+	if(getenv("SETUP_LOCALEDIR")) {
+		strncpy(locale, getenv("SETUP_LOCALEDIR"), sizeof(locale));
+		locale[sizeof(locale)-1]='\0';
+	}
+	else if ( product ) { /* Use the installation directory from the product */
         product_t *prod = loki_openproduct(product);
 		if ( prod ) {
 			product_info_t *info = loki_getinfo_product(prod);
 
 			snprintf(locale, sizeof(locale), "%s/" LOCALEDIR, info->root);
 			if ( access(locale, R_OK) < 0 ) { /* If not existing, revert to copy in the home directory */
-				snprintf(locale, sizeof(locale), "%s/" LOKI_DIRNAME "/installed/" LOCALEDIR, detect_home());
+				locale[0] = '\0';
 			}
-		} else {
-			snprintf(locale, sizeof(locale), "%s/" LOKI_DIRNAME "/installed/" LOCALEDIR, detect_home());
 		}
-	} else {
+	}
+
+	if(!locale[0]) {
 		snprintf(locale, sizeof(locale), "%s/" LOKI_DIRNAME "/installed/" LOCALEDIR, detect_home());
 	}
+
 	bindtextdomain (PACKAGE, locale);
 	textdomain (PACKAGE);
 }

@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.138 2004-08-31 02:30:07 megastep Exp $ */
+/* $Id: install.c,v 1.139 2004-09-02 03:19:59 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1426,6 +1426,7 @@ void delete_install(install_info *info)
  
                 elem = opt->file_list;
                 opt->file_list = elem->next;
+                free(elem->symlink);
                 free(elem->path);
                 free(elem);
             }
@@ -2053,6 +2054,9 @@ void generate_uninstall(install_info *info)
         loki_upgrade_uninstall(product, buf, "setup.data/" LOCALEDIR);
 		/* We must call the following in all cases - component installs even, as we have to save the changes */
 		loki_closeproduct(product);
+		/* product might have pointed to info->product. Reopen it so
+		 * install_postinstall/run_script/get_optiontags_string can work */
+		info->product = loki_openproduct(info->name);
     } else {
 		log_fatal(_("Could not create install log"),
 				  detect_home(), info->name);

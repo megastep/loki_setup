@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.103 2004-08-20 01:05:10 megastep Exp $
+   $Id: gtk_ui.c,v 1.104 2004-09-02 03:19:59 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -150,6 +150,8 @@ static int diskspace;
 static int license_okay = 0;
 static gboolean in_setup = TRUE;
 static GSList *radio_list = NULL; /* Group for the radio buttons */
+
+static const char* glade_file = SETUP_GLADE;
 
 /******** Local prototypes **********/
 
@@ -367,7 +369,7 @@ void setup_button_view_readme_slot( GtkWidget* w, gpointer data )
     GtkWidget *widget;
     const char *file;
     
-    setup_glade_readme = glade_xml_new(SETUP_GLADE, "readme_dialog");
+    setup_glade_readme = glade_xml_new(glade_file, "readme_dialog");
     glade_xml_signal_autoconnect(setup_glade_readme);
     readme = glade_xml_get_widget(setup_glade_readme, "readme_dialog");
     widget = glade_xml_get_widget(setup_glade_readme, "readme_area");
@@ -733,7 +735,7 @@ void setup_checkbox_option_slot( GtkWidget* widget, gpointer func_data)
 					GtkWidget *license_widget;
 					
 					if (!setup_glade_license)
-						setup_glade_license = glade_xml_new(SETUP_GLADE, "license_dialog");
+						setup_glade_license = glade_xml_new(glade_file, "license_dialog");
 					glade_xml_signal_autoconnect(setup_glade_license);
 					license = glade_xml_get_widget(setup_glade_license, "license_dialog");
 					license_widget = glade_xml_get_widget(setup_glade_license, "license_area");
@@ -1383,18 +1385,25 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
     }
 }
 
-static void update_image(const char *image_file)
+static void update_image(const char *image_file, gboolean left)
 {
     GtkWidget* window;
     GtkWidget* frame;
     GdkPixmap* pixmap;
 	GdkBitmap* mask;
     GtkWidget* image;
-	char image_path[1024] = SETUP_BASE;
+	char image_path[PATH_MAX] = SETUP_BASE;
 
-	strncat(image_path, image_file, sizeof(image_path));
+	strncat(image_path, image_file, sizeof(image_path)-strlen(image_path));
+	image_path[sizeof(image_path)-1] = '\0';
 
-    frame = glade_xml_get_widget(setup_glade, "image_frame");
+	if(left)
+		frame = glade_xml_get_widget(setup_glade, "image_frame");
+	else
+		frame = glade_xml_get_widget(setup_glade, "image_frame_top");
+
+	g_return_if_fail(frame != NULL);
+
     gtk_container_remove(GTK_CONTAINER(frame), GTK_BIN(frame)->child);
     window = gtk_widget_get_toplevel(frame);
     pixmap = gdk_pixmap_create_from_xpm(window->window, &mask, NULL, image_path);
@@ -1402,6 +1411,7 @@ static void update_image(const char *image_file)
         image = gtk_pixmap_new(pixmap, mask);
         gtk_widget_show(image);
         gtk_container_add(GTK_CONTAINER(frame), image);
+        gtk_widget_show(frame);
     } else {
         gtk_widget_hide(frame);
     }
@@ -1418,7 +1428,6 @@ static install_state gtkui_init(install_info *info, int argc, char **argv, int n
     GtkWidget *button;
     GtkWidget *install_path, *install_entry, *binary_path, *binary_entry;
     char title[1024];
-	const char* glade_file = SETUP_GLADE;
 
     cur_state = SETUP_INIT;
     cur_info = info;
@@ -1614,7 +1623,7 @@ static install_state gtkui_init(install_info *info, int argc, char **argv, int n
     gtk_widget_realize(window);
 
     /* Update the install image */
-    update_image(GetProductSplash(info));
+    update_image(GetProductSplash(info), GetProductSplashPosition(info));
 
     /* Center the installer, it will be shown later */
     gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
@@ -1627,7 +1636,7 @@ static install_state gtkui_license(install_info *info)
     GtkWidget *license;
     GtkWidget *widget;
 
-    setup_glade_license = glade_xml_new(SETUP_GLADE, "license_dialog");
+    setup_glade_license = glade_xml_new(glade_file, "license_dialog");
     glade_xml_signal_autoconnect(setup_glade_license);
     license = glade_xml_get_widget(setup_glade_license, "license_dialog");
     widget = glade_xml_get_widget(setup_glade_license, "license_area");
@@ -1759,6 +1768,8 @@ static int gtkui_update(install_info *info, const char *path, size_t progress, s
     const char *text;
     char *install_path;
     gfloat new_update;
+    static GTimeVal ltv = { 0, 0 };
+    GTimeVal tv;
 
     if ( cur_state == SETUP_ABORT ) {
 		return FALSE;
@@ -1769,6 +1780,21 @@ static int gtkui_update(install_info *info, const char *path, size_t progress, s
     } else { /* "Running script" */
         new_update = 1.0;
     }
+
+    g_get_current_time(&tv);
+
+    if( (int)(new_update*100) != 100) {
+		if(tv.tv_sec == ltv.tv_sec
+				&& tv.tv_usec - ltv.tv_usec < 50000) { /* 50ms */
+			return TRUE;
+		}
+		else if(tv.tv_sec == ltv.tv_sec+1
+				&& tv.tv_usec + (1000000-ltv.tv_usec) < 50000) { /* 50ms */
+			return TRUE;
+		}
+    }
+	ltv = tv;
+
     if ( ( (int)(new_update*100) != (int)(last_update*100) ) || ( last_installed_bytes !=  (gdouble)info->installed_bytes ) ) {
         if ( new_update == 1.0 ) {
             last_update = 0.0;

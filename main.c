@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.72 2004-08-04 03:12:34 megastep Exp $ */
+/* $Id: main.c,v 1.73 2004-09-02 03:19:59 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -151,6 +151,21 @@ _("Usage: %s [options]\n\n"
      argv0, SETUP_CONFIG);
 }
 
+static void init_locale()
+{
+	char locale[PATH_MAX] = "setup.data/" LOCALEDIR;
+
+	setlocale (LC_ALL, "");
+
+	if(getenv("SETUP_LOCALEDIR")) {
+		strncpy(locale, getenv("SETUP_LOCALEDIR"), sizeof(locale));
+		locale[sizeof(locale)-1]='\0';
+	}
+
+	bindtextdomain (PACKAGE, locale);
+	textdomain (PACKAGE);
+}
+
 /* The main installer code */
 int main(int argc, char **argv)
 {
@@ -180,10 +195,8 @@ int main(int argc, char **argv)
     umask(DEFAULT_UMASK);
 
 	/* Set the locale */
-	setlocale (LC_ALL, "");
-	bindtextdomain (PACKAGE, "setup.data/" LOCALEDIR);
-	textdomain (PACKAGE);
-
+	init_locale();
+		
 	DetectLocale();
 
     /* Parse the command-line options */

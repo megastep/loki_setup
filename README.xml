@@ -92,7 +92,7 @@ There are several optional attributes of the install element:
             the left of the installer in X11). The image must be in XPM format,
             and the default name for this attribute is "splash.xpm".
  
- splashpos  (CARBON ONLY) This option sets the position that the splash image
+ splashpos  This option sets the position that the splash image 
             will appear on the setup screen.  If unspecified, the default is
             "left".  The only valid options currently are "left" and "top".
 
@@ -950,3 +950,4 @@ Example XML product specification:
 </install>
 
 -------------------------------------------------------------------------
+
