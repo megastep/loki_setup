@@ -491,13 +491,14 @@ size_t copy_directory(install_info *info, const char *path, const char *dest, co
                 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     char fpat[PATH_MAX];
-    int i;
+    int i, err;
     glob_t globbed;
     size_t size, copied;
 
     size = 0;
     sprintf(fpat, "%s/*", path);
-    if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
+	err = glob(fpat, GLOB_ERR, NULL, &globbed);
+    if ( err == 0 ) {
         for ( i=0; i<globbed.gl_pathc; ++i ) {
           copied = copy_path(info, globbed.gl_pathv[i], dest, cdrom, update);
           if ( copied > 0 ) {
@@ -505,6 +506,10 @@ size_t copy_directory(install_info *info, const char *path, const char *dest, co
           }
         }
         globfree(&globbed);
+	} else if ( err == GLOB_NOMATCH ) { /* Empty directory */
+		sprintf(fpat, "%s/%s", dest, path);
+		file_create_hierarchy(info, fpat);
+		file_mkdir(info, fpat, 0755);
     } else {
         log_warning(info, _("Unable to copy directory '%s'"), path);
     }
