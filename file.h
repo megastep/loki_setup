@@ -1,4 +1,4 @@
-/* $Id: file.h,v 1.12 2000-10-11 02:27:37 megastep Exp $ */
+/* $Id: file.h,v 1.13 2000-10-17 22:49:53 megastep Exp $ */
 
 #ifndef __LOKI_FILE_H__
 #define __LOKI_FILE_H__
@@ -41,7 +41,6 @@ extern int file_chmod(install_info *info, const char *path, int mode);
 extern size_t file_size(install_info *info, const char *path);
 extern int file_exists(const char *path);
 extern void file_create_hierarchy(install_info *info, const char *path);
-extern void dir_create_hierarchy(install_info *info, const char *path,int mode);
+extern void dir_create_hierarchy(install_info *info, const char *path, int mode);
 extern int dir_is_accessible(const char *path);
-
 #endif

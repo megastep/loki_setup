@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.10 2000-10-17 08:26:41 megastep Exp $ */
+/* $Id: uninstall.c,v 1.11 2000-10-17 22:49:53 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -106,6 +106,7 @@ static int perform_uninstall(product_t *prod, product_info_t *info)
     for ( comp = loki_getfirst_component(prod); comp; comp = loki_getnext_component(comp) ) {
         /* Run pre-uninstall scripts */
         loki_runscripts(comp, LOKI_SCRIPT_PREUNINSTALL);
+
         for ( opt = loki_getfirst_option(comp); opt; opt = loki_getnext_option(opt)){
             product_file_t *file = loki_getfirst_file(opt), *nextfile;
             struct dir_entry *list = NULL, *freeable;
@@ -152,11 +153,11 @@ static int perform_uninstall(product_t *prod, product_info_t *info)
 
         /* Run post-uninstall scripts */
         loki_runscripts(comp, LOKI_SCRIPT_POSTUNINSTALL);
-        loki_unregister_script(comp, "preun");
-        loki_unregister_script(comp, "postun");
+
     }
 
-	/* Remove all product-related files from the manifest, i.e. the XML file and associated scripts */
+	/* Remove all product-related files from the manifest, i.e. the XML file and associated scripts
+     */
     if ( unlink("uninstall") < 0 )
         log_file("uninstall", strerror(errno));;
 

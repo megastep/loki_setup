@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.70 2000-10-17 04:06:06 megastep Exp $ */
+/* $Id: install.c,v 1.71 2000-10-17 22:49:53 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -875,6 +875,25 @@ void uninstall(install_info *info)
     pop_curdir();
 }
 
+static void output_script_header(FILE *f, install_info *info)
+{
+    fprintf(f,
+            "SETUP_PRODUCTNAME=\"%s\"\n"
+            "SETUP_PRODUCTVER=\"%s\"\n"
+            "SETUP_INSTALLPATH=\"%s\"\n"
+            "SETUP_SYMLINKSPATH=\"%s\"\n"
+            "SETUP_CDROMPATH=\"%s\"\n"
+            "export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH\n",
+            info->name, info->version,
+            info->install_path,
+            info->symlinks_path,
+            num_cdroms > 0 ? cdroms[0] : "");
+#ifdef RPM_SUPPORT
+    if(strcmp(rpm_root,"/")) /* Emulate RPM environment for scripts */
+        fprintf(f,"RPM_INSTALL_PREFIX=%s\n", rpm_root);
+#endif
+}
+
 void generate_uninstall(install_info *info)
 {
     product_t *product;
@@ -885,7 +904,7 @@ void generate_uninstall(install_info *info)
                                   info->update_url);
     component = loki_create_component(product, "Default", info->version);
 
-	if ( product ) {
+	if ( product && component ) {
 		struct file_elem *felem;
         struct bin_elem *belem;
 		struct dir_elem *delem;
@@ -893,9 +912,55 @@ void generate_uninstall(install_info *info)
 		struct rpm_elem *relem;
         struct option_elem *opt;
 		char buf[PATH_MAX];
+        int count;
         
-        push_curdir(info->install_path);
+        if (GetPreUnInstall(info)) {
+            char *tmp = tmpnam(NULL);
+            
+            FILE *pre = fopen(tmp, "w");
+            if ( pre ) {
+                FILE *script_file = fopen(GetPreUnInstall(info), "r");
+                output_script_header(pre, info);
+                if (script_file) {
+                    while (! feof(script_file)) {
+                        count = fread(buf, sizeof(char), PATH_MAX, script_file);
+                        if(count>0)
+                            fwrite(buf, sizeof(char), count, pre);
+                    }
+                    fclose(script_file);
+                }
+                fchmod(fileno(pre), 0755);
+                fclose(pre);
+                loki_registerscript_fromfile_component(component, LOKI_SCRIPT_PREUNINSTALL,
+                                                       "preun", tmp);
+                unlink(tmp);
+            }
+        }
 
+        if (GetPostUnInstall(info)) {
+            char *tmp = tmpnam(NULL);
+            
+            FILE *post = fopen(tmp, "w");
+            if ( post ) {
+                FILE *script_file = fopen(GetPostUnInstall(info), "r");
+                output_script_header(post, info);
+                if (script_file) {
+                    while (! feof(script_file)) {
+                        count = fread(buf, sizeof(char), PATH_MAX, script_file);
+                        if(count>0)
+                            fwrite(buf, sizeof(char), count, post);
+                    }
+                    fclose(script_file);
+                }
+                fchmod(fileno(post), 0755);
+                fclose(post);
+                loki_registerscript_fromfile_component(component, LOKI_SCRIPT_POSTUNINSTALL,
+                                                       "postun", tmp);
+                unlink(tmp);
+            }
+        }
+
+        push_curdir(info->install_path);
         for ( opt = info->options_list; opt; opt = opt->next ) {
             option = loki_create_option(component, opt->name);
             /* Add files */
@@ -931,96 +996,46 @@ void generate_uninstall(install_info *info)
             }
 		
             /* Generate optional pre and post uninstall scripts in the 'scripts' subdirectory */
-            // TODO: The global pre-uninstall script should probably move somewhere else
-            if(opt->pre_script_list || GetPreUnInstall(info)){
-                int count = 0;
+
+            if(opt->pre_script_list){
                 FILE *pre;
                 char *tmp = tmpnam(NULL);
                 
                 pre = fopen(tmp, "w");
                 if ( pre ) {
-                    fprintf(pre,
-                            "SETUP_PRODUCTNAME=\"%s\"\n"
-                            "SETUP_PRODUCTVER=\"%s\"\n"
-                            "SETUP_INSTALLPATH=\"%s\"\n"
-                            "SETUP_SYMLINKSPATH=\"%s\"\n"
-                            "SETUP_CDROMPATH=\"%s\"\n"
-                            "export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH\n",
-                            info->name, info->version,
-                            info->install_path,
-                            info->symlinks_path,
-                            num_cdroms > 0 ? cdroms[0] : "");
-#ifdef RPM_SUPPORT
-                    if(strcmp(rpm_root,"/")) /* Emulate RPM environment for scripts */
-                        fprintf(fp,"RPM_INSTALL_PREFIX=%s\n", rpm_root);
-#endif
-                    if (GetPreUnInstall(info)) {
-                        FILE *script_file = fopen(GetPreUnInstall(info), "r");
-                        if (script_file) {
-                            while (! feof(script_file)) {
-                                count = fread(buf, sizeof(char), PATH_MAX, script_file);
-                                fwrite(buf, sizeof(char), count, pre);
-                            }
-                            fclose(script_file);
-                        }
+                    output_script_header(pre, info);
+
+                    fprintf(pre, "function pre()\n{\n");
+                    for ( selem = opt->pre_script_list; selem; selem = selem->next ) {
+                        fprintf(pre, "%s\n", selem->script);
                     }
-                    if ( opt->pre_script_list ) {
-                        fprintf(pre, "function pre()\n{\n");
-                        for ( selem = opt->pre_script_list; selem; selem = selem->next ) {
-                            fprintf(pre, "%s\n", selem->script);
-                        }
-                        fprintf(pre,"}\npre 0\n");
-                    }
+                    fprintf(pre,"}\npre 0\n");
+                    
                     fchmod(fileno(pre), 0755);
                     fclose(pre);
-                    loki_registerscript_fromfile_component(component, LOKI_SCRIPT_PREUNINSTALL, "preun", tmp);
+                    snprintf(buf, sizeof(buf), "%s-preun", opt->name);
+                    loki_registerscript_fromfile(option, LOKI_SCRIPT_PREUNINSTALL, buf, tmp);
                     unlink(tmp);
                 } else {
                     log_fatal(info, _("Could not write temporary pre-uninstall script in %s"), buf);
                 }
             }
 
-            if(opt->post_script_list || GetPostUnInstall(info)){
-                int count = 0;
+            if(opt->post_script_list){
                 FILE *post;
                 char *tmp = tmpnam(NULL);
 
                 post = fopen(tmp, "w");
                 if ( post ) {
-                    fprintf(post,
-                            "SETUP_PRODUCTNAME=\"%s\"\n"
-                            "SETUP_PRODUCTVER=\"%s\"\n"
-                            "SETUP_INSTALLPATH=\"%s\"\n"
-                            "SETUP_SYMLINKSPATH=\"%s\"\n"
-                            "SETUP_CDROMPATH=\"%s\"\n"
-                            "export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH\n",
-                            info->name, info->version,
-                            info->install_path,
-                            info->symlinks_path,
-                            num_cdroms > 0 ? cdroms[0] : "");
-#ifdef RPM_SUPPORT
-                    if(strcmp(rpm_root,"/")) /* Emulate RPM environment for scripts */
-                        fprintf(fp,"RPM_INSTALL_PREFIX=%s\n", rpm_root);
-#endif
-                    if (GetPostUnInstall(info)) {
-                        FILE *script_file = fopen(GetPostUnInstall(info), "r");
-                        if (script_file) {
-                            while (! feof(script_file)) {
-                                count = fread(buf, sizeof(char), PATH_MAX, script_file);
-                                fwrite(buf, sizeof(char), count, post);
-                            }
-                            fclose(script_file);
-                        }
+                    output_script_header(post, info);
+                    fprintf(post, "function post()\n{\n");
+                    for ( selem = opt->post_script_list; selem; selem = selem->next ) {
+                        fprintf(post, "%s\n", selem->script);
                     }
-                    if ( opt->post_script_list ) {
-                        fprintf(post, "function post()\n{\n");
-                        for ( selem = opt->post_script_list; selem; selem = selem->next ) {
-                            fprintf(post, "%s\n", selem->script);
-                        }
-                        fprintf(post,"}\npost 0\n");
-                    }
+                    fprintf(post,"}\npost 0\n");
                     fclose(post);
-                    loki_registerscript_fromfile_component(component, LOKI_SCRIPT_POSTUNINSTALL, "postun", tmp);
+                    snprintf(buf, sizeof(buf), "%s-postun", opt->name);
+                    loki_registerscript_fromfile(option, LOKI_SCRIPT_POSTUNINSTALL, buf, tmp);
                     unlink(tmp);
                 } else {
                     log_fatal(info, _("Could not write post-uninstall script in %s"), buf);
