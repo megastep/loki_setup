@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.37 2003-06-19 01:01:46 megastep Exp $ */
+/* $Id: uninstall.c,v 1.38 2003-06-20 19:55:15 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -364,6 +364,10 @@ const char *get_installpath(char *argv0)
 	return datapath;
 }
 
+#if defined(__hpux) || defined(sgi) || defined(sco) || defined(_AIX) || defined(__svr4__)
+#define SETUP_COPY_UNINSTALL
+#endif
+
 int main(int argc, char *argv[])
 {
     product_info_t *info;
@@ -393,7 +397,7 @@ printf("\n\n");
 #endif
 	int ret = 0;
 
-#ifdef __hpux
+#ifdef SETUP_COPY_UNINSTALL
     const char *env;
 	/* HP-UX wouldn't allow us to uninstall ourselves unless we copy the binary some other place */
 
@@ -474,7 +478,8 @@ printf("\n\n");
 #endif
 
 #ifdef UNINSTALL_UI
-#ifdef __hpux
+#ifdef SETUP_COPY_UNINSTALL
+	env = getenv("SETUP_DONT_COPY");
 	if ( env==NULL || atoi(env)==0 ) {
 #endif
     p = get_installpath(argv[0]);
@@ -482,7 +487,7 @@ printf("\n\n");
         fprintf(stderr, _("Couldn't change to install directory\n"));
         exit(1);
 	}
-#ifdef __hpux
+#ifdef SETUP_COPY_UNINSTALL
 	}
 #endif
 #endif
