@@ -514,9 +514,8 @@ static install_state console_setup(install_info *info)
 				} else if ( ! strcmp(node->name, "exclusive") ) {
 					xmlNodePtr child;
 					int reinst = GetReinstallNode(info, node);
-					for ( child = node->childs; child; child = child->next) {
-						parse_option(info, NULL, child, 1, reinst);
-					}
+					for ( child = node->childs; child && parse_option(info, NULL, child, 1, reinst); child = child->next)
+						;
 				} else if ( ! strcmp(node->name, "component") ) {
                     if ( match_arch(info, xmlGetProp(node, "arch")) &&
                          match_libc(info, xmlGetProp(node, "libc")) &&
