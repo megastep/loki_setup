@@ -30,6 +30,9 @@ DetectARCH()
 {
 	status=1
 	case `uname -m` in
+	    amd64 | x86_64)
+		echo "amd64"
+		status=0;;
 	    i?86 | i86*)
 		echo "x86"
 		status=0;;
@@ -65,7 +68,7 @@ DetectLIBC()
 		  echo "glibc-2.1"
 		  return $status
 	  fi
-      if [ -f `echo /lib/libc.so.6* | tail -1` ]; then
+      if [ -f `echo /lib/libc.so.6* | tail -n 1` ]; then
 	      if fgrep GLIBC_2.1 /lib/libc.so.6* 2> $NULL >> $NULL; then
 	              echo "glibc-2.1"
 	              status=0
