@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.21 2004-03-02 04:31:08 icculus Exp $
+ * $Id: dialog_ui.c,v 1.22 2004-04-20 02:06:41 megastep Exp $
  */
 
 #include <limits.h>
@@ -428,7 +428,7 @@ install_state dialog_setup(install_info *info)
 					clear_screen();
 					if ( dialog_inputbox(_("Manual path"), 
 										 _("Please enter the path in which to install manual pages"),
-										 10, 50, info->man_path, 0) < 0 ) {
+										 10, 50, "/usr/local/man", 0) < 0 ) {
 						return SETUP_ABORT;
 					} else {
 						strncpy(path, dialog_vars.input_result, sizeof(path));

@@ -467,7 +467,7 @@ static install_state console_setup(install_info *info)
 			/* Check for manual path */
 			if ( GetProductHasManPages(info) ) {
 				if ( ! prompt_user(_("Please enter the path in which to install manual pages for this product"),
-								   info->man_path, path, sizeof(path)) ) {
+								   "/usr/local/man", path, sizeof(path)) ) {
 					return SETUP_ABORT;
 				}
 				
