@@ -292,7 +292,7 @@ AC_MSG_CHECKING(libc version)
 if test `uname -s` != Linux; then
     LIBC=glibc-2.1
 else
-      if test -f `echo /lib/libc.so.6* | tail -1`; then
+      if test -f `echo /lib/libc.so.6* | tail -n 1`; then
               if grep GLIBC_2.1 /lib/libc.so.6* 2>&1 >/dev/null; then
                       LIBC="glibc-2.1"
               else
