@@ -147,6 +147,8 @@ There are several optional attributes of the binary element:
  name       This is an optional name for the menu entry.  By default the
             name of the product is used. 
 
+ cdrom      If this attribute has a "yes" value, then setup will look for
+            the file on one of the mounted CDROMs on the system.
 
 The FILES element:
 
@@ -155,9 +157,12 @@ which are installed for this option.
 
 You may specify relative paths and shell wildcard patterns for the files.
 
-There is an optional attribute of the files element:
+There are several optional attributes of the files element:
 
  path       This is a system path that these files should be installed into.
+
+ cdrom      If this attribute has a "yes" value, then setup will look for
+            the files on one of the mounted CDROMs on the system.
 
 
 The SCRIPT element:

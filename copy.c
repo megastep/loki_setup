@@ -23,6 +23,7 @@
 #include "copy.h"
 #include "tar.h"
 #include "cpio.h"
+#include "detect.h"
 #include "install_log.h"
 
 #define TAR_EXTENSION   ".tar"
@@ -433,12 +434,12 @@ size_t copy_tarball(install_info *info, const char *path, const char *dest,
     return size;
 }
 
-size_t copy_file(install_info *info, const char *path, const char *dest, char *final, int binary,
+size_t copy_file(install_info *info, const char *cdrom, const char *path, const char *dest, char *final, int binary,
                 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     size_t size, copied;
     const char *base;
-    char buf[BUFSIZ];
+    char buf[BUFSIZ], fullpath[PATH_MAX];
     stream *input, *output;
 
     if ( binary ) {
@@ -454,8 +455,14 @@ size_t copy_file(install_info *info, const char *path, const char *dest, char *f
     }
     sprintf(final, "%s/%s", dest, base);
 
+	if ( cdrom ) {
+		sprintf(fullpath, "%s/%s", cdrom, path);
+	} else {
+		strcpy(fullpath, path);
+	}
+
     size = 0;
-    input = file_open(info, path, "r");
+    input = file_open(info, fullpath, "r");
     if ( input == NULL ) {
         return(-1);
     }
@@ -480,19 +487,19 @@ size_t copy_file(install_info *info, const char *path, const char *dest, char *f
     return size;
 }
 
-size_t copy_directory(install_info *info, const char *path, const char *dest,
+size_t copy_directory(install_info *info, const char *path, const char *dest, const char *cdrom,
                 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
-    char fpat[BUFSIZ];
+    char fpat[PATH_MAX];
     int i;
     glob_t globbed;
     size_t size, copied;
 
     size = 0;
-    sprintf(fpat, "%s/*", path);
+	sprintf(fpat, "%s/*", path);
     if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
         for ( i=0; i<globbed.gl_pathc; ++i ) {
-          copied = copy_path(info, globbed.gl_pathv[i], dest, update);
+          copied = copy_path(info, globbed.gl_pathv[i], dest, cdrom, update);
           if ( copied > 0 ) {
             size += copied;
           }
@@ -504,7 +511,7 @@ size_t copy_directory(install_info *info, const char *path, const char *dest,
     return size;
 }
 
-size_t copy_path(install_info *info, const char *path, const char *dest,
+size_t copy_path(install_info *info, const char *path, const char *dest, const char *cdrom,
                 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     char final[PATH_MAX];
@@ -514,7 +521,7 @@ size_t copy_path(install_info *info, const char *path, const char *dest,
     size = 0;
     if ( stat(path, &sb) == 0 ) {
         if ( S_ISDIR(sb.st_mode) ) {
-            copied = copy_directory(info, path, dest, update);
+            copied = copy_directory(info, path, dest, cdrom, update);
         } else {
             if ( strstr(path, TAR_EXTENSION) != NULL ) {
                 copied = copy_tarball(info, path, dest, update);
@@ -525,7 +532,7 @@ size_t copy_path(install_info *info, const char *path, const char *dest,
                 copied = copy_rpm(info, path, update);
 #endif
             } else {
-                copied = copy_file(info, path, dest, final, 0, update);
+                copied = copy_file(info, cdrom, path, dest, final, 0, update);
             }
         }
         if ( copied > 0 ) {
@@ -537,7 +544,7 @@ size_t copy_path(install_info *info, const char *path, const char *dest,
     return size;
 }
 
-size_t copy_list(install_info *info, const char *filedesc, const char *dest,
+size_t copy_list(install_info *info, const char *filedesc, const char *dest, int from_cdrom,
                 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     char fpat[BUFSIZ];
@@ -547,32 +554,66 @@ size_t copy_list(install_info *info, const char *filedesc, const char *dest,
 
     size = 0;
     while ( filedesc && parse_line(&filedesc, fpat, (sizeof fpat)) ) {
-        if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
-            for ( i=0; i<globbed.gl_pathc; ++i ) {
-                copied = copy_path(info, globbed.gl_pathv[i], dest, update);
-                if ( copied > 0 ) {
-                    size += copied;
-                }
-            }
-            globfree(&globbed);
-        } else {
-            log_warning(info, "Unable to find file '%s'", fpat);
-        }
+		if ( from_cdrom ) {
+			char curdir[PATH_MAX];
+			int d;
+
+			getcwd(curdir, sizeof(curdir));
+
+			/* Go thru all the drives until we match the pattern */
+			for( d = 0; d < num_cdroms; ++d ) {
+				chdir(cdroms[d]);
+				if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
+					for ( i=0; i<globbed.gl_pathc; ++i ) {
+						copied = copy_path(info, globbed.gl_pathv[i], dest, cdroms[d], update);
+						if ( copied > 0 ) {
+							size += copied;
+						}
+					}
+					globfree(&globbed);
+					break;
+				}
+			}
+			chdir(curdir);
+			if ( d == num_cdroms ) {
+				log_warning(info, "Unable to find file '%s' on any of the CDROM drives", fpat);
+			}
+		} else {
+			if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
+				for ( i=0; i<globbed.gl_pathc; ++i ) {
+					copied = copy_path(info, globbed.gl_pathv[i], dest, NULL, update);
+					if ( copied > 0 ) {
+						size += copied;
+					}
+				}
+				globfree(&globbed);
+			} else {
+				log_warning(info, "Unable to find file '%s'", fpat);
+			}
+		}
     }
     return size;
 }
 
-static void check_dynamic(const char *fpat, char *bin)
+static void check_dynamic(const char *fpat, char *bin, const char *cdrom)
 {
     int use_dynamic;
     char test[PATH_MAX], testcmd[PATH_MAX];
 
     use_dynamic = 0;
-    sprintf(test, "%s.check-dynamic.sh", fpat);
+	if ( cdrom ) {
+		sprintf(test, "%s/%s.check-dynamic.sh", cdrom, fpat);
+	} else {
+		sprintf(test, "%s.check-dynamic.sh", fpat);
+	}
     if ( access(test, R_OK) == 0 ) {
         sprintf(testcmd, "sh %s >/dev/null 2>&1", test);
         if ( system(testcmd) == 0 ) {
-            sprintf(bin, "%s.dynamic", fpat);
+			if( cdrom ) {
+				sprintf(bin, "%s/%s.dynamic", cdrom, fpat);
+			} else {
+				sprintf(bin, "%s.dynamic", fpat);
+			}
             if ( access(bin, R_OK) == 0 ) {
                 use_dynamic = 1;
             }
@@ -583,7 +624,7 @@ static void check_dynamic(const char *fpat, char *bin)
     }
 }
 
-size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, const char *dest,
+size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, const char *dest, int from_cdrom,
                 void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     struct stat sb;
@@ -596,18 +637,43 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
         strncpy(current_option, final, sizeof(current_option));
         strncat(current_option, " binary", sizeof(current_option));
         sprintf(fpat, "bin/%s/%s/%s", info->arch, info->libc, final);
-        if ( stat(fpat, &sb) == 0 ) {
-            check_dynamic(fpat, bin);
-            copied = copy_file(info, bin, dest, final, 1, update);
-        } else {
-            sprintf(fpat, "bin/%s/%s", info->arch, final);
-            if ( stat(fpat, &sb) == 0 ) {
-                check_dynamic(fpat, bin);
-                copied = copy_file(info, bin, dest, final, 1, update);
-            } else {
-                log_warning(info, "Unable to find file '%s'", fpat);
-            }
-        }
+		if ( from_cdrom ) {
+			int d;
+			char fullpath[PATH_MAX];
+			
+			for( d = 0; d < num_cdroms; ++d ) {
+				sprintf(fullpath, "%s/%s", cdroms[d], fpat);
+				if ( stat(fullpath, &sb) == 0 ) {
+					check_dynamic(fpat, bin, cdroms[d]);
+					copied = copy_file(info, cdroms[d], bin, dest, final, 1, update);
+					break;
+				} else {
+					sprintf(fullpath, "%s/bin/%s/%s", cdroms[d], info->arch, final);
+					if ( stat(fullpath, &sb) == 0 ) {
+						sprintf(fullpath, "bin/%s/%s", info->arch, final);
+						check_dynamic(fullpath, bin, cdroms[d]);
+						copied = copy_file(info, cdroms[d], bin, dest, final, 1, update);
+						break;
+					}
+				}
+			}
+			if ( d == num_cdroms ) {
+				log_warning(info, "Unable to find file '%s'", fpat);
+			}
+		} else {
+			if ( stat(fpat, &sb) == 0 ) {
+				check_dynamic(fpat, bin, NULL);
+				copied = copy_file(info, NULL, bin, dest, final, 1, update);
+			} else {
+				sprintf(fpat, "bin/%s/%s", info->arch, final);
+				if ( stat(fpat, &sb) == 0 ) {
+					check_dynamic(fpat, bin, NULL);
+					copied = copy_file(info, NULL, bin, dest, final, 1, update);
+				} else {
+					log_warning(info, "Unable to find file '%s'", fpat);
+				}
+			}
+		}
         if ( copied > 0 ) {
             char *symlink = xmlGetProp(node, "symlink");
             char sym_to[PATH_MAX];
@@ -631,7 +697,7 @@ size_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, co
 
 int copy_script(install_info *info, xmlNodePtr node, const char *script, const char *dest)
 {
-    return(run_script(info, script, -1));
+	return(run_script(info, script, -1));
 }
 
 size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
@@ -644,6 +710,9 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
     node = node->childs;
     while ( node ) {
         const char *path = xmlGetProp(node, "path");
+		const char *prop = xmlGetProp(node, "cdrom");
+		int from_cdrom = (prop && !strcasecmp(prop, "yes"));
+
         if (!path)
             path = dest;
         else {
@@ -653,10 +722,11 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
 /* printf("Checking node element '%s'\n", node->name); */
         if ( strcmp(node->name, "files") == 0 ) {
             const char *str = xmlNodeListGetString(info->config, (node->parent)->childs, 1);
+			
             parse_line(&str, current_option, sizeof(current_option));
             copied = copy_list(info,
                                xmlNodeListGetString(info->config, node->childs, 1),
-                               path, update);
+                               path, from_cdrom, update);
             if ( copied > 0 ) {
                 size += copied;
             }
@@ -664,7 +734,7 @@ size_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
         if ( strcmp(node->name, "binary") == 0 ) {
             copied = copy_binary(info, node,
                                xmlNodeListGetString(info->config, node->childs, 1),
-                               path, update);
+                               path, from_cdrom, update);
             if ( copied > 0 ) {
                 size += copied;
             }
@@ -713,29 +783,48 @@ size_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
 }
 
 /* Returns the install size of a binary, in bytes */
-size_t size_binary(install_info *info, const char *filedesc)
+size_t size_binary(install_info *info, int from_cdrom, const char *filedesc)
 {
     struct stat sb;
     char fpat[BUFSIZ], final[BUFSIZ];
     size_t size;
 
     size = 0;
-    while ( filedesc && parse_line(&filedesc, final, (sizeof final)) ) {
-        sprintf(fpat, "bin/%s/%s/%s", info->arch, info->libc, final);
-        if ( stat(fpat, &sb) == 0 ) {
-            size += sb.st_size;
-        } else {
-            sprintf(fpat, "bin/%s/%s", info->arch, final);
-            if ( stat(fpat, &sb) == 0 ) {
-                size += sb.st_size;
-            }
-        }
-    }
+	if ( from_cdrom ) {
+		int d;
+		for( d = 0; d < num_cdroms; ++d ) {
+			while ( filedesc && parse_line(&filedesc, final, (sizeof final)) ) {
+				sprintf(fpat, "%s/bin/%s/%s/%s", cdroms[d], info->arch, info->libc, final);
+				if ( stat(fpat, &sb) == 0 ) {
+					size += sb.st_size;
+					break;
+				} else {
+					sprintf(fpat, "%s/bin/%s/%s", cdroms[d], info->arch, final);
+					if ( stat(fpat, &sb) == 0 ) {
+						size += sb.st_size;
+						break;
+					}
+				}
+			}
+		}
+	} else {
+		while ( filedesc && parse_line(&filedesc, final, (sizeof final)) ) {
+			sprintf(fpat, "bin/%s/%s/%s", info->arch, info->libc, final);
+			if ( stat(fpat, &sb) == 0 ) {
+				size += sb.st_size;
+			} else {
+				sprintf(fpat, "bin/%s/%s", info->arch, final);
+				if ( stat(fpat, &sb) == 0 ) {
+					size += sb.st_size;
+				}
+			}
+		}
+	}
     return size;
 }
 
 /* Returns the install size of a list of files, in bytes */
-size_t size_list(install_info *info, const char *filedesc)
+size_t size_list(install_info *info, int from_cdrom, const char *filedesc)
 {
     char fpat[BUFSIZ];
     int i;
@@ -743,17 +832,39 @@ size_t size_list(install_info *info, const char *filedesc)
     size_t size, count;
 
     size = 0;
-    while ( filedesc && parse_line(&filedesc, fpat, (sizeof fpat)) ) {
-        if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
-            for ( i=0; i<globbed.gl_pathc; ++i ) {
-                count = file_size(info, globbed.gl_pathv[i]);
-                if ( count > 0 ) {
-                    size += count;
-                }
-            }
-            globfree(&globbed);
-        }
-    }
+	if( from_cdrom ) {
+		int d;
+		char fullpath[BUFSIZ];
+		for( d = 0; d < num_cdroms; ++d ) {
+			while ( filedesc && parse_line(&filedesc, fpat, (sizeof fpat)) ) {
+				sprintf(fullpath,"%s/%s", cdroms[d], fpat);
+				if ( glob(fullpath, GLOB_ERR, NULL, &globbed) == 0 ) {
+					for ( i=0; i<globbed.gl_pathc; ++i ) {
+						count = file_size(info, globbed.gl_pathv[i]);
+						if ( count > 0 ) {
+							size += count;
+						}
+					}
+					globfree(&globbed);
+				} else { /* Error in glob, try next CDROM drive */
+					size = 0;
+					break;
+				}
+			}			
+		}
+	} else {
+		while ( filedesc && parse_line(&filedesc, fpat, (sizeof fpat)) ) {
+			if ( glob(fpat, GLOB_ERR, NULL, &globbed) == 0 ) {
+				for ( i=0; i<globbed.gl_pathc; ++i ) {
+					count = file_size(info, globbed.gl_pathv[i]);
+					if ( count > 0 ) {
+						size += count;
+					}
+				}
+			globfree(&globbed);
+			}
+		}
+	}
     return size;
 }
 
@@ -775,13 +886,16 @@ size_t size_node(install_info *info, xmlNodePtr node)
     if ( size == 0 ) {
         node = node->childs;
         while ( node ) {
+			const char *prop = xmlGetProp(node, "cdrom");
+			int from_cdrom = (prop && !strcasecmp(prop, "yes"));
+			
 /* printf("Checking node element '%s'\n", node->name); */
             if ( strcmp(node->name, "files") == 0 ) {
-                size += size_list(info,
+                size += size_list(info, from_cdrom,
                           xmlNodeListGetString(info->config, node->childs, 1));
             }
             if ( strcmp(node->name, "binary") == 0 ) {
-                size += size_binary(info,
+                size += size_binary(info, from_cdrom,
                           xmlNodeListGetString(info->config, node->childs, 1));
             }
             node = node->next;

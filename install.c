@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.31 2000-03-02 17:52:50 briareos Exp $ */
+/* $Id: install.c,v 1.32 2000-03-03 03:38:41 megastep Exp $ */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -689,6 +689,7 @@ char install_menuitems(install_info *info, desktop_type desktop)
                 found_links[1] = "~/.gnome/apps/";
                 found_links[2] = 0;
                 app_links = found_links;
+				pclose(fp);
             }
             else {
                 app_links = gnome_app_links;

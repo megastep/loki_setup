@@ -4,8 +4,22 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <mntent.h>
 
 #include "detect.h"
+
+#ifndef MNTTYPE_CDROM
+#define MNTTYPE_CDROM	"iso9660"
+#endif
+#ifndef MNTTYPE_SUPER
+#define MNTTYPE_SUPER	"supermount"
+#endif
+
+/* Global variables */
+
+char *cdroms[MAX_DRIVES];
+int  num_cdroms = 0;
+
 
 /* Function to detect the current architecture */
 const char *detect_arch(void)
@@ -99,10 +113,62 @@ int detect_diskspace(const char *path)
             if ( df ) {
                 fgets(buf, (sizeof buf)-1, df);
                 fscanf(df, "%*s %*d %*d %d %*s %*s", &space);
+				pclose(df);
             }
         }
     }
 
     /* Return space in MB */
     return (space/1024);
+}
+
+/* Function to detect the CDROM drives, returns the number of drives */
+int detect_cdrom(void)
+{
+    char mntdevpath[PATH_MAX];
+    FILE * mountfp;
+    struct mntent *mntent;
+	int count = 0, i;
+
+	for( i = 0; i < num_cdroms; ++ i ) {
+		if(cdroms[i])
+			free(cdroms[i]);
+	}
+
+    mountfp = setmntent( _PATH_MNTTAB, "r" );
+    if( mountfp != NULL ) {
+        while( (mntent = getmntent( mountfp )) != NULL ){
+			char *tmp, mntdev[1024], mnt_type[32];
+
+			strcpy(mntdev, mntent->mnt_fsname);
+			strcpy(mnt_type, mntent->mnt_type);
+			if ( strcmp(mntent->mnt_type, MNTTYPE_SUPER) == 0 ) {
+				tmp = strstr(mntent->mnt_opts, "fs=");
+				if ( tmp ) {
+					strcpy(mnt_type, tmp+strlen("fs="));
+					tmp = strchr(mnt_type, ',');
+					if ( tmp ) {
+						*tmp = '\0';
+					}
+				}
+ 				tmp = strstr(mntent->mnt_opts, "dev=");
+				if ( tmp ) {
+					strcpy(mntdev, tmp+strlen("dev="));
+					tmp = strchr(mntdev, ',');
+					if ( tmp ) {
+						*tmp = '\0';
+					}
+				}
+			}
+			if( strncmp(mntdev, "/dev", 4) || 
+				realpath(mntdev, mntdevpath) == NULL ) {
+				continue;
+			}
+			if ( strcmp(mnt_type, MNTTYPE_CDROM) == 0 && count < MAX_DRIVES) {
+				cdroms[count ++] = strdup(mntent->mnt_dir);
+			}
+        }
+        endmntent( mountfp );
+    }
+    return(num_cdroms = count);
 }

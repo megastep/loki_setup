@@ -7,7 +7,7 @@
 #include "install.h"
 
 /* Copy a path to the destination directory */
-extern size_t copy_path(install_info *info, const char *path, const char *dest,
+extern size_t copy_path(install_info *info, const char *path, const char *dest, const char *cdrom,
            void (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current));
 
 /* Copy an option tree to the destination directory */

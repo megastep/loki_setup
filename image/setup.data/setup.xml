@@ -16,7 +16,7 @@
   </option>
   <option>
     Classic Campaign (can run from CD)
-    <files>
+    <files cdrom="yes">
       maps/#[01]*
     </files>
     <option>

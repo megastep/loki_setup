@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.15 2000-02-14 21:07:29 hercules Exp $ */
+/* $Id: main.c,v 1.16 2000-03-03 03:38:41 megastep Exp $ */
 
 #include <stdio.h>
 #include <setjmp.h>
@@ -12,6 +12,7 @@
 #include "install.h"
 #include "install_ui.h"
 #include "log.h"
+#include "detect.h"
 
 #define SETUP_VERSION "1.2.1"
 
@@ -106,14 +107,16 @@ int main(int argc, char **argv)
                 }
                 break;
             case 'V':
-                printf(
-"Loki Setup version " SETUP_VERSION ", built on "__DATE__"\n");
+                printf("Loki Setup version " SETUP_VERSION ", built on "__DATE__"\n");
                 exit(0);
             default:
                 print_usage(argv[0]);
                 exit(0);
         }
     }
+
+	/* Detect the available mounted CDROMs */
+	detect_cdrom();
 
     /* Initialize the XML setup configuration */
     info = create_install(xml_file, log_level);
