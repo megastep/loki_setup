@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.24 2000-05-02 00:25:47 megastep Exp $ */
+/* $Id: main.c,v 1.25 2000-05-03 03:22:21 megastep Exp $ */
 
 #include <stdio.h>
 #include <setjmp.h>
@@ -53,8 +53,10 @@ static int (*GUI_okay[])(Install_UI *UI) = {
 
 int MatchLocale(const char *str)
 {
-	if ( current_locale ) {
-		if ( str && strstr(current_locale, str) == current_locale ) {
+	if ( ! str )
+		return 1;
+	if ( current_locale && ! (!strcmp(current_locale, "C") || !strcmp(current_locale,"POSIX")) ) {
+		if ( strstr(current_locale, str) == current_locale ) {
 			return 1;
 		}
 	} else if ( !strcmp(str, "none") ) {
@@ -99,7 +101,14 @@ int main(int argc, char **argv)
 	setlocale (LC_ALL, "");
 	bindtextdomain (PACKAGE, LOCALEDIR);
 	textdomain (PACKAGE);
-	current_locale = getenv("LANG");
+
+	current_locale = getenv("LC_ALL");
+	if(!current_locale) {
+		current_locale = getenv("LC_MESSAGES");
+		if(!current_locale) {
+			current_locale = getenv("LANG");
+		}
+	}
 
     /* Parse the command-line options */
     while ( (c=getopt(argc, argv, "hnc:f:r:v::V")) != EOF ) {

@@ -50,11 +50,15 @@ There are several optional attributes of the install element:
  eula       This is a file which contains a text license agreement that
             must be agreed to by the user before the installation will
             proceed.
+            *OBSOLETE* DO NOT USE! Starting from version 1.3.0, use the
+            EULA element instead (see below).
 
  readme     This is the README file for the product, the user will be
             prompted to see it before the installation begins. The default
             value is "README" if not specified and such a file is
             actually present.
+            *OBSOLETE* DO NOT USE! Starting from version 1.3.0, use the
+            README element instead (see below).
 
  url        This is a web site which is launched after the install is
             completed.
@@ -81,6 +85,28 @@ There are several optional attributes of the install element:
  nouninstall This is an optional flag which, if specified, tells setup
              not to generate an uninstall script after it runs.
 
+The README and EULA elements:
+
+Those elements are used to mark special files, that are unique for
+each program and are always installed in the installation directory.
+Those are of course optional. The README tag specifies the program's
+README file. The EULA should specify the End-User License Agreement or
+license associated with the program, and it will be the first thing
+that the user will be prompted with.
+
+Both elements take an optional attribute :
+
+ lang        Specify a locale, so that you can have different EULAs and
+             READMEs translated in many languages in the same distribution.
+             See 'About localization' below for more details.
+
+The important thing to remember about those elements is that they are
+siblings of the OPTION element described below, and thus direct children
+of the INSTALL element. Those elements should NOT be inside an OPTION
+element, alongside 'file' and 'binary' elements.
+
+There is also no need to have the files designated by those tags explicitly
+installed in a FILES section, setup will take care of that for you.
 
 The OPTION element:
 
@@ -157,7 +183,7 @@ help message. Please forgive my very poor Spanish ;-)
 
 The BINARY element:
 
-The binary element contains a single binary file to be installed for
+The binary element contains one or more binary files to be installed for
 this option.  The binary is installed in the top level of the install
 directory, and if the symlink attribute is set, a symbolic link is
 placed in the system executable path.
@@ -200,6 +226,12 @@ There are several optional attributes of the binary element:
 
  cdrom      If this attribute has a "yes" value, then setup will look for
             the file on one of the mounted CDROMs on the system.
+
+ keepdirs   If this attribute has a "yes" value, then the directory structure
+            specified in the file names for the binaries will be kept. For
+            example: bin/mybin will be extracted in the 'bin' subdirectory
+            under the installation directory, instead of being extracted in
+            the installation directory itself.
 
  lang       The files are only installed if the current locale matches the
             string of this attribute. See 'About localization' below for
@@ -279,9 +311,11 @@ Example XML product specification:
          path="/opt"
          preinstall="sh setup.data/foo-preinst.sh $*"
          postinstall="sh setup.data/foo-postinst.sh $*"
-         eula="license.txt"
          url="http://www.products.kom/foo/index.html"
 >
+  <eula>license.txt</eula>
+  <eula lang="fr">license-fr.txt</eula>
+  <readme>README</readme>
   # This installs a product named "foo" in /opt/foo by default.
   # The user may specify a different installation directory.
   # The installer will prompt the user with the license contained in the
@@ -290,9 +324,10 @@ Example XML product specification:
   # installing, a browser will be launched to the site:
   #     http://www.products.kom/foo/index.html
 
-    <option install="true" help="Required for use">
+    <option install="true">
         Base Install  # Option called "Base Install" contains a binary,
                       # some data files, and two optional editors.
+        <help>Required for use</help>
         <help lang="fr">Requis pour utilisation</help>
         <binary arch="any" libc="any" symlink="foo" icon="icon.xpm">
             foo
@@ -300,22 +335,21 @@ Example XML product specification:
         <files lang="fr">
             README.fr
         <files>
-        <files lang="none">
-            README
-        <files>
         <files>
             icon.xpm
             edit.xpm
             data/*.dat
         </files>
-        <option help="terminal editor for foo data files">
+        <option>
             Curses Editor
+            <help>Terminal editor for foo data files</help>
             <binary arch="any" libc="any">
                 foo-edit.ncurses
             </binary>
         </option>
-        <option help="X windows editor for foo data files">
+        <option>
             Motif Editor
+            <help>X windows editor for foo data files</help>
             <binary arch="any" libc="any">
                 foo-edit.motif
             </binary>

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: setup 1.0\n"
-"POT-Creation-Date: 2000-05-01 17:38-0700\n"
+"POT-Creation-Date: 2000-05-02 19:42-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Stéphane Peter <megastep@lokigames.com>\n"
 "Language-Team: French <LI@li.org>\n"
@@ -196,7 +196,7 @@ msgstr "[produit]"
 msgid "[warning text]"
 msgstr "[texte d'avertissement]"
 
-#: main.c:71
+#: main.c:73
 #, c-format
 msgid ""
 "Usage: %s [options]\n"
@@ -224,25 +224,25 @@ msgstr ""
 "            0: Debug 1: Tranquille 2: Normal 3: Avertissements 4: Fatal\n"
 "   -V       Affiche la version de setup et sort\n"
 
-#: main.c:127
+#: main.c:136
 msgid "Out of range value, setting verbosity level to normal.\n"
 msgstr "Valeur invalide, le niveau de verbosité est normal.\n"
 
-#: main.c:146
+#: main.c:155
 #, c-format
 msgid "Couldn't load '%s'\n"
 msgstr "Ne peut pas charger '%s'\n"
 
-#: main.c:150
+#: main.c:159
 #, c-format
 msgid "Detected locale is %s"
 msgstr "La localisation détectée est %s"
 
-#: main.c:164
+#: main.c:173
 msgid "No UI drivers available\n"
 msgstr "Aucun pilote d'interface disponible\n"
 
-#: main.c:196
+#: main.c:205
 #, c-format
 msgid ""
 "\n"
@@ -253,50 +253,54 @@ msgstr ""
 "Veuillez monter le CDROM %s.\n"
 "Choisissez Oui pour réessayer, Non pour annuler"
 
-#: install.c:156 install.c:164
+#: install.c:220 install.c:228
 msgid "Out of memory\n"
 msgstr "A cours de mémoire\n"
 
-#: file.c:49 file.c:69 file.c:76 install.c:215 install.c:233 install.c:254
-#: install.c:271 install.c:298
+#: file.c:49 file.c:69 file.c:76 install.c:279 install.c:297 install.c:318
+#: install.c:335 install.c:362
 msgid "Out of memory"
 msgstr "A cours de mémoire"
 
-#: install.c:316
+#: install.c:380
 msgid "Couldn't find your home directory"
 msgstr "Ne peut pas trouver votre répertoire utilisateur"
 
-#: install.c:334
+#: install.c:398
 #, c-format
 msgid "Couldn't find home directory for %s"
 msgstr "Ne peut pas trouver le répertoire de l'utilisateur %s"
 
-#: install.c:400
+#: install.c:458
+msgid "XML: 'lang' tag does not have a mandatory 'lang' attribute"
+msgstr "XML: l'élément 'lang' n'a pas d'attribut 'lang' obligatoire"
+
+#: install.c:466
 #, fuzzy, c-format
 msgid "XML: option listed without translated description for locale '%s'"
 msgstr "XML: option listée sans description traduite"
 
-#: install.c:407
+#: install.c:473
 msgid "XML: option listed without description"
 msgstr "XML: option listée sans description"
 
-#: install.c:498 install.c:509
+#: install.c:606 install.c:617
 #, c-format
 msgid "Unable to remove '%s'"
 msgstr "Impossible de supprimer '%s'"
 
-#: install.c:528
+#: install.c:636
 #, c-format
 msgid "The '%s' RPM was installed or upgraded (version %s, release %s)"
 msgstr ""
 "L'archive RPM '%s' a été installé ou mis à jour (version %s, release %s)"
 
-#: install.c:584
+#: install.c:692
 #, c-format
 msgid "echo \"%s has been uninstalled.\"\n"
 msgstr "echo \"%s a été désinstallé.\"\n"
 
-#: install.c:586
+#: install.c:694
 msgid ""
 "echo\n"
 "echo WARNING: The following RPM archives have been installed or upgraded\n"
@@ -309,12 +313,12 @@ msgstr ""
 "en\n"
 "echo supprimer certains:\n"
 
-#: install.c:620
+#: install.c:728
 #, c-format
 msgid "Please visit %s"
 msgstr "Veuillez visiter %s"
 
-#: install.c:817
+#: install.c:925
 #, c-format
 msgid "Unable to create desktop file '%s'"
 msgstr "Impossible de créer le fichier de bureau '%s'"
@@ -344,7 +348,7 @@ msgstr "Tar: '%s' a un type de fichier inconnu: %c"
 msgid "Unable to copy directory '%s'"
 msgstr "Incapable de copier le répertoire '%s'"
 
-#: copy.c:542 copy.c:591 copy.c:671 copy.c:683
+#: copy.c:542 copy.c:591 copy.c:683 copy.c:695
 #, c-format
 msgid "Unable to find file '%s'"
 msgstr "Incapable de trouver le fichier '%s'"

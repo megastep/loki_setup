@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.42 2000-05-02 01:06:42 megastep Exp $ */
+/* $Id: install.c,v 1.43 2000-05-03 03:22:21 megastep Exp $ */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -66,18 +66,82 @@ const char *GetDefaultPath(install_info *info)
     }
     return path;
 }
+
 const char *GetProductEULA(install_info *info)
 {
-    return xmlGetProp(info->config->root, "eula");
+	const char *text;
+	static char name[BUFSIZ];
+	xmlNodePtr node;
+	int found = 0;
+
+    text = xmlGetProp(info->config->root, "eula");
+	if (text) {
+		strncpy(name, text, BUFSIZ);
+		found = 1;
+		log_warning(info, "The 'eula' attribute is deprecated, please use the 'eula' element from now on.");
+	}
+	/* Look for EULA elements */
+	node = info->config->root->childs;
+	while(node) {
+		if(! strcmp(node->name, "eula") ) {
+			const char *prop = xmlGetProp(node, "lang");
+			if ( MatchLocale(prop) ) {
+				if (found == 1)
+					log_warning(info, "Duplicate matching EULA entries in XML file!");
+				text = xmlNodeListGetString(info->config, node->childs, 1);
+				if(text) {
+					*name = '\0';
+					while ( (*name == 0) && parse_line(&text, name, sizeof(name)) )
+						;
+					found = 2;
+				}
+			}
+		}
+		node = node->next;
+	}
+    if ( found && ! access(name, R_OK) ) {
+        return name;
+    } else {
+        return NULL;
+    }
 }
+
 const char *GetProductREADME(install_info *info)
 {
     const char *ret = xmlGetProp(info->config->root, "readme");
+	const char *text;
+	static char name[BUFSIZ];
+	xmlNodePtr node;
+	int found = 0;
+
     if ( ! ret ) {
-        ret = "README";
-    }
-    if ( ! access(ret, R_OK) ) {
-        return ret;
+        strcpy(name, "README");
+    } else {
+		strncpy(name, ret, BUFSIZ);
+		found = 1;
+		log_warning(info, "The 'readme' attribute is deprecated, please use the 'readme' element from now on.");
+	}
+	/* Try to find a README that matches the locale */
+	node = info->config->root->childs;
+	while(node) {
+		if(! strcmp(node->name, "readme") ) {
+			const char *prop = xmlGetProp(node, "lang");
+			if ( MatchLocale(prop) ) {
+				if (found == 1)
+					log_warning(info, "Duplicate matching README entries in XML file!");
+				text = xmlNodeListGetString(info->config, node->childs, 1);
+				if(text) {
+					*name = '\0';
+					while ( (*name == 0) && parse_line(&text, name, sizeof(name)) )
+						;
+					found = 2;
+				}
+			}
+		}
+		node = node->next;
+	}
+    if ( found && ! access(name, R_OK) ) {
+        return name;
     } else {
         return NULL;
     }
@@ -390,7 +454,9 @@ char *get_option_name(install_info *info, xmlNodePtr node, char *name, int len)
 		while ( n ) {
 			if( strcmp(n->name, "lang") == 0 ) {
 				const char *prop = xmlGetProp(n, "lang");
-				if ( prop && MatchLocale(prop) ) {
+				if ( ! prop ) {
+					log_fatal(info, _("XML: 'lang' tag does not have a mandatory 'lang' attribute"));
+				} else if ( MatchLocale(prop) ) {
 					text = xmlNodeListGetString(info->config, n->childs, 1);
 					if(text) {
 						*name = '\0';
@@ -419,13 +485,14 @@ const char *get_option_help(install_info *info, xmlNodePtr node)
 	*line = '\0';
 	if ( help ) {
 		strncpy(line, help, sizeof(line));
+		log_warning(info, "The 'help' attribute is deprecated, please use the 'help' element from now on.");
 	}
 	/* Look for translated strings */
 	n = node->childs;
 	while ( n ) {
 		if( strcmp(n->name, "help") == 0 ) {
 			const char *prop = xmlGetProp(n, "lang");
-			if ( prop && MatchLocale(prop) ) {
+			if ( MatchLocale(prop) ) {
 				text = xmlNodeListGetString(info->config, n->childs, 1);
 				if(text) {
 					*line = '\0';
@@ -482,6 +549,7 @@ install_state install(install_info *info,
 {
     xmlNodePtr node;
     install_state state;
+	const char *f;
 
     /* Walk the install tree */
     node = info->config->root->childs;
@@ -494,6 +562,16 @@ install_state install(install_info *info,
           break;
         }
     }
+	/* Install the optional README and EULA files */
+	f = GetProductREADME(info);
+	if ( f ) {
+		copy_path(info, f, info->install_path, NULL, update);
+	}
+	f = GetProductEULA(info);
+	if ( f ) {
+		copy_path(info, f, info->install_path, NULL, update);
+	}
+
     if ( ! GetInstallOption(info, "nouninstall") ) {
         generate_uninstall(info);
     }

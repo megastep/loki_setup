@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-05-01 16:54-0700\n"
+"POT-Creation-Date: 2000-05-02 19:42-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -194,7 +194,7 @@ msgstr ""
 msgid "[warning text]"
 msgstr ""
 
-#: main.c:69
+#: main.c:73
 #, c-format
 msgid ""
 "Usage: %s [options]\n"
@@ -213,33 +213,36 @@ msgstr ""
 "\n"
 "Folgende Parameter sind erlaubt:\n"
 "   -h       Diese Hilfe anzeigen\n"
-"   -c cwd   Benutze ein alternatives aktives Verzeichnis für die Installation\n"
+"   -c cwd   Benutze ein alternatives aktives Verzeichnis für die "
+"Installation\n"
 "   -f file  Benutze eine alternative XML Datei (Standard %s)\n"
 "   -n       Erzwinge Nur- Text Benutzerinterface\n"
-"   -r root  Setze Basis Verzeichnis für die Installation von RPM Dateien (Standard ist /)\n"
+"   -r root  Setze Basis Verzeichnis für die Installation von RPM Dateien "
+"(Standard ist /)\n"
 "   -v n     Setze Ausgabelevel n. Mögliche Werte :\n"
 "            0: Debug  1: Quiet  2: Normal 3: Warnings 4: Fatal\n"
-"   -V       Zeigt die Version des Setup Programmes an und beendet dieses\n"    
+"   -V       Zeigt die Version des Setup Programmes an und beendet dieses\n"
 
-#: main.c:125
+#: main.c:136
 msgid "Out of range value, setting verbosity level to normal.\n"
-msgstr "Wert außerhalb des gültigen Bereiches; setze Ausgabelevel auf normal.\n"
+msgstr ""
+"Wert außerhalb des gültigen Bereiches; setze Ausgabelevel auf normal.\n"
 
-#: main.c:144
+#: main.c:155
 #, c-format
 msgid "Couldn't load '%s'\n"
 msgstr "Laden von '%s' fehlgeschlagen\n"
 
-#: main.c:148
+#: main.c:159
 #, c-format
 msgid "Detected locale is %s"
 msgstr ""
 
-#: main.c:162
+#: main.c:173
 msgid "No UI drivers available\n"
 msgstr "Keine UI Treiber vorhanden\n"
 
-#: main.c:194
+#: main.c:205
 #, c-format
 msgid ""
 "\n"
@@ -250,50 +253,53 @@ msgstr ""
 "Bitte mounten Sie die %s CDROM.\n"
 "Wählen Sie Ja um es nochmal zu versuche, Nein um abzubrechen"
 
-
-#: install.c:156 install.c:164
+#: install.c:220 install.c:228
 msgid "Out of memory\n"
 msgstr "Nicht genügend Arbeitsspeicher\n"
 
-#: file.c:49 file.c:69 file.c:76 install.c:215 install.c:233 install.c:254
-#: install.c:271 install.c:298
+#: file.c:49 file.c:69 file.c:76 install.c:279 install.c:297 install.c:318
+#: install.c:335 install.c:362
 msgid "Out of memory"
 msgstr "Nicht genügend Arbeitsspeicher"
 
-#: install.c:316
+#: install.c:380
 msgid "Couldn't find your home directory"
 msgstr "Konnte Heimatverzeichnis nicht finden"
 
-#: install.c:334
+#: install.c:398
 #, c-format
 msgid "Couldn't find home directory for %s"
 msgstr "Konnte Heimatverzeichnis von %s nicht finden"
 
-#: install.c:400
+#: install.c:458
+msgid "XML: 'lang' tag does not have a mandatory 'lang' attribute"
+msgstr ""
+
+#: install.c:466
 #, c-format
 msgid "XML: option listed without translated description for locale '%s'"
 msgstr "XML: Option aufgelistet ohne übersetzte Beschreibung für '%s'"
 
-#: install.c:407
+#: install.c:473
 msgid "XML: option listed without description"
 msgstr "XML: Option aufgelistet ohne Beschreibung"
 
-#: install.c:498 install.c:509
+#: install.c:606 install.c:617
 #, c-format
 msgid "Unable to remove '%s'"
 msgstr "Löschen von '%s' fehlgeschlagen"
 
-#: install.c:528
+#: install.c:636
 #, c-format
 msgid "The '%s' RPM was installed or upgraded (version %s, release %s)"
 msgstr "Das '%s' RPM wurde installiert oder erneuert (Version %s, Release %s)"
 
-#: install.c:584
+#: install.c:692
 #, c-format
 msgid "echo \"%s has been uninstalled.\"\n"
 msgstr "echo \"s wurde deinstalliert.\"\n"
 
-#: install.c:586
+#: install.c:694
 msgid ""
 "echo\n"
 "echo WARNING: The following RPM archives have been installed or upgraded\n"
@@ -302,15 +308,15 @@ msgid ""
 msgstr ""
 "echo\n"
 "echo WARNUNG: Während der Installation dieser Software wurden die folgenden\n"
-"echo RPM Archive installiert oder erneuert. Sie möchten vielleicht einige der "
-"folgenden Packete manuel entfernen:\n"
+"echo RPM Archive installiert oder erneuert. Sie möchten vielleicht einige "
+"der folgenden Packete manuel entfernen:\n"
 
-#: install.c:620
+#: install.c:728
 #, c-format
 msgid "Please visit %s"
 msgstr "Bitte besuchen Sie %s"
 
-#: install.c:817
+#: install.c:925
 #, c-format
 msgid "Unable to create desktop file '%s'"
 msgstr "Konnte Desktop Datei '%s' nicht erzeugen"
@@ -340,7 +346,7 @@ msgstr "Tar: '%s' ist unbekannter Filetyp: %c"
 msgid "Unable to copy directory '%s'"
 msgstr "Konnte Verzeichnis '%s' nicht kopieren"
 
-#: copy.c:542 copy.c:591 copy.c:671 copy.c:683
+#: copy.c:542 copy.c:591 copy.c:683 copy.c:695
 #, c-format
 msgid "Unable to find file '%s'"
 msgstr "Konnte Datei '%s' nicht finden"
@@ -484,7 +490,8 @@ msgstr "Sie benutzen eine %s Maschine mit %s\n"
 
 #: console_ui.c:192
 msgid "Hit Control-C anytime to cancel this installation program.\n"
-msgstr "Drücken Sie Strg-C um jederzeit das Installationsprogramm abzubrechen.\n"
+msgstr ""
+"Drücken Sie Strg-C um jederzeit das Installationsprogramm abzubrechen.\n"
 
 #: console_ui.c:210
 msgid "Do you agree with the license?"
@@ -549,7 +556,8 @@ msgid ""
 "root's home directory instead of your user account directory."
 msgstr ""
 "Wenn Sie das Spiel als root starten werden die Einstellungen in\n"
-"dem Heimatverzeichnis von root installiert anstatt in Ihrem Benutzerverzeichnis."
+"dem Heimatverzeichnis von root installiert anstatt in Ihrem "
+"Benutzerverzeichnis."
 
 #: console_ui.c:371
 #, c-format

@@ -9,7 +9,7 @@ libc := $(shell ./print_libc)
 CC = gcc
 
 # The supported locales so far
-LOCALES = fr de
+LOCALES = fr de es
 
 OPTIMIZE = -Wall -g -O2 -funroll-loops
 ifeq ($(arch), alpha)
@@ -48,12 +48,16 @@ setup:	$(CONSOLE_OBJS)
 setup.gtk: $(GUI_OBJS)
 	$(CC) -o $@ $^ $(GUI_LIBS)
 
-install: all
-	if [ -d image/setup.data/bin/$(arch)/$(libc) ]; then \
-	    strip setup; \
+install.dbg: all
+	@if [ -d image/setup.data/bin/$(arch)/$(libc) ]; then \
 	    cp -v setup image/setup.data/bin/$(arch); \
-	    strip setup.gtk; \
 	    cp -v setup.gtk image/setup.data/bin/$(arch)/$(libc); \
+	fi
+
+install: all
+	@if [ -d image/setup.data/bin/$(arch)/$(libc) ]; then \
+	    install -s --verbose setup image/setup.data/bin/$(arch); \
+	    install -s --verbose setup.gtk image/setup.data/bin/$(arch)/$(libc); \
 	fi
 
 clean:
