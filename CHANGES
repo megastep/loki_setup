@@ -1,5 +1,7 @@
 
 1.2.1:
+Stephane Peter - Tue Mar  7 14:34:11 PST 2000
+ * Added default environment variables for scripts called from within setup.
 Stephane Peter - Thu Mar  2 17:04:06 PST 2000
  * Added CDROM support and "cdrom" attribute to "files" and "binary" elements
 Sam Lantinga - Thu Feb 17 18:59:36 PST 2000
