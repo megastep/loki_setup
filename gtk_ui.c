@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.66 2002-02-24 02:35:16 icculus Exp $
+   $Id: gtk_ui.c,v 1.67 2002-03-10 17:46:22 icculus Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -950,23 +950,13 @@ static void init_menuitems_option(install_info *info, xmlNodePtr node)
     }
 }
 
-static const char *beginning_string(const char *str)
-{
-	while (*str) {
-		if (!isspace(*str))
-			break;
-		str ++;
-	}
-	return str;
-}
-
 static void parse_option(install_info *info, const char *component, xmlNodePtr node, GtkWidget *window, GtkWidget *box, int level, GtkWidget *parent, int exclusive, GSList **radio)
 {
     xmlNodePtr child;
     char text[1024] = "";
     const char *help;
     const char *wanted;
-    const char *name;
+    gchar *name;
     int i;
     GtkWidget *button;
     option_data *dat;
@@ -989,12 +979,14 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
 
     /* See if the user wants this option */
 	if ( node->type == XML_TEXT_NODE ) {
-		name = beginning_string(node->content);
+		name = g_strdup(node->content);
+		g_strstrip(name);
 		if ( *name ) {
 			button = gtk_label_new(name);
 			gtk_widget_show(button);
 			gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(button), FALSE, FALSE, 0);
 		}
+		g_free(name);
 		return;
 	} else {
 		name = get_option_name(info, node, NULL, 0);
