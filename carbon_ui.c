@@ -782,8 +782,8 @@ int OnCommandEvent(UInt32 CommandID)
             ReturnValue = true;
             break;
         case 'quit':
-            if (cur_state == SETUP_COMPLETE)
-                cur_state = SETUP_EXIT;
+            if (cur_info->install_complete)
+                OnCommandExit();
             else
                 OnCommandCancel();
             ReturnValue = true;
