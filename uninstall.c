@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.13 2000-10-25 19:10:42 megastep Exp $ */
+/* $Id: uninstall.c,v 1.14 2000-10-26 21:13:16 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -16,7 +16,6 @@
 #include "install.h"
 
 #define PACKAGE "loki-uninstall"
-#define LOCALEDIR SETUP_BASE "locale"
 
 static char *current_locale = NULL;
 static product_t *prod = NULL;
@@ -103,7 +102,7 @@ static struct dir_entry *add_directory_entry(product_file_t *dir, struct dir_ent
 /* Signal handler for interrupted uninstalls */
 static void emergency_exit(int sig)
 {
-    fprintf(stderr, _("Signal %s caught. Aborting.\n"), sig);
+    fprintf(stderr, _("Signal %d caught. Aborting.\n"), sig);
     if ( prod ) {
         /* Try to save the XML file */
         loki_closeproduct(prod);
@@ -214,12 +213,13 @@ static int check_permissions(product_info_t *info)
 int main(int argc, char **argv)
 {
     product_info_t *info;
-    char desc[128];
+    char desc[128], locale[PATH_MAX];
 	int ret = 0;
 
 	/* Set the locale */
 	setlocale (LC_ALL, "");
-	bindtextdomain (PACKAGE, LOCALEDIR);
+    snprintf(locale, sizeof(locale), "%s/.loki/installed/locale", getenv("HOME"));
+	bindtextdomain (PACKAGE, locale);
 	textdomain (PACKAGE);
 
 	current_locale = getenv("LC_ALL");

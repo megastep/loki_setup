@@ -112,16 +112,22 @@ po/setup.po: $(SRCS) image/setup.data/setup.glade
 	libglade-xgettext image/setup.data/setup.glade > po/setup.po
 	xgettext -p po -j -d setup --keyword=_ $(SRCS) plugins/*.c
 
-gettext: po/setup.po
+po/loki-uninstall.po: uninstall.c
+	xgettext -p po -j -d loki-uninstall --keyword=_ uninstall.c
+
+gettext: po/setup.po po/loki-uninstall.po
 	for lang in $(LOCALES); do \
 		msgfmt -f po/$$lang/setup.po -o image/setup.data/locale/$$lang/LC_MESSAGES/setup.mo; \
+		msgfmt -f po/$$lang/loki-uninstall.po -o image/setup.data/locale/$$lang/LC_MESSAGES/loki-uninstall.mo; \
 	done
 
 # This rule merges changes from the newest PO file in all the translated PO files
-update-po: po/setup.po
+update-po: po/setup.po po/loki-uninstall.po
 	for lang in $(LOCALES); do \
 		msgmerge po/$$lang/setup.po po/setup.po > po/$$lang/tmp; \
 		mv po/$$lang/tmp po/$$lang/setup.po; \
+		msgmerge po/$$lang/loki-uninstall.po po/loki-uninstall.po > po/$$lang/tmp; \
+		mv po/$$lang/tmp po/$$lang/loki-uninstall.po; \
 	done
 
 dep: depend

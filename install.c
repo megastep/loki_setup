@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.73 2000-10-18 04:56:08 megastep Exp $ */
+/* $Id: install.c,v 1.74 2000-10-26 21:13:16 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1055,7 +1055,7 @@ void generate_uninstall(install_info *info)
         pop_curdir();
 
         snprintf(buf, sizeof(buf), "setup.data/bin/%s/%s/uninstall", detect_os(), detect_arch());
-        loki_upgrade_uninstall(product, buf);
+        loki_upgrade_uninstall(product, buf, "setup.data/locale");
 		loki_closeproduct(product);
     } else {
 		log_fatal(info, _("Could not create install log"),
