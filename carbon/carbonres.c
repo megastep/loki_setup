@@ -1,6 +1,7 @@
 #include "carbonres.h"
 #include "carbondebug.h"
 #include <stdlib.h>
+#include <unistd.h>
 
 // Size and position constants
 #define WINDOW_WIDTH    350
@@ -21,6 +22,20 @@
 static int PromptResponse;
 static int PromptResponseValid;
 //static Rect DefaultBounds = {BUTTON_MARGIN, BUTTON_MARGIN, BUTTON_HEIGHT, BUTTON_WIDTH};
+
+static void MoveImage(CarbonRes *Res)
+{
+    HIRect bounds;
+    HIViewRef WindowViewRef;    
+    // Get window content view
+    HIViewFindByID(HIViewGetRoot(Res->Window), kHIViewWindowContentID, &WindowViewRef);
+    // Get window view bounds...yeah.
+    HIViewGetBounds(WindowViewRef, &bounds);
+    // Move image in the center (vertically)
+    MoveControl(Res->SplashImageView, bounds.origin.x,
+        bounds.size.height / 2 - Res->ImageHeight / 2);
+    Draw1Control(Res->SplashImageView);
+}
 
 static void HResize(OptionsBox *Box, int ID, int Offset)
 {
@@ -48,6 +63,18 @@ static void HMove(OptionsBox *Box, int ID, int Offset)
     MoveControl(TempControl, TempRect.left + Offset, TempRect.top);
 }
 
+// Moves group controls to correct location (typically called when an image
+//  is used
+static void MoveGroups(CarbonRes *Res)
+{
+    int i;
+
+    for(i = 0; i < PAGE_COUNT; i++)
+    {
+        // Set the position of the group control to top/left position
+        MoveControl(Res->PageHandles[i], GROUP_LEFT + Res->ImageWidth, GROUP_TOP);
+    }
+}
 static int OptionsSetRadioButton(OptionsButton *Button)
 {
     RadioGroup *Group = (RadioGroup *)Button->Group;
@@ -304,7 +331,7 @@ static void ApplyOffsetToControl(OptionsBox *Box, int ID, int Offset, int GrowNo
     }
 }
 
-CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32))
+CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32), const char *InstallName)
 {
     IBNibRef 		nibRef;
     OSStatus		err;
@@ -330,6 +357,10 @@ CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32))
     // Set defaults for resource object members
     NewRes->IsShown = false;
     NewRes->CurInstallPage = NONE_PAGE;
+    NewRes->SplashImage = NULL;
+    NewRes->SplashImageView = NULL;
+    NewRes->ImageWidth = 0;
+    NewRes->ImageHeight = 0;
 
     // Defines the kind of event handler we will be installing later on
     EventTypeSpec commSpec = {kEventClassCommand, kEventProcessCommand};
@@ -339,9 +370,16 @@ CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32))
     
     // Once the nib reference is created, set the menu bar. "MainMenu" is the name of the menu bar
     // object. This name is set in InterfaceBuilder when the nib is created.
-    err = CreateMenuFromNib(nibRef, CFSTR("install_menu"), &NewRes->Menu);
-    err = SetRootMenu(NewRes->Menu);
+    err = SetMenuBarFromNib(nibRef, CFSTR("install_menu"));
     require_noerr(err, CantSetMenuBar);
+    NewRes->Menu = AcquireRootMenu();
+    /*char InstallNameTemp[255];
+    CFStringRef CFInstallName;
+    strcpy(InstallNameTemp, InstallName);
+    strcat(InstallNameTemp, " Setup");
+    CFInstallName = CFStringCreateWithCString(NULL, InstallNameTemp, kCFStringEncodingMacRoman);*/
+    //SetMenuTitleWithCFString(NewRes->Menu, CFInstallName);
+    SetMenuTitleWithCFString(NewRes->Menu, CFSTR("Test"));
 
     // Then create a window. "MainWindow" is the name of the window object. This name is set in 
     // InterfaceBuilder when the nib is created.
@@ -561,28 +599,73 @@ int carbon_GetInstallClass(CarbonRes *Res)
 
 void carbon_UpdateImage(CarbonRes *Res, const char *Filename, const char *Path)
 {
-    /*char FullPath[1024];
-    CGImageRef Image;
-    CFBundleRef Bundle;
     CGDataProviderRef Provider;
+    char FullPath[CARBON_MAX_APP_PATH];
+    char AppPath[CARBON_MAX_APP_PATH];
     CFURLRef url;
-    CFStringRef CFExePath;
+    HIRect bounds;
+    HIViewRef WindowViewRef;
 
-    Bundle = CFBundleGetMainBundle();
-    url = CFBundleCopyExecutableURL(Bundle);
-    CFExePath = CFURLCopyPath(url);
-    CFRelease(url);
-    CFStringGetCString(CFExePath, FullPath, 1024, kCFStringEncodingMacRoman);
-    strcpy(FullPath, Path);
+    // Get application path
+    carbon_GetAppPath(AppPath, CARBON_MAX_APP_PATH);
+    // Append filename and base path (setup.data) to the full path
+    strcpy(FullPath, "file://");
+    strcat(FullPath, AppPath);
+    strcat(FullPath, Path);
     strcat(FullPath, Filename);
-    printf("carbon_UpdateImage() - specified path: '%s'\n", FullPath);
-    url = CFBundleCopyResourceURL(Bundle, FullPath, NULL, NULL);
-    //url = CFURLCreateWithBytes(kCFAllocatorDefault, FullPath, 1024, kCFStringEncodingASCII, NULL);
-    Provider = CGDataProviderCreateWithURL(url);
-    Image = CGImageCreateWithJPEGDataProvider(Provider, NULL, false, kCGRenderingIntentDefault);
-    //strrchr(
-    CGDataProviderRelease(Provider);
-    CFRelease(url);*/
+    printf("carbon_UpdateImage() - Image Path: '%s'\n", FullPath);
+    // Create URL to image
+    //url = CFURLCreateWithBytes(kCFAllocatorDefault, FullPath, strlen(FullPath), kCFStringEncodingASCII, NULL);
+    url = CFURLCreateWithBytes(kCFAllocatorDefault, FullPath, strlen(FullPath), kCFStringEncodingMacRoman, NULL);
+    if(url == NULL)
+        carbon_debug("carbon_UpdateImage() - URL to image could not be generated.\n");
+    else
+    {
+        // Get EXE path as a CFString
+        CFStringRef CFURLString = CFURLCopyPath(url);
+        // Convert it to a char *
+        char URLString[CARBON_MAX_APP_PATH]; 
+        //CFStringGetCString(CFURLString, URLString, CARBON_MAX_APP_PATH, kCFStringEncodingASCII);
+        CFStringGetCString(CFURLString, URLString, CARBON_MAX_APP_PATH, kCFStringEncodingMacRoman);
+        printf("carbon_UpdateImage() - URL = '%s'\n", URLString);
+
+        // Create provider for accessing file data
+        Provider = CGDataProviderCreateWithURL(url);
+        CFRelease(url);
+        if(Provider == NULL)
+            carbon_debug("carbon_UpdateImage() - Image file could not be opened.\n");
+        else
+        {
+            // Open data as a JPEG image
+            Res->SplashImage = CGImageCreateWithJPEGDataProvider(Provider, NULL,
+                false, kCGRenderingIntentDefault);
+            if(Res->SplashImage == NULL)
+                carbon_debug("carbon_UpdateImage() - File could not be loaded as a JPEG.\n");
+            else
+            {
+                carbon_debug("carbon_UpdateImage() - Image loaded successfully.\n");
+                if(HIImageViewCreate(Res->SplashImage, &Res->SplashImageView) == noErr)
+                {
+                    // Set size of image container to fit the image
+                    bounds.origin.x = 0;
+                    bounds.origin.y = 0;
+                    Res->ImageWidth = bounds.size.width = CGImageGetWidth(Res->SplashImage);
+                    Res->ImageHeight = bounds.size.height = CGImageGetHeight(Res->SplashImage);
+                    HIViewSetFrame(Res->SplashImageView, &bounds);
+                    HIViewSetVisible(Res->SplashImageView, true);
+                    // Add image view to the window at the default position
+                    HIViewFindByID(HIViewGetRoot(Res->Window), kHIViewWindowContentID, &WindowViewRef);
+                    HIViewAddSubview(WindowViewRef, Res->SplashImageView);
+                    // Move groups to accomodate the image
+                    MoveGroups(Res);
+                    MoveImage(Res);
+                }
+                else
+                    carbon_debug("carbon_UpdateImage() - Imageview creation failed.\n");
+            }
+            CGDataProviderRelease(Provider);
+        }
+    }
 }
 
 void carbon_HandlePendingEvents(CarbonRes *Res)
@@ -657,8 +740,20 @@ void carbon_SetCheckbox(CarbonRes *Res, int CheckboxID, int Value)
 
 int carbon_GetCheckbox(CarbonRes *Res, int CheckboxID)
 {
-    //!!!TODO
-    carbon_debug("carbon_GetCheckbox() - Not implemented.\n");
+    int ReturnValue;
+    ControlRef Checkbox;
+    ControlID IDStruct = {LOKI_SETUP_SIG, CheckboxID};
+
+    carbon_debug("carbon_GetCheckbox()\n");
+
+    GetControlByID(Res->Window, &IDStruct, &Checkbox);
+
+    if(GetControl32BitValue(Checkbox) == kControlRadioButtonCheckedValue)
+        ReturnValue = true;
+    else
+        ReturnValue = false;
+    
+    return ReturnValue;
 }
 
 void carbon_SetEntryText(CarbonRes *Res, int EntryID, const char *Value)
@@ -1072,10 +1167,13 @@ void carbon_SetProperWindowSize(OptionsBox *Box, int OptionsNotOther)
 
     // Resize window
     printf("carbon_SetProperWindowSize - Box->MaxButtonWidth = %d", Box->MaxButtonWidth);
-    SizeWindow(Box->Res->Window, NewWidth, NewHeight, true);
+    SizeWindow(Box->Res->Window, NewWidth + Box->Res->ImageWidth, NewHeight, true);
 
     // When size changes, we have to reposition it to the center
     RepositionWindow(Box->Res->Window, NULL, kWindowCenterOnMainScreen);
+
+    // Move the image to accomodate new window size
+    MoveImage(Box->Res);
 
     // Redraw it
     DrawControls(Box->Res->Window);
@@ -1123,13 +1221,18 @@ int carbon_LaunchURL(const char *url)
     return ReturnValue;
 }
 
-// This function returns the path where the .APP folder is stored
-void carbon_GetAppPath(const char *Dest, int Length)
+// This function returns the path where the setup.data is located
+/* This function starts the search from setup.data from the same folder
+ * as the binary, and continue to ascend up the tree up to and including
+ * the path in which the .APP folder resides.
+ */
+void carbon_GetAppPath(char *Dest, int Length)
 {
     CFURLRef url;
     CFStringRef CFExePath;
     char EXEPath[CARBON_MAX_APP_PATH];
     char *p;
+    char TempStr[CARBON_MAX_APP_PATH];
     CFBundleRef Bundle;
     int i;
 
@@ -1157,17 +1260,162 @@ void carbon_GetAppPath(const char *Dest, int Length)
             carbon_debug("carbon_GetAppPath() - Couldn't parse path!!!!\n");
             break;
         }
-        else if(i == ASCENT_COUNT)
-        {
-            // We want to keep the last slash, so move the pointer one ahead
-            *(++p) = 0x00;
-        }
         else
         {
-            // Reposition end of path to the current '/'
-            *p = 0x00;
+            // Reposition end of path just after the current '/'
+            *(p + 1) = 0x00;
+            // Check for existence of setup.data folder
+            printf("carbon_GetAppPath() - Checking for existence of '%s'\n", EXEPath);
+            strcpy(TempStr, EXEPath);
+            strcat(TempStr, "setup.data");
+            // If setup.data found
+            if(access(TempStr, F_OK) == 0)
+            {
+                printf("carbon_GetAppPath() - Found in setup.data\n");
+                break;
+            }
+            else
+            {
+                // setup.data not found, get rid of trailing slash so we'll
+                //  go higher in the directory tree the next iteration.
+                *p = 0x00;
+            }
         }
     }
+
     printf("carbon_GetAppPath() - AppPath = '%s'\n", EXEPath);
     strcpy(Dest, EXEPath);
 }
+
+int carbon_PromptForPath(char *Path, int PathLength)
+{
+    NavDialogCreationOptions DialogOptions;
+    NavDialogRef Dialog;
+    NavReplyRecord Reply;
+    NavUserAction Action;
+    int ReturnValue = false;    // By default, user cancels dialog
+    AEKeyword DummyKeyword;
+    AEDesc ResultDesc;
+    FSRef ResultFSRef;
+
+    carbon_debug("carbon_PromptForPath()\n");
+    // Fill in our structure with default dialog options
+    NavGetDefaultDialogCreationOptions(&DialogOptions);
+
+    // Create the dialog instance
+    NavCreateChooseFolderDialog(&DialogOptions, NULL, NULL, NULL, &Dialog);
+    // Run the dialog
+    NavDialogRun(Dialog);
+    // Get action that user performed in dialog
+    Action = NavDialogGetUserAction(Dialog);
+    // If action was not cancel or no action then continue
+    if(!(Action == kNavUserActionCancel) || (Action == kNavUserActionNone))
+    {
+        // Get user selection from dialog
+        NavDialogGetReply(Dialog, &Reply);
+        // User hit "OK" on dialog
+        ReturnValue = true;     
+
+        if(AEGetNthDesc(&Reply.selection, 1, typeFSRef, &DummyKeyword, &ResultDesc) == noErr)
+        {
+            BlockMoveData(*ResultDesc.dataHandle, &ResultFSRef, sizeof(FSRef));
+            FSRefMakePath(&ResultFSRef, Path, PathLength);
+            AEDisposeDesc(&ResultDesc);
+        }
+        else
+            carbon_debug("Could not get filename!!!\n");
+        NavDisposeReply(&Reply);
+    }
+
+    // Release the dialog resource since we're done with it
+    NavDialogDispose(Dialog);
+    return ReturnValue;
+}
+
+void carbon_AddDesktopAlias(const char *Path)
+{
+    AliasHandle AliasHandle;
+    FSRef FSPath;
+    FSRef FSDesktop;
+
+    carbon_debug("carbon_AddDesktopAlias() - Not working yet\n");
+    // Make FS object from the Path string
+    if(FSPathMakeRef(Path, &FSPath, NULL) == noErr)
+    {
+        // Get FS object associated with user's desktop
+        if(FSFindFolder(kUserDomain, kDesktopFolderType, kDontCreateFolder, &FSDesktop) == noErr)
+        {
+            if(FSNewAlias(&FSPath, &FSDesktop, &AliasHandle) == noErr)
+                carbon_debug("carbon_AddDesktopAlias() - Alias created successfully\n");
+            else
+                carbon_debug("carbon_AddDesktopAlias() - Could not create desktop alias\n");
+        }
+        else
+            carbon_debug("carbon_AddDesktopAlias() - Could not create FSRef for Desktop\n");
+    }
+    else
+        carbon_debug("carbon_AddDesktopAlias() - Could not create FSRef for path\n");
+}
+
+/*void carbon_AddDesktopAlias(const char *Path)
+{
+ AliasHandle hArticle;
+ OSErr  err;
+ FInfo  fndrInfo;
+ FSSpec  articleSpec;
+ short  refNum;
+ FSSpec  newsFolderFS;
+
+ // Create minimal alias for the original article.
+ newsFolderFS.vRefNum = gSpoolFolder->fldrVRefNum;
+ newsFolderFS.parID = gSpoolFolder->fldrDirID;
+ newsFolderFS.name[0] = '\0';
+);
+
+ err = NewAlias( &newsFolderFS, theSpec, &hArticle );
+ if ( !hArticle || err != noErr ) {
+  LogError( "Could not allocate alias for article!" );
+  return;
+ }
+
+  // Setup the article file, initialize it and specify where it is
+  // supposed to be put. If it exists, then delete it.
+
+ FSMakeFSSpec( gSpoolFolder->fldrVRefNum, entry->dirID, 
+  (StringPtr) articleNumber, &articleSpec );
+ FSpCreateResFile( &articleSpec, 'fndr', 'alis', 0 );
+ err = ResError();
+ if ( err == dupFNErr ) {
+  err = FSpDelete( &articleSpec );
+  FSpCreateResFile( &articleSpec, 'fndr', 'alis', 0 );
+  err = ResError();
+ }
+ if ( err != noErr ) {
+  LogError( "Couldn't create alias file!" );
+  return;
+ }
+ 
+  // Create the resource file and open it for writing.
+
+ refNum = FSpOpenResFile( &articleSpec, fsWrPerm ); 
+ if ( refNum == -1 || ResError() != noErr ) {
+  LogError( "Couldn't open an alias file!" );
+  return;
+ }
+ 
+  // Write alias resource to file.
+
+ AddResource( (Handle) hArticle, 'alis', 0, "\p" );
+ ChangedResource( (Handle) hArticle );
+ if ( ResError() == noErr ) {
+  WriteResource( (Handle) hArticle );
+  HPurge( (Handle) hArticle );
+ }
+
+ CloseResFile( refNum );
+ 
+  // Now set the "alias" finder bit.
+ 
+ FSpGetFInfo( &articleSpec, &fndrInfo );
+ fndrInfo.fdFlags |= (1L << 15);
+ FSpSetFInfo( &articleSpec, &fndrInfo );*/

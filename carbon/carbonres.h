@@ -33,6 +33,7 @@
 #define OPTION_CANCEL_BUTTON_ID             210
 #define OPTION_README_BUTTON_ID             211
 #define OPTION_BEGIN_INSTALL_BUTTON_ID      212
+#define OPTION_CREATE_DESKTOP_ALIAS_BUTTON_ID   218
 
 // CLASS_GROUP_ID controls
 #define CLASS_TEXT_LABEL_ID                 301
@@ -85,6 +86,7 @@
 #define COMMAND_WEB_CONTINUE    'con1'
 #define COMMAND_README          'read'
 #define COMMAND_INSTALLPATH     'inst'
+#define COMMAND_SYMLINKPATH     'link'
 #define COMMAND_BEGIN_INSTALL   'begn'
 #define COMMAND_RECOMMENDED     'recc'
 #define COMMAND_EXPERT          'expr'
@@ -141,10 +143,15 @@ typedef struct
     InstallPage CurInstallPage;
     // Callback for application to handle command events (buttons)
     int (*CommandEventCallback)(UInt32);
+
+    CGImageRef SplashImage;
+    ControlRef SplashImageView;
+    size_t ImageWidth;
+    size_t ImageHeight;
 } CarbonRes;
 
 // Function declarations
-CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32));
+CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32), const char *);
 void carbon_UnloadCarbonRes(CarbonRes *);
 int carbon_IterateForState(CarbonRes *, int *);
 void carbon_ShowInstallScreen(CarbonRes *, InstallPage);
@@ -238,6 +245,8 @@ void carbon_OptionsShowBox(OptionsBox *);
 void carbon_SetProperWindowSize(OptionsBox *, int);
 OptionsButton *carbon_GetButtonByName(OptionsBox *, const char *);
 int carbon_LaunchURL(const char *);
-void carbon_GetAppPath(const char *, int);
+void carbon_GetAppPath(char *, int);
+int carbon_PromptForPath(char *, int);
+void carbon_AddDesktopAlias(const char *);
 
 #endif

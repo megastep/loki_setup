@@ -17,8 +17,11 @@
 #define DEFAULT_UMASK       022
 
 /* The default location of the product */
+#if defined(darwin)
+#define DEFAULT_PATH        "/Applications"
+#else
 #define DEFAULT_PATH        "/usr/local/games"
-
+#endif
 /* The default location of the symlinks */
 #define DEFAULT_SYMLINKS    "/usr/local/bin"
 

@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.106 2003-04-01 04:15:10 megastep Exp $ */
+/* $Id: install.c,v 1.107 2003-04-16 06:01:16 zeph Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -590,7 +590,7 @@ install_info *create_install(const char *configfile,
 
     if ( info->product ) {
         product_info_t *pinfo = loki_getinfo_product(info->product);
-            
+        
         disable_install_path = 1;
         strncpy(info->install_path, pinfo->root, sizeof(info->install_path));
     }

@@ -9,7 +9,6 @@
 #include "copy.h"
 #include "loki_launchurl.h"
 
-
 static int cur_state;
 static install_info *cur_info;
 static int diskspace;
@@ -18,9 +17,9 @@ static int in_setup = true;
 static CarbonRes *MyRes;
 static RadioGroup *radio_list = NULL; // Group for the radio buttons
 
-#define MAX_TEXTLEN	40	// The maximum length of current filename
-#define MAX_README_SIZE     65535
-#define DEFAULT_INSTALL_FOLDER "/Applications/test"
+#define MAX_TEXTLEN	            40	// The maximum length of current filename
+#define MAX_README_SIZE         65535
+#define INSTALLFOLDER_MAX_PATH  1024
 
 static enum {
     WARNING_NONE,
@@ -307,20 +306,21 @@ static void update_space(void)
 
 static void init_install_path(void)
 {
-    //!!!TODO - Make sure this is adequate for Mac install.  In GTK version they
-    // provide a list contained in XML of suggested install paths.  In Mac it
-    // seems more appopriate to give the standard folder selection dialog instead.
-
+    carbon_debug("init_install_path()\n");
     // Just set the Applications folder as the default install dir
-    set_installpath(cur_info, DEFAULT_INSTALL_FOLDER);
-    carbon_SetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, DEFAULT_INSTALL_FOLDER);
+    carbon_SetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, cur_info->install_path);
 }
 
 static void init_binary_path(void)
 {
-    //!!!TODO - Do we need symbolic link support?
+    carbon_debug("init_binary_path()\n");
+    // Just set the Applications folder as the default install dir
+    carbon_SetEntryText(MyRes, OPTION_LINK_PATH_ENTRY_ID, cur_info->symlinks_path);
+    // By default, set the symlinks path to blank (after we took the
+    //  default and put it in the textbox.  When the checkbox is unchecked
+    //  for the symlink (unchecked by default), we have to set the symlink
+    //  path to empty so it doesn't use the default.
     set_symlinkspath(cur_info, "");
-    carbon_debug("init_binary_path() not implemented\n");
 }
 
 static void init_menuitems_option(install_info *info)
@@ -403,42 +403,48 @@ static void OnCommandCancel(void)
 
 static void OnCommandInstallPath(void)
 {
-    //!!!TODO - Implement
-    carbon_debug("OnCommandInstallPath() - Not implemented.\n");
-    /*NavDialogCreationOptions *DialogOptions;
-    NavDialogRef Dialog;
-    NavReplyRecord Reply;
-    NavUserAction Action;
-    
+    char InstallPath[INSTALLFOLDER_MAX_PATH];
+
     carbon_debug("OnCommandInstallPath()\n");
-    // Fill in our structure with default dialog options
-    NavGetDefaultDialogCreationOptions(DialogOptions);
-    // Create the dialog instance
-    NavCreateChooseFolderDialog(DialogOptions, NULL, NULL, NULL, &Dialog);
-    // Run the dialog
-    NavDialogRun(Dialog);
-    // Get action that user performed in dialog
-    Action = NavDialogGetUserAction(Dialog);
-    // If action was not cancel or no action then continue
-    if(!(Action == kNavUserActionCancel) || (Action == kNavUserActionNone))
+    // Bring up dialog to prompt for new folder
+    if(carbon_PromptForPath(InstallPath, INSTALLFOLDER_MAX_PATH))
     {
-        // Get user selection from dialog
-        NavDialogGetReply(Dialog, &Reply);
-        //!!!TODO - Save reply into the install path entry box
-        carbon_debug("OnCommandInstallPath() - TODO: Save reply into the install path entry box.\n");
-    }    
-    // Release the dialog resource since we're done with it
-    NavDialogDispose(Dialog);*/
+        // If user hit OK
+        set_installpath(cur_info, InstallPath);
+        carbon_SetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, cur_info->install_path);
+    }
+}
+
+static void OnCommandSymlinkPath(void)
+{
+    char SymlinkPath[INSTALLFOLDER_MAX_PATH];
+
+    carbon_debug("OnCommandSymlinkPath()\n");
+    // Bring up dialog to prompt for new folder
+    if(carbon_PromptForPath(SymlinkPath, INSTALLFOLDER_MAX_PATH))
+    {
+        // If user hit OK
+        set_symlinkspath(cur_info, SymlinkPath);
+        carbon_SetEntryText(MyRes, OPTION_LINK_PATH_ENTRY_ID, cur_info->symlinks_path);
+    }
 }
 
 void OnCommandBeginInstall()
 {
-    //!!!TODO - This is temporary until we get the path select working...then
-    //this method will be called from the path change event handler
+    carbon_debug("OnCommandBeginInstall()\n");
+
+    // Set install and binary paths accordingly
     char string[1024];
     carbon_GetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, string, 1024);
-
-    carbon_debug("OnCommandBeginInstall()\n");
+    set_installpath(cur_info, string);
+    // Only set binary path if symbolic link checkbox is set
+    if(carbon_GetCheckbox(MyRes, OPTION_SYMBOLIC_LINK_CHECK_ID))
+    {
+        carbon_debug("OnCommandBeginInstall() - Setting binary path\n");
+        carbon_GetEntryText(MyRes, OPTION_LINK_PATH_ENTRY_ID, string, 1024);
+        set_symlinkspath(cur_info, string);
+    }
+    
     carbon_ShowInstallScreen(MyRes, COPY_PAGE);
     cur_state = SETUP_INSTALL;
 }
@@ -637,6 +643,10 @@ int OnCommandEvent(UInt32 CommandID)
             OnCommandInstallPath();
             ReturnValue = true;
             break;
+        case COMMAND_SYMLINKPATH:
+            OnCommandSymlinkPath();
+            ReturnValue = true;
+            break;
         case COMMAND_BEGIN_INSTALL:
             OnCommandBeginInstall();
             ReturnValue = true;
@@ -699,7 +709,7 @@ static install_state carbonui_init(install_info *info, int argc, char **argv, in
     carbon_debug("***carbonui_init()\n");
 
     // Load the resources related to our carbon interface
-    MyRes = carbon_LoadCarbonRes(OnCommandEvent);
+    MyRes = carbon_LoadCarbonRes(OnCommandEvent, GetProductDesc(info));
     // Couldn't allocate resources...exit setup.
     if(MyRes == NULL)
     {
@@ -758,8 +768,24 @@ static install_state carbonui_init(install_info *info, int argc, char **argv, in
     }
     if(disable_binary_path)
     {
+        carbon_debug("carbonui_init() - disable_binary_path != 0\n");
         carbon_DisableControl(MyRes, OPTION_LINK_PATH_BUTTON_ID);
         carbon_DisableControl(MyRes, OPTION_LINK_PATH_ENTRY_ID);
+    }
+
+    // Disable dock option if not requested in dockoption attribute
+    const char *DesktopOptionString = xmlGetProp(cur_info->config->root, "desktopicon");
+    if(DesktopOptionString != NULL)
+    {
+        printf("carbonui_init() - desktopicon = %s\n", DesktopOptionString);
+        if(strcasecmp(DesktopOptionString, "yes") != 0)
+            carbon_HideControl(MyRes, OPTION_CREATE_DESKTOP_ALIAS_BUTTON_ID);
+    }
+    // Else, option doesn't appear...disable it
+    else
+    {
+        printf("carbonui_init() - desktopicon = NULL\n");
+        carbon_HideControl(MyRes, OPTION_CREATE_DESKTOP_ALIAS_BUTTON_ID);
     }
 
     // If product has no binary, don't provide them with option to set
@@ -768,6 +794,7 @@ static install_state carbonui_init(install_info *info, int argc, char **argv, in
     {
         carbon_HideControl(MyRes, OPTION_LINK_PATH_LABEL_ID);
         carbon_HideControl(MyRes, OPTION_LINK_PATH_ENTRY_ID);
+        carbon_HideControl(MyRes, OPTION_LINK_PATH_BUTTON_ID);
     }
 
     // Hide symlink checkbox if no binary or feature not used
@@ -1057,6 +1084,10 @@ static install_state carbonui_complete(install_info *info)
     char text[1024];
 
     carbon_debug("***carbonui_complete()\n");
+
+    // If desktop alias option is checked, add the desktop alias
+    if(carbon_GetCheckbox(MyRes, OPTION_CREATE_DESKTOP_ALIAS_BUTTON_ID))
+        carbon_AddDesktopAlias(info->install_path);
 
     // Show the install complete page
     carbon_ShowInstallScreen(MyRes, DONE_PAGE);
