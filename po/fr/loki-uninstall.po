@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Setup 1.5\n"
-"POT-Creation-Date: 2000-11-15 19:04-0800\n"
+"POT-Creation-Date: 2000-11-19 15:58-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Stéphane Peter <megastep@lokigames.com>\n"
 "Language-Team: French <LL@li.org>\n"
@@ -39,18 +39,17 @@ msgstr "Sortir"
 msgid "Finished"
 msgstr "Fini"
 
-#: uninstall.glade:51
-#, fuzzy
-msgid "Installed products:"
-msgstr "Produits installés:"
-
 #: uninstall.glade:23
 msgid "Loki Uninstall Tool"
-msgstr ""
+msgstr "Outil Loki Uninstall"
 
 #: uninstall.glade:229
 msgid "Performing uninstall:"
 msgstr "Désinstallation:"
+
+#: uninstall.glade:51
+msgid "Please select the packages you would like to uninstall:"
+msgstr "Veuillez choisir les paquets que vous souhaitez désinstaller:"
 
 #: uninstall.glade:125
 msgid "Recovered space: "
@@ -64,7 +63,7 @@ msgstr "Désinstaller"
 msgid "[current component]"
 msgstr "[composant en cours]"
 
-#: uninstall.c:31
+#: uninstall.c:30
 #, c-format
 msgid ""
 "Usage: %s product to uninstall the product\n"
@@ -77,27 +76,27 @@ msgstr ""
 "             %s produit -l pour lister tous les composants\n"
 "             %s produit composant pour désinstaller un composant\n"
 
-#: uninstall.c:109
+#: uninstall.c:108
 #, c-format
 msgid "Signal %d caught. Aborting.\n"
 msgstr "Signal %d reçu. Abandon.\n"
 
-#: uninstall.c:123
+#: uninstall.c:122
 #, c-format
 msgid "Could not change to directory: %s\n"
 msgstr "Ne peut aller dans le répertoire: %s\n"
 
-#: uninstall.c:145
+#: uninstall.c:144
 #, c-format
 msgid "Notice: the %s RPM was installed for this product.\n"
 msgstr "Attention: l'archive RPM %s a été installée pour ce produit.\n"
 
-#: uninstall.c:180
+#: uninstall.c:179
 #, fuzzy, c-format
 msgid "Component %s has been successfully uninstalled.\n"
 msgstr "Le composant %s a été désinstallé avec succès.\n"
 
-#: uninstall.c:218
+#: uninstall.c:217
 msgid ""
 "No write access to the installation directory.\n"
 "Aborting.\n"
@@ -105,7 +104,7 @@ msgstr ""
 "Pas d'accès en écriture dans le répertoire d'installation.\n"
 "Abandon.\n"
 
-#: uninstall.c:226
+#: uninstall.c:225
 #, c-format
 msgid ""
 "No write access to the registry file: %s.\n"
@@ -114,25 +113,25 @@ msgstr ""
 "Pas d'accès en écriture pour le fichier de registre: %s.\n"
 "Abandon.\n"
 
-#: uninstall.c:356
+#: uninstall.c:347
 msgid "Installed products:\n"
 msgstr "Produits installés:\n"
 
-#: uninstall.c:362
+#: uninstall.c:353
 #, c-format
 msgid "installed in %s\n"
 msgstr "installé dans %s\n"
 
-#: uninstall.c:365
+#: uninstall.c:356
 msgid " Error while accessing product info\n"
 msgstr " Erreur lors de l'accès aux infos du produit\n"
 
-#: uninstall.c:373
+#: uninstall.c:368
 #, c-format
 msgid "Could not open product information for %s\n"
 msgstr "Impossible d'ouvrir les informations du produit pour %s\n"
 
-#: uninstall.c:379
+#: uninstall.c:374
 #, fuzzy, c-format
 msgid ""
 "Product: %s\n"
@@ -141,52 +140,56 @@ msgstr ""
 "Produit: %s\n"
 "Installé dans %s\n"
 
-#: uninstall.c:386
+#: uninstall.c:381
 msgid "Components:\n"
 msgstr "Composants:\n"
 
-#: uninstall.c:399
+#: uninstall.c:394
 #, c-format
 msgid "Unable to find component %s\n"
 msgstr "Impossible de trouver le composant %s\n"
 
-#: uninstall.c:407
+#: uninstall.c:402
 msgid "An error occured during the uninstallation process.\n"
 msgstr "Une erreur est apparue durant le processus d'installation.\n"
 
-#: uninstall.c:411
+#: uninstall.c:406
 #, c-format
 msgid "%s has been successfully uninstalled.\n"
 msgstr "%s a été désinstallé avec succès.\n"
 
-#: uninstall_ui.c:143
+#: uninstall_ui.c:169
 #, c-format
 msgid "%d MB"
 msgstr "%d Mo"
 
-#: uninstall_ui.c:287
+#: uninstall_ui.c:314
 msgid "Uninstall cancelled"
 msgstr "Désinstallation annulée"
 
-#: uninstall_ui.c:289
+#: uninstall_ui.c:316
 msgid "Uninstall complete"
 msgstr "Désinstallation terminée"
 
-#: uninstall_ui.c:375
+#: uninstall_ui.c:407
 msgid "No uninstall_vbox in glade file!\n"
 msgstr "Pas de uninstall_vbox dans le fichier glade!\n"
 
-#: uninstall_ui.c:410
+#: uninstall_ui.c:439
 msgid "Complete uninstall"
 msgstr "Désinstallation complète"
 
-#: uninstall_ui.c:448
+#: uninstall_ui.c:476
 msgid ""
 "No products found.\n"
 "Are you the one that installed the software?"
 msgstr ""
 "Aucun produit trouvé.\n"
 "Etes-vous l'utilisateur qui a installé le logiciel?"
+
+#, fuzzy
+#~ msgid "Installed products:"
+#~ msgstr "Produits installés:"
 
 #~ msgid ""
 #~ "Product name: %s\n"

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-11-15 19:01-0800\n"
+"POT-Creation-Date: 2000-11-16 15:26-0800\n"
 "PO-Revision-Date: 2000-05-10 01:11+1\n"
 "Last-Translator: MARTIJN DE MEULDER <MARTIJN@NL.LINUX.ORG>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
