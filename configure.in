@@ -111,7 +111,7 @@ if test x$enable_rpm = xyes; then
         AC_DEFINE(ENABLE_RPM)
 fi
 
-if test ! -z "USE_LIBINTL"; then
+if test ! -z "$USE_LIBINTL"; then
 	LIBS="$LIBS -lintl"
 	GUI_LIBS="$GUI_LIBS -lintl"
 fi
