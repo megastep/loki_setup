@@ -1,6 +1,6 @@
 #
 # Makefile for the setup plugins
-# $Id: Makefile,v 1.6 2000-10-14 02:16:39 megastep Exp $
+# $Id: Makefile,v 1.7 2000-11-03 03:15:33 hercules Exp $
 #
 
 STATICS = cpio.c
@@ -11,6 +11,9 @@ CC		= gcc
 ifeq ($(USE_RPM),true)
 PLUGINS += rpm.c
 CFLAGS  += -I/usr/include/rpm
+endif
+ifeq ($(USE_OUTRAGE),true)
+PLUGINS += outrage.c
 endif
 
 arch := $(shell ../print_arch)

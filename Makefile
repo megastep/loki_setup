@@ -5,8 +5,9 @@ PACKAGE = setup-1.5
 arch := $(shell sh print_arch)
 libc := $(shell sh print_libc)
 os   := $(shell uname -s)
-# USE_RPM = true
 # DYN_PLUGINS = true
+# USE_RPM = true
+# USE_OUTRAGE = true
 
 CC = gcc
 
@@ -26,11 +27,14 @@ endif
 HEADERS = -I$(SETUPDB) -I/usr/X11R6/include -I/usr/local/include $(shell glib-config --cflags) $(shell xml-config --cflags) $(shell libglade-config --cflags)
 OPTIONS = -DSTUB_UI
 
+ifeq ($(DYN_PLUGINS),true)
+OPTIONS += -DDYNAMIC_PLUGINS
+endif
 ifeq ($(USE_RPM),true)
 OPTIONS += -DRPM_SUPPORT
 endif
-ifeq ($(DYN_PLUGINS),true)
-OPTIONS += -DDYNAMIC_PLUGINS
+ifeq ($(USE_OUTRAGE),true)
+OPTIONS += -DOUTRAGE_SUPPORT
 endif
 
 CFLAGS += $(OPTIMIZE) $(HEADERS) $(OPTIONS)
@@ -73,7 +77,7 @@ setup.gtk: $(GUI_OBJS) $(SETUPDB)/$(arch)/libsetupdb.a
 	$(CC) -o $@ $^ $(GUI_LIBS)
 
 do-plugins:
-	$(MAKE) -C plugins DYN_PLUGINS=$(DYN_PLUGINS) USE_RPM=$(USE_RPM) SETUPDB=$(shell pwd)/$(SETUPDB) all
+	$(MAKE) -C plugins DYN_PLUGINS=$(DYN_PLUGINS) USE_RPM=$(USE_RPM) USE_OUTRAGE=$(USE_OUTRAGE) SETUPDB=$(shell pwd)/$(SETUPDB) all
 
 install.dbg: all
 ifeq ($(DYN_PLUGINS),true)
