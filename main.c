@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.42 2000-11-16 22:30:51 megastep Exp $ */
+/* $Id: main.c,v 1.43 2000-11-29 02:04:52 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -161,11 +161,17 @@ const char *get_cdrom(install_info *info, const char *id)
         if ( ! mounted ) {
             yesno_answer response;
             char buf[1024];
+            const char *prompt;
 
+            if ( info->mounted_list ) { /* We were able to mount at least one CDROM */
+                prompt =  _("\nPlease insert the %s CDROM.\n"
+                            "Choose Yes to retry, No to cancel");                
+            } else {
+                prompt =  _("\nPlease mount the %s CDROM.\n"
+                            "Choose Yes to retry, No to cancel");
+            }
             unmount_filesystems(info);
-            snprintf(buf, sizeof(buf), _("\nPlease mount the %s CDROM.\n"
-                                         "Choose Yes to retry, No to cancel"),
-                     desc);
+            snprintf(buf, sizeof(buf), prompt, desc);
             response = UI.prompt(buf, RESPONSE_NO);
             if ( response == RESPONSE_NO ) {
                 abort_install();
