@@ -311,6 +311,9 @@ extern void uninstall(install_info *info);
 /* Generate an uninstall shell script */
 extern void generate_uninstall(install_info *info);
 
+/* Remove the root directory part from a path */
+extern const char *remove_root(install_info *info, const char *path);
+
 /* Updates the 'uninstall' binary in ~/.loki/installed/bin and creates a shell script */
 extern int update_uninstall(install_info *info, product_t *product);
 

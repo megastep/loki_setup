@@ -54,7 +54,7 @@ static size_t CPIOSize(install_info *info, const char *path)
 
 /* Exported so that the RPM plugin can access it */
 size_t copy_cpio_stream(install_info *info, stream *input, const char *dest, const char *current_option,
-						int mutable, const char *md5,
+			xmlNodePtr node,
                         int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     stream *output;
@@ -67,6 +67,9 @@ size_t copy_cpio_stream(install_info *info, stream *input, const char *dest, con
     size_t size = 0;
     char buf[BUFSIZ];
     int count = 0;
+    /* Optional MD5 sum can be specified in the XML file */
+    const char *md5 = xmlGetProp(node, "md5sum");
+    const char *mut = xmlGetProp(node, "mutable");
 
     memset(&file_hdr, 0, sizeof(file_hdr));
     while ( ! file_eof(info, input) ) {
@@ -140,7 +143,7 @@ size_t copy_cpio_stream(install_info *info, stream *input, const char *dest, con
 			} else {
 				unsigned long chk = 0;
 				/* Open the file for output */
-				output = file_open(info, file_hdr.c_name, mutable ? "wm" : "wb"); /* FIXME: Mmh, is the path expanded??? */
+				output = file_open(info, file_hdr.c_name, (mut && *mut=='y') ? "wm" : "wb"); /* FIXME: Mmh, is the path expanded??? */
 				if(output){
 					left = file_hdr.c_filesize;
 					while(left && (nread=file_read(info, buf, (left >= BUFSIZ) ? BUFSIZ : left, input))){
@@ -191,12 +194,12 @@ size_t copy_cpio_stream(install_info *info, stream *input, const char *dest, con
 
 /* Extract the file */
 static size_t CPIOCopy(install_info *info, const char *path, const char *dest, const char *current_option, 
-					   int mutable, const char *md5, xmlNodePtr node,
+					   xmlNodePtr node,
 					   int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
 	stream *input = file_open(info, path, "rb");
 	if(input)
-		return copy_cpio_stream(info, input, dest, current_option, mutable, md5, update);
+		return copy_cpio_stream(info, input, dest, current_option, node, update);
 	return 0;
 }
 

@@ -1,5 +1,5 @@
 /* Sample plugin for setup */
-/* $Id: sample.c,v 1.4 2002-09-17 22:40:49 megastep Exp $ */
+/* $Id: sample.c,v 1.5 2002-09-18 08:34:47 megastep Exp $ */
 
 #include "plugins.h"
 #include "file.h"
@@ -37,7 +37,7 @@ static size_t Copy(install_info *info, const char *path, const char *dest, const
 				   int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
 	/* TODO: Extract the files, calling the update function as often as possible. 
-	   Also check for optional MD5 sum */
+	   Also check for optional MD5 sum and mutable flag */
 	return 0;
 }
 

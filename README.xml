@@ -627,6 +627,20 @@ There are several optional attributes of the files element:
             against this checksum. Installation will abort in the case of an invalid
             checksum, indicating corruption.
 
+ process    You can optionally manually uncompress (or otherwise post-process) a
+            file through an arbitrary shell command specified in this tag. %s in the
+            string will be substituted (twice) with the actual file name. The current directory 
+            for the command will be that of the directory containing the file to be processed.
+
+ target     Use this optional tag with 'process' above, to specify the resulting file
+            name of the uncompressed/processed file. If this tag is in effect, then the
+            original file will be removed, if it is still present. %s can optionally be used
+            to substitute the original file name (or any other valid %s pattern according to
+            printf).
+
+Use caution when using the "uncompress" as file sizes won't be able to be determined automatically.
+Hence, you are much better off specifying the uncompressed size of the options in the XML file.
+
 The SCRIPT element:
 
 The script element contains shell commands which are executed when the

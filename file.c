@@ -308,15 +308,18 @@ int file_close(install_info *info, stream *streamp)
                     log_warning(_("Short write on %s"), streamp->path);
                 }
             }
+	    streamp->fp = NULL;
         } else if ( streamp->zfp ) {
             if ( gzclose(streamp->zfp) != 0 ) {
                 if ( streamp->mode == 'w' ) {
                     log_warning(_("Short write on %s"), streamp->path);
                 }
             }
+	    streamp->zfp = NULL;
         #ifdef HAVE_BZIP2_SUPPORT
         } else if ( streamp->bzfp ) {
 			BZCLOSE(streamp->bzfp);
+	    streamp->bzfp = NULL;
         #endif
         }
 		if ( streamp->elem ) {

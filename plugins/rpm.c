@@ -1,5 +1,5 @@
 /* RPM plugin for setup */
-/* $Id: rpm.c,v 1.6 2002-09-17 22:40:49 megastep Exp $ */
+/* $Id: rpm.c,v 1.7 2002-09-18 08:34:47 megastep Exp $ */
 
 #include "plugins.h"
 #include "file.h"
@@ -85,7 +85,7 @@ static size_t RPMSize(install_info *info, const char *path)
 
 /* Extract the file */
 static size_t RPMCopy(install_info *info, const char *path, const char *dest, const char *current_option_name, 
-		      int mutable, const char *md5, xmlNodePtr node,
+		      xmlNodePtr node,
 		      int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     FD_t fdi;
@@ -205,9 +205,9 @@ static size_t RPMCopy(install_info *info, const char *path, const char *dest, co
 
         /* if relocate="true", copy the files into dest instead of rpm_root */
 		if (relocate) {
-			size = copy_cpio_stream(info, cpio, dest, current_option_name, mutable, md5, update);
+			size = copy_cpio_stream(info, cpio, dest, current_option_name, node, update);
 		} else {
-			size = copy_cpio_stream(info, cpio, rpm_root, current_option_name, mutable, md5, update);
+			size = copy_cpio_stream(info, cpio, rpm_root, current_option_name, node, update);
 		}
 
         if(headerIsEntry(hd, RPMTAG_POSTIN)){      

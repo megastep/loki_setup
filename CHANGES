@@ -28,6 +28,9 @@ Stephane Peter (Codehost) - Fri Sep 13 16:36:15 PDT 2002
    checksum verifications with MD5 sums (idea suggested by zakk).
 Timothee Besset / merged by Stephane Peter - Fri Sep 13 19:57:22 PDT 2002
  * Support EULA tags for options as well.
+Stephane Peter - Wed Sep 18 01:27:09 PDT 2002
+ * Added 'process' and 'target' attributes to the <files> tag to allow automatic
+   post-processing of files through an arbitrary command.
 
 1.6.0:
 Stephane Peter (Codehost) - Tue Aug 21 20:22:10 PDT 2001

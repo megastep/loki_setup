@@ -1,5 +1,5 @@
 /* ZIP plugin for setup */
-/* $Id: zip.c,v 1.3 2002-09-17 22:40:49 megastep Exp $ */
+/* $Id: zip.c,v 1.4 2002-09-18 08:34:47 megastep Exp $ */
 
 #include "plugins.h"
 #include "file.h"
@@ -662,7 +662,7 @@ zip_zipsize_end:
 
 /* Extract the file */
 static size_t ZIPCopy(install_info *info, const char *path, const char *dest, const char *current_option,
-					  int mutable, const char *md5, xmlNodePtr node,
+					  xmlNodePtr node,
 					  int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     char final[BUFSIZ];
@@ -675,6 +675,9 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
     uint32 compressed_position = 0;
     uint32 i;
     int rc;
+    /* Optional MD5 sum can be specified in the XML file */
+    const char *md5 = xmlGetProp(node, "md5sum");
+    const char *mut = xmlGetProp(node, "mutable");
 
     memset(&zipinfo, '\0', sizeof (ZIPinfo));
 
@@ -726,7 +729,7 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
 
         if (!symlnk)
         {
-            out = file_open(info, final, mutable ? "wm" : "wb");
+            out = file_open(info, final, (mut && *mut=='y') ? "wm" : "wb");
             if (!out)
             {
                 log_debug("ZIP: failed to open [%s] for write.", final);
@@ -841,6 +844,14 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
         else
         {
             retval += entry->uncompressed_size;
+			if ( md5 ) { /* Verify the output file */
+			  char sum[CHECKSUM_SIZE+1];
+			  
+			  strcpy(sum, get_md5(out->md5.buf));
+			  if ( strcasecmp(md5, sum) ) {
+				log_fatal(_("File '%s' has an invalid checksum! Aborting."), final);
+			  }
+			}
         } /* else */
     } /* for */
 

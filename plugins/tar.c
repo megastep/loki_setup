@@ -1,5 +1,5 @@
 /* TAR plugin for setup */
-/* $Id: tar.c,v 1.5 2002-09-17 22:40:49 megastep Exp $ */
+/* $Id: tar.c,v 1.6 2002-09-18 08:34:47 megastep Exp $ */
 
 #include "plugins.h"
 #include "tar.h"
@@ -35,8 +35,8 @@ static size_t TarSize(install_info *info, const char *path)
 
 /* Extract the file */
 static size_t TarCopy(install_info *info, const char *path, const char *dest, const char *current_option, 
-					  int mutable, const char *md5, xmlNodePtr node,
-			int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
+		      xmlNodePtr node,
+		      int (*update)(install_info *info, const char *path, size_t progress, size_t size, const char *current))
 {
     static tar_record zeroes;
     tar_record record;
@@ -46,6 +46,9 @@ static size_t TarCopy(install_info *info, const char *path, const char *dest, co
     size_t this_size;
     unsigned int mode;
     int blocks, left, length;
+    /* Optional MD5 sum can be specified in the XML file */
+    const char *md5 = xmlGetProp(node, "md5sum");
+    const char *mut = xmlGetProp(node, "mutable");
 
 	log_debug("TAR: Copy %s -> %s", path, dest);
 
@@ -76,7 +79,7 @@ static size_t TarCopy(install_info *info, const char *path, const char *dest, co
 					file_skip(info, left, input);
 				} else {
 					this_size = 0;
-					output = file_open(info, final, mutable ? "wm" : "wb");
+					output = file_open(info, final, (mut && *mut=='y') ? "wm" : "wb");
 					if ( output ) {
 						while ( blocks-- > 0 ) {
 							if ( file_read(info, &record, (sizeof record), input)
