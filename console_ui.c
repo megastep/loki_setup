@@ -591,7 +591,7 @@ static install_state console_pick_class(install_info *info)
 	char buf[BUFSIZ];
 	const char *msg = IsReadyToInstall(info);
 
-	express_setup = (console_prompt(_("Do you want to proceed with Express installation?"), 
+	express_setup = (console_prompt(_("Do you want to proceed with Recommended installation?"), 
 									msg ? RESPONSE_NO : RESPONSE_YES) == RESPONSE_YES);
 
 	if ( express_setup && msg ) {

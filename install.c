@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.121 2003-09-04 02:29:03 megastep Exp $ */
+/* $Id: install.c,v 1.122 2003-09-05 22:30:03 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -2373,21 +2373,22 @@ int run_script(install_info *info, const char *script, int arg, int include_tags
 					"SETUP_CDROMPATH=\"%s\"\n"
 					"SETUP_DISTRO=\"%s\"\n"
 					"SETUP_REINSTALL=\"%s\"\n"
-					"export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH SETUP_DISTRO SETUP_REINSTALL\n"
-					"%s%s\n",
+					"export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH SETUP_DISTRO SETUP_REINSTALL\n",
 					info->name, info->version,
 					info->install_path,
 					info->symlinks_path,
 					info->cdroms_list ? info->cdroms_list->mounted : "",
 					info->distro ? distribution_symbol[info->distro] : "",
-					info->options.reinstalling ? "1" : "0",
-					working_dir, script);     
+					info->options.reinstalling ? "1" : "0");
+
 			if ( include_tags )
 				fprintf(fp, 
 						"SETUP_OPTIONTAGS=\"%s\"\n"
 						"export SETUP_OPTIONTAGS\n", 
 						get_optiontags_string(info));
-
+			/* Append script itself */
+			fprintf(fp, "%s%s\n", 
+					working_dir, script);
             fchmod(fileno(fp),0755); /* Turn on executable bit */
             fclose(fp);
 			if ( arg >= 0 ) {
