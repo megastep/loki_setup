@@ -239,7 +239,7 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
     switch(response) {
         case RESPONSE_YES:
 			/* See if there is an EULA for this option */
-			name = GetProductEULANode(info, node);
+			name = GetProductEULANode(info, node, NULL);
 			if ( name ) {
 				run_command(info, pagercmd, name, 1);
 				if ( console_prompt(_("Do you agree with the license?"), RESPONSE_YES) !=
@@ -310,7 +310,7 @@ static install_state console_init(install_info *info, int argc, char **argv, int
     printf(_("You are running a %s machine with %s\n"), info->arch, info->libc);
     printf(_("Hit Control-C anytime to cancel this installation program.\n"));
     printf("\n");
-    if ( GetProductEULA(info) ) {
+    if ( GetProductEULA(info, NULL) ) {
         state = SETUP_LICENSE;
     } else {
         state = SETUP_README;
@@ -326,7 +326,7 @@ static install_state console_license(install_info *info)
     install_state state;
 
     sleep(1);
-	run_command(info, pagercmd, GetProductEULA(info), 1);
+	run_command(info, pagercmd, GetProductEULA(info, NULL), 1);
     if ( console_prompt(_("Do you agree with the license?"), RESPONSE_YES) ==
                                                         RESPONSE_YES ) {
         state = SETUP_README;
@@ -340,7 +340,7 @@ static install_state console_readme(install_info *info)
 {
     const char *readme;
 
-    readme = GetProductREADME(info);
+    readme = GetProductREADME(info, NULL);
     if ( readme ) {
         char prompt[256];
 	const char *str;

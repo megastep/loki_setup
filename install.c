@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.116 2003-08-13 23:33:42 megastep Exp $ */
+/* $Id: install.c,v 1.117 2003-08-14 00:55:35 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -320,12 +320,12 @@ const char *GetDefaultPath(install_info *info)
     return path;
 }
 
-const char *GetProductEULA(install_info *info)
+const char *GetProductEULA(install_info *info, int *keepdirs)
 {
-	return GetProductEULANode(info, info->config->root);
+	return GetProductEULANode(info, info->config->root, keepdirs);
 }
 
-const char *GetProductEULANode(install_info *info, xmlNodePtr node)
+const char *GetProductEULANode(install_info *info, xmlNodePtr node, int *keepdirs)
 {
 	const char *text;
 	static char name[BUFSIZ], matched_name[BUFSIZ];
@@ -345,6 +345,8 @@ const char *GetProductEULANode(install_info *info, xmlNodePtr node)
 			if ( match_locale(prop) ) {
 				if (found == 1)
 					log_warning("Duplicate matching EULA entries in XML file!");
+				if ( keepdirs )
+					*keepdirs = ( xmlGetProp(node, "keepdirs") != NULL);
 				text = xmlNodeListGetString(info->config, node->childs, 1);
 				if(text) {
 					*matched_name = '\0';
@@ -365,7 +367,7 @@ const char *GetProductEULANode(install_info *info, xmlNodePtr node)
 	return NULL;
 }
 
-const char *GetProductREADME(install_info *info)
+const char *GetProductREADME(install_info *info, int *keepdirs)
 {
     const char *ret = xmlGetProp(info->config->root, "readme");
 	const char *text;
@@ -389,6 +391,8 @@ const char *GetProductREADME(install_info *info)
 				if (found == 1) {
 					log_warning("Duplicate matching README entries in XML file!");
 				}
+				if ( keepdirs )
+					*keepdirs = ( xmlGetProp(node, "keepdirs") != NULL);
 				text = xmlNodeListGetString(info->config, node->childs, 1);
 				if (text) {
 					*matched_name = '\0';
@@ -1308,6 +1312,7 @@ install_state install(install_info *info,
     install_state state;
 	const char *f;
 	struct component_elem *comp;
+	int keepdirs = 0;
 	extern struct option_elem *current_option;
 
     /* Check if we need to create a default component entry */
@@ -1338,13 +1343,13 @@ install_state install(install_info *info,
 			break;
 		}
 	}
-	f = GetProductREADME(info);
+	f = GetProductREADME(info, &keepdirs);
 	if ( f && ! GetProductIsMeta(info) ) {
-		copy_path(info, f, info->install_path, NULL, 1, NULL, update);
+		copy_path(info, f, info->install_path, NULL, !keepdirs, NULL, update);
 	}
-	f = GetProductEULA(info);
+	f = GetProductEULA(info, &keepdirs);
 	if ( f && ! GetProductIsMeta(info) ) {
-		copy_path(info, f, info->install_path, NULL, 1, NULL, update);
+		copy_path(info, f, info->install_path, NULL, !keepdirs, NULL, update);
 	}
     if(info->options.install_menuitems){
 		int i;

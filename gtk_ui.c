@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.83 2003-07-30 03:39:07 megastep Exp $
+   $Id: gtk_ui.c,v 1.84 2003-08-14 00:55:35 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -370,7 +370,7 @@ void setup_button_view_readme_slot( GtkWidget* w, gpointer data )
     glade_xml_signal_autoconnect(setup_glade_readme);
     readme = glade_xml_get_widget(setup_glade_readme, "readme_dialog");
     widget = glade_xml_get_widget(setup_glade_readme, "readme_area");
-    file = GetProductREADME(cur_info);
+    file = GetProductREADME(cur_info, NULL);
     if ( file && readme && widget ) {
         gtk_widget_hide(readme);
         load_file(GTK_TEXT(widget), NULL, file);
@@ -642,7 +642,7 @@ void setup_checkbox_option_slot( GtkWidget* widget, gpointer func_data)
 				/* this option has some EULA nodes
 				 * we need to prompt before this change can be validated / turned on
 				 */
-				const char* name = GetProductEULANode(cur_info, data_node);
+				const char* name = GetProductEULANode(cur_info, data_node, NULL);
 				if (name)
 				{
 					GtkWidget *license;
@@ -1316,7 +1316,7 @@ static install_state gtkui_init(install_info *info, int argc, char **argv, int n
 	gtk_widget_queue_draw(window);
 
     /* Disable the "View Readme" button if no README available */
-     if ( ! GetProductREADME(cur_info) ) {
+     if ( ! GetProductREADME(cur_info, NULL) ) {
          button = glade_xml_get_widget(setup_glade, "button_readme");
          gtk_widget_set_sensitive(button, FALSE);
          button = glade_xml_get_widget(setup_glade, "view_readme_progress_button");
@@ -1403,7 +1403,7 @@ static install_state gtkui_init(install_info *info, int argc, char **argv, int n
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget), TRUE);
 	}
     
-    if ( GetProductEULA(info) ) {
+    if ( GetProductEULA(info, NULL) ) {
         license_okay = 0;
         cur_state = SETUP_LICENSE;
     } else {
@@ -1437,7 +1437,7 @@ static install_state gtkui_license(install_info *info)
 
         font = gdk_font_load(LICENSE_FONT);
         gtk_widget_hide(license);
-        load_file(GTK_TEXT(widget), font, GetProductEULA(info));
+        load_file(GTK_TEXT(widget), font, GetProductEULA(info, NULL));
         gtk_widget_show(license);
         gtk_window_set_modal(GTK_WINDOW(license), TRUE);
 
@@ -1694,7 +1694,7 @@ static install_state gtkui_complete(install_info *info)
     }
 
     /* Hide the 'View Readme' button if we have no readme... */
-    if ( ! GetProductREADME(info) ) {
+    if ( ! GetProductREADME(info, NULL) ) {
         widget = glade_xml_get_widget(setup_glade, "view_readme_end_button");
         if(widget)
             gtk_widget_hide(widget);

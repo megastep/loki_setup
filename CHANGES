@@ -1,4 +1,6 @@
 Current:
+Stephane Peter (Codehost) - Wed Aug 13 17:48:51 PDT 2003
+ * Allow "keepdirs" attribute for README and EULA
 Stephane Peter (Codehost) - Mon Jul 28 19:55:15 PDT 2003
  * Added the "reinstall" attribute for options, as well as a warning
    to the user when reinstalling. Also export SETUP_REINSTALL in scripts.

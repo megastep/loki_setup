@@ -263,11 +263,15 @@ README file. The EULA should specify the End-User License Agreement or
 license associated with the program, and it will be the first thing
 that the user will be prompted with.
 
-Both elements take an optional attribute :
+Both elements accept these optional attributes :
 
  lang        Specify a locale, so that you can have different EULAs and
              READMEs translated in many languages in the same distribution.
              See 'About localization' below for more details.
+
+ keepdirs    By default, the file will be copied to the root of the installation
+             directory. If set to yes, then you can specify a relative path for the
+             file, and have it installed in a sub-directory.
 
 The important thing to remember about those elements is that they are
 siblings of the OPTION element described below, and thus direct children

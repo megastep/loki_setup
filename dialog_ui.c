@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.13 2003-07-30 03:39:07 megastep Exp $
+ * $Id: dialog_ui.c,v 1.14 2003-08-14 00:55:35 megastep Exp $
  */
 
 #include <limits.h>
@@ -84,7 +84,7 @@ install_state dialog_init(install_info *info,int argc, char **argv,
 
     info->install_size = size_tree(info, info->config->root->childs);
 
-    if ( GetProductEULA(info) ) {
+    if ( GetProductEULA(info, NULL) ) {
         return SETUP_LICENSE;
     } else {
         return SETUP_README;
@@ -94,7 +94,7 @@ install_state dialog_init(install_info *info,int argc, char **argv,
 static
 install_state dialog_license(install_info *info)
 {
-    dialog_textbox(_("License Agreement"), GetProductEULA(info),
+    dialog_textbox(_("License Agreement"), GetProductEULA(info, NULL),
 				   -1, -1);
 	clear_screen();
     if ( dialog_prompt(_("Do you agree with the license?"), RESPONSE_YES) ==
@@ -110,7 +110,7 @@ install_state dialog_readme(install_info *info)
 {
     const char *readme;
 
-    readme = GetProductREADME(info);
+    readme = GetProductREADME(info, NULL);
     if ( readme ) {
         char prompt[256];
 		const char *str;
@@ -125,7 +125,7 @@ install_state dialog_readme(install_info *info)
 
         snprintf(prompt, sizeof(prompt), _("Would you like to read the %s file ?"), str);
         if ( dialog_prompt(prompt, RESPONSE_YES) == RESPONSE_YES ) {
-			dialog_textbox(_("README"), GetProductREADME(info),
+			dialog_textbox(_("README"), GetProductREADME(info, NULL),
 						   -1, -1);
         }
     }
@@ -256,7 +256,7 @@ options_loop:
 						/* this option has some EULA nodes
 						 * we need to prompt before this change can be validated / turned on
 						 */
-						const char* name = GetProductEULANode(info, nodes[i]);
+						const char* name = GetProductEULANode(info, nodes[i], NULL);
 						if (name) {
 							/* prompt for the EULA */
 							dialog_textbox(_("License Agreement"), name, -1, -1);
