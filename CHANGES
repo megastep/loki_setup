@@ -1,4 +1,6 @@
 Current:
+Ryan C. Gordon (Epic Games) - Sun Nov 10 19:55:35 EST 2002
+ * Corrected typo in configure.in (thanks, zakk!)
 Ryan C. Gordon (Epic Games) - Thu Sep 19 17:05:48 EDT 2002
  * console_ui.c now respects $PAGER environment var.
 Stephane Peter (Codehost) - Fri Sep 20 15:46:23 PDT 2002
