@@ -19,6 +19,63 @@ static int PromptResponse;
 static int PromptResponseValid;
 static Rect DefaultBounds = {BUTTON_MARGIN, BUTTON_MARGIN, BUTTON_HEIGHT, BUTTON_WIDTH};
 
+static int OptionsSetRadioButton(OptionsButton *Button)
+{
+    RadioGroup *Group = (RadioGroup *)Button->Group;
+    int Value;
+    int i;
+
+    carbon_debug("OptionsSetRadioButton()\n");
+
+    // If click event was on a radio button
+    if(Button->Type == ButtonType_Radio)
+    {
+        // Make sure all buttons in that group are unchecked.  If we got
+        // a click event, the box gets checked automatically by Carbon on
+        // the current button.
+        for(i = 0; i < Group->ButtonCount; i++)
+        {
+            // Only uncheck buttons that aren't the current button.  We're using
+            //  the SetControl32BitValue command so that a click event will not
+            //  be generated when calling carbon_OptionsSetValue()
+            if(Group->Buttons[i] != Button)
+            {
+                Value = GetControl32BitValue(Group->Buttons[i]->Control);
+                SetControl32BitValue(Group->Buttons[i]->Control, kControlRadioButtonUncheckedValue);
+                // If previous state of radio button was checked
+                if(Value == kControlRadioButtonCheckedValue)
+                {
+                    carbon_debug("OptionsSetRadoiButton() - Raise event for toggle button uncheck\n");
+                    // Raise event for radio button that got unselected.  This
+                    // emulates the functionality of GTK
+                    ((OptionsBox *)Button->Box)->OptionClickCallback(Group->Buttons[i]);
+                }
+            }
+        }
+    }
+    else
+        carbon_debug("OptionsSetRadioButton() - Called on non-radio button\n");
+
+    // Raise event of the value change (emulates the "click" event)
+    // GTK raises a toggle event when the state changes, even if it
+    // changes programmatically.
+    return ((OptionsBox *)Button->Box)->OptionClickCallback(Button);
+}
+
+static pascal OSStatus OptionButtonEventHandler(EventHandlerCallRef HandlerRef, EventRef Event, void *UserData)
+{
+    OSStatus err = eventNotHandledErr;	// Default is event is not handled by this function
+    OptionsButton *Button = (OptionsButton *)UserData;
+
+    printf("OptionsButtonEventHandler()\n");
+
+    // If radio button, unselect other radio buttons in group and raise any relevant toggle events
+    if(OptionsSetRadioButton(Button))
+        err = noErr;
+
+    return err;
+}
+
 static pascal OSStatus WindowEventHandler(EventHandlerCallRef HandlerRef, EventRef Event, void *UserData)
 {
     OSStatus err = eventNotHandledErr;	// Default is event is not handled by this function
@@ -139,6 +196,14 @@ static void AddOptionsButton(OptionsBox *Box, OptionsButton *Button)
     Box->Buttons[Box->ButtonCount] = Button;
     // Increment the number of buttons...yeah.
     Box->ButtonCount++;
+    // Set button parent to the box
+    Button->Box = (void *)Box;
+
+    // Install click event handler for new button
+    EventTypeSpec commSpec = {kEventClassControl, kEventControlHit};    
+    printf("Return value for InstallEvent = %ld", InstallControlEventHandler(Button->Control,
+        NewEventHandlerUPP(OptionButtonEventHandler), 1, &commSpec,
+        (void *)Button, NULL));
 }
 
 static void ApplyOffsetToControl(OptionsBox *Box, int ID, int Offset, int GrowNotMove)
@@ -239,6 +304,8 @@ CarbonRes *carbon_LoadCarbonRes(int (*CommandEventCallback)(UInt32))
     // Install default event handler for window since we're not calling
     // RunApplicationEventLoop() to process events.
     InstallStandardEventHandler(GetWindowEventTarget(NewRes->Window));
+    // Hide the menu bar since we're not using it for the installer
+    HideMenuBar();
     // Setup the event handler associated with the main window
     InstallWindowEventHandler(NewRes->Window,
         NewEventHandlerUPP(WindowEventHandler), 1, &commSpec, (void *)NewRes,
@@ -657,6 +724,10 @@ int carbon_ReadmeOrLicense(CarbonRes *Res, int ReadmeNotLicense, const char *Mes
     return PromptResponse;
 }
 
+//!!!TODO - For now, we create "dynamic" controls from existing controls
+//on the resource.  Click events aren't being generated from dynamic
+//controls for some reason...probably something I'm doing wrong.  For
+//now, the code to create them dynamically is commented out.
 OptionsButton *carbon_OptionsNewLabel(OptionsBox *Box, const char *Name)
 {
     printf("carbon_OptionsNewLabel() - %s\n", Name);
@@ -664,13 +735,13 @@ OptionsButton *carbon_OptionsNewLabel(OptionsBox *Box, const char *Name)
     // Create our option button
     OptionsButton *Button = malloc(sizeof(OptionsButton));
     // Create the physical button in the window
-    CFStringRef CFName = CFStringCreateWithCString(NULL, Name, kCFStringEncodingMacRoman);
+    //CFStringRef CFName = CFStringCreateWithCString(NULL, Name, kCFStringEncodingMacRoman);
     // Create the static text control
-    CreateStaticTextControl(Box->Res->Window, &DefaultBounds, CFName, NULL, &Button->Control);
-    CFRelease(Name);
-    /*ControlID ID = {LOKI_SETUP_SIG, Box->CurLabelID++};
+    //CreateStaticTextControl(Box->Res->Window, &DefaultBounds, CFName, NULL, &Button->Control);
+    //CFRelease(CFName);
+    ControlID ID = {LOKI_SETUP_SIG, Box->CurLabelID++};
     GetControlByID(Box->Res->Window, &ID, &Button->Control);
-    SetControlData(Button->Control, kControlEditTextPart, kControlStaticTextTextTag, strlen(Name), Name);*/
+    SetControlData(Button->Control, kControlEditTextPart, kControlStaticTextTextTag, strlen(Name), Name);
     // Add button to options box
     AddOptionsButton(Box, Button);
     // Set button type accordingly
@@ -688,10 +759,10 @@ OptionsButton *carbon_OptionsNewCheckButton(OptionsBox *Box, const char *Name)
     // Create the physical button in the window
     CFStringRef CFName = CFStringCreateWithCString(NULL, Name, kCFStringEncodingMacRoman);
     // Create the static text control
-    CreateCheckBoxControl(Box->Res->Window, &DefaultBounds, CFName, false, true, &Button->Control);
-    /*ControlID ID = {LOKI_SETUP_SIG, Box->CurCheckID++};
+    //CreateCheckBoxControl(Box->Res->Window, &DefaultBounds, CFName, false, false, &Button->Control);
+    ControlID ID = {LOKI_SETUP_SIG, Box->CurCheckID++};
     GetControlByID(Box->Res->Window, &ID, &Button->Control);
-    SetControlTitleWithCFString(Button->Control, CFName);*/
+    SetControlTitleWithCFString(Button->Control, CFName);
     CFRelease(Name);
     // Add button to options box
     AddOptionsButton(Box, Button);
@@ -708,9 +779,9 @@ OptionsButton *carbon_OptionsNewSeparator(OptionsBox *Box)
     // Create our option button
     OptionsButton *Button = malloc(sizeof(OptionsButton));
     // Create the static text control
-    CreateSeparatorControl(Box->Res->Window, &DefaultBounds, &Button->Control);
-    /*ControlID ID = {LOKI_SETUP_SIG, Box->CurSepID++};
-    GetControlByID(Box->Res->Window, &ID, &Button->Control);*/
+    //CreateSeparatorControl(Box->Res->Window, &DefaultBounds, &Button->Control);
+    ControlID ID = {LOKI_SETUP_SIG, Box->CurSepID++};
+    GetControlByID(Box->Res->Window, &ID, &Button->Control);
     // Add control to options box
     AddOptionsButton(Box, Button);
     // Set button type accordingly
@@ -728,20 +799,30 @@ OptionsButton *carbon_OptionsNewRadioButton(OptionsBox *Box, const char *Name, R
     // Create the physical button in the window
     CFStringRef CFName = CFStringCreateWithCString(NULL, Name, kCFStringEncodingMacRoman);
     // Create the static text control
-    CreateRadioButtonControl(Box->Res->Window, &DefaultBounds, CFName, false, true, &Button->Control);
-    /*ControlID ID = {LOKI_SETUP_SIG, Box->CurRadioID++};
+    //CreateRadioButtonControl(Box->Res->Window, &DefaultBounds, CFName, false, false, &Button->Control);
+    ControlID ID = {LOKI_SETUP_SIG, Box->CurRadioID++};
     GetControlByID(Box->Res->Window, &ID, &Button->Control);
-    SetControlTitleWithCFString(Button->Control, CFName);*/
-    CFRelease(Name);
+    SetControlTitleWithCFString(Button->Control, CFName);
+    CFRelease(CFName);
     // Add button to options box
     AddOptionsButton(Box, Button);
     // Set button type accordingly
     Button->Type = ButtonType_Radio;
 
+    // If radio group has not been created yet, create it
+    if(*Group == NULL)
+    {
+        *Group = malloc(sizeof(RadioGroup));
+        (*Group)->ButtonCount = 0;
+    }
+    // Add radio button to group
+    Button->Group = (void *)*Group;
+    (*Group)->Buttons[(*Group)->ButtonCount++] = Button;
+
     return Button;
 }
 
-OptionsBox *carbon_OptionsNewBox(CarbonRes *Res)
+OptionsBox *carbon_OptionsNewBox(CarbonRes *Res, int (*OptionClickCallback)(OptionsButton *Button))
 {
     carbon_debug("carbon_OptionsNewBox()\n");
     OptionsBox *Box = malloc(sizeof(OptionsBox));
@@ -749,12 +830,13 @@ OptionsBox *carbon_OptionsNewBox(CarbonRes *Res)
     // Set default box properties
     Box->Res = Res;
     Box->ButtonCount = 0;
+    Box->OptionClickCallback = OptionClickCallback;
 
     // Set starting IDs for "dynamic" controls
-    /*Box->CurLabelID = START_LABEL_ID;
+    Box->CurLabelID = START_LABEL_ID;
     Box->CurRadioID = START_RADIO_ID;
     Box->CurSepID = START_SEP_ID;
-    Box->CurCheckID = START_CHECK_ID;*/
+    Box->CurCheckID = START_CHECK_ID;
 
     return Box;
 }
@@ -817,11 +899,27 @@ void carbon_OptionsSetTooltip(OptionsButton *Box, const char *Name)
 void carbon_OptionsSetValue(OptionsButton *Button, int Value)
 {
     printf("carbon_OptionsSetValue() - %d\n", Value);
+    if(Value)
+        SetControl32BitValue(Button->Control, kControlRadioButtonCheckedValue);
+    // Can't set a Radio Button to False
+    else if(Button->Type != ButtonType_Radio)
+        SetControl32BitValue(Button->Control, kControlRadioButtonUncheckedValue);
+
+    // Unselect other radio buttons in group and raise any relevant toggle events
+    OptionsSetRadioButton(Button);
 }
 
 int carbon_OptionsGetValue(OptionsButton *Button)
 {
-    carbon_debug("carbon_OptionsGetValue() not implemented\n");
+    int ReturnValue;
+    carbon_debug("carbon_OptionsGetValue()\n");
+
+    if(GetControl32BitValue(Button->Control) == kControlRadioButtonCheckedValue)
+        ReturnValue = true;
+    else
+        ReturnValue = false;
+    
+    return ReturnValue;
 }
 
 void carbon_SetProperWindowSize(OptionsBox *Box, int OptionsNotOther)
@@ -840,4 +938,26 @@ void carbon_SetProperWindowSize(OptionsBox *Box, int OptionsNotOther)
     SizeWindow(Box->Res->Window, WINDOW_WIDTH, NewHeight, true);
     // Redraw it
     DrawControls(Box->Res->Window);
+}
+
+OptionsButton *carbon_GetButtonByName(OptionsBox *Box, const char *Name)
+{
+    int i;
+
+    carbon_debug("GetButtonByName()\n");
+
+    for(i = 0; i < Box->ButtonCount; i++)
+    {
+        // Does name match button name?
+        if(strcmp(Name, Box->Buttons[i]->Name) == 0)
+        {
+            // Return button
+            carbon_debug("GetButtonByName() - Found name\n");
+            return Box->Buttons[i];
+        }
+    }
+
+    // No button found...rock.
+    carbon_debug("GetButtonByName() - Name not found\n");
+    return NULL;
 }

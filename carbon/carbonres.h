@@ -170,50 +170,62 @@ typedef enum
     ButtonType_Separator,
 }ButtonType;
 
-#define MAX_OPTIONS 32
-
+#define MAX_OPTIONS         32
+#define MAX_BUTTON_NAME     512
 typedef struct
 {
     ControlRef Control;
     ButtonType Type;
     void *Data;
+    // This should be cast to an OptionsBox when used.  It had
+    // to be "void *" to avoid a circular reference.  This is
+    // pretty much a hack, but it provides us a way to access
+    // the parent of the button pretty easily.
+    void *Box;
+    void *Group;
+    char Name[MAX_BUTTON_NAME];
 }OptionsButton;
 
 typedef struct
 {
-    
+    OptionsButton *Buttons[MAX_OPTIONS];
+    int ButtonCount;
 }RadioGroup;
 
 // Starting ID's for "dynamic" controls
-/*#define START_LABEL_ID  1040
+#define START_LABEL_ID  1040
 #define START_CHECK_ID  1000
 #define START_RADIO_ID  1020
-#define START_SEP_ID    1060*/
+#define START_SEP_ID    1060
 typedef struct
 {
     CarbonRes *Res;
     OptionsButton *Buttons[MAX_OPTIONS];
     int ButtonCount;
 
+    // Callback for application to handle command events (buttons)
+    int (*OptionClickCallback)(OptionsButton *Button);
+
     // These variables are used to keep track of the current resource ID
     // of controls (since we're not creating controls dynamically right now
     // and need to keep track of the next available control in the resource
     // file.
-    /*int CurLabelID;
+    int CurLabelID;
     int CurRadioID;
     int CurSepID;
-    int CurCheckID;*/
+    int CurCheckID;
 }OptionsBox;
 
 OptionsButton *carbon_OptionsNewLabel(OptionsBox *, const char *);
 OptionsButton *carbon_OptionsNewCheckButton(OptionsBox *, const char *);
 OptionsButton *carbon_OptionsNewSeparator(OptionsBox *);
 OptionsButton *carbon_OptionsNewRadioButton(OptionsBox *, const char *, RadioGroup **);
-OptionsBox *carbon_OptionsNewBox(CarbonRes *);
+OptionsBox *carbon_OptionsNewBox(CarbonRes *, int (*OptionClickCallback)(OptionsButton *Button));
 void carbon_OptionsSetTooltip(OptionsButton *, const char *);
 void carbon_OptionsSetValue(OptionsButton *, int);
 int carbon_OptionsGetValue(OptionsButton *);
 void carbon_OptionsShowBox(OptionsBox *);
 void carbon_SetProperWindowSize(OptionsBox *, int);
+OptionsButton *carbon_GetButtonByName(OptionsBox *, const char *);
 
 #endif

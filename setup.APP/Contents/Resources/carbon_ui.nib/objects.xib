@@ -4,9 +4,9 @@
   <object name="rootObject" class="NSCustomObject" id="1">
     <string name="customClass">NSApplication</string>
   </object>
-  <array count="77" name="allObjects">
+  <array count="125" name="allObjects">
     <object class="IBCarbonWindow" id="166">
-      <string name="windowRect">114 404 669 1789 </string>
+      <string name="windowRect">107 665 662 2050 </string>
       <string name="title">Window</string>
       <object name="rootControl" class="IBCarbonRootControl" id="167">
         <string name="bounds">0 0 555 1385 </string>
@@ -102,7 +102,7 @@
               </object>
               <object class="IBCarbonGroupBox" id="189">
                 <string name="bounds">114 11 222 340 </string>
-                <array count="4" name="subviews">
+                <array count="52" name="subviews">
                   <object class="IBCarbonStaticText" id="318">
                     <string name="bounds">201 281 217 357 </string>
                     <ostype name="controlSignature">loki</ostype>
@@ -132,6 +132,342 @@
                     <int name="controlID">214</int>
                     <boolean name="small">TRUE</boolean>
                     <string name="title">0 MB</string>
+                  </object>
+                  <object class="IBCarbonCheckBox" id="356">
+                    <string name="bounds">131 16 145 35 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1000</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonCheckBox" id="357">
+                    <string name="bounds">131 34 145 54 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1001</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonCheckBox" id="358">
+                    <string name="bounds">131 52 145 71 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1002</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonCheckBox" id="359">
+                    <string name="bounds">131 72 145 91 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1003</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonCheckBox" id="360">
+                    <string name="bounds">131 90 145 110 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1004</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonCheckBox" id="361">
+                    <string name="bounds">131 108 145 127 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1005</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonCheckBox" id="362">
+                    <string name="bounds">131 183 145 202 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1009</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonCheckBox" id="363">
+                    <string name="bounds">131 145 145 165 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1007</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonCheckBox" id="364">
+                    <string name="bounds">131 163 145 182 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1008</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonCheckBox" id="365">
+                    <string name="bounds">131 219 145 238 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1011</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonCheckBox" id="366">
+                    <string name="bounds">131 127 145 146 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1006</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonCheckBox" id="367">
+                    <string name="bounds">131 201 145 221 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1010</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonRadioButton" id="368">
+                    <string name="bounds">152 15 167 35 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1020</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonRadioButton" id="369">
+                    <string name="bounds">152 34 167 54 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1021</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonRadioButton" id="370">
+                    <string name="bounds">152 52 167 72 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1022</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonRadioButton" id="371">
+                    <string name="bounds">152 72 167 92 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1023</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonRadioButton" id="372">
+                    <string name="bounds">152 90 167 110 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1024</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonRadioButton" id="373">
+                    <string name="bounds">152 108 167 128 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1025</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonRadioButton" id="374">
+                    <string name="bounds">152 127 167 147 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1026</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonRadioButton" id="375">
+                    <string name="bounds">152 145 167 165 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1027</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonRadioButton" id="376">
+                    <string name="bounds">152 163 167 183 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1028</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonRadioButton" id="377">
+                    <string name="bounds">152 183 167 203 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1029</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonRadioButton" id="378">
+                    <string name="bounds">152 201 167 221 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1030</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonRadioButton" id="379">
+                    <string name="bounds">152 219 167 239 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1031</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonStaticText" id="380">
+                    <string name="bounds">169 15 185 30 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1040</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                    <string name="title">S</string>
+                  </object>
+                  <object class="IBCarbonStaticText" id="381">
+                    <string name="bounds">169 34 185 49 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1041</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                    <string name="title">S</string>
+                  </object>
+                  <object class="IBCarbonStaticText" id="382">
+                    <string name="bounds">169 52 185 67 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1042</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                    <string name="title">S</string>
+                  </object>
+                  <object class="IBCarbonStaticText" id="383">
+                    <string name="bounds">169 72 185 87 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1043</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                    <string name="title">S</string>
+                  </object>
+                  <object class="IBCarbonStaticText" id="384">
+                    <string name="bounds">169 91 185 106 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1044</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                    <string name="title">S</string>
+                  </object>
+                  <object class="IBCarbonStaticText" id="385">
+                    <string name="bounds">169 109 185 124 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1045</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                    <string name="title">S</string>
+                  </object>
+                  <object class="IBCarbonStaticText" id="386">
+                    <string name="bounds">169 127 185 142 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1046</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                    <string name="title">S</string>
+                  </object>
+                  <object class="IBCarbonStaticText" id="387">
+                    <string name="bounds">169 146 185 161 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1047</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                    <string name="title">S</string>
+                  </object>
+                  <object class="IBCarbonStaticText" id="388">
+                    <string name="bounds">169 164 185 179 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1048</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                    <string name="title">S</string>
+                  </object>
+                  <object class="IBCarbonStaticText" id="389">
+                    <string name="bounds">169 183 185 198 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1049</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                    <string name="title">S</string>
+                  </object>
+                  <object class="IBCarbonStaticText" id="390">
+                    <string name="bounds">169 202 185 217 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1050</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                    <string name="title">S</string>
+                  </object>
+                  <object class="IBCarbonStaticText" id="391">
+                    <string name="bounds">169 220 185 235 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1051</int>
+                    <boolean name="hidden">TRUE</boolean>
+                    <boolean name="small">TRUE</boolean>
+                    <string name="title">S</string>
+                  </object>
+                  <object class="IBCarbonSeparator" id="398">
+                    <string name="bounds">137 251 138 286 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1060</int>
+                    <boolean name="hidden">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonSeparator" id="399">
+                    <string name="bounds">146 251 147 286 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1061</int>
+                    <boolean name="hidden">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonSeparator" id="400">
+                    <string name="bounds">155 251 156 286 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1062</int>
+                    <boolean name="hidden">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonSeparator" id="401">
+                    <string name="bounds">164 251 165 286 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1063</int>
+                    <boolean name="hidden">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonSeparator" id="402">
+                    <string name="bounds">173 251 174 286 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1064</int>
+                    <boolean name="hidden">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonSeparator" id="403">
+                    <string name="bounds">182 251 183 286 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1065</int>
+                    <boolean name="hidden">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonSeparator" id="404">
+                    <string name="bounds">137 294 138 329 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1066</int>
+                    <boolean name="hidden">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonSeparator" id="405">
+                    <string name="bounds">146 294 147 329 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1067</int>
+                    <boolean name="hidden">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonSeparator" id="406">
+                    <string name="bounds">155 294 156 329 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1068</int>
+                    <boolean name="hidden">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonSeparator" id="407">
+                    <string name="bounds">164 294 165 329 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1069</int>
+                    <boolean name="hidden">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonSeparator" id="408">
+                    <string name="bounds">173 294 174 329 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1070</int>
+                    <boolean name="hidden">TRUE</boolean>
+                  </object>
+                  <object class="IBCarbonSeparator" id="409">
+                    <string name="bounds">182 294 183 329 </string>
+                    <ostype name="controlSignature">loki</ostype>
+                    <int name="controlID">1071</int>
+                    <boolean name="hidden">TRUE</boolean>
                   </object>
                 </array>
                 <ostype name="controlSignature">loki</ostype>
@@ -656,8 +992,56 @@
     <reference idRef="346"/>
     <reference idRef="347"/>
     <reference idRef="348"/>
+    <reference idRef="356"/>
+    <reference idRef="357"/>
+    <reference idRef="358"/>
+    <reference idRef="359"/>
+    <reference idRef="360"/>
+    <reference idRef="361"/>
+    <reference idRef="362"/>
+    <reference idRef="363"/>
+    <reference idRef="364"/>
+    <reference idRef="365"/>
+    <reference idRef="366"/>
+    <reference idRef="367"/>
+    <reference idRef="368"/>
+    <reference idRef="369"/>
+    <reference idRef="370"/>
+    <reference idRef="371"/>
+    <reference idRef="372"/>
+    <reference idRef="373"/>
+    <reference idRef="374"/>
+    <reference idRef="375"/>
+    <reference idRef="376"/>
+    <reference idRef="377"/>
+    <reference idRef="378"/>
+    <reference idRef="379"/>
+    <reference idRef="380"/>
+    <reference idRef="381"/>
+    <reference idRef="382"/>
+    <reference idRef="383"/>
+    <reference idRef="384"/>
+    <reference idRef="385"/>
+    <reference idRef="386"/>
+    <reference idRef="387"/>
+    <reference idRef="388"/>
+    <reference idRef="389"/>
+    <reference idRef="390"/>
+    <reference idRef="391"/>
+    <reference idRef="398"/>
+    <reference idRef="399"/>
+    <reference idRef="400"/>
+    <reference idRef="401"/>
+    <reference idRef="402"/>
+    <reference idRef="403"/>
+    <reference idRef="404"/>
+    <reference idRef="405"/>
+    <reference idRef="406"/>
+    <reference idRef="407"/>
+    <reference idRef="408"/>
+    <reference idRef="409"/>
   </array>
-  <array count="77" name="allParents">
+  <array count="125" name="allParents">
     <reference idRef="1"/>
     <reference idRef="166"/>
     <reference idRef="167"/>
@@ -735,6 +1119,54 @@
     <reference idRef="344"/>
     <reference idRef="344"/>
     <reference idRef="344"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
+    <reference idRef="189"/>
   </array>
   <dictionary count="7" name="nameTable">
     <string>File&apos;s Owner</string>

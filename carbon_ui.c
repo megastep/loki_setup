@@ -20,7 +20,7 @@ static RadioGroup *radio_list = NULL; // Group for the radio buttons
 
 #define MAX_TEXTLEN	40	// The maximum length of current filename
 #define MAX_README_SIZE     65535
-#define DEFAULT_INSTALL_FOLDER "/Applications"
+#define DEFAULT_INSTALL_FOLDER "/Applications/test"
 
 /******* PROTOTYPE DECLARATION *******/
 static const char *check_for_installation(install_info *);
@@ -39,6 +39,27 @@ int OnCommandEvent(UInt32 CommandID);
 static yesno_answer carbonui_prompt(const char *, yesno_answer);
 
 /********** HELPER FUNCTIONS ***********/
+static void EnableTree(xmlNodePtr node, OptionsBox *box)
+{
+    if(strcmp(node->name, "option") == 0)
+    {
+	    //GtkWidget *button = (GtkWidget*)gtk_object_get_data(GTK_OBJECT(window),
+	    //											  get_option_name(cur_info, node, NULL, 0));
+        OptionsButton *button = carbon_GetButtonByName(box, 
+            get_option_name(cur_info, node, NULL, 0));
+
+	    if(button)
+		    //gtk_widget_set_sensitive(button, TRUE);
+            EnableControl(button->Control);
+    }
+    node = node->childs;
+    while(node)
+    {
+	    EnableTree(node, box);
+	    node = node->next;
+    }
+}
+
 static void parse_option(install_info *info, const char *component, xmlNodePtr node, OptionsBox *box, int level, OptionsButton *parent, int exclusive, RadioGroup **radio)
 {
     xmlNodePtr child;
@@ -129,9 +150,12 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
         button->Data = (void *)node;
 
 		/* Register the button in the window's private data */
-        //!!!TODO - Add name data to the "window"
 		//window = glade_xml_get_widget(setup_glade, "setup_window");
 		//gtk_object_set_data(GTK_OBJECT(window), name, (gpointer)button);
+        if(strlen(name) >= MAX_BUTTON_NAME)
+            carbon_debug("parse_option() - Button name exceeeded length!  This will cause problems with selecting options!\n");
+        else
+            strcpy(button->Name, name);
 	}
 
     /* Check for required option */
@@ -283,12 +307,14 @@ static void init_install_path(void)
     // seems more appopriate to give the standard folder selection dialog instead.
 
     // Just set the Applications folder as the default install dir
+    set_installpath(cur_info, DEFAULT_INSTALL_FOLDER);
     carbon_SetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, DEFAULT_INSTALL_FOLDER);
 }
 
 static void init_binary_path(void)
 {
     //!!!TODO - Do we need symbolic link support?
+    set_symlinkspath(cur_info, "");
     carbon_debug("init_binary_path() not implemented\n");
 }
 
@@ -414,11 +440,155 @@ void OnCommandBeginInstall()
     //this method will be called from the path change event handler
     char string[1024];
     carbon_GetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, string, 1024);
-    set_installpath(cur_info, string);
 
     carbon_debug("OnCommandBeginInstall()\n");
     carbon_ShowInstallScreen(MyRes, COPY_PAGE);
     cur_state = SETUP_INSTALL;
+}
+
+//void setup_checkbox_option_slot( GtkWidget* widget, gpointer func_data)
+int OnOptionClickEvent(OptionsButton *ButtonWithEventClick)
+{
+	//GtkWidget *window;
+	xmlNodePtr node;
+    //xmlNodePtr data_node = (xmlNodePtr) func_data; //gtk_object_get_data(GTK_OBJECT(widget),"data");
+    xmlNodePtr data_node = (xmlNodePtr)ButtonWithEventClick->Data;
+
+    carbon_debug("OnOptionClickEvent()\n");
+
+	if(!data_node)
+		return true;
+	
+	//window = glade_xml_get_widget(setup_glade, "setup_window");
+
+	//if(GTK_TOGGLE_BUTTON(widget)->active)
+    if(carbon_OptionsGetValue(ButtonWithEventClick))
+    {
+        carbon_debug("OnOptionClickEvent() - Button toggle to true\n");
+		const char *warn = get_option_warn(cur_info, data_node);
+
+		// does this option require a seperate EULA?
+		xmlNodePtr child;
+		child = data_node->childs;
+		while(child)
+		{
+			if (!strcmp(child->name, "eula"))
+			{
+                carbon_debug("EULA not supported yet!\n");
+                //!!!TODO - Support EULA
+				/* this option has some EULA nodes
+				 * we need to prompt before this change can be validated / turned on
+				 */
+				/*const char* name = GetProductEULANode(cur_info, data_node);
+				if (name)
+				{
+					GtkWidget *license;
+					GtkWidget *license_widget;
+					
+					if (!setup_glade_license)
+						setup_glade_license = glade_xml_new(SETUP_GLADE, "license_dialog");
+					glade_xml_signal_autoconnect(setup_glade_license);
+					license = glade_xml_get_widget(setup_glade_license, "license_dialog");
+					license_widget = glade_xml_get_widget(setup_glade_license, "license_area");
+					if ( license && license_widget ) {
+						GdkFont *font;
+						install_state start;
+						
+						font = gdk_font_load(LICENSE_FONT);
+						gtk_widget_hide(license);
+						load_file(GTK_TEXT(license_widget), font, name);
+						gtk_widget_show(license);
+						gtk_window_set_modal(GTK_WINDOW(license), TRUE);
+						
+						start = cur_state; // happy hacking
+						license_okay = 0;
+						iterate_for_state();
+						cur_state = start;
+
+						gtk_widget_hide(license);
+						if (!license_okay)
+						{
+							// the user doesn't accept the option EULA, leave this option disabled
+							license_okay = 1; // put things back in order regarding the product EULA
+							gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget), FALSE);
+							return;
+						}
+						license_okay = 1;
+						break;
+					}
+				}
+				else
+				{
+					log_warning("option-specific EULA not found, can't set option on\n");
+					// EULA not found 	or not accepted
+					gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget), FALSE);
+					return;
+				}*/
+			}
+			child = child->next;
+		}
+		
+		if ( warn && !in_setup ) { // Display a warning message to the user
+			carbonui_prompt(warn, RESPONSE_OK);
+		}
+
+		/* Mark this option for installation */
+		mark_option(cur_info, data_node, "true", 0);
+		
+		/* Recurse down any other options to re-enable grayed out options */
+		node = data_node->childs;
+		while ( node ) {
+			//enable_tree(node, window);
+            EnableTree(node, (OptionsBox *)ButtonWithEventClick->Box);
+			node = node->next;
+		}
+	}
+    else
+    {
+        carbon_debug("OnOptionClickEvent() - Button toggle to false\n");
+		/* Unmark this option for installation */
+		mark_option(cur_info, data_node, "false", 1);
+		
+		/* Recurse down any other options */
+		node = data_node->childs;
+		while ( node ) {
+			if ( !strcmp(node->name, "option") ) {
+				//GtkWidget *button;
+				//button = (GtkWidget*)gtk_object_get_data(GTK_OBJECT(window),
+				//										 get_option_name(cur_info, node, NULL, 0));
+                OptionsButton *button;
+				button = carbon_GetButtonByName((OptionsBox *)ButtonWithEventClick->Box, get_option_name(cur_info, node, NULL, 0));
+
+                if(button){ /* This recursively calls this function */
+					//gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), FALSE);
+					//gtk_widget_set_sensitive(button, FALSE);
+                    carbon_OptionsSetValue(button, false);
+                    DisableControl(button->Control);
+				}
+			} else if ( !strcmp(node->name, "exclusive") ) {
+				xmlNodePtr child;
+				for ( child = node->childs; child; child = child->next) {
+					//GtkWidget *button;
+					
+					//button = (GtkWidget*)gtk_object_get_data(GTK_OBJECT(window),
+					//										 get_option_name(cur_info, child, NULL, 0));
+                    OptionsButton *button;
+                    button = carbon_GetButtonByName((OptionsBox *)ButtonWithEventClick->Box, get_option_name(cur_info, node, NULL, 0));
+					if(button){ /* This recursively calls this function */
+						//gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), FALSE);
+						//gtk_widget_set_sensitive(button, FALSE);
+                        carbon_OptionsSetValue(button, false);
+                        DisableControl(button->Control);
+					}
+				}
+			}
+			node = node->next;
+		}
+	}
+    cur_info->install_size = size_tree(cur_info, cur_info->config->root->childs);
+	update_size();
+
+    return true;
 }
 
 int OnCommandEvent(UInt32 CommandID)
@@ -669,7 +839,7 @@ static install_state carbonui_setup(install_info *info)
     // Else, let the user select appropriate options
     //options = glade_xml_get_widget(setup_glade, "option_vbox");
     //gtk_container_foreach(GTK_CONTAINER(options), empty_container, options);
-    options = carbon_OptionsNewBox(MyRes);
+    options = carbon_OptionsNewBox(MyRes, OnOptionClickEvent);
     info->install_size = 0;
     node = info->config->root->childs;
     radio_list = NULL;
