@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.104 2003-03-31 23:22:50 megastep Exp $ */
+/* $Id: install.c,v 1.105 2003-04-01 03:04:14 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1262,7 +1262,8 @@ install_state install(install_info *info,
     xmlNodePtr node;
     install_state state;
 	const char *f;
-	struct component_elem *first_component, *old_component;
+	struct component_elem *comp;
+	extern struct option_elem *current_option;
 
     /* Check if we need to create a default component entry */
     if ( GetProductNumComponents(info) == 0 ) {
@@ -1273,14 +1274,25 @@ install_state install(install_info *info,
     node = info->config->root->childs;
     info->install_size = size_tree(info, node);
 
-	first_component = current_component;
     copy_tree(info, node, info->install_path, update);
 
 	/* Install the optional README and EULA files
 	   Warning: those are always installed in the root of the installation directory!
 	 */
-	old_component = current_component;
-	current_component = first_component;
+
+	for(comp = info->components_list; comp; comp = comp->next ) {
+		if ( comp->is_default ) {
+			struct option_elem *opt;
+			/* The first option of a component is the last in the linked list */
+			for ( opt = comp->options_list; opt; opt = opt->next ) {
+				if ( opt->next == NULL ) {
+					current_option = opt;
+					break;
+				}
+			}
+			break;
+		}
+	}
 	f = GetProductREADME(info);
 	if ( f && ! GetProductIsMeta(info) ) {
 		copy_path(info, f, info->install_path, NULL, 1, NULL, update);
@@ -1299,7 +1311,6 @@ install_state install(install_info *info,
     if ( ! GetInstallOption(info, "nouninstall") ) {
         generate_uninstall(info);
     }
-	current_component = old_component;
 	info->install_complete = 1;
 
     /* Return the new install state */
@@ -1794,6 +1805,7 @@ void mark_cmd_options(install_info *info, xmlNodePtr parent, int exclusive)
 					if ( str ) {
 						cmd = run_script(info, str, 0);
 						xmlSetProp(child, "install", cmd ? "false" : "true");
+						log_debug("Script run: '%s' returned %d\n", str, cmd);
 					} else {
 						log_fatal(_("Missing 'command' attribute for an option"));
 						xmlSetProp(child, "install", "false");

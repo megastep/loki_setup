@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.79 2003-03-30 04:37:07 megastep Exp $
+   $Id: gtk_ui.c,v 1.80 2003-04-01 03:04:14 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1038,7 +1038,7 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
     const char *wanted;
     gchar *name;
     int i;
-    GtkWidget *button;
+    GtkWidget *button = NULL;
 
     /* See if this node matches the current architecture */
     wanted = xmlGetProp(node, "arch");
@@ -1062,9 +1062,11 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
 
     /* See if the user wants this option */
 	if ( node->type == XML_TEXT_NODE ) {
+		log_debug("Parsing text node.\n");
 		name = g_strdup(node->content);
 		g_strstrip(name);
 		if ( *name ) {
+			log_debug("String: '%s'\n", name);
 			button = gtk_label_new(name);
 			gtk_widget_show(button);
 			gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(button), FALSE, FALSE, 0);
@@ -1079,12 +1081,13 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
 		strncat(text, name, sizeof(text)-strlen(text));
 	}
 
+	log_debug("Parsing option: '%s'\n", text);
 	if ( GetProductIsMeta(info) ) {
 		button = gtk_radio_button_new_with_label(radio_list, text);
 		radio_list = gtk_radio_button_group(GTK_RADIO_BUTTON(button));
 	} else if ( exclusive ) {
 		button = gtk_radio_button_new_with_label(*radio, text);
-		*radio = gtk_radio_button_group(GTK_RADIO_BUTTON(button));		
+		*radio = gtk_radio_button_group(GTK_RADIO_BUTTON(button));
 	} else {
 		button = gtk_check_button_new_with_label(text);
 	}
@@ -1103,29 +1106,33 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
     }
 
     /* Set the data associated with the button */
-    gtk_object_set_data(GTK_OBJECT(button), "data", (gpointer)node);
+	if ( button ) {
+		gtk_object_set_data(GTK_OBJECT(button), "data", (gpointer)node);
 
-    /* Register the button in the window's private data */
-    window = glade_xml_get_widget(setup_glade, "setup_window");
-    gtk_object_set_data(GTK_OBJECT(window), name, (gpointer)button);
+		/* Register the button in the window's private data */
+		window = glade_xml_get_widget(setup_glade, "setup_window");
+		gtk_object_set_data(GTK_OBJECT(window), name, (gpointer)button);
+	}
 
     /* Check for required option */
     if ( xmlGetProp(node, "required") ) {
-	xmlSetProp(node, "install", "true");
-	gtk_widget_set_sensitive(GTK_WIDGET(button), FALSE);
+		xmlSetProp(node, "install", "true");
+		gtk_widget_set_sensitive(GTK_WIDGET(button), FALSE);
     }
 
     /* If this is a sub-option and parent is not active, then disable option */
     wanted = xmlGetProp(node, "install");
-    if( level>0 && !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(parent)) ) {
+    if( level>0 && GTK_IS_TOGGLE_BUTTON(parent) && !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(parent)) ) {
 		wanted = "false";
 		gtk_widget_set_sensitive(GTK_WIDGET(button), FALSE);
     }
-    gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(button), FALSE, FALSE, 0);
-    
-    gtk_signal_connect(GTK_OBJECT(button), "toggled",
-             GTK_SIGNAL_FUNC(setup_checkbox_option_slot), (gpointer)node);
-    gtk_widget_show(button);
+	if ( button ) {
+		gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(button), FALSE, FALSE, 0);
+		gtk_signal_connect(GTK_OBJECT(button), "toggled",
+						   GTK_SIGNAL_FUNC(setup_checkbox_option_slot), (gpointer)node);
+		gtk_widget_show(button);
+	}
+
     if ( wanted && (strcmp(wanted, "true") == 0) ) {
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
     } else {
@@ -1471,15 +1478,15 @@ static install_state gtkui_setup(install_info *info)
     radio_list = NULL;
     in_setup = TRUE;
     while ( node ) {
-	if ( ! strcmp(node->name, "option") ) {
-	    parse_option(info, NULL, node, window, options, 0, NULL, 0, NULL);
-	} else if ( ! strcmp(node->name, "exclusive") ) {
-	    xmlNodePtr child;
-	    GSList *list = NULL;
-	    for ( child = node->childs; child; child = child->next) {
-			  parse_option(info, NULL, child, window, options, 0, NULL, 1, &list);
-	    }
-	} else if ( ! strcmp(node->name, "component") ) {
+		if ( ! strcmp(node->name, "option") ) {
+			parse_option(info, NULL, node, window, options, 0, NULL, 0, NULL);
+		} else if ( ! strcmp(node->name, "exclusive") ) {
+			xmlNodePtr child;
+			GSList *list = NULL;
+			for ( child = node->childs; child; child = child->next) {
+				parse_option(info, NULL, child, window, options, 0, NULL, 1, &list);
+			}
+		} else if ( ! strcmp(node->name, "component") ) {
             if ( match_arch(info, xmlGetProp(node, "arch")) &&
                  match_libc(info, xmlGetProp(node, "libc")) && 
 				 match_distro(info, xmlGetProp(node, "distro")) ) {
@@ -1493,19 +1500,19 @@ static install_state gtkui_setup(install_info *info)
                     gtk_widget_show(widget);
                 }
                 for ( child = node->childs; child; child = child->next) {
-				  if ( ! strcmp(child->name, "option") ) {
-					parse_option(info, xmlGetProp(node, "name"), child, window, options, 0, NULL, 0, NULL);
-				  } else if ( ! strcmp(child->name, "exclusive") ) {
-					xmlNodePtr child2;
-					GSList *list = NULL;
-					for ( child2 = node->childs; child2; child2 = child->next) {
-					  parse_option(info, xmlGetProp(node, "name"), child2, window, options, 0, NULL, 1, &list);
+					if ( ! strcmp(child->name, "option") ) {
+						parse_option(info, xmlGetProp(node, "name"), child, window, options, 0, NULL, 0, NULL);
+					} else if ( ! strcmp(child->name, "exclusive") ) {
+						xmlNodePtr child2;
+						GSList *list = NULL;
+						for ( child2 = child->childs; child2; child2 = child2->next) {
+							parse_option(info, xmlGetProp(node, "name"), child2, window, options, 0, NULL, 1, &list);
+						}
 					}
-				  }
                 }
             }
-        }
-	node = node->next;
+		}
+		node = node->next;
     }
     init_install_path();
     init_binary_path();
@@ -1722,10 +1729,6 @@ int gtkui_okay(Install_UI *UI, int *argc, char ***argv)
 
 #ifdef STUB_UI
 int console_okay(Install_UI *UI, int *argc, char ***argv)
-{
-    return(0);
-}
-int carbonui_okay(Install_UI *UI, int *argc, char ***argv)
 {
     return(0);
 }
