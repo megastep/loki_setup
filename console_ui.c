@@ -31,9 +31,6 @@
 static const char *yes_letter = gettext_noop("Y");
 static const char *no_letter  = gettext_noop("N");
 
-extern int disable_install_path;
-extern int disable_binary_path;
-
 static int prompt_user(const char *prompt, const char *default_answer,
                        char *answer, int maxlen)
 {
@@ -131,6 +128,11 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
 
     wanted = xmlGetProp(node, "libc");
     if ( ! match_libc(info, wanted) ) {
+        return retval;
+    }
+
+    wanted = xmlGetProp(node, "distro");
+    if ( ! match_distro(info, wanted) ) {
         return retval;
     }
 
@@ -246,6 +248,9 @@ static install_state console_init(install_info *info, int argc, char **argv, int
     } else {
         state = SETUP_README;
     }
+
+    info->install_size = size_tree(info, info->config->root->childs);
+
     return state;
 }
 
@@ -271,33 +276,22 @@ static install_state console_readme(install_info *info)
     const char *readme;
 
     readme = GetProductREADME(info);
-    if ( readme && ! access(readme, R_OK) ) {
+    if ( readme ) {
         char prompt[256];
+	const char *str;
 
+	str = readme + strlen(info->setup_path)+1; /* Skip the install path */
         snprintf(prompt, sizeof(prompt), _("Would you like to read the %s file ?"), readme);
         if ( console_prompt(prompt, RESPONSE_YES) == RESPONSE_YES ) {
             snprintf(prompt, sizeof(prompt), PAGER_COMMAND " \"%s\"", readme);
             system(prompt);
         }
     }
-    return SETUP_OPTIONS;
-}
-
-/* stolen from gtk_ui.c to validate write access to install directory */
-void topmost_valid_path(char *target, const char *src) {
-    char *cp;
-  
-    /* Get the topmost valid path */
-    strcpy(target, src);
-    if ( target[0] == '/' ) {
-        cp = target+strlen(target);
-        while ( access(target, F_OK) < 0 ) {
-            while ( (cp > (target+1)) && (*cp != '/') ) {
-                --cp;
-            }
-            *cp = '\0';
-        }
-    }
+	if ( GetProductAllowsExpress(info) ) {
+		return SETUP_CLASS;
+	} else {
+		return SETUP_OPTIONS;
+	}
 }
 
 static install_state console_setup(install_info *info)
@@ -306,6 +300,14 @@ static install_state console_setup(install_info *info)
     char path[PATH_MAX];
     xmlNodePtr node;
 
+	if ( express_setup ) {
+		/* Install desktop menu items */
+		if ( !GetProductHasNoBinaries(info) &&
+			 has_binaries(info, info->config->root->childs)) {
+			info->options.install_menuitems = 1;
+		}
+		return SETUP_INSTALL;
+	}
 
 	if ( GetProductIsMeta(info) ) {
 		while ( ! okay ) {
@@ -451,7 +453,8 @@ static install_state console_setup(install_info *info)
 					}
 				} else if ( ! strcmp(node->name, "component") ) {
                     if ( match_arch(info, xmlGetProp(node, "arch")) &&
-                         match_libc(info, xmlGetProp(node, "libc")) ) {
+                         match_libc(info, xmlGetProp(node, "libc")) &&
+						 match_distro(info, xmlGetProp(node, "distro")) ) {
                         xmlNodePtr child;
                         if ( xmlGetProp(node, "showname") ) {
                             printf(_("\n%s component\n\n"), xmlGetProp(node, "name"));
@@ -467,7 +470,7 @@ static install_state console_setup(install_info *info)
 			/* Ask for desktop menu items */
 			if ( !GetProductHasNoBinaries(info) &&
                  has_binaries(info, info->config->root->childs) &&
-				 console_prompt(_("Do you want to install desktop items?"),
+				 console_prompt(_("Do you want to install startup menu entries?"),
 								RESPONSE_YES) == RESPONSE_YES ) {
 				info->options.install_menuitems = 1;
 			}
@@ -517,13 +520,13 @@ static install_state console_complete(install_info *info)
     printf(_("Installation complete.\n"));
 
     new_state = SETUP_EXIT;
-    if ( info->installed_symlink &&
-         console_prompt(_("Would you like to launch the game now?"), RESPONSE_YES)
+    if ( info->installed_symlink && *info->play_binary &&
+         console_prompt(_("Would you like to start now?"), RESPONSE_YES)
          == RESPONSE_YES ) {
         new_state = SETUP_PLAY;
         if ( getuid() == 0 ) {
             const char *warning_text = 
-_("If you run a game as root, the preferences will be stored in\n"
+_("If you run the program as root, the preferences will be stored in\n"
   "root's home directory instead of your user account directory.");
 
             if ( prompt_warning(warning_text) != RESPONSE_YES ) {
@@ -534,6 +537,23 @@ _("If you run a game as root, the preferences will be stored in\n"
     return new_state;
 }
 
+static install_state console_pick_class(install_info *info)
+{
+	char buf[BUFSIZ];
+	const char *msg = IsReadyToInstall(info);
+
+	express_setup = (console_prompt(_("Do you want to proceed with Express installation?"), 
+									msg ? RESPONSE_NO : RESPONSE_YES) == RESPONSE_YES);
+
+	if ( express_setup && msg ) {
+		snprintf(buf, sizeof(buf),
+				 _("Installation could not proceed due to the following error:\n%s\nTry to use 'Expert' installation."), 
+				 msg);
+		console_prompt(buf, RESPONSE_OK);
+		return SETUP_CLASS;
+	}
+	return SETUP_OPTIONS;
+}
 
 static install_state console_website(install_info *info)
 {
@@ -573,7 +593,10 @@ int console_okay(Install_UI *UI)
     UI->prompt = console_prompt;
     UI->website = console_website;
     UI->complete = console_complete;
-	UI->idle = NULL;
+    UI->pick_class = console_pick_class;
+    UI->idle = NULL;
+    UI->exit = NULL;
+    UI->is_gui = 0;
 
     return(1);
 }

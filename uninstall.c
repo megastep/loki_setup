@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.c,v 1.24 2001-03-09 02:10:24 hercules Exp $ */
+/* $Id: uninstall.c,v 1.25 2002-01-28 01:13:30 megastep Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -38,7 +38,7 @@ static void print_usage(const char *argv0)
 
 static void log_file(const char *name, const char *reason)
 {
-    FILE *log = fopen("uninstall.log", "a");
+    FILE *log = fopen("/tmp/uninstall.log", "a");
     fprintf(stderr, "%s : %s\n", name, reason);
     if(log) {
         fprintf(log, "%s : %s\n", name, reason);
@@ -308,7 +308,7 @@ static void goto_installpath(char *argv0)
         *(strrchr(datapath, '/')) = '\0';
     }
     if ( ! *datapath || (chdir(datapath) < 0) ) {
-        fprintf(stderr, "Couldn't change to install directory\n");
+        fprintf(stderr, _("Couldn't change to install directory\n"));
         exit(1);
     }
 }

@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.89 2001-03-08 23:27:06 hercules Exp $ */
+/* $Id: install.c,v 1.90 2002-01-28 01:13:30 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -73,10 +73,14 @@
 #include "network.h"
 
 extern char *rpm_root;
-extern int disable_install_path;
-extern int disable_binary_path;
-extern Install_UI UI;
 extern struct component_elem *current_component;
+
+/* Global variables */
+Install_UI UI;
+int disable_install_path = 0;
+int disable_binary_path = 0;
+
+static int install_updatemenus_script = 0;
 
 /* Functions to retrieve attribution information from the XML tree */
 const char *GetProductName(install_info *info)
@@ -129,6 +133,11 @@ const char *GetProductVersion(install_info *info)
 {
     return xmlGetProp(info->config->root, "version");
 }
+
+const char *GetProductDefaultBinaryPath(install_info *info)
+{
+    return xmlGetProp(info->config->root, "binarypath");
+}
 int GetProductCDROMRequired(install_info *info)
 {
     const char *str = xmlGetProp(info->config->root, "cdrom");
@@ -145,6 +154,32 @@ int GetProductIsMeta(install_info *info)
     }
     return 0;
 }
+int GetProductInstallOnce(install_info *info)
+{
+    const char *str = xmlGetProp(info->config->root, "once");
+    if ( str && !strcasecmp(str, "yes") ) {
+        return 1;
+    }
+    return 0;
+}
+int GetProductRequireRoot(install_info *info)
+{
+    const char *str = xmlGetProp(info->config->root, "superuser");
+    if ( str && !strcasecmp(str, "yes") ) {
+        return 1;
+    }
+    return 0;
+}
+
+int GetProductAllowsExpress(install_info *info)
+{
+    const char *str = xmlGetProp(info->config->root, "express");
+    if ( str && !strcasecmp(str, "yes") ) {
+        return 1;
+    }
+    return 0;
+}
+
 int GetProductHasNoBinaries(install_info *info)
 {
 	return xmlGetProp(info->config->root, "nobinaries") != NULL;
@@ -159,6 +194,74 @@ int GetProductHasPromptBinaries(install_info *info)
     return 0;
 }
 
+/* returns true if any deviant paths are not writable */
+char check_deviant_paths(xmlNodePtr node, install_info *info)
+{
+    char path_up[PATH_MAX];
+
+    while ( node ) {
+        const char *wanted;
+        const char *dpath;
+        char deviant_path[PATH_MAX];
+
+        wanted = xmlGetProp(node, "install");
+        if ( wanted  && (strcmp(wanted, "true") == 0) ) {
+            xmlNodePtr elements = node->childs;
+            while ( elements ) {
+                dpath = xmlGetProp(elements, "path");
+                if ( dpath ) {
+					parse_line(&dpath, deviant_path, PATH_MAX);
+                    topmost_valid_path(path_up, deviant_path);
+					if ( path_up[0] != '/' ) { /* Not an absolute path */
+						char buf[PATH_MAX];
+						snprintf(buf, PATH_MAX, "%s/%s", info->install_path, path_up);
+						return ! dir_is_accessible(buf);
+					} else if ( ! dir_is_accessible(path_up) )
+                        return 1;
+                }
+                elements = elements->next;
+            }
+            if (check_deviant_paths(node->childs, info))
+                return 1;
+        }
+        node = node->next;
+    }
+    return 0;
+}
+
+const char *IsReadyToInstall(install_info *info)
+{
+	const char *message = NULL;
+	char path_up[PATH_MAX];
+    struct stat st;
+	
+    /* Get the topmost valid path */
+    topmost_valid_path(path_up, info->install_path);
+  
+    /* See if we can install yet */
+	if ( ! *info->install_path ) {
+        message = _("No destination directory selected");
+    } else if ( info->install_size <= 0 ) {
+		if ( !GetProductIsMeta(info) ) {
+			message = _("Please select at least one option");
+		}
+    } else if ( BYTES2MB(info->install_size) > detect_diskspace(info->install_path) ) {
+        message = _("Not enough free space for the selected options");
+    } else if ( (stat(path_up, &st) == 0) && !S_ISDIR(st.st_mode) ) {
+        message = _("Install path is not a directory");
+    } else if ( access(path_up, W_OK) < 0 ) {
+        message = _("No write permissions on the install directory");
+	} else if (strcmp(info->symlinks_path, info->install_path) == 0) {
+		message = _("Binary path and install path must be different");
+	} else if ( check_deviant_paths(info->config->root->childs, info) ) {
+        message = _("No write permissions to install a selected package");
+    } else if ( info->symlinks_path[0] &&
+				(access(info->symlinks_path, W_OK) < 0) ) {
+        message = _("No write permissions on the binary directory");
+    }
+
+	return message;
+}
 
 const char *GetProductCDROMFile(install_info *info)
 {
@@ -186,7 +289,7 @@ const char *GetProductEULA(install_info *info)
 	if (text) {
 		strncpy(matched_name, text, BUFSIZ);
 		found = 1;
-		log_warning(info, "The 'eula' attribute is deprecated, please use the 'eula' element from now on.");
+		log_warning("The 'eula' attribute is deprecated, please use the 'eula' element from now on.");
 	}
 	/* Look for EULA elements */
 	node = info->config->root->childs;
@@ -195,7 +298,7 @@ const char *GetProductEULA(install_info *info)
 			const char *prop = xmlGetProp(node, "lang");
 			if ( MatchLocale(prop) ) {
 				if (found == 1)
-					log_warning(info, "Duplicate matching EULA entries in XML file!");
+					log_warning("Duplicate matching EULA entries in XML file!");
 				text = xmlNodeListGetString(info->config, node->childs, 1);
 				if(text) {
 					*matched_name = '\0';
@@ -229,7 +332,7 @@ const char *GetProductREADME(install_info *info)
     } else {
 		strncpy(matched_name, ret, BUFSIZ);
 		found = 1;
-		log_warning(info, "The 'readme' attribute is deprecated, please use the 'readme' element from now on.");
+		log_warning("The 'readme' attribute is deprecated, please use the 'readme' element from now on.");
 	}
 	/* Try to find a README that matches the locale */
 	node = info->config->root->childs;
@@ -238,7 +341,7 @@ const char *GetProductREADME(install_info *info)
 			const char *prop = xmlGetProp(node, "lang");
 			if ( MatchLocale(prop) ) {
 				if (found == 1) {
-					log_warning(info, "Duplicate matching README entries in XML file!");
+					log_warning("Duplicate matching README entries in XML file!");
 				}
 				text = xmlNodeListGetString(info->config, node->childs, 1);
 				if (text) {
@@ -345,7 +448,7 @@ const char *GetProductUpdateURL(install_info *info)
 
     url = xmlGetProp(info->config->root, "update_url");
     if ( url == NULL ) {
-        url = "http://updates.lokigames.com/";
+        url = "http://codehost.com/";
     }
     return url;
 }
@@ -385,7 +488,7 @@ const char *GetInstallOption(install_info *info, const char *option)
 }
 
 /* Create the initial installation information */
-install_info *create_install(const char *configfile, int log_level,
+install_info *create_install(const char *configfile,
                              const char *install_path,
                              const char *binary_path)
 {
@@ -401,14 +504,6 @@ install_info *create_install(const char *configfile, int log_level,
     }
     memset(info, 0, (sizeof *info));
 
-    /* Create the log file */
-    info->log = create_log(LOG_NORMAL);
-    if ( info->log == NULL ) {
-        fprintf(stderr, _("Out of memory\n"));
-        delete_install(info);
-        return(NULL);
-    }
-
     /* Load the XML configuration file */
     info->config = xmlParseFile(configfile);
     if ( info->config == NULL ) {
@@ -423,9 +518,11 @@ install_info *create_install(const char *configfile, int log_level,
     info->update_url = GetProductUpdateURL(info);
     info->arch = detect_arch();
     info->libc = detect_libc();
+	info->distro = detect_distro(&info->distro_maj, &info->distro_min);
+
+ 	log_quiet(_("Detected distribution: %s %d.%d"), distribution_name[info->distro], info->distro_maj, info->distro_min);
 
     info->cdroms_list = NULL;
-    info->mounted_list = NULL;
 
     /* Set product DB stuff to nothing by default */
     info->product = loki_openproduct(info->name);
@@ -451,12 +548,14 @@ install_info *create_install(const char *configfile, int log_level,
     free(temppath);
 
     /* if paths were passed in as command line args, set them here */
-    if (disable_install_path) {
+    if ( disable_install_path ) {
         strncpy(info->install_path, install_path, sizeof(info->install_path));
     }
-    if (disable_binary_path) {
+    if ( disable_binary_path && binary_path ) {
         strncpy(info->symlinks_path, binary_path, sizeof(info->symlinks_path));
-    }
+    } else if ( GetProductDefaultBinaryPath(info) ) {
+        strncpy(info->symlinks_path, GetProductDefaultBinaryPath(info), sizeof(info->symlinks_path));
+	}
 
     if ( info->product ) {
         product_info_t *pinfo = loki_getinfo_product(info->product);
@@ -483,6 +582,11 @@ install_info *create_install(const char *configfile, int log_level,
     } else {
         info->lookup = NULL;
     }
+
+	if ( !restoring_corrupt() ) {
+		/* Now run any auto-detection commands */	
+		mark_cmd_options(info, info->config->root, 0);
+	}
 
     /* That was easy.. :) */
     return(info);
@@ -520,20 +624,6 @@ void set_cdrom_mounted(struct cdrom_elem *cd, const char *path)
         free(cd->mounted);
         cd->mounted = path ? strdup(path) : NULL;
     }
-}
-
-struct mounted_elem *add_mounted_entry(install_info *info, const char *device, const char *dir)
-{
-    struct mounted_elem *elem;
-
-    elem = (struct mounted_elem *)malloc(sizeof *elem);
-    if ( elem ) {
-        elem->device = strdup(device);
-        elem->dir = strdup(dir);
-        elem->next = info->mounted_list;
-        info->mounted_list = elem;
-    }
-    return elem;
 }
 
 struct component_elem *add_component_entry(install_info *info, const char *name, const char *version,
@@ -596,7 +686,7 @@ struct file_elem *add_file_entry(install_info *info, struct option_elem *comp,
             comp->file_list = elem;
         }
     } else {
-        log_fatal(info, _("Out of memory"));
+        log_fatal(_("Out of memory"));
     }
 	return elem;
 }
@@ -618,7 +708,7 @@ void add_rpm_entry(install_info *info, struct option_elem *comp,
         }
 		elem->autoremove = autoremove;
     } else {
-        log_fatal(info, _("Out of memory"));
+        log_fatal(_("Out of memory"));
     }
 }
 
@@ -640,7 +730,7 @@ void add_script_entry(install_info *info, struct option_elem *comp,
             }
         }
     } else {
-        log_fatal(info, _("Out of memory"));
+        log_fatal(_("Out of memory"));
     }
 }
 
@@ -661,7 +751,7 @@ void add_dir_entry(install_info *info, struct option_elem *comp,
             comp->dir_list = elem;
         }
     } else {
-        log_fatal(info, _("Out of memory"));
+        log_fatal(_("Out of memory"));
     }
 }
 
@@ -683,24 +773,27 @@ void add_bin_entry(install_info *info, struct option_elem *comp, struct file_ele
         elem->next = comp->bin_list;
         comp->bin_list = elem;
         if ( play ) {
-			if ( !strcmp(play, "yes") ) {
+			if ( !strcmp(play, "yes") || !strcmp(play, "gui") ) {
 				if ( !symlink ) {
-					log_fatal(info, _("You must use a 'symlink' attribute with 'play'"));
+					log_fatal(_("You must use a 'symlink' attribute with 'play'"));
 				} else if ( !info->installed_symlink ) {
 					info->installed_symlink = symlink;
-					snprintf(info->play_binary, PATH_MAX, "%s/%s", info->symlinks_path, symlink);
+					if ( !strcmp(play, "yes") || 
+					     (!strcmp(play, "gui") && UI.is_gui) ) {
+					  snprintf(info->play_binary, PATH_MAX, "%s/%s", info->symlinks_path, symlink);
+					}
 				} else {
-					log_fatal(info, _("There can be only one binary with a 'play' attribute"));
+					log_fatal(_("There can be only one binary with a 'play' attribute"));
 				}
 			} else if ( strcmp(play, "no") ) {
-				log_fatal(info, _("The only valid values for the 'play' attribute are yes and no"));
+				log_fatal(_("The only valid values for the 'play' attribute are yes, gui and no"));
 			}
         } else if ( symlink && !info->installed_symlink ) { /* Defaults to 'yes' */
 			info->installed_symlink = symlink;
 			snprintf(info->play_binary, PATH_MAX, "%s/%s", info->symlinks_path, symlink);
 		}
     } else {
-        log_fatal(info, _("Out of memory"));
+        log_fatal(_("Out of memory"));
     }
 }
 
@@ -718,7 +811,7 @@ void expand_home(install_info *info, const char *path, char *buffer)
             if ( home ) {
                 strcpy(buffer, home);
             } else {
-                log_warning(info, _("Couldn't find your home directory"));
+                log_warning(_("Couldn't find your home directory"));
             }
         } else {
             char user[PATH_MAX];
@@ -736,7 +829,7 @@ void expand_home(install_info *info, const char *path, char *buffer)
             if ( pwent ) {
                 strcpy(buffer, pwent->pw_dir);
             } else {
-                log_warning(info, _("Couldn't find home directory for %s"), user);
+                log_warning(_("Couldn't find home directory for %s"), user);
             }
         }
     }
@@ -778,7 +871,6 @@ void mark_option(install_info *info, xmlNodePtr node,
 }
 
 /* Enable an option, given its name */
-
 int enable_option_recurse(install_info *info, xmlNodePtr node, const char *option)
 {
     int ret = 0;
@@ -809,6 +901,41 @@ int enable_option(install_info *info, const char *option)
    return enable_option_recurse(info, info->config->root->childs, option);
 }
 
+/* Check for all the 'require' tags */
+int CheckRequirements(install_info *info)
+{
+	xmlNodePtr node = info->config->root->childs;
+	char line[BUFSIZ];
+    const char *text;
+
+	while ( node ) {
+		if ( !strcmp(node->name, "require") && MatchLocale(xmlGetProp(node, "lang")) &&
+			 match_arch(info, xmlGetProp(node, "arch")) &&
+			 match_libc(info, xmlGetProp(node, "libc")) &&
+			 match_distro(info, xmlGetProp(node, "distro")) ) {
+			const char *prop = xmlGetProp(node, "command");
+			if ( !prop ) {
+				log_fatal(_("XML: 'require' tag doesn't have a mandatory 'command' attribute"));
+			} else {
+				/* Launch the command */
+				if ( run_script(info, prop, 0) != 0 ) {
+					/* We failed: print out error message */
+					text = xmlNodeListGetString(info->config, node->childs, 1);
+					if(text) {
+						*line = '\0';
+						while ( (*line == 0) && parse_line(&text, line, sizeof(line)) )
+							;
+						UI.prompt(line, RESPONSE_OK);
+					}
+					return 0;
+				}
+			}
+		}
+		node = node->next;
+	}
+	return 1; /* All requirements passed */
+}
+
 /* Get the name of an option node */
 char *get_option_name(install_info *info, xmlNodePtr node, char *name, int len)
 {
@@ -831,7 +958,7 @@ char *get_option_name(install_info *info, xmlNodePtr node, char *name, int len)
 			if( strcmp(n->name, "lang") == 0 ) {
 				const char *prop = xmlGetProp(n, "lang");
 				if ( ! prop ) {
-					log_fatal(info, _("XML: 'lang' tag does not have a mandatory 'lang' attribute"));
+					log_fatal(_("XML: 'lang' tag does not have a mandatory 'lang' attribute"));
 				} else if ( MatchLocale(prop) ) {
 					text = xmlNodeListGetString(info->config, n->childs, 1);
 					if(text) {
@@ -839,14 +966,14 @@ char *get_option_name(install_info *info, xmlNodePtr node, char *name, int len)
 						while ( (*name == 0) && parse_line(&text, name, len) )
 							;
 					} else {
-						log_warning(info, _("XML: option listed without translated description for locale '%s'"), prop);
+						log_warning(_("XML: option listed without translated description for locale '%s'"), prop);
 					}
 				}
 			}
 			n = n->next;
 		}
     } else {
-        log_warning(info, _("XML: option listed without description"));
+        log_warning(_("XML: option listed without description"));
     }
     return name;
 }
@@ -861,7 +988,7 @@ const char *get_option_help(install_info *info, xmlNodePtr node)
 	*line = '\0';
 	if ( help ) {
 		strncpy(line, help, sizeof(line));
-		log_warning(info, "The 'help' attribute is deprecated, please use the 'help' element from now on.");
+		log_warning("The 'help' attribute is deprecated, please use the 'help' element from now on.");
 	}
 	/* Look for translated strings */
 	n = node->childs;
@@ -882,11 +1009,24 @@ const char *get_option_help(install_info *info, xmlNodePtr node)
 	return (*line) ? line : NULL;
 }
 
+void delete_cdrom_install(install_info *info)
+{
+    struct cdrom_elem *cdrom;
+    while ( info->cdroms_list ) {
+        cdrom = info->cdroms_list;
+        info->cdroms_list = cdrom->next;
+        free(cdrom->name);
+        free(cdrom->id);
+        free(cdrom->file);
+        free(cdrom->mounted);
+        free(cdrom);
+    }
+}
+
 /* Free the install information structure */
 void delete_install(install_info *info)
 {
     struct component_elem *comp;
-    struct cdrom_elem *cdrom;
     while ( info->components_list ) {
         struct option_elem *opt;
         
@@ -952,21 +1092,9 @@ void delete_install(install_info *info)
         free(comp->version);
         free(comp);
     }
-    while ( info->cdroms_list ) {
-        cdrom = info->cdroms_list;
-        info->cdroms_list = cdrom->next;
-        free(cdrom->name);
-        free(cdrom->id);
-        free(cdrom->file);
-        free(cdrom->mounted);
-        free(cdrom);
-    }
-    unmount_filesystems(info);
+	delete_cdrom_install(info);
     if ( info->lookup ) {
         close_lookup(info->lookup);
-    }
-    if ( info->log ) {
-        destroy_log(info->log);
     }
     free(info);
 }
@@ -1052,13 +1180,13 @@ void uninstall(install_info *info)
 
             for ( felem = opt->file_list; felem; felem = felem->next ) {
                 if ( unlink(felem->path) < 0 ) {
-                    log_warning(info, _("Unable to remove '%s'"), felem->path);
+                    log_warning(_("Unable to remove '%s'"), felem->path);
                 }
             }
 
             for ( delem = opt->dir_list; delem; delem = delem->next ) {
                 if ( rmdir(delem->path) < 0 ) {
-                    log_warning(info, _("Unable to remove '%s'"), delem->path);
+                    log_warning(_("Unable to remove '%s'"), delem->path);
                 }
             }
             for ( selem = opt->post_script_list; selem; selem = selem->next ) { /* RPM post-uninstall */
@@ -1066,7 +1194,7 @@ void uninstall(install_info *info)
             }
 
             for ( relem = opt->rpm_list; relem; relem = relem->next ) {
-                log_warning(info, _("The '%s' RPM was installed or upgraded (version %s, release %d)"),
+                log_warning(_("The '%s' RPM was installed or upgraded (version %s, release %d)"),
                             relem->name, relem->version, relem->release);
             }
 
@@ -1075,7 +1203,7 @@ void uninstall(install_info *info)
     /* Check for uninstall script and remove it if present */
     snprintf(path, PATH_MAX, "%s/%s", info->install_path, GetProductUninstall(info));
     if ( file_exists(path) && unlink(path) < 0 ) {
-        log_warning(info, _("Unable to remove '%s'"), path);
+        log_warning(_("Unable to remove '%s'"), path);
     }
     if (GetPostUnInstall(info)) {
         run_script(info, GetPostUnInstall(info), 0);
@@ -1094,13 +1222,15 @@ static void output_script_header(FILE *f, install_info *info, product_component_
             "SETUP_INSTALLPATH=\"%s\"\n"
             "SETUP_SYMLINKSPATH=\"%s\"\n"
             "SETUP_CDROMPATH=\"%s\"\n"
+            "SETUP_DISTRO=\"%s\"\n"
             "export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_COMPONENTNAME SETUP_COMPONENTVER\n"
-            "export SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH\n",
+            "export SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH SETUP_DISTRO\n",
             info->name, info->version,
             loki_getname_component(comp), loki_getversion_component(comp),
             info->install_path,
             info->symlinks_path,
-            info->cdroms_list ? info->cdroms_list->mounted : "");
+            info->cdroms_list ? info->cdroms_list->mounted : "",
+			info->distro ? distribution_symbol[info->distro] : "");
 #ifdef RPM_SUPPORT
     if(strcmp(rpm_root,"/")) /* Emulate RPM environment for scripts */
         fprintf(f,"RPM_INSTALL_PREFIX=%s\n", rpm_root);
@@ -1177,7 +1307,7 @@ void generate_uninstall(install_info *info)
                         if (file) {
                             loki_setmode_file(file, 0755); /* Binaries have special permissions */
                         } else {
-                            log_warning(info, _("Could not register binary: %s"), belem->file->path);
+                            log_warning(_("Could not register binary: %s"), belem->file->path);
                         }
                     }
                 }
@@ -1197,9 +1327,13 @@ void generate_uninstall(install_info *info)
 
                 if(opt->pre_script_list){
                     FILE *pre;
-                    char *tmp = tmpnam(NULL);
-                
-                    pre = fopen(tmp, "w");
+		    char tmp_name[] = "/tmp/setupXXXXXX";
+                    int tmp = mkstemp(tmp_name);
+		    if ( tmp < 0 ) {
+                        log_fatal(_("Could not create temporary script"));
+		    }
+
+                    pre = fdopen(tmp, "w");
                     if ( pre ) {
                         output_script_header(pre, info, component);
 
@@ -1212,18 +1346,22 @@ void generate_uninstall(install_info *info)
                         fchmod(fileno(pre), 0755);
                         fclose(pre);
                         snprintf(buf, sizeof(buf), "%s-preun", opt->name);
-                        loki_registerscript_fromfile(option, LOKI_SCRIPT_PREUNINSTALL, buf, tmp);
-                        unlink(tmp);
+                        loki_registerscript_fromfile(option, LOKI_SCRIPT_PREUNINSTALL, buf, tmp_name);
+                        unlink(tmp_name);
                     } else {
-                        log_fatal(info, _("Could not write temporary pre-uninstall script in %s"), buf);
+                        log_fatal(_("Could not write temporary pre-uninstall script in %s"), buf);
                     }
                 }
 
                 if(opt->post_script_list){
                     FILE *post;
-                    char *tmp = tmpnam(NULL);
+		    char tmp_name[] = "/tmp/setupXXXXXX";
+                    int tmp = mkstemp(tmp_name);
+		    if ( tmp < 0 ) {
+                        log_fatal(_("Could not create temporary script"));
+		    }
 
-                    post = fopen(tmp, "w");
+                    post = fdopen(tmp, "w");
                     if ( post ) {
                         output_script_header(post, info, component);
                         fprintf(post, "function post()\n{\n");
@@ -1233,23 +1371,34 @@ void generate_uninstall(install_info *info)
                         fprintf(post,"}\npost 0\n");
                         fclose(post);
                         snprintf(buf, sizeof(buf), "%s-postun", opt->name);
-                        loki_registerscript_fromfile(option, LOKI_SCRIPT_POSTUNINSTALL, buf, tmp);
-                        unlink(tmp);
+                        loki_registerscript_fromfile(option, LOKI_SCRIPT_POSTUNINSTALL, buf, tmp_name);
+                        unlink(tmp_name);
                     } else {
-                        log_fatal(info, _("Could not write post-uninstall script in %s"), buf);
+                        log_fatal(_("Could not write post-uninstall script in %s"), buf);
                     }
                 }
             }
             pop_curdir();
         }
 
+		if ( install_updatemenus_script ) {
+			/* Add a call to the post-uninstall scripts */
+			loki_registerscript_component(component, LOKI_SCRIPT_POSTUNINSTALL,
+										  "update-menus", "update-menus");
+		}
+
         /* Register the pre and post uninstall scripts with the default component */
         component = loki_getdefault_component(product);
 
         if (GetPreUnInstall(info)) {
-            char *tmp = tmpnam(NULL);
+	    FILE *pre;
+	    char tmp_name[] = "/tmp/setupXXXXXX";
+	    int tmp = mkstemp(tmp_name);
+	    if ( tmp < 0 ) {
+		log_fatal(_("Could not create temporary script"));
+	    }
             
-            FILE *pre = fopen(tmp, "w");
+            pre = fdopen(tmp, "w");
             if ( pre ) {
                 int script_file = open(GetPreUnInstall(info), O_RDONLY);
                 output_script_header(pre, info, component);
@@ -1266,15 +1415,20 @@ void generate_uninstall(install_info *info)
                 fchmod(fileno(pre), 0755);
                 fclose(pre);
                 loki_registerscript_fromfile_component(component, LOKI_SCRIPT_PREUNINSTALL,
-                                                       "preun", tmp);
-                unlink(tmp);
+                                                       "preun", tmp_name);
+                unlink(tmp_name);
             }
         }
 
         if (GetPostUnInstall(info)) {
-            char *tmp = tmpnam(NULL);
+	    FILE *post;
+	    char tmp_name[] = "/tmp/setupXXXXXX";
+	    int tmp = mkstemp(tmp_name);
+	    if ( tmp < 0 ) {
+		log_fatal(_("Could not create temporary script"));
+	    }
             
-            FILE *post = fopen(tmp, "w");
+            post = fdopen(tmp, "w");
             if ( post ) {
                 int script_file = open(GetPostUnInstall(info), O_RDONLY);
                 output_script_header(post, info, component);
@@ -1291,8 +1445,8 @@ void generate_uninstall(install_info *info)
                 fchmod(fileno(post), 0755);
                 fclose(post);
                 loki_registerscript_fromfile_component(component, LOKI_SCRIPT_POSTUNINSTALL,
-                                                       "postun", tmp);
-                unlink(tmp);
+                                                       "postun", tmp_name);
+                unlink(tmp_name);
             }
         }
 
@@ -1300,7 +1454,7 @@ void generate_uninstall(install_info *info)
         loki_upgrade_uninstall(product, buf, "setup.data/locale");
 		loki_closeproduct(product);
     } else {
-		log_fatal(info, _("Could not create install log"),
+		log_fatal(_("Could not create install log"),
 				  detect_home(), info->name);
 	}
 }
@@ -1327,7 +1481,7 @@ int launch_browser(install_info *info, int (*launcher)(const char *url))
     if ( url ) {
         retval = launcher(url);
         if ( retval < 0 ) {
-            log_warning(info, _("Please visit %s"), url);
+            log_warning(_("Please visit %s"), url);
         }
     }
     return retval;
@@ -1337,28 +1491,65 @@ int launch_browser(install_info *info, int (*launcher)(const char *url))
 int install_preinstall(install_info *info)
 {
     const char *script;
-    int exitval;
+    int exitval = 0;
 
-    script = GetPreInstall(info);
-    if ( script ) {
-        exitval = run_script(info, script, -1);
-    } else {
-        exitval = 0;
-    }
+	if ( ! restoring_corrupt() ) {
+		script = GetPreInstall(info);
+		if ( script ) {
+			exitval = run_script(info, script, -1);
+		}
+	}
     return exitval;
 }
 int install_postinstall(install_info *info)
 {
     const char *script;
-    int exitval;
+    int exitval = 0;
 
-    script = GetPostInstall(info);
-    if ( script ) {
-        exitval = run_script(info, script, -1);
-    } else {
-        exitval = 0;
-    }
+	if ( ! restoring_corrupt() ) {
+		script = GetPostInstall(info);
+		if ( script ) {
+			exitval = run_script(info, script, -1);
+		}
+	}
     return exitval;
+}
+
+/* Recursively look for options with install="command" and run the commands to determine the actual status */
+void mark_cmd_options(install_info *info, xmlNodePtr parent, int exclusive)
+{
+	int cmd = 1;
+	const char *str;
+	/* Iterate through the children */
+	xmlNodePtr child;
+	for ( child = parent->childs; child; child = child->next ) {
+		if ( !strcmp(child->name, "option") ) {
+			str = xmlGetProp(child, "install");
+			if ( str ) {
+				if ( !strcmp(str, "command") ) {
+					/* Run the command and set it to "true" if the return value is ok */
+					str = xmlGetProp(child, "command");
+					if ( str ) {
+						cmd = run_script(info, str, 0);
+						xmlSetProp(child, "install", cmd ? "false" : "true");
+					} else {
+						log_fatal(_("Missing 'command' attribute for an option"));
+						xmlSetProp(child, "install", "false");
+					}
+				} else if ( !strcmp(str, "true") ) {
+					cmd = 0;
+				}
+			}
+			mark_cmd_options(info, child, 0);
+			if ( exclusive && !cmd ) { /* Stop at the first set option if we're in an exclusive block */
+				break;
+			}
+		} else if ( !strcmp(child->name, "component") ) {
+			mark_cmd_options(info, child, 0);
+		} else if ( !strcmp(child->name, "exclusive") ) {
+			mark_cmd_options(info, child, 1);
+		}
+	}
 }
 
 /* Launch the game using the information in the install info */
@@ -1366,91 +1557,80 @@ install_state launch_game(install_info *info)
 {
     char cmd[PATH_MAX];
 
-    if ( info->installed_symlink && info->symlinks_path && *info->symlinks_path ) {
+    if ( info->installed_symlink && info->symlinks_path &&
+	 *info->symlinks_path && *info->play_binary ) {
         snprintf(cmd, PATH_MAX, "%s %s &", info->play_binary, info->args);
 		system(cmd);
     }
     return SETUP_EXIT;
 }
 
-static const char* redhat_app_links[] =
+/* Install the desktop menu items; returns a boolean indicating if we should stop
+   installing more menu items after this */
+int install_menuitems(install_info *info, desktop_type desktop)
 {
-    "/etc/X11/applnk/",
-    0
-};
-
-
-static const char* kde_app_links[] =
-{
-    "/usr/X11R6/share/applnk/",
-    "/usr/share/applnk/",
-    "/opt/kde/share/applnk/",
-    "~/.kde/share/applnk/",
-    0
-};
-
-
-static const char* gnome_app_links[] =
-{
-    "/usr/share/gnome/apps/",
-    "/usr/local/share/gnome/apps/",
-    "/opt/gnome/share/gnome/apps/",
-    "~/.gnome/apps/",
-    0
-};
-
-/* Install the desktop menu items */
-char install_menuitems(install_info *info, desktop_type desktop)
-{
-    const char **app_links;
     const char **tmp_links;
     char buf[PATH_MAX];
     struct bin_elem *elem;
     struct option_elem *opt;
     struct component_elem *comp;
-    char ret_val = 0;
+    int ret_val = 0, num_items = 0;
     const char *desk_base;
     char icon_base[PATH_MAX];
-    const char *found_links[3];
+    const char *app_links[10];
     const char *exec_script_name = NULL;
     char exec_script[PATH_MAX*2];
     char exec_command[PATH_MAX*2];
+	int i = 0;
     FILE *fp;
 
     switch (desktop) {
-        case DESKTOP_REDHAT:
-            app_links = redhat_app_links;
-            break;
-        case DESKTOP_KDE:
-            desk_base = getenv("KDEDIR");
-            if (desk_base) {
-                snprintf(icon_base, PATH_MAX, "%s/share/applnk/", desk_base); 
-                found_links[0] = icon_base;
-                found_links[1] = "~/.kde/share/applnk/";
-                found_links[2] = 0;
-                app_links = found_links;
-            }
-            else {
-                app_links = kde_app_links;
-            }
-            break;
-        case DESKTOP_GNOME:
-            app_links = gnome_app_links;
-            fp = popen("gnome-config --prefix 2>/dev/null", "r");
-            if (fp) {
-                if ( fgets(icon_base, PATH_MAX-1, fp) ) {
-                    icon_base[sizeof(icon_base)-1]=0;
-                    strcat(icon_base, "/share/gnome/apps/");
-                    found_links[0] = icon_base;
-                    found_links[1] = "~/.gnome/apps/";
-                    found_links[2] = 0;
-                    app_links = found_links;
-                }
-                pclose(fp);
-            }
-            break;
-        default:
-            return ret_val;
+    case DESKTOP_MENUDEBIAN:
+		app_links[0] = "/usr/lib/menu/";
+		app_links[1] = "~/.menu/";
+		app_links[2] = NULL;
+		break;
+	case DESKTOP_REDHAT:
+		app_links[0] = "/etc/X11/applnk/";
+		app_links[1] = NULL;
+		break;
+	case DESKTOP_KDE:
+		desk_base = getenv("KDE2DIR");
+		if (desk_base) {
+			snprintf(icon_base, PATH_MAX, "%s/share/applnk/", desk_base); 
+			app_links[i++] = icon_base;
+		} else {
+			desk_base = getenv("KDEDIR");
+			if (desk_base) {
+				snprintf(icon_base, PATH_MAX, "%s/share/applnk/", desk_base); 
+				app_links[i++] = icon_base;
+			}
+		}
+		app_links[i++] = "/opt/kde2/share/applnk/";
+		app_links[i++] = "/opt/kde/share/applnk/";
+		app_links[i++] = "/usr/X11R6/share/applnk/";
+		app_links[i++] = "/usr/share/applnk/";
+		app_links[i++] = "~/.kde2/share/applnk/";
+		app_links[i++] = "~/.kde/share/applnk/";
+		app_links[i++] = NULL;
+		break;
+	case DESKTOP_GNOME:
+		fp = popen("gnome-config --prefix 2>/dev/null", "r");
+		if (fp) {
+			if ( fscanf(fp, "%s", icon_base) ) {
+				strcat(icon_base, "/share/gnome/apps/");
+				app_links[i++] = icon_base;
+			}
+			pclose(fp);
+		}
+		app_links[i++] = "/usr/share/gnome/apps/";				
+		app_links[i++] = "/usr/local/share/gnome/apps/";
+		app_links[i++] = "/opt/gnome/share/gnome/apps/";
+		app_links[i++] = "~/.gnome/apps/";
+		app_links[i++] = NULL;
+		break;
+	default:
+		return ret_val;
     }
 
     /* Get the exec command we want to use. */
@@ -1468,75 +1648,115 @@ char install_menuitems(install_info *info, desktop_type desktop)
     for (comp = info->components_list; comp; comp = comp->next ) {
         for (opt = comp->options_list; opt; opt = opt->next ) {
             for (elem = opt->bin_list; elem; elem = elem->next ) {      
+				/* Presumably if there is no icon, no desktop entry */
+				if ( (elem->icon == NULL) || (elem->symlink == NULL) ) {
+					continue;
+				}
+
                 for ( tmp_links = app_links; *tmp_links; ++tmp_links ) {
                     FILE *fp;
                     char finalbuf[PATH_MAX];
+					char exec[PATH_MAX*2], icon[PATH_MAX];
 
                     expand_home(info, *tmp_links, buf);
 
+					/* Locate an accessible directory in the list */
                     if ( access(buf, W_OK) < 0 )
                         continue;
 
-                    snprintf(finalbuf, PATH_MAX, "%s%s/", buf, (elem->menu) ? elem->menu : "Games");
-                    file_create_hierarchy(info, finalbuf);
+					if (*exec_command) {
+						strncpy(exec, exec_command, sizeof(exec));
+					} else {
+						snprintf(exec, sizeof(exec), "%s/%s", info->install_path, elem->file->path);
+					}
+					snprintf(icon, PATH_MAX, "%s/%s", info->install_path, elem->icon);
 
-                    /* Presumably if there is no icon, no desktop entry */
-                    if ( (elem->icon == NULL) || (elem->symlink == NULL) ) {
-                        continue;
-                    }
-                    strncat(finalbuf, elem->symlink, PATH_MAX-strlen(finalbuf));
-                    switch(desktop){
-                    case DESKTOP_KDE:
-                        strncat(finalbuf,".kdelnk", PATH_MAX-strlen(finalbuf));
-                        break;
-                    case DESKTOP_REDHAT:
-                    case DESKTOP_GNOME:
-                        strncat(finalbuf,".desktop", PATH_MAX-strlen(finalbuf));
-                        break;
-                    default:
-                        break;
-                    }
+					if ( desktop == DESKTOP_MENUDEBIAN ) {
+						/* Present on newer Mandrake and Debian systems, we just create 
+						   a single file */
 
-                    fp = fopen(finalbuf, "w");
-                    if (fp) {
-                        char exec[PATH_MAX*2], icon[PATH_MAX];
+						/* The directory may exist so we need to check for the command as well */
+						if( access("/usr/bin/update-menus", X_OK) < 0 )
+							continue;
 
-                        if (exec_command[0] != 0) {
-                            snprintf(exec, sizeof(exec), "%s", exec_command);
-                        } else {
-                            snprintf(exec, sizeof(exec), "%s", elem->file->path);
-                        }
-                        snprintf(icon, PATH_MAX, "%s/%s", info->install_path, elem->icon);
-                        if (desktop == DESKTOP_KDE) {
-                            fprintf(fp, "# KDE Config File\n");
-                        }
-                        fprintf(fp, "[%sDesktop Entry]\n"
-                                "Name=%s\n"
-                                "Comment=%s\n"
-                                "Exec=%s\n"
-                                "Icon=%s\n"
-                                "Terminal=0\n"
-                                "Type=Application\n",
-                                (desktop==DESKTOP_KDE) ? "KDE " : "",
-                                elem->name ? elem->name : info->name,
-                                elem->desc ? elem->desc : info->desc,
-                                exec, icon);
-                        fclose(fp);
-                        add_file_entry(info, opt, finalbuf, NULL);
+						snprintf(finalbuf, PATH_MAX, "%s%s", buf, elem->symlink);
+						/* Maybe we should try to group menu entries in a single file, but it
+						   can be tricky for components. Maybe per component? */
+						fp = fopen(finalbuf, "w");
+						if (fp) {
+							fprintf(fp,"?package(local.%s):\\\n"
+									" needs=\"X11\" \\\n"
+									" section=\"%s\" \\\n"
+									" title=\"%s\" \\\n"
+									" longtitle=\"%s\" \\\n"
+									" command=\"%s\" \\\n"
+									" icon=\"%s\"\n",
+									info->name, elem->menu ? elem->menu : "Games",
+									elem->name ? elem->name : info->name,
+									elem->desc ? elem->desc : info->desc,
+									exec, icon);
+							fclose(fp);
+							add_file_entry(info, opt, finalbuf, NULL);
+							++ num_items;
+							ret_val = 1; /* No need to install anything else */
+						} else {
+							log_warning(_("Unable to create desktop file '%s'"), finalbuf);
+						}
+					} else {
+						snprintf(finalbuf, PATH_MAX, "%s%s/", buf, elem->menu ? elem->menu : "Games");
+						file_create_hierarchy(info, finalbuf);
 
-                        // successful REDHAT takes care of KDE/GNOME
-                        // tell caller no need to continue others
-                        ret_val = (desktop == DESKTOP_REDHAT);
+						strncat(finalbuf, elem->symlink, PATH_MAX-strlen(finalbuf));
 
-                    } else {
-                        log_warning(info, _("Unable to create desktop file '%s'"), finalbuf);
-                    }
+						if ( desktop == DESKTOP_KDE ) {
+							strncat(finalbuf,".kdelnk", PATH_MAX-strlen(finalbuf));
+						} else {
+							strncat(finalbuf,".desktop", PATH_MAX-strlen(finalbuf));
+						}
+
+						fp = fopen(finalbuf, "w");
+						if (fp) {
+							if (desktop == DESKTOP_KDE) {
+								fprintf(fp, "# KDE Config File\n");
+							}
+							fprintf(fp, "[%sDesktop Entry]\n"
+									"Name=%s\n"
+									"Comment=%s\n"
+									"Exec=%s\n"
+									"Icon=%s\n"
+									"Terminal=0\n"
+									"Type=Application\n",
+									(desktop==DESKTOP_KDE) ? "KDE " : "",
+									elem->name ? elem->name : info->name,
+									elem->desc ? elem->desc : info->desc,
+									exec, icon);
+							fclose(fp);
+							add_file_entry(info, opt, finalbuf, NULL);
+							++ num_items;
+							// successful REDHAT takes care of KDE/GNOME
+							// tell caller no need to continue others
+							// UNLESS we are Redhat 6.1 or earlier, in which case we need to install
+							// everything else.
+							if ( (info->distro != DISTRO_REDHAT) || (info->distro_maj>6) || (info->distro_min>1) ) {
+								ret_val = (desktop == DESKTOP_REDHAT);
+							}
+
+						} else {
+							log_warning(_("Unable to create desktop file '%s'"), finalbuf);
+						}
+					}
                     /* Created a desktop item, our job is done here */
                     break;
                 }
             }
         }
     }
+
+	if ( desktop == DESKTOP_MENUDEBIAN && num_items > 0 ) {
+		/* Run update-menus */
+		run_command(info, "update-menus", NULL);
+		install_updatemenus_script = 1;
+	}
     return ret_val;
 }
 
@@ -1573,19 +1793,21 @@ int run_script(install_info *info, const char *script, int arg)
         fp = fdopen(fd, "w");
         if ( fp ) {
             fprintf(fp, /* Create script file, setting environment variables */
-                "#!/bin/sh\n"
-                "SETUP_PRODUCTNAME=\"%s\"\n"
-                "SETUP_PRODUCTVER=\"%s\"\n"
-                "SETUP_INSTALLPATH=\"%s\"\n"
-                "SETUP_SYMLINKSPATH=\"%s\"\n"
-                "SETUP_CDROMPATH=\"%s\"\n"
-                "export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH\n"
-                "%s%s\n",
-                info->name, info->version,
-                info->install_path,
-                info->symlinks_path,
-                info->cdroms_list ? info->cdroms_list->mounted : "",
-                working_dir, script);     
+					"#!/bin/sh\n"
+					"SETUP_PRODUCTNAME=\"%s\"\n"
+					"SETUP_PRODUCTVER=\"%s\"\n"
+					"SETUP_INSTALLPATH=\"%s\"\n"
+					"SETUP_SYMLINKSPATH=\"%s\"\n"
+					"SETUP_CDROMPATH=\"%s\"\n"
+					"SETUP_DISTRO=\"%s\"\n"
+					"export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH SETUP_DISTRO\n"
+					"%s%s\n",
+					info->name, info->version,
+					info->install_path,
+					info->symlinks_path,
+					info->cdroms_list ? info->cdroms_list->mounted : "",
+					info->distro ? distribution_symbol[info->distro] : "",
+					working_dir, script);     
             fchmod(fileno(fp),0755); /* Turn on executable bit */
             fclose(fp);
 			if ( arg >= 0 ) {
@@ -1611,11 +1833,13 @@ int run_command(install_info *info, const char *cmd, const char *arg)
     case 0: {/* Inside the child */
         char *argv[3];
         argv[0] = strdup(cmd);
-        argv[1] = strdup(arg);
+        argv[1] = arg ? strdup(arg) : NULL;
         argv[2] = NULL;
         execvp(cmd, argv);
         perror("execv");
-        free(argv[0]); free(argv[1]);
+        free(argv[0]);
+		if(arg)
+			free(argv[1]);
         break;
     }
     case -1: /* Error */
@@ -1649,7 +1873,7 @@ static int curdir_index = 0;
 void push_curdir(const char *path)
 {
     if (curdir_index >= MAX_CURDIRS) {
-        fprintf(stderr,"ERROR: Too much curdirs. FIX IT!\n");
+        fprintf(stderr,"ERROR: Too many curdirs. FIX IT!\n");
     } else {
         getcwd(curdirs[curdir_index++], PATH_MAX);
         if( chdir(path) < 0)

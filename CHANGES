@@ -1,3 +1,38 @@
+1.6.0:
+Stephane Peter (Codehost) - Tue Aug 21 20:22:10 PDT 2001
+ * Added distribution detection: "distro" attribute, SETUP_DISTRO environment
+   variable in scripts.
+ * Automatic selection of options using the "command" attribute.
+Stephane Peter (Codehost) - Fri Aug 31 00:07:40 PDT 2001
+ * Included the "dialog" source code and added a dialog-based UI.
+ * Added the "superuser" attribute for root-only installations.
+Stephane Peter (Codehost) - Fri Sep 14 00:41:04 PDT 2001
+ * Added two optional installation classes, through the "express" install XML keyword.
+   'Recommended' is an express, non-interactive, installation based on defaults.
+Stephane Peter (Codehost) - Fri Sep 14 18:25:24 PDT 2001
+ * Added the "require" element that allows to set prerequisites for the installation
+   through the use of arbitrary commands.
+Stephane Peter (Codehost) - Tue Oct  9 19:48:29 PDT 2001
+ * Allow the 'arch', 'glibc' and 'distro' attributes in conjunction with 'files' elements.
+Stéphane Peter (Codehost) - Thu Oct 18 00:29:40 PDT 2001
+ * Added the 'gui' value to the 'play' attribute to binaries to specify binaries that require
+   an X11 environment to be able to be started.
+Stephane Peter (Codehost) - Fri Oct 19 18:39:12 PDT 2001
+ * Added the 'once' attribute to the global 'install' element, to explicitly prevent multiple
+   installations of the same product.
+Stephane Peter (Codehost) - Tue Oct 23 11:48:32 PDT 2001
+ * Support transparent pixmaps correctly for splash images.
+Stephane Peter (Codehost) - Mon Nov 26 16:48:01 PST 2001
+ * Allow the 'arch', 'glibc' and 'distro' attributes on all elements : files, binaries,
+   scripts and 'require' (to allow for very specific requirement checks).
+ * Extended the 'distro' matching with 'up', 'exact' and 'major' matching policies.
+Stephane Peter (Codehost) - Tue Dec  4 22:49:21 PST 2001
+ * Added the 'binarypath' attribute to the root 'install' element to specify a default
+   binary path from the configuration file.
+Stéphane Peter (Codehost) - Thu Dec  6 02:30:28 PST 2001
+ * Added support for the Debian menus systems (update-menus command) that is also
+   used in Mandrake to install desktop menu entries.
+
 1.5.9:
 Sam Lantinga - Thu Mar  8 18:09:29 PST 2001
  * Don't prompt for menu items if the "nobinaries" option is set

@@ -1,6 +1,6 @@
 #
 # Makefile for the setup plugins
-# $Id: Makefile.in,v 1.1 2000-11-29 02:10:08 megastep Exp $
+# $Id: Makefile.in,v 1.2 2002-01-28 01:13:32 megastep Exp $
 #
 
 @SET_MAKE@

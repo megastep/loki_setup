@@ -139,7 +139,7 @@ URLlookup *open_lookup(install_info *info, const char *url)
 #ifdef TEST_MAIN
         fprintf(stderr, "Out of memory, no network check\n");
 #else
-        log_warning(info, _("Out of memory, no network check"));
+        log_warning(_("Out of memory, no network check"));
 #endif
         return(NULL);
     }
@@ -149,7 +149,7 @@ URLlookup *open_lookup(install_info *info, const char *url)
 #ifdef TEST_MAIN
         fprintf(stderr, "Unable to create pipe, no network check\n");
 #else
-        log_warning(info, _("Unable to create pipe, no network check"));
+        log_warning(_("Unable to create pipe, no network check"));
 #endif
         free(lookup);
         return(NULL);
@@ -163,7 +163,7 @@ URLlookup *open_lookup(install_info *info, const char *url)
 #ifdef TEST_MAIN
             fprintf(stderr, "Fork failed, no network check\n");
 #else
-            log_warning(info, _("Fork failed, no network check"));
+            log_warning(_("Fork failed, no network check"));
 #endif
             close(pipe_fds[0]);
             close(pipe_fds[1]);

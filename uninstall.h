@@ -2,7 +2,7 @@
    Parses the product INI file in ~/.loki/installed/ and uninstalls the software.
 */
 
-/* $Id: uninstall.h,v 1.1 2000-11-14 22:39:51 hercules Exp $ */
+/* $Id: uninstall.h,v 1.2 2002-01-28 01:13:31 megastep Exp $ */
 
 extern product_t *prod;
 

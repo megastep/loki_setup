@@ -20,7 +20,7 @@
     <handler>main_quit_slot</handler>
     <last_modification_time>Tue, 14 Nov 2000 20:09:25 GMT</last_modification_time>
   </signal>
-  <title>Loki Uninstall Tool</title>
+  <title>Uninstall Tool</title>
   <type>GTK_WINDOW_TOPLEVEL</type>
   <position>GTK_WIN_POS_NONE</position>
   <modal>False</modal>
@@ -186,6 +186,7 @@
 	      <last_modification_time>Tue, 14 Nov 2000 19:30:53 GMT</last_modification_time>
 	    </signal>
 	    <label>Exit</label>
+	    <relief>GTK_RELIEF_NORMAL</relief>
 	  </widget>
 
 	  <widget>
@@ -199,6 +200,7 @@
 	      <last_modification_time>Tue, 14 Nov 2000 19:55:13 GMT</last_modification_time>
 	    </signal>
 	    <label>Uninstall</label>
+	    <relief>GTK_RELIEF_NORMAL</relief>
 	  </widget>
 	</widget>
       </widget>
@@ -355,6 +357,7 @@
 	      <last_modification_time>Tue, 14 Nov 2000 19:31:22 GMT</last_modification_time>
 	    </signal>
 	    <label>Cancel</label>
+	    <relief>GTK_RELIEF_NORMAL</relief>
 	  </widget>
 
 	  <widget>
@@ -368,6 +371,7 @@
 	      <last_modification_time>Tue, 14 Nov 2000 19:31:09 GMT</last_modification_time>
 	    </signal>
 	    <label>Finished</label>
+	    <relief>GTK_RELIEF_NORMAL</relief>
 	  </widget>
 	</widget>
       </widget>

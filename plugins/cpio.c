@@ -98,6 +98,8 @@ size_t copy_cpio_stream(install_info *info, stream *input, const char *dest, con
 			file_hdr.c_dev_min = minor (dev);
 			file_hdr.c_rdev_maj = major (rdev);
 			file_hdr.c_rdev_min = minor (rdev);
+		} else {
+			log_fatal(_("Invalid CPIO header\n"));
 		}
 		if(file_hdr.c_name != NULL)
 			free(file_hdr.c_name);
@@ -113,17 +115,17 @@ size_t copy_cpio_stream(install_info *info, stream *input, const char *dest, con
 		if(S_ISDIR(file_hdr.c_mode)){
 			file_create_hierarchy(info, file_hdr.c_name);
 			file_mkdir(info, file_hdr.c_name, file_hdr.c_mode & C_MODE);
-		}else if(S_ISFIFO(file_hdr.c_mode)){
+		}else if(S_ISFIFO(file_hdr.c_mode) && !restoring_corrupt() ){
 			file_mkfifo(info, file_hdr.c_name, file_hdr.c_mode & C_MODE);
-		}else if(S_ISBLK(file_hdr.c_mode)){
+		}else if(S_ISBLK(file_hdr.c_mode) && !restoring_corrupt() ){
 			file_mknod(info, file_hdr.c_name, S_IFBLK|(file_hdr.c_mode & C_MODE), 
 					   device(file_hdr.c_rdev_maj,file_hdr.c_rdev_min));
-		}else if(S_ISCHR(file_hdr.c_mode)){
+		}else if(S_ISCHR(file_hdr.c_mode) && !restoring_corrupt() ){
 			file_mknod(info, file_hdr.c_name, S_IFCHR|(file_hdr.c_mode & C_MODE), 
 					   device(file_hdr.c_rdev_maj,file_hdr.c_rdev_min));
-		}else if(S_ISSOCK(file_hdr.c_mode)){
+		}else if(S_ISSOCK(file_hdr.c_mode) && !restoring_corrupt() ){
 			// TODO: create Unix socket
-		}else if(S_ISLNK(file_hdr.c_mode)){
+		}else if(S_ISLNK(file_hdr.c_mode) && !restoring_corrupt() ){
 			char *lnk = (char *)malloc(file_hdr.c_filesize+1);
 			file_read(info, lnk, file_hdr.c_filesize, input);
 			count += file_hdr.c_filesize;
@@ -131,34 +133,38 @@ size_t copy_cpio_stream(install_info *info, stream *input, const char *dest, con
 			file_symlink(info, lnk, file_hdr.c_name);
 			free(lnk);
 		}else{
-			unsigned long chk = 0;
-			/* Open the file for output */
-			output = file_open(info, file_hdr.c_name, "wb");
-			if(output){
-				left = file_hdr.c_filesize;
-				while(left && (nread=file_read(info, buf, (left >= BUFSIZ) ? BUFSIZ : left, input))){
-					count += nread;
-					copied = file_write(info, buf, nread, output);
-					left -= nread;
-					if(has_crc && file_hdr.c_chksum){
-						int i;
-						for(i=0; i<BUFSIZ; i++)
-							chk += buf[i];
-					}
-				
-					info->installed_bytes += copied;
-					if(update){
-						update(info, file_hdr.c_name, file_hdr.c_filesize-left, file_hdr.c_filesize, current_option);
-					}
-				}
-				if(has_crc && file_hdr.c_chksum && file_hdr.c_chksum != chk)
-					log_warning(info,_("Bad checksum for file '%s'"), file_hdr.c_name);
-				size += file_hdr.c_filesize;
-				file_close(info, output);
-				chmod(file_hdr.c_name, file_hdr.c_mode & C_MODE);
-			}else { /* Skip the file data */
+			if ( restoring_corrupt() && !file_is_corrupt(file_hdr.c_name) ) {
 				file_skip(info, file_hdr.c_filesize, input);
-				count += file_hdr.c_filesize;
+			} else {
+				unsigned long chk = 0;
+				/* Open the file for output */
+				output = file_open(info, file_hdr.c_name, "wb"); /* FIXME: Mmh, is the path expanded??? */
+				if(output){
+					left = file_hdr.c_filesize;
+					while(left && (nread=file_read(info, buf, (left >= BUFSIZ) ? BUFSIZ : left, input))){
+						count += nread;
+						copied = file_write(info, buf, nread, output);
+						left -= nread;
+						if(has_crc && file_hdr.c_chksum){
+							int i;
+							for(i=0; i<BUFSIZ; i++)
+								chk += buf[i];
+						}
+				
+						info->installed_bytes += copied;
+						if(update){
+							update(info, file_hdr.c_name, file_hdr.c_filesize-left, file_hdr.c_filesize, current_option);
+						}
+					}
+					if(has_crc && file_hdr.c_chksum && file_hdr.c_chksum != chk)
+						log_warning(_("Bad checksum for file '%s'"), file_hdr.c_name);
+					size += file_hdr.c_filesize;
+					file_close(info, output);
+					chmod(file_hdr.c_name, file_hdr.c_mode & C_MODE);
+				}else { /* Skip the file data */
+					file_skip(info, file_hdr.c_filesize, input);
+					count += file_hdr.c_filesize;
+				}
 			}
 		}
 		/* More padding zeroes after the data */
@@ -184,7 +190,7 @@ static size_t CPIOCopy(install_info *info, const char *path, const char *dest, c
 SetupPlugin cpio_plugin = {
 	"Unix CPIO Plugin",
 	"1.0",
-	"Stéphane Peter <megastep@lokigames.com>",
+	"Stéphane Peter <megastep@megastep.org>",
 	3, {".cpio", ".cpio.gz", ".cpio.Z"},
 	CPIOInitPlugin, CPIOFreePlugin,
 	CPIOSize, CPIOCopy

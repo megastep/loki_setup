@@ -16,7 +16,7 @@ CC = @CC@
 # This indicates where the 'setupdb' CVS module is checked out
 SETUPDB	= @SETUPDB@
 
-IMAGE = /loki/patch-tools/setup-image
+IMAGE = ../../spp/image
 UPDATES = /loki/updates/loki_uninstall
 CONVERT_IMAGE = /loki/patch-tools/convert-image
 
@@ -33,19 +33,23 @@ OPTIONS = -DSTUB_UI -DSETUP_VERSION_MAJOR=@SETUP_VERSION_MAJOR@ \
 CFLAGS += $(OPTIMIZE) $(HEADERS) $(OPTIONS)
 
 COMMON_OBJS = log.o install_log.o
-OBJS 		= $(COMMON_OBJS) main.o detect.o plugins.o network.o install.o copy.o file.o loki_launchurl.o
+CORE_OBJS   = detect.o plugins.o network.o install.o copy.o file.o loki_launchurl.o
+OBJS 		= $(COMMON_OBJS) $(CORE_OBJS) main.o 
 LOKI_UNINSTALL_OBJS = loki_uninstall.o uninstall_ui.o
 UNINSTALL_OBJS 		= uninstall.o
-CONSOLE_OBJS 		= $(OBJS) console_ui.o
+CHECK_OBJS			= $(COMMON_OBJS) $(CORE_OBJS) check.o
+CONSOLE_OBJS 		= $(OBJS) console_ui.o dialog_ui.o
 GUI_OBJS 			= $(OBJS) gtk_ui.o
 
 SRCS = $(OBJS:.o=.c) $(CONSOLE_OBJS:.o=.c) $(GUI_OBJS:.o=.c)
 
-LIBS = plugins/libplugins.a $(SETUPDB)/$(arch)/libsetupdb.a @LIBS@ -lz
-GUI_LIBS = plugins/libplugins.a $(SETUPDB)/$(arch)/libsetupdb.a @GUI_LIBS@ -lz
-CONSOLE_LIBS = $(LIBS)
+COMMON_LIBS = plugins/libplugins.a dialog/libdialog.a \
+	      $(SETUPDB)/$(arch)/libsetupdb.a
+LIBS =  $(COMMON_LIBS) @LIBS@ -lz -lm
+GUI_LIBS = $(COMMON_LIBS) @GUI_LIBS@ -lz
+CONSOLE_LIBS = $(LIBS) -lncurses -lgpm
 
-all: do-plugins setup setup.gtk uninstall
+all: do-plugins do-dialog setup setup.gtk uninstall
 
 testxml: testxml.o
 	$(CC) -o $@ $^ $(LIBS)
@@ -56,17 +60,23 @@ loki_uninstall.o: uninstall.c
 loki_uninstall: $(LOKI_UNINSTALL_OBJS) $(SETUPDB)/$(arch)/libsetupdb.a
 	$(CC) -o $@ $^ $(GUI_LIBS)
 
-uninstall: $(UNINSTALL_OBJS) $(SETUPDB)/$(arch)/libsetupdb.a
+uninstall: $(UNINSTALL_OBJS) $(COMMON_LIBS)
 	$(CC) -o $@ $^ $(CONSOLE_LIBS) -static
 
-setup:	$(CONSOLE_OBJS) $(SETUPDB)/$(arch)/libsetupdb.a
+check: $(CHECK_OBJS)  $(COMMON_LIBS)
+	$(CC) -o $@ $^ $(GUI_LIBS)
+
+setup:	$(CONSOLE_OBJS) $(COMMON_LIBS)
 	$(CC) -o $@ $^ $(CONSOLE_LIBS) -static
 
-setup.gtk: $(GUI_OBJS) $(SETUPDB)/$(arch)/libsetupdb.a
+setup.gtk: $(GUI_OBJS) $(COMMON_LIBS)
 	$(CC) -o $@ $^ $(GUI_LIBS)
 
 do-plugins:
 	$(MAKE) -C plugins all
+
+do-dialog:
+	$(MAKE) -C dialog all
 
 install.dbg: all
 ifeq ($(DYN_PLUGINS),true)
@@ -106,13 +116,38 @@ endif
 	    cp -v uninstall $(IMAGE)/setup.data/bin/$(os)/$(arch); \
 	    strip $(IMAGE)/setup.data/bin/$(os)/$(arch)/uninstall; \
 	    brandelf -t $(os) $(IMAGE)/setup.data/bin/$(os)/$(arch)/uninstall; \
-		if [ $(os) = Linux ]; then \
+		if [ $(os) = Linux -a -d $(CONVERT_IMAGE) ]; then \
 	    	cp -v uninstall $(CONVERT_IMAGE)/bin/$(os)/$(arch); \
 	    	strip $(CONVERT_IMAGE)/bin/$(os)/$(arch)/uninstall; \
 	    	brandelf -t $(os) $(CONVERT_IMAGE)/bin/$(os)/$(arch)/uninstall; \
 		fi; \
 	    cp -v setup.gtk $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc); \
 	    strip $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk; \
+	else \
+		echo No directory to copy the binary files to.; \
+	fi
+
+# Pretty LPP-specific
+install-check: check
+	@if [ -d $(IMAGE)/bin/$(arch)/ ]; then \
+	    cp -v check $(IMAGE)/bin/$(arch)/; \
+	    strip $(IMAGE)/bin/$(arch)/check; \
+	    cp -v check.glade $(IMAGE)/misc/; \
+	else \
+		echo No directory to copy the binary files to.; \
+	fi
+
+# Copy loki_uninstall and the required files
+
+spp: all loki_uninstall install-image install-check
+	@if [ -d $(IMAGE)/bin/$(arch)/ ]; then \
+	    cp -v loki_uninstall $(IMAGE)/bin/$(arch)/bin/codehost-uninstall; \
+	    strip $(IMAGE)/bin/$(arch)/bin/codehost-uninstall; \
+	    for file in `find image/setup.data -name loki-uninstall.mo -print`; \
+	    do  path="$(IMAGE)/`dirname $$file | sed 's,image/setup.data/,,'`"; \
+	        mkdirhier $$path; \
+	        cp -v $$file $$path; \
+	    done; \
 	else \
 		echo No directory to copy the binary files to.; \
 	fi
@@ -156,6 +191,7 @@ po-image:
 
 clean:
 	$(MAKE) -C plugins clean
+	$(MAKE) -C dialog clean
 	rm -f foo.xml core tags *.o
 
 distclean: clean
@@ -196,6 +232,7 @@ dep: depend
 
 depend:
 	$(MAKE) -C plugins depend
+	$(MAKE) -C dialog depend
 	$(CC) -MM $(CFLAGS) $(SRCS) > .depend
 
 ifeq ($(wildcard .depend),.depend)

@@ -1,5 +1,5 @@
 /* TAR plugin for setup */
-/* $Id: tar.c,v 1.1 2000-07-31 21:27:08 megastep Exp $ */
+/* $Id: tar.c,v 1.2 2002-01-28 01:13:33 megastep Exp $ */
 
 #include "plugins.h"
 #include "tar.h"
@@ -7,6 +7,7 @@
 #include "install_log.h"
 
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -27,7 +28,7 @@ static int TarFreePlugin(void)
 static size_t TarSize(install_info *info, const char *path)
 {
 	/* This is a rough estimate, the headers are quite small */
-	log_debug(info, "TAR: Size(%s)", path);
+	log_debug("TAR: Size(%s)", path);
 	return file_size(info, path) - sizeof(tar_record);
 }
 
@@ -44,7 +45,7 @@ static size_t TarCopy(install_info *info, const char *path, const char *dest, co
     unsigned int mode;
     int blocks, left, length;
 
-	log_debug(info, "TAR: Copy %s -> %s", path, dest);
+	log_debug("TAR: Copy %s -> %s", path, dest);
 
     size = 0;
     input = file_open(info, path, "rb");
@@ -61,6 +62,7 @@ static size_t TarCopy(install_info *info, const char *path, const char *dest, co
             continue;
         }
         snprintf(final, sizeof(final), "%s/%s", dest, record.hdr.name);
+
         sscanf(record.hdr.mode, "%o", &mode);
         sscanf(record.hdr.size, "%o", &left);
         cur_size = left;
@@ -68,41 +70,49 @@ static size_t TarCopy(install_info *info, const char *path, const char *dest, co
         switch (record.hdr.typeflag) {
             case TF_OLDNORMAL:
             case TF_NORMAL:
-                this_size = 0;
-                output = file_open(info, final, "wb");
-                if ( output ) {
-                    while ( blocks-- > 0 ) {
-                        if ( file_read(info, &record, (sizeof record), input)
-                                                        != (sizeof record) ) {
-                            break;
-                        }
-                        if ( left < (sizeof record) ) {
-                            length = left;
-                        } else {
-                            length = (sizeof record);
-                        }
-                        copied = file_write(info, &record, length, output);
-                        info->installed_bytes += copied;
-                        size += copied;
-                        left -= copied;
-                        this_size += copied;
+				if ( restoring_corrupt() && !file_is_corrupt(final) ) {
+					file_skip(info, left, input);
+				} else {
+					this_size = 0;
+					output = file_open(info, final, "wb");
+					if ( output ) {
+						while ( blocks-- > 0 ) {
+							if ( file_read(info, &record, (sizeof record), input)
+								 != (sizeof record) ) {
+								break;
+							}
+							if ( left < (sizeof record) ) {
+								length = left;
+							} else {
+								length = (sizeof record);
+							}
+							copied = file_write(info, &record, length, output);
+							info->installed_bytes += copied;
+							size += copied;
+							left -= copied;
+							this_size += copied;
 
-                        if ( update ) {
-                            update(info, final, this_size, cur_size, current_option);
-                        }
-                    }
-                    file_close(info, output);
-                    chmod(final, mode);
-                }
+							if ( update ) {
+								update(info, final, this_size, cur_size, current_option);
+							}
+						}
+						file_close(info, output);
+						chmod(final, mode);
+					}
+				}
                 break;
             case TF_SYMLINK:
-                file_symlink(info, record.hdr.linkname, final);
+				if ( !restoring_corrupt() ) {
+					file_symlink(info, record.hdr.linkname, final);
+				}
                 break;
             case TF_DIR:
-                dir_create_hierarchy(info, final, mode);
+				if ( !restoring_corrupt() ) {
+					dir_create_hierarchy(info, final, mode);
+				}
                 break;
             default:
-                log_warning(info, _("Tar: '%s' is unknown file type: %c"),
+                log_warning(_("Tar: '%s' is unknown file type: %c"),
                             record.hdr.name, record.hdr.typeflag);
                 break;
         }
@@ -124,7 +134,7 @@ static
 SetupPlugin tar_plugin = {
 	"Unix TAR Archives Plugin",
 	"1.0",
-	"Stéphane Peter <megastep@lokigames.com>",
+	"Stéphane Peter <megastep@megastep.org>",
 	3, {".tar", ".tar.gz", ".tar.Z"},
 	TarInitPlugin, TarFreePlugin,
 	TarSize, TarCopy

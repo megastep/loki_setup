@@ -5,6 +5,9 @@
 # Go to the proper setup directory (if not already there)
 cd `dirname $0`
 
+# Feel free to add some additional command-line arguments for setup here.
+args=""
+
 # Return the appropriate architecture string
 DetectARCH()
 {
@@ -72,7 +75,6 @@ try_run()
             cat <<__EOF__
 This installation doesn't support $libc on $os / $arch
 
-Please contact Loki Technical Support at support@lokigames.com
 __EOF__
             exit 1
         fi
@@ -99,7 +101,7 @@ __EOF__
 # Try to run the setup program
 status=0
 rm -f "$setup"
-try_run setup.gtk $* || try_run setup $* -fatal || {
+try_run setup.gtk $args $* || try_run setup $args $* -fatal || {
     echo "The setup program seems to have failed on $arch/$libc"
     echo
     echo "Please contact Loki Technical Support at support@lokigames.com"

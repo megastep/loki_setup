@@ -3,6 +3,7 @@
 #define _install_h
 
 #include "setupdb.h"
+#include "detect.h"
 
 #include <limits.h>
 #include <parser.h>		/* From gnome-xml */
@@ -29,6 +30,7 @@
 typedef enum {
     SETUP_ABORT = -1,
     SETUP_INIT,
+	SETUP_CLASS,
     SETUP_LICENSE,
     SETUP_README,
     SETUP_OPTIONS,
@@ -41,8 +43,9 @@ typedef enum {
 
 /* The types of desktop we support menu items for */
 typedef enum {
-    DESKTOP_KDE, // KDE first because RH6.1 does not yet handle KDE well.
+    DESKTOP_MENUDEBIAN,
     DESKTOP_REDHAT,
+    DESKTOP_KDE, // KDE first because RH6.1 does not yet handle KDE well.
     DESKTOP_GNOME,
     MAX_DESKTOPS
     /* More to come ? */
@@ -58,7 +61,7 @@ typedef struct _URLlookup URLlookup;
 typedef struct _install_log install_log;
 
 /* The main installation information structure */
-typedef struct {
+typedef struct _install_info {
 
     /* The product name and description */
     const char *name;
@@ -88,6 +91,9 @@ typedef struct {
     const char *arch;
     const char *libc;
 
+	distribution distro;
+	int distro_maj, distro_min; /* Version numbers for the detected distribution */
+
     /* Bitfields of install options */
     struct {
         int install_menuitems:1;
@@ -102,16 +108,6 @@ typedef struct {
         char *mounted;
         struct cdrom_elem *next;
     } *cdroms_list;
-
-    /* The filesystems that were mounted by setup */
-    struct mounted_elem {
-        char *device;
-        char *dir;
-        struct mounted_elem *next;
-    } *mounted_list;
-
-    /* Log of actions taken */
-    install_log *log;
 
     /* The amount installed so far, in bytes */
     size_t installed_bytes;
@@ -191,9 +187,6 @@ typedef struct {
 
 } install_info;
 
-/* Matches a locale string against the current one */
-extern int MatchLocale(const char *str);
-
 /* Functions to retrieve attribution information from the XML tree */
 extern const char *GetProductName(install_info *info);
 extern const char *GetProductDesc(install_info *info);
@@ -220,10 +213,17 @@ extern const char *GetRuntimeArgs(install_info *info);
 extern const char *GetInstallOption(install_info *info, const char *option);
 extern const char *GetPreUnInstall(install_info *info);
 extern const char *GetPostUnInstall(install_info *info);
+extern const char *GetProductDefaultBinaryPath(install_info *info);
 extern int         GetProductNumComponents(install_info *info);
+extern int         GetProductRequireRoot(install_info *info);
+extern int         GetProductAllowsExpress(install_info *info);
+extern int         GetProductInstallOnce(install_info *info);
+
+extern const char *IsReadyToInstall(install_info *info);
+extern int         CheckRequirements(install_info *info);
 
 /* Create the initial installation information */
-extern install_info *create_install(const char *configfile, int log_level,
+extern install_info *create_install(const char *configfile,
                                     const char *install_path,
                                     const char *binary_path);
 
@@ -233,13 +233,6 @@ struct cdrom_elem *add_cdrom_entry(install_info *info, const char *id, const cha
 
 /* Change the detected mount point for a CDROM */
 void set_cdrom_mounted(struct cdrom_elem *cd, const char *path);
-
-/* Get a mount point for the specified CDROM, and return its path.
-   If the CDROM is not mounted, prompt the user to mount it */
-const char *get_cdrom(install_info *info, const char *id);
-
-/* Add a new mounted filesystem entry */
-struct mounted_elem *add_mounted_entry(install_info *info, const char *device, const char *dir);
 
 /* Create a new component entry */
 struct component_elem *add_component_entry(install_info *info, const char *name, const char *version, int def);
@@ -290,6 +283,8 @@ const char *get_option_help(install_info *info, xmlNodePtr node);
 
 /* Free the install information structure */
 extern void delete_install(install_info *info);
+/* This only affects the CDROM and filesystem components, and is called from delete_install() */
+extern void delete_cdrom_install(install_info *info);
 
 /* Actually install the selected filesets */
 extern install_state install(install_info *info,
@@ -311,6 +306,9 @@ extern int update_uninstall(install_info *info, product_t *product);
 extern int install_preinstall(install_info *info);
 extern int install_postinstall(install_info *info);
 
+/* Recursively look for options with install="command" and run the commands to determine the actual status */
+void mark_cmd_options(install_info *info, xmlNodePtr parent, int exclusive);
+
 /* Launch the game using the information in the install info */
 extern install_state launch_game(install_info *info);
 
@@ -318,13 +316,16 @@ extern install_state launch_game(install_info *info);
 extern int launch_browser(install_info *info, int (*browser)(const char *url));
 
 /* Install the desktop menu items */
-extern char install_menuitems(install_info *info, desktop_type d);
+extern int install_menuitems(install_info *info, desktop_type d);
 
 /* Run shell script commands from a string
    If 'arg' is >= 0, it is passed to the script as a numeric argument,
    otherwise the install path is passed as a command line argument.
  */
 extern int run_script(install_info *info, const char *script, int arg);
+
+/* returns true if any deviant paths are not writable */
+char check_deviant_paths(xmlNodePtr node, install_info *info);
 
 /* Convenience functions to quickly change back and forth between current directories */
 
@@ -334,6 +335,21 @@ extern void pop_curdir(void);
 
 /* Run a program in the background */
 int run_command(install_info *info, const char *cmd, const char *arg);
+
+/* Manage the list of corrupt files if we're restoring */
+extern void add_corrupt_file(const char *path, const char *option);
+extern void free_corrupt_files(void);
+extern int file_is_corrupt(const char *path);
+extern int restoring_corrupt(void);
+extern void select_corrupt_options(install_info *info);
+
+
+/*** Global variables ****/
+
+extern int disable_install_path;
+extern int disable_binary_path;
+extern int express_setup;
+
 
 #endif /* _install_h */
 

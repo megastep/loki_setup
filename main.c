@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.45 2001-01-19 03:48:08 megastep Exp $ */
+/* $Id: main.c,v 1.46 2002-01-28 01:13:30 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -45,16 +45,17 @@ Modifications by Borland/Inprise Corp.:
 /* Global options */
 
 int force_console = 0;
-int disable_install_path = 0;
-int disable_binary_path = 0;
+extern int disable_install_path;
+extern int disable_binary_path;
+int express_setup = 0;
 #ifdef RPM_SUPPORT
-char *rpm_root = "/";
-int force_manual = 0;
+extern char *rpm_root;
+extern int force_manual;
 #endif
 const char *argv0 = NULL;
 
 static install_info *info = NULL;
-Install_UI UI;
+extern Install_UI UI;
 
 /* List of options enabled on the command line */
 static struct enabled_option {
@@ -62,14 +63,15 @@ static struct enabled_option {
     struct enabled_option *next;
 } *enabled_options = NULL;
 
-static char *current_locale = NULL;
-
 void exit_setup(int ret)
 {
     /* Cleanup afterwards */
     if ( info )
         delete_install(info);
     FreePlugins();
+	free_corrupt_files();
+    unmount_filesystems();
+	log_exit();
     exit(ret);
 }
 
@@ -91,25 +93,10 @@ void abort_install(void)
 /* List of UI drivers */
 static int (*GUI_okay[])(Install_UI *UI) = {
     gtkui_okay,
+    dialog_okay,
     console_okay,
     NULL
 };
-
-/* Matches a locale string against the current one */
-
-int MatchLocale(const char *str)
-{
-	if ( ! str )
-		return 1;
-	if ( current_locale && ! (!strcmp(current_locale, "C") || !strcmp(current_locale,"POSIX")) ) {
-		if ( strstr(current_locale, str) == current_locale ) {
-			return 1;
-		}
-	} else if ( !strcmp(str, "none") ) {
-		return 1;
-	}
-	return 0;
-}
 
 /* List the valid command-line options */
 
@@ -150,66 +137,10 @@ _("Usage: %s [options]\n\n"
      argv0, SETUP_CONFIG);
 }
 
-/* Get a mount point for the specified CDROM, and return its path.
-   If the CDROM is not mounted, prompt the user to mount it */
-const char *get_cdrom(install_info *info, const char *id)
-{
-    const char *mounted = NULL, *desc = info->desc;
-    struct cdrom_elem *cd;
-
-    while ( ! mounted ) {
-        for ( cd = info->cdroms_list; cd; cd = cd->next ) {
-            if ( !strcmp(id, cd->id) ) {
-                desc = cd->name;
-                if ( cd->mounted ) {
-                    mounted = cd->mounted;
-                    break;
-                }
-            }
-        }
-        if ( ! mounted ) {
-            yesno_answer response;
-            char buf[1024];
-            const char *prompt;
-
-            if ( info->mounted_list ) { /* We were able to mount at least one CDROM */
-                prompt =  _("\nPlease insert the %s CDROM.\n"
-                            "Choose Yes to retry, No to cancel");                
-            } else {
-                prompt =  _("\nPlease mount the %s CDROM.\n"
-                            "Choose Yes to retry, No to cancel");
-            }
-            unmount_filesystems(info);
-            snprintf(buf, sizeof(buf), prompt, desc);
-            response = UI.prompt(buf, RESPONSE_NO);
-            if ( response == RESPONSE_NO ) {
-                abort_install();
-                return NULL;
-            }
-            detect_cdrom(info);
-        }
-    }
-    return mounted;
-}
-
-/* Displays a dialog using the UI code and abort the installation */
-void ui_fatal_error(const char *txt, ...)
-{
-    va_list ap;
-    char buf[BUFSIZ];
-
-    va_start(ap, txt);
-    vsnprintf(buf, BUFSIZ, txt, ap);
-    va_end(ap);
-
-    UI.prompt(buf, RESPONSE_OK);
-    abort_install();
-}
-
 /* The main installer code */
 int main(int argc, char **argv)
 {
-    int exit_status;
+    int exit_status, get_out = 0;
     int i, c;
     install_state state;
     char *xml_file = SETUP_CONFIG;
@@ -229,13 +160,7 @@ int main(int argc, char **argv)
 	bindtextdomain (PACKAGE, LOCALEDIR);
 	textdomain (PACKAGE);
 
-	current_locale = getenv("LC_ALL");
-	if(!current_locale) {
-		current_locale = getenv("LC_MESSAGES");
-		if(!current_locale) {
-			current_locale = getenv("LANG");
-		}
-	}
+	DetectLocale();
 
     /* Parse the command-line options */
     while ( (c=getopt(argc, argv,
@@ -308,14 +233,14 @@ int main(int argc, char **argv)
 		DumpPlugins(stderr);
 	}
 
+	log_init(log_level);
+
     /* Initialize the XML setup configuration */
-    info = create_install(xml_file, log_level, install_path, binary_path);
+    info = create_install(xml_file, install_path, binary_path);
     if ( info == NULL ) {
         fprintf(stderr, _("Couldn't load '%s'\n"), xml_file);
         exit(1);
     }
-
-	log_debug(info, _("Detected locale is %s"), current_locale);
 
     /* Get the appropriate setup UI */
     for ( i=0; GUI_okay[i]; ++i ) {
@@ -336,7 +261,7 @@ int main(int argc, char **argv)
 
     /* Run the little state machine */
     exit_status = 0;
-    while ( state != SETUP_EXIT ) {
+    while ( ! get_out ) {
         char buf[1024];
         int num_cds;
 
@@ -346,11 +271,23 @@ int main(int argc, char **argv)
                 if ( state == SETUP_ABORT ) {
                     exit_status = 1;
                 }
+				/* Check if we should be root */
+				if ( GetProductRequireRoot(info) && geteuid()!=0 ) {
+					UI.prompt(_("You need to run this installer as the super-user.\n"), RESPONSE_OK);
+					state = SETUP_ABORT;
+					continue;
+				}
+				if ( info->product && GetProductInstallOnce(info) ) {
+					UI.prompt(_("\nThis product is already installed.\nUninstall it before running this program again.\n"), RESPONSE_OK);
+					state = SETUP_EXIT;
+					continue;
+				}
                 /* Check for the presence of the product if we install a component */
                 if ( GetProductComponent(info) ) {
                     if ( GetProductNumComponents(info) > 0 ) {
                         UI.prompt(_("\nIllegal installation: do not mix components with a component installation.\n"), RESPONSE_OK);
                         state = SETUP_EXIT;
+						continue;
                     } else if ( info->product ) {
                         if ( ! info->component ) {
                             snprintf(buf, sizeof(buf), _("\nThe %s component is already installed.\n"
@@ -358,6 +295,7 @@ int main(int argc, char **argv)
                                      GetProductComponent(info));
                             UI.prompt(buf, RESPONSE_OK);
                             state = SETUP_EXIT;
+							continue;
                         }
                     } else {                        
                         snprintf(buf, sizeof(buf), _("\nYou must install %s before running this\n"
@@ -365,6 +303,7 @@ int main(int argc, char **argv)
                                 info->desc);
                         UI.prompt(buf, RESPONSE_OK);
                         state = SETUP_EXIT;
+						continue;
                     }
                 }
 
@@ -373,29 +312,38 @@ int main(int argc, char **argv)
                 /* Check for the presence of a CDROM if required */
                 if ( GetProductCDROMRequired(info) ) {
                     if ( ! GetProductCDROMFile(info) ) {
-                        log_fatal(info, _("The 'cdromfile' attribute is now mandatory when using the 'cdrom' attribute."));
+                        log_fatal(_("The 'cdromfile' attribute is now mandatory when using the 'cdrom' attribute."));
                     }
                     add_cdrom_entry(info, info->name, info->desc, GetProductCDROMFile(info));
                     detect_cdrom(info);
 
                     if ( ! get_cdrom(info, info->name) ) {
                         state = SETUP_EXIT;
+						break;
                     }
                 } else if ( num_cds > 0) {
                     detect_cdrom(info);
                 }
 
+				if ( ! CheckRequirements(info) ) {
+					state = SETUP_ABORT;
+					break;
+				}
+
                 if ( enabled_options ) {
                     enabled_opt = enabled_options;
                     while ( enabled_opt ) {
                         if ( enable_option(info, enabled_opt->option) == 0 ) {
-                            log_warning(info, _("Could not enable option: %s"), enabled_opt->option);
+                            log_warning(_("Could not enable option: %s"), enabled_opt->option);
                         }
                         enabled_opt = enabled_opt->next;
                     }
                     state = SETUP_INSTALL;
                 }
                 break;
+		    case SETUP_CLASS:
+				state = UI.pick_class(info);
+				break;
             case SETUP_LICENSE:
                 state = UI.license(info);
                 break;
@@ -423,7 +371,11 @@ int main(int argc, char **argv)
                 abort_install();
                 break;
             case SETUP_EXIT:
-                /* Not reached */
+                /* Optional cleanup */
+				if ( UI.exit ) {
+					UI.exit(info);
+				}
+				get_out = 1;
                 break;
         }
     }

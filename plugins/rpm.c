@@ -1,5 +1,5 @@
 /* RPM plugin for setup */
-/* $Id: rpm.c,v 1.2 2000-11-29 02:01:20 megastep Exp $ */
+/* $Id: rpm.c,v 1.3 2002-01-28 01:13:32 megastep Exp $ */
 
 #include "plugins.h"
 #include "file.h"
@@ -12,14 +12,22 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include <zlib.h>
+#include <bzlib.h>
+
+#ifdef LIBBZ2_PREFIX
+#define BZDOPEN BZ2_bzdopen
+#else
+#define BZDOPEN bzdopen
+#endif
+
 #define HAVE_ZLIB_H
 #include <rpm/rpmio.h>
 #include <rpm/rpmlib.h>
 #include <rpm/header.h>
 
-
-extern char *rpm_root;
-extern int force_manual;
+char *rpm_root = "/";
+int force_manual = 0;
 extern struct option_elem *current_option;
 
 static int rpm_access = 0;
@@ -29,10 +37,11 @@ static int RPMInitPlugin(void)
 {
     char location[PATH_MAX];
 
+	/* We test on the directory itself because filenames seem to change across versions */
     if(strcmp(rpm_root, "/")) {
-        snprintf(location, PATH_MAX, "%s/var/lib/rpm/packages.rpm", rpm_root);
+        snprintf(location, PATH_MAX, "%s/var/lib/rpm", rpm_root);
     } else {
-        strcpy(location,"/var/lib/rpm/packages.rpm");
+        strcpy(location,"/var/lib/rpm");
     }
 
     /* Try to get write access to the RPM database */
@@ -61,7 +70,7 @@ static size_t RPMSize(install_info *info, const char *path)
     fdi = fdOpen(path, O_RDONLY, 0644);
     rc = rpmReadPackageHeader(fdi, &hd, NULL, NULL, NULL);
     if ( rc ) {
-		log_warning(info,_("RPM error: %s"), rpmErrorString());
+		log_warning(_("RPM error: %s"), rpmErrorString());
         fdClose(fdi);
         return 0;
     }
@@ -94,7 +103,7 @@ static size_t RPMCopy(install_info *info, const char *path, const char *dest, co
     fdi = fdOpen(path, O_RDONLY, 0644);
     rc = rpmReadPackageHeader(fdi, &hd, &isSource, NULL, NULL);
     if ( rc ) {
-		log_warning(info,_("RPM error: %s"), rpmErrorString());
+		log_warning(_("RPM error: %s"), rpmErrorString());
         return 0;
     }
 
@@ -142,13 +151,15 @@ static size_t RPMCopy(install_info *info, const char *path, const char *dest, co
 		while ( percent < 100.0 ) {
 			if(!fp || feof(fp)){
 				pclose(fp);
-				log_warning(info,_("Unable to install RPM file: '%s'"), path);
+				free(options);
+				log_warning(_("Unable to install RPM file: '%s'"), path);
 				return 0;
 			}
 			fscanf(fp,"%s", cmd);
 			if(strcmp(cmd,"%%")){
 				pclose(fp);
-				log_warning(info,_("Unable to install RPM file: '%s'"), path);
+				free(options);
+				log_warning(_("Unable to install RPM file: '%s'"), path);
 				return 0;
 			}
 			fscanf(fp,"%f", &percent);
@@ -163,7 +174,10 @@ static size_t RPMCopy(install_info *info, const char *path, const char *dest, co
 		/* Log the RPM installation */
 		add_rpm_entry(info, current_option, name, version, atoi(release), autoremove);
     } else { /* Manually install the RPM file */
-        FD_t gzdi;
+        gzFile gzdi = NULL;
+		BZFILE *bzdi = NULL;
+		FILE *fd = NULL;
+		unsigned char magic[2];
         stream *cpio;
     
         if(headerIsEntry(hd, RPMTAG_PREIN)){      
@@ -171,9 +185,21 @@ static size_t RPMCopy(install_info *info, const char *path, const char *dest, co
 			if(type==RPM_STRING_TYPE)
 				run_script(info, (char*)p, 1);
         }
-        gzdi = gzdFdopen(fdi, "r");    /* XXX gzdi == fdi */
-    
-        cpio = file_fdopen(info, path, NULL, (gzFile*)gzdi->fd_gzd, "r");
+
+		/* Identify the type of compression for the archive */
+		if ( Fread(magic, 1, 2, fdi) < 2 ) {
+			return 0;
+		}
+		Fseek(fdi, -2L, SEEK_CUR); 
+		if ( magic[0]==037 && magic[1]==0213 ) {
+			gzdi = gzdopen(fdFileno(fdi), "r");    /* XXX gzdi == fdi */
+		} else if ( magic[0]=='B' && magic[1]=='Z' ) {
+			bzdi = BZDOPEN(fdFileno(fdi), "r");
+		} else { /* Assume not compressed */
+			fd = fdopen(fdFileno(fdi), "r");
+		}
+		
+        cpio = file_fdopen(info, path, fd, gzdi, bzdi, "r");
 
         /* if relocate="true", copy the files into dest instead of rpm_root */
 		if (relocate) {
@@ -199,6 +225,7 @@ static size_t RPMCopy(install_info *info, const char *path, const char *dest, co
 			if(type==RPM_STRING_TYPE)
 				add_script_entry(info, current_option, (char*)p, 1);
         }
+        fdClose(fdi);
     }
     return size;
 }
@@ -210,7 +237,7 @@ static
 SetupPlugin rpm_plugin = {
 	"RedHat RPM Plugin",
 	"1.0",
-	"Stéphane Peter <megastep@lokigames.com>",
+	"Stéphane Peter <megastep@megastep.org>",
 	2, {".rpm", ".rpm.gz"},
 	RPMInitPlugin, RPMFreePlugin,
 	RPMSize, RPMCopy

@@ -81,6 +81,142 @@
       </child>
 
       <widget>
+	<class>GtkVBox</class>
+	<name>class_continue</name>
+	<homogeneous>True</homogeneous>
+	<spacing>0</spacing>
+
+	<widget>
+	  <class>GtkLabel</class>
+	  <name>label69</name>
+	  <label>Please choose the class of installation.</label>
+	  <justify>GTK_JUSTIFY_CENTER</justify>
+	  <wrap>False</wrap>
+	  <xalign>0.5</xalign>
+	  <yalign>0.5</yalign>
+	  <xpad>0</xpad>
+	  <ypad>0</ypad>
+	  <child>
+	    <padding>0</padding>
+	    <expand>False</expand>
+	    <fill>False</fill>
+	  </child>
+	</widget>
+
+	<widget>
+	  <class>GtkRadioButton</class>
+	  <name>recommended_but</name>
+	  <border_width>20</border_width>
+	  <can_focus>True</can_focus>
+	  <label>Recommended</label>
+	  <active>True</active>
+	  <draw_indicator>True</draw_indicator>
+	  <group>install_class</group>
+	  <child>
+	    <padding>0</padding>
+	    <expand>False</expand>
+	    <fill>False</fill>
+	  </child>
+	</widget>
+
+	<widget>
+	  <class>GtkRadioButton</class>
+	  <name>expert_but</name>
+	  <border_width>20</border_width>
+	  <can_focus>True</can_focus>
+	  <label>Expert</label>
+	  <active>False</active>
+	  <draw_indicator>True</draw_indicator>
+	  <group>install_class</group>
+	  <child>
+	    <padding>0</padding>
+	    <expand>False</expand>
+	    <fill>False</fill>
+	  </child>
+	</widget>
+
+	<widget>
+	  <class>GtkHBox</class>
+	  <name>hbox4</name>
+	  <homogeneous>True</homogeneous>
+	  <spacing>0</spacing>
+	  <child>
+	    <padding>0</padding>
+	    <expand>True</expand>
+	    <fill>False</fill>
+	    <pack>GTK_PACK_END</pack>
+	  </child>
+
+	  <widget>
+	    <class>GtkButton</class>
+	    <name>class_cancel</name>
+	    <can_focus>True</can_focus>
+	    <signal>
+	      <name>clicked</name>
+	      <handler>setup_button_exit_slot</handler>
+	      <last_modification_time>Thu, 13 Sep 2001 23:46:19 GMT</last_modification_time>
+	    </signal>
+	    <label>Cancel</label>
+	    <relief>GTK_RELIEF_NORMAL</relief>
+	    <child>
+	      <padding>0</padding>
+	      <expand>False</expand>
+	      <fill>False</fill>
+	    </child>
+	  </widget>
+
+	  <widget>
+	    <class>GtkButton</class>
+	    <name>class_readme</name>
+	    <can_focus>True</can_focus>
+	    <signal>
+	      <name>clicked</name>
+	      <handler>setup_button_view_readme_slot</handler>
+	      <last_modification_time>Thu, 13 Sep 2001 23:23:42 GMT</last_modification_time>
+	    </signal>
+	    <label>View Readme</label>
+	    <relief>GTK_RELIEF_NORMAL</relief>
+	    <child>
+	      <padding>0</padding>
+	      <expand>False</expand>
+	      <fill>False</fill>
+	    </child>
+	  </widget>
+
+	  <widget>
+	    <class>GtkButton</class>
+	    <name>class_continue</name>
+	    <can_focus>True</can_focus>
+	    <signal>
+	      <name>clicked</name>
+	      <handler>on_class_continue_clicked</handler>
+	      <last_modification_time>Thu, 13 Sep 2001 23:39:48 GMT</last_modification_time>
+	    </signal>
+	    <label>Continue</label>
+	    <relief>GTK_RELIEF_NORMAL</relief>
+	    <child>
+	      <padding>0</padding>
+	      <expand>False</expand>
+	      <fill>False</fill>
+	    </child>
+	  </widget>
+	</widget>
+      </widget>
+
+      <widget>
+	<class>GtkLabel</class>
+	<child_name>Notebook:tab</child_name>
+	<name>label68</name>
+	<label>label68</label>
+	<justify>GTK_JUSTIFY_CENTER</justify>
+	<wrap>False</wrap>
+	<xalign>0.5</xalign>
+	<yalign>0.5</yalign>
+	<xpad>0</xpad>
+	<ypad>0</ypad>
+      </widget>
+
+      <widget>
 	<class>GtkTable</class>
 	<name>table11</name>
 	<rows>4</rows>
@@ -469,7 +605,7 @@
 		<handler>setup_checkbox_menuitems_slot</handler>
 		<last_modification_time>Thu, 16 Sep 1999 01:16:33 GMT</last_modification_time>
 	      </signal>
-	      <label>Desktop menu items (KDE/Gnome)</label>
+	      <label>Startup menu entries (KDE/Gnome)</label>
 	      <active>True</active>
 	      <draw_indicator>True</draw_indicator>
 	      <child>
@@ -544,6 +680,7 @@
 	      <last_modification_time>Tue, 14 Sep 1999 22:58:10 GMT</last_modification_time>
 	    </signal>
 	    <label>Cancel</label>
+	    <relief>GTK_RELIEF_NORMAL</relief>
 	  </widget>
 
 	  <widget>
@@ -557,6 +694,7 @@
 	      <last_modification_time>Wed, 15 Sep 1999 01:10:59 GMT</last_modification_time>
 	    </signal>
 	    <label>View Readme</label>
+	    <relief>GTK_RELIEF_NORMAL</relief>
 	  </widget>
 
 	  <widget>
@@ -570,6 +708,7 @@
 	      <last_modification_time>Tue, 14 Sep 1999 22:36:50 GMT</last_modification_time>
 	    </signal>
 	    <label>Begin Install</label>
+	    <relief>GTK_RELIEF_NORMAL</relief>
 	  </widget>
 	</widget>
 
@@ -836,6 +975,7 @@
 	      <last_modification_time>Tue, 14 Sep 1999 19:53:47 GMT</last_modification_time>
 	    </signal>
 	    <label>Cancel</label>
+	    <relief>GTK_RELIEF_NORMAL</relief>
 	  </widget>
 
 	  <widget>
@@ -849,6 +989,7 @@
 	      <last_modification_time>Wed, 15 Sep 1999 01:11:10 GMT</last_modification_time>
 	    </signal>
 	    <label>View Readme</label>
+	    <relief>GTK_RELIEF_NORMAL</relief>
 	  </widget>
 	</widget>
       </widget>
@@ -910,6 +1051,7 @@
 	      <last_modification_time>Tue, 14 Sep 1999 22:58:23 GMT</last_modification_time>
 	    </signal>
 	    <label>Exit</label>
+	    <relief>GTK_RELIEF_NORMAL</relief>
 	  </widget>
 
 	  <widget>
@@ -923,6 +1065,7 @@
 	      <last_modification_time>Wed, 15 Sep 1999 01:11:23 GMT</last_modification_time>
 	    </signal>
 	    <label>View Readme</label>
+	    <relief>GTK_RELIEF_NORMAL</relief>
 	  </widget>
 
 	  <widget>
@@ -935,7 +1078,8 @@
 	      <handler>setup_button_play_slot</handler>
 	      <last_modification_time>Tue, 14 Sep 1999 22:35:17 GMT</last_modification_time>
 	    </signal>
-	    <label>Play!</label>
+	    <label>Start</label>
+	    <relief>GTK_RELIEF_NORMAL</relief>
 	  </widget>
 	</widget>
 
@@ -1072,7 +1216,7 @@
 	    <widget>
 	      <class>GtkLabel</class>
 	      <name>play_game_label</name>
-	      <label>Type '[game]' to play the game.</label>
+	      <label>Type '[game]' to start.</label>
 	      <justify>GTK_JUSTIFY_CENTER</justify>
 	      <wrap>False</wrap>
 	      <xalign>0</xalign>
@@ -1146,6 +1290,7 @@
 	      <last_modification_time>Tue, 14 Sep 1999 22:58:34 GMT</last_modification_time>
 	    </signal>
 	    <label>Exit</label>
+	    <relief>GTK_RELIEF_NORMAL</relief>
 	  </widget>
 	</widget>
 
@@ -1271,6 +1416,7 @@
 	      <last_modification_time>Wed, 29 Sep 1999 21:51:04 GMT</last_modification_time>
 	    </signal>
 	    <label>Cancel</label>
+	    <relief>GTK_RELIEF_NORMAL</relief>
 	  </widget>
 
 	  <widget>
@@ -1284,6 +1430,7 @@
 	      <last_modification_time>Wed, 29 Sep 1999 21:50:51 GMT</last_modification_time>
 	    </signal>
 	    <label>Continue</label>
+	    <relief>GTK_RELIEF_NORMAL</relief>
 	  </widget>
 	</widget>
 
@@ -1392,6 +1539,7 @@
 	      <last_modification_time>Tue, 14 Sep 1999 22:58:23 GMT</last_modification_time>
 	    </signal>
 	    <label>Exit</label>
+	    <relief>GTK_RELIEF_NORMAL</relief>
 	  </widget>
 
 	  <widget>
@@ -1405,6 +1553,7 @@
 	      <last_modification_time>Wed, 15 Sep 1999 01:11:23 GMT</last_modification_time>
 	    </signal>
 	    <label>View Readme</label>
+	    <relief>GTK_RELIEF_NORMAL</relief>
 	  </widget>
 
 	  <widget>
@@ -1418,6 +1567,7 @@
 	      <last_modification_time>Sat, 11 Dec 1999 04:16:26 GMT</last_modification_time>
 	    </signal>
 	    <label>Continue</label>
+	    <relief>GTK_RELIEF_NORMAL</relief>
 	  </widget>
 	</widget>
 
@@ -1606,6 +1756,7 @@
 		  <last_modification_time>Sat, 11 Dec 1999 04:35:32 GMT</last_modification_time>
 		</signal>
 		<label>Launch Browser</label>
+		<relief>GTK_RELIEF_NORMAL</relief>
 	      </widget>
 	    </widget>
 	  </widget>
@@ -1678,6 +1829,7 @@
 	  <last_modification_time>Wed, 15 Sep 1999 01:10:31 GMT</last_modification_time>
 	</signal>
 	<label>Close</label>
+	<relief>GTK_RELIEF_NORMAL</relief>
 	<child>
 	  <padding>0</padding>
 	  <expand>False</expand>
@@ -1775,6 +1927,7 @@
 	    <last_modification_time>Tue, 14 Sep 1999 22:58:10 GMT</last_modification_time>
 	  </signal>
 	  <label>Cancel</label>
+	  <relief>GTK_RELIEF_NORMAL</relief>
 	</widget>
 
 	<widget>
@@ -1788,6 +1941,7 @@
 	    <last_modification_time>Tue, 30 Nov 1999 01:28:20 GMT</last_modification_time>
 	  </signal>
 	  <label>I Agree</label>
+	  <relief>GTK_RELIEF_NORMAL</relief>
 	</widget>
       </widget>
     </widget>

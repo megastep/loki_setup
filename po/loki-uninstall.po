@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-12-06 16:42-0800\n"
+"POT-Creation-Date: 2001-10-23 16:44-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -14,8 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: ENCODING\n"
 
-# SOME DESCRIPTIVE TITLE
-#: uninstall.glade:298
+#: uninstall.glade:300
 msgid "%P %%"
 msgstr ""
 
@@ -27,7 +26,7 @@ msgstr ""
 msgid "0 MB"
 msgstr ""
 
-#: uninstall.glade:357
+#: uninstall.glade:359
 msgid "Cancel"
 msgstr ""
 
@@ -35,15 +34,11 @@ msgstr ""
 msgid "Exit"
 msgstr ""
 
-#: uninstall.glade:370
+#: uninstall.glade:373
 msgid "Finished"
 msgstr ""
 
-#: uninstall.glade:23
-msgid "Loki Uninstall Tool"
-msgstr ""
-
-#: uninstall.glade:229
+#: uninstall.glade:231
 msgid "Performing uninstall:"
 msgstr ""
 
@@ -55,15 +50,19 @@ msgstr ""
 msgid "Recovered space: "
 msgstr ""
 
-#: uninstall.glade:201
+#: uninstall.glade:202
 msgid "Uninstall"
 msgstr ""
 
-#: uninstall.glade:263
+#: uninstall.glade:23
+msgid "Uninstall Tool"
+msgstr ""
+
+#: uninstall.glade:265
 msgid "[current component]"
 msgstr ""
 
-#: uninstall.c:30
+#: uninstall.c:31
 #, c-format
 msgid ""
 "Usage: %s product to uninstall the product\n"
@@ -72,82 +71,86 @@ msgid ""
 "       %s product component to uninstall a single component\n"
 msgstr ""
 
-#: uninstall.c:108
+#: uninstall.c:109
 #, c-format
 msgid "Signal %d caught. Aborting.\n"
 msgstr ""
 
-#: uninstall.c:122
+#: uninstall.c:123
 #, c-format
 msgid "Could not change to directory: %s\n"
 msgstr ""
 
-#: uninstall.c:144
+#: uninstall.c:145
 #, c-format
 msgid "Notice: the %s RPM was installed for this product.\n"
 msgstr ""
 
-#: uninstall.c:179
+#: uninstall.c:180
 #, c-format
 msgid "Component %s has been successfully uninstalled.\n"
 msgstr ""
 
-#: uninstall.c:217
+#: uninstall.c:218
 msgid ""
 "No write access to the installation directory.\n"
 "Aborting.\n"
 msgstr ""
 
-#: uninstall.c:225
+#: uninstall.c:226
 #, c-format
 msgid ""
 "No write access to the registry file: %s.\n"
 "Aborting.\n"
 msgstr ""
 
-#: uninstall.c:347
+#: uninstall.c:311
+msgid "Couldn't change to install directory\n"
+msgstr ""
+
+#: uninstall.c:348
 msgid "Installed products:\n"
 msgstr ""
 
-#: uninstall.c:353
+#: uninstall.c:354
 #, c-format
 msgid "installed in %s\n"
 msgstr ""
 
-#: uninstall.c:356
+#: uninstall.c:357
 msgid " Error while accessing product info\n"
 msgstr ""
 
-#: uninstall.c:368
+#: uninstall.c:369
 #, c-format
 msgid "Could not open product information for %s\n"
 msgstr ""
 
-#: uninstall.c:374
+#: uninstall.c:375
 #, c-format
 msgid ""
 "Product: %s\n"
 "Installed in %s\n"
 msgstr ""
 
-#: uninstall.c:381
+#: uninstall.c:382
 msgid "Components:\n"
 msgstr ""
 
-#: uninstall.c:394
+#: uninstall.c:395
 #, c-format
 msgid "Unable to find component %s\n"
 msgstr ""
 
-#: uninstall.c:398
+#: uninstall.c:399
 msgid "Too many arguments for the command\n"
 msgstr ""
 
-#: uninstall.c:405
+#: uninstall.c:406
 msgid "An error occured during the uninstallation process.\n"
 msgstr ""
 
-#: uninstall.c:409
+#: uninstall.c:410
 #, c-format
 msgid "%s has been successfully uninstalled.\n"
 msgstr ""

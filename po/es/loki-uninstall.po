@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Setup 1.5\n"
-"POT-Creation-Date: 2000-12-06 16:42-0800\n"
+"POT-Creation-Date: 2001-10-23 16:44-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Transfer-Encoding: ENCODING\n"
 
 # SOME DESCRIPTIVE TITLE
-#: uninstall.glade:298
+#: uninstall.glade:300
 msgid "%P %%"
 msgstr "%P %%"
 
@@ -27,7 +27,7 @@ msgstr "... CREANDO LISTA DE PRODUCTOS ..."
 msgid "0 MB"
 msgstr "0 MB"
 
-#: uninstall.glade:357
+#: uninstall.glade:359
 msgid "Cancel"
 msgstr "Cancellar"
 
@@ -35,15 +35,11 @@ msgstr "Cancellar"
 msgid "Exit"
 msgstr "Salir"
 
-#: uninstall.glade:370
+#: uninstall.glade:373
 msgid "Finished"
 msgstr "Fin"
 
-#: uninstall.glade:23
-msgid "Loki Uninstall Tool"
-msgstr "Loki Uninstall Tool"
-
-#: uninstall.glade:229
+#: uninstall.glade:231
 msgid "Performing uninstall:"
 msgstr "Haciendo desinstalacion:"
 
@@ -55,15 +51,20 @@ msgstr "Por favor escoja los archivos que quieres desinstalar:"
 msgid "Recovered space: "
 msgstr "Espacio ganado: "
 
-#: uninstall.glade:201
+#: uninstall.glade:202
 msgid "Uninstall"
 msgstr "Desinstalacion"
 
-#: uninstall.glade:263
+#: uninstall.glade:23
+#, fuzzy
+msgid "Uninstall Tool"
+msgstr "Loki Uninstall Tool"
+
+#: uninstall.glade:265
 msgid "[current component]"
 msgstr "[componente actual]"
 
-#: uninstall.c:30
+#: uninstall.c:31
 #, c-format
 msgid ""
 "Usage: %s product to uninstall the product\n"
@@ -76,27 +77,27 @@ msgstr ""
 "\t%s producto -l\t\tpara ver la lista de todos los componentes\n"
 "\t%s producto componente\tpara deinstalar solo un componente\n"
 
-#: uninstall.c:108
+#: uninstall.c:109
 #, c-format
 msgid "Signal %d caught. Aborting.\n"
 msgstr "Signal %d caught. Saliend.\n"
 
-#: uninstall.c:122
+#: uninstall.c:123
 #, c-format
 msgid "Could not change to directory: %s\n"
 msgstr "No pude cambiar al directorio: %s\n"
 
-#: uninstall.c:144
+#: uninstall.c:145
 #, c-format
 msgid "Notice: the %s RPM was installed for this product.\n"
 msgstr "Advertencia: el % RPM fue instalado para este producto.\n"
 
-#: uninstall.c:179
+#: uninstall.c:180
 #, c-format
 msgid "Component %s has been successfully uninstalled.\n"
 msgstr "El %s componente fue deinstalado sin problemas.\n"
 
-#: uninstall.c:217
+#: uninstall.c:218
 msgid ""
 "No write access to the installation directory.\n"
 "Aborting.\n"
@@ -104,7 +105,7 @@ msgstr ""
 "No puedes escribir al directorio de instalacion.\n"
 "Saliendo.\n"
 
-#: uninstall.c:225
+#: uninstall.c:226
 #, c-format
 msgid ""
 "No write access to the registry file: %s.\n"
@@ -113,25 +114,30 @@ msgstr ""
 "No puedes escribir al registry: %s.\n"
 "Saliendo.\n"
 
-#: uninstall.c:347
+#: uninstall.c:311
+#, fuzzy
+msgid "Couldn't change to install directory\n"
+msgstr "No pude cambiar al directorio: %s\n"
+
+#: uninstall.c:348
 msgid "Installed products:\n"
 msgstr "Productos Instalados:\n"
 
-#: uninstall.c:353
+#: uninstall.c:354
 #, c-format
 msgid "installed in %s\n"
 msgstr "instalado en %s\n"
 
-#: uninstall.c:356
+#: uninstall.c:357
 msgid " Error while accessing product info\n"
 msgstr "Error tratando de leer informacion del producto\n"
 
-#: uninstall.c:368
+#: uninstall.c:369
 #, c-format
 msgid "Could not open product information for %s\n"
 msgstr "No pude abrir la informacion para el producto %s\n"
 
-#: uninstall.c:374
+#: uninstall.c:375
 #, c-format
 msgid ""
 "Product: %s\n"
@@ -140,24 +146,24 @@ msgstr ""
 "Producto: %s\n"
 "Instalado en %s\n"
 
-#: uninstall.c:381
+#: uninstall.c:382
 msgid "Components:\n"
 msgstr "Componentes:\n"
 
-#: uninstall.c:394
+#: uninstall.c:395
 #, c-format
 msgid "Unable to find component %s\n"
 msgstr "No pude encontrar componente %s\n"
 
-#: uninstall.c:398
+#: uninstall.c:399
 msgid "Too many arguments for the command\n"
 msgstr "Muchos argementos para el programa\n"
 
-#: uninstall.c:405
+#: uninstall.c:406
 msgid "An error occured during the uninstallation process.\n"
 msgstr "Hubo error durante la deinstalacion.\n"
 
-#: uninstall.c:409
+#: uninstall.c:410
 #, c-format
 msgid "%s has been successfully uninstalled.\n"
 msgstr "%s ha sido deinstalado sin problemas.\n"

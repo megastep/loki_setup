@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.64 2001-03-09 02:10:24 hercules Exp $
+   $Id: gtk_ui.c,v 1.65 2002-01-28 01:13:30 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -89,6 +89,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <ctype.h>
 #include <X11/Xlib.h>
 #include <gtk/gtk.h>
 #include <glade/glade.h>
@@ -131,6 +132,7 @@ static enum {
 
 typedef enum
 {
+	CLASS_PAGE,
     OPTION_PAGE,
     COPY_PAGE,
     DONE_PAGE,
@@ -152,10 +154,9 @@ static int diskspace;
 static int license_okay;
 static GSList *radio_list = NULL; // Group for the radio buttons
 
-extern int disable_install_path;
-extern int disable_binary_path;
-
 /******** Local prototypes **********/
+
+static const char *check_for_installation(install_info *info);
 static void check_install_button(void);
 static void update_space(void);
 static void update_size(void);
@@ -164,12 +165,12 @@ static yesno_answer gtkui_prompt(const char*, yesno_answer);
 
 static int iterate_for_state(void)
 {
-  int start = cur_state;
-  while(cur_state == start)
-    gtk_main_iteration();
+	int start = cur_state;
+	while(cur_state == start)
+		gtk_main_iteration();
 
-  /* fprintf(stderr,"New state: %d\n", cur_state); */
-  return cur_state;
+	/* fprintf(stderr,"New state: %d\n", cur_state); */
+	return cur_state;
 }
 
 /*********** GTK slots *************/
@@ -252,7 +253,7 @@ gint binary_path_combo_change_slot(GtkWidget *widget, GdkEvent *event,
     char* string;
     GtkWidget *binary_entry;
     
-    binary_entry = glade_xml_get_widget(setup_glade, "symlink_entry");
+    binary_entry = glade_xml_get_widget(setup_glade, "binary_entry");
     string = gtk_entry_get_text( GTK_ENTRY(binary_entry) );
     if ( string ) {
         set_symlinkspath(cur_info, string);
@@ -298,6 +299,38 @@ static gboolean load_file( GtkText *widget, GdkFont *font, const char *file )
     gtk_editable_set_position(GTK_EDITABLE(widget), 0);
 
     return (fp != NULL);
+}
+
+void on_class_continue_clicked( GtkWidget  *w, gpointer data )
+{
+	GtkWidget *widget = glade_xml_get_widget(setup_glade, "recommended_but");
+
+	if ( cur_state != SETUP_CLASS ) {
+		return;
+	}
+	express_setup = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+
+	if ( express_setup ) {
+		const char *msg = check_for_installation(cur_info);
+		if ( msg ) {
+			char buf[BUFSIZ];
+			snprintf(buf, sizeof(buf),
+					 _("Installation could not proceed due to the following error:\n%s\nTry to use 'Expert' installation."), 
+					 msg);
+			gtkui_prompt(buf, RESPONSE_OK);
+			widget = glade_xml_get_widget(setup_glade, "expert_but");
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget), TRUE);
+			return;
+		}
+	}
+	/* Install desktop menu items */
+	if ( !GetProductHasNoBinaries(cur_info) &&
+		 has_binaries(cur_info, cur_info->config->root->childs)) {
+		cur_info->options.install_menuitems = 1;
+	}
+	widget = glade_xml_get_widget(setup_glade, "setup_notebook");
+	gtk_notebook_set_page(GTK_NOTEBOOK(widget), OPTION_PAGE);
+	cur_state = SETUP_OPTIONS;
 }
 
 void setup_close_view_readme_slot( GtkWidget* w, gpointer data )
@@ -358,7 +391,7 @@ void setup_button_license_agree_slot( GtkWidget* widget, gpointer func_data )
     gtk_widget_hide(license);
     license_okay = 1;
     check_install_button();
-    cur_state = SETUP_OPTIONS;
+    cur_state = SETUP_README;
 }
 
 void setup_destroy_license_slot( GtkWidget* w, gpointer data )
@@ -401,21 +434,22 @@ void setup_button_complete_slot( GtkWidget* _widget, gpointer func_data )
 
 void setup_button_play_slot( GtkWidget* _widget, gpointer func_data )
 {
-    GtkWidget *widget;
-
+	/* Enable this only if the application actually does that */
+#if 0
     if ( getuid() == 0 ) {
-    const char *warning_text =
-_("If you run this as root, the preferences will be stored in\n"
-  "root's home directory instead of your user account directory.");
+		GtkWidget *widget;
+		const char *warning_text =
+			_("If you run this as root, the preferences will be stored in\n"
+			  "root's home directory instead of your user account directory.");
 
         warning_dialog = WARNING_ROOT;
         widget = glade_xml_get_widget(setup_glade, "setup_notebook");
         gtk_notebook_set_page(GTK_NOTEBOOK(widget), WARNING_PAGE);
         widget = glade_xml_get_widget(setup_glade, "warning_label");
         gtk_label_set_text(GTK_LABEL(widget), warning_text);
-    } else {
+    } else
+#endif
         cur_state = SETUP_PLAY;
-    }
 }
 
 void setup_button_exit_slot( GtkWidget* widget, gpointer func_data )
@@ -450,59 +484,14 @@ void setup_button_browser_slot( GtkWidget* widget, gpointer func_data )
     launch_browser(cur_info, loki_launchURL);
 }
 
-
-void topmost_valid_path(char *target, const char *src) {
-    char *cp;
-  
-    /* Get the topmost valid path */
-    strcpy(target, src);
-    if ( target[0] == '/' ) {
-        cp = target+strlen(target);
-        while ( access(target, F_OK) < 0 ) {
-            while ( (cp > (target+1)) && (*cp != '/') ) {
-                --cp;
-            }
-            *cp = '\0';
-        }
-    }
-}
-
-
-/* returns true if any deviant paths are not writable */
-char check_deviant_paths(xmlNodePtr node)
+/* Returns NULL if installation can be performed */
+static const char *check_for_installation(install_info *info)
 {
-    char path_up[PATH_MAX];
-
-    while ( node ) {
-        const char *wanted;
-        const char *dpath;
-        char deviant_path[PATH_MAX];
-
-        wanted = xmlGetProp(node, "install");
-        if ( wanted  && (strcmp(wanted, "true") == 0) ) {
-            xmlNodePtr elements = node->childs;
-            while ( elements ) {
-                dpath = xmlGetProp(elements, "path");
-                if ( dpath ) {
-					parse_line(&dpath, deviant_path, PATH_MAX);
-                    topmost_valid_path(path_up, deviant_path);
-					if ( path_up[0] != '/' ) { /* Not an absolute path */
-						char buf[PATH_MAX];
-						snprintf(buf, PATH_MAX, "%s/%s", cur_info->install_path, path_up);
-						return ! dir_is_accessible(buf);
-					} else if ( ! dir_is_accessible(path_up) )
-                        return 1;
-                }
-                elements = elements->next;
-            }
-            if (check_deviant_paths(node->childs))
-                return 1;
-        }
-        node = node->next;
+    if ( ! license_okay ) {
+        return _("Please respond to the license dialog");
     }
-    return 0;
+	return IsReadyToInstall(info);
 }
-
 
 /* Checks if we can enable the "Begin install" button */
 static void check_install_button(void)
@@ -510,41 +499,13 @@ static void check_install_button(void)
     const char *message;
     GtkWidget *options_status;
     GtkWidget *button_install;
-    char path_up[PATH_MAX];
-    struct stat st;
-  
-    /* Get the topmost valid path */
-    topmost_valid_path(path_up, cur_info->install_path);
-  
-    /* See if we can install yet */
-    message = "";
-    if ( ! license_okay ) {
-        message = _("Please respond to the license dialog");
-    } else if ( ! *cur_info->install_path ) {
-        message = _("No destination directory selected");
-    } else if ( cur_info->install_size <= 0 ) {
-          if ( !GetProductIsMeta(cur_info) ) {
-	      message = _("Please select at least one option");
-	  }
-    } else if ( BYTES2MB(cur_info->install_size) > diskspace ) {
-        message = _("Not enough free space for the selected options");
-    } else if ( (stat(path_up, &st) == 0) && !S_ISDIR(st.st_mode) ) {
-        message = _("Install path is not a directory");
-    } else if ( access(path_up, W_OK) < 0 ) {
-        message = _("No write permissions on the install directory");
-	} else if (strcmp(cur_info->symlinks_path, cur_info->install_path) == 0) {
-		message = _("Binary path and install path must be different");
-	} else if ( check_deviant_paths(cur_info->config->root->childs) ) {
-        message = _("No write permissions to install a selected package");
-    } else if ( cur_info->symlinks_path[0] &&
-               (access(cur_info->symlinks_path, W_OK) < 0) ) {
-        message = _("No write permissions on the binary directory");
-    }
+
+	message = check_for_installation(cur_info);
 
     /* Get the appropriate widgets and set the new state */
     options_status = glade_xml_get_widget(setup_glade, "options_status");
     button_install = glade_xml_get_widget(setup_glade, "button_install");
-    if ( *message ) {
+    if ( message ) {
         gtk_widget_set_sensitive(button_install, 0);
     } else {
         message = _("Ready to install!");
@@ -727,21 +688,27 @@ static yesno_answer gtkui_prompt(const char *txt, yesno_answer suggest)
     
     dialog = gtk_dialog_new();
     label = gtk_label_new (txt);
-    yes_button = gtk_button_new_with_label(_("Yes"));
-    no_button = gtk_button_new_with_label(_("No"));
     ok_button = gtk_button_new_with_label("OK");
 
     prompt_response = RESPONSE_INVALID;
     
     /* Ensure that the dialog box is destroyed when the user clicks ok. */
     
-    gtk_signal_connect_object (GTK_OBJECT (yes_button), "clicked",
-                               GTK_SIGNAL_FUNC (prompt_yesbutton_slot), GTK_OBJECT(dialog));
-    gtk_signal_connect_object (GTK_OBJECT (no_button), "clicked",
-                               GTK_SIGNAL_FUNC (prompt_nobutton_slot), GTK_OBJECT(dialog));
     gtk_signal_connect_object (GTK_OBJECT (ok_button), "clicked",
                                GTK_SIGNAL_FUNC (prompt_okbutton_slot), GTK_OBJECT(dialog));
+
+	gtk_signal_connect_object(GTK_OBJECT(dialog), "delete-event",
+							  GTK_SIGNAL_FUNC(prompt_nobutton_slot), GTK_OBJECT(dialog));
+
     if (suggest != RESPONSE_OK) {
+		yes_button = gtk_button_new_with_label(_("Yes"));
+		no_button = gtk_button_new_with_label(_("No"));
+
+		gtk_signal_connect_object (GTK_OBJECT (yes_button), "clicked",
+								   GTK_SIGNAL_FUNC (prompt_yesbutton_slot), GTK_OBJECT(dialog));
+		gtk_signal_connect_object (GTK_OBJECT (no_button), "clicked",
+								   GTK_SIGNAL_FUNC (prompt_nobutton_slot), GTK_OBJECT(dialog));
+
         gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->action_area),
                            yes_button);
         gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->action_area),
@@ -928,7 +895,7 @@ static void init_binary_path(void)
 
     if ((list == NULL || g_list_length(list) == 0) && change_default)
     {
-        log_warning(cur_info, _("Warning: No writable targets in path... You may want to be root.\n"));
+        log_warning(_("Warning: No writable targets in path... You may want to be root.\n"));
         /* FIXME */
     }
     gtk_entry_set_text( GTK_ENTRY(GTK_COMBO(widget)->entry), cur_info->symlinks_path );
@@ -947,14 +914,24 @@ static void init_menuitems_option(install_info *info, xmlNodePtr node)
             gtk_widget_hide(widget);
         }
     } else {
-        log_warning(cur_info, _("Unable to locate 'setup_menuitems_checkbox'"));
+        log_warning(_("Unable to locate 'setup_menuitems_checkbox'"));
     }
+}
+
+static const char *beginning_string(const char *str)
+{
+	while (*str) {
+		if (!isspace(*str))
+			break;
+		str ++;
+	}
+	return str;
 }
 
 static void parse_option(install_info *info, const char *component, xmlNodePtr node, GtkWidget *window, GtkWidget *box, int level, GtkWidget *parent, int exclusive, GSList **radio)
 {
     xmlNodePtr child;
-    char text[1024];
+    char text[1024] = "";
     const char *help;
     const char *wanted;
     const char *name;
@@ -973,12 +950,27 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
         return;
     }
 
+    wanted = xmlGetProp(node, "distro");
+    if ( ! match_distro(info, wanted) ) {
+        return;
+    }
+
     /* See if the user wants this option */
-    name = get_option_name(info, node, NULL, 0);
-    for(i=0; i < (level*5); i++)
-        text[i] = ' ';
-    text[i] = '\0';
-    strncat(text, name, sizeof(text)-strlen(text));
+	if ( node->type == XML_TEXT_NODE ) {
+		name = beginning_string(node->content);
+		if ( *name ) {
+			button = gtk_label_new(name);
+			gtk_widget_show(button);
+			gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(button), FALSE, FALSE, 0);
+		}
+		return;
+	} else {
+		name = get_option_name(info, node, NULL, 0);
+		for(i=0; i < (level*5); i++)
+			text[i] = ' ';
+		text[i] = '\0';
+		strncat(text, name, sizeof(text)-strlen(text));
+	}
 
 	if ( GetProductIsMeta(info) ) {
 		button = gtk_radio_button_new_with_label(radio_list, text);
@@ -1073,6 +1065,7 @@ static void update_image(const char *image_file)
     GtkWidget* window;
     GtkWidget* frame;
     GdkPixmap* pixmap;
+	GdkBitmap* mask;
     GtkWidget* image;
 	char image_path[1024] = SETUP_BASE;
 
@@ -1081,9 +1074,9 @@ static void update_image(const char *image_file)
     frame = glade_xml_get_widget(setup_glade, "image_frame");
     gtk_container_remove(GTK_CONTAINER(frame), GTK_BIN(frame)->child);
     window = gtk_widget_get_toplevel(frame);
-    pixmap = gdk_pixmap_create_from_xpm(window->window, NULL, NULL, image_path);
+    pixmap = gdk_pixmap_create_from_xpm(window->window, &mask, NULL, image_path);
     if ( pixmap ) {
-        image = gtk_pixmap_new(pixmap, NULL);
+        image = gtk_pixmap_new(pixmap, mask);
         gtk_widget_show(image);
         gtk_container_add(GTK_CONTAINER(frame), image);
     } else {
@@ -1178,6 +1171,12 @@ static install_state gtkui_init(install_info *info, int argc, char **argv, int n
 
     if ( noninteractive ) {
         gtk_notebook_set_page(GTK_NOTEBOOK(notebook), COPY_PAGE);        
+	} else if ( GetProductAllowsExpress(info) ) {
+        gtk_notebook_set_page(GTK_NOTEBOOK(notebook), CLASS_PAGE);
+		/* Workaround for weird GTK behavior with old Debian, disable the button until
+		   we reach the class selection state. We should find a better fix... */
+		widget = glade_xml_get_widget(setup_glade, "class_continue");
+		gtk_widget_set_sensitive(widget, FALSE);
     } else {
         gtk_notebook_set_page(GTK_NOTEBOOK(notebook), OPTION_PAGE);
     }
@@ -1187,6 +1186,8 @@ static install_state gtkui_init(install_info *info, int argc, char **argv, int n
          button = glade_xml_get_widget(setup_glade, "button_readme");
          gtk_widget_set_sensitive(button, FALSE);
          button = glade_xml_get_widget(setup_glade, "view_readme_progress_button");
+         gtk_widget_hide(button);
+         button = glade_xml_get_widget(setup_glade, "class_readme");
          gtk_widget_hide(button);
      }
 
@@ -1256,6 +1257,14 @@ static install_state gtkui_init(install_info *info, int argc, char **argv, int n
 		if (widget)	gtk_widget_hide(widget);
 	}
 
+    info->install_size = size_tree(info, info->config->root->childs);
+
+	/* Check if we should check "Expert" installation by default */
+	if ( check_for_installation(info) ) {
+		widget = glade_xml_get_widget(setup_glade, "expert_but");
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget), TRUE);
+	}
+
     /* Realize the main window for pixmap loading */
     gtk_widget_realize(window);
 
@@ -1296,8 +1305,20 @@ static install_state gtkui_license(install_info *info)
 
 static install_state gtkui_readme(install_info *info)
 {
-    cur_state = SETUP_OPTIONS;
+	if ( GetProductAllowsExpress(info) ) {
+		cur_state = SETUP_CLASS;
+	} else {
+		cur_state = SETUP_OPTIONS;
+	}
     return cur_state;
+}
+
+static install_state gtkui_pick_class(install_info *info)
+{
+	/* Enable the Continue button now */
+	GtkWidget *widget = glade_xml_get_widget(setup_glade, "class_continue");
+	gtk_widget_set_sensitive(widget, TRUE);
+	return iterate_for_state();
 }
 
 static void gtkui_idle(install_info *info)
@@ -1312,6 +1333,12 @@ static install_state gtkui_setup(install_info *info)
     GtkWidget *window;
     GtkWidget *options;
     xmlNodePtr node;
+
+	if ( express_setup ) {
+		GtkWidget *notebook = glade_xml_get_widget(setup_glade, "setup_notebook");
+		gtk_notebook_set_page(GTK_NOTEBOOK(notebook), COPY_PAGE);
+		return SETUP_INSTALL;
+	}
 
     /* Go through the install options */
     window = glade_xml_get_widget(setup_glade, "setup_window");
@@ -1331,7 +1358,8 @@ static install_state gtkui_setup(install_info *info)
 			}
 		} else if ( ! strcmp(node->name, "component") ) {
             if ( match_arch(info, xmlGetProp(node, "arch")) &&
-                 match_libc(info, xmlGetProp(node, "libc")) ) {
+                 match_libc(info, xmlGetProp(node, "libc")) && 
+				 match_distro(info, xmlGetProp(node, "distro")) ) {
                 xmlNodePtr child;
                 if ( xmlGetProp(node, "showname") ) {
                     GtkWidget *widget = gtk_hseparator_new();
@@ -1521,7 +1549,10 @@ int gtkui_okay(Install_UI *UI)
             UI->prompt = gtkui_prompt;
             UI->website = gtkui_website;
             UI->complete = gtkui_complete;
-			UI->idle = gtkui_idle;
+	    UI->pick_class = gtkui_pick_class;
+	    UI->idle = gtkui_idle;
+	    UI->exit = NULL;
+	    UI->is_gui = 1;
             XCloseDisplay(dpy);
 
             okay = 1;
@@ -1535,6 +1566,12 @@ int console_okay(Install_UI *UI)
 {
     return(0);
 }
+
+int dialog_okay(Install_UI *UI)
+{
+    return(0);
+}
+
 #endif
 
 

@@ -1,6 +1,9 @@
 
 /* Functions for unpacking and copying files with status bar update */
 
+#ifndef __COPY_H__
+#define __COPY_H__
+
 #include <sys/types.h>
 #include <parser.h>			/* From gnome-xml */
 
@@ -27,3 +30,5 @@ extern int has_binaries(install_info *info, xmlNodePtr node);
 
 /* Utility function to parse a line in the XML file */
 extern int parse_line(const char **srcpp, char *buf, int maxlen);
+
+#endif

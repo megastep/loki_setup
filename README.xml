@@ -34,6 +34,11 @@ There are several optional attributes of the install element:
             may be changed by the user at installation time.
             The default is: /usr/local/games
 
+ binarypath This can be used to specify the default binary directory (where
+            symbolic links to the binaries will be installed), instead of the
+            first writable entry in the user's $PATH. The action is very similar
+            to the -b command line argument to setup, and is secondary to it.
+
  preinstall This is a shell script which is executed before any options
             are installed.  It is run with the installation destination
             as a command line argument.
@@ -143,6 +148,17 @@ There are several optional attributes of the install element:
             is detected as already installed the installation will fail.
             Important: This attribute can't be mixed with <component> elements.
 
+ superuser  If set to 'yes', then the installer will refuse to start if not run as
+            the super-user (root).
+
+ express    If set to 'yes', then the user will have the choice between "Recommended" and
+            "Expert" classes of installation. "Expert" is the normal mode, when the user has to confirm
+            all steps of the installation. "Recommended" uses the defaults values and proceeds to the
+            installation automatically with as less input from the user as possible.
+
+ once       If set to 'yes', the installer won't allow to install the same product twice, and will ask
+            the user to uninstall manually a previous instance if it could be detected.
+
 The CDROM element:
 
 An installer can fetch the necesary data files from one or more CDROM discs. As of setup 1.5.0,
@@ -201,6 +217,9 @@ There are also optional attributes :
             The version can be one of:
                libc5, glibc-2.0, glibc-2.1, etc.
 
+  distro    This component is only available with the specified OS distribution.
+            Look at the end of this file for a list of possible values.
+
 The README and EULA elements:
 
 Those elements are used to mark special files, that are unique for
@@ -224,6 +243,41 @@ element, alongside 'file' and 'binary' elements.
 There is also no need to have the files designated by those tags explicitly
 installed in a FILES section, setup will take care of that for you.
 
+The REQUIRE element :
+
+This element allows to set prerequisite conditions for the installer, through the
+use of arbitrary commands whose return value is used to determine whether the conditions
+are fulfilled.
+
+'require' elements have to be at the top level (right under the root 'install' element), and
+are parsed in sequential order. Installation will abort if any of the specified commands return
+a non-nil value.
+
+This element takes one mandatory attribute :
+
+ command     Specify the command to be run to determine the condition. A nil value means success.
+
+This element takes some optional attributes :
+  lang      Specify the language for the message. Used for localization. The command will be executed
+            only if the locale settings match.
+
+  arch      This requirement applies only on the specified architectures.
+            The architecture can be any of:
+               x86, ppc, alpha, sparc64, etc.
+
+  libc      This requirement applies only to the specified version of libc.
+            The version can be one of:
+               libc5, glibc-2.0, glibc-2.1, etc.
+
+  distro    This component applies only to the specified OS distribution.
+            Look at the end of this file for a list of possible values.
+
+The text specified in the element will be displayed to the user if the condition fails.
+Example:
+
+<require command="/bin/false">
+This is always failing! Thus this message is always displayed.
+</require>
 
 The INSTALL_DROP_LIST element:
 
@@ -276,6 +330,14 @@ There are several optional attributes of the option element:
 
  install    If this attribute is set to "true", then the option will
             be installed by default.  It may be deselected by the user.
+            Another possible value is "command", in which case the script specified
+            in the "command" attribute will determine the final value of this
+            property.
+
+ command    This attribute must be set to a shell script if "install" is "command".
+            If the command returns with a value of 0 (normal), then the option will
+            be selected (and unselected otherwise).
+            This can be used for auto-detection purposes.
 
  required   If this attribute is set to "true", the option will always
             be installed. The user won't be able to disable it.
@@ -292,6 +354,9 @@ There are several optional attributes of the option element:
  libc       This option is only available with the specified version of libC.
             The version can be one of:
                libc5, glibc-2.0, glibc-2.1, etc.
+
+ distro     This option is only available with the specified OS distribution.
+            Look at the end of this file for a list of possible values.
 
  size       This is an optional size of the install option. The size can be
             expressed in megabytes (with a M suffix), kilobytes (K), gigabytes
@@ -385,6 +450,9 @@ There are several required attributes of the binary element:
 
 There are several optional attributes of the binary element:
 
+ distro     Files are only installed with the specified OS distribution.
+            Look at the end of this file for a list of possible values.
+
  symlink    This is a symbolic link that is installed in the system path
             and points to the installed binary.
 
@@ -396,6 +464,8 @@ There are several optional attributes of the binary element:
             then this binary will explicitly not be used to launch after
             the installation. The default value for this attribute is 'yes'
             for the first binary with a symlink.
+            The value can also be 'gui', which means that the binary will only
+            be launched if the installer is in a graphical environment (e.g X11).
 
  icon       This is an optional icon file that you should install into
             the top level of the install directory.  If both a symlink
@@ -462,6 +532,17 @@ There are several optional attributes of the files element:
             the product. Thus an empty value ("") can be used to designate
             the installation directory.
 
+ arch       "any" is synonymous with the current architecture. You can also
+            use this attribute to force a precise architecture, for example
+            "ppc" or "sparc64".
+
+ libc       "any" is synonymous with the current libc version. This can
+            also be used to force a libc version for the binary, i.e
+            "glibc-2.0" or "glibc-2.1".
+
+ distro     Files are only installed with the specified OS distribution.
+            Look at the end of this file for a list of possible values.
+
  srcpath    This is a directory relative to the top of the CD where the files
             for this element should be copied from.
 
@@ -518,6 +599,10 @@ There only supported attribute for the script element is the 'lang' element:
             string of this attribute. See 'About localization' below for
             more details.
 
+It is also possible to filter the scripts on system characteristics, through
+the use of the "arch", "glibc" and "distro" attributes, that work just like
+for the "files" element.
+
 The following environment variables are defined while in the shell script:
     SETUP_PRODUCTNAME   : Product name from the XML file
     SETUP_PRODUCTVER    : Product version from the XML file
@@ -529,6 +614,8 @@ The following environment variables are defined while in the shell script:
     SETUP_CDROMPATH     : Path where the install CD-ROM is mounted, if
                           the XML file designates that some components
                           are to be installed from CD-ROM.
+    SETUP_DISTRO        : If an OS distribution was detected, this is its
+                          name.
 
 About localization :
 
@@ -542,6 +629,32 @@ order for the more specialized locale values to be matched correctly,
 the longer values should be be specified last (i.e. if you have different
 translations, list "fr" before "fr_CA" in the XML file).
 
+About distributions :
+
+It is now possible to have options or components specific to a specific brand
+of the operating system (i.e. the Linux distribution). Specifications have
+the form:
+
+   distribution-major.minor-policy
+
+'major' and 'minor' are both optional and describe the minimal release numbers
+for the detected distribution. If specified, versions at least this recent
+will match.
+
+'policy' is also an optional string that describes the matching policy for this
+version, i.e. if you don't necesarily want to match all later releases of a
+distribution. Possible values are 'up' (the default), 'major' (includes all
+versions of the same major number), and 'exact' (for the exact specification).
+
+Currently, the recognized distribution names are :
+
+redhat, mandrake, suse, debian, slackware, caldera, linuxppc
+
+Examples: redhat-7.1 (will match RedHat 7.1 and up)
+          mandrake (will match all versions of Mandrake Linux)
+          slackware-7 (will match Slackware 7.0 and up)
+          slackware-7.0-major (will match all Slackware 7.x releases, but not 8.x and up)
+          caldera-3.1-exact (will match Caldera OpenLinux 3.1 only)
 
 About Meta-Installations :
 

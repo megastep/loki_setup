@@ -1,0 +1,418 @@
+-- T.Dickey <dickey@herndon4.his.com>
+
+This version of dialog was originally from a Debian snapshot.  I've done this
+to it:
+
+2001/08/11
+	+ porting fixes to work on AIX: flush output to work around bug in
+	  curses library, use ./killall in scripts to avoid conflict with
+	  AIX program by that name.
+	+ modify dlg_trim_string() to retain literal newlines if the string
+	  does not contain "\\n" strings, and to retain leading blanks on the
+	  resulting lines, for compatibility with older scripts (Debian
+	  #102942).
+	+ add charset specification to cs.po
+	+ change dates in CHANGES to consistent format, add el.po for Greek
+	  (patch by kromJx <kromJx@crosswinds.net>).
+	+ eliminate static globals (bss, data) from modules rc, tailbox,
+	  textbox using better parameter-passing convention, and const.
+	+ cleanup temporary files in a few of the sample scripts.
+	+ rewrote tailboxbg using select() rather than fork(), thereby
+	  eliminating lock-files.  Only one process should be trying to display
+	  on the screen at any given time.
+	+ add error check to ensure that numeric parameters are really numbers.
+	+ correct off-by-one in error messages reporting too-few or too-many
+	  tokens for a given option (reported by George Mirchev).
+	+ fix typo in manpage, "textboxbg" where "tailboxbg" was meant
+	  (reported by George Mirchev <la@mail.techno-link.com>).
+	+ use DLG_EXIT_xxx symbols consistently for all exit codes.
+	+ updated es.po (patch by Santiago Vila).
+	+ updates for some configure script macros from lynx:  CF_MAKEFLAGS,
+	  CF_NCURSES_VERSION, CF_PROG_EXT.
+	+ fixes to compile if <term.h> is included, e.g., when building with
+	  AIX curses (report by Suzi Dowson <Suzi.Dowson@capgemini.co.uk>).
+
+2001/05/27
+	+ updated dialog.pot
+	+ modify fselect.c to work with autosize, i.e., given height and width
+	  zero (report by Martin Povolny).
+	+ add a null-pointer check in justify_text(), needed by fselect.c
+	+ add several more options which dialog can safely ignore, from
+	  Xdialog 2.0.2
+	+ refinements for configure macros checking for $CPPFLAGS, from lynx.
+	+ update config.guess, config.sub to match autoconf 2.50
+	> Martin Povolny <martin@solnet.cz>:
+	+ add cs.po
+	+ use nl_langinfo() to customize names for day-of-week, and month
+
+2001/05/11
+	> Vincent Stemen <dialog@AdvancedResearch.org>:
+          Fixed dialog.c to not pass menu items through dlg_trim_string().
+          Stripping extra spaces out of the menu items broke some of my
+          scripts by altering the string that it compared to know which menu
+          item was selected.  There should be no need to do justification on
+          the menu items, which are always one line, anyway.
+
+2001/04/29
+	> Vincent Stemen <dialog@AdvancedResearch.org>:
+	+ rewrote the text justification code to be able to have preformatted
+	  text in the prompts with extra spaces like the older versions of
+	  dialog.  If there are "\n" strings in the text, then extra spaces are
+	  preserved.  Lines are always wrapped on word boundaries.
+        + fixed --cr-wrap to break lines on '\n' (newline) characters and not
+          add an extra line at the top and bottom of the text.  It now works
+          as the manual says it should.
+	+ it is no longer necessary to use "\n\" at the end of lines to escape
+	  the '\n' character.  "\n" now works.  However, the old way, "\n\"
+	  still works.
+        + the fixes involved the following changes:
+          - rewrote dlg_trim_string() to recognize preformatted text (know
+            when not to strip extra spaces) and to pay attention to --cr-wrap.
+          - rewrote justify_text() which now calls a new function in util.c,
+            print_line(), to print each line and end it on a word boundary.
+	  - modified real_auto_size() to call a new function
+	    auto_size_preformated() to calculate the box size for preformatted
+	    text.
+          - removed skip_blanks() and skip_text() since they are not used by
+            the new justify_text().
+          - modified dialog.c to not call dlg_trim_string() on title strings
+            so that titles retain their spaces.
+        + modified the following demo files in the sample directory:
+          - inputbox
+	      changed all "\n\" strings to "\n" to demonstrate the extra
+	      backslash is no longer needed.
+          - inputbox1
+              removed all the "\n\" strings from the end of the lines to
+              properly demonstrate --cr-wrap.
+          - msgbox1
+	      this sample was using "--aspect 9 --cr-wrap".  Rewrote it to
+	      properly demonstrate --aspect.  9 is already dialog's default
+	      aspect ratio.  It now creates several dialogs in sequence,
+	      demonstrating aspect ratios of 9, 12 and 6 and properly
+	      demonstrates --cr-wrap.
+        + made the following changes to the manual (dialog.1).
+          - rewrote the description of --aspect to be more understandable.
+          - rewrote the description of --cr-wrap to be more correct and more
+            detailed.  It did say, "Otherwise, the text for each dialog will
+            display on a single line.", which is not correct.  It wraps the
+            text to fit in the box.
+	> T.Dickey:
+	+ use logic from menubox dialog in checklist to handle autosizing when
+	  list height is given as zero (fixes problem reported by Eric Veltman
+	  <eveltman@baan.nl>).
+	+ modify checklist and menubox dialogs to check for too-wide data, and
+	  truncate one or both of the name and text fields to fit (also
+	  reported by Eric Veltman).
+	+ corrected a few items from Vincent's patch:
+	  - use C89-style comments rather than C++
+	  - restore logic in justify_text() which checks for win==0, needed to
+	    work with standard curses implementations other than ncurses.
+	    The first call on justify_text() passes a null pointer as a flag
+	    to indicate that checking should be done, but no screen updates.
+	  - avoid modifying the buffer in decode_percent(), otherwise a message
+	    containing a space or newline would be truncated at the whitespace.
+	  - modify dlg_button_x_step() and dlg_button_layout() slightly to
+	    work with altered print_autowrap(), etc.
+	+ fixes to build/work with SunOS 4.x 5lib curses
+
+2001/04/15
+	+ fix a memory leak in mouse_region().
+	+ simplify handling of optional parameters with new functions
+	  optional_str() and optional_num().
+	+ add calendar and timebox dialogs (compatible with Xdialog).
+	+ correct typo in fallback definition for getparyx, and remove void
+	  cast for mouse_open and mouse_close which prevented build with
+	  Sun's Solaris compiler.
+	+ rename --enable-lxdialog configure option to --enable-Xdialog
+	+ modify CF_NCURSES_CPPFLAGS macro to match more variations of ncurses
+	  header files.
+	+ update config.guess, config.sub
+	+ modify some configure script macros to avoid problems with buggy
+	  autoconf 2.49c which breaks changequote().
+
+2001/01/15
+	+ small fix to revised real_auto_size() and justify_text() to avoid
+	  adding origin to box-width, which broke samples/wheel.
+	+ apply 1999/12/25 tempfile change to wheel and copismall samples.
+	+ add sample script for tailboxbg.
+	+ revised lock-file management to better ensure that locks are actually
+	  created by the tailbox subprocess(es).
+	+ correct hardcoded signal 15 in tailbox to SIGHUP to match
+	  documentation.  Signal 15 is usually SIGTERM, which cannot be caught.
+	+ correct off-by-one comparison of return-value for arg_rest() which
+	  made
+		dialog --gauge test 10 50
+	  dump core because it expected a 4th parameter (fixes Debian #80641).
+	+ resync config.sub, config.guess from
+	  http://subversions.gnu.org/cgi-bin/cvsweb/config/ (which finally have
+	  cases for OS/2 EMX), minor tweaks to related configure script macros.
+
+2000/12/17
+	+ restore treatment of predefined height/width in real_auto_size()
+	  which was lost in 2000/12/12 rewrite (report by Raphael Halimi
+	  <raphaelh@easynet.fr>).
+	+ updates for configure script macros AM_PATH_PROG_WITH_TEST,
+	  CF_CURSES_LIBS, CF_LIB_PREFIX, CF_PROG_EXT for $PATHSEP and $CFLAGS
+	  fixes.
+
+2000/12/13
+	+ correct change for create_lock(), which resulted in an infinite loop
+	  (patch by Chris Butler, <chrisb@debian.org>).
+
+2000/12/12
+	+ rewrote print_autowrap() and real_auto_size() to share common code
+	  justify_text(), which now does text flow even when the string
+	  contains newlines (fixes Debian #77199).
+	+ improve create_lock() function using open() with O_EXCL rather than
+	  fopen() (patch by Matt Kraai <kraai@debian.org> fixes Debian #78951).
+	+ correct description of --fselect in man page (patch by Tomas Pospisek
+	  <tpo@spin.ch> fixes Debian #77200).
+	+ add --no-cancel as alias for --nocancel for compatibility with
+	  Xdialog (report by Luis E Limon <luisl@abriasoft.com>).
+
+2000/10/27
+	+ some lint fixes using lclint (mostly void-casts, but some
+	  sign-extension fixes e.g., for ctype.h macros, and loop in
+	  dlg_char_to_button()).
+	+ modified to build/run on OS/2 EMX with ncurses.
+	+ minor changes to po/*.po (trim trailing blanks, provide explicit
+	  translation for "OK"), to work with Solaris gettext.
+	+ modified to allow this to build with archaic version (1.8.6)
+	  of ncurses on FreeBSD 3.1 (does not run).
+	+ update config.guess, config.sub from subversions.gnu.org
+
+2000/10/17
+	+ use new function sub_window() to check success/failure of calls to
+	  subwin(), printing an error message if it fails (fixes Debian #74903).
+	+ use combination of isatty/ttyname to look for workable tty device
+	  on systems which have no /dev/tty, e.g., BeOS.
+
+2000/10/08
+	+ change exiterr() to use stdarg.h, make some messages easier to
+	  understand.
+	+ add dialog_clear()
+	+ make samples/install/setup build.
+	+ implemented mouse support for buttons, e.g., in yesno dialog using
+	  ncurses (the gpm support no longer works, but is useful for reference)
+	+ add a configure check for chtype.
+	+ updates for configure script macros (CF_BUNDLED_INTL, CF_CURSES_LIBS,
+	  CF_GCC_ATTRIBUTES, CF_GCC_WARNINGS, CF_INCLUDE_DIRS), and scripts
+	  config.guess, config.sub
+	+ cleanup of item-help change, integrate with checkbox and radiobox.
+	+ add ja.po, from Hirofumi Takeda <takepin@turbolinux.co.jp>.
+	> patch by Marco Mariani <marcom@sferacarta.com>
+	+ add --item-help option, which makes menubox data interpreted as
+	  3 columns rather than 2.  The third column is displayed on the
+	  last line of the screen as a help/status message for the currently
+	  selected item.
+	+ add it.po, pt.po
+	+ change TAG_KEY_HL to FALSE, making unselected items in checkbox
+	  easier to read on Linux console.
+
+2000/07/30
+	+ change real_auto_size() to allow it to be used for dialogs that have
+	  no prompt, e.g., fselect.  Also, rather than requiring both height
+	  and width to be given as -1 for maximizing the dialog, allow either
+	  alone.
+	+ increase minimum height needed for autosized yesno dialog.
+	+ add --version as an alias for --print-version.
+	+ fix for build on Solaris without NLS (cannot redefine 'gettext()').
+	+ add fselect dialog (compatible with Xdialog).
+	+ add --enable-lxdialog configure option.
+	+ use new configure macro CF_ARG_MSG_ENABLE to show progress with
+	  enable/disable switches.
+
+2000/07/02
+	+ implement --stdout and --stderr options as in Xdialog.
+	+ move logic that translates "\\n" into '\n' into main program to
+	  simplify logic that formats text.
+	+ make ifdef's for rc-file not specific to ncurses.
+	+ correct logic making percent parameter of gauge optional.
+
+2000/06/29
+	+ add alternate test-script for gauge, adapted from Xdialog.
+	+ modify guage to make optional a percentage which was read at the
+	  beginning of the XXX-delimited message text, since clones of dialog
+	  are written to assume this is text.  If the line is not a simple
+	  integer, dialog will treat it as text.
+	+ make the percent parameter of gauge optional, as in Xdialog.
+	+ undo one use of CharOf() in guage.c, an error.
+	+ fix configure macro AM_WITH_NLS to refrain from attempting to make a
+	  symbolic link into/libintl.h if we are not using the bundled intl
+	  directory from gettext (reported by Julian Coleman
+	  <J.D.Coleman@newcastle.ac.uk>).
+	+ add ru.po, from Michael Sobolev <mss@transas.com>
+	+ updates for config.guess, config.sub from tin.
+	+ updates for configure script macros:  CF_MATH_LIB (improperly nested
+	  brackets/parenthesis) and CF_XOPEN_CURSES (make include of
+	  <*curses.h> depend on configure tests).
+
+2000/04/25
+	+ repaint screen when a control/L is pressed.
+	+ apply CharOf() macro to avoid sign-extension on calls to waddch(),
+	  fixes a problem with accented characters (reported by Santiago Vila).
+	+ add es.po, from Santiago Vila <sanvila@unex.es>
+
+2000/04/23
+	+ modified to use gettext (configure option --enable-nls).  This uses
+	  gettext 0.10.35, which must be previously installed.  (It can also
+	  use an included intl library, but I consider that to be a waste of
+	  disk space).
+	+ remove code in checklist/radiobox, menubox that try to use
+	  abbreviations for the OK/Cancel buttons since those conflict with the
+	  check for abbreviations in list entries, which are more useful.
+	+ moved padding of button labels out of string literals, into the
+	  logic of dlg_draw_buttons().
+	+ resync/update with configure macros CF_CURSES_LIBS, CF_FIND_LIBRARY,
+	  CF_HEADER_PATH, CF_LIBRARY_PATH and CF_NCURSES_LIBS, as well as
+	  mkdirs.sh and config.guess.
+
+2000/02/22
+	+ add --default-item option, for menubox to set the default selection
+	  (fixes Debian #49796).
+	+ add sample scripts for --nocancel and --fb options with inputbox.
+	+ modify inputbox* sample scripts to show application errors, if any.
+	+ add --nocancel option, and ignore --noitem, --fb, --fullbutton, to
+	  make this compatible with whiptail scripts.  (whiptail does not
+	  handle many dialog scripts however).
+	+ modify checklist/radiobox to handle home, end, nextpage, prevpage
+	  keys, as well as make the abbreviation search work for the whole
+	  list, not only the current page.
+	+ treat KEY_LL the same as KEY_END in checklist and textbox.
+	+ add logic for KEY_BTAB.
+	+ use new function dlg_draw_buttons() to better manage the layout of
+	  yes/no/ok/cancel buttons.
+	+ another pass of cleanup of dialog.c, makes it use a single table for
+	  lookup of option names and help-message.  Eliminated numerous
+	  adjustments to 'offset' variable.
+	+ on initialization, check if standard input is from a terminal.  If
+	  not, open /dev/tty (fixes Debian #57771)
+
+2000/02/05
+	+ implement inline editing in textbox.c search dialog.
+	+ revise inputbox.c, allowing inline editing with arrow-keys.  removed
+	  redundant logic in that module.
+	+ correct a typo that prevented rc-file configuration from building.
+	+ correct ifdef's to compile/run if the curses implementation does not
+	  support color.
+
+2000/01/23
+	+ improve test-case for gauge.
+	+ change gauge.c to show progress in reverse-video, add a check for
+	  end-of-file in the loop for reading new messages.
+	+ use curses whline() function to simplify print_arrows() logic in
+	  checkbox.c and menubox.c
+	+ use curses beep() function rather than hardcoded strings.
+	+ correct several compiler warnings for gcc -pedantic (mismatch of
+	  const, signed/unsigned).
+	+ modify exiterr() to avoid possible expansion of '%'.
+	+ change CF_MATH_LIB configure macro to allow specifying a particular
+	  test-function.  For dialog, this should be sqrt().  The macro was
+	  originally written for ncurses, which needs sin().  However, that is
+	  a builtin function on the m68k port (reported by Roman Hodek
+	  <Roman.Hodek@informatik.uni-erlangen.de>, this fixes Debian #55553).
+
+2000/01/18
+	+ update manpage (Debian #25648).
+	+ modify configure test for math library to avoid using a constant
+	  parameter to the test function, lest gcc optimize the call away
+	  (fixes Debian #55553).
+	+ restructure help-message so actual problem is indicated.  The original
+	  help-message is shown if no parameters are given, or if the --help
+	  option is specified alone.
+	+ suppress xterm's alternate screen mode by sending an exit_ca_mode
+	  after initscr if the terminal looks like xterm, e.g., has key_mouse
+	  defined, and has private-mode escapes in both enter_ca_mode and
+	  exit_ca_mode (fixes Debian #55181).
+	+ change yellow lettering on white to blue on white, since it offers
+	  better contrast (fixes Debian #51196).
+	+ use napms() rather than sleep().
+	+ some cleanup/simplification of main program.  Indent'd dialog.c and
+	  util.c
+	+ eliminate several places where repeated options are treated as
+	  an error, since they are really executed once anyway.
+
+2000/01/15
+	+ remove pre-autoconf Makefile
+	+ remove sleep's from a few of the sample scripts, which left users
+	  thinking that dialog was slow to complete an action.
+	+ rewrote infobox sample script, using dialog's --sleep option and
+	  a loop in the script.
+	+ change 'ch' variable in tailbox.c to an integer, because it is
+	  compared against EOF (fixes Debian #53157).
+	+ corrected mandir variable in makefile.in (reported by Santiago Vila).
+	+ small changes to sample scripts, from Debian: rename "guage" script
+	  to "gauge", change path to copy of GPL used in textbox.
+	+ add uninstall rule to makefile.in, fixed some dependencies so
+	  "make install" works without first doing "make all".
+
+1999/12/25
+	+ use more portable scheme for tempfile generation in samples.
+	+ add a configure script, prefer to not use the original Makefile
+	  because it works only with GNU make.
+	+ correct prototype of 'main()', which misused const.
+	+ modify guage.c to use fgets() rather than gets().
+	+ merge changes from Debian package maintainer
+	  Santiago Vila <sanvila@ctv.es>:
+
+	  1999/10/07
+		+ add a password dialog box.
+		+ implement "--defaultno" option to specify if the default for
+		  the yes/no box is "No".
+	  1999/03/10
+		+ modify input.c to clear the input field to the right of the
+		  given string (unclear:  this seems redundant, since the
+		  dialog is drawn in a new window).
+	  1998/12/08
+		+ check for list_height less than one in checklist.c
+	  1998/10/21
+		+ use function wscrl() in preference to scroll() in checklist.c
+		  and menubox.c (unclear: in ncurses, scroll() is a macro that
+		  uses wscrl()).
+		+ remove the "-I/usr/include/ncurses" option from Makefile
+		  since Debian does not install ncurses' header files into
+		  that directory.
+	  1998/09/12
+		+ simplify menubox.c using new functions print_arrows() and
+		  print_items().
+		+ add logic to handle KEY_NPAGE and KEY_PPAGE.
+		+ change sample scripts to use Debian tempfile utility rather
+		  than putting files into /tmp.
+		+ change sample scripts to use 'dialog' from user's path rather
+		  than in the parent directory as in the build directory.
+		+ use the system copy of GPL rather than that in the build
+		  directory as an example for the textbox script.
+
+1999/11/27
+	+ fix some gcc warnings about ambiguous use of "else"
+
+1999/05/01
+	+ cleaned up some of the redundant code with new functions:
+		box_x_ordinate
+		box_y_ordinate
+		draw_title
+		draw_bottom_box
+		new_window
+
+	+ modified msgbox.c and yesno.c to work with the KEY_RESIZE sigwinch
+	  handling in ncurses 4.2
+
+	+ corrected spelling of "gauge"
+
+The relevant portions of the Debian change log for the original version
+(dialog-0.9a-12) are abstracted here, omitting details of their packaging:
+
+1998/05/24
+
+	+ Replaced guage.c by the one in dialog 0.6z, which is known to work.
+	  Fixes Bug #18284: unstable dialog.
+
+1997/12/16
+
+	+ dialog.c:  dialog_input_result printed with "%s" format.  This was
+	  Bug #9913, fixed by Bill Mitchell, but the change was lost.
+	+ Pristine source, .depend is not removed in clean target.  Instead, it
+	  is made zero lenght (otherwise it would not work *without* fakeroot).
+	+ Added '^U' support in input box (Bug #9915, patch by joey@debian.org).
+	+ Wrote patch to fix core-dumping problem (Bug #13170).  Sven Rudolph
+	  <sr1@inf.tu-dresden.de>:
