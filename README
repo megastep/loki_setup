@@ -1,7 +1,13 @@
 
-The Loki Game Installer 1.2.3
+The Loki Setup Installer 1.3.0
 Written by Sam Lantinga and Stephane Peter
 ------------------------------------------
+
+New since 1.2:
+ * Added internationalization support
+   - German, Spanish, French, Italian and Swedish are included
+ * Fixed potential security problem
+ * Various pathing fixes and other miscellaneous improvements.
 
 New since 1.1:
  * Improved C library detection
