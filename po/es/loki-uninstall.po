@@ -84,7 +84,7 @@ msgstr "Signal %d caught. Saliend.\n"
 #: uninstall.c:122
 #, c-format
 msgid "Could not change to directory: %s\n"
-msgstr "No pude cambiar al directorio: %s\n""
+msgstr "No pude cambiar al directorio: %s\n"
 
 #: uninstall.c:144
 #, c-format
@@ -116,7 +116,7 @@ msgstr ""
 
 #: uninstall.c:347
 msgid "Installed products:\n"
-msgstr "Productos Instalados:"
+msgstr "Productos Instalados:\n"
 
 #: uninstall.c:353
 #, c-format
