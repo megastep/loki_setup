@@ -45,6 +45,9 @@ void gtk_button_set_sensitive(GtkWidget *button, gboolean sensitive)
 
 static int dialog_done;
 
+#define BUTTON_OK    1
+#define BUTTON_ABORT 2
+
 static void prompt_okbutton_slot( GtkWidget* widget, gpointer func_data)
 {
     dialog_done = 1;
@@ -55,7 +58,7 @@ static void prompt_nobutton_slot( GtkWidget* widget, gpointer func_data)
     dialog_done = 2;
 }
 
-static int display_message(const char *txt)
+static int display_message(const char *txt, int buttons)
 {
     GtkWidget *dialog, *label, *ok_button, *abort_button;
        
@@ -64,23 +67,24 @@ static int display_message(const char *txt)
     
     dialog = gtk_dialog_new();
     label = gtk_label_new (txt);
-    ok_button = gtk_button_new_with_label(_("OK"));
-    abort_button = gtk_button_new_with_label(_("Abort"));
-
+	if ( buttons & BUTTON_OK ) {
+		ok_button = gtk_button_new_with_label(_("OK"));
+		gtk_signal_connect_object (GTK_OBJECT (ok_button), "clicked",
+								   GTK_SIGNAL_FUNC (prompt_okbutton_slot), GTK_OBJECT(dialog));
+		gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->action_area),
+						   ok_button);
+	}
+	if ( buttons & BUTTON_ABORT ) {
+		abort_button = gtk_button_new_with_label(_("Abort"));
+		gtk_signal_connect_object (GTK_OBJECT (abort_button), "clicked",
+								   GTK_SIGNAL_FUNC (prompt_nobutton_slot), GTK_OBJECT(dialog));
+		gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->action_area),
+						   abort_button);
+	}
     /* Ensure that the dialog box is destroyed when the user clicks ok. */
     
-    gtk_signal_connect_object (GTK_OBJECT (ok_button), "clicked",
-                               GTK_SIGNAL_FUNC (prompt_okbutton_slot), GTK_OBJECT(dialog));
-    gtk_signal_connect_object (GTK_OBJECT (abort_button), "clicked",
-                               GTK_SIGNAL_FUNC (prompt_nobutton_slot), GTK_OBJECT(dialog));
-
 	gtk_signal_connect_object(GTK_OBJECT(dialog), "delete-event",
 							  GTK_SIGNAL_FUNC(prompt_nobutton_slot), GTK_OBJECT(dialog));
-
-	gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->action_area),
-					   ok_button);
-	gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->action_area),
-					   abort_button);
     
     /* Add the label, and show everything we've added to the dialog. */
     
@@ -310,14 +314,21 @@ void perform_uninstall_slot(GtkWidget* w, gpointer data)
 				
 				/* Display an optional message to the user */
 				message = loki_getmessage_component(component->component);
-				if ( message && !display_message(message) ) {
+				if ( message && !display_message(message, BUTTON_OK|BUTTON_ABORT) ) {
                     clist = clist->next;
 					uninstall_cancelled = 1;
 					break;
 				}
 
                 /* Remove the component */
-                uninstall_component(component->component, component->info);
+                if ( ! uninstall_component(component->component, component->info) ) {
+					uninstall_cancelled = 2;
+					snprintf(text, sizeof(text), _("Uninstallation of component %s has failed!\n"
+												   "The whole uninstallation may be incomplete.\n"),
+							 loki_getname_component(component->component));
+					display_message(text, BUTTON_ABORT);
+					break;
+				}
 
                 /* Update the progress bar */
                 if ( total && progress ) {
@@ -355,14 +366,21 @@ void perform_uninstall_slot(GtkWidget* w, gpointer data)
 
 				/* Display an optional message to the user */
 				message = loki_getmessage_component(component->component);
-				if ( message && !display_message(message) ) {
+				if ( message && !display_message(message, BUTTON_OK|BUTTON_ABORT) ) {
                     clist = clist->next;
 					uninstall_cancelled = 1;
 					break;
 				}
 
                 /* Remove the component */
-                perform_uninstall(component->product, component->info);
+                if ( ! perform_uninstall(component->product, component->info) ) {
+					uninstall_cancelled = 2;
+					snprintf(text, sizeof(text), _("Uninstallation of product %s has failed!\n"
+												   "Aborting the rest of the uninstallation.\n"),
+							 component->info->description);
+					display_message(text, BUTTON_ABORT);
+					break;
+				}
                 remove_product(component->product);
 
                 /* Update the progress bar */
@@ -382,10 +400,16 @@ void perform_uninstall_slot(GtkWidget* w, gpointer data)
         }
         list = list->next;
     }
-    if ( uninstall_cancelled ) {
+    switch ( uninstall_cancelled ) {
+	case 1:
         set_status_text(_("Uninstall cancelled"));
-    } else {
+		break;
+	case 2:
+        set_status_text(_("Uninstall aborted"));
+		break;
+	default:
         set_status_text(_("Uninstall complete"));
+		break;
     }
     widget = glade_xml_get_widget(uninstall_glade, "cancel_button");
     if ( widget ) {

@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.99 2003-02-27 06:16:01 megastep Exp $ */
+/* $Id: install.c,v 1.100 2003-03-21 07:33:16 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1372,13 +1372,13 @@ void uninstall(install_info *info)
         log_warning(_("Unable to remove '%s'"), path);
     }
     if (GetPostUnInstall(info) && info->installed_bytes>0) {
-	snprintf(path, sizeof(path), "sh %s", GetPostUnInstall(info));
+		snprintf(path, sizeof(path), "sh %s", GetPostUnInstall(info));
         run_script(info, path, 0);
     }
 
     if ( uninstall_generated ) {
-	/* Remove support files as well */
-	loki_removeproduct(info->product);
+		/* Remove support files as well */
+		loki_removeproduct(info->product);
     }
     pop_curdir();
 }
