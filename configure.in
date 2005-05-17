@@ -16,6 +16,7 @@ AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
 
 AC_PROG_CC
+AC_PROG_CXX
 AC_PROG_RANLIB
 AC_PROG_MAKE_SET
 AC_PROG_INSTALL
@@ -64,6 +65,7 @@ AC_PATH_PROG(MOUNT_PATH, mount, /sbin/mount, $PATH:/usr/sbin:/sbin)
 AC_PATH_PROG(UMOUNT_PATH, umount, /sbin/umount, $PATH:/usr/sbin:/sbin)
 AC_PATH_PROG(BRANDELF, brandelf, true)
 
+LD="$CC"
 CFLAGS="-fsigned-char -funroll-loops -Wall -g -O2 -I. $X_CFLAGS"
 CONSOLE_LIBS=""
 if test -d /usr/codehost/lib; then
@@ -465,6 +467,18 @@ if test x$enable_uz2 = xyes; then
   AC_DEFINE(ENABLE_UZ2, 1, UZ2 support.)
 fi
 
+dnl enable RAR support
+AC_ARG_ENABLE(rar,
+[  --enable-rar              enable RAR archives support  [default=no]],
+              , enable_rar=no)
+if test x$enable_rar = xyes; then
+  PLUGINS="$PLUGINS rar.c"
+  LD="$CXX"
+  CFLAGS="$CFLAGS -DRAR_SUPPORT -DRARDLL -DSILENT"
+  COMMON_LIBS="$COMMON_LIBS unrar/filestr.o unrar/scantree.o unrar/dll.o unrar/rar.o unrar/strlist.o unrar/strfn.o unrar/pathfn.o unrar/int64.o unrar/savepos.o unrar/global.o unrar/file.o unrar/filefn.o unrar/filcreat.o unrar/archive.o unrar/arcread.o unrar/unicode.o unrar/system.o unrar/isnt.o unrar/crypt.o unrar/crc.o unrar/rawread.o unrar/encname.o unrar/resource.o unrar/match.o unrar/timefn.o unrar/rdwrfn.o unrar/consio.o unrar/options.o unrar/ulinks.o unrar/errhnd.o unrar/rarvm.o unrar/rijndael.o unrar/getbits.o unrar/sha1.o unrar/extinfo.o unrar/extract.o unrar/volume.o unrar/list.o unrar/find.o unrar/unpack.o unrar/cmddata.o"
+  AC_DEFINE(ENABLE_RAR, 1, RAR support.)
+fi
+
 dnl enable RPM support
 AC_ARG_ENABLE(rpm,
 [  --enable-rpm              enable RPM archives support  [default=no]],
@@ -585,6 +599,8 @@ BRAND="$with_vendor"
 
 OS=`uname -s`
 
+CXXFLAGS="$CFLAGS"
+
 AC_SUBST(SETUPDB)
 AC_SUBST(PLUGINS)
 AC_SUBST(DYN_PLUGINS)
@@ -614,6 +630,7 @@ AC_SUBST(DO_DIALOG)
 AC_SUBST(IMAGE)
 AC_SUBST(BRAND)
 AC_SUBST(BDYNAMIC)
+AC_SUBST(LD)
 
 AC_OUTPUT(Makefile plugins/Makefile dialog/Makefile)
 

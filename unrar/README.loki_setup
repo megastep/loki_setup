@@ -1,0 +1,25 @@
+
+These are the unrar 3.5.2 sources (unrarsrc-3.5.2.tar.gz) from rarlabs.com.
+ They are completely unmodified in this directory, except for the addition of
+ this file. loki_setup builds these through their makefiles and ignores the
+ build system from unrar.
+
+These are built with RARDLL defined, so that we get an external API for
+ decompressing .rar files without having to dig into the guts of these files.
+
+Basically, as long as their API doesn't change, you can just replace this
+ whole directory with the latest unrar sources, if you need bugfixes or
+ whatnot, and it shouldn't affect loki_setup.
+
+The .o files are statically linked to the loki_setup binaries. You can enable
+ the .rar plugin by specifying --enable-rar on the loki_setup ./configure
+ command line...RAR support is disabled by default, since it bloats the
+ binary with functionality that most people don't need, but it is known to
+ work on at least x86 linux and 32-bit PowerPC MacOS X, and probably just
+ about anywhere else.
+
+Please see license.txt in this directory for unrar-specific licensing details.
+ The unrar code may not be used to develop a RAR (WinRAR) compatible archiver.
+
+--ryan.
+
