@@ -194,6 +194,17 @@ There are several optional attributes of the install element:
  nopromptoverwrite  If set to 'yes' existing files will be overwritten without
                     prompting the user. This was the default before setup 1.6.4
 
+ appbundleid  (CARBON ONLY) This string means that you are installing new files into an existing
+              Application Bundle. If the bundle isn't found, the installation aborts, otherwise, all
+              files are added relative to the base of the app bundle. The string specified here is
+              the app bundle's CFBundleIdentifier entry in its Info.plist file. LaunchServices are
+              used to find the bundle and the user can be prompted to manually locate the product
+              if LaunchServices fails to find it. This is all MacOS-specific, and unrelated to the
+              "component" attribute.
+
+ appbundledesc (CARBON ONLY) This string is used with the "appbundleid" attribute...it's a human
+               readable text describing the app bundle in question.
+
 The CDROM element:
 
 An installer can fetch the necesary data files from one or more CDROM discs. As of setup 1.5.0,

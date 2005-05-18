@@ -2,6 +2,7 @@
 
 #include "carbon/carbonres.h"
 #include "carbon/carbondebug.h"
+#include "carbon/appbundle.h"
 
 #include "install.h"
 #include "install_ui.h"
@@ -336,28 +337,50 @@ static void update_space(void)
     check_install_button();
 }
 
+
 static void init_install_path(void)
 {
     FSRef Ref;
     const char *Path = cur_info->install_path;
     carbon_debug("init_install_path()\n");
 
-    // Set the textbox to the install folder, and show it as a "special folder" if
-    //  we're an app bundle.
-
-    // Sanity check that default folder actually exists...  --ryan.
-    if (FSPathMakeRef(Path, &Ref, NULL) != noErr)
-    {
-        /* "/Applications" (or whatever) doesn't exist? Try Home dir... */
-        Path = getenv("HOME");
-        if ((!Path) || (FSPathMakeRef(Path, &Ref, NULL) != noErr))
-        {
-            /* oh well. Becomes "Macintosh HD" or whatever. */
-            Path = "/";
-            if (FSPathMakeRef(Path, &Ref, NULL) != noErr)
+    static char AppBundlePath[INSTALLFOLDER_MAX_PATH];
+    char *appbundleid = xmlGetProp(cur_info->config->root, "appbundleid");
+    if (appbundleid) {
+        static int alreadyfound = 0;
+        if (!alreadyfound) {
+            char *appbundledesc = xmlGetProp(cur_info->config->root, "appbundledesc");
+            char *desc = xmlGetProp(cur_info->config->root, "desc");
+            int rc = FindAppBundlePath(appbundleid, appbundledesc, desc, AppBundlePath, sizeof (AppBundlePath));
+            if (appbundledesc) xmlFree(appbundledesc);
+            if (desc) xmlFree(desc);
+            if (!rc) return;
+            if (FSPathMakeRef(AppBundlePath, &Ref, NULL) != noErr)
             {
-                log_fatal(_("Can't find default install dir!"));
+                log_fatal(_("Can't find install dir!"));
                 return;
+            }
+            Path = AppBundlePath;
+            alreadyfound = 1;
+        }
+    } else {
+        // Set the textbox to the install folder, and show it as a "special folder" if
+        //  we're an app bundle.
+
+        // Sanity check that default folder actually exists...  --ryan.
+        if (FSPathMakeRef(Path, &Ref, NULL) != noErr)
+        {
+            /* "/Applications" (or whatever) doesn't exist? Try Home dir... */
+            Path = getenv("HOME");
+            if ((!Path) || (FSPathMakeRef(Path, &Ref, NULL) != noErr))
+            {
+                /* oh well. Becomes "Macintosh HD" or whatever. */
+                Path = "/";
+                if (FSPathMakeRef(Path, &Ref, NULL) != noErr)
+                {
+                    log_fatal(_("Can't find default install dir!"));
+                    return;
+                }
             }
         }
     }
@@ -371,6 +394,14 @@ static void init_install_path(void)
     Path = GetSpecialPathName(Path);
     carbon_SetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, Path);
     check_install_button();
+
+    if (appbundleid) {
+        // Installing into existing app bundle:
+        //  disable some controls to prevent user from changing install path.
+        carbon_DisableControl(MyRes, OPTION_INSTALL_PATH_BUTTON_ID);
+        carbon_DisableControl(MyRes, OPTION_INSTALL_PATH_ENTRY_ID);
+        xmlFree(appbundleid);
+    }
 }
 
 static void init_binary_path(void)
@@ -1322,6 +1353,7 @@ static void carbonui_abort(install_info *info)
     // was necessary to check for the window presence to avoid some problems...
     // For instance it may have already been closed because we started the
     // program after installation already (state SETUP_PLAY))
+    carbon_SetProperWindowSize(MyRes, NULL);
     carbon_ShowInstallScreen(MyRes, ABORT_PAGE);
     carbon_IterateForState(MyRes, &cur_state);
 }

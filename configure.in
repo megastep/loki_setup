@@ -173,7 +173,7 @@ case "$target" in
 	REENTRANT=""
 	CFLAGS="$CFLAGS -I/sw/include -Ddarwin"
 	LDFLAGS="$LDFLAGS -framework Carbon -framework Security -framework IOKit"
-	COMMON_LIBS="carbon/carbonres.o carbon/carbondebug.o carbon/STUPControl.o carbon/YASTControl.o"
+	COMMON_LIBS="carbon/carbonres.o carbon/carbondebug.o carbon/STUPControl.o carbon/YASTControl.o carbon/appbundle.o"
 	ARCH=ppc ;;
     *ppc64* | *powerpc64*)
         ARCH=ppc64 ;;
