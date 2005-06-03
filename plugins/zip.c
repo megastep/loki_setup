@@ -1,5 +1,5 @@
 /* ZIP plugin for setup */
-/* $Id: zip.c,v 1.11 2005-06-03 04:31:50 megastep Exp $ */
+/* $Id: zip.c,v 1.12 2005-06-03 22:00:43 megastep Exp $ */
 
 #include "plugins.h"
 #include "file.h"
@@ -13,6 +13,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <time.h>
+#include <ctype.h>
 #include <errno.h>
 #include <unistd.h>
 #include <assert.h>
@@ -748,8 +749,8 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
         {
             if (lcase_fnames) {
                int flen = strlen(final);
-               char *p = final[flen - 1];
-               while ((p != '/') && (flen > 0)) {
+               char *p = &final[flen - 1];
+               while ((*p != '/') && (flen > 0)) {
                   *p = tolower(*p);
                   if (--flen)
                       p--;

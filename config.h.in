@@ -195,6 +195,9 @@
 /* UZ2 support. */
 #undef ENABLE_UZ2
 
+/* RAR support. */
+#undef ENABLE_RAR
+
 /* RPM support. */
 #undef ENABLE_RPM
 
