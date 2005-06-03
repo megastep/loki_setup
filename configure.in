@@ -181,6 +181,8 @@ case "$target" in
         ARCH=ppc ;;
     *i?86*)
         ARCH=x86 ;;
+    *x86_64*)
+        ARCH=amd64 ;;
     *)
         ARCH=`uname -p 2> /dev/null || uname -m` ;;
 esac
@@ -222,12 +224,23 @@ fi
 dnl Check for correct setupdb installation
 
 if test -f $SETUPDB/$ARCH/libsetupdb.a; then
-    AC_MSG_RESULT([SetupDB library found in $SETUPDB/$ARCH])
+    for ac_SETUPDB_INCDIR in $SETUPDB $SETUPDB/include
+    do
+        if test -f $ac_SETUPDB_INCDIR/setupdb.h; then
+            SETUPDB_INCDIR=$ac_SETUPDB_INCDIR
+            break
+        fi
+    done
+    if test x$SETUPDB_INCDIR == x; then
+        AC_MSG_ERROR([*** $SSETUPDB_NAME headers not found. ***])
+    else
+        AC_MSG_RESULT([SetupDB library found in $SETUPDB/$ARCH])
+    fi
 else
     AC_MSG_ERROR([*** Please compile $SETUPDB_NAME first!])
 fi
 
-CFLAGS="$CFLAGS -I$SETUPDB"
+CFLAGS="$CFLAGS -I$SETUPDB_INCDIR"
 
 GUI_LIBS=$GTK_STATIC
 GTK_LIBS=$GTK_STATIC

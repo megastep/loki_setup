@@ -1,5 +1,5 @@
 /* ZIP plugin for setup */
-/* $Id: zip.c,v 1.10 2005-01-25 03:00:57 megastep Exp $ */
+/* $Id: zip.c,v 1.11 2005-06-03 04:31:50 megastep Exp $ */
 
 #include "plugins.h"
 #include "file.h"
@@ -676,15 +676,20 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
     uint32 i;
     int rc;
 	unsigned int user_mode = 0;
+    int lcase_fnames = 0;
 
     /* Optional MD5 sum can be specified in the XML file */
     const char *md5 = xmlGetProp(node, "md5sum");
     const char *mut = xmlGetProp(node, "mutable");
     const char *mode_str = xmlGetProp(node, "mode");
+    const char *fname_conv = xmlGetProp(node, "lcasefilenames");
 
 	if ( mode_str ) {
 		user_mode = (unsigned int) strtol(mode_str, NULL, 8);
 	}
+    if ( fname_conv ) {
+        lcase_fnames = (int) strtol(fname_conv, NULL, 10);
+    }
 
 
     memset(&zipinfo, '\0', sizeof (ZIPinfo));
@@ -709,6 +714,7 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
 
         compressed_position = 0;
         snprintf(final, sizeof(final), "%s/%s", dest, entry->name);
+
         if (entry->name[strlen(entry->name) - 1] == '/')
         {
             final[strlen(final) - 1] = '\0';  /* lose '/' at end. */
@@ -740,6 +746,15 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
 
         if (!symlnk)
         {
+            if (lcase_fnames) {
+               int flen = strlen(final);
+               char *p = final[flen - 1];
+               while ((p != '/') && (flen > 0)) {
+                  *p = tolower(*p);
+                  if (--flen)
+                      p--;
+               } /* while */
+            } /* if */
             out = file_open_install(info, final, (mut && *mut=='y') ? "wm" : "wb");
             if (!out)
             {
