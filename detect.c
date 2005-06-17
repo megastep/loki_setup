@@ -108,6 +108,15 @@ extern Install_UI UI;
 
 
 #if defined(darwin)
+
+/*
+ * MacOS 10.4 ("Tiger") includes statvfs(), which break binary compat with
+ *  previous MacOS releases, so force down the older codepath...
+ */
+#ifdef HAVE_SYS_STATVFS_H
+#undef HAVE_SYS_STATVFS_H
+#endif
+
 /*
  * Code based on sample from Apple Developer Connection:
  *  http://developer.apple.com/samplecode/Sample_Code/Devices_and_Hardware/Disks/VolumeToBSDNode/VolumeToBSDNode.c.htm

@@ -1,4 +1,6 @@
 Current:
+Ryan C. Gordon (icculus.org) - Fri Jun 17 00:15:51 EDT 2005
+ * Patched so binary built on MacOSX Tiger will still run on Panther.
 Ryan C. Gordon (icculus.org) - Wed May 18 11:40:10 EDT 2005
  * Added appbundleid and appbundledesc to setup.xml install tag (MacOS only).
 Ryan C. Gordon (icculus.org) - Tue May 17 12:21:23 EDT 2005
