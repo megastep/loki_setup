@@ -31,7 +31,7 @@ DetectARCH()
 	status=1
 	case `uname -m` in
 	    amd64 | x86_64)
-		echo "amd64"
+		echo "x86_64"
 		status=0;;
 	    i?86 | i86*)
 		echo "x86"

@@ -182,7 +182,7 @@ case "$target" in
     *i?86*)
         ARCH=x86 ;;
     *x86_64*)
-        ARCH=amd64 ;;
+        ARCH=x86_64 ;;
     *)
         ARCH=`uname -p 2> /dev/null || uname -m` ;;
 esac
