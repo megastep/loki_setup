@@ -182,6 +182,7 @@ case "$target" in
     *i?86*)
         ARCH=x86 ;;
     *x86_64*)
+	LIBSUFFIX=64
         ARCH=x86_64 ;;
     *)
         ARCH=`uname -p 2> /dev/null || uname -m` ;;
@@ -563,7 +564,7 @@ fi
 
 if test ! -z "$USE_GPM"; then
 	AC_CHECK_HEADERS(gpm.h)
-	CONSOLE_LIBS="$CONSOLE_LIBS -lgpm"
+	CONSOLE_LIBS="$CONSOLE_LIBS -lgpm $LIBDL"
 fi
 
 X11_LIBS="\$(BDYNAMIC) $X_PRE_LIBS -L$x_libraries -lXi -lXext -lX11 -lm"
