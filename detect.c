@@ -811,7 +811,7 @@ char *convert_encoding(char *str)
 
 /*  	fprintf(stderr, "convert_encoding(%s) handler=%s\n", str, handler->name); */
 	if ( handler && handler->output ) {
-		if ( handler->output(buf, sizeof(buf), str, strlen(str)+1) < 0 ) {
+		if ( handler->output((unsigned char*)buf, sizeof(buf), (unsigned char*)str, strlen(str)+1) < 0 ) {
 			return str;
 		} else {
 /*  			fprintf(stderr, "Converted to %s\n", buf); */

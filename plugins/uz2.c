@@ -1,5 +1,5 @@
 /* UnrealEngine2-compressed files (.uz2) plugin for setup */
-/* $Id: uz2.c,v 1.7 2005-01-25 03:00:57 megastep Exp $ */
+/* $Id: uz2.c,v 1.8 2005-08-23 00:48:00 megastep Exp $ */
 
 #include <stdlib.h>
 #include <string.h>
@@ -109,10 +109,10 @@ static size_t UZ2Copy(install_info *info, const char *path, const char *dest, co
 	unsigned int user_mode = 0;
 
     /* Optional MD5 sum can be specified in the XML file */
-    const char *md5 = xmlGetProp(node, "md5sum");
-    const char *mut = xmlGetProp(node, "mutable");
-    const char *mode_str = xmlGetProp(node, "mode");
-    const char *dstrename = xmlGetProp(node, "uz2rename");
+    const char *md5 = (char *)xmlGetProp(node, BAD_CAST "md5sum");
+    const char *mut = (char *)xmlGetProp(node, BAD_CAST "mutable");
+    const char *mode_str = (char *)xmlGetProp(node, BAD_CAST "mode");
+    const char *dstrename = (char *)xmlGetProp(node, BAD_CAST "uz2rename");
 
 	log_debug("UZ2: Copy %s -> %s", path, dest);
 

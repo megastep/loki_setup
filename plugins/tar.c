@@ -1,5 +1,5 @@
 /* TAR plugin for setup */
-/* $Id: tar.c,v 1.13 2005-01-25 03:00:57 megastep Exp $ */
+/* $Id: tar.c,v 1.14 2005-08-23 00:48:00 megastep Exp $ */
 
 #include "config.h"
 #include "plugins.h"
@@ -51,9 +51,9 @@ static size_t TarCopy(install_info *info, const char *path, const char *dest, co
     unsigned int mode, user_mode = 0;
     int blocks, left, length;
     /* Optional MD5 sum can be specified in the XML file */
-    const char *md5 = xmlGetProp(node, "md5sum");
-    const char *mut = xmlGetProp(node, "mutable");
-    const char *mode_str = xmlGetProp(node, "mode");
+    const char *md5 = (char *)xmlGetProp(node, BAD_CAST "md5sum");
+    const char *mut = (char *)xmlGetProp(node, BAD_CAST "mutable");
+    const char *mode_str = (char *)xmlGetProp(node, BAD_CAST "mode");
 
 	if ( mode_str ) {
 		user_mode = (unsigned int) strtol(mode_str, NULL, 8);

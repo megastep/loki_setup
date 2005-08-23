@@ -128,22 +128,22 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
     yesno_answer response = RESPONSE_INVALID, default_response = RESPONSE_INVALID;
 
 	/* Check if we are on a valid tag */
-	if ( strcmp(node->name, "option") && strcmp(node->name, "exclusive") ) {
+	if ( strcmp((char *)node->name, "option") && strcmp((char *)node->name, "exclusive") ) {
 		return retval;
 	}
 
     /* See if this node matches the current architecture */
-    wanted = xmlGetProp(node, "arch");
+    wanted = (char *)xmlGetProp(node, BAD_CAST "arch");
     if ( ! match_arch(info, wanted) ) {
         return retval;
     }
 
-    wanted = xmlGetProp(node, "libc");
+    wanted = (char *)xmlGetProp(node, BAD_CAST "libc");
     if ( ! match_libc(info, wanted) ) {
         return retval;
     }
 
-    wanted = xmlGetProp(node, "distro");
+    wanted = (char *)xmlGetProp(node, BAD_CAST "distro");
     if ( ! match_distro(info, wanted) ) {
         return retval;
     }
@@ -174,9 +174,9 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
 				/* Recurse down any other options */
 				node = node->childs;
 				while ( node ) {
-					if ( ! strcmp(node->name, "option") ) {
+					if ( ! strcmp((char *)node->name, "option") ) {
 						parse_option(info, component, node, 0, 0);
-					} else if ( ! strcmp(node->name, "exclusive") ) {
+					} else if ( ! strcmp((char *)node->name, "exclusive") ) {
 						xmlNodePtr child;
 						int reinst = GetReinstallNode(info, node);
 						for ( child = node->childs; child && parse_option(info, component, child, 1, reinst); child = child->next)
@@ -192,12 +192,12 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
     }
 
 	/* Check for required option */
-	if ( xmlGetProp(node, "required") ) {
+	if ( xmlGetProp(node, BAD_CAST "required") ) {
 		printf(_("'%s' option will be installed.\n"), get_option_name(info,node,line,BUFSIZ));
 		response = RESPONSE_YES;
 	}
 
-	if ( !strcmp(node->name, "exclusive")) {
+	if ( !strcmp((char *)node->name, "exclusive")) {
 		printf(_("'%s' :\n"), get_option_name(info,node,line,BUFSIZ));
 		response = RESPONSE_YES;
 	}
@@ -207,8 +207,8 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
     /* See if the user wants this option */
     while ( response == RESPONSE_INVALID ) {
 		snprintf(prompt, sizeof(prompt), _("Option: '%s' ?"), get_option_name(info,node,line,BUFSIZ));
-		wanted = xmlGetProp(node, "install");
-		if ( (wanted  && (strcmp(wanted, "true") == 0)) || !strcmp(node->name, "exclusive") ) {
+		wanted = (char *)xmlGetProp(node, BAD_CAST "install");
+		if ( (wanted  && (strcmp(wanted, "true") == 0)) || !strcmp((char *)node->name, "exclusive") ) {
 			default_response = RESPONSE_YES;
 		} else {
 			default_response = RESPONSE_NO;
@@ -250,13 +250,13 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
             /* Recurse down any other options */
             kid = node->childs;
             while ( kid ) {
-                if ( ! strcmp(kid->name, "option") ) {
-					if ( !strcmp(node->name, "exclusive") ) {
+                if ( ! strcmp((char *)kid->name, "option") ) {
+					if ( !strcmp((char *)node->name, "exclusive") ) {
 						parse_option(info, component, kid, 1, GetReinstallNode(info, node));
 					} else {
 						parse_option(info, component, kid, 0, 0);
 					}
-                } else if ( ! strcmp(kid->name, "exclusive") ) {
+                } else if ( ! strcmp((char *)kid->name, "exclusive") ) {
 					xmlNodePtr child;
 					int reinst = GetReinstallNode(info, kid);
 					for ( child = kid->childs; child && parse_option(info, component, child, 1, reinst); child = child->next)
@@ -372,9 +372,9 @@ static install_state console_setup(install_info *info)
 
 			printf("%s\n", GetProductDesc(info));
 			while ( node ) {
-				if ( strcmp(node->name, "option") == 0 ) {
+				if ( strcmp((char *)node->name, "option") == 0 ) {
 					printf("%d) %s\n", index, get_option_name(info, node, NULL, 0));
-					wanted = xmlGetProp(node, "install"); /* Look for a default value */
+					wanted = (char *)xmlGetProp(node, BAD_CAST "install"); /* Look for a default value */
 					if ( wanted  && (strcmp(wanted, "true") == 0) ) {
 						snprintf(path, sizeof(path), "%d", index);
 					}
@@ -394,7 +394,7 @@ static install_state console_setup(install_info *info)
 				node = info->config->root->childs;
 				index = 1;
 				while ( node ) {
-					if ( strcmp(node->name, "option") == 0 ) {
+					if ( strcmp((char *)node->name, "option") == 0 ) {
 						if ( index == chosen ) {
 							mark_option(info, node, "true", 0);
 						} else {
@@ -509,27 +509,27 @@ static install_state console_setup(install_info *info)
 			info->install_size = 0;
 			node = info->config->root->childs;
 			while ( node ) {
-				if ( ! strcmp(node->name, "option") ) {
+				if ( ! strcmp((char *)node->name, "option") ) {
 					parse_option(info, NULL, node, 0, 0);
-				} else if ( ! strcmp(node->name, "exclusive") ) {
+				} else if ( ! strcmp((char *)node->name, "exclusive") ) {
 					xmlNodePtr child;
 					int reinst = GetReinstallNode(info, node);
 					for ( child = node->childs; child && parse_option(info, NULL, child, 1, reinst); child = child->next)
 						;
-				} else if ( ! strcmp(node->name, "component") ) {
-                    if ( match_arch(info, xmlGetProp(node, "arch")) &&
-                         match_libc(info, xmlGetProp(node, "libc")) &&
-						 match_distro(info, xmlGetProp(node, "distro")) ) {
+				} else if ( ! strcmp((char *)node->name, "component") ) {
+                    if ( match_arch(info, (char *)xmlGetProp(node, BAD_CAST "arch")) &&
+                         match_libc(info, (char *)xmlGetProp(node, BAD_CAST "libc")) &&
+				 match_distro(info, (char *)xmlGetProp(node, BAD_CAST "distro")) ) {
                         xmlNodePtr child;
-                        if ( xmlGetProp(node, "showname") ) {
-							const char *str = xmlGetProp(node, "name");
+                        if ( xmlGetProp(node, BAD_CAST "showname") ) {
+							const char *str = (char *)xmlGetProp(node, BAD_CAST "name");
 							if ( !str || !strcmp(str, "Default") ) { /* Show the name of the product instead */
 								str = info->desc;
 							}
 							printf(_("\n%s component\n\n"), str);
                         }
                         for ( child = node->childs; child; child = child->next) {
-                            parse_option(info, xmlGetProp(node, "name"), child, 0, 0);
+                            parse_option(info, (char *)xmlGetProp(node, BAD_CAST "name"), child, 0, 0);
                         }
                     }
                 }

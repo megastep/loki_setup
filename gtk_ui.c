@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.108 2004-11-17 20:17:16 megastep Exp $
+   $Id: gtk_ui.c,v 1.109 2005-08-23 00:47:59 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -119,7 +119,7 @@ static char *default_install_paths[] = {
 
 /* Use an arbitrary maximum; the lack of
    flexibility shouldn't be an issue */
-#define MAX_INSTALL_PATHS       25
+#define MAX_INSTALL_PATHS       26
  
 static char *install_paths[MAX_INSTALL_PATHS];
 
@@ -652,7 +652,7 @@ static void empty_container(GtkWidget *widget, gpointer data)
 
 static void enable_tree(xmlNodePtr node, GtkWidget *window)
 {
-  if ( strcmp(node->name, "option") == 0 ) {
+  if ( strcmp((char *)node->name, "option") == 0 ) {
 	  GtkWidget *button = (GtkWidget*)gtk_object_get_data(GTK_OBJECT(window),
 														  get_option_name(cur_info, node, NULL, 0));
 	  if(button)
@@ -738,7 +738,7 @@ void setup_checkbox_option_slot( GtkWidget* widget, gpointer func_data)
 		child = data_node->childs;
 		while(child)
 		{
-			if (!strcmp(child->name, "eula"))
+			if (!strcmp((char *)child->name, "eula"))
 			{
 				/* this option has some EULA nodes
 				 * we need to prompt before this change can be validated / turned on
@@ -812,7 +812,7 @@ void setup_checkbox_option_slot( GtkWidget* widget, gpointer func_data)
 		/* Recurse down any other options */
 		node = data_node->childs;
 		while ( node ) {
-			if ( !strcmp(node->name, "option") ) {
+			if ( !strcmp((char *)node->name, "option") ) {
 				GtkWidget *button;
 				
 				button = (GtkWidget*)gtk_object_get_data(GTK_OBJECT(window),
@@ -821,7 +821,7 @@ void setup_checkbox_option_slot( GtkWidget* widget, gpointer func_data)
 					gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), FALSE);
 					gtk_widget_set_sensitive(button, FALSE);
 				}
-			} else if ( !strcmp(node->name, "exclusive") ) {
+			} else if ( !strcmp((char *)node->name, "exclusive") ) {
 				xmlNodePtr child;
 				for ( child = node->childs; child; child = child->next) {
 					GtkWidget *button;
@@ -1003,10 +1003,10 @@ static void init_install_path(void)
     **  Retrieve the list of install paths from the config file, if we can
     **--------------------------------------------------------------------*/
     for (i = 0, node = cur_info->config->root->childs; node;  node = node->next) {
-        if (strcmp(node->name, "install_drop_list") == 0) {
+        if (strcmp((char *)node->name, "install_drop_list") == 0) {
             /* Retrieve the value - note that it's up to us to free
                 the memory, which means we can use it without copying it */
-            char *content = xmlNodeGetContent(node);
+            char *content = (char *)xmlNodeGetContent(node);
             char *p;
             if (content) {
                 for (p = strtok(content, "\n\t \r\b"); p; 
@@ -1022,11 +1022,15 @@ static void init_install_path(void)
                     }
                     expand_home(cur_info, p, temp_buf);
 
-                    if (i > sizeof(install_paths) > sizeof(install_paths[0])) {
+		    // install_paths[last one - 1] --> home directory
+		    // install_paths[ last one ] ----> NULL terminate
+		    if (i >= MAX_INSTALL_PATHS - 2) {
                         fprintf(stderr, 
-								_("Error: maximum of %d install_path entries exceeded\n"),
-								sizeof(install_paths) > sizeof(install_paths[0]));
-                        return; 
+				_("Error: maximum of %d install_path entries exceeded\n"),
+				MAX_INSTALL_PATHS -2);
+			free (temp_buf);
+			//return;
+			goto enough_of_config;
                     }
 
                     install_paths[i++] = temp_buf;
@@ -1035,7 +1039,8 @@ static void init_install_path(void)
         }
     }
 
-    
+enough_of_config:
+
     /*----------------------------------------------------------------------
     **  If no installation paths were specified, use the default
     **      values that are hard coded in.
@@ -1043,8 +1048,8 @@ static void init_install_path(void)
     if (i == 0) {
         for (i = 0; default_install_paths[i]; ++i) {
             install_paths[i] = default_install_paths[i];
-		}
 	}
+    }
 
     /*----------------------------------------------------------------------
     **  Add in the home directory, as a last-resort.
@@ -1248,21 +1253,21 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
 	gboolean install = FALSE;
 
 	/* Skip translation nodes */
-	if ( !strcmp(node->name, "lang") )
+	if ( !strcmp((char *)node->name, "lang") )
 		return;
 
     /* See if this node matches the current architecture */
-    wanted = xmlGetProp(node, "arch");
+    wanted = (char *)xmlGetProp(node, BAD_CAST "arch");
     if ( ! match_arch(info, wanted) ) {
         return;
     }
 
-    wanted = xmlGetProp(node, "libc");
+    wanted = (char *)xmlGetProp(node, BAD_CAST "libc");
     if ( ! match_libc(info, wanted) ) {
         return;
     }
 
-    wanted = xmlGetProp(node, "distro");
+    wanted = (char *)xmlGetProp(node, BAD_CAST "distro");
     if ( ! match_distro(info, wanted) ) {
         return;
     }
@@ -1274,7 +1279,7 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
     /* See if the user wants this option */
 	if ( node->type == XML_TEXT_NODE ) {
 		log_debug("Parsing text node: '%s'\n", node->content);
-		name = g_strdup(node->content);
+		name = g_strdup((gchar *)node->content);
 		g_strstrip(name);
 		if ( *name ) {
 			log_debug("String: '%s'\n", name);
@@ -1327,7 +1332,7 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
 
     /* Check for required option */
     if ( xmlNodePropIsTrue(node, "required") ) {
-		xmlSetProp(node, "install", "true");
+		xmlSetProp(node, BAD_CAST "install", BAD_CAST "true");
 		gtk_widget_set_sensitive(GTK_WIDGET(button), FALSE);
     }
 
@@ -1354,9 +1359,9 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
     /* Recurse down any other options */
     child = node->childs;
     while ( child ) {
-		if ( !strcmp(child->name, "option") ) {
+		if ( !strcmp((char *)child->name, "option") ) {
 			parse_option(info, component, child, window, box, level+1, button, 0, 0, NULL);
-		} else if ( !strcmp(child->name, "exclusive") ) {
+		} else if ( !strcmp((char *)child->name, "exclusive") ) {
 			xmlNodePtr exchild;
 			GSList *list = NULL;
 			int reinst = GetReinstallNode(info, child);
@@ -1727,37 +1732,37 @@ static install_state gtkui_setup(install_info *info)
     radio_list = NULL;
     in_setup = TRUE;
     while ( node ) {
-		if ( ! strcmp(node->name, "option") ) {
+		if ( ! strcmp((char *)node->name, "option") ) {
 			parse_option(info, NULL, node, window, options, 0, NULL, 0, 0, NULL);
-		} else if ( ! strcmp(node->name, "exclusive") ) {
+		} else if ( ! strcmp((char *)node->name, "exclusive") ) {
 			xmlNodePtr child;
 			GSList *list = NULL;
 			int reinst = GetReinstallNode(info, node);
 			for ( child = node->childs; child; child = child->next) {
 				parse_option(info, NULL, child, window, options, 0, NULL, 1, reinst, &list);
 			}
-		} else if ( ! strcmp(node->name, "component") ) {
-            if ( match_arch(info, xmlGetProp(node, "arch")) &&
-                 match_libc(info, xmlGetProp(node, "libc")) && 
-				 match_distro(info, xmlGetProp(node, "distro")) ) {
+		} else if ( ! strcmp((char *)node->name, "component") ) {
+            if ( match_arch(info, (char *)xmlGetProp(node, BAD_CAST "arch")) &&
+                 match_libc(info, (char *)xmlGetProp(node, BAD_CAST "libc")) && 
+				 match_distro(info, (char *)xmlGetProp(node, BAD_CAST "distro")) ) {
                 xmlNodePtr child;
-                if ( xmlGetProp(node, "showname") ) {
+                if ( xmlGetProp(node, BAD_CAST "showname") ) {
                     GtkWidget *widget = gtk_hseparator_new();
                     gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 0);
                     gtk_widget_show(widget);                
-                    widget = gtk_label_new(xmlGetProp(node, "name"));
+                    widget = gtk_label_new((gchar *)xmlGetProp(node, BAD_CAST "name"));
                     gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 10);
                     gtk_widget_show(widget);
                 }
                 for ( child = node->childs; child; child = child->next) {
-					if ( ! strcmp(child->name, "option") ) {
-						parse_option(info, xmlGetProp(node, "name"), child, window, options, 0, NULL, 0, 0, NULL);
-					} else if ( ! strcmp(child->name, "exclusive") ) {
+					if ( ! strcmp((char *)child->name, "option") ) {
+						parse_option(info, (char *)xmlGetProp(node, BAD_CAST "name"), child, window, options, 0, NULL, 0, 0, NULL);
+					} else if ( ! strcmp((char *)child->name, "exclusive") ) {
 						xmlNodePtr child2;
 						GSList *list = NULL;
 						int reinst = GetReinstallNode(info, child);
 						for ( child2 = child->childs; child2; child2 = child2->next) {
-							parse_option(info, xmlGetProp(node, "name"), child2, window, options, 0, NULL, 1, reinst, &list);
+							parse_option(info, (char *)xmlGetProp(node, BAD_CAST "name"), child2, window, options, 0, NULL, 1, reinst, &list);
 						}
 					}
                 }

@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.155 2005-05-06 02:07:47 megastep Exp $ */
+/* $Id: install.c,v 1.156 2005-08-23 00:47:59 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -160,7 +160,7 @@ const char *GetProductName(install_info *info)
 {
     const char *name;
 
-    name = xmlGetProp(info->config->root, "product");
+    name = (char *)xmlGetProp(info->config->root, BAD_CAST "product");
     if ( name == NULL ) {
         name = "";
     }
@@ -170,7 +170,7 @@ const char *GetProductDesc(install_info *info)
 {
     const char *desc;
 
-    desc = xmlGetProp(info->config->root, "desc");
+    desc = (char *)xmlGetProp(info->config->root, BAD_CAST "desc");
     if ( desc == NULL ) {
         desc = "";
     }
@@ -179,14 +179,14 @@ const char *GetProductDesc(install_info *info)
 
 const char *GetProductComponent(install_info *info)
 {
-    return xmlGetProp(info->config->root, "component");
+    return (char *)xmlGetProp(info->config->root, BAD_CAST "component");
 }
 
 const char *GetProductUninstall(install_info *info)
 {
     const char *desc;
 
-    desc = xmlGetProp(info->config->root, "uninstall");
+    desc = (char *)xmlGetProp(info->config->root, BAD_CAST "uninstall");
     if ( desc == NULL ) {
         desc = "uninstall";
     }
@@ -196,7 +196,7 @@ const char *GetProductSplash(install_info *info)
 {
     const char *desc;
 
-    desc = xmlGetProp(info->config->root, "splash");
+    desc = (char *)xmlGetProp(info->config->root, BAD_CAST "splash");
     if ( desc == NULL ) {
         desc = "splash.xpm";
     }
@@ -204,27 +204,27 @@ const char *GetProductSplash(install_info *info)
 }
 const char *GetProductVersion(install_info *info)
 {
-    return xmlGetProp(info->config->root, "version");
+    return (char *)xmlGetProp(info->config->root, BAD_CAST "version");
 }
 const char *GetProductCategory(install_info *info)
 {
     const char *cat;
 
-    cat = xmlGetProp(info->config->root, "category");
+    cat = (char *)xmlGetProp(info->config->root, BAD_CAST "category");
     if ( cat == NULL ) {
-        cat = "Games";
+        cat = "Game";
     }
     return cat;
 }
 
 const char *GetProductDefaultBinaryPath(install_info *info)
 {
-    return xmlGetProp(info->config->root, "binarypath");
+    return (char *)xmlGetProp(info->config->root, BAD_CAST "binarypath");
 }
 int GetProductCDROMRequired(install_info *info)
 {
 	int ret = 0;
-    char *str = xmlGetProp(info->config->root, "cdrom");
+    char *str = (char *)xmlGetProp(info->config->root, BAD_CAST "cdrom");
     if ( str && !strcasecmp(str, "required") ) {
         ret = 1;
     }
@@ -234,7 +234,7 @@ int GetProductCDROMRequired(install_info *info)
 int GetProductIsMeta(install_info *info)
 {
 	int ret = 0;
-    char *str = xmlGetProp(info->config->root, "meta");
+    char *str = (char *)xmlGetProp(info->config->root, BAD_CAST "meta");
     if ( str && !strcasecmp(str, "yes") ) {
         ret = 1;
     }
@@ -244,7 +244,7 @@ int GetProductIsMeta(install_info *info)
 int GetProductInstallOnce(install_info *info)
 {
 	int ret = 0;
-    char *str = xmlGetProp(info->config->root, "once");
+    char *str = (char *)xmlGetProp(info->config->root, BAD_CAST "once");
     if ( str && !strcasecmp(str, "yes") ) {
         ret = 1;
     }
@@ -254,7 +254,7 @@ int GetProductInstallOnce(install_info *info)
 int GetProductRequireRoot(install_info *info)
 {
 	int ret = 0;
-    char *str = xmlGetProp(info->config->root, "superuser");
+    char *str = (char *)xmlGetProp(info->config->root, BAD_CAST "superuser");
     if ( str && !strcasecmp(str, "yes") ) {
         ret = 1;
     }
@@ -265,7 +265,7 @@ int GetProductRequireRoot(install_info *info)
 int GetProductAllowsExpress(install_info *info)
 {
 	int ret = 0;
-    char *str = xmlGetProp(info->config->root, "express");
+    char *str = (char *)xmlGetProp(info->config->root, BAD_CAST "express");
     if ( str && !strcasecmp(str, "yes") ) {
         ret = 1;
     }
@@ -275,7 +275,7 @@ int GetProductAllowsExpress(install_info *info)
 
 int GetProductHasNoBinaries(install_info *info)
 {
-	char *str = xmlGetProp(info->config->root, "nobinaries");
+	char *str = (char *)xmlGetProp(info->config->root, BAD_CAST "nobinaries");
 	int ret;
 
 	ret = (str || !has_binaries(info, info->config->root->childs));
@@ -286,7 +286,7 @@ int GetProductHasNoBinaries(install_info *info)
 int GetProductHasPromptBinaries(install_info *info)
 {
 	int ret = 0;
-    char *p = xmlGetProp(info->config->root, "promptbinaries");
+    char *p = (char *)xmlGetProp(info->config->root, BAD_CAST "promptbinaries");
     if (p && strstr(p, "yes")) {
 		ret = 1;
 	}
@@ -297,7 +297,7 @@ int GetProductHasPromptBinaries(install_info *info)
 int GetProductHasManPages(install_info *info)
 {
 	int ret = 0;
-    char *p = xmlGetProp(info->config->root, "manpages");
+    char *p = (char *)xmlGetProp(info->config->root, BAD_CAST "manpages");
     if (p && strstr(p, "yes")) {
 		ret = 1;
 	}
@@ -308,7 +308,7 @@ int GetProductHasManPages(install_info *info)
 int GetProductIsAppBundle(install_info *info)
 {
 	int ret = 0;
-    char *str = xmlGetProp(info->config->root, "appbundle");
+    char *str = (char *)xmlGetProp(info->config->root, BAD_CAST "appbundle");
     if ( str && !strcasecmp(str, "yes") ) {
         ret = 1;
     }
@@ -319,7 +319,7 @@ int GetProductIsAppBundle(install_info *info)
 int GetProductSplashPosition(install_info *info)
 {
 	int ret = 1; /* Left */
-    char *str = xmlGetProp(info->config->root, "splashpos");
+    char *str = (char *)xmlGetProp(info->config->root, BAD_CAST "splashpos");
     if ( str && !strcasecmp(str, "top") ) {
         ret = 0; /* Top */
     }
@@ -329,7 +329,7 @@ int GetProductSplashPosition(install_info *info)
 
 const char *GetProductCDKey(install_info *info)
 {
-    return xmlGetProp(info->config->root, "cdkey");
+    return (char *)xmlGetProp(info->config->root, BAD_CAST "cdkey");
 }
 
 int GetProductPromptOverwrite(install_info *info)
@@ -341,7 +341,7 @@ int GetProductPromptOverwrite(install_info *info)
 		str = getenv("SETUP_NOPROMPTOVERWRITE");
 	}
 	else {
-		str = xmlGetProp(info->config->root, "nopromptoverwrite");
+		str = (char *)xmlGetProp(info->config->root, BAD_CAST "nopromptoverwrite");
 		needfree = 1;
 	}
     if ( str && (!strcasecmp(str, "yes") || !strcasecmp(str, "true"))) {
@@ -365,7 +365,7 @@ static char check_deviant_paths(xmlNodePtr node, install_info *info, char* path_
         if ( xmlNodePropIsTrue(node, "install") ) {
             xmlNodePtr elements = node->childs;
             while ( elements ) {
-                dpath = orig_dpath = xmlGetProp(elements, "path");
+                dpath = orig_dpath = (char *)xmlGetProp(elements, BAD_CAST "path");
                 if ( dpath ) {
 					char path_up[PATH_MAX];
 					char deviant_path[PATH_MAX];
@@ -481,13 +481,13 @@ const char *IsReadyToInstall_explain(install_info *info, char** explanation)
 
 const char *GetProductCDROMFile(install_info *info)
 {
-    return xmlGetProp(info->config->root, "cdromfile");
+    return (char *)xmlGetProp(info->config->root, BAD_CAST "cdromfile");
 }
 const char *GetDefaultPath(install_info *info)
 {
     const char *path;
 
-    path = xmlGetProp(info->config->root, "path");
+    path = (char *)xmlGetProp(info->config->root, BAD_CAST "path");
     if ( path == NULL ) {
         path = DEFAULT_PATH;
     }
@@ -506,7 +506,7 @@ const char *GetProductEULANode(install_info *info, xmlNodePtr node, int *keepdir
 	static char name[BUFSIZ], matched_name[BUFSIZ];
 	int found = 0;
 
-    eula = xmlGetProp(node, "eula");
+	eula = (char *)xmlGetProp(node, BAD_CAST "eula");
 	if (eula) {
 		strncpy(matched_name, eula, sizeof(matched_name));
 		found = 1;
@@ -516,17 +516,17 @@ const char *GetProductEULANode(install_info *info, xmlNodePtr node, int *keepdir
 	/* Look for EULA elements */
 	node = node->childs;
 	while(node && !found) {
-		if(! strcmp(node->name, "eula") ) {
-			char *prop = xmlGetProp(node, "lang");
+		if(! strcmp((char *)node->name, "eula") ) {
+			char *prop = (char *)xmlGetProp(node, BAD_CAST "lang");
 			if ( match_locale(prop) ) {
 				if (found == 1)
 					log_warning("Duplicate matching EULA entries in XML file!");
 				if ( keepdirs ) {
-					char *str = xmlGetProp(node, "keepdirs");
+					char *str = (char *)xmlGetProp(node, BAD_CAST "keepdirs");
 					*keepdirs = ( str != NULL);
 					xmlFree(str);
 				}
-				text = xmlNodeListGetString(info->config, node->childs, 1);
+				text = (char *)xmlNodeListGetString(info->config, node->childs, 1);
 				if(text) {
 					*matched_name = '\0';
 					while ( (*matched_name == 0) && 
@@ -550,7 +550,7 @@ const char *GetProductEULANode(install_info *info, xmlNodePtr node, int *keepdir
 
 const char *GetProductREADME(install_info *info, int *keepdirs)
 {
-    char *ret = xmlGetProp(info->config->root, "readme");
+	char *ret = (char *)xmlGetProp(info->config->root, BAD_CAST "readme");
 	const char *text;
 	static char name[BUFSIZ], matched_name[BUFSIZ];
 	xmlNodePtr node;
@@ -567,18 +567,18 @@ const char *GetProductREADME(install_info *info, int *keepdirs)
 	/* Try to find a README that matches the locale */
 	node = info->config->root->childs;
 	while(node && !found) {
-		if(! strcmp(node->name, "readme") ) {
-			char *prop = xmlGetProp(node, "lang");
+		if(! strcmp((char *)node->name, "readme") ) {
+			char *prop = (char *)xmlGetProp(node, BAD_CAST "lang");
 			if ( match_locale(prop) ) {
 				if (found == 1) {
 					log_warning("Duplicate matching README entries in XML file!");
 				}
 				if ( keepdirs ) {
-					char *str = xmlGetProp(node, "keepdirs");
+					char *str = (char *)xmlGetProp(node, BAD_CAST "keepdirs");
 					*keepdirs = ( str != NULL);
 					xmlFree(str);
 				}
-				text = xmlNodeListGetString(info->config, node->childs, 1);
+				text = (char *)xmlNodeListGetString(info->config, node->childs, 1);
 				if (text) {
 					*matched_name = '\0';
 					while ( (*matched_name == 0) && parse_line(&text, matched_name, sizeof(matched_name)) )
@@ -605,17 +605,17 @@ const char *GetProductPostInstallMsg(install_info *info)
 	const char *text;
 
 	for(node = info->config->root->childs; node; node = node->next) {
-		if(! strcmp(node->name, "post_install_msg") ) {
+		if(! strcmp((char *)node->name, "post_install_msg") ) {
 			char *prop = NULL;
 			if ( UI.is_gui ) {
-				prop = xmlGetProp(node, "nogui");
+				prop = (char *)xmlGetProp(node, BAD_CAST "nogui");
 				if ( prop && !strcmp(prop, "true") ){
 					xmlFree(prop);
 					continue;
 				}
 			}
 			xmlFree(prop);
-			prop = xmlGetProp(node, "command");
+			prop = (char *)xmlGetProp(node, BAD_CAST "command");
 			if ( prop ) { /* Run the command */
 				if ( run_script(info, prop, 0, 1) != 0 ) { /* Failed, skip */
 					xmlFree(prop);
@@ -623,11 +623,11 @@ const char *GetProductPostInstallMsg(install_info *info)
 				}
 				xmlFree(prop);
 			}
-			prop = xmlGetProp(node, "lang");
+			prop = (char *)xmlGetProp(node, BAD_CAST "lang");
 			if ( match_locale(prop) ) {
 				static char line[BUFSIZ], buf[BUFSIZ];
 
-				text = xmlNodeListGetString(info->config, node->childs, 1);
+				text = (char *)xmlNodeListGetString(info->config, node->childs, 1);
 				if (text) {
 					*buf = '\0';
 					while ( *text ) {
@@ -652,7 +652,7 @@ int GetProductNumComponents(install_info *info)
 
 	node = info->config->root->childs;
 	while(node) {
-        if ( !strcmp(node->name, "component") ) {
+        if ( !strcmp((char *)node->name, "component") ) {
             count ++;
         }
         node = node->next;
@@ -670,19 +670,19 @@ int GetProductCDROMDescriptions(install_info *info)
 
 	node = info->config->root->childs;
 	while(node) {
-        if ( !strcmp(node->name, "cdrom") ) {
+        if ( !strcmp((char *)node->name, "cdrom") ) {
 			char *id, *nname;
-            text = xmlNodeListGetString(info->config, node->childs, 1);
+            text = (char *)xmlNodeListGetString(info->config, node->childs, 1);
             if (text) {
                 *name = '\0';
                 while ( (*name == 0) && parse_line(&text, name, sizeof(name)) )
 						;
             }
-			id = xmlGetProp(node, "id");
-			nname = xmlGetProp(node, "name");
+	    id = (char *)xmlGetProp(node, BAD_CAST "id");
+	    nname = (char *)xmlGetProp(node, BAD_CAST "name");
             entry = add_cdrom_entry(info, id, nname, name);
-			xmlFree(id);
-			xmlFree(nname);
+	    xmlFree(id);
+	    xmlFree(nname);
             if ( entry ) {
                 
                 count ++;
@@ -695,17 +695,17 @@ int GetProductCDROMDescriptions(install_info *info)
 
 const char *GetWebsiteText(install_info *info)
 {
-    return xmlGetProp(info->config->root, "website_text");
+    return (char *)xmlGetProp(info->config->root, BAD_CAST "website_text");
 }
 const char *GetProductURL(install_info *info)
 {
-    return xmlGetProp(info->config->root, "url");
+    return (char *)xmlGetProp(info->config->root, BAD_CAST "url");
 }
 
 int GetProductReinstall(install_info *info)
 {
 	int ret;
-	char *str = xmlGetProp(info->config->root, "reinstall");
+	char *str = (char *)xmlGetProp(info->config->root, BAD_CAST "reinstall");
 	ret = str && (*str=='t' || *str=='y');
 	xmlFree(str);
 	return ret;
@@ -714,7 +714,7 @@ int GetProductReinstall(install_info *info)
 int GetReinstallNode(install_info *info, xmlNodePtr node)
 {
 	int ret = 1; /* Default to yes */
-	char *str = xmlGetProp(node, "reinstall");
+	char *str = (char *)xmlGetProp(node, BAD_CAST "reinstall");
 	if ( str ) {
 		ret = (*str=='t' || *str=='y');
 	}
@@ -726,7 +726,7 @@ const char *GetLocalURL(install_info *info)
 {
     const char *file;
 
-    file = xmlGetProp(info->config->root, "localurl");
+    file = (char *)xmlGetProp(info->config->root, BAD_CAST "localurl");
     if ( file ) {
         /* Warning, memory leak */
         char *path;
@@ -746,7 +746,7 @@ const char *GetAutoLaunchURL(install_info *info)
 {
     const char *auto_url;
 
-    auto_url = xmlGetProp(info->config->root, "auto_url");
+    auto_url = (char *)xmlGetProp(info->config->root, BAD_CAST "auto_url");
     if ( auto_url == NULL ) {
         auto_url = "false";
     }
@@ -756,7 +756,7 @@ const char *GetProductUpdateURL(install_info *info)
 {
     const char *url;
 
-    url = xmlGetProp(info->config->root, "update_url");
+    url = (char *)xmlGetProp(info->config->root, BAD_CAST "update_url");
     if ( url == NULL ) {
         url = "http://icculus.org/";
     }
@@ -764,29 +764,29 @@ const char *GetProductUpdateURL(install_info *info)
 }
 const char *GetPreInstall(install_info *info)
 {
-    return xmlGetProp(info->config->root, "preinstall");
+    return (char *)xmlGetProp(info->config->root, BAD_CAST "preinstall");
 }
 const char *GetPreUnInstall(install_info *info)
 {
-    return xmlGetProp(info->config->root, "preuninstall");
+    return (char *)xmlGetProp(info->config->root, BAD_CAST "preuninstall");
 }
 const char *GetPostInstall(install_info *info)
 {
-    return xmlGetProp(info->config->root, "postinstall");
+    return (char *)xmlGetProp(info->config->root, BAD_CAST "postinstall");
 }
 const char *GetPostUnInstall(install_info *info)
 {
-    return xmlGetProp(info->config->root, "postuninstall");
+    return (char *)xmlGetProp(info->config->root, BAD_CAST "postuninstall");
 }
 const char *GetDesktopInstall(install_info *info)
 {
-    return xmlGetProp(info->config->root, "desktop");
+    return (char *)xmlGetProp(info->config->root, BAD_CAST "desktop");
 }
 const char *GetRuntimeArgs(install_info *info)
 {
     const char *args;
 
-    args = xmlGetProp(info->config->root, "args");
+    args = (char *)xmlGetProp(info->config->root, BAD_CAST "args");
     if ( args == NULL ) {
         args = "";
     }
@@ -794,7 +794,7 @@ const char *GetRuntimeArgs(install_info *info)
 }
 const char *GetInstallOption(install_info *info, const char *option)
 {
-    return xmlGetProp(info->config->root, option);
+    return (char *)xmlGetProp(info->config->root, BAD_CAST option);
 }
 
 /* Create the initial installation information */
@@ -1253,22 +1253,22 @@ void mark_option(install_info *info, xmlNodePtr node,
                  const char *value, int recurse)
 {
     /* Unmark this option for installation */
-    if ( !strcmp(node->name, "option") ) {
+    if ( !strcmp((char *)node->name, "option") ) {
 		char name[BUFSIZ];
-		const char *text = xmlNodeListGetString(info->config, node->childs, 1);
+		const char *text = (char *)xmlNodeListGetString(info->config, node->childs, 1);
 		*name = '\0';
 		while ( (*name == 0) && parse_line(&text, name, sizeof(name)) )
 			;
 		log_debug("Marked option '%s' to '%s'\n", name, value);
 
-        xmlSetProp(node, "install", value);
+		xmlSetProp(node, BAD_CAST "install", BAD_CAST value);
     }
 
     /* Recurse down any other options */
     if ( recurse ) {
         node = node->childs;
         while ( node ) {
-            if ( !strcmp(node->name, "option") ) {
+            if ( !strcmp((char *)node->name, "option") ) {
                 mark_option(info, node, value, recurse);
             }
 			/* We don't touch exclusive options */
@@ -1282,10 +1282,10 @@ int enable_option_recurse(install_info *info, xmlNodePtr node, const char *optio
 {
     int ret = 0;
     while ( node ) {
-        if ( !strcmp(node->name, "option")) {
+        if ( !strcmp((char *)node->name, "option")) {
             /* Is this the option we're looking for ? */
             char name[BUFSIZ];
-            const char *text = xmlNodeListGetString(info->config, node->childs, 1);
+            const char *text = (char *)xmlNodeListGetString(info->config, node->childs, 1);
             *name = '\0';
             while ( (*name == 0) && parse_line(&text, name, sizeof(name)) )
                 ;
@@ -1293,9 +1293,9 @@ int enable_option_recurse(install_info *info, xmlNodePtr node, const char *optio
                 mark_option(info, node, "true", 1);
                 ret ++;
             }
-        } else if ( !strcmp(node->name, "exclusive") ) {
+        } else if ( !strcmp((char *)node->name, "exclusive") ) {
             ret += enable_option_recurse(info, node->childs, option);
-        } else if ( !strcmp(node->name, "component") ) {
+        } else if ( !strcmp((char *)node->name, "component") ) {
             ret += enable_option_recurse(info, node->childs, option);            
         } 
         node = node->next;
@@ -1316,16 +1316,16 @@ int CheckRequirements(install_info *info)
     const char *text;
 
 	while ( node ) {
-		lang = xmlGetProp(node, "lang");
-		arch = xmlGetProp(node, "arch");
-		libc = xmlGetProp(node, "libc");
-		distro = xmlGetProp(node, "distro");
-		if ( !strcmp(node->name, "require") && match_locale(lang) &&
+		lang = (char *)xmlGetProp(node, BAD_CAST "lang");
+		arch = (char *)xmlGetProp(node, BAD_CAST "arch");
+		libc = (char *)xmlGetProp(node, BAD_CAST "libc");
+		distro = (char *)xmlGetProp(node, BAD_CAST "distro");
+		if ( !strcmp((char *)node->name, "require") && match_locale(lang) &&
 			 match_arch(info, arch) &&
 			 match_libc(info, libc) &&
 			 match_distro(info, distro) ) {
-			char *commandprop = xmlGetProp(node, "command");
-			char *featureprop = xmlGetProp(node, "feature");
+			char *commandprop = (char *)xmlGetProp(node, BAD_CAST "command");
+			char *featureprop = (char *)xmlGetProp(node, BAD_CAST "feature");
 			xmlFree(lang); xmlFree(arch); xmlFree(libc); xmlFree(distro);
 			if ( !commandprop && !featureprop ) {
 				log_fatal(_("XML: 'require' tag doesn't have a mandatory 'command' or 'feature' attribute"));
@@ -1334,7 +1334,7 @@ int CheckRequirements(install_info *info)
 				/* Launch the command */
 				if ( run_script(info, commandprop, 0, 0) != 0 ) {
 					/* We failed: print out error message */
-					text = xmlNodeListGetString(info->config, node->childs, 1);
+					text = (char *)xmlNodeListGetString(info->config, node->childs, 1);
 					if(text) {
 						*buf = '\0';
 						while ( *text ) {
@@ -1349,7 +1349,7 @@ int CheckRequirements(install_info *info)
 				}
 				xmlFree(commandprop);
 			} else if(featureprop) {
-				char *verprop = xmlGetProp(node, "version");
+				char *verprop = (char *)xmlGetProp(node, BAD_CAST "version");
 				unsigned version = 1;
 				if(verprop) {
 					version = atoi(verprop);
@@ -1386,7 +1386,7 @@ char *get_option_name(install_info *info, xmlNodePtr node, char *name, int len)
         name = line;
         len = (sizeof line);
     }
-    text = xmlNodeListGetString(info->config, node->childs, 1);
+    text = (char *)xmlNodeListGetString(info->config, node->childs, 1);
     *name = '\0';
     if ( text ) {
 		xmlNodePtr n;
@@ -1395,12 +1395,12 @@ char *get_option_name(install_info *info, xmlNodePtr node, char *name, int len)
 		/* Parse the children and look for a 'lang' element for translated names */
 		n = node->childs;
 		while ( n ) {
-			if( strcmp(n->name, "lang") == 0 ) {
-				char *prop = xmlGetProp(n, "lang");
+			if( strcmp((char *)n->name, "lang") == 0 ) {
+				char *prop = (char *)xmlGetProp(n, BAD_CAST "lang");
 				if ( ! prop ) {
 					log_fatal(_("XML: 'lang' tag does not have a mandatory 'lang' attribute"));
 				} else if ( match_locale(prop) ) {
-					text = xmlNodeListGetString(info->config, n->childs, 1);
+					text = (char *)xmlNodeListGetString(info->config, n->childs, 1);
 					if(text) {
 						*name = '\0';
 						while ( (*name == 0) && parse_line(&text, name, len) )
@@ -1424,8 +1424,8 @@ char *get_option_name(install_info *info, xmlNodePtr node, char *name, int len)
 const char *get_option_help(install_info *info, xmlNodePtr node)
 {
 	static char line[BUFSIZ];
-    const char *text;
-	char *help = xmlGetProp(node, "help");
+	const char *text;
+	char *help = (char *)xmlGetProp(node, BAD_CAST "help");
 	xmlNodePtr n;
 	xmlNodePtr nolang = NULL;
 
@@ -1438,12 +1438,12 @@ const char *get_option_help(install_info *info, xmlNodePtr node)
 	/* Look for translated strings */
 	n = node->childs;
 	while ( n ) {
-		if( strcmp(n->name, "help") == 0 ) {
-			char *prop = xmlGetProp(n, "lang");
+		if( strcmp((char *)n->name, "help") == 0 ) {
+			char *prop = (char *)xmlGetProp(n, BAD_CAST "lang");
 			if(!prop) {
 				nolang = n;
 			} else if ( match_locale(prop) ) {
-				text = xmlNodeListGetString(info->config, n->childs, 1);
+				text = (char *)xmlNodeListGetString(info->config, n->childs, 1);
 				if(text) {
 					*line = '\0';
 					while ( (*line == 0) && parse_line(&text, line, sizeof(line)) )
@@ -1458,7 +1458,7 @@ const char *get_option_help(install_info *info, xmlNodePtr node)
 
 	/* no matching locale found. use if available */
 	if(!*line && nolang) {
-		text = xmlNodeListGetString(info->config, nolang->childs, 1);
+		text = (char *)xmlNodeListGetString(info->config, nolang->childs, 1);
 		if(text) {
 			*line = '\0';
 			while ( (*line == 0) && parse_line(&text, line, sizeof(line)) )
@@ -1480,10 +1480,10 @@ const char *get_option_warn(install_info *info, xmlNodePtr node)
 	/* Look for translated strings */
 	n = node->childs;
 	while ( n ) {
-		if( strcmp(n->name, "warn") == 0 ) {
-			char *prop = xmlGetProp(n, "lang");
+		if( strcmp((char *)n->name, "warn") == 0 ) {
+			char *prop = (char *)xmlGetProp(n, BAD_CAST "lang");
 			if ( match_locale(prop) ) {
-				text = xmlNodeListGetString(info->config, n->childs, 1);
+				text = (char *)xmlNodeListGetString(info->config, n->childs, 1);
 				if(text) {
 					*line = '\0';
 					*buf = '\0';
@@ -1507,8 +1507,8 @@ const char *get_option_warn(install_info *info, xmlNodePtr node)
 int get_option_displayed(install_info *info, xmlNodePtr node)
 {
 	int ret = 1;
-    if ( node ) {
-		char *txt = xmlGetProp(node, "show");
+	if ( node ) {
+		char *txt = (char *)xmlGetProp(node, BAD_CAST "show");
 		if ( txt ) {
 			if ( !strcasecmp(txt, "false") ) {
 				ret = 0;
@@ -1829,14 +1829,14 @@ static void optionstag_sub(install_info *info, xmlNodePtr node)
 	}
 
 	while ( node ) {
-		if ( ! strcmp(node->name, "option") ) {
-			char *wanted = xmlGetProp(node, "install");
+		if ( ! strcmp((char *)node->name, "option") ) {
+			char *wanted = (char *)xmlGetProp(node, BAD_CAST "install");
 			if ( wanted  && (strcmp(wanted, "true") == 0) ) {
-				char *tag = xmlGetProp(node, "tag");
-				lang = xmlGetProp(node, "lang");
-				arch = xmlGetProp(node, "arch");
-				libc = xmlGetProp(node, "libc");
-				distro = xmlGetProp(node, "distro");
+				char *tag = (char *)xmlGetProp(node, BAD_CAST "tag");
+				lang = (char *)xmlGetProp(node, BAD_CAST "lang");
+				arch = (char *)xmlGetProp(node, BAD_CAST "arch");
+				libc = (char *)xmlGetProp(node, BAD_CAST "libc");
+				distro = (char *)xmlGetProp(node, BAD_CAST "distro");
 				if ( tag &&
 					 match_locale(lang) &&
 					 match_arch(info, arch) &&
@@ -1878,12 +1878,12 @@ static void optionstag_sub(install_info *info, xmlNodePtr node)
 			xmlFree(wanted);
 			if ( node->childs )  /* Sub-options */
 				optionstag_sub(info, node->childs);
-		} else if ( ! strcmp(node->name, "exclusive" ) ) {
+		} else if ( ! strcmp((char *)node->name, "exclusive" ) ) {
 			optionstag_sub(info, node->childs);
-		} else if ( ! strcmp(node->name, "component" ) ) {
-			arch = xmlGetProp(node, "arch");
-			libc = xmlGetProp(node, "libc");
-			distro = xmlGetProp(node, "distro");
+		} else if ( ! strcmp((char *)node->name, "component" ) ) {
+			arch = (char *)xmlGetProp(node, BAD_CAST "arch");
+			libc = (char *)xmlGetProp(node, BAD_CAST "libc");
+			distro = (char *)xmlGetProp(node, BAD_CAST "distro");
             if ( match_arch(info, arch) &&
                  match_libc(info, libc) &&
 				 match_distro(info, distro) ) {
@@ -2281,20 +2281,20 @@ void mark_cmd_options(install_info *info, xmlNodePtr parent, int exclusive)
 	/* Iterate through the children */
 	xmlNodePtr child;
 	for ( child = parent->childs; child; child = child->next ) {
-		if ( !strcmp(child->name, "option") ) {
-			str = xmlGetProp(child, "install");
+		if ( !strcmp((char *)child->name, "option") ) {
+			str = (char *)xmlGetProp(child, BAD_CAST "install");
 			if ( str ) {
 				if ( !strcmp(str, "command") ) {
 					/* Run the command and set it to "true" if the return value is ok */
 					xmlFree(str);
-					str = xmlGetProp(child, "command");
+					str = (char *)xmlGetProp(child, BAD_CAST "command");
 					if ( str ) {
 						cmd = run_script(info, str, 0, 0);
-						xmlSetProp(child, "install", cmd ? "false" : "true");
+						xmlSetProp(child, BAD_CAST "install", cmd ? BAD_CAST "false" : BAD_CAST "true");
 						log_debug("Script run: '%s' returned %d\n", str, cmd);
 					} else {
 						log_fatal(_("Missing 'command' attribute for an option"));
-						xmlSetProp(child, "install", "false");
+						xmlSetProp(child, BAD_CAST "install", BAD_CAST "false");
 					}
 				} else if ( !strcmp(str, "true") ) {
 					cmd = 0;
@@ -2305,9 +2305,9 @@ void mark_cmd_options(install_info *info, xmlNodePtr parent, int exclusive)
 			if ( exclusive && !cmd ) { /* Stop at the first set option if we're in an exclusive block */
 				break;
 			}
-		} else if ( !strcmp(child->name, "component") ) {
+		} else if ( !strcmp((char *)child->name, "component") ) {
 			mark_cmd_options(info, child, 0);
-		} else if ( !strcmp(child->name, "exclusive") ) {
+		} else if ( !strcmp((char *)child->name, "exclusive") ) {
 			mark_cmd_options(info, child, 1);
 		}
 	}
@@ -2891,7 +2891,7 @@ void pop_curdir(void)
 
 int xmlNodePropIsTrue(xmlNodePtr node, const char* prop)
 {
-    char *str = xmlGetProp(node, prop);
+	char *str = (char *)xmlGetProp(node, BAD_CAST prop);
 	int ret = 0;
 
 	if(str && (!strcmp(str, "true") || !strcmp(str, "yes")))
@@ -2902,7 +2902,7 @@ int xmlNodePropIsTrue(xmlNodePtr node, const char* prop)
 
 int xmlNodePropIsFalse(xmlNodePtr node, const char* prop)
 {
-    char *str = xmlGetProp(node, prop);
+	char *str = (char *)xmlGetProp(node, BAD_CAST prop);
 	int ret = 0;
 
 	if(str && (!strcmp(str, "false") || !strcmp(str, "no")))

@@ -69,9 +69,9 @@ size_t copy_cpio_stream(install_info *info, stream *input, const char *dest, con
     int count = 0;
 	unsigned int user_mode = 0;
     /* Optional MD5 sum can be specified in the XML file */
-    const char *md5 = xmlGetProp(node, "md5sum");
-    const char *mut = xmlGetProp(node, "mutable");
-    const char *mode_str = xmlGetProp(node, "mode");
+    const char *md5 = (char *)xmlGetProp(node, BAD_CAST "md5sum");
+    const char *mut = (char *)xmlGetProp(node, BAD_CAST "mutable");
+    const char *mode_str = (char *)xmlGetProp(node, BAD_CAST "mode");
 
 	if ( mode_str ) {
 		user_mode = (unsigned int) strtol(mode_str, NULL, 8);

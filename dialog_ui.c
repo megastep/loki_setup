@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.31 2004-12-12 22:39:37 megastep Exp $
+ * $Id: dialog_ui.c,v 1.32 2005-08-23 00:47:59 megastep Exp $
  */
 
 #include <limits.h>
@@ -153,22 +153,22 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr pa
    
 	xmlNodePtr node = parent->childs;
 	for ( ; node && nb_choices<MAX_CHOICES; node = node->next ) {
-	    const char *set = xmlGetProp(node, "install");
+	    const char *set = (char *)xmlGetProp(node, BAD_CAST "install");
 		const char *str;
 
 		if ( ! set ) {
 			/* it's also possible to use the "required" attribute */
-			set = xmlGetProp(node, "required");
+			set = (char *)xmlGetProp(node, BAD_CAST "required");
 		}
-	    if ( ! strcmp(node->name, "option") ) {
+	    if ( ! strcmp((char *)node->name, "option") ) {
 
-			if ( ! match_arch(info, xmlGetProp(node, "arch")) )
+			if ( ! match_arch(info, (char *)xmlGetProp(node, BAD_CAST "arch")) )
 				continue;
 		
-			if ( ! match_libc(info, xmlGetProp(node, "libc")) )
+			if ( ! match_libc(info, (char *)xmlGetProp(node, BAD_CAST "libc")) )
 				continue;
 			 
-			if ( ! match_distro(info, xmlGetProp(node, "distro")) )
+			if ( ! match_distro(info, (char *)xmlGetProp(node, BAD_CAST "distro")) )
 				continue;
 		
 			if ( ! get_option_displayed(info, node) ) {
@@ -203,17 +203,17 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr pa
 			str = get_option_help(info, node);
 			choices[i++] = str ? strdup(str) : NULL;
 			nb_choices++;
-	    } else if ( ! strcmp(node->name, "exclusive") ) {
+	    } else if ( ! strcmp((char *)node->name, "exclusive") ) {
 			nodes[nb_choices] = node;
 			choices[i++] = "";
-            exc_text_index=i;
+			exc_text_index=i;
 			choices[i++] = strdup(get_option_name(info, node, NULL, 0));
 			choices[i++] = "on";
 			str = get_option_help(info, node);
 			choices[i++] = str ? strdup(str) : NULL;
 			nb_choices++;
-	    } else if ( ! strcmp(node->name, "component") ) {
-			str = xmlGetProp(node, "name");
+	    } else if ( ! strcmp((char *)node->name, "component") ) {
+			str = (char *)xmlGetProp(node, BAD_CAST "name");
 			nodes[nb_choices] = node;
 			choices[i++] = _("Component");
 			if ( !str || !strcmp(str, "Default") ) { /* Show the name of the product instead */
@@ -248,7 +248,7 @@ options_loop:
 
 	/* Now parse the results */
 	for ( i = 0; ret && i < nb_choices; ++i ) {
-		if ( !strcmp(nodes[i]->name, "option") ) {
+		if ( !strcmp((char *)nodes[i]->name, "option") ) {
 		    if ( result[i] ) {
 				const char *warn = get_option_warn(info, nodes[i]);
 
@@ -256,7 +256,7 @@ options_loop:
 				xmlNodePtr child;
 				child = nodes[i]->childs;
 				while(child) {
-					if (!strcmp(child->name, "eula")) {
+					if (!strcmp((char *)child->name, "eula")) {
 						/* this option has some EULA nodes
 						 * we need to prompt before this change can be validated / turned on
 						 */
@@ -291,7 +291,7 @@ options_loop:
 				info->install_size += size_node(info, nodes[i]);
                 /* Parse any child options */
 		        ret = parse_option(info, NULL, nodes[i], 0, 0, _("Choose the options"));
-		    } else if ( xmlGetProp(nodes[i], "required") ) {
+		    } else if ( xmlGetProp(nodes[i], BAD_CAST "required") ) {
 				snprintf(buf, sizeof(buf), _("Option '%s' is required.\n"), 
 						 get_option_name(info, nodes[i], NULL, 0));
 				dialog_prompt(buf, RESPONSE_OK);
@@ -305,34 +305,34 @@ options_loop:
 		        ret = parse_option(info, NULL, nodes[i], 0, 0, _("Choose the options"));
                 
 		    } else { /* Unmark */
-                xmlNodePtr sub_option = nodes[i]->childs;
-                /* Unmark the childs */
-				mark_option(info, nodes[i], "false", 0);
-                while(sub_option)
-                {
-                    mark_option(info, sub_option, "false", 1); /* Recursively unmark the child options */
-                    sub_option = sub_option->next;
-                }
+			xmlNodePtr sub_option = nodes[i]->childs;
+			/* Unmark the childs */
+			mark_option(info, nodes[i], "false", 0);
+			while(sub_option)
+			{
+				mark_option(info, sub_option, "false", 1); /* Recursively unmark the child options */
+				sub_option = sub_option->next;
+			}
 		    }
 		}
-        else if ( !strcmp(nodes[i]->name, "exclusive")) {
-            if (result[i]) {
+		else if ( !strcmp((char *)nodes[i]->name, "exclusive")) {
+		   if (result[i]) {
                 /* The heading for the exclusive childs should be the name of the parent exclusive option, 
                 which is choices[exc_text_index]*/
 		        ret = parse_option(info, component, nodes[i], 1, GetReinstallNode(info, nodes[i]),
                         choices[exc_text_index]);
-            }else{
+		   } else {
                 /* If an exclusive option is deselected, unmark all the child options */
-                xmlNodePtr exc_childs = nodes[i]->childs;
-                while(exc_childs)
-                {
-                    mark_option(info, exc_childs, "false", 1); /* Recursively unmark the child options */
-                    exc_childs = exc_childs->next;
-                }
-            }
-		} else if ( !strcmp(nodes[i]->name, "component") && result[i]) {
-			snprintf(buf, sizeof(buf), _("Component: %s"), xmlGetProp(nodes[i], "name"));
-		    ret = parse_option(info, xmlGetProp(nodes[i], "name"), nodes[i], 0, 0, buf);
+			xmlNodePtr exc_childs = nodes[i]->childs;
+			while(exc_childs)
+			{
+				mark_option(info, exc_childs, "false", 1); /* Recursively unmark the child options */
+				exc_childs = exc_childs->next;
+			}
+		   }
+		} else if ( !strcmp((char *)nodes[i]->name, "component") && result[i]) {
+			snprintf(buf, sizeof(buf), _("Component: %s"), xmlGetProp(nodes[i], BAD_CAST "name"));
+			ret = parse_option(info, (char *)xmlGetProp(nodes[i], BAD_CAST "name"), nodes[i], 0, 0, buf);
 		}
 	}
 	return ret;
@@ -362,12 +362,12 @@ install_state dialog_setup(install_info *info)
 			node = info->config->root->childs;
 			while ( node ) {
 				const char *str;
-                if ( strcmp(node->name, "option") == 0 ) {
+                if ( strcmp((char *)node->name, "option") == 0 ) {
                     nb_choices++;
                     sprintf(buf, "%d. ", nb_choices);
 					choices[i++] = strdup(buf);
                     choices[i] = strdup(get_option_name(info, node, NULL, 0));
-					wanted = xmlGetProp(node, "install"); /* Look for a default value */
+					wanted = (char *)xmlGetProp(node, BAD_CAST "install"); /* Look for a default value */
 					if ( wanted && !strcmp(wanted, "true") ) {
 						dialog_vars.default_item = choices[i];
 					}
@@ -388,21 +388,21 @@ install_state dialog_setup(install_info *info)
 				return SETUP_ABORT;
 			} else {
 				/* Process the choice */
-                int node_index=0;
-                node = info->config->root->childs;
-                while ( node ){
-                    if ( strcmp(node->name, "option") == 0 )
-                    {
-                        if ( node_index == choice)
-                        {
+				int node_index=0;
+				node = info->config->root->childs;
+				while ( node ) {
+					if ( strcmp((char *)node->name, "option") == 0 )
+					{
+						if ( node_index == choice)
+						{
 						    mark_option(info, node, "true", 0);
-                        }else{
-                            mark_option(info, node, "false", 0);
-                        }
-                    }
-                    node = node->next;
-                    node_index++;
-                }
+						} else {
+						    mark_option(info, node, "false", 0);
+						}
+					}
+					node = node->next;
+					node_index++;
+				}
 			}
 		} else {
 			char path[PATH_MAX];

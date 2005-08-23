@@ -1,5 +1,5 @@
 /* ZIP plugin for setup */
-/* $Id: zip.c,v 1.12 2005-06-03 22:00:43 megastep Exp $ */
+/* $Id: zip.c,v 1.13 2005-08-23 00:48:00 megastep Exp $ */
 
 #include "plugins.h"
 #include "file.h"
@@ -680,10 +680,10 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
     int lcase_fnames = 0;
 
     /* Optional MD5 sum can be specified in the XML file */
-    const char *md5 = xmlGetProp(node, "md5sum");
-    const char *mut = xmlGetProp(node, "mutable");
-    const char *mode_str = xmlGetProp(node, "mode");
-    const char *fname_conv = xmlGetProp(node, "lcasefilenames");
+    const char *md5 = (char *)xmlGetProp(node, BAD_CAST "md5sum");
+    const char *mut = (char *)xmlGetProp(node, BAD_CAST "mutable");
+    const char *mode_str = (char *)xmlGetProp(node, BAD_CAST "mode");
+    const char *fname_conv = (char *)xmlGetProp(node, BAD_CAST "lcasefilenames");
 
 	if ( mode_str ) {
 		user_mode = (unsigned int) strtol(mode_str, NULL, 8);
@@ -869,7 +869,7 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
             char lnkname[PATH_MAX];
             /* null-terminate string. */
             zip_buf_out[entry->uncompressed_size] = '\0';
-            zip_expand_symlink_path(zip_buf_out);
+            zip_expand_symlink_path((char *)zip_buf_out);
             snprintf(lnkname, sizeof (lnkname), "%s/%s", dest, zip_buf_out);
             file_symlink(info, lnkname, final);
         } /* if */

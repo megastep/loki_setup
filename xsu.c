@@ -78,7 +78,8 @@ void sighandler(int sig)
 #endif
   if ( sig == SIGCHLD && term > 0 ) {
     int status;
-    pid_t pid = wait(&status);
+    pid_t pid;
+    pid = wait(&status);
     if ( WIFEXITED(status) ) {
 #ifdef DEBUG
       fprintf(stderr,"Child %d returned\n", pid);
