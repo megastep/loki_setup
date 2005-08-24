@@ -69,13 +69,7 @@ DetectLIBC()
 		  return $status
 	  fi
       if [ -f `echo /lib/libc.so.6* | tail -n 1` ]; then
-	      if fgrep GLIBC_2.3 /lib/libc.so.6* 2> $NULL >> $NULL; then
-	              echo "glibc-2.3"
-	              status=0
-	      elif fgrep GLIBC_2.2 /lib/libc.so.6* 2> $NULL >> $NULL; then
-	              echo "glibc-2.2"
-	              status=0
-	      elif fgrep GLIBC_2.1 /lib/libc.so.6* 2> $NULL >> $NULL; then
+		  if fgrep GLIBC_2.1 /lib/libc.so.6* 2> $NULL >> $NULL; then
 	              echo "glibc-2.1"
 	              status=0
 	      else
