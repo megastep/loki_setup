@@ -19,6 +19,12 @@ USE_XHOST=0
 # this is the message for su call, printf
 SU_MESSAGE="You need to run this installation as the super user.\nPlease enter the root password."
 
+if test -x /bin/su; then
+	SU_CMD=/bin/su
+else
+	SU_CMD=/usr/bin/su
+fi
+
 NULL=/dev/null
 # See if we have the XPG4 utilities (Solaris)
 if test -d /usr/xpg4/bin; then
@@ -239,7 +245,7 @@ then
       # if xsu actually ran and the auth was cancelled, $status is 2
       # try with su
       printf "$SU_MESSAGE\n"
-      try_run -absolute /bin/su root -c "export DISPLAY=$DISPLAY;sh `pwd`/setup.sh -auth"
+      try_run -absolute $SU_CMD root -c "export DISPLAY=$DISPLAY;sh `pwd`/setup.sh -auth"
       status="$?"
 	  if [ "$status" -eq 0 ]; then
 		# the auth command was properly executed
