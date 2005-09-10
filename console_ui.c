@@ -296,7 +296,11 @@ static install_state console_init(install_info *info, int argc, char **argv, int
         printf(_("----====== %s installation program ======----\n"), info->desc);
     }
     printf("\n");
+#ifdef __linux /* Glibc version only matters on Linux anyway */
     printf(_("You are running a %s machine with %s\n"), info->arch, info->libc);
+#else
+    printf(_("You are running a %s machine\n"), info->arch);
+#endif
     printf(_("Hit Control-C anytime to cancel this installation program.\n"));
     printf("\n");
     if ( GetProductEULA(info, NULL) ) {
