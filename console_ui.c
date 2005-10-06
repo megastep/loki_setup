@@ -297,9 +297,9 @@ static install_state console_init(install_info *info, int argc, char **argv, int
     }
     printf("\n");
 #ifdef __linux /* Glibc version only matters on Linux anyway */
-    printf(_("You are running a %s machine with %s\n"), info->arch, info->libc);
+    printf(_("You are running a %s machine with %s (%s)\n"), info->arch, info->libc, distribution_name[info->distro]);
 #else
-    printf(_("You are running a %s machine\n"), info->arch);
+    printf(_("You are running a %s machine (%s)\n"), info->arch, distribution_name[info->distro]);
 #endif
     printf(_("Hit Control-C anytime to cancel this installation program.\n"));
     printf("\n");
