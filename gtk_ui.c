@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.109 2005-08-23 00:47:59 megastep Exp $
+   $Id: gtk_ui.c,v 1.110 2005-10-06 23:53:15 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -199,7 +199,7 @@ gint path_entry_keypress_slot(GtkWidget *widget, GdkEvent *event,
         }
         update_space();
     }
-    return(TRUE);
+    return FALSE;
 }
 
 gint path_combo_change_slot(GtkWidget *widget, GdkEvent *event, 
@@ -220,7 +220,7 @@ gint path_combo_change_slot(GtkWidget *widget, GdkEvent *event,
     return(FALSE);
 }
 
-void setup_entry_installpath_slot( GtkWidget* widget, gpointer func_data )
+gboolean setup_entry_installpath_slot( GtkWidget* widget, GdkEventFocus *event, gpointer func_data )
 {
     char* string;
     string = gtk_entry_get_text( GTK_ENTRY(widget) );
@@ -231,6 +231,7 @@ void setup_entry_installpath_slot( GtkWidget* widget, gpointer func_data )
         }
         update_space();
     }
+	return FALSE;
 }
 
 gint binary_path_entry_keypress_slot(GtkWidget *widget, GdkEvent *event, 
@@ -246,7 +247,7 @@ gint binary_path_entry_keypress_slot(GtkWidget *widget, GdkEvent *event,
         }
         check_install_button();
     }    
-    return(TRUE);
+    return FALSE;
 }
 
 gint binary_path_combo_change_slot(GtkWidget *widget, GdkEvent *event, 
@@ -267,7 +268,7 @@ gint binary_path_combo_change_slot(GtkWidget *widget, GdkEvent *event,
     return(FALSE);
 }
 
-void setup_entry_binarypath_slot( GtkWidget* widget, gpointer func_data )
+gboolean setup_entry_binarypath_slot( GtkWidget* widget, GdkEventFocus *event, gpointer func_data )
 {
     char* string;
     string = gtk_entry_get_text( GTK_ENTRY(widget) );
@@ -278,6 +279,7 @@ void setup_entry_binarypath_slot( GtkWidget* widget, gpointer func_data )
         }
         check_install_button();
     }
+	return FALSE;
 }
 
 /*
@@ -677,7 +679,7 @@ gboolean on_manpage_entry_focus_out_event(GtkWidget *widget,
             gtk_entry_set_text(GTK_ENTRY(widget), cur_info->man_path);
         }
 	}
-	return TRUE;
+	return FALSE;
 }
 
 /*-----------------------------------------------------------------------------
