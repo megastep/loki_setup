@@ -74,7 +74,7 @@ elif test -d /opt/codehost/lib; then
 	LIBS="-L/opt/codehost/lib"
 elif test -d /sw/lib; then
 	case "$target" in
-	    powerpc-apple-darwin*)
+	    *-apple-darwin*)
 		LIBS="-L/sw/lib" ;;
 	esac
 else
@@ -165,7 +165,7 @@ case "$target" in
 	RDYNAMIC="-Wl,-export-dynamic"
 	LIBDL=""
 	ARCH=`uname -p` ;;
-    powerpc-apple-darwin*)
+    *-apple-darwin*)
 	STATIC="-static"
 	RDYNAMIC="-Wl,-Sn"
 	BSTATIC=""
@@ -174,7 +174,7 @@ case "$target" in
 	CFLAGS="$CFLAGS -I/sw/include -Ddarwin"
 	LDFLAGS="$LDFLAGS -framework Carbon -framework Security -framework IOKit"
 	COMMON_LIBS="carbon/carbonres.o carbon/carbondebug.o carbon/STUPControl.o carbon/YASTControl.o carbon/appbundle.o"
-	ARCH=ppc ;;
+	ARCH=`uname -p` ;;
     *ppc64* | *powerpc64*)
         ARCH=ppc64 ;;
     *ppc* | *powerpc*)

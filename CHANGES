@@ -1,4 +1,6 @@
 Current:
+Ryan C. Gordon (icculus.org) - Fri Jan 27 16:35:25 EST 2006
+ * Intel Mac support.
 Ryan C. Gordon (icculus.org) - Fri Jun 17 00:15:51 EDT 2005
  * Patched so binary built on MacOSX Tiger will still run on Panther.
 Ryan C. Gordon (icculus.org) - Wed May 18 11:40:10 EDT 2005
