@@ -790,6 +790,12 @@ ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, c
 				final[0] = '\0';
 				strcpy(final, fpat);
 			}
+
+			file = malloc(sizeof(*file));
+			if (file) {
+				memset(file, '\0', sizeof(*file));
+				file->path = strdup(final);
+			}
 		}
 		if ( copied < 0 ) {
 			log_warning(_("Unable to copy file '%s'"), fpat);

@@ -157,6 +157,7 @@ endif
 	    $(BRANDELF) -t $(os) image/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk; \
 	else \
 		echo No directory to copy the binary files to.; \
+		echo   wanted image/setup.data/bin/${os}/${arch}/${libc}; \
 	fi
 
 install-image: all
