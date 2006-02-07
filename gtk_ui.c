@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.110 2005-10-06 23:53:15 megastep Exp $
+   $Id: gtk_ui.c,v 1.111 2006-02-07 23:54:01 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -101,7 +101,13 @@
 #include "copy.h"
 #include "loki_launchurl.h"
 
-#define SETUP_GLADE SETUP_BASE "setup.glade"
+#if defined(ENABLE_GTK2)
+    #define SETUP_GLADE SETUP_BASE "setup.gtk2.glade"
+    #define GLADE_XML_NEW(a, b) glade_xml_new(a, b, NULL)
+#else
+    #define SETUP_GLADE SETUP_BASE "setup.glade"
+    #define GLADE_XML_NEW(a, b) glade_xml_new(a, b)
+#endif
 
 #define LICENSE_FONT            \
         "-misc-fixed-medium-r-semicondensed-*-*-120-*-*-c-*-iso8859-8"
@@ -282,10 +288,81 @@ gboolean setup_entry_binarypath_slot( GtkWidget* widget, GdkEventFocus *event, g
 	return FALSE;
 }
 
+#if defined(ENABLE_GTK2)
+/* Computes a nice size for a dialog box */
+static int get_nice_width(GtkWidget *widget, int maxlen)
+{
+    PangoContext *pc;
+    PangoFontDescription *fd;
+    PangoLanguage *pl;
+    PangoFontMetrics *fm;
+    int approx_width;
+
+    pc = gtk_widget_get_pango_context(widget);
+    fd = pango_context_get_font_description(pc);
+    pl = pango_context_get_language(pc);
+    fm = pango_context_get_metrics(pc, fd, pl);
+    approx_width = pango_font_metrics_get_approximate_char_width(fm);
+
+    if (maxlen > 100)
+        maxlen = 100;
+
+
+    return((maxlen * approx_width) / PANGO_SCALE);
+
+}
+
 /*
    Returns 0 if fails.
 */
-static gboolean load_file( GtkText *widget, GdkFont *font, const char *file )
+static gboolean load_file_gtk2( GtkTextView *widget, const char *file )
+{
+    FILE *fp;
+    int pos;
+    GtkTextBuffer *buffer;
+    GtkTextIter start, end;
+    int nice_width = 0;
+    int maxlen = 0;
+    GtkWidget *toplevel;
+   
+    buffer = gtk_text_view_get_buffer (widget);
+    gtk_text_buffer_get_start_iter(buffer, &start);
+    gtk_text_buffer_get_end_iter(buffer, &end);
+    gtk_text_buffer_delete(buffer, &start, &end);
+    fp = fopen(file, "r");
+    if ( fp ) {
+        char line[BUFSIZ];
+        pos = 0;
+        while ( fgets(line, BUFSIZ-1, fp) ) {
+            gtk_text_buffer_insert_at_cursor (buffer, line, strlen(line));
+            if (strlen(line) > maxlen)
+                maxlen = strlen(line);
+        }
+        fclose(fp);
+    }
+
+    gtk_text_buffer_get_start_iter(buffer, &start);
+    gtk_text_buffer_place_cursor(buffer, &start);
+
+    nice_width = get_nice_width(GTK_WIDGET(widget), maxlen);
+    if (nice_width / 5 < 75)
+        nice_width += 75;
+    else
+        nice_width += (nice_width / 5);
+
+    toplevel = gtk_widget_get_toplevel (GTK_WIDGET(widget));
+    if (GTK_WIDGET_TOPLEVEL (toplevel))
+        gtk_window_set_default_size(GTK_WINDOW(toplevel), nice_width, (nice_width * 3) / 4);
+
+    return (fp != NULL);
+}
+
+
+#else   /* ! ENABLE_GTK2 */
+/*
+   Returns 0 if fails.
+*/
+static gboolean load_file_gtk1( GtkText *widget, GdkFont *font, const char *file )
 {
     FILE *fp;
     int pos;
@@ -304,6 +381,7 @@ static gboolean load_file( GtkText *widget, GdkFont *font, const char *file )
 
     return (fp != NULL);
 }
+#endif
 
 void on_class_continue_clicked( GtkWidget  *w, gpointer data )
 {
@@ -372,14 +450,18 @@ void setup_button_view_readme_slot( GtkWidget* w, gpointer data )
     GtkWidget *widget;
     const char *file;
     
-    setup_glade_readme = glade_xml_new(glade_file, "readme_dialog");
+    setup_glade_readme = GLADE_XML_NEW(glade_file, "readme_dialog");
     glade_xml_signal_autoconnect(setup_glade_readme);
     readme = glade_xml_get_widget(setup_glade_readme, "readme_dialog");
     widget = glade_xml_get_widget(setup_glade_readme, "readme_area");
     file = GetProductREADME(cur_info, NULL);
     if ( file && readme && widget ) {
         gtk_widget_hide(readme);
-        load_file(GTK_TEXT(widget), NULL, file);
+#if defined(ENABLE_GTK2)
+        load_file_gtk2(GTK_TEXT_VIEW(widget), file);
+#else
+        load_file_gtk1(GTK_TEXT(widget), NULL, file);
+#endif
         gtk_widget_show(readme);
 		/* there are 3 'view readme' buttons...disable all of them */
 		widget = glade_xml_get_widget(setup_glade, "button_readme");
@@ -608,16 +690,23 @@ static void check_install_button(void)
 {
     const char *message;
     GtkWidget *options_status;
+    GtkWidget *install_widget;
 
 	message = check_for_installation(cur_info, NULL);
 
     /* Get the appropriate widgets and set the new state */
     options_status = glade_xml_get_widget(setup_glade, "options_status");
+    install_widget = glade_xml_get_widget(setup_glade, "button_install");
 
     if ( !message ) {
         message = _("Ready to install!");
+
+        gtk_widget_set_sensitive(install_widget, TRUE);
     }
+    else
+        gtk_widget_set_sensitive(install_widget, FALSE);
     gtk_label_set_text(GTK_LABEL(options_status), message);
+
 }
 
 static void update_size(void)
@@ -752,17 +841,23 @@ void setup_checkbox_option_slot( GtkWidget* widget, gpointer func_data)
 					GtkWidget *license_widget;
 					
 					if (!setup_glade_license)
-						setup_glade_license = glade_xml_new(glade_file, "license_dialog");
+						setup_glade_license = GLADE_XML_NEW(glade_file, "license_dialog");
 					glade_xml_signal_autoconnect(setup_glade_license);
 					license = glade_xml_get_widget(setup_glade_license, "license_dialog");
 					license_widget = glade_xml_get_widget(setup_glade_license, "license_area");
 					if ( license && license_widget ) {
-						GdkFont *font;
 						install_state start;
+#if ! defined(ENABLE_GTK2)
+						GdkFont *font;
+#endif
 						
-						font = gdk_font_load(LICENSE_FONT);
 						gtk_widget_hide(license);
-						load_file(GTK_TEXT(license_widget), font, name);
+#if defined(ENABLE_GTK2)
+						load_file_gtk2(GTK_TEXT_VIEW(license_widget), name);
+#else
+						font = gdk_font_load(LICENSE_FONT);
+						load_file_gtk1(GTK_TEXT(license_widget), font, name);
+#endif
 						gtk_widget_show(license);
 						gtk_window_set_modal(GTK_WINDOW(license), TRUE);
 						
@@ -978,6 +1073,51 @@ static inline int str_in_g_list(const char *str, GList *list)
     }
 
     return 0;  /* not in the list. */
+}
+
+// Determine if there is a program to auto start
+//   That is, if we don't want to make a symlink, but
+//   we want to start something as an option at the end
+//   the installation, let's enable that.
+static void check_program_to_start(install_info *info)
+{
+    int i;
+    xmlNodePtr node;
+
+    /*----------------------------------------------------------------------
+    **  Find a program to start, if any.
+    **--------------------------------------------------------------------*/
+    for (i = 0, node = cur_info->config->root->childs; node;  node = node->next) {
+        if (strcmp((char *)node->name, "program_to_start") == 0) {
+            /* Retrieve the value - note that it's up to us to free
+                the memory, which means we can use it without copying it */
+            char *content = (char *)xmlNodeGetContent(node);
+            char *p, *q;
+            if (content) {
+                if ( info->installed_symlink && info->symlinks_path && *info->symlinks_path ) {
+                    log_warning(_("Warning: program_to_start is only meaningful when there are no symlinks.\n"));
+                    return;
+                }
+
+		g_strstrip(content);
+                for (p = content, q = info->play_binary; (q - info->play_binary) < (PATH_MAX - 20) && *p; )
+                {
+                    if (memcmp(p, "$INSTALLDIR", 11) == 0) {
+                        strcpy(q, info->install_path);
+                        q += strlen(info->install_path);
+                        p += 11;
+                        if (*(q - 1) == '/' && *p == '/')
+                            p++;
+                    }
+                    else
+                        *q++ = *p++;
+                }
+
+                g_free(content);
+                return;
+            }
+        }
+    }
 }
 
 // FIXME: this does not belong into the UI
@@ -1477,7 +1617,7 @@ static install_state gtkui_init(install_info *info, int argc, char **argv, int n
     }
     fclose(opened);
 
-    setup_glade = glade_xml_new(glade_file, "setup_window"); 
+    setup_glade = GLADE_XML_NEW(glade_file, "setup_window"); 
 
     /* add signal handlers to manage enabling/disabling the Install button */
     install_path = glade_xml_get_widget(setup_glade, "install_path");
@@ -1661,7 +1801,7 @@ static install_state gtkui_license(install_info *info)
     GtkWidget *license;
     GtkWidget *widget;
 
-    setup_glade_license = glade_xml_new(glade_file, "license_dialog");
+    setup_glade_license = GLADE_XML_NEW(glade_file, "license_dialog");
     glade_xml_signal_autoconnect(setup_glade_license);
     license = glade_xml_get_widget(setup_glade_license, "license_dialog");
     widget = glade_xml_get_widget(setup_glade_license, "license_area");
@@ -1670,7 +1810,11 @@ static install_state gtkui_license(install_info *info)
 
         font = gdk_font_load(LICENSE_FONT);
         gtk_widget_hide(license);
-        load_file(GTK_TEXT(widget), font, GetProductEULA(info, NULL));
+#if defined(ENABLE_GTK2)
+        load_file_gtk2(GTK_TEXT_VIEW(widget), GetProductEULA(info, NULL));
+#else
+        load_file_gtk1(GTK_TEXT(widget), font, GetProductEULA(info, NULL));
+#endif
         gtk_widget_show(license);
         gtk_window_set_modal(GTK_WINDOW(license), TRUE);
 
@@ -1930,9 +2074,14 @@ static install_state gtkui_complete(install_info *info)
     gtk_notebook_set_page(GTK_NOTEBOOK(widget), DONE_PAGE);
     widget = glade_xml_get_widget(setup_glade, "install_directory_label");
     gtk_label_set_text(GTK_LABEL(widget), info->install_path);
+
+    check_program_to_start(info);
     widget = glade_xml_get_widget(setup_glade, "play_game_label");
     if ( info->installed_symlink && info->symlinks_path && *info->symlinks_path ) {
         snprintf(text, sizeof(text), _("Type '%s' to start the program"), info->installed_symlink);
+    }
+    else if ( *info->play_binary ) {
+        snprintf(text, sizeof(text), _("Type '%s' to start the program"), info->play_binary);
     } else {
 		*text = '\0';
     }
@@ -1941,7 +2090,7 @@ static install_state gtkui_complete(install_info *info)
     /* Hide the play game button if there's no game to play. :) */
     widget = glade_xml_get_widget(setup_glade, "play_game_button");
     if ( widget && 
-		 (!info->installed_symlink || !info->symlinks_path || !*info->symlinks_path ) ) {
+		 (!info->installed_symlink || !info->symlinks_path || !*info->symlinks_path ) && ! *info->play_binary) {
         gtk_widget_hide(widget);
     }
 

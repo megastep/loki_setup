@@ -25,7 +25,6 @@ AC_PATH_XTRA
 AC_CHECK_HEADERS(unistd.h)
 AC_CHECK_HEADERS(strings.h)
 AC_CHECK_HEADERS(pwd.h)
-AC_CHECK_HEADERS(gtk.h)
 AC_CHECK_HEADERS(carbon/carbon.h)
 AC_CHECK_HEADERS(dirent.h)
 AC_CHECK_HEADERS(sys/dirent.h)
@@ -232,7 +231,7 @@ if test -f $SETUPDB/$ARCH/libsetupdb.a; then
             break
         fi
     done
-    if test x$SETUPDB_INCDIR == x; then
+    if test x$SETUPDB_INCDIR = x; then
         AC_MSG_ERROR([*** $SSETUPDB_NAME headers not found. ***])
     else
         AC_MSG_RESULT([SetupDB library found in $SETUPDB/$ARCH])
@@ -284,6 +283,9 @@ AC_CHECK_HEADERS(langinfo.h)
 AC_CHECK_HEADERS(locale.h)
 
 AC_CHECK_LIB(gpm, Gpm_Open, USE_GPM=yes)
+
+dnl If NCURSES_MOUSE_VERSION is defined, we don't use GPM, so let's not link it in
+AC_TRY_COMPILE([#include <ncurses.h>], [int n = NCURSES_MOUSE_VERSION;], unset USE_GPM)
 
 dnl Check for gtk12 libraries in case those are available (FreeBSD)
 AC_CHECK_LIB(glib12, g_log, GTK12="12")
@@ -399,20 +401,18 @@ else
     AC_MSG_ERROR([*** xml-config not found. You need a working libxml installation.])
 fi
 
-dnl Check for libglade
+dnl Check for libglade 1
 
 AC_PATH_PROG(HAVEGLADE, libglade-config, $PATH)
 if test ! -z "$HAVEGLADE"; then
     GLADE_CFLAGS=`$HAVEGLADE --cflags`
     GLADE_PREFIX=`$HAVEGLADE --prefix`
 
-    CFLAGS="$CFLAGS $GLADE_CFLAGS"
-    GUI_LIBS="$GUI_LIBS $GLADE_STATIC -L$GLADE_PREFIX/lib$LIBSUFFIX -lglade $BDYNAMIC"
 else
     AC_MSG_ERROR([*** libglade-config not found. You need a working libglade installation.])
 fi
 
-dnl Check for GTK
+dnl Check for GTK 1.X
 AC_PATH_PROG(HAVEGTK, gtk$GTK12-config, $PATH)
 AC_PATH_PROG(HAVEGLIB, glib$GTK12-config, $PATH)
 if test ! -z "$HAVEGTK"; then
@@ -420,11 +420,45 @@ if test ! -z "$HAVEGTK"; then
     GTK_PREFIX=`$HAVEGTK --prefix`
     GLIB_PREFIX=`$HAVEGLIB --prefix`
 
-    CFLAGS="$CFLAGS $GTK_CFLAGS"
     GTK_LIBS="$GTK_LIBS -L$GTK_PREFIX/lib$LIBSUFFIX -L$GLIB_PREFIX/lib$LIBSUFFIX -lgtk$GTK12 -lgdk$GTK12 $RDYNAMIC -lgmodule$GTK12 -lglib$GTK12"
-    GUI_LIBS="$GUI_LIBS $GTK_LIBS"
 else
     AC_MSG_ERROR([*** gtk-config not found. You need a working GTK+ 1.2 installation.])
+fi
+
+AC_ARG_ENABLE(gtk2,
+[  --enable-gtk2            Use gtk2 support, not gtk1  [default=no]],
+              , enable_gtk2=no)
+if test x$enable_gtk2 = xyes; then
+
+    AC_DEFINE(ENABLE_GTK2, 1, GTK2 support.)
+
+    dnl Check for glade2 and gtk2 libraries
+
+    AC_PATH_PROG(HAVEPKGCONFIG, pkg-config, $PATH)
+
+    if test ! -z "$HAVEPKGCONFIG"; then
+        $HAVEPKGCONFIG --exists libglade-2.0 gtk+-2.0 
+        if test $? -eq 0 ; then
+            GTK2_CFLAGS=`$HAVEPKGCONFIG --cflags libglade-2.0 gtk+-2.0`
+            GTK2_LIBS=`$HAVEPKGCONFIG --libs libglade-2.0 gtk+-2.0`
+
+            dnl Pkg-config is supposed to add the export-dynamic, but it doesn't, at least on my system
+            LDFLAGS="$LDFLAGS -Wl,-export-dynamic"
+            CFLAGS="$CFLAGS $GTK2_CFLAGS"
+            if test ! -z "GLADE_STATIC"  ; then
+                GTK2_LIBS=`echo $GTK2_LIBS | sed "s/-lglade-2.0/$GLADE_STATIC -lglade-2.0 $BDYNAMIC/g"`
+            fi
+            GUI_LIBS="$GUI_LIBS $GTK2_LIBS"
+        else
+            AC_MSG_ERROR([*** Either libglade-2.0 or gtk+-2.0 are not available.])
+        fi
+    else
+        AC_MSG_ERROR([*** pkg-config not found. Cannot probe for libglade-2.0 or gtk+-2.0.])
+    fi
+
+else
+    CFLAGS="$CFLAGS $GLADE_CFLAGS $GTK_CFLAGS"
+    GUI_LIBS="$GUI_LIBS $GLADE_STATIC -L$GLADE_PREFIX/lib$LIBSUFFIX -lglade $BDYNAMIC $GTK_LIBS"
 fi
 
 if test x$HAVE_BZIP2_SUPPORT = xyes; then

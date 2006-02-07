@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.156 2005-08-23 00:47:59 megastep Exp $ */
+/* $Id: install.c,v 1.157 2006-02-07 23:54:01 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -2318,8 +2318,7 @@ install_state launch_game(install_info *info)
 {
     char cmd[PATH_MAX];
 
-    if ( info->installed_symlink && info->symlinks_path &&
-		 *info->symlinks_path && *info->play_binary ) {
+    if ( *info->play_binary ) {
         snprintf(cmd, PATH_MAX, "%s %s", info->play_binary, info->args);
 		system(cmd);
     }

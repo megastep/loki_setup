@@ -421,6 +421,28 @@ writable paths.
 
 
 
+The PROGRAM_TO_START element:
+
+The program_to_start element allows you to request that a given
+program be started after installation, without that program having
+to be a symbolic link.
+
+That is, if you do not wish to have a symlink or primary binary,
+but just wish to indicate that a certain program should be launched
+at installer end, this element will allow you to do that.
+
+You can use the $INSTALLDIR string and the installer will substitute
+the path where the program was installed.
+
+An example looks like this:
+
+  <program_to_start>
+  $INSTALLDIR/my_cool_binary_file
+  </program_to_start>
+
+
+
+
 The OPTION element:
 
 The option element contains text describing the element, along with
