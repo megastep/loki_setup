@@ -3,7 +3,6 @@
 #define __PLUGINS_H__
 
 #include "install.h"
-#include <parser.h>		/* From gnome-xml */
 
 #define MAX_EXTENSIONS 16
 

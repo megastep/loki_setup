@@ -5,7 +5,6 @@
 #define __COPY_H__
 
 #include <sys/types.h>
-#include <parser.h>			/* From gnome-xml */
 
 #include "install.h"
 
