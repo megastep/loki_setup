@@ -1,4 +1,9 @@
-#include <gnome-xml/parser.h>
+
+#include "config.h"
+#include <stdio.h>
+#include <ctype.h>
+
+#include "setup-xml.h"
 
 int copy_line(const char **srcpp, char *buf, int maxlen)
 {
@@ -46,7 +51,6 @@ void ParseNode(xmlDocPtr doc, xmlNodePtr cur, int level)
 {
     const char *data;
     char buf[BUFSIZ];
-    int i;
 
     while ( cur ) {
         if ( strcmp(cur->name, "option") != 0 ) {
@@ -106,7 +110,7 @@ const char *GetNodeText(xmlDocPtr doc, xmlNodePtr node, const char *name)
     return(text);
 }
 
-main()
+int main(void)
 {
     xmlDocPtr doc;
     xmlNodePtr cur;
@@ -121,4 +125,5 @@ main()
         }
     }
     xmlSaveFile("foo.xml", doc);
+	return 0;
 }
