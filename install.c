@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.157 2006-02-07 23:54:01 megastep Exp $ */
+/* $Id: install.c,v 1.158 2006-02-10 01:40:36 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -160,7 +160,7 @@ const char *GetProductName(install_info *info)
 {
     const char *name;
 
-    name = (char *)xmlGetProp(info->config->root, BAD_CAST "product");
+    name = (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "product");
     if ( name == NULL ) {
         name = "";
     }
@@ -170,7 +170,7 @@ const char *GetProductDesc(install_info *info)
 {
     const char *desc;
 
-    desc = (char *)xmlGetProp(info->config->root, BAD_CAST "desc");
+    desc = (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "desc");
     if ( desc == NULL ) {
         desc = "";
     }
@@ -179,14 +179,14 @@ const char *GetProductDesc(install_info *info)
 
 const char *GetProductComponent(install_info *info)
 {
-    return (char *)xmlGetProp(info->config->root, BAD_CAST "component");
+    return (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "component");
 }
 
 const char *GetProductUninstall(install_info *info)
 {
     const char *desc;
 
-    desc = (char *)xmlGetProp(info->config->root, BAD_CAST "uninstall");
+    desc = (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "uninstall");
     if ( desc == NULL ) {
         desc = "uninstall";
     }
@@ -196,7 +196,7 @@ const char *GetProductSplash(install_info *info)
 {
     const char *desc;
 
-    desc = (char *)xmlGetProp(info->config->root, BAD_CAST "splash");
+    desc = (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "splash");
     if ( desc == NULL ) {
         desc = "splash.xpm";
     }
@@ -204,13 +204,13 @@ const char *GetProductSplash(install_info *info)
 }
 const char *GetProductVersion(install_info *info)
 {
-    return (char *)xmlGetProp(info->config->root, BAD_CAST "version");
+    return (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "version");
 }
 const char *GetProductCategory(install_info *info)
 {
     const char *cat;
 
-    cat = (char *)xmlGetProp(info->config->root, BAD_CAST "category");
+    cat = (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "category");
     if ( cat == NULL ) {
         cat = "Game";
     }
@@ -219,12 +219,12 @@ const char *GetProductCategory(install_info *info)
 
 const char *GetProductDefaultBinaryPath(install_info *info)
 {
-    return (char *)xmlGetProp(info->config->root, BAD_CAST "binarypath");
+    return (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "binarypath");
 }
 int GetProductCDROMRequired(install_info *info)
 {
 	int ret = 0;
-    char *str = (char *)xmlGetProp(info->config->root, BAD_CAST "cdrom");
+    char *str = (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "cdrom");
     if ( str && !strcasecmp(str, "required") ) {
         ret = 1;
     }
@@ -234,7 +234,7 @@ int GetProductCDROMRequired(install_info *info)
 int GetProductIsMeta(install_info *info)
 {
 	int ret = 0;
-    char *str = (char *)xmlGetProp(info->config->root, BAD_CAST "meta");
+    char *str = (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "meta");
     if ( str && !strcasecmp(str, "yes") ) {
         ret = 1;
     }
@@ -244,7 +244,7 @@ int GetProductIsMeta(install_info *info)
 int GetProductInstallOnce(install_info *info)
 {
 	int ret = 0;
-    char *str = (char *)xmlGetProp(info->config->root, BAD_CAST "once");
+    char *str = (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "once");
     if ( str && !strcasecmp(str, "yes") ) {
         ret = 1;
     }
@@ -254,7 +254,7 @@ int GetProductInstallOnce(install_info *info)
 int GetProductRequireRoot(install_info *info)
 {
 	int ret = 0;
-    char *str = (char *)xmlGetProp(info->config->root, BAD_CAST "superuser");
+    char *str = (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "superuser");
     if ( str && !strcasecmp(str, "yes") ) {
         ret = 1;
     }
@@ -265,7 +265,7 @@ int GetProductRequireRoot(install_info *info)
 int GetProductAllowsExpress(install_info *info)
 {
 	int ret = 0;
-    char *str = (char *)xmlGetProp(info->config->root, BAD_CAST "express");
+    char *str = (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "express");
     if ( str && !strcasecmp(str, "yes") ) {
         ret = 1;
     }
@@ -275,10 +275,10 @@ int GetProductAllowsExpress(install_info *info)
 
 int GetProductHasNoBinaries(install_info *info)
 {
-	char *str = (char *)xmlGetProp(info->config->root, BAD_CAST "nobinaries");
+	char *str = (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "nobinaries");
 	int ret;
 
-	ret = (str || !has_binaries(info, info->config->root->childs));
+	ret = (str || !has_binaries(info, XML_CHILDREN(XML_ROOT(info->config))));
 	xmlFree(str);
 	return ret;
 }
@@ -286,7 +286,7 @@ int GetProductHasNoBinaries(install_info *info)
 int GetProductHasPromptBinaries(install_info *info)
 {
 	int ret = 0;
-    char *p = (char *)xmlGetProp(info->config->root, BAD_CAST "promptbinaries");
+    char *p = (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "promptbinaries");
     if (p && strstr(p, "yes")) {
 		ret = 1;
 	}
@@ -297,7 +297,7 @@ int GetProductHasPromptBinaries(install_info *info)
 int GetProductHasManPages(install_info *info)
 {
 	int ret = 0;
-    char *p = (char *)xmlGetProp(info->config->root, BAD_CAST "manpages");
+    char *p = (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "manpages");
     if (p && strstr(p, "yes")) {
 		ret = 1;
 	}
@@ -308,7 +308,7 @@ int GetProductHasManPages(install_info *info)
 int GetProductIsAppBundle(install_info *info)
 {
 	int ret = 0;
-    char *str = (char *)xmlGetProp(info->config->root, BAD_CAST "appbundle");
+    char *str = (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "appbundle");
     if ( str && !strcasecmp(str, "yes") ) {
         ret = 1;
     }
@@ -319,7 +319,7 @@ int GetProductIsAppBundle(install_info *info)
 int GetProductSplashPosition(install_info *info)
 {
 	int ret = 1; /* Left */
-    char *str = (char *)xmlGetProp(info->config->root, BAD_CAST "splashpos");
+    char *str = (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "splashpos");
     if ( str && !strcasecmp(str, "top") ) {
         ret = 0; /* Top */
     }
@@ -329,7 +329,7 @@ int GetProductSplashPosition(install_info *info)
 
 const char *GetProductCDKey(install_info *info)
 {
-    return (char *)xmlGetProp(info->config->root, BAD_CAST "cdkey");
+    return (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "cdkey");
 }
 
 int GetProductPromptOverwrite(install_info *info)
@@ -341,7 +341,7 @@ int GetProductPromptOverwrite(install_info *info)
 		str = getenv("SETUP_NOPROMPTOVERWRITE");
 	}
 	else {
-		str = (char *)xmlGetProp(info->config->root, BAD_CAST "nopromptoverwrite");
+		str = (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "nopromptoverwrite");
 		needfree = 1;
 	}
     if ( str && (!strcasecmp(str, "yes") || !strcasecmp(str, "true"))) {
@@ -363,7 +363,7 @@ static char check_deviant_paths(xmlNodePtr node, install_info *info, char* path_
 		const char *dpath;
 
         if ( xmlNodePropIsTrue(node, "install") ) {
-            xmlNodePtr elements = node->childs;
+            xmlNodePtr elements = XML_CHILDREN(node);
             while ( elements ) {
                 dpath = orig_dpath = (char *)xmlGetProp(elements, BAD_CAST "path");
                 if ( dpath ) {
@@ -389,7 +389,7 @@ static char check_deviant_paths(xmlNodePtr node, install_info *info, char* path_
                 }
                 elements = elements->next;
             }
-            if (check_deviant_paths(node->childs, info, path_ret))
+            if (check_deviant_paths(XML_CHILDREN(node), info, path_ret))
                 return 1;
         }
         node = node->next;
@@ -447,7 +447,7 @@ static const char *_IsReadyToInstall(install_info *info, char** explanation)
 		if(explanation) *explanation = explain_nowritepermission(path_up);
 	} else if (strcmp(info->symlinks_path, info->install_path) == 0) {
 		message = _("Binary path and install path must be different.");
-	} else if ( check_deviant_paths(info->config->root->childs, info, path_up) ) {
+	} else if ( check_deviant_paths(XML_CHILDREN(XML_ROOT(info->config)), info, path_up) ) {
         message = _("No write permissions to install a selected package.");
 		if(explanation) *explanation = explain_nowritepermission(path_up);
     } else if ( info->symlinks_path[0]) {
@@ -481,13 +481,13 @@ const char *IsReadyToInstall_explain(install_info *info, char** explanation)
 
 const char *GetProductCDROMFile(install_info *info)
 {
-    return (char *)xmlGetProp(info->config->root, BAD_CAST "cdromfile");
+    return (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "cdromfile");
 }
 const char *GetDefaultPath(install_info *info)
 {
     const char *path;
 
-    path = (char *)xmlGetProp(info->config->root, BAD_CAST "path");
+    path = (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "path");
     if ( path == NULL ) {
         path = DEFAULT_PATH;
     }
@@ -496,7 +496,7 @@ const char *GetDefaultPath(install_info *info)
 
 const char *GetProductEULA(install_info *info, int *keepdirs)
 {
-	return GetProductEULANode(info, info->config->root, keepdirs);
+	return GetProductEULANode(info, XML_ROOT(info->config), keepdirs);
 }
 
 const char *GetProductEULANode(install_info *info, xmlNodePtr node, int *keepdirs)
@@ -514,7 +514,7 @@ const char *GetProductEULANode(install_info *info, xmlNodePtr node, int *keepdir
 		xmlFree(eula);
 	}
 	/* Look for EULA elements */
-	node = node->childs;
+	node = XML_CHILDREN(node);
 	while(node && !found) {
 		if(! strcmp((char *)node->name, "eula") ) {
 			char *prop = (char *)xmlGetProp(node, BAD_CAST "lang");
@@ -526,7 +526,7 @@ const char *GetProductEULANode(install_info *info, xmlNodePtr node, int *keepdir
 					*keepdirs = ( str != NULL);
 					xmlFree(str);
 				}
-				text = (char *)xmlNodeListGetString(info->config, node->childs, 1);
+				text = (char *)xmlNodeListGetString(info->config, XML_CHILDREN(node), 1);
 				if(text) {
 					*matched_name = '\0';
 					while ( (*matched_name == 0) && 
@@ -550,7 +550,7 @@ const char *GetProductEULANode(install_info *info, xmlNodePtr node, int *keepdir
 
 const char *GetProductREADME(install_info *info, int *keepdirs)
 {
-	char *ret = (char *)xmlGetProp(info->config->root, BAD_CAST "readme");
+	char *ret = (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "readme");
 	const char *text;
 	static char name[BUFSIZ], matched_name[BUFSIZ];
 	xmlNodePtr node;
@@ -565,7 +565,7 @@ const char *GetProductREADME(install_info *info, int *keepdirs)
 		xmlFree(ret);
 	}
 	/* Try to find a README that matches the locale */
-	node = info->config->root->childs;
+	node = XML_CHILDREN(XML_ROOT(info->config));
 	while(node && !found) {
 		if(! strcmp((char *)node->name, "readme") ) {
 			char *prop = (char *)xmlGetProp(node, BAD_CAST "lang");
@@ -578,7 +578,7 @@ const char *GetProductREADME(install_info *info, int *keepdirs)
 					*keepdirs = ( str != NULL);
 					xmlFree(str);
 				}
-				text = (char *)xmlNodeListGetString(info->config, node->childs, 1);
+				text = (char *)xmlNodeListGetString(info->config, XML_CHILDREN(node), 1);
 				if (text) {
 					*matched_name = '\0';
 					while ( (*matched_name == 0) && parse_line(&text, matched_name, sizeof(matched_name)) )
@@ -604,7 +604,7 @@ const char *GetProductPostInstallMsg(install_info *info)
 	xmlNodePtr node;
 	const char *text;
 
-	for(node = info->config->root->childs; node; node = node->next) {
+	for(node = XML_CHILDREN(XML_ROOT(info->config)); node; node = node->next) {
 		if(! strcmp((char *)node->name, "post_install_msg") ) {
 			char *prop = NULL;
 			if ( UI.is_gui ) {
@@ -627,7 +627,7 @@ const char *GetProductPostInstallMsg(install_info *info)
 			if ( match_locale(prop) ) {
 				static char line[BUFSIZ], buf[BUFSIZ];
 
-				text = (char *)xmlNodeListGetString(info->config, node->childs, 1);
+				text = (char *)xmlNodeListGetString(info->config, XML_CHILDREN(node), 1);
 				if (text) {
 					*buf = '\0';
 					while ( *text ) {
@@ -650,7 +650,7 @@ int GetProductNumComponents(install_info *info)
     int count = 0;
 	xmlNodePtr node;
 
-	node = info->config->root->childs;
+	node = XML_CHILDREN(XML_ROOT(info->config));
 	while(node) {
         if ( !strcmp((char *)node->name, "component") ) {
             count ++;
@@ -668,23 +668,22 @@ int GetProductCDROMDescriptions(install_info *info)
     char name[BUFSIZ];
     struct cdrom_elem *entry;
 
-	node = info->config->root->childs;
+	node = XML_CHILDREN(XML_ROOT(info->config));
 	while(node) {
         if ( !strcmp((char *)node->name, "cdrom") ) {
 			char *id, *nname;
-            text = (char *)xmlNodeListGetString(info->config, node->childs, 1);
+            text = (char *)xmlNodeListGetString(info->config, XML_CHILDREN(node), 1);
             if (text) {
                 *name = '\0';
                 while ( (*name == 0) && parse_line(&text, name, sizeof(name)) )
 						;
             }
-	    id = (char *)xmlGetProp(node, BAD_CAST "id");
-	    nname = (char *)xmlGetProp(node, BAD_CAST "name");
+			id = (char *)xmlGetProp(node, BAD_CAST "id");
+			nname = (char *)xmlGetProp(node, BAD_CAST "name");
             entry = add_cdrom_entry(info, id, nname, name);
-	    xmlFree(id);
-	    xmlFree(nname);
+			xmlFree(id);
+			xmlFree(nname);
             if ( entry ) {
-                
                 count ++;
             }
         }
@@ -695,17 +694,17 @@ int GetProductCDROMDescriptions(install_info *info)
 
 const char *GetWebsiteText(install_info *info)
 {
-    return (char *)xmlGetProp(info->config->root, BAD_CAST "website_text");
+    return (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "website_text");
 }
 const char *GetProductURL(install_info *info)
 {
-    return (char *)xmlGetProp(info->config->root, BAD_CAST "url");
+    return (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "url");
 }
 
 int GetProductReinstall(install_info *info)
 {
 	int ret;
-	char *str = (char *)xmlGetProp(info->config->root, BAD_CAST "reinstall");
+	char *str = (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "reinstall");
 	ret = str && (*str=='t' || *str=='y');
 	xmlFree(str);
 	return ret;
@@ -726,7 +725,7 @@ const char *GetLocalURL(install_info *info)
 {
     const char *file;
 
-    file = (char *)xmlGetProp(info->config->root, BAD_CAST "localurl");
+    file = (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "localurl");
     if ( file ) {
         /* Warning, memory leak */
         char *path;
@@ -746,7 +745,7 @@ const char *GetAutoLaunchURL(install_info *info)
 {
     const char *auto_url;
 
-    auto_url = (char *)xmlGetProp(info->config->root, BAD_CAST "auto_url");
+    auto_url = (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "auto_url");
     if ( auto_url == NULL ) {
         auto_url = "false";
     }
@@ -756,7 +755,7 @@ const char *GetProductUpdateURL(install_info *info)
 {
     const char *url;
 
-    url = (char *)xmlGetProp(info->config->root, BAD_CAST "update_url");
+    url = (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "update_url");
     if ( url == NULL ) {
         url = "http://icculus.org/";
     }
@@ -764,29 +763,29 @@ const char *GetProductUpdateURL(install_info *info)
 }
 const char *GetPreInstall(install_info *info)
 {
-    return (char *)xmlGetProp(info->config->root, BAD_CAST "preinstall");
+    return (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "preinstall");
 }
 const char *GetPreUnInstall(install_info *info)
 {
-    return (char *)xmlGetProp(info->config->root, BAD_CAST "preuninstall");
+    return (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "preuninstall");
 }
 const char *GetPostInstall(install_info *info)
 {
-    return (char *)xmlGetProp(info->config->root, BAD_CAST "postinstall");
+    return (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "postinstall");
 }
 const char *GetPostUnInstall(install_info *info)
 {
-    return (char *)xmlGetProp(info->config->root, BAD_CAST "postuninstall");
+    return (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "postuninstall");
 }
 const char *GetDesktopInstall(install_info *info)
 {
-    return (char *)xmlGetProp(info->config->root, BAD_CAST "desktop");
+    return (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "desktop");
 }
 const char *GetRuntimeArgs(install_info *info)
 {
     const char *args;
 
-    args = (char *)xmlGetProp(info->config->root, BAD_CAST "args");
+    args = (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "args");
     if ( args == NULL ) {
         args = "";
     }
@@ -794,7 +793,7 @@ const char *GetRuntimeArgs(install_info *info)
 }
 const char *GetInstallOption(install_info *info, const char *option)
 {
-    return (char *)xmlGetProp(info->config->root, BAD_CAST option);
+    return (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST option);
 }
 
 /* Create the initial installation information */
@@ -917,7 +916,7 @@ install_info *create_install(const char *configfile,
 
 	if ( !restoring_corrupt() ) {
 		/* Now run any auto-detection commands */	
-		mark_cmd_options(info, info->config->root, 0);
+		mark_cmd_options(info, XML_ROOT(info->config), 0);
 	}
 
     /* That was easy.. :) */
@@ -1255,7 +1254,7 @@ void mark_option(install_info *info, xmlNodePtr node,
     /* Unmark this option for installation */
     if ( !strcmp((char *)node->name, "option") ) {
 		char name[BUFSIZ];
-		const char *text = (char *)xmlNodeListGetString(info->config, node->childs, 1);
+		const char *text = (char *)xmlNodeListGetString(info->config, XML_CHILDREN(node), 1);
 		*name = '\0';
 		while ( (*name == 0) && parse_line(&text, name, sizeof(name)) )
 			;
@@ -1266,7 +1265,7 @@ void mark_option(install_info *info, xmlNodePtr node,
 
     /* Recurse down any other options */
     if ( recurse ) {
-        node = node->childs;
+        node = XML_CHILDREN(node);
         while ( node ) {
             if ( !strcmp((char *)node->name, "option") ) {
                 mark_option(info, node, value, recurse);
@@ -1285,7 +1284,7 @@ int enable_option_recurse(install_info *info, xmlNodePtr node, const char *optio
         if ( !strcmp((char *)node->name, "option")) {
             /* Is this the option we're looking for ? */
             char name[BUFSIZ];
-            const char *text = (char *)xmlNodeListGetString(info->config, node->childs, 1);
+            const char *text = (char *)xmlNodeListGetString(info->config, XML_CHILDREN(node), 1);
             *name = '\0';
             while ( (*name == 0) && parse_line(&text, name, sizeof(name)) )
                 ;
@@ -1294,9 +1293,9 @@ int enable_option_recurse(install_info *info, xmlNodePtr node, const char *optio
                 ret ++;
             }
         } else if ( !strcmp((char *)node->name, "exclusive") ) {
-            ret += enable_option_recurse(info, node->childs, option);
+            ret += enable_option_recurse(info, XML_CHILDREN(node), option);
         } else if ( !strcmp((char *)node->name, "component") ) {
-            ret += enable_option_recurse(info, node->childs, option);            
+            ret += enable_option_recurse(info, XML_CHILDREN(node), option);            
         } 
         node = node->next;
     }
@@ -1305,13 +1304,13 @@ int enable_option_recurse(install_info *info, xmlNodePtr node, const char *optio
 
 int enable_option(install_info *info, const char *option)
 {
-   return enable_option_recurse(info, info->config->root->childs, option);
+	return enable_option_recurse(info, XML_CHILDREN(XML_ROOT(info->config)), option);
 }
 
 /* Check for all the 'require' tags */
 int CheckRequirements(install_info *info)
 {
-	xmlNodePtr node = info->config->root->childs;
+	xmlNodePtr node = XML_CHILDREN(XML_ROOT(info->config));
 	char line[BUFSIZ], buf[BUFSIZ], *lang, *arch, *libc, *distro;
     const char *text;
 
@@ -1334,7 +1333,7 @@ int CheckRequirements(install_info *info)
 				/* Launch the command */
 				if ( run_script(info, commandprop, 0, 0) != 0 ) {
 					/* We failed: print out error message */
-					text = (char *)xmlNodeListGetString(info->config, node->childs, 1);
+					text = (char *)xmlNodeListGetString(info->config, XML_CHILDREN(node), 1);
 					if(text) {
 						*buf = '\0';
 						while ( *text ) {
@@ -1386,21 +1385,21 @@ char *get_option_name(install_info *info, xmlNodePtr node, char *name, int len)
         name = line;
         len = (sizeof line);
     }
-    text = (char *)xmlNodeListGetString(info->config, node->childs, 1);
+    text = (char *)xmlNodeListGetString(info->config, XML_CHILDREN(node), 1);
     *name = '\0';
     if ( text ) {
 		xmlNodePtr n;
         while ( (*name == 0) && parse_line(&text, name, len) )
             ;
 		/* Parse the children and look for a 'lang' element for translated names */
-		n = node->childs;
+		n = XML_CHILDREN(node);
 		while ( n ) {
 			if( strcmp((char *)n->name, "lang") == 0 ) {
 				char *prop = (char *)xmlGetProp(n, BAD_CAST "lang");
 				if ( ! prop ) {
 					log_fatal(_("XML: 'lang' tag does not have a mandatory 'lang' attribute"));
 				} else if ( match_locale(prop) ) {
-					text = (char *)xmlNodeListGetString(info->config, n->childs, 1);
+					text = (char *)xmlNodeListGetString(info->config, XML_CHILDREN(n), 1);
 					if(text) {
 						*name = '\0';
 						while ( (*name == 0) && parse_line(&text, name, len) )
@@ -1436,14 +1435,14 @@ const char *get_option_help(install_info *info, xmlNodePtr node)
 		xmlFree(help);
 	}
 	/* Look for translated strings */
-	n = node->childs;
+	n = XML_CHILDREN(node);
 	while ( n ) {
 		if( strcmp((char *)n->name, "help") == 0 ) {
 			char *prop = (char *)xmlGetProp(n, BAD_CAST "lang");
 			if(!prop) {
 				nolang = n;
 			} else if ( match_locale(prop) ) {
-				text = (char *)xmlNodeListGetString(info->config, n->childs, 1);
+				text = (char *)xmlNodeListGetString(info->config, XML_CHILDREN(n), 1);
 				if(text) {
 					*line = '\0';
 					while ( (*line == 0) && parse_line(&text, line, sizeof(line)) )
@@ -1458,7 +1457,7 @@ const char *get_option_help(install_info *info, xmlNodePtr node)
 
 	/* no matching locale found. use if available */
 	if(!*line && nolang) {
-		text = (char *)xmlNodeListGetString(info->config, nolang->childs, 1);
+		text = (char *)xmlNodeListGetString(info->config, XML_CHILDREN(nolang), 1);
 		if(text) {
 			*line = '\0';
 			while ( (*line == 0) && parse_line(&text, line, sizeof(line)) )
@@ -1478,12 +1477,12 @@ const char *get_option_warn(install_info *info, xmlNodePtr node)
 
 	*buf = *line = '\0';
 	/* Look for translated strings */
-	n = node->childs;
+	n = XML_CHILDREN(node);
 	while ( n ) {
 		if( strcmp((char *)n->name, "warn") == 0 ) {
 			char *prop = (char *)xmlGetProp(n, BAD_CAST "lang");
 			if ( match_locale(prop) ) {
-				text = (char *)xmlNodeListGetString(info->config, n->childs, 1);
+				text = (char *)xmlNodeListGetString(info->config, XML_CHILDREN(n), 1);
 				if(text) {
 					*line = '\0';
 					*buf = '\0';
@@ -1682,7 +1681,7 @@ install_state install(install_info *info, UIUpdateFunc update)
     }
 
     /* Walk the install tree */
-    node = info->config->root->childs;
+    node = XML_CHILDREN(XML_ROOT(info->config));
     info->install_size = size_tree(info, node);
 
     copy_tree(info, node, info->install_path, update);
@@ -1876,10 +1875,10 @@ static void optionstag_sub(install_info *info, xmlNodePtr node)
 				xmlFree(tag);
 			}
 			xmlFree(wanted);
-			if ( node->childs )  /* Sub-options */
-				optionstag_sub(info, node->childs);
+			if ( XML_CHILDREN(node) )  /* Sub-options */
+				optionstag_sub(info, XML_CHILDREN(node));
 		} else if ( ! strcmp((char *)node->name, "exclusive" ) ) {
-			optionstag_sub(info, node->childs);
+			optionstag_sub(info, XML_CHILDREN(node));
 		} else if ( ! strcmp((char *)node->name, "component" ) ) {
 			arch = (char *)xmlGetProp(node, BAD_CAST "arch");
 			libc = (char *)xmlGetProp(node, BAD_CAST "libc");
@@ -1887,7 +1886,7 @@ static void optionstag_sub(install_info *info, xmlNodePtr node)
             if ( match_arch(info, arch) &&
                  match_libc(info, libc) &&
 				 match_distro(info, distro) ) {
-				optionstag_sub(info, node->childs);
+				optionstag_sub(info, XML_CHILDREN(node));
 			}
 			xmlFree(arch); xmlFree(libc); xmlFree(distro);
 		}
@@ -1920,7 +1919,7 @@ static const char *get_optiontags_string(install_info *info)
 		}
 		
 		/* Recursively parse the XML for install="true" tags */
-		optionstag_sub(info, info->config->root->childs);
+		optionstag_sub(info, XML_CHILDREN(XML_ROOT(info->config)));
 		
 		if ( tags_left <= 0 ) /* String full */ {
 			log_warning(_("Options tag string maxed out!"));
@@ -2280,7 +2279,7 @@ void mark_cmd_options(install_info *info, xmlNodePtr parent, int exclusive)
 	char *str;
 	/* Iterate through the children */
 	xmlNodePtr child;
-	for ( child = parent->childs; child; child = child->next ) {
+	for ( child = XML_CHILDREN(parent); child; child = child->next ) {
 		if ( !strcmp((char *)child->name, "option") ) {
 			str = (char *)xmlGetProp(child, BAD_CAST "install");
 			if ( str ) {

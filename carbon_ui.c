@@ -92,7 +92,7 @@ static void EnableTree(xmlNodePtr node, OptionsBox *box)
 		    //gtk_widget_set_sensitive(button, TRUE);
             EnableControl(button->Control);
     }
-    node = node->childs;
+    node = XML_CHILDREN(node);
     while(node)
     {
 	    EnableTree(node, box);
@@ -227,7 +227,7 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
         mark_option(info, node, "false", 1);
     }
     /* Recurse down any other options */
-    child = node->childs;
+    child = XML_CHILDREN(node);
     while ( child ) {
 		if ( !strcmp(child->name, "option") ) {
 			//parse_option(info, component, child, window, box, level+1, button, 0, NULL);
@@ -236,7 +236,7 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
 			xmlNodePtr exchild;
 			//GSList *list = NULL;
             RadioGroup *list = NULL;
-			for ( exchild = child->childs; exchild; exchild = exchild->next) {
+			for ( exchild = XML_CHILDREN(child); exchild; exchild = exchild->next) {
 				//parse_option(info, component, exchild, window, box, level+1, button, 1, &list);
                 parse_option(info, component, exchild, box, level+1, button, 1, &list);
 			}
@@ -345,12 +345,12 @@ static void init_install_path(void)
     carbon_debug("init_install_path()\n");
 
     static char AppBundlePath[INSTALLFOLDER_MAX_PATH];
-    char *appbundleid = xmlGetProp(cur_info->config->root, "appbundleid");
+    char *appbundleid = xmlGetProp(XML_ROOT(cur_info->config), "appbundleid");
     if (appbundleid) {
         static int alreadyfound = 0;
         if (!alreadyfound) {
-            char *appbundledesc = xmlGetProp(cur_info->config->root, "appbundledesc");
-            char *desc = xmlGetProp(cur_info->config->root, "desc");
+            char *appbundledesc = xmlGetProp(XML_ROOT(cur_info->config), "appbundledesc");
+            char *desc = xmlGetProp(XML_ROOT(cur_info->config), "desc");
             int rc = FindAppBundlePath(appbundleid, appbundledesc, desc, AppBundlePath, sizeof (AppBundlePath));
             if (appbundledesc) xmlFree(appbundledesc);
             if (desc) xmlFree(desc);
@@ -608,7 +608,7 @@ int OnOptionClickEvent(OptionsButton *ButtonWithEventClick)
 
 		// does this option require a seperate EULA?
 		xmlNodePtr child;
-		child = data_node->childs;
+		child = XML_CHILDREN(data_node);
 		while(child)
 		{
 			if (!strcmp(child->name, "eula"))
@@ -645,7 +645,7 @@ int OnOptionClickEvent(OptionsButton *ButtonWithEventClick)
 		mark_option(cur_info, data_node, "true", 0);
 		
 		/* Recurse down any other options to re-enable grayed out options */
-		node = data_node->childs;
+		node = XML_CHILDREN(data_node);
 		while ( node ) {
 			//enable_tree(node, window);
             EnableTree(node, (OptionsBox *)ButtonWithEventClick->Box);
@@ -659,7 +659,7 @@ int OnOptionClickEvent(OptionsButton *ButtonWithEventClick)
 		mark_option(cur_info, data_node, "false", 1);
 		
 		/* Recurse down any other options */
-		node = data_node->childs;
+		node = XML_CHILDREN(data_node);
 		while ( node ) {
 			if ( !strcmp(node->name, "option") ) {
 				//GtkWidget *button;
@@ -676,7 +676,7 @@ int OnOptionClickEvent(OptionsButton *ButtonWithEventClick)
 				}
 			} else if ( !strcmp(node->name, "exclusive") ) {
 				xmlNodePtr child;
-				for ( child = node->childs; child; child = child->next) {
+				for ( child = XML_CHILDREN(node); child; child = child->next) {
 					//GtkWidget *button;
 					
 					//button = (GtkWidget*)gtk_object_get_data(GTK_OBJECT(window),
@@ -694,7 +694,7 @@ int OnOptionClickEvent(OptionsButton *ButtonWithEventClick)
 			node = node->next;
 		}
 	}
-    cur_info->install_size = size_tree(cur_info, cur_info->config->root->childs);
+    cur_info->install_size = size_tree(cur_info, XML_CHILDREN(XML_ROOT(cur_info->config)));
 	update_size();
 
     return true;
@@ -973,7 +973,7 @@ static install_state carbonui_init(install_info *info, int argc, char **argv, in
     }
 
     // Disable dock option if not requested in dockoption attribute
-    /*const char *DesktopOptionString = xmlGetProp(cur_info->config->root, "desktopicon");
+    /*const char *DesktopOptionString = xmlGetProp(XML_ROOT(cur_info->config), "desktopicon");
     if(DesktopOptionString != NULL)
     {
         printf("carbonui_init() - desktopicon = %s\n", DesktopOptionString);
@@ -1001,7 +1001,7 @@ static install_state carbonui_init(install_info *info, int argc, char **argv, in
         carbon_HideControl(MyRes, OPTION_SYMBOLIC_LINK_CHECK_ID);
 
     // Set initial install size
-    info->install_size = size_tree(info, info->config->root->childs);
+    info->install_size = size_tree(info, XML_CHILDREN(XML_ROOT(info->config)));
 
     // Needed so that Expert is detected properly at this point
     //license_okay = 1;
@@ -1119,7 +1119,7 @@ static install_state carbonui_setup(install_info *info)
         //gtk_container_foreach(GTK_CONTAINER(options), empty_container, options);
         options = carbon_OptionsNewBox(MyRes, true, OnOptionClickEvent);
         info->install_size = 0;
-        node = info->config->root->childs;
+        node = XML_CHILDREN(XML_ROOT(info->config));
         radio_list = NULL;
         in_setup = TRUE;
         while ( node ) {
@@ -1128,7 +1128,7 @@ static install_state carbonui_setup(install_info *info)
 		    } else if ( ! strcmp(node->name, "exclusive") ) {
 			    xmlNodePtr child;
 			    RadioGroup *list = NULL;
-			    for ( child = node->childs; child; child = child->next) {
+			    for ( child = XML_CHILDREN(node); child; child = child->next) {
 				    parse_option(info, NULL, child, options, 0, NULL, 1, &list);
 			    }
 		    } else if ( ! strcmp(node->name, "component") ) {
@@ -1146,14 +1146,14 @@ static install_state carbonui_setup(install_info *info)
                         //gtk_widget_show(widget);
                         carbon_OptionsNewLabel(options, xmlGetProp(node, "name"));
                     }
-                    for ( child = node->childs; child; child = child->next) {
+                    for ( child = XML_CHILDREN(node); child; child = child->next) {
 					    if ( ! strcmp(child->name, "option") ) {
 						    //parse_option(info, xmlGetProp(node, "name"), child, window, options, 0, NULL, 0, NULL);
                             parse_option(info, xmlGetProp(node, "name"), child, options, 0, NULL, 0, NULL);
 					    } else if ( ! strcmp(child->name, "exclusive") ) {
 						    xmlNodePtr child2;
 						    RadioGroup *list = NULL;
-						    for ( child2 = child->childs; child2; child2 = child2->next) {
+						    for ( child2 = XML_CHILDREN(child); child2; child2 = child2->next) {
 							    //parse_option(info, xmlGetProp(node, "name"), child2, window, options, 0, NULL, 1, &list);
                                 parse_option(info, xmlGetProp(node, "name"), child2, options, 0, NULL, 1, &list);
 						    }

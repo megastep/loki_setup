@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.32 2005-08-23 00:47:59 megastep Exp $
+ * $Id: dialog_ui.c,v 1.33 2006-02-10 01:40:36 megastep Exp $
  */
 
 #include <limits.h>
@@ -83,7 +83,7 @@ install_state dialog_init(install_info *info,int argc, char **argv,
 	clear_screen();
     dialog_msgbox(title, msg, 6, 50, 1);
 
-    info->install_size = size_tree(info, info->config->root->childs);
+    info->install_size = size_tree(info, XML_CHILDREN(XML_ROOT(info->config)));
 
     if ( GetProductEULA(info, NULL) ) {
         return SETUP_LICENSE;
@@ -151,7 +151,7 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr pa
 	int i = 0, nb_choices = 0, ret = 1;
     int exc_text_index = 0; //index to keep track of the exclusive option text in choices
    
-	xmlNodePtr node = parent->childs;
+	xmlNodePtr node = XML_CHILDREN(parent);
 	for ( ; node && nb_choices<MAX_CHOICES; node = node->next ) {
 	    const char *set = (char *)xmlGetProp(node, BAD_CAST "install");
 		const char *str;
@@ -254,7 +254,7 @@ options_loop:
 
 				/* does this option have a EULA item */
 				xmlNodePtr child;
-				child = nodes[i]->childs;
+				child = XML_CHILDREN(nodes[i]);
 				while(child) {
 					if (!strcmp((char *)child->name, "eula")) {
 						/* this option has some EULA nodes
@@ -305,14 +305,13 @@ options_loop:
 		        ret = parse_option(info, NULL, nodes[i], 0, 0, _("Choose the options"));
                 
 		    } else { /* Unmark */
-			xmlNodePtr sub_option = nodes[i]->childs;
-			/* Unmark the childs */
-			mark_option(info, nodes[i], "false", 0);
-			while(sub_option)
-			{
-				mark_option(info, sub_option, "false", 1); /* Recursively unmark the child options */
-				sub_option = sub_option->next;
-			}
+				xmlNodePtr sub_option = XML_CHILDREN(nodes[i]);
+				/* Unmark the childs */
+				mark_option(info, nodes[i], "false", 0);
+				while(sub_option) {
+					mark_option(info, sub_option, "false", 1); /* Recursively unmark the child options */
+					sub_option = sub_option->next;
+				}
 		    }
 		}
 		else if ( !strcmp((char *)nodes[i]->name, "exclusive")) {
@@ -323,12 +322,11 @@ options_loop:
                         choices[exc_text_index]);
 		   } else {
                 /* If an exclusive option is deselected, unmark all the child options */
-			xmlNodePtr exc_childs = nodes[i]->childs;
-			while(exc_childs)
-			{
-				mark_option(info, exc_childs, "false", 1); /* Recursively unmark the child options */
-				exc_childs = exc_childs->next;
-			}
+			   xmlNodePtr exc_childs = XML_CHILDREN(nodes[i]);
+			   while(exc_childs) {
+				   mark_option(info, exc_childs, "false", 1); /* Recursively unmark the child options */
+				   exc_childs = exc_childs->next;
+			   }
 		   }
 		} else if ( !strcmp((char *)nodes[i]->name, "component") && result[i]) {
 			snprintf(buf, sizeof(buf), _("Component: %s"), xmlGetProp(nodes[i], BAD_CAST "name"));
@@ -359,7 +357,7 @@ install_state dialog_setup(install_info *info)
 			const char *wanted;
 
 			/* Build a list of products */
-			node = info->config->root->childs;
+			node = XML_CHILDREN(XML_ROOT(info->config));
 			while ( node ) {
 				const char *str;
                 if ( strcmp((char *)node->name, "option") == 0 ) {
@@ -389,7 +387,7 @@ install_state dialog_setup(install_info *info)
 			} else {
 				/* Process the choice */
 				int node_index=0;
-				node = info->config->root->childs;
+				node = XML_CHILDREN(XML_ROOT(info->config));
 				while ( node ) {
 					if ( strcmp((char *)node->name, "option") == 0 )
 					{
@@ -524,7 +522,7 @@ install_state dialog_setup(install_info *info)
 				} else {
 					label = _("Please choose the options to install");
 				}
-				if ( parse_option(info, NULL, info->config->root, 0, 0, label) ) {
+				if ( parse_option(info, NULL, XML_ROOT(info->config), 0, 0, label) ) {
 					okay = TRUE;
 				} else {
 					return SETUP_ABORT;

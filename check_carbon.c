@@ -2,7 +2,7 @@
  * Check and Rescue Tool for Loki Setup packages. Verifies the consistency of the files,
  * and optionally restores them from the original installation medium.
  *
- * $Id: check_carbon.c,v 1.6 2004-11-02 03:48:57 megastep Exp $
+ * $Id: check_carbon.c,v 1.7 2006-02-10 01:40:36 megastep Exp $
  */
 
 #include <stdlib.h>
@@ -161,7 +161,7 @@ int check_xml_setup(const char *file, const char *product)
 	int ret = 0;
 	xmlDocPtr doc = xmlParseFile(file);
 	if ( doc ) {
-		const char *prod = xmlGetProp(doc->root, "product");
+		const char *prod = xmlGetProp(XML_ROOT(doc), "product");
 		if ( prod && !strcmp(prod, product) ) {
 			ret = 1;
 		}
@@ -237,7 +237,7 @@ void DoMediaCheck(const char *Dir)
 
 		/* Enable the relevant options */
 		select_corrupt_options(install);
-		copy_tree(install, install->config->root->childs, install->install_path, NULL);
+		copy_tree(install, XML_CHILDREN(XML_ROOT(install->config)), install->install_path, NULL);
 
 		/* Menu items are currently not being restored - maybe they should be tagged in setupdb ? */
 

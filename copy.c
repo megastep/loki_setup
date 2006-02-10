@@ -875,14 +875,14 @@ ssize_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
     const char *str;
 
     if ( !strcmp((char *)node->name, "option") ) {
-        str = (char *)xmlNodeListGetString(info->config, node->childs, 1);    
+        str = (char *)xmlNodeListGetString(info->config, XML_CHILDREN(node), 1);    
         parse_line(&str, tmppath, sizeof(tmppath));
         current_option = add_option_entry(current_component, tmppath, tmp = (char *)xmlGetProp(node, BAD_CAST "tag"));
 		xmlFree(tmp);
     }
 
     size = 0;
-    node = node->childs;
+    node = XML_CHILDREN(node);
     while ( node ) {
 		const char *path = (char *)xmlGetProp(node, BAD_CAST "path");
 		char *srcpath = (char *)xmlGetProp(node, BAD_CAST "srcpath");
@@ -927,21 +927,21 @@ ssize_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
 
 			if ( strcmp((char *)node->name, "files") == 0 ) {
 				char* suffix = (char *)xmlGetProp(node, BAD_CAST "suffix");
-				const char *str = (char *)xmlNodeListGetString(info->config, (node->parent)->childs, 1);
+				const char *str = (char *)xmlNodeListGetString(info->config, XML_CHILDREN(node->parent), 1);
 
 				parse_line(&str, current_option_txt, sizeof(current_option_txt));
 				copied = copy_list(info,
-						   (char *)xmlNodeListGetString(info->config, node->childs, 1),
-						   path, from_cdrom, srcpath, strip_dirs, suffix,
-						   node, update);
+								   (char *)xmlNodeListGetString(info->config, XML_CHILDREN(node), 1),
+								   path, from_cdrom, srcpath, strip_dirs, suffix,
+								   node, update);
 				if ( copied > 0 ) {
 					size += copied;
 				}
 				xmlFree(suffix);
 			} else if ( strcmp((char *)node->name, "binary") == 0 ) {
 				copied = copy_binary(info, node,
-						     (char *)xmlNodeListGetString(info->config, node->childs, 1),
-						     path, from_cdrom, update);
+									 (char *)xmlNodeListGetString(info->config, XML_CHILDREN(node), 1),
+									 path, from_cdrom, update);
 				if ( copied > 0 ) {
 					size += copied;
 				}
@@ -956,7 +956,7 @@ ssize_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
 				int rc;
 
 				rc = copy_script(info, node,
-					    (char *)xmlNodeListGetString(info->config, node->childs, 1),
+								 (char *)xmlNodeListGetString(info->config, XML_CHILDREN(node), 1),
 					    path, sz, update, from_cdrom, msg);
 				if (rc==0) {
 					info->installed_bytes += sz;
@@ -1026,7 +1026,7 @@ ssize_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
 					if ( copied > 0 ) {
 						size += copied;
 					}
-					copied = copy_tree(info, node->childs, dest, update);
+					copied = copy_tree(info, XML_CHILDREN(node), dest, update);
 					if ( copied > 0 ) {
 						size += copied;
 					}
@@ -1034,7 +1034,7 @@ ssize_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
 			}
 		} else if ( ! strcmp((char *)node->name, "exclusive" ) ) {
 			/* Recurse in the sub-options (only one should be enabled!) */
-			copied = copy_tree(info, node->childs, dest, update);
+			copied = copy_tree(info, XML_CHILDREN(node), dest, update);
 			if ( copied > 0 ) {
 				size += copied;
 			}
@@ -1046,7 +1046,7 @@ ssize_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
 				if ( ! current_component ) {
 					log_fatal(_("The remove_msg element should be within a component!\n"));
 				}
-				text = (char *)xmlNodeListGetString(info->config, node->childs, 1);
+				text = (char *)xmlNodeListGetString(info->config, XML_CHILDREN(node), 1);
 				if (text) {
 					*buf = '\0';
 					while ( *text ) {
@@ -1075,7 +1075,7 @@ ssize_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
 							(char *)xmlGetProp(node, BAD_CAST "preuninstall"),
 							(char *)xmlGetProp(node, BAD_CAST "postuninstall"));
 				/* Recurse in the sub-options */
-				copied = copy_tree(info, node->childs, dest, update);
+				copied = copy_tree(info, XML_CHILDREN(node), dest, update);
 				if ( copied > 0 ) {
 					size += copied;
 				}
@@ -1234,7 +1234,7 @@ ssize_t size_readme(install_info *info, xmlNodePtr node)
 
 	lang_prop = (char *)xmlGetProp(node, BAD_CAST "lang");
 	if (lang_prop && match_locale(lang_prop) ) {
-		ret = size_list(info, 0, ".", (char *)xmlNodeListGetString(info->config, node->childs, 1), NULL);
+		ret = size_list(info, 0, ".", (char *)xmlNodeListGetString(info->config, XML_CHILDREN(node), 1), NULL);
 	}
 	xmlFree(lang_prop);
 	return ret;
@@ -1278,7 +1278,7 @@ unsigned long long size_node(install_info *info, xmlNodePtr node)
 	}
     /* Now, if necessary, scan all the files to install */
     if ( size == 0 ) {
-        node = node->childs;
+        node = XML_CHILDREN(node);
         while ( node ) {
             const char *srcpath = (char *)xmlGetProp(node, BAD_CAST "srcpath");
             const char *from_cdrom = (char *)xmlGetProp(node, BAD_CAST "cdromid");
@@ -1297,12 +1297,12 @@ unsigned long long size_node(install_info *info, xmlNodePtr node)
 				if ( strcmp((char *)node->name, "files") == 0 ) {
 					char* suffix = (char *)xmlGetProp(node, BAD_CAST "suffix");
 					size += size_list(info, from_cdrom, srcpath,
-							  (char *)xmlNodeListGetString(info->config, node->childs, 1), suffix);
+									  (char *)xmlNodeListGetString(info->config, XML_CHILDREN(node), 1), suffix);
 					xmlFree(suffix);
 				} else if ( strcmp((char *)node->name, "binary") == 0 ) {
 					if(!xmlNodePropIsTrue(node, "inline"))
 						size += size_binary(info, from_cdrom,
-									(char *)xmlNodeListGetString(info->config, node->childs, 1));
+											(char *)xmlNodeListGetString(info->config, XML_CHILDREN(node), 1));
 				} else if ( strcmp((char *)node->name, "manpage") == 0 ) {
 					size += size_manpage(info, node, from_cdrom);
 				}
@@ -1325,16 +1325,16 @@ unsigned long long size_tree(install_info *info, xmlNodePtr node)
 			wanted = (char *)xmlGetProp(node, BAD_CAST "install");
 			if ( wanted  && (strcmp(wanted, "true") == 0) ) {
 				size += size_node(info, node);
-				size += size_tree(info, node->childs);
+				size += size_tree(info, XML_CHILDREN(node));
 			}
 			xmlFree(wanted);
 		} else if ( !strcmp((char *)node->name, "exclusive") ) {
-			size += size_tree(info, node->childs);
+			size += size_tree(info, XML_CHILDREN(node));
         } else if ( !strcmp((char *)node->name, "component") ) {
             if ( match_arch(info, (char *)xmlGetProp(node, BAD_CAST "arch")) &&
                  match_libc(info, (char *)xmlGetProp(node, BAD_CAST "libc")) &&
 		 match_distro(info, (char *)xmlGetProp(node, BAD_CAST "distro")) ) {
-                size += size_tree(info, node->childs);
+                size += size_tree(info, XML_CHILDREN(node));
             }
 		} else if ( !strcmp((char *)node->name, "readme") ||
 			    !strcmp((char *)node->name, "eula") ) {
@@ -1356,7 +1356,7 @@ int has_binaries(install_info *info, xmlNodePtr node)
         if ( strcmp((char *)node->name, "binary") == 0 ) {
             ++num_binaries;
         }
-        num_binaries += has_binaries(info, node->childs);
+        num_binaries += has_binaries(info, XML_CHILDREN(node));
         node = node->next;
     }
     return num_binaries;

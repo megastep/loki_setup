@@ -172,14 +172,14 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
 			if ( comp &&
 				 loki_find_option(comp, get_option_name(info,node,NULL,0)) ) {
 				/* Recurse down any other options */
-				node = node->childs;
+				node = XML_CHILDREN(node);
 				while ( node ) {
 					if ( ! strcmp((char *)node->name, "option") ) {
 						parse_option(info, component, node, 0, 0);
 					} else if ( ! strcmp((char *)node->name, "exclusive") ) {
 						xmlNodePtr child;
 						int reinst = GetReinstallNode(info, node);
-						for ( child = node->childs; child && parse_option(info, component, child, 1, reinst); child = child->next)
+						for ( child = XML_CHILDREN(node); child && parse_option(info, component, child, 1, reinst); child = child->next)
 							;
 					}
 					node = node->next;
@@ -248,7 +248,7 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
             info->install_size += size_node(info, node);
 
             /* Recurse down any other options */
-            kid = node->childs;
+            kid = XML_CHILDREN(node);
             while ( kid ) {
                 if ( ! strcmp((char *)kid->name, "option") ) {
 					if ( !strcmp((char *)node->name, "exclusive") ) {
@@ -259,7 +259,7 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
                 } else if ( ! strcmp((char *)kid->name, "exclusive") ) {
 					xmlNodePtr child;
 					int reinst = GetReinstallNode(info, kid);
-					for ( child = kid->childs; child && parse_option(info, component, child, 1, reinst); child = child->next)
+					for ( child = XML_CHILDREN(kid); child && parse_option(info, component, child, 1, reinst); child = child->next)
 						;
 				}
                 kid = kid->next;
@@ -309,7 +309,7 @@ static install_state console_init(install_info *info, int argc, char **argv, int
         state = SETUP_README;
     }
 
-    info->install_size = size_tree(info, info->config->root->childs);
+    info->install_size = size_tree(info, XML_CHILDREN(XML_ROOT(info->config)));
 
     return state;
 }
@@ -372,7 +372,7 @@ static install_state console_setup(install_info *info)
 		while ( ! okay ) {
 			int index = 1, chosen;
 			const char *wanted;
-			node = info->config->root->childs;
+			node = XML_CHILDREN(XML_ROOT(info->config));
 
 			printf("%s\n", GetProductDesc(info));
 			while ( node ) {
@@ -395,7 +395,7 @@ static install_state console_setup(install_info *info)
 			}
 			chosen = atoi(path);
 			if ( chosen > 0 && chosen < index ) {
-				node = info->config->root->childs;
+				node = XML_CHILDREN(XML_ROOT(info->config));
 				index = 1;
 				while ( node ) {
 					if ( strcmp((char *)node->name, "option") == 0 ) {
@@ -511,14 +511,14 @@ static install_state console_setup(install_info *info)
 			
 			/* Go through the install options */
 			info->install_size = 0;
-			node = info->config->root->childs;
+			node = XML_CHILDREN(XML_ROOT(info->config));
 			while ( node ) {
 				if ( ! strcmp((char *)node->name, "option") ) {
 					parse_option(info, NULL, node, 0, 0);
 				} else if ( ! strcmp((char *)node->name, "exclusive") ) {
 					xmlNodePtr child;
 					int reinst = GetReinstallNode(info, node);
-					for ( child = node->childs; child && parse_option(info, NULL, child, 1, reinst); child = child->next)
+					for ( child = XML_CHILDREN(node); child && parse_option(info, NULL, child, 1, reinst); child = child->next)
 						;
 				} else if ( ! strcmp((char *)node->name, "component") ) {
                     if ( match_arch(info, (char *)xmlGetProp(node, BAD_CAST "arch")) &&
@@ -532,7 +532,7 @@ static install_state console_setup(install_info *info)
 							}
 							printf(_("\n%s component\n\n"), str);
                         }
-                        for ( child = node->childs; child; child = child->next) {
+                        for ( child = XML_CHILDREN(node); child; child = child->next) {
                             parse_option(info, (char *)xmlGetProp(node, BAD_CAST "name"), child, 0, 0);
                         }
                     }

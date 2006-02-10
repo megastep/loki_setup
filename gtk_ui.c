@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.111 2006-02-07 23:54:01 megastep Exp $
+   $Id: gtk_ui.c,v 1.112 2006-02-10 01:40:36 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -749,7 +749,7 @@ static void enable_tree(xmlNodePtr node, GtkWidget *window)
 	  if(button)
 		  gtk_widget_set_sensitive(button, TRUE);
   }
-  node = node->childs;
+  node = XML_CHILDREN(node);
   while ( node ) {
 	  enable_tree(node, window);
 	  node = node->next;
@@ -826,7 +826,7 @@ void setup_checkbox_option_slot( GtkWidget* widget, gpointer func_data)
 
 		/* does this option require a seperate EULA? */
 		xmlNodePtr child;
-		child = data_node->childs;
+		child = XML_CHILDREN(data_node);
 		while(child)
 		{
 			if (!strcmp((char *)child->name, "eula"))
@@ -897,7 +897,7 @@ void setup_checkbox_option_slot( GtkWidget* widget, gpointer func_data)
 		mark_option(cur_info, data_node, "true", 0);
 		
 		/* Recurse down any other options to re-enable grayed out options */
-		node = data_node->childs;
+		node = XML_CHILDREN(data_node);
 		while ( node ) {
 			enable_tree(node, window);
 			node = node->next;
@@ -907,7 +907,7 @@ void setup_checkbox_option_slot( GtkWidget* widget, gpointer func_data)
 		mark_option(cur_info, data_node, "false", 1);
 		
 		/* Recurse down any other options */
-		node = data_node->childs;
+		node = XML_CHILDREN(data_node);
 		while ( node ) {
 			if ( !strcmp((char *)node->name, "option") ) {
 				GtkWidget *button;
@@ -920,7 +920,7 @@ void setup_checkbox_option_slot( GtkWidget* widget, gpointer func_data)
 				}
 			} else if ( !strcmp((char *)node->name, "exclusive") ) {
 				xmlNodePtr child;
-				for ( child = node->childs; child; child = child->next) {
+				for ( child = XML_CHILDREN(node); child; child = child->next) {
 					GtkWidget *button;
 					
 					button = (GtkWidget*)gtk_object_get_data(GTK_OBJECT(window),
@@ -934,7 +934,7 @@ void setup_checkbox_option_slot( GtkWidget* widget, gpointer func_data)
 			node = node->next;
 		}
 	}
-    cur_info->install_size = size_tree(cur_info, cur_info->config->root->childs);
+    cur_info->install_size = size_tree(cur_info, XML_CHILDREN(XML_ROOT(cur_info->config)));
 	update_size();
 }
 
@@ -1087,7 +1087,7 @@ static void check_program_to_start(install_info *info)
     /*----------------------------------------------------------------------
     **  Find a program to start, if any.
     **--------------------------------------------------------------------*/
-    for (i = 0, node = cur_info->config->root->childs; node;  node = node->next) {
+    for (i = 0, node = XML_CHILDREN(XML_ROOT(cur_info->config)); node;  node = node->next) {
         if (strcmp((char *)node->name, "program_to_start") == 0) {
             /* Retrieve the value - note that it's up to us to free
                 the memory, which means we can use it without copying it */
@@ -1144,7 +1144,7 @@ static void init_install_path(void)
     /*----------------------------------------------------------------------
     **  Retrieve the list of install paths from the config file, if we can
     **--------------------------------------------------------------------*/
-    for (i = 0, node = cur_info->config->root->childs; node;  node = node->next) {
+    for (i = 0, node = XML_CHILDREN(XML_ROOT(cur_info->config)); node;  node = node->next) {
         if (strcmp((char *)node->name, "install_drop_list") == 0) {
             /* Retrieve the value - note that it's up to us to free
                 the memory, which means we can use it without copying it */
@@ -1499,7 +1499,7 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
     }
 
     /* Recurse down any other options */
-    child = node->childs;
+    child = XML_CHILDREN(node);
     while ( child ) {
 		if ( !strcmp((char *)child->name, "option") ) {
 			parse_option(info, component, child, window, box, level+1, button, 0, 0, NULL);
@@ -1508,7 +1508,7 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
 			GSList *list = NULL;
 			int reinst = GetReinstallNode(info, child);
 
-			for ( exchild = child->childs; exchild; exchild = exchild->next) {
+			for ( exchild = XML_CHILDREN(child); exchild; exchild = exchild->next) {
 				parse_option(info, component, exchild, window, box, level+1, button, 1, reinst, &list);
 			}
 		}
@@ -1766,7 +1766,7 @@ static install_state gtkui_init(install_info *info, int argc, char **argv, int n
 		if (widget)	gtk_widget_hide(widget);
 	}
 
-    info->install_size = size_tree(info, info->config->root->childs);
+    info->install_size = size_tree(info, XML_CHILDREN(XML_ROOT(info->config)));
 
     license_okay = 1; /* Needed so that Expert is detected properly at this point */
     
@@ -1874,7 +1874,7 @@ static install_state gtkui_setup(install_info *info)
     options = glade_xml_get_widget(setup_glade, "option_vbox");
     gtk_container_foreach(GTK_CONTAINER(options), empty_container, options);
     info->install_size = 0;
-    node = info->config->root->childs;
+    node = XML_CHILDREN(XML_ROOT(info->config));
     radio_list = NULL;
     in_setup = TRUE;
     while ( node ) {
@@ -1884,7 +1884,7 @@ static install_state gtkui_setup(install_info *info)
 			xmlNodePtr child;
 			GSList *list = NULL;
 			int reinst = GetReinstallNode(info, node);
-			for ( child = node->childs; child; child = child->next) {
+			for ( child = XML_CHILDREN(node); child; child = child->next) {
 				parse_option(info, NULL, child, window, options, 0, NULL, 1, reinst, &list);
 			}
 		} else if ( ! strcmp((char *)node->name, "component") ) {
@@ -1900,14 +1900,14 @@ static install_state gtkui_setup(install_info *info)
                     gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 10);
                     gtk_widget_show(widget);
                 }
-                for ( child = node->childs; child; child = child->next) {
+                for ( child = XML_CHILDREN(node); child; child = child->next) {
 					if ( ! strcmp((char *)child->name, "option") ) {
 						parse_option(info, (char *)xmlGetProp(node, BAD_CAST "name"), child, window, options, 0, NULL, 0, 0, NULL);
 					} else if ( ! strcmp((char *)child->name, "exclusive") ) {
 						xmlNodePtr child2;
 						GSList *list = NULL;
 						int reinst = GetReinstallNode(info, child);
-						for ( child2 = child->childs; child2; child2 = child2->next) {
+						for ( child2 = XML_CHILDREN(child); child2; child2 = child2->next) {
 							parse_option(info, (char *)xmlGetProp(node, BAD_CAST "name"), child2, window, options, 0, NULL, 1, reinst, &list);
 						}
 					}
