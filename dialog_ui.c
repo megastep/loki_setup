@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.33 2006-02-10 01:40:36 megastep Exp $
+ * $Id: dialog_ui.c,v 1.34 2006-02-21 19:52:26 megastep Exp $
  */
 
 #include <limits.h>
@@ -33,7 +33,7 @@ static int count_lines(const char *str)
     return ret;
 }
 
-static void clear_screen(void)
+static void clear_the_screen(void)
 {
 	dialog_clear();
 	put_backtitle();
@@ -80,7 +80,7 @@ install_state dialog_init(install_info *info,int argc, char **argv,
 			 info->distro_maj, info->distro_min);
 	
     /* Welcome box */
-	clear_screen();
+	clear_the_screen();
     dialog_msgbox(title, msg, 6, 50, 1);
 
     info->install_size = size_tree(info, XML_CHILDREN(XML_ROOT(info->config)));
@@ -97,7 +97,7 @@ install_state dialog_license(install_info *info)
 {
     dialog_textbox(_("License Agreement"), GetProductEULA(info, NULL),
 				   -1, -1);
-	clear_screen();
+	clear_the_screen();
     if ( dialog_prompt(_("Do you agree with the license?"), RESPONSE_YES) ==
 	                  RESPONSE_YES ) {
         return SETUP_README;
@@ -116,7 +116,7 @@ install_state dialog_readme(install_info *info)
         char prompt[256];
 		const char *str;
 
-		clear_screen();
+		clear_the_screen();
 		readme += strlen(info->setup_path)+1; /* Skip the install path */
 		str = strrchr(readme, '/');
 		if ( str )
@@ -233,7 +233,7 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr pa
 
 	/* TTimo: loop until the selected options are all validated by possible EULA */
 options_loop:  
-	clear_screen();
+	clear_the_screen();
 	snprintf(buf, sizeof(buf), _("Installation of %s"), info->desc); 
 	if ( nb_choices == 0 ) {
 		dialog_prompt(_("No installation options detected. If the product is already\n"
@@ -264,7 +264,7 @@ options_loop:
 						if (name) {
 							/* prompt for the EULA */
 							dialog_textbox(_("License Agreement"), name, -1, -1);
-							clear_screen();
+							clear_the_screen();
 							if ( dialog_prompt(_("Do you agree with the license?"), RESPONSE_YES) == RESPONSE_NO ) {
 								/* refused the license, don't set the option and bounce back */
 								choices[i*4+2] = "off";
@@ -352,7 +352,7 @@ install_state dialog_setup(install_info *info)
 
 		/* Prompt for all options */
 
-		clear_screen();
+		clear_the_screen();
 		if ( GetProductIsMeta(info) ) {
 			const char *wanted;
 
@@ -464,7 +464,7 @@ install_state dialog_setup(install_info *info)
 					}
 				
 					if (get_path) {
-						clear_screen();
+						clear_the_screen();
 						if ( dialog_inputbox(_("Symlink path"), 
 											 _("Please enter the path in which to create the symbolic links"),
 											 10, 50, info->symlinks_path, 0) < 0 ) {
@@ -480,7 +480,7 @@ install_state dialog_setup(install_info *info)
 				set_symlinkspath(info, path);
 
 				if ( GetProductHasManPages(info) ) {
-					clear_screen();
+					clear_the_screen();
 					if ( dialog_inputbox(_("Manual path"), 
 										 _("Please enter the path in which to install manual pages"),
 										 10, 50, "/usr/local/man", 0) < 0 ) {
@@ -528,7 +528,7 @@ install_state dialog_setup(install_info *info)
 					return SETUP_ABORT;
 				}
 
-				clear_screen();
+				clear_the_screen();
 				/* Ask for desktop menu items */
 				if ( !GetProductHasNoBinaries(info) &&
 					 dialog_prompt(_("Do you want to install startup menu entries?"),
@@ -556,14 +556,14 @@ install_state dialog_setup(install_info *info)
         int cdkey_is_okay = 0;
         while (!cdkey_is_okay)
         {
-    	    clear_screen();
+    	    clear_the_screen();
     	    if ( dialog_inputbox(_("CD Key"),
     		                     _("Please enter your CD key"),
     							 10, 50, "", 0) < 0 ) {
 	    	    return SETUP_ABORT;
             }
 
-    	    clear_screen();
+    	    clear_the_screen();
 
             strncpy(gCDKeyString, dialog_vars.input_result, sizeof(gCDKeyString));
             gCDKeyString[sizeof (gCDKeyString) - 1] = '\0';
@@ -592,7 +592,7 @@ install_state dialog_setup(install_info *info)
         }
     }
 
-	clear_screen();
+	clear_the_screen();
 	dialog_gauge_begin(10, COLS*8/10, 0);
     return SETUP_INSTALL;
 }
@@ -638,7 +638,7 @@ void dialog_exit(install_info *info)
 static
 void dialog_abort(install_info *info)
 {
-	clear_screen();
+	clear_the_screen();
 	dialog_msgbox(_("Aborting"), _("Install aborted - cleaning up files\n"),
 				  3, 45, 0);
 	dialog_exit(info);
@@ -647,7 +647,7 @@ void dialog_abort(install_info *info)
 static
 install_state dialog_website(install_info *info)
 {
-	clear_screen();
+	clear_the_screen();
     if ( (strcmp( GetAutoLaunchURL(info), "true" )==0)
          || (dialog_prompt(_("Would you like to launch a Web browser?"), RESPONSE_YES) == RESPONSE_YES ) ) {
         launch_browser(info, loki_launchURL);
@@ -661,7 +661,7 @@ install_state dialog_complete(install_info *info)
     install_state new_state = SETUP_EXIT;
 
 	dialog_gauge_end();
-	clear_screen();
+	clear_the_screen();
     if ( info->installed_symlink && *info->play_binary &&
          dialog_prompt(_("Installation complete!\nWould you like to start now?"), 
 					   RESPONSE_YES) == RESPONSE_YES ) {
@@ -690,7 +690,7 @@ install_state dialog_pick_class(install_info *info)
 		choices[6] = "on";
 	}
 
-	clear_screen();
+	clear_the_screen();
 	snprintf(buf, sizeof(buf), _("Installation of %s"), info->desc); 
 	if ( dialog_checklist(buf, _("Please select the class of installation"),
 						  9, COLS*9/10, 2, 2, choices,
@@ -711,7 +711,7 @@ install_state dialog_pick_class(install_info *info)
 
 static void dialog_shutdown(install_info *info)
 {
-    clear_screen();
+    clear_the_screen();
     end_dialog();
 }
 
