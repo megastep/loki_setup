@@ -603,6 +603,8 @@ fi
 if test ! -z "$USE_GPM"; then
 	AC_CHECK_HEADERS(gpm.h)
 	CONSOLE_LIBS="$CONSOLE_LIBS -lgpm $LIBDL"
+else
+	CONSOLE_LIBS="$CONSOLE_LIBS $LIBDL"
 fi
 
 X11_LIBS="\$(BDYNAMIC) $X_PRE_LIBS -L$x_libraries -lXi -lXext -lX11 -lm"
