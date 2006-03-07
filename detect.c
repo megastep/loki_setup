@@ -811,7 +811,14 @@ char *convert_encoding(char *str)
 
 /*  	fprintf(stderr, "convert_encoding(%s) handler=%s\n", str, handler->name); */
 	if ( handler && handler->output ) {
-		if ( handler->output((unsigned char*)buf, sizeof(buf), (unsigned char*)str, strlen(str)+1) < 0 ) {
+		int outlen = sizeof(buf), inlen = strlen(str)+1;
+		if ( 
+#if LIBXML_VERSION < 20000
+			handler->output((unsigned char*)buf, outlen, (unsigned char*)str, inlen) 
+#else
+			handler->output((unsigned char*)buf, &outlen, (unsigned char*)str, &inlen) 
+#endif
+			< 0 ) {
 			return str;
 		} else {
 /*  			fprintf(stderr, "Converted to %s\n", buf); */
