@@ -10,9 +10,18 @@
 #include <gtk/gtk.h>
 #include <glade/glade.h>
 
+#include "config.h"
 #include "setupdb.h"
 #include "uninstall.h"
 #include "uninstall_ui.h"
+
+#if defined(ENABLE_GTK2)
+    #define UNINSTALL_GLADE "uninstall.gtk2.glade"
+    #define GLADE_XML_NEW(a, b) glade_xml_new(a, b, NULL)
+#else
+    #define UNINSTALL_GLADE "uninstall.glade"
+    #define GLADE_XML_NEW(a, b) glade_xml_new(a, b)
+#endif
 
 static GladeXML *uninstall_glade;
 static int uninstall_cancelled = 0;
@@ -487,7 +496,7 @@ int uninstall_ui(int argc, char *argv[])
 
     /* Initialize Glade */
     glade_init();
-    uninstall_glade = glade_xml_new(DATADIR "/uninstall.glade", "loki_uninstall"); 
+    uninstall_glade = GLADE_XML_NEW(DATADIR "/" UNINSTALL_GLADE, "loki_uninstall"); 
 
     /* Add all signal handlers defined in glade file */
     glade_xml_signal_autoconnect(uninstall_glade);
