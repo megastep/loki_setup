@@ -328,11 +328,8 @@ if test `uname -s` != Linux; then
     LIBC=glibc-2.1
 else
       if test -f `echo /lib/libc.so.6* | tail -n 1`; then
-              if grep GLIBC_2.3 /lib/libc.so.6* 2>&1 >/dev/null; then
-                      LIBC="glibc-2.3"
-              elif grep GLIBC_2.2 /lib/libc.so.6* 2>&1 >/dev/null; then
-                      LIBC="glibc-2.2"
-              elif grep GLIBC_2.1 /lib/libc.so.6* 2>&1 >/dev/null; then
+dnl This should cover all other releases post 2.1
+              if grep GLIBC_2.1 /lib/libc.so.6* 2>&1 >/dev/null; then
                       LIBC="glibc-2.1"
               else
                       LIBC="glibc-2.0"
