@@ -1,4 +1,4 @@
-<?xml version="1.0" standalone="yes"?>
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
 <install product="RT2" desc="Railroad Tycoon II" version="1.54" uninstall="uninstall.sh" binarypath="/usr/bin"
          promptbinaries="yes" update_url="http://www.lokigames.com/updates/" express="yes">
   <readme>
@@ -11,7 +11,6 @@
    <option install="true" required="false">
     Base Install
     <lang lang="fr">Installation de base</lang>
-    <lang lang="es">Instalación base</lang>
     <lang lang="it">Installazione base</lang>
     <lang lang="de">Minimale Installation</lang>
     <help          >Required for play</help>

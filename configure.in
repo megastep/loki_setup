@@ -380,27 +380,6 @@ AC_CHECK_HEADERS(ncurses/curses.h)
 AC_CHECK_HEADERS(ncurses.h)
 AC_CHECK_LIB(ncurses, keypad, USE_NCURSES=yes)
 
-dnl Look for the XML libraries
-
-AC_PATH_PROG(HAVEXML, xml-config, $PATH)
-if test ! -z "$HAVEXML"; then
-    XML_CFLAGS=`$HAVEXML --cflags`
-    XML_PREFIX=`$HAVEXML --prefix`
-
-    CFLAGS="$CFLAGS $XML_CFLAGS"
-    if test "$STATIC" = ""; then
-        LIBS="$LIBS $XML_STATIC -L$XML_PREFIX/lib$LIBSUFFIX -lxml $BDYNAMIC"
-        GUI_LIBS="$GUI_LIBS $XML_STATIC -L$XML_PREFIX/lib$LIBSUFFIX -lxml $BDYNAMIC"
-        CARBON_LIBS="$CARBON_LIBS -L$XML_PREFIX/lib$LIBSUFFIX -lxml"
-    else
-        LIBS="$LIBS $XML_PREFIX/lib$LIBSUFFIX/libxml.a"
-        GUI_LIBS="$GUI_LIBS $XML_PREFIX/lib$LIBSUFFIX/libxml.a"
-        CARBON_LIBS="$CARBON_LIBS $XML_PREFIX/lib$LIBSUFFIX/libxml.a"
-    fi
-else
-    AC_MSG_ERROR([*** xml-config not found. You need a working libxml installation.])
-fi
-
 dnl Check for libglade 1
 
 AC_PATH_PROG(HAVEGLADE, libglade-config, $PATH)
@@ -424,6 +403,8 @@ if test ! -z "$HAVEGTK"; then
 else
     AC_MSG_ERROR([*** gtk-config not found. You need a working GTK+ 1.2 installation.])
 fi
+
+XMLVER=""
 
 AC_ARG_ENABLE(gtk2,
 [  --enable-gtk2            Use gtk2 support, not gtk1  [default=no]],
@@ -449,6 +430,7 @@ if test x$enable_gtk2 = xyes; then
                 GTK2_LIBS=`echo $GTK2_LIBS | sed "s/-lglade-2.0/$GLADE_STATIC -lglade-2.0 $BDYNAMIC/g"`
             fi
             GUI_LIBS="$GUI_LIBS $GTK2_LIBS"
+			XMLVER="2"
         else
             AC_MSG_ERROR([*** Either libglade-2.0 or gtk+-2.0 are not available.])
         fi
@@ -459,6 +441,35 @@ if test x$enable_gtk2 = xyes; then
 else
     CFLAGS="$CFLAGS $GLADE_CFLAGS $GTK_CFLAGS"
     GUI_LIBS="$GUI_LIBS $GLADE_STATIC -L$GLADE_PREFIX/lib$LIBSUFFIX -lglade $BDYNAMIC $GTK_LIBS"
+fi
+
+dnl Look for the XML libraries
+
+AC_ARG_WITH(libxml2,
+[  --with-libxml2          use libxml2 [default=libxml1 unless GTK2 is enabled]],
+	,	with_libxml2=yes)
+if test x$with_libxml2 = xyes; then
+	XMLVER="2"
+	EXTRA_LIBS="$EXTRA_LIBS -lm"
+fi
+
+AC_PATH_PROG(HAVEXML, xml${XMLVER}-config, $PATH)
+if test ! -z "$HAVEXML"; then
+    XML_CFLAGS=`$HAVEXML --cflags`
+    XML_PREFIX=`$HAVEXML --prefix`
+
+    CFLAGS="$CFLAGS $XML_CFLAGS"
+    if test "$STATIC" = ""; then
+        LIBS="$LIBS $XML_STATIC -L$XML_PREFIX/lib$LIBSUFFIX -lxml${XMLVER} $BDYNAMIC"
+        GUI_LIBS="$GUI_LIBS $XML_STATIC -L$XML_PREFIX/lib$LIBSUFFIX -lxml${XMLVER} $BDYNAMIC"
+        CARBON_LIBS="$CARBON_LIBS -L$XML_PREFIX/lib$LIBSUFFIX -lxml${XMLVER}"
+    else
+        LIBS="$LIBS $XML_PREFIX/lib$LIBSUFFIX/libxml${XMLVER}.a"
+        GUI_LIBS="$GUI_LIBS $XML_PREFIX/lib$LIBSUFFIX/libxml${XMLVER}.a"
+        CARBON_LIBS="$CARBON_LIBS $XML_PREFIX/lib$LIBSUFFIX/libxml${XMLVER}.a"
+    fi
+else
+    AC_MSG_ERROR([*** xml${XMLVER}-config not found. You need a working libxml${XMLVER} installation.])
 fi
 
 if test x$HAVE_BZIP2_SUPPORT = xyes; then

@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.158 2006-02-10 01:40:36 megastep Exp $ */
+/* $Id: install.c,v 1.159 2006-03-07 02:02:26 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -2717,20 +2717,20 @@ int install_menuitems(install_info *info, desktop_type desktop)
 		case DESKTOP_MENUDEBIAN:
 			/* Run update-menus */
             if ( loki_valid_program("update-menus") )
-				run_command(info, "update-menus", NULL, 1);
+				run_command(info, "update-menus", NULL, NULL, 1);
 			install_updatemenus_script = 1;
 			break;
 		case DESKTOP_KDE:
 			/* Run kbuildsycoca */
             if ( loki_valid_program("kbuildsycoca") )
-				run_command(info, "kbuildsycoca", NULL, 0);
+				run_command(info, "kbuildsycoca", NULL, NULL, 0);
 			install_updatemenus_script = 1;
 			break;
 		case DESKTOP_CDE:
 			/* Run dtaction */
             if ( loki_valid_program("dtaction") ) {
-				run_command(info, "dtaction", "ReloadActions", 0);
-				run_command(info, "dtaction", "RestorePanel", 0);
+				run_command(info, "dtaction", "ReloadActions", NULL,  0);
+				run_command(info, "dtaction", "RestorePanel", NULL, 0);
 			}
 			install_updatemenus_script = 1;
 			break;
@@ -2738,7 +2738,7 @@ int install_menuitems(install_info *info, desktop_type desktop)
 			break;
 		}
 		if ( loki_valid_program("susewm") )
-	    	run_command(info, "susewm", "-q", 0);
+	    	run_command(info, "susewm", "-q", NULL, 0);
     }
     return ret_val;
 }
@@ -2810,7 +2810,7 @@ int run_script(install_info *info, const char *script, int arg, int include_tags
 				strncpy(cmd, info->install_path, sizeof(cmd));
 			}
            
-            exitval = run_command(info, script_file, cmd, 1);
+            exitval = run_command(info, script_file, cmd, NULL, 1);
         }
         close(fd);
     }
@@ -2818,26 +2818,29 @@ int run_script(install_info *info, const char *script, int arg, int include_tags
     return(exitval);
 }
 
-int run_command(install_info *info, const char *cmd, const char *arg, int warn)
+int run_command(install_info *info, const char *cmd, const char *arg1, const char *arg2, int warn)
 {
     int exitval = 0;
     pid_t child;
 
-	log_debug("Running command: '%s' '%s'\n", cmd, arg ? arg : "");
+	log_debug("Running command: '%s' '%s' '%s'\n", cmd, arg1 ? arg1 : "", arg2 ? arg2 : "");
     switch( child = fork() ) {
     case 0: {/* Inside the child */
-        char *argv[3];
+        char *argv[4];
         argv[0] = strdup(cmd);
-        argv[1] = arg ? strdup(arg) : NULL;
-        argv[2] = NULL;
+        argv[1] = arg1 ? strdup(arg1) : NULL;
+        argv[2] = arg2 ? strdup(arg2) : NULL;
+        argv[3] = NULL;
         execvp(cmd, argv);
 		if ( warn ) {
 			perror("execv");
 			fprintf(stderr, "Command: %s\n", cmd);
 		}
         free(argv[0]);
-		if(arg)
+		if (arg1)
 			free(argv[1]);
+		if (arg2)
+			free(argv[2]);
 		_exit(1);
     }
     case -1: /* Error */

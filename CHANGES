@@ -1,4 +1,7 @@
 Current:
+Stephane Peter (Codehost) - Mon Mar  6 18:00:40 PST 2006
+ * Added support for SELinux context attributes for files
+ * GTK2 cleanups and fixes to use libxml2
 Jeremy White (Codeweavers) - Tue Feb  7 15:37:28 PST 2006
  * Preliminary optional GTK2 support
  * Added support for program_to_start XML element

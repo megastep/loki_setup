@@ -413,7 +413,7 @@ extern void push_curdir(const char *path);
 extern void pop_curdir(void);
 
 /* Run a program in the background */
-int run_command(install_info *info, const char *cmd, const char *arg, int warn);
+int run_command(install_info *info, const char *cmd, const char *arg1, const char *arg2, int warn);
 
 /* Manage the list of corrupt files if we're restoring */
 extern void add_corrupt_file(const product_t *prod, const char *path, const char *option);
@@ -430,7 +430,9 @@ int xmlNodePropIsFalse(xmlNodePtr node, const char* prop);
 extern int disable_install_path;
 extern int disable_binary_path;
 extern int express_setup;
-
+#ifdef __linux
+extern int have_selinux;
+#endif
 
 #endif /* _install_h */
 

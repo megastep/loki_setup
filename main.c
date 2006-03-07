@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.77 2005-10-03 19:26:10 megastep Exp $ */
+/* $Id: main.c,v 1.78 2006-03-07 02:02:26 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -57,6 +57,10 @@ extern char *rpm_root;
 extern int force_manual;
 #endif
 const char *argv0 = NULL;
+
+#ifdef __linux
+int have_selinux = 0;
+#endif
 
 static install_info *info = NULL;
 extern Install_UI UI;
@@ -301,6 +305,13 @@ int main(int argc, char **argv)
     signal(SIGQUIT, signal_abort);
     signal(SIGHUP, signal_abort);
     signal(SIGTERM, signal_abort);
+
+#ifdef __linux
+	/* See if we have a SELinux environment */
+	if ( !access("/usr/bin/chcon", X_OK) && !access("/usr/sbin/getenforce", X_OK) ) {
+		have_selinux = 1;
+	}
+#endif
 
     /* Run the little state machine */
     exit_status = 0;

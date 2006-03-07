@@ -778,9 +778,12 @@ There are several optional attributes of the files element:
             NOTE: This doesn't apply to directories, which are currently always created with
             mode 755.
 
+ secontext  On Linux systems only. Specify an optional SELinux context string that will be
+            applied to the files upon creation, by calling the chcon command.
+
  suffix     An optional file extension that is forced on all files. Can be used
-	    to make loki-setup recognize e.g. SFX ZIP archives as such even if
-	    they end in .exe.
+            to make loki-setup recognize e.g. SFX ZIP archives as such even if
+            they end in .exe.
 
 The MANPAGE element:
 

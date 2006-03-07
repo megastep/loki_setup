@@ -301,6 +301,9 @@ ssize_t copy_file(install_info *info, const char *cdrom, const char *path, const
 		char *mut = (char *)xmlGetProp(node, BAD_CAST "mutable");
 		char *uncompress = (char *)xmlGetProp(node, BAD_CAST "process");
 		char *mode_str = (char *)xmlGetProp(node, BAD_CAST "mode");
+#ifdef __linux
+		char *se_context = (char *)xmlGetProp(node, BAD_CAST "secontext");
+#endif
 		int mode = binary ? 0755 : 0644;
 
 		input = file_open(info, fullpath, "r");
@@ -380,6 +383,11 @@ ssize_t copy_file(install_info *info, const char *cdrom, const char *path, const
 		} else {
 			file_chmod(info, final, mode);
 		}
+#ifdef __linux
+		if ( se_context && have_selinux ) {
+			run_command(info, "chcon", se_context, final, 0);
+		}
+#endif
 		if ( md5 ) { /* Verify the output file */
 			strcpy(sum, get_md5(output->md5.buf));
 			if ( strcasecmp(md5, sum) ) {
@@ -388,6 +396,9 @@ ssize_t copy_file(install_info *info, const char *cdrom, const char *path, const
 		}
 	copy_file_exit:
 		xmlFree(md5); xmlFree(mut); xmlFree(uncompress); xmlFree(mode_str);
+#ifdef __linux
+		xmlFree(se_context);
+#endif
 	}
     return size;
 }

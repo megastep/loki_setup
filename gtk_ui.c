@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.112 2006-02-10 01:40:36 megastep Exp $
+   $Id: gtk_ui.c,v 1.113 2006-03-07 02:02:26 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -195,7 +195,7 @@ void setup_entry_givefocus( GtkWidget* widget, gpointer func_data )
 gint path_entry_keypress_slot(GtkWidget *widget, GdkEvent *event, 
 				  gpointer data)
 {
-    char* string;
+    const char* string;
     
     string = gtk_entry_get_text( GTK_ENTRY(widget) );
     if ( string ) {
@@ -211,7 +211,7 @@ gint path_entry_keypress_slot(GtkWidget *widget, GdkEvent *event,
 gint path_combo_change_slot(GtkWidget *widget, GdkEvent *event, 
 				  gpointer data)
 {
-    char* string;
+    const char* string;
     GtkWidget *install_entry;
     
     install_entry = glade_xml_get_widget(setup_glade, "install_entry");
@@ -228,7 +228,7 @@ gint path_combo_change_slot(GtkWidget *widget, GdkEvent *event,
 
 gboolean setup_entry_installpath_slot( GtkWidget* widget, GdkEventFocus *event, gpointer func_data )
 {
-    char* string;
+    const char* string;
     string = gtk_entry_get_text( GTK_ENTRY(widget) );
     if ( string ) {
         set_installpath(cur_info, string, 1);
@@ -243,7 +243,7 @@ gboolean setup_entry_installpath_slot( GtkWidget* widget, GdkEventFocus *event, 
 gint binary_path_entry_keypress_slot(GtkWidget *widget, GdkEvent *event, 
 				  gpointer data)
 {
-    char* string;
+    const char* string;
     
     string = gtk_entry_get_text( GTK_ENTRY(widget) );
     if ( string ) {
@@ -259,7 +259,7 @@ gint binary_path_entry_keypress_slot(GtkWidget *widget, GdkEvent *event,
 gint binary_path_combo_change_slot(GtkWidget *widget, GdkEvent *event, 
 				  gpointer data)
 {
-    char* string;
+    const char* string;
     GtkWidget *binary_entry;
     
     binary_entry = glade_xml_get_widget(setup_glade, "binary_entry");
@@ -276,7 +276,7 @@ gint binary_path_combo_change_slot(GtkWidget *widget, GdkEvent *event,
 
 gboolean setup_entry_binarypath_slot( GtkWidget* widget, GdkEventFocus *event, gpointer func_data )
 {
-    char* string;
+    const char* string;
     string = gtk_entry_get_text( GTK_ENTRY(widget) );
     if ( string ) {
         set_symlinkspath(cur_info, string);
@@ -580,7 +580,7 @@ extern char gCDKeyString[128];
 
 void setup_cdkey_entry_changed_slot(GtkEntry *entry, gpointer user_data)
 {
-    gchar *CDKey = gtk_entry_get_text( GTK_ENTRY(entry) );
+    const gchar *CDKey = gtk_entry_get_text( GTK_ENTRY(entry) );
     GtkWidget *button;
     button = glade_xml_get_widget(setup_glade, "setup_button_cdkey_continue");
 
@@ -760,7 +760,7 @@ gboolean on_manpage_entry_focus_out_event(GtkWidget *widget,
 										  GdkEventFocus *event,
 										  gpointer user_data)
 {
-    char* string;
+    const char* string;
     string = gtk_entry_get_text( GTK_ENTRY(widget) );
     if ( string ) {
         set_manpath(cur_info, string);
@@ -781,7 +781,7 @@ void on_use_binary_toggled ( GtkWidget* widget, gpointer func_data)
     GtkWidget *binary_path_widget;
     GtkWidget *binary_label_widget;
     GtkWidget *binary_entry;
-    char *string;
+    const char *string;
 
     /*-------------------------------------------------------------------------
     ** Pick up widget handles

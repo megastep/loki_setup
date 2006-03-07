@@ -47,7 +47,7 @@
 #endif
 
 /* From libxml */
-#include <encoding.h>
+#include <libxml/encoding.h>
 
 #include "install.h"
 #include "install_ui.h"
@@ -345,7 +345,7 @@ void unmount_filesystems(void)
     struct mounted_elem *mnt = mounted_list, *oldmnt;
     while ( mnt ) {
         log_normal(_("Unmounting device %s"), mnt->device);
-        if ( run_command(NULL, UMOUNT_PATH, mnt->dir, 1) ) {
+        if ( run_command(NULL, UMOUNT_PATH, mnt->dir, NULL, 1) ) {
             log_warning(_("Failed to unmount device %s mounted on %s"), mnt->device, mnt->dir);
         }
         free(mnt->device);
@@ -410,7 +410,7 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
     while( (fstab = getfsent()) != NULL ){
         if ( !strcmp(fstab->fs_vfstype, MNTTYPE_CDROM)) {
             if ( !is_fs_mounted(fstab->fs_spec)) {
-                if ( ! run_command(NULL, MOUNT_PATH, fstab->fs_spec, 1) ) {
+                if ( ! run_command(NULL, MOUNT_PATH, fstab->fs_spec, NULL, 1) ) {
                     add_mounted_entry(fstab->fs_spec, fstab->fs_file);
                     log_normal(_("Mounted device %s"), fstab->fs_spec);
                 }
@@ -502,7 +502,7 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
                 char *fsname = strdup(mntent->mnt_fsname);
                 char *dir = strdup(mntent->mnt_dir);
                 if ( !is_fs_mounted(fsname)) {
-                    if ( ! run_command(NULL, mount_cmd, fsname, 1) ) {
+                    if ( ! run_command(NULL, mount_cmd, fsname, NULL, 1) ) {
                         add_mounted_entry(fsname, dir);
                         log_normal(_("Mounted device %s"), fsname);
                     }
@@ -584,7 +584,7 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
                 char *fsname = strdup(mntent->mnt_fsname);
                 char *dir = strdup(mntent->mnt_dir);
                 if ( !is_fs_mounted(fsname)) {
-                    if ( ! run_command(NULL, MOUNT_PATH, fsname, 1) ) {
+                    if ( ! run_command(NULL, MOUNT_PATH, fsname, NULL, 1) ) {
                         add_mounted_entry(fsname, dir);
                         log_normal(_("Mounted device %s"), fsname);
                     }
