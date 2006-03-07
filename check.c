@@ -2,7 +2,7 @@
  * Check and Rescue Tool for Loki Setup packages. Verifies the consistency of the files,
  * and optionally restores them from the original installation medium.
  *
- * $Id: check.c,v 1.14 2006-02-10 01:40:36 megastep Exp $
+ * $Id: check.c,v 1.15 2006-03-07 19:30:38 megastep Exp $
  */
 
 #include <stdlib.h>
@@ -20,7 +20,7 @@
 #include <gtk/gtk.h>
 #include <glade/glade.h>
 
-
+#include "config.h"
 #include "arch.h"
 #include "setupdb.h"
 #include "install.h"
@@ -29,10 +29,22 @@
 #undef PACKAGE
 #define PACKAGE "loki-uninstall"
 
+#if defined(ENABLE_GTK2)
+    #define CHECK_GLADE "check.gtk2.glade"
+    #define GLADE_XML_NEW(a, b) glade_xml_new(a, b, NULL)
+#else
+    #define CHECK_GLADE "check.glade"
+    #define GLADE_XML_NEW(a, b) glade_xml_new(a, b)
+#endif
+
 product_t *product = NULL;
 GtkWidget *file_selector;
 GladeXML *check_glade, *rescue_glade = NULL;
 extern struct component_elem *current_component;
+
+#ifdef __linux
+int have_selinux = 0;
+#endif
 
 const char *argv0 = NULL;
 
@@ -369,7 +381,7 @@ on_rescue_button_clicked            (GtkButton       *button,
 {
 	GtkWidget *window;
 
-    rescue_glade = glade_xml_new("check.glade", "media_select"); 
+    rescue_glade = GLADE_XML_NEW(CHECK_GLADE, "media_select"); 
     glade_xml_signal_autoconnect(rescue_glade);
 
 	/* Ask the user to insert the media */
@@ -400,6 +412,13 @@ int main(int argc, char *argv[])
 	/* Set the locale */
     init_locale();
 
+#ifdef __linux
+	/* See if we have a SELinux environment */
+	if ( !access("/usr/bin/chcon", X_OK) && !access("/usr/sbin/getenforce", X_OK) ) {
+		have_selinux = 1;
+	}
+#endif
+
 	if ( argc < 2 ) {
 		fprintf(stderr, _("Usage: %s product\n"), argv[0]);
 		return 1;
@@ -411,7 +430,7 @@ int main(int argc, char *argv[])
 
     /* Initialize Glade */
     glade_init();
-    check_glade = glade_xml_new("check.glade", "check_dialog"); 
+    check_glade = GLADE_XML_NEW(CHECK_GLADE, "check_dialog"); 
 
     /* Add all signal handlers defined in glade file */
     glade_xml_signal_autoconnect(check_glade);
