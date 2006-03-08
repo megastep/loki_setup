@@ -12,15 +12,14 @@
 
 #include "config.h"
 #include "setupdb.h"
+#include "setup-xml.h"
 #include "uninstall.h"
 #include "uninstall_ui.h"
 
 #if defined(ENABLE_GTK2)
     #define UNINSTALL_GLADE "uninstall.gtk2.glade"
-    #define GLADE_XML_NEW(a, b) glade_xml_new(a, b, NULL)
 #else
     #define UNINSTALL_GLADE "uninstall.glade"
-    #define GLADE_XML_NEW(a, b) glade_xml_new(a, b)
 #endif
 
 static GladeXML *uninstall_glade;

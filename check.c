@@ -2,7 +2,7 @@
  * Check and Rescue Tool for Loki Setup packages. Verifies the consistency of the files,
  * and optionally restores them from the original installation medium.
  *
- * $Id: check.c,v 1.16 2006-03-08 02:14:12 megastep Exp $
+ * $Id: check.c,v 1.17 2006-03-08 18:58:53 megastep Exp $
  */
 
 #include <stdlib.h>
@@ -35,10 +35,8 @@
 
 #if defined(ENABLE_GTK2)
     #define CHECK_GLADE "check.gtk2.glade"
-    #define GLADE_XML_NEW(a, b) glade_xml_new(a, b, NULL)
 #else
     #define CHECK_GLADE "check.glade"
-    #define GLADE_XML_NEW(a, b) glade_xml_new(a, b)
 #endif
 
 product_t *product = NULL;

@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.114 2006-03-07 20:31:04 megastep Exp $
+   $Id: gtk_ui.c,v 1.115 2006-03-08 18:58:53 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -103,10 +103,8 @@
 
 #if defined(ENABLE_GTK2)
     #define SETUP_GLADE SETUP_BASE "setup.gtk2.glade"
-    #define GLADE_XML_NEW(a, b) glade_xml_new(a, b, NULL)
 #else
     #define SETUP_GLADE SETUP_BASE "setup.glade"
-    #define GLADE_XML_NEW(a, b) glade_xml_new(a, b)
 #endif
 
 #define LICENSE_FONT            \
@@ -427,11 +425,7 @@ void setup_destroy_view_readme_slot( GtkWidget* w, gpointer data )
         widget = glade_xml_get_widget(setup_glade_readme, "readme_dialog");
 		if (widget)
 			gtk_widget_hide(widget);
-#ifdef ENABLE_GTK2
-        g_object_unref(G_OBJECT(setup_glade_readme));
-#else
-        gtk_object_unref(GTK_OBJECT(setup_glade_readme));
-#endif
+		GLADE_XML_UNREF(setup_glade_readme);
         setup_glade_readme = NULL;
         /*
          * re-enable the 'view readme buttons...all 3 of them since we don't
@@ -497,11 +491,7 @@ void setup_destroy_license_slot( GtkWidget* w, gpointer data )
     widget = glade_xml_get_widget(setup_glade_license, "license_dialog");
     gtk_widget_hide(widget);
     cur_state = SETUP_EXIT;
-#ifdef ENABLE_GTK2
-    g_object_unref(G_OBJECT(setup_glade_license));
-#else
-    gtk_object_unref(GTK_OBJECT(setup_glade_license));
-#endif
+	GLADE_XML_UNREF(setup_glade_license);
 }
 
 void setup_button_warning_continue_slot( GtkWidget* widget, gpointer func_data )
