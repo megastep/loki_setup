@@ -46,6 +46,7 @@ AC_CHECK_HEADERS(libgen.h)
 AC_CHECK_HEADERS(pty.h)
 AC_CHECK_HEADERS(sys/ptms.h)
 AC_CHECK_HEADERS(sys/stropts.h)
+AC_CHECK_HEADERS(selinux/selinux.h)
 AC_CHECK_HEADERS(getopt.h)
 AC_CHECK_FILES(/dev/ptmx)
 AC_CHECK_FILES(/dev/pts)
@@ -202,6 +203,7 @@ AC_CHECK_LIB(gnugetopt, getopt_long, LIBS="$LIBS $BSTATIC -lgnugetopt")
 AC_CHECK_FUNCS(getopt_long)
 
 AC_CHECK_LIB(util, forkpty, LIBUTIL="-lutil"; LIBS="$LIBS -lutil")
+AC_CHECK_LIB(selinux, is_selinux_enabled, LIBS="$LIBS $BSTATIC -lselinux")
 AC_CHECK_FUNCS(openpty)
 
 SETUPDB_NAME=loki_setupdb

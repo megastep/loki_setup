@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.78 2006-03-07 02:02:26 megastep Exp $ */
+/* $Id: main.c,v 1.79 2006-03-08 02:14:12 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -44,6 +44,10 @@ Modifications by Borland/Inprise Corp.:
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
+#endif
+
+#ifdef HAVE_SELINUX_SELINUX_H
+#include <selinux/selinux.h>
 #endif
 
 /* Global options */
@@ -308,9 +312,13 @@ int main(int argc, char **argv)
 
 #ifdef __linux
 	/* See if we have a SELinux environment */
+# ifdef HAVE_SELINUX_SELINUX_H
+	have_selinux = is_selinux_enabled();
+# else
 	if ( !access("/usr/bin/chcon", X_OK) && !access("/usr/sbin/getenforce", X_OK) ) {
 		have_selinux = 1;
 	}
+# endif
 #endif
 
     /* Run the little state machine */

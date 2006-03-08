@@ -2,7 +2,7 @@
  * Check and Rescue Tool for Loki Setup packages. Verifies the consistency of the files,
  * and optionally restores them from the original installation medium.
  *
- * $Id: check.c,v 1.15 2006-03-07 19:30:38 megastep Exp $
+ * $Id: check.c,v 1.16 2006-03-08 02:14:12 megastep Exp $
  */
 
 #include <stdlib.h>
@@ -25,6 +25,10 @@
 #include "setupdb.h"
 #include "install.h"
 #include "copy.h"
+
+#ifdef HAVE_SELINUX_SELINUX_H
+#include <selinux/selinux.h>
+#endif
 
 #undef PACKAGE
 #define PACKAGE "loki-uninstall"
@@ -414,9 +418,13 @@ int main(int argc, char *argv[])
 
 #ifdef __linux
 	/* See if we have a SELinux environment */
+# ifdef HAVE_SELINUX_SELINUX_H
+	have_selinux = is_selinux_enabled();
+# else
 	if ( !access("/usr/bin/chcon", X_OK) && !access("/usr/sbin/getenforce", X_OK) ) {
 		have_selinux = 1;
 	}
+# endif
 #endif
 
 	if ( argc < 2 ) {

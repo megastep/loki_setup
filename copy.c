@@ -88,6 +88,11 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <glob.h>
+#ifdef HAVE_SELINUX_SELINUX_H
+#  include <selinux/selinux.h>
+#  include <selinux/context.h>
+#endif
+
 
 #include "file.h"
 #include "copy.h"
@@ -385,7 +390,21 @@ ssize_t copy_file(install_info *info, const char *cdrom, const char *path, const
 		}
 #ifdef __linux
 		if ( se_context && have_selinux ) {
+# ifdef HAVE_SELINUX_SELINUX_H
+			/* Use the selinux library */
+			context_t cont = context_new(se_context);
+			if ( cont ) {
+				security_context_t sec = context_str(cont);
+				if ( setfilecon(final, sec) ) {
+					log_warning(_("Failed to change SELinux context for file '%s'"), base);
+				}
+				context_free(cont);
+			} else {
+				log_warning(_("Invalid SELinux context '%s' for file '%s'"), se_context, base);
+			}
+# else
 			run_command(info, "chcon", se_context, final, 0);
+# endif
 		}
 #endif
 		if ( md5 ) { /* Verify the output file */
