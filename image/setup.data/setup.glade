@@ -1203,7 +1203,7 @@
 		<handler>setup_button_exit_slot</handler>
 		<last_modification_time>Tue, 14 Sep 1999 22:58:23 GMT</last_modification_time>
 	      </signal>
-	      <label>_Exit</label>
+	      <label>_Quit</label>
 	      <relief>GTK_RELIEF_NORMAL</relief>
 	    </widget>
 
@@ -1467,7 +1467,7 @@
 		<handler>setup_button_abort_slot</handler>
 		<last_modification_time>Wed, 06 Feb 2002 01:32:49 GMT</last_modification_time>
 	      </signal>
-	      <label>_Exit</label>
+	      <label>_Quit</label>
 	      <relief>GTK_RELIEF_NORMAL</relief>
 	    </widget>
 	  </widget>
@@ -1732,7 +1732,7 @@
 		<handler>setup_button_exit_slot</handler>
 		<last_modification_time>Tue, 14 Sep 1999 22:58:23 GMT</last_modification_time>
 	      </signal>
-	      <label>_Exit</label>
+	      <label>_Quit</label>
 	      <relief>GTK_RELIEF_NORMAL</relief>
 	    </widget>
 
