@@ -541,7 +541,7 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
                 char *fsname = strdup(mnt.mnt_special);
                 char *dir = strdup(mnt.mnt_mountp);
                 if ( !is_fs_mounted(fsname)) {
-                    if ( ! run_command(NULL, MOUNT_PATH, fsname, 1) ) {
+                    if ( ! run_command(NULL, MOUNT_PATH, fsname, NULL, 1) ) {
                         add_mounted_entry(fsname, dir);
                         log_normal(_("Mounted device %s"), fsname);
                     }
