@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.79 2006-03-08 02:14:12 megastep Exp $ */
+/* $Id: main.c,v 1.80 2006-03-09 20:29:56 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -370,8 +370,8 @@ int main(int argc, char **argv)
 					state = SETUP_EXIT;
 					continue;
 				}
-				if ( info->options.reinstalling ) {
-					if ( UI.prompt(_("Warning: You are about to reinstall\non top of an existing installation. Continue?\n"), 
+				if ( info->options.reinstalling )  {
+					if ( GetProductReinstallNoWarning(info) || UI.prompt(_("Warning: You are about to reinstall\non top of an existing installation. Continue?\n"), 
 								   RESPONSE_YES) == RESPONSE_YES ) {
 						/* Restore the initial environment */
 						loki_put_envvars(info->product);

@@ -262,6 +262,7 @@ extern int         GetProductRequireRoot(install_info *info);
 extern int         GetProductAllowsExpress(install_info *info);
 extern int         GetProductInstallOnce(install_info *info);
 extern int         GetProductReinstall(install_info *info);
+extern int         GetProductReinstallNoWarning(install_info *info);
 extern int         GetReinstallNode(install_info *info, xmlNodePtr node);
 extern int         GetProductIsAppBundle(install_info *info);
 extern int         GetProductSplashPosition(install_info *info);

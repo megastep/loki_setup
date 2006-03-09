@@ -1,6 +1,6 @@
 #define TRACE
 /*
- *  $Id: util.c,v 1.5 2002-12-07 00:57:32 megastep Exp $
+ *  $Id: util.c,v 1.6 2006-03-09 20:29:56 megastep Exp $
  *
  *  util.c
  *
@@ -61,7 +61,7 @@ DIALOG_STATE dialog_state;
 DIALOG_VARS dialog_vars;
 int defaultno = FALSE;
 int screen_initialized = 0;
-static FILE *my_output;		/* prefer to stdout, to support --stdout */
+static FILE *my_output = NULL;		/* prefer to stdout, to support --stdout */
 
 #ifdef HAVE_COLOR
 /* use colors by default? */
@@ -205,7 +205,10 @@ dialog_clear(void)
 static int
 my_putc(int ch)
 {
-    return fputc(ch, my_output);
+    if (! my_output)
+        return EOF;
+    else
+        return fputc(ch, my_output);
 }
 #endif
 

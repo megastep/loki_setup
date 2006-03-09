@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.159 2006-03-07 02:02:26 megastep Exp $ */
+/* $Id: install.c,v 1.160 2006-03-09 20:29:56 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -710,6 +710,15 @@ int GetProductReinstall(install_info *info)
 	return ret;
 }
 
+int GetProductReinstallNoWarning(install_info *info)
+{
+	int ret;
+	char *str = (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "reinstallnowarning");
+	ret = str && (*str=='t' || *str=='y');
+	xmlFree(str);
+	return ret;
+}
+
 int GetReinstallNode(install_info *info, xmlNodePtr node)
 {
 	int ret = 1; /* Default to yes */
@@ -892,7 +901,10 @@ install_info *create_install(const char *configfile,
         strncpy(info->install_path, pinfo->root, sizeof(info->install_path));
 
 		if ( GetProductReinstall(info) )
+                {
 			info->options.reinstalling = 1;
+                        disable_install_path = 0;
+                }
     }
 
     /* Handle component stuff */
@@ -2319,7 +2331,10 @@ install_state launch_game(install_info *info)
 
     if ( *info->play_binary ) {
         snprintf(cmd, PATH_MAX, "%s %s", info->play_binary, info->args);
-		system(cmd);
+        if (fork() == 0)
+        {
+                exit(system(cmd));
+        }
     }
     return SETUP_EXIT;
 }
