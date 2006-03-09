@@ -877,6 +877,12 @@ int match_arch(install_info *info, const char *wanted)
     if ( wanted && (strcmp(wanted, "any") != 0) ) {
         int matched_arch = 0;
         char *space, *copy;
+		int reverse = 0;
+
+		if ( wanted[0] == '!' ) { /* Negate the end result */
+			reverse = 1;
+			wanted ++;
+		}
 
         copy = strdup(wanted);
         wanted = copy;
@@ -893,6 +899,10 @@ int match_arch(install_info *info, const char *wanted)
             matched_arch = 1;
         }
         free(copy);
+
+		if ( reverse )
+			matched_arch = !matched_arch;
+
         return matched_arch;
     } else {
         return 1;
@@ -901,9 +911,21 @@ int match_arch(install_info *info, const char *wanted)
 
 int match_libc(install_info *info, const char *wanted)
 {
-    if ( wanted && ((strcmp(wanted, "any") != 0) &&
-                    (strcmp(wanted, info->libc) != 0)) ) {
-        return 0;
+    if ( wanted && ((strcmp(wanted, "any") != 0) ) )  {
+		int match = 1;
+		int reverse = 0;
+
+		if ( wanted[0] == '!' ) { /* Negate the end result */
+			reverse = 1;
+			wanted ++;
+		}
+
+		if (strcmp(wanted, info->libc) != 0) {
+			match = 0;
+		}
+		if ( reverse )
+			match = !match;
+		return match;
     } else {
         return 1;
     }
@@ -916,19 +938,19 @@ static int match_versions(const char *str, int distro_maj, int distro_min)
 
     ass = sscanf(str, "%d.%d-%19s", &maj, &min, policy);
     if ( !strcmp(policy, "up")) { 
-	if ((distro_maj < maj) || ((distro_maj == maj) && (distro_min < min))) {
-	    match = 0;
-	}
+		if ((distro_maj < maj) || ((distro_maj == maj) && (distro_min < min))) {
+			match = 0;
+		}
     } else if (!strcmp(policy, "major")) {
-	if ( distro_maj != maj ) {
-	    match = 0;
-	}
+		if ( distro_maj != maj ) {
+			match = 0;
+		}
     } else if (!strcmp(policy, "exact")) {
-	if ( (distro_maj != maj) || (distro_min != min) ) {
-	    match = 0;
-	}
+		if ( (distro_maj != maj) || (distro_min != min) ) {
+			match = 0;
+		}
     } else {
-	log_fatal(_("Invalid matching policy: %s"), policy);
+		log_fatal(_("Invalid matching policy: %s"), policy);
     }
     return match;
 }
@@ -938,6 +960,12 @@ int match_distro(install_info *info, const char *wanted)
 	int match = 1;
 
 	if ( wanted && strcmp(wanted, "any") ) {
+		int reverse = 0;
+
+		if ( wanted[0] == '!' ) { /* Negate the end result */
+			reverse = 1;
+			wanted ++;
+		}
 		if ( info->distro != DISTRO_NONE ) {
 			char *dup = strdup(wanted), *ptr;
 			/* If necesary, separate the version number */
@@ -965,6 +993,10 @@ int match_distro(install_info *info, const char *wanted)
 			    match = match_versions(ptr, info->distro_maj, info->distro_min);
 			}
 			free(dup);
+
+			if ( reverse ) {
+				match = !match;
+			}
 		} else {
 			match = 0;
 		}

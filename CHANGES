@@ -1,4 +1,6 @@
 Current:
+Stephane Peter (Codehost) = Thu Mar  9 11:09:13 PST 2006
+ * Allow reverse matching on distro, arch and glibc tags with ! prefix.
 Stephane Peter (Codehost) - Mon Mar  6 18:00:40 PST 2006
  * Added support for SELinux context attributes for files
  * GTK2 cleanups and fixes to use libxml2

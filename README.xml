@@ -615,11 +615,13 @@ There are several required attributes of the binary element:
 
  arch       "any" is synonymous with the current architecture. You can also
             use this attribute to force a precise architecture, for example
-            "ppc" or "sparc64".
+            "ppc" or "sparc64". Matching can be negated with a leading !,
+            for instance "!x86".
 
  libc       "any" is synonymous with the current libc version. This can
             also be used to force a libc version for the binary, i.e
-            "glibc-2.0" or "glibc-2.1".
+            "glibc-2.0" or "glibc-2.1". Matching can be negated with a
+            leading !, for example "!glibc-2.0".
 
 There are several optional attributes of the binary element:
 
@@ -721,11 +723,13 @@ There are several optional attributes of the files element:
 
  arch       "any" is synonymous with the current architecture. You can also
             use this attribute to force a precise architecture, for example
-            "ppc" or "sparc64".
+            "ppc" or "sparc64". Matching can be negated with a leading !,
+            for instance "!x86".
 
  libc       "any" is synonymous with the current libc version. This can
             also be used to force a libc version for the binary, i.e
-            "glibc-2.0" or "glibc-2.1".
+            "glibc-2.0" or "glibc-2.1". Matching can be negated with a
+            leading !, for example "!glibc-2.0".
 
  distro     Files are only installed with the specified OS distribution.
             Look at the end of this file for a list of possible values.
@@ -878,7 +882,7 @@ It is now possible to have options or components specific to a specific brand
 of the operating system (i.e. the Linux distribution). Specifications have
 the form:
 
-   distribution-major.minor-policy
+   [!]distribution-major.minor-policy
 
 'major' and 'minor' are both optional and describe the minimal release numbers
 for the detected distribution. If specified, versions at least this recent
@@ -888,6 +892,9 @@ will match.
 version, i.e. if you don't necesarily want to match all later releases of a
 distribution. Possible values are 'up' (the default), 'major' (includes all
 versions of the same major number), and 'exact' (for the exact specification).
+
+The optional leading ! character is used to negate the result of the matching.
+For example, to match all non-Linux systems, use "!linux".
 
 Currently, the recognized distribution names are :
 
