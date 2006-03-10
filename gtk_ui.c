@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.116 2006-03-10 19:50:21 megastep Exp $
+   $Id: gtk_ui.c,v 1.117 2006-03-10 20:42:17 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1161,16 +1161,16 @@ static void init_install_path(void)
                         return;
                     }
                     expand_home(cur_info, p, temp_buf);
-
-		    // install_paths[last one - 1] --> home directory
-		    // install_paths[ last one ] ----> NULL terminate
-		    if (i >= MAX_INSTALL_PATHS - 2) {
+					
+					// install_paths[last one - 1] --> home directory
+					// install_paths[ last one ] ----> NULL terminate
+					if (i >= MAX_INSTALL_PATHS - 2) {
                         fprintf(stderr, 
-				_("Error: maximum of %d install_path entries exceeded\n"),
-				MAX_INSTALL_PATHS -2);
-			free (temp_buf);
-			//return;
-			goto enough_of_config;
+								_("Error: maximum of %d install_path entries exceeded\n"),
+								MAX_INSTALL_PATHS -2);
+						free (temp_buf);
+						//return;
+						goto enough_of_config;
                     }
 
                     install_paths[i++] = temp_buf;
@@ -1220,7 +1220,7 @@ enough_of_config:
 
     /* cheat. Make the first entry the default for IsReadyToInstall(). */
     if(cur_info->install_path != list->data)
-	strncpy(cur_info->install_path, list->data, sizeof (cur_info->install_path));
+		strncpy(cur_info->install_path, list->data, sizeof (cur_info->install_path));
 
     gtk_combo_set_use_arrows( GTK_COMBO(widget), 0);
 }
@@ -1260,7 +1260,7 @@ static void init_man_path(void)
             else
                 *pc = '\0';
 
-            if( len && ((sc=strcmp( pc0, cur_info->symlinks_path)) != 0) && (*pc0 != '.') ) {
+            if( len && ((sc=strcmp( pc0, cur_info->man_path)) != 0) && (*pc0 != '.') ) {
 				if ((!str_in_g_list(pc0, list)) && (access(pc0, W_OK) == 0)) {
 					list = g_list_append( list, pc0 );
 				}
@@ -1826,9 +1826,9 @@ static install_state gtkui_license(install_info *info)
 static install_state gtkui_readme(install_info *info)
 {
     if ( GetProductAllowsExpress(info) ) {
-	cur_state = SETUP_CLASS;
+		cur_state = SETUP_CLASS;
     } else {
-	cur_state = SETUP_OPTIONS;
+		cur_state = SETUP_OPTIONS;
     }
     return cur_state;
 }

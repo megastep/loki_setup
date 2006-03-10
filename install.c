@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.161 2006-03-10 19:50:21 megastep Exp $ */
+/* $Id: install.c,v 1.162 2006-03-10 20:42:17 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1243,18 +1243,21 @@ void set_installpath(install_info *info, const char *path, int append_slash)
         }
     }
     expand_home(info, path, info->install_path);
+	log_debug("Setting install path to '%s'\n", info->symlinks_path);
 }
 
 /* Function to set the symlink path string, expanding home directories */
 void set_symlinkspath(install_info *info, const char *path)
 {
     expand_home(info, path, info->symlinks_path);
+	log_debug("Setting symlinks path to '%s'\n", info->symlinks_path);
 }
 
 /* Function to set the man path string, expanding home directories */
 void set_manpath(install_info *info, const char *path)
 {
     expand_home(info, path, info->man_path);
+	log_debug("Setting man path to '%s'\n", info->man_path);
 }
 
 /* Mark/unmark an option node for install, optionally recursing */
