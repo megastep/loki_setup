@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.160 2006-03-09 20:29:56 megastep Exp $ */
+/* $Id: install.c,v 1.161 2006-03-10 19:50:21 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -900,11 +900,9 @@ install_info *create_install(const char *configfile,
         disable_install_path = 1;
         strncpy(info->install_path, pinfo->root, sizeof(info->install_path));
 
-		if ( GetProductReinstall(info) )
-                {
+		if ( GetProductReinstall(info) )  {
 			info->options.reinstalling = 1;
-                        disable_install_path = 0;
-                }
+		}
     }
 
     /* Handle component stuff */

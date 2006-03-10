@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.115 2006-03-08 18:58:53 megastep Exp $
+   $Id: gtk_ui.c,v 1.116 2006-03-10 19:50:21 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1097,7 +1097,7 @@ static void check_program_to_start(install_info *info)
                     return;
                 }
 
-		g_strstrip(content);
+				g_strstrip(content);
                 for (p = content, q = info->play_binary; (q - info->play_binary) < (PATH_MAX - 20) && *p; )
                 {
                     if (memcmp(p, "$INSTALLDIR", 11) == 0) {
