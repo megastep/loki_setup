@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.162 2006-03-10 20:42:17 megastep Exp $ */
+/* $Id: install.c,v 1.163 2006-03-10 22:57:03 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1167,7 +1167,11 @@ void add_bin_entry(install_info *info, struct option_elem *comp, struct file_ele
 					info->installed_symlink = symlink;
 					if ( !strcmp(play, "yes") || 
 					     (!strcmp(play, "gui") && UI.is_gui) ) {
-					  snprintf(info->play_binary, PATH_MAX, "%s/%s", info->symlinks_path, symlink);
+						if (info->symlinks_path && *info->symlinks_path ) {
+							snprintf(info->play_binary, PATH_MAX, "%s/%s", info->symlinks_path, symlink);
+						} else {
+							strncpy(info->play_binary, symlink, PATH_MAX);
+						}
 					}
 				} else {
 					log_fatal(_("There can be only one binary with a 'play' attribute"));
@@ -1177,7 +1181,11 @@ void add_bin_entry(install_info *info, struct option_elem *comp, struct file_ele
 			}
         } else if ( symlink && !info->installed_symlink ) { /* Defaults to 'yes' */
 			info->installed_symlink = symlink;
-			snprintf(info->play_binary, PATH_MAX, "%s/%s", info->symlinks_path, symlink);
+			if (info->symlinks_path && *info->symlinks_path ) {
+				snprintf(info->play_binary, PATH_MAX, "%s/%s", info->symlinks_path, symlink);
+			} else {
+				strncpy(info->play_binary, symlink, PATH_MAX);
+			}
 		}
     } else {
         log_fatal(_("Out of memory"));
@@ -2332,9 +2340,8 @@ install_state launch_game(install_info *info)
 
     if ( *info->play_binary ) {
         snprintf(cmd, PATH_MAX, "%s %s", info->play_binary, info->args);
-        if (fork() == 0)
-        {
-                exit(system(cmd));
+        if (fork() == 0) {
+			exit(system(cmd));
         }
     }
     return SETUP_EXIT;
