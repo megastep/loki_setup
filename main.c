@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.80 2006-03-09 20:29:56 megastep Exp $ */
+/* $Id: main.c,v 1.81 2006-03-13 20:38:08 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -433,46 +433,53 @@ int main(int argc, char **argv)
 	    case SETUP_CLASS:
 			state = UI.pick_class(info);
 			break;
-            case SETUP_LICENSE:
-                state = UI.license(info);
-                break;
-            case SETUP_README:
-                state = UI.readme(info);
-                break;
-            case SETUP_OPTIONS:
-                state = UI.setup(info);
-                break;
-            case SETUP_INSTALL:
-                install_preinstall(info);
-                state = install(info, UI.update);
-                install_postinstall(info);
-                break;
-            case SETUP_WEBSITE:
-                state = UI.website(info);
-                break;
-            case SETUP_COMPLETE:
-                state = UI.complete(info);
-				/* Check for a post-install message */
-				str = GetProductPostInstallMsg(info);
-				if ( str ) {
-					UI.prompt(str, RESPONSE_OK);
-				}
-                break;
-            case SETUP_PLAY:
-				if ( UI.shutdown ) 
-					UI.shutdown(info);
-                state = launch_game(info);
-                break;
-            case SETUP_ABORT:
-                abort_install();
-                break;
-            case SETUP_EXIT:
-                /* Optional cleanup */
-				if ( UI.exit ) {
-					UI.exit(info);
-				}
-				get_out = 1;
-                break;
+		case SETUP_LICENSE:
+			state = UI.license(info);
+			break;
+		case SETUP_README:
+			state = UI.readme(info);
+			break;
+		case SETUP_OPTIONS:
+			state = UI.setup(info);
+			break;
+		case SETUP_INSTALL:
+			if ( info->install_path[0] ) {
+				install_preinstall(info);
+				state = install(info, UI.update);
+				install_postinstall(info);
+			} else {
+				UI.prompt(_("No installation path was specified. Aborting."), RESPONSE_OK);
+				state = SETUP_ABORT;
+			}
+			break;
+		case SETUP_WEBSITE:
+			state = UI.website(info);
+			break;
+		case SETUP_COMPLETE:
+			state = UI.complete(info);
+			/* Check for a post-install message */
+			str = GetProductPostInstallMsg(info);
+			if ( str ) {
+				UI.prompt(str, RESPONSE_OK);
+			}
+			break;
+		case SETUP_PLAY:
+			if ( UI.shutdown ) 
+				UI.shutdown(info);
+			state = launch_game(info);
+			break;
+		case SETUP_ABORT:
+			abort_install();
+			break;
+		case SETUP_EXIT:
+			/* Optional cleanup */
+			if ( UI.exit ) {
+				UI.exit(info);
+			}
+			get_out = 1;
+			break;
+		default:
+			break;
         }
     }
 

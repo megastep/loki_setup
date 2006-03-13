@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.117 2006-03-10 20:42:17 megastep Exp $
+   $Id: gtk_ui.c,v 1.118 2006-03-13 20:38:08 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1862,6 +1862,11 @@ static install_state gtkui_setup(install_info *info)
 	/* Make sure the window is being shown */
     gtk_widget_show(window);
 
+	/* Set paths regardless of whether we are in express or not */
+    init_install_path();
+    init_binary_path();
+	init_man_path();
+
     if ( express_setup ) {
 		GtkWidget *notebook = glade_xml_get_widget(setup_glade, "setup_notebook");
 		gtk_notebook_set_page(GTK_NOTEBOOK(notebook), COPY_PAGE);
@@ -1914,9 +1919,6 @@ static install_state gtkui_setup(install_info *info)
 		}
 		node = node->next;
     }
-    init_install_path();
-    init_binary_path();
-	init_man_path();
     update_size();
     update_space();
     init_menuitems_option(info);
