@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.81 2006-03-13 20:38:08 megastep Exp $ */
+/* $Id: main.c,v 1.82 2006-03-14 01:33:57 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -342,6 +342,7 @@ int main(int argc, char **argv)
                 state = UI.init(info,argc,argv, enabled_options != NULL);
                 if ( state == SETUP_ABORT ) {
                     exit_status = 3;
+					continue;
                 }
 				/* Check if getcwd() works now */
 				if ( getcwd(buf, sizeof(buf)) == NULL ) {
