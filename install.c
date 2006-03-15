@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.163 2006-03-10 22:57:03 megastep Exp $ */
+/* $Id: install.c,v 1.164 2006-03-15 20:40:46 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -266,6 +266,17 @@ int GetProductAllowsExpress(install_info *info)
 {
 	int ret = 0;
     char *str = (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "express");
+    if ( str && !strcasecmp(str, "yes") ) {
+        ret = 1;
+    }
+	xmlFree(str);
+    return ret;
+}
+
+int GetProductUseFork(install_info *info)
+{
+	int ret = 0;
+    char *str = (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "fork");
     if ( str && !strcasecmp(str, "yes") ) {
         ret = 1;
     }
@@ -2340,9 +2351,13 @@ install_state launch_game(install_info *info)
 
     if ( *info->play_binary ) {
         snprintf(cmd, PATH_MAX, "%s %s", info->play_binary, info->args);
-        if (fork() == 0) {
-			exit(system(cmd));
-        }
+		if ( GetProductUseFork(info) ) {
+			if (fork() == 0) {
+				exit(system(cmd));
+			}
+		} else {
+			system(cmd);
+		}
     }
     return SETUP_EXIT;
 }

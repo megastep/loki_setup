@@ -146,6 +146,11 @@ There are several optional attributes of the install element:
 
                 This setting has no effect if nobinaries is "yes".
 
+ fork       If set to "yes", and a binary can be started upon successful installation,
+            setup will fork() itself, allowing the installer to exit as the program is
+            running. Note: this may cause problems removing setup binaries within setup.sh
+            on some platforms.
+
  meta       When this attribute is set to "yes", then setup will act as
             a meta-installer, i.e. it will allow the user to select a
             product and set-up will respawn itself for the selected

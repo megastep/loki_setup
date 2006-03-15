@@ -115,7 +115,7 @@ int exec_program(const char *prog, char *argv[])
 	  _exit(1);
 	case -1:
 		perror("pty_fork");
-		break;
+		return -1;
 	default:
 /* 	  fprintf(stderr,"Started program %s, fd = %d, PID = %d\n", prog, fd, child); */
 	  break;
@@ -129,8 +129,8 @@ void xsu_perform()
 	Some code from gnomesu, thanks to Hongli Lai <hongli@telekabel.nl> 
 */
 	guint timeout;
-	gchar *password_return, 
-		  *username=gtk_entry_get_text (GTK_ENTRY (gtk_user_textbox)),
+	gchar *password_return;
+	const gchar *username=gtk_entry_get_text (GTK_ENTRY (gtk_user_textbox)),
 		  *password=gtk_entry_get_text (GTK_ENTRY (gtk_password_textbox)),
 		  *command=gtk_entry_get_text (GTK_ENTRY (gtk_command_textbox));
 	gchar *buffer;
@@ -174,7 +174,7 @@ void xsu_perform()
 	
 	/* su - username -c command */
 	argv[0] = su_command;
-	argv[1] = username;
+	argv[1] = (char *) username;
 	argv[2] = "-c";
 	argv[3] = buffer;
 	argv[4] = NULL;
@@ -256,7 +256,7 @@ void xsu_perform()
 	}
 	memset (password_return, 0, strlen (password_return));
 	g_free (password_return); password_return = NULL;
-	g_free (password); password = NULL;
+	password = NULL;
 
 	//gtk_main();
 }
