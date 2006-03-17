@@ -33,10 +33,13 @@
 #include <locale.h>
 #include <signal.h>
 #include <ctype.h>
+#include <termios.h>
 
 #include "xsu.h"
 
 static int term = -1;
+static FILE *fterm = NULL;
+static pid_t pid = 0;
 
 static gint
 exec_su_failed (gpointer user_data)
@@ -74,52 +77,79 @@ static SigFunc *Signal(int signo, SigFunc *func)
 void sighandler(int sig)
 {
 #ifdef DEBUG
-  fprintf(stderr, "Signal %d received, term = %d.\n", sig, term);
+	fprintf(stderr, "Signal %d received, term = %d.\n", sig, term);
 #endif
-  if ( sig == SIGCHLD && term > 0 ) {
-    int status;
-    pid_t pid;
-    pid = wait(&status);
-    if ( WIFEXITED(status) ) {
+	if ( sig == SIGCHLD && term > 0 ) {
+		int status;
+		pid_t pid;
+		pid = wait(&status);
+		if ( WIFEXITED(status) ) {
 #ifdef DEBUG
-      fprintf(stderr,"Child %d returned\n", pid);
+			fprintf(stderr,"Child %d returned\n", pid);
 #endif
-      gtk_exit(WEXITSTATUS(status));
-    } else if ( WIFSIGNALED(status) ) { 
+			gtk_exit(WEXITSTATUS(status));
+		} else if ( WIFSIGNALED(status) ) { 
 #ifdef DEBUG
-      fprintf(stderr,"Xsu: subprocess %d has died from signal %d\n", pid, WTERMSIG(status));
+			fprintf(stderr,"Xsu: subprocess %d has died from signal %d\n", pid, WTERMSIG(status));
 #endif
-      gtk_exit(EXIT_ERROR);
-    }
-    close(term); term = -1;
-
-    while (gtk_events_pending ())
-      gtk_main_iteration ();
-    gtk_main_quit ();
-  }
+			gtk_exit(EXIT_ERROR);
+		}
+		close(term); term = -1;
+		
+		while (gtk_events_pending ())
+			gtk_main_iteration ();
+		gtk_main_quit ();
+	}
 }
 
 /* Execute an external command on a pty without going through system() */
-int exec_program(const char *prog, char *argv[])
+int exec_program(const char *prog, char *argv[], pid_t *pid)
 {
 	int  fd = -1;
 	pid_t child;
 	char slavename[PATH_MAX];
+	struct termios *stdin_termios = NULL;
+    struct winsize stdin_winsize;
+	int havewin = 0;
+
+	if (isatty(STDIN_FILENO))
+		havewin = ioctl(STDIN_FILENO, TIOCGWINSZ, &stdin_winsize) != -1;
+
+	if (isatty(STDIN_FILENO) ) {
+		stdin_termios = malloc(sizeof(struct termios));
+		if ( tcgetattr(STDIN_FILENO, stdin_termios) < 0) {
+			perror("tcgetattr");
+			free(stdin_termios);
+			stdin_termios = NULL;
+		} else {
+			/* stdin_termios->c_lflag |= ICANON;
+			   stdin_termios->c_oflag &= ~ONLCR; */
+			stdin_termios->c_iflag &= ~(ISTRIP | IGNCR | INLCR | IXOFF | ECHO);
+			stdin_termios->c_iflag |= (ICRNL | IGNPAR | BRKINT | IXON);
+			stdin_termios->c_cflag &= ~CSIZE;
+			stdin_termios->c_cflag |= CREAD | CS8;
+		}
+	}
 
 	Signal(SIGCHLD, sighandler);
 
-	switch( child = pty_fork(&fd, slavename, sizeof(slavename), NULL, NULL) ) {
+	switch( child = pty_fork(&fd, slavename, sizeof(slavename), stdin_termios, havewin ? &stdin_winsize : NULL) ) {
 	case 0:
-	  execvp(prog, argv);
-	  fprintf(stderr, "execv(%s): %s\n", prog, strerror(errno));
-	  _exit(1);
+		execvp(prog, argv);
+		fprintf(stderr, "execv(%s): %s\n", prog, strerror(errno));
+		_exit(1);
 	case -1:
 		perror("pty_fork");
 		return -1;
 	default:
-/* 	  fprintf(stderr,"Started program %s, fd = %d, PID = %d\n", prog, fd, child); */
-	  break;
+#ifdef DEBUG
+		fprintf(stderr,"Started program %s, fd = %d (%s), PID = %d\n", prog, fd, slavename, child);
+#endif
+		if (pid)
+			*pid = child;
+		break;
 	}
+	free(stdin_termios);
 	return fd;
 }
 
@@ -129,12 +159,12 @@ void xsu_perform()
 	Some code from gnomesu, thanks to Hongli Lai <hongli@telekabel.nl> 
 */
 	guint timeout;
-	gchar *password_return;
+	gchar *password= g_strdup(gtk_entry_get_text (GTK_ENTRY (gtk_password_textbox)));
+
 	const gchar *username=gtk_entry_get_text (GTK_ENTRY (gtk_user_textbox)),
-		  *password=gtk_entry_get_text (GTK_ENTRY (gtk_password_textbox)),
 		  *command=gtk_entry_get_text (GTK_ENTRY (gtk_command_textbox));
 	gchar *buffer;
-	char *argv[6], c;
+	char *argv[6], c, line[120];
 	fd_set fds;
 	struct timeval delay = { 0, 10*1000 }; /* 10 ms wait */
 
@@ -149,6 +179,10 @@ void xsu_perform()
 	gtk_entry_set_text(GTK_ENTRY(gtk_password_textbox),"");
 	gtk_widget_hide (gtk_xsu_window);
 	
+    while( gtk_events_pending() ) {
+        gtk_main_iteration();
+    }
+
 	if (password == NULL)
 		return;
 
@@ -178,12 +212,12 @@ void xsu_perform()
 	argv[2] = "-c";
 	argv[3] = buffer;
 	argv[4] = NULL;
-	term = exec_program(su_command, argv);
+	term = exec_program(su_command, argv, &pid);
 	/* We are not a gnome-application anymore but under control of su */
 
 	if ( term < 0 ) {
-	  perror ("Could not exec");
-	  gtk_exit (EXIT_ERROR);
+		perror ("Could not exec");
+		gtk_exit (EXIT_ERROR);
 	}
 
 	timeout = gtk_timeout_add (SU_DELAY, exec_su_failed, NULL);
@@ -237,28 +271,38 @@ void xsu_perform()
 		FD_ZERO(&fds);
 		FD_SET(term, &fds);
 		if ( select(term+1, &fds, NULL, NULL, &delay) ) {
-		    if ( read(term, &c, 1) <= 0 )
-			break;
+		    if ( read(term, &c, 1) <= 0 ) {
+#ifdef DEBUG
+				fprintf(stderr, "'%c'", c);
+#endif				
+				break;
+			}
 		} else
 			break;
 	}
 
-	password_return = g_strdup_printf ("%s\n", password);
+	fterm = fdopen(term, "w+");
+	setbuf(fterm, NULL);
+
 #ifdef DEBUG
- 	fprintf(stderr,"Sending password\n");
+ 	fprintf(stderr,"Sending password: '%s'\n", password);
 #endif
 /* 0.2.2 *
 	Minor security fix, clear the password from memory
 */  
-	memset (password, 0, strlen (password));	
-	if ( write(term, password_return, strlen(password_return)) < 0 ) {
-	    perror("write");
-	}
-	memset (password_return, 0, strlen (password_return));
-	g_free (password_return); password_return = NULL;
-	password = NULL;
+   	fprintf(fterm, "%s\n", password);
+	fflush(fterm);
 
-	//gtk_main();
+	/* Clear out all the lines of output, we may want to have an option to show those */
+	while ( !feof(fterm) ) {
+		if ( fgets(line, sizeof(line), fterm) ) {
+#ifdef DEBUG
+			fprintf(stderr,"Read %d chars: %s", strlen(line), line);
+#endif		
+		}
+	}
+	g_free(password);
+	password = NULL;
 }
 
 
@@ -757,9 +801,18 @@ int main (int argc, char *argv[])
 	gtk_widget_show (gtk_xsu_window);
 	gtk_main ();    
 
-	if ( term > 0 )
-	  close(term);
-
+	/* Wait for child to finish */
+	if ( pid ) {
+#ifdef DEBUG
+		printf("Waiting for child %d\n", pid);
+#endif
+		waitpid(pid, NULL, 0);
+	}
+	if ( fterm ) {
+		fclose(fterm);
+	} if ( term > 0 ) {
+		close(term);
+	}
 	g_free(su_command);
 	return 0;
 }

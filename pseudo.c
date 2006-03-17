@@ -1,7 +1,7 @@
 /*
 * libslack - http://libslack.org/
 *
-* Copyright (C) 1999-2001 raf <raf@raf.org>
+* Copyright (C) 1999-2004 raf <raf@raf.org>
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 * or visit http://www.gnu.org/copyleft/gpl.html
 *
-* 20011109 raf <raf@raf.org>
+* 20040102 raf <raf@raf.org>
 */
 
 /*
@@ -52,6 +52,7 @@ I<libslack(pseudo)> - pseudo terminal module
 
 =head1 SYNOPSIS
 
+    #include <slack/std.h>
     #include <slack/pseudo.h>
 
     int pty_open(int *masterfd, int *slavefd, char *slavename, size_t slavenamesize, const struct termios *slave_termios, const struct winsize *slave_winsize);
@@ -105,7 +106,7 @@ attached to a pseudo terminal which is made the controlling terminal.
 
 #ifndef NO_XOPEN_SOURCE
 #ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE 600
+#define _XOPEN_SOURCE 500
 #endif
 #endif
 
@@ -149,9 +150,11 @@ attached to a pseudo terminal which is made the controlling terminal.
 #include <string.h>
 #include <time.h>
 
-#include <unistd.h>
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif
 
-/** End of std.h **/
+#include <unistd.h>
 
 #include <fcntl.h>
 #include <grp.h>
@@ -169,29 +172,33 @@ attached to a pseudo terminal which is made the controlling terminal.
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
-#if defined(HAVE_SYS_PTMS_H) && !defined(__sun)
-#include <sys/ptms.h>
-#endif
 
 #include "pseudo.h"
 
-/* Pty allocated with _getpty gets broken if we do I_PUSH:es to it */
-#if defined(HAVE__GETPTY) || defined(HAVE_OPENPTY)
-#undef HAVE__DEV_PTMX
+#ifndef TEST
+
+/* That's the way it is detected in configure, but how that original code handles it */
+#ifdef HAVE__DEV_PTNX
+#define HAVE_DEV_PTMX
 #endif
 
 #if defined(HAVE__DEV_PTS) && defined(HAVE__DEV_PTC)
-#define HAVE_DEV_PTS_AND_PTC 1
+# define HAVE_DEV_PTS_AND_PTC
+#endif
+
+/* Pty allocated with _getpty gets broken if we do I_PUSH:es to it */
+#if defined(HAVE__GETPTY) || defined(HAVE_OPENPTY)
+#undef HAVE_DEV_PTMX
 #endif
 
 #ifdef HAVE_PTY_H
 #include <pty.h>
 #endif
-#if defined(HAVE__DEV_PTMX) && defined(HAVE_SYS_STROPTS_H)
+#if defined(HAVE_DEV_PTMX) && defined(HAVE_SYS_STROPTS_H)
 #include <sys/stropts.h>
 #endif
 
-#if defined(HAVE_VHANGUP) && !defined(HAVE__DEV_PTMX)
+#if defined(HAVE_VHANGUP) && !defined(HAVE_DEV_PTMX)
 #define USE_VHANGUP
 #endif
 
@@ -203,33 +210,32 @@ attached to a pseudo terminal which is made the controlling terminal.
 #define PATH_TTY "/dev/tty"
 #endif
 
-#define set_errno(errnum) (errno = (errnum), -1)
-
 #ifndef HAVE_STRLCPY
 
 static size_t strlcpy(char *dst, const char *src, size_t size)
 {
-        const char *s = src;
-        char *d = dst;
-        size_t n = size;
-
-        if (n)
-                while (--n && (*d++ = *s++))
-                {}
-
-        if (n == 0)
-        {
-                if (size)
-                        *d = '\0';
-
-                while (*s++)
-                {}
-        }
-
-        return s - src - 1;
+	const char *s = src;
+	char *d = dst;
+	size_t n = size;
+	
+	if (n)
+		while (--n && (*d++ = *s++))
+			{}
+	
+	if (n == 0)  {
+		if (size)
+			*d = '\0';
+		
+		while (*s++)
+			{}
+	}
+	
+	return s - src - 1;
 }
 
 #endif
+
+#define set_errno(errnum) (errno = (errnum), -1)
 
 /*
 
@@ -299,8 +305,264 @@ static int uid2gid(uid_t uid)
 
 int pty_open(int *masterfd, int *slavefd, char *slavename, size_t slavenamesize, const struct termios *slave_termios, const struct winsize *slave_winsize)
 {
+#if defined(HAVE_OPENPTY) || defined(BSD4_4)
 
-#ifdef USE_BSD_PTY
+	/* openpty(3) exists in OSF/1 and some other os'es */
+
+#ifdef HAVE_TTYNAME_R
+	char buf[64], *name = buf;
+	int err;
+#else
+	char *name;
+#endif
+
+	if (!masterfd || !slavefd || !slavename || slavenamesize < 64)
+		return set_errno(EINVAL);
+
+	/* Open the master and slave descriptors, set ownership and permissions */
+
+	if (openpty(masterfd, slavefd, NULL, NULL, NULL) == -1) {
+		perror("openpty");
+		return -1;
+	}
+	/* Retrieve the device name of the slave */
+
+#ifdef HAVE_TTYNAME_R
+	if ((err = ttyname_r(*slavefd, buf, 64)))
+	{
+		close(*masterfd);
+		close(*slavefd);
+		perror("ttyname_r");
+		return set_errno(err);
+	}
+#else
+	if (!(name = ttyname(*slavefd)))
+	{
+		close(*masterfd);
+		close(*slavefd);
+		perror("ttyname");
+		return set_errno(ENOTTY);
+	}
+#endif
+
+	/* Return it to the caller */
+
+	if (strlcpy(slavename, name, slavenamesize) >= slavenamesize)
+	{
+		close(*masterfd);
+		close(*slavefd);
+		return set_errno(ENOSPC);
+	}
+#ifdef DEBUG
+	fprintf(stderr, "Slave terminal is %s\n", slavename);
+#endif
+
+#else /* HAVE_OPENPTY */
+#ifdef HAVE__GETPTY
+
+	/*
+	 * _getpty(3) exists in SGI Irix 4.x, 5.x & 6.x -- it generates more
+	 * pty's automagically when needed
+	 */
+
+	char *slave;
+
+	if (!masterfd || !slavefd || !slavename || slavenamesize < 64)
+		return set_errno(EINVAL);
+
+	/* Open the master descriptor and get the slave's device name */
+
+	if (!(slave = _getpty(masterfd, O_RDWR, 0622, 0))) {
+		perror("_getpty");
+		return -1;
+	}
+
+	/* Return it to the caller */
+
+	if (strlcpy(slavename, name, slavenamesize) >= slavenamesize)
+	{
+		close(*masterfd);
+		return set_errno(ENOSPC);
+	}
+
+	/* Open the slave descriptor */
+
+	if ((*slavefd = open(slavename, O_RDWR | O_NOCTTY)) == -1)
+	{
+		perror("open(slave)");
+		close(*masterfd);
+		return -1;
+	}
+
+#else /* HAVE__GETPTY */
+#if defined(HAVE_DEV_PTMX)
+
+	/*
+	 * This code is used e.g. on Solaris 2.x.  (Note that Solaris 2.3
+	 * also has bsd-style ptys, but they simply do not work.)
+	 */
+
+#ifdef HAVE_PTSNAME_R
+	char buf[64], *name = buf;
+	int err;
+#else
+	char *name;
+#endif
+
+	if (!masterfd || !slavefd || !slavename || slavenamesize < 64)
+		return set_errno(EINVAL);
+
+	/* Open the master descriptor */
+
+	if ((*masterfd = open("/dev/ptmx", O_RDWR | O_NOCTTY)) == -1) {
+		perror("open(/dev/ptmx)");
+		return -1;
+	}
+
+	/* Set slave ownership and permissions to real uid of process */
+
+	if (grantpt(*masterfd) == -1)
+	{
+		perror("grantpt");
+		close(*masterfd);
+		return -1;
+	}
+
+	/* Unlock the slave so it can be opened */
+
+	if (unlockpt(*masterfd) == -1)
+	{
+		perror("unlockpt");
+		close(*masterfd);
+		return -1;
+	}
+
+	/* Retrieve the device name of the slave */
+
+#ifdef HAVE_PTSNAME_R
+	if ((err = ptsname_r(*masterfd, buf, 64)))
+	{
+		perror("ptsname_r");
+		close(*masterfd);
+		return set_errno(err);
+	}
+#else
+	if (!(name = ptsname(*masterfd)))
+	{
+		perror("ptsname");
+		close(*masterfd);
+		return set_errno(ENOTTY);
+	}
+#endif
+
+	/* Return it to the caller */
+
+	if (strlcpy(slavename, name, slavenamesize) >= slavenamesize)
+	{
+		close(*masterfd);
+		return set_errno(ENOSPC);
+	}
+
+	/* Open the slave descriptor */
+
+	if ((*slavefd = open(slavename, O_RDWR | O_NOCTTY)) == -1)
+	{
+		perror("open(slave)");
+		close(*masterfd);
+		return -1;
+	}
+
+	/* Turn the slave into a terminal */
+
+#ifndef HAVE_CYGWIN
+	/*
+	 * Push the appropriate streams modules, as described in Solaris pts(7).
+	 * HP-UX pts(7) doesn't have ttcompat module.
+	 */
+	if (ioctl(*slavefd, I_PUSH, "ptem") == -1)
+	{
+		perror("ioctl(I_PUSH,ptem)");
+		close(*masterfd);
+		close(*slavefd);
+		return -1;
+	}
+
+	if (ioctl(*slavefd, I_PUSH, "ldterm") == -1)
+	{
+		perror("ioctl(I_PUSH,ldterm)");
+		close(*masterfd);
+		close(*slavefd);
+		return -1;
+	}
+
+#ifndef __hpux
+	if (ioctl(*slavefd, I_PUSH, "ttcompat") == -1)
+	{
+		perror("ioctl(I_PUSH,ttcompat)");
+		close(*masterfd);
+		close(*slavefd);
+		return -1;
+	}
+#endif
+#endif
+
+#else /* HAVE_DEV_PTMX */
+#ifdef HAVE_DEV_PTS_AND_PTC
+
+	/* AIX-style pty code */
+
+#ifdef HAVE_TTYNAME_R
+	char buf[64], *name = buf;
+	int err;
+#else
+	char *name;
+#endif
+
+	if (!masterfd || !slavefd || !slavename || slavenamesize < 64)
+		return set_errno(EINVAL);
+
+	/* Open the master descriptor */
+
+	if ((*masterfd = open("/dev/ptc", O_RDWR | O_NOCTTY)) == -1) {
+		perror("open(/dev/ptc)");
+		return -1;
+	}
+	/* Retrieve the device name of the slave */
+
+#ifdef HAVE_TTYNAME_R
+	if ((err = ttyname_r(*masterfd, buf, 64)))
+	{
+		perror("ttyname_r");
+		close(*masterfd);
+		return set_errno(err);
+	}
+#else
+	if (!(name = ttyname(*masterfd)))
+	{
+		perror("ttyname");
+		close(*masterfd);
+		return set_errno(ENOTTY);
+	}
+#endif
+
+	/* Return it to the caller */
+
+	if (strlcpy(slavename, name, slavenamesize) >= slavenamesize)
+	{
+		close(*masterfd);
+		return set_errno(ENOSPC);
+	}
+
+	/* Open the slave descriptor */
+
+	if ((*slavefd = open(name, O_RDWR | O_NOCTTY)) == -1)
+	{
+		perror("open(slave)");
+		close(*masterfd);
+		return -1;
+	}
+
+#else /* HAVE_DEV_PTS_AND_PTC */
 
 	/* BSD-style pty code */
 	const char * const ptymajors = "pqrstuvwxyzabcdefghijklmnoABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -338,6 +600,7 @@ int pty_open(int *masterfd, int *slavefd, char *slavename, size_t slavenamesize,
 
 		if ((*slavefd = open(slavename, O_RDWR | O_NOCTTY)) == -1)
 		{
+			perror("open(slave)");
 			close(*masterfd);
 			return -1;
 		}
@@ -348,272 +611,16 @@ int pty_open(int *masterfd, int *slavefd, char *slavename, size_t slavenamesize,
 	if (!found)
 		return set_errno(ENOENT);
 
-#else /* ! USE_BSD_PTY */
-#if defined(HAVE_OPENPTY) || defined(BSD4_4)
-
-	/* openpty(3) exists in OSF/1 and some other os'es */
-
-# ifdef HAVE_TTYNAME_R
-	char buf[64], *name = buf;
-	int err;
-# else
-	char *name;
-# endif
-
-	if (!masterfd || !slavefd || !slavename || slavenamesize < 64)
-		return set_errno(EINVAL);
-
-	/* Open the master and slave descriptors, set ownership and permissions */
-
-	if (openpty(masterfd, slavefd, NULL, NULL, NULL) == -1) {
-	    perror("openpty");
-	    return -1;
-	}
-
-	/* Retrieve the device name of the slave */
-
-# ifdef HAVE_TTYNAME_R
-	if ((err = ttyname_r(*slavefd, buf, 64)))
-	{
-		close(*masterfd);
-		close(*slavefd);
-		return set_errno(err);
-	}
-# else
-	if (!(name = ttyname(*slavefd)))
-	{
-		close(*masterfd);
-		close(*slavefd);
-		return set_errno(ENOTTY);
-	}
-# endif
-
-	/* Return it to the caller */
-
-	if (strlcpy(slavename, name, slavenamesize) >= slavenamesize)
-	{
-		close(*masterfd);
-		close(*slavefd);
-		return set_errno(ENOSPC);
-	}
-
-#else /* HAVE_OPENPTY */
-# ifdef HAVE__GETPTY
-
-	/*
-	 * _getpty(3) exists in SGI Irix 4.x, 5.x & 6.x -- it generates more
-	 * pty's automagically when needed
-	 */
-
-	char *slave;
-
-	if (!masterfd || !slavefd || !slavename || slavenamesize < 64)
-		return set_errno(EINVAL);
-
-	/* Open the master descriptor and get the slave's device name */
-
-	if (!(slave = _getpty(masterfd, O_RDWR, 0622, 0))) {
-	    perror("_getpty");
-	    return -1;
-	}
-
-	/* Return it to the caller */
-
-	if (strlcpy(slavename, slave, slavenamesize) >= slavenamesize)
-	{
-		close(*masterfd);
-		return set_errno(ENOSPC);
-	}
-
-	/* Open the slave descriptor */
-
-	if ((*slavefd = open(slavename, O_RDWR | O_NOCTTY)) == -1)
-	{
-		close(*masterfd);
-		perror("open(slave)");
-		return -1;
-	}
-
-# else /* HAVE__GETPTY */
-#  if defined(HAVE__DEV_PTMX)
-
-	/*
-	 * This code is used e.g. on Solaris 2.x.  (Note that Solaris 2.3
-	 * also has bsd-style ptys, but they simply do not work.)
-	 */
-
-#   ifdef HAVE_PTSNAME_R
-	char buf[64], *name = buf;
-	int err;
-#   else
-	char *name;
-#   endif
-
-	if (!masterfd || !slavefd || !slavename || slavenamesize < 64)
-		return set_errno(EINVAL);
-
-	/* Open the master descriptor */
-
-	if ((*masterfd = open("/dev/ptmx", O_RDWR | O_NOCTTY)) == -1) {
-	  perror("open(/dev/ptmx)");
-		return -1;
-	}
-
-	/* Set slave ownership and permissions to real uid of process */
-
-	if (grantpt(*masterfd) == -1)
-	{
-		perror("grantpt");
-		close(*masterfd);
-		return -1;
-	}
-
-	/* Unlock the slave so it can be opened */
-
-	if (unlockpt(*masterfd) == -1)
-	{
-		perror("unlockpt");
-		close(*masterfd);
-		return -1;
-	}
-
-	/* Retrieve the device name of the slave */
-
-#   ifdef HAVE_PTSNAME_R
-	if ((err = ptsname_r(*masterfd, buf, 64)))
-	{
-		perror("ptsname_r");
-		close(*masterfd);
-		return set_errno(err);
-	}
-#   else
-	if (!(name = ptsname(*masterfd)))
-	{
-		perror("ptsname");
-		close(*masterfd);
-		return set_errno(ENOTTY);
-	}
-#   endif
-
-	/* Return it to the caller */
-
-	if (strlcpy(slavename, name, slavenamesize) >= slavenamesize)
-	{
-		close(*masterfd);
-		return set_errno(ENOSPC);
-	}
-
-	/* Open the slave descriptor */
-
-	if ((*slavefd = open(slavename, O_RDWR | O_NOCTTY)) == -1)
-	{
-		perror("open(slave)");
-		close(*masterfd);
-		return -1;
-	}
-
-	/* Turn the slave into a terminal */
-
-#   ifndef HAVE_CYGWIN
-
-	/*
-	 * Push the appropriate streams modules, as described in Solaris pts(7).
-	 * HP-UX pts(7) and SCO don't have ttcompat module.
-	 */
-	if (ioctl(*slavefd, I_PUSH, "ptem") == -1)
-	{
-	  perror("ioctl(I_PUSH, ptem)");
-		close(*masterfd);
-		close(*slavefd);
-		return -1;
-	}
-
-	if (ioctl(*slavefd, I_PUSH, "ldterm") == -1)
-	{
-	  perror("ioctl(I_PUSH, ldterm)");
-		close(*masterfd);
-		close(*slavefd);
-		return -1;
-	}
-
-#    if !defined(__hpux) && !defined(sco)
-	if (ioctl(*slavefd, I_PUSH, "ttcompat") == -1)
-	{
-	  perror("ioctl(I_PUSH, ttcompat)");
-		close(*masterfd);
-		close(*slavefd);
-		return -1;
-	}
-#    endif
-#   endif
-
-#  else /* HAVE__DEV_PTMX */
-#   ifdef HAVE_DEV_PTS_AND_PTC
-
-	/* AIX-style pty code */
-
-#    ifdef HAVE_TTYNAME_R
-	char buf[64], *name = buf;
-	int err;
-#    else
-	char *name;
-#    endif
-
-	if (!masterfd || !slavefd || !slavename || slavenamesize < 64)
-		return set_errno(EINVAL);
-
-	/* Open the master descriptor */
-
-	if ((*masterfd = open("/dev/ptc", O_RDWR | O_NOCTTY)) == -1)
-		return -1;
-
-	/* Retrieve the device name of the slave */
-
-#    ifdef HAVE_TTYNAME_R
-	if ((err = ttyname_r(*masterfd, buf, 64)))
-	{
-		close(*masterfd);
-		return set_errno(err);
-	}
-#    else
-	if (!(name = ttyname(*masterfd)))
-	{
-		close(*masterfd);
-		return set_errno(ENOTTY);
-	}
-#    endif
-
-	/* Return it to the caller */
-
-	if (strlcpy(slavename, name, slavenamesize) >= slavenamesize)
-	{
-		close(*masterfd);
-		return set_errno(ENOSPC);
-	}
-
-	/* Open the slave descriptor */
-
-	if ((*slavefd = open(name, O_RDWR | O_NOCTTY)) == -1)
-	{
-		close(*masterfd);
-		return -1;
-	}
-
-#   else /* HAVE_DEV_PTS_AND_PTC */
-
-#   error "You should enable BSD PTYs on this platform"
-
-#   endif /* HAVE_DEV_PTS_AND_PTC */
-#  endif /* HAVE_DEV_PTMX */
-# endif /* HAVE__GETPTY */
+#endif /* HAVE_DEV_PTS_AND_PTC */
+#endif /* HAVE_DEV_PTMX */
+#endif /* HAVE__GETPTY */
 #endif /* HAVE_OPENPTY */
 
-#endif /* USE_BSD_PTY */
 	/* Set the slave's terminal attributes if requested */
 
 	if (slave_termios && tcsetattr(*slavefd, TCSANOW, slave_termios) == -1)
 	{
-	  perror("tcsetattr(TCSANOW)");
+		perror("tcsetattr");
 		close(*masterfd);
 		close(*slavefd);
 		return -1;
@@ -623,7 +630,7 @@ int pty_open(int *masterfd, int *slavefd, char *slavename, size_t slavenamesize,
 
 	if (slave_winsize && ioctl(*slavefd, TIOCSWINSZ, slave_winsize) == -1)
 	{
-	  perror("ioctl(TIOCSWINSZ)");
+		perror("ioctl(TIOCSWINSZ)");
 		close(*masterfd);
 		close(*slavefd);
 		return -1;
@@ -669,9 +676,9 @@ to the C<tty> group if it exists. Otherwise, it will be changed to the given
 user's primary group. The slave pty device's permissions are set to
 C<rw--w---->. Note that only root can execute this function successfully on
 most systems. Also note that the ownership of the device is automatically
-set to the real uid of the process by I<pty_open()> and I<pty_fork()>. The
+set to the real uid of the process by I<pty_open(3)> and I<pty_fork(3)>. The
 permissions are also set automatically by these functions. So
-I<pty_set_owner()> is only needed when the device needs to be owned by some
+I<pty_set_owner(3)> is only needed when the device needs to be owned by some
 user other than the real user. On success, returns C<0>. On error, returns
 C<-1> with C<errno> set appropriately.
 
@@ -740,11 +747,8 @@ int pty_make_controlling_tty(int *slavefd, const char *slavename)
 	}
 #endif /* TIOCNOTTY */
 
-#ifndef _AIX
 	/* Privileged operation on AIX ? */
-	if ( setsid() < 0 )
-	  perror("setsid");
-#endif
+	setsid();
 
 	/*
 	 * Verify that we are successfully disconnected from the controlling
@@ -761,9 +765,10 @@ int pty_make_controlling_tty(int *slavefd, const char *slavename)
 	/* Make it our controlling tty */
 #ifdef TIOCSCTTY
 	if (ioctl(*slavefd, TIOCSCTTY, NULL) == -1) {
-	    perror("ioctl(TIOSCTTY)");
-	    return -1;
+		perror("ioctl(TIOCSCTTY)");
+		return -1;
 	}
+
 #endif /* TIOCSCTTY */
 #ifdef HAVE_NEWS4
 	setpgrp(0, 0);
@@ -776,16 +781,18 @@ int pty_make_controlling_tty(int *slavefd, const char *slavename)
 	/* Why do this? */
 	if ((fd = open(slavename, O_RDWR)) >= 0)
 	{
-	  close(*slavefd);
-	  *slavefd = fd;
-	} else {
-	  perror("open(slave)");
+#ifdef USE_VHANGUP
+		close(*slavefd);
+		*slavefd = fd;
+#else /* USE_VHANGUP */
+		close(fd);
+#endif /* USE_VHANGUP */
 	}
 
 	/* Verify that we now have a controlling tty */
 	if ((fd = open(PATH_TTY, O_RDWR)) == -1) {
-	    perror("open(" PATH_TTY ")");
-	    return -1;
+		perror("open(PATH_TTY)");
+		return -1;
 	}
 
 	close(fd);
@@ -859,65 +866,60 @@ pid_t pty_fork(int *masterfd, char *slavename, size_t slavenamesize, const struc
 	** controlling terminal (but I have no idea why).
 	*/
 
-	if (pty_open(masterfd, &slavefd, slavename, slavenamesize, slave_termios, slave_winsize) == -1) {
-	    perror("pty_open");
-	    return -1;
-	}
+	if (pty_open(masterfd, &slavefd, slavename, slavenamesize, slave_termios, slave_winsize) == -1)
+		return -1;
 
 	switch (pid = fork())
 	{
 		case -1:
-		    perror("fork");
-		    pty_release(slavename);
-		    close(slavefd);
-		    close(*masterfd);
-		    return -1;
+			pty_release(slavename);
+			close(slavefd);
+			close(*masterfd);
+			return -1;
 
 		case 0:
 		{
 			/* Make the slave our controlling tty */
 
-		    if (pty_make_controlling_tty(&slavefd, slavename) == -1) {
-			perror("pty_make_controlling_tty");
-			_exit(EXIT_FAILURE);
-		    }
+			if (pty_make_controlling_tty(&slavefd, slavename) == -1)
+				_exit(EXIT_FAILURE);
 
-		    /* Redirect stdin, stdout and stderr from the pseudo tty */
+			/* Redirect stdin, stdout and stderr from the pseudo tty */
 
-		    if (slavefd != STDIN_FILENO && dup2(slavefd, STDIN_FILENO) == -1) {
-			perror("dup2(stdin)");
-			_exit(EXIT_FAILURE);
-		    }
-		    
-		    if (slavefd != STDOUT_FILENO && dup2(slavefd, STDOUT_FILENO) == -1) {
-			perror("dup2(stdout)");
-			_exit(EXIT_FAILURE);
-		    }
+			if (slavefd != STDIN_FILENO && dup2(slavefd, STDIN_FILENO) == -1) {
+				perror("dup2(stdin)");
+				_exit(EXIT_FAILURE);
+			}
 
-		    if (slavefd != STDERR_FILENO && dup2(slavefd, STDERR_FILENO) == -1) {
-			perror("dup2(stderr)");
-			_exit(EXIT_FAILURE);
-		    }
+			if (slavefd != STDOUT_FILENO && dup2(slavefd, STDOUT_FILENO) == -1) {
+				perror("dup2(stdout)");
+				_exit(EXIT_FAILURE);
+			}
 
-		    /* Close the extra descriptor for the pseudo tty */
-		    
-		    if (slavefd != STDIN_FILENO && slavefd != STDOUT_FILENO && slavefd != STDERR_FILENO)
-			close(slavefd);
-		    
-		    /* Close the master side of the pseudo tty in the child */
-		    
-		    close(*masterfd);
-		    
-		    return 0;
+			if (slavefd != STDERR_FILENO && dup2(slavefd, STDERR_FILENO) == -1) {
+				perror("dup2(stderr)");
+				_exit(EXIT_FAILURE);
+			}
+
+			/* Close the extra descriptor for the pseudo tty */
+
+			if (slavefd != STDIN_FILENO && slavefd != STDOUT_FILENO && slavefd != STDERR_FILENO)
+				close(slavefd);
+
+			/* Close the master side of the pseudo tty in the child */
+
+			close(*masterfd);
+
+			return 0;
 		}
 
 		default:
 		{
-		    /* Close the slave side of the pseudo tty in the parent */
+			/* Close the slave side of the pseudo tty in the parent */
 
-		    close(slavefd);
-		    
-		    return pid;
+			close(slavefd);
+
+			return pid;
 		}
 	}
 }
@@ -939,10 +941,10 @@ Invalid arguments were passed to one of the functions.
 
 =item ENOTTY
 
-I<openpty()> or I<open("/dev/ptc")> returned a slave descriptor for which
-I<ttyname()> failed to return the slave device name. I<open("/dev/ptmx")>
-returned a master descriptor for which I<ptsname()> failed to return the the
-slave device name.
+I<openpty(3)> or I<open("/dev/ptc")> returned a slave descriptor for which
+I<ttyname(3)> failed to return the slave device name. I<open("/dev/ptmx")>
+returned a master descriptor for which I<ptsname(3)> failed to return the
+the slave device name.
 
 =item ENOENT
 
@@ -952,14 +954,24 @@ terminal.
 =item ENOSPC
 
 The device name of the slave side of the pseudo terminal was too large to
-fit in the C<slavename> buffer passed to I<pty_open()> or I<pty_fork()>.
+fit in the C<slavename> buffer passed to I<pty_open(3)> or I<pty_fork(3)>.
 
 =item ENXIO
 
-I<pty_make_controlling_tty()> failed to disconnect from the controlling
+I<pty_make_controlling_tty(3)> failed to disconnect from the controlling
 terminal.
 
 =back
+
+=head1 MT-Level
+
+MT-Safe if and only if I<ttyname_r(3)> or I<ptsname_r(3)> are available when
+needed. On systems that have I<openpty(3)> or C<"/dev/ptc">, I<ttyname_r(3)>
+is required, otherwise the unsafe I<ttyname(3)> will be used. On systems
+that have C<"/dev/ptmx">, I<ptsname_r(3)> is required, otherwise the unsafe
+I<ptsname(3)> will be used. On systems that have I<_getpty(2)>,
+I<pty_open(3)> is unsafe because I<_getpty(2)> is unsafe. In short, it's
+MT-Safe under Linux, Unsafe under Solaris and OpenBSD.
 
 =head1 EXAMPLE
 
@@ -967,23 +979,62 @@ A very simple pty program:
 
     #include <slack/std.h>
     #include <slack/pseudo.h>
+    #include <slack/sig.h>
 
     #include <sys/select.h>
     #include <sys/wait.h>
 
+    struct termios stdin_termios;
+    struct winsize stdin_winsize;
+    int havewin = 0;
+    char slavename[64];
+    int masterfd;
+    pid_t pid;
+
+    int tty_raw(int fd)
+    {
+        struct termios attr[1];
+
+        if (tcgetattr(fd, attr) == -1)
+            return -1;
+
+        attr->c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
+        attr->c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
+        attr->c_cflag &= ~(CSIZE | PARENB);
+        attr->c_cflag |= (CS8);
+        attr->c_oflag &= ~(OPOST);
+        attr->c_cc[VMIN] = 1;
+        attr->c_cc[VTIME] = 0;
+
+        return tcsetattr(fd, TCSANOW, attr);
+    }
+
+    void restore_stdin(void)
+    {
+        if (tcsetattr(STDIN_FILENO, TCSANOW, &stdin_termios) == -1)
+            errorsys("failed to restore stdin terminal attributes");
+    }
+
+    void winch(int signo)
+    {
+        struct winsize winsize;
+
+        if (ioctl(STDIN_FILENO, TIOCGWINSZ, &winsize) != -1)
+            ioctl(masterfd, TIOCSWINSZ, &winsize);
+    }
+
     int main(int ac, char **av)
     {
-        char slavename[64];
-        int masterfd;
-        pid_t pid;
-
         if (ac == 1)
         {
             fprintf(stderr, "usage: pty command [arg...]\n");
             return EXIT_FAILURE;
         }
 
-        switch (pid = pty_fork(&masterfd, slavename, sizeof slavename, NULL, NULL))
+        if (isatty(STDIN_FILENO))
+            havewin = ioctl(STDIN_FILENO, TIOCGWINSZ, &stdin_winsize) != -1;
+
+        switch (pid = pty_fork(&masterfd, slavename, sizeof slavename, NULL, havewin ? &stdin_winsize : NULL))
         {
             case -1:
                 fprintf(stderr, "pty: pty_fork() failed (%s)\n", strerror(errno));
@@ -998,6 +1049,16 @@ A very simple pty program:
             {
                 int infd = STDIN_FILENO;
                 int status;
+
+                if (isatty(STDIN_FILENO))
+                {
+                    if (tcgetattr(STDIN_FILENO, &stdin_termios) != -1)
+                        atexit((void (*)(void))restore_stdin);
+
+                    tty_raw(STDIN_FILENO);
+
+                    signal_set_handler(SIGWINCH, 0, winch);
+                }
 
                 while (masterfd != -1)
                 {
@@ -1016,6 +1077,8 @@ A very simple pty program:
                         FD_SET(masterfd, readfds);
 
                     maxfd = (masterfd > infd) ? masterfd : infd;
+
+                    signal_handle_all();
 
                     if ((n = select(maxfd + 1, readfds, NULL, NULL, NULL)) == -1 && errno != EINTR)
                         break;
@@ -1054,6 +1117,7 @@ A very simple pty program:
                         }
                         else
                         {
+                            close(masterfd);
                             masterfd = -1;
                             continue;
                         }
@@ -1070,20 +1134,12 @@ A very simple pty program:
         }
 
         pty_release(slavename);
-        close(masterfd);
+
+        if (masterfd != -1)
+            close(masterfd);
 
         return EXIT_SUCCESS;
     }
-
-=head1 MT-Level
-
-MT-Safe if and only if I<ttyname_r()> or I<ptsname_r()> are available when
-needed. On systems that have I<openpty()> or C<"/dev/ptc">, I<ttyname_r()>
-is required, otherwise the unsafe I<ttyname()> will be used. On systems that
-have C<"/dev/ptmx">, I<ptsname_r()> is required, otherwise the unsafe
-I<ptsname()> will be used. On systems that have I<_getpty()>, I<pty_open()>
-is unsafe because I<_getpty()> is unsafe. In short, it's MT-Safe under Linux,
-Unsafe under Solaris and OpenBSD.
 
 =head1 SEE ALSO
 
@@ -1118,6 +1174,7 @@ L<dup2(2)|dup2(2)>
 
 */
 
+#endif
 
 #ifdef TEST
 
@@ -1126,7 +1183,6 @@ L<dup2(2)|dup2(2)>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <sys/signal.h>
 
 #include <pwd.h>
 
@@ -1141,7 +1197,7 @@ int main(int ac, char **av)
 	uid_t euid = geteuid();
 	pid_t pid;
 
-	printf("Testing: pseudo\n");
+	printf("Testing: %s\n", "pseudo");
 
 	/* Test pty_open() */
 
@@ -1155,7 +1211,7 @@ int main(int ac, char **av)
 			++errors, printf("Test2: pty_set_owner() failed (%s)\n", strerror(errno));
 
 		/* Test pty_make_controlling_tty() and pty_change_window_size() */
-		signal(5, SIG_IGN);
+
 		switch (pid = fork())
 		{
 			case -1:
