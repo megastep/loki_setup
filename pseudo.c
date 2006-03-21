@@ -78,6 +78,8 @@ attached to a pseudo terminal which is made the controlling terminal.
 #define _GNU_SOURCE /* ptsname_r() under Linux */
 #include "config.h"
 
+#include <signal.h>
+
 /** Contents of std.h **/
 
 #ifndef NO_STDC
@@ -142,8 +144,6 @@ attached to a pseudo terminal which is made the controlling terminal.
 #include <locale.h>
 #include <math.h>
 #include <setjmp.h>
-#include <signal.h>
-#include <stdarg.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -155,6 +155,8 @@ attached to a pseudo terminal which is made the controlling terminal.
 #endif
 
 #include <unistd.h>
+#include <stdarg.h>
+#include <signal.h>
 
 #include <fcntl.h>
 #include <grp.h>
