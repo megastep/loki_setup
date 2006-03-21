@@ -379,7 +379,7 @@ int pty_open(int *masterfd, int *slavefd, char *slavename, size_t slavenamesize,
 
 	/* Return it to the caller */
 
-	if (strlcpy(slavename, name, slavenamesize) >= slavenamesize)
+	if (strlcpy(slavename, slave, slavenamesize) >= slavenamesize)
 	{
 		close(*masterfd);
 		return set_errno(ENOSPC);
