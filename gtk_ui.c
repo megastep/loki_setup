@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.118 2006-03-13 20:38:08 megastep Exp $
+   $Id: gtk_ui.c,v 1.119 2006-03-22 20:38:35 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1579,6 +1579,14 @@ static void update_image(const char *image_file, gboolean left)
     }
 }
 
+static void log_handler(const gchar *log_domain,
+					 GLogLevelFlags log_level,
+					 const gchar *message,
+					 gpointer user_data)
+{
+	log_debug("Glib-WARNING(%s): %s\n", log_domain, message);
+}
+
 /********** UI functions *************/
 
 static install_state gtkui_init(install_info *info, int argc, char **argv, int noninteractive)
@@ -1596,6 +1604,10 @@ static install_state gtkui_init(install_info *info, int argc, char **argv, int n
 
 	gtk_set_locale();
     gtk_init(&argc,&argv);
+
+	/* Disable GLib warnings that may be triggered by libglade */
+	g_log_set_handler ("libglade", G_LOG_LEVEL_WARNING | G_LOG_FLAG_RECURSION, log_handler, NULL);
+
 	/* Try to get a RGB colormap */
 	gdk_rgb_init();
 	gtk_widget_set_default_colormap(gdk_rgb_get_cmap());
