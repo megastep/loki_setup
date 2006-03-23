@@ -161,14 +161,20 @@ endif
 		echo   wanted image/setup.data/bin/${os}/${arch}/${libc}; \
 	fi
 
-install-image: all
+install-setup: setup
+	@if [ -d $(IMAGE)/setup.data/bin/$(os)/$(arch) ]; then \
+	    cp setup $(IMAGE)/setup.data/bin/$(os)/$(arch); \
+	    strip $(IMAGE)/setup.data/bin/$(os)/$(arch)/setup; \
+	    $(BRANDELF) -t $(os) $(IMAGE)/setup.data/bin/$(os)/$(arch)/setup; \
+	else \
+		echo No directory to copy the setup binary file to.; \
+	fi
+
+install-image: all install-setup
 ifeq ($(DYN_PLUGINS),true)
 	$(MAKE) -C plugins install
 endif
 	@if [ -d $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc) ]; then \
-	    cp setup $(IMAGE)/setup.data/bin/$(os)/$(arch); \
-	    strip $(IMAGE)/setup.data/bin/$(os)/$(arch)/setup; \
-	    $(BRANDELF) -t $(os) $(IMAGE)/setup.data/bin/$(os)/$(arch)/setup; \
 	    cp uninstall $(IMAGE)/setup.data/bin/$(os)/$(arch); \
 	    strip $(IMAGE)/setup.data/bin/$(os)/$(arch)/uninstall; \
 	    $(BRANDELF) -t $(os) $(IMAGE)/setup.data/bin/$(os)/$(arch)/uninstall; \
@@ -198,7 +204,7 @@ install-check: check
 
 # Copy loki_uninstall and the required files
 
-copy-image: all loki_uninstall install-image po-image
+copy-image: install-image loki_uninstall po-image
 	@if [ -d $(IMAGE)/bin/$(os)/$(arch)/ ]; then \
 	    cp loki_uninstall $(IMAGE)/bin/$(os)/$(arch)/bin/$(BRAND)-uninstall; \
 	    strip $(IMAGE)/bin/$(os)/$(arch)/bin/$(BRAND)-uninstall; \
