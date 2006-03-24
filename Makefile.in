@@ -170,14 +170,20 @@ install-setup: setup
 		echo No directory to copy the setup binary file to.; \
 	fi
 
-install-image: all install-setup
+install-uninstall: uninstall
+	@if [ -d $(IMAGE)/setup.data/bin/$(os)/$(arch)/ ]; then \
+	    cp uninstall $(IMAGE)/setup.data/bin/$(os)/$(arch)/uninstall; \
+	    strip $(IMAGE)/setup.data/bin/$(os)/$(arch)/uninstall; \
+	    $(BRANDELF) -t $(os) $(IMAGE)/setup.data/bin/$(os)/$(arch)/uninstall; \
+	else \
+		echo No directory to copy the uninstall binary file to.; \
+	fi
+
+install-image: all install-setup install-uninstall
 ifeq ($(DYN_PLUGINS),true)
 	$(MAKE) -C plugins install
 endif
 	@if [ -d $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc) ]; then \
-	    cp uninstall $(IMAGE)/setup.data/bin/$(os)/$(arch); \
-	    strip $(IMAGE)/setup.data/bin/$(os)/$(arch)/uninstall; \
-	    $(BRANDELF) -t $(os) $(IMAGE)/setup.data/bin/$(os)/$(arch)/uninstall; \
 	    cp xsu $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc); \
 	    strip $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc)/xsu; \
 	    $(BRANDELF) -t $(os) $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc)/xsu; \
@@ -204,23 +210,15 @@ install-check: check
 
 # Copy loki_uninstall and the required files
 
-copy-uninstall: loki_uninstall po-image
-	@if [ -d $(IMAGE)/bin/$(os)/$(arch)/ ]; then \
-	    cp uninstall $(IMAGE)/bin/$(os)/$(arch)/uninstall; \
-	    strip $(IMAGE)/bin/$(os)/$(arch)/uninstall; \
+copy-image: install-image loki_uninstall po-image
+	@if [ -d $(IMAGE)/bin/$(os)/$(arch)/bin ]; then \
+	    cp loki_uninstall $(IMAGE)/bin/$(os)/$(arch)/bin/$(BRAND)-uninstall; \
+	    strip $(IMAGE)/bin/$(os)/$(arch)/bin/$(BRAND)-uninstall; \
 	    for file in `find image/setup.data -name loki-uninstall.mo -print`; \
 	    do  path="$(IMAGE)/`dirname $$file | sed 's,image/setup.data/,,'`"; \
 	        mkdir -p $$path; \
 	        cp $$file $$path; \
 	    done; \
-	else \
-		echo No directory to copy the uninstall binary file to.; \
-	fi
-
-copy-image: install-image copy-uninstall
-	@if [ -d $(IMAGE)/bin/$(os)/$(arch)/bin ]; then \
-	    cp loki_uninstall $(IMAGE)/bin/$(os)/$(arch)/bin/$(BRAND)-uninstall; \
-	    strip $(IMAGE)/bin/$(os)/$(arch)/bin/$(BRAND)-uninstall; \
 	else \
 		echo No directory to copy the $(BRAND)-uninstall binary file to.; \
 	fi
