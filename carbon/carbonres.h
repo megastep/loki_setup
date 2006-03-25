@@ -242,7 +242,7 @@ int carbon_Prompt(CarbonRes *, PromptType, const char *, char *, int);
 int carbon_ReadmeOrLicense(CarbonRes *, int, char *, int);
 int carbon_LaunchURL(const char *);
 void carbon_GetAppPath(char *, int);
-int carbon_PromptForPath(char *, int);
+int carbon_PromptForPath(unsigned char *, int);
 //void carbon_AddDesktopAlias(const char *);
 int carbon_MediaPrompt(CarbonRes *, int *, char *, int);
 

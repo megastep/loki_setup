@@ -50,10 +50,10 @@ static yesno_answer carbonui_prompt(const char *, yesno_answer);
 /*static const char *DesktopName = "Desktop";
 static const char *DocumentsName = "Documents";
 static const char *ApplicationsName = "Applications";*/
-static char SpecialPath[1024];
+static unsigned char SpecialPath[1024];
 
 /********** HELPER FUNCTIONS ***********/
-static const char *GetSpecialPathName(const char *Path)
+static const unsigned char *GetSpecialPathName(const unsigned char *Path)
 {
     if(GetProductIsAppBundle(cur_info))
     {
@@ -65,7 +65,7 @@ static const char *GetSpecialPathName(const char *Path)
 
         FSGetCatalogInfo(&Ref, kFSCatInfoNone, NULL, &SpecialPathHFS, NULL, NULL);
         CFStringRef cfs = CFStringCreateWithCharacters(kCFAllocatorDefault, SpecialPathHFS.unicode, SpecialPathHFS.length);
-        CFStringGetCString(cfs, SpecialPath, 1024, kCFStringEncodingISOLatin1);
+        CFStringGetCString(cfs, (char *) SpecialPath, 1024, kCFStringEncodingISOLatin1);
         CFRelease(cfs);
         return SpecialPath;
         /*//  Otherwise, it'll show /Users/joeshmo/Desktop.
@@ -81,7 +81,7 @@ static const char *GetSpecialPathName(const char *Path)
 
 static void EnableTree(xmlNodePtr node, OptionsBox *box)
 {
-    if(strcmp(node->name, "option") == 0)
+  if(strcmp((char *)node->name, "option") == 0)
     {
 	    //GtkWidget *button = (GtkWidget*)gtk_object_get_data(GTK_OBJECT(window),
 	    //											  get_option_name(cur_info, node, NULL, 0));
@@ -111,17 +111,17 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
     OptionsButton *button = NULL;
 
     /* See if this node matches the current architecture */
-    wanted = xmlGetProp(node, "arch");
+    wanted = (char *) xmlGetProp(node, BAD_CAST "arch");
     if ( ! match_arch(info, wanted) ) {
         return;
     }
 
-    wanted = xmlGetProp(node, "libc");
+    wanted = (char *) xmlGetProp(node, BAD_CAST "libc");
     if ( ! match_libc(info, wanted) ) {
         return;
     }
 
-    wanted = xmlGetProp(node, "distro");
+    wanted = (char *) xmlGetProp(node, BAD_CAST "distro");
     if ( ! match_distro(info, wanted) ) {
         return;
     }
@@ -133,7 +133,7 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
     /* See if the user wants this option */
 	if ( node->type == XML_TEXT_NODE ) {
 		//name = g_strdup(node->content);
-        name = strdup(node->content);
+        name = strdup((char *) node->content);
         //!!!TODO - Strip name
 		//g_strstrip(name);
 		if( *name ) {
@@ -196,14 +196,14 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
 	}
 
     /* Check for required option */
-    if ( xmlGetProp(node, "required") ) {
-		xmlSetProp(node, "install", "true");
+    if ( xmlGetProp(node, BAD_CAST "required") ) {
+		xmlSetProp(node, BAD_CAST "install", BAD_CAST "true");
 		//gtk_widget_set_sensitive(GTK_WIDGET(button), FALSE);
         DisableControl(button->Control);
     }
 
     /* If this is a sub-option and parent is not active, then disable option */
-    wanted = xmlGetProp(node, "install");
+    wanted = (char *) xmlGetProp(node, BAD_CAST "install");
     //if( level>0 && GTK_IS_TOGGLE_BUTTON(parent) && !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(parent)) ) {
     if( level>0 && parent->Type == ButtonType_Radio && !carbon_OptionsGetValue(parent)) {
 		wanted = "false";
@@ -229,10 +229,10 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
     /* Recurse down any other options */
     child = XML_CHILDREN(node);
     while ( child ) {
-		if ( !strcmp(child->name, "option") ) {
+		if ( !strcmp((char *) child->name, "option") ) {
 			//parse_option(info, component, child, window, box, level+1, button, 0, NULL);
             parse_option(info, component, child, box, level+1, button, 0, NULL);
-		} else if ( !strcmp(child->name, "exclusive") ) {
+		} else if ( !strcmp((char *) child->name, "exclusive") ) {
 			xmlNodePtr exchild;
 			//GSList *list = NULL;
             RadioGroup *list = NULL;
@@ -341,17 +341,17 @@ static void update_space(void)
 static void init_install_path(void)
 {
     FSRef Ref;
-    const char *Path = cur_info->install_path;
+    const unsigned char *Path = (unsigned char *) cur_info->install_path;
     carbon_debug("init_install_path()\n");
 
-    static char AppBundlePath[INSTALLFOLDER_MAX_PATH];
-    char *appbundleid = xmlGetProp(XML_ROOT(cur_info->config), "appbundleid");
+    static unsigned char AppBundlePath[INSTALLFOLDER_MAX_PATH];
+    char *appbundleid = (char *) xmlGetProp(XML_ROOT(cur_info->config), BAD_CAST "appbundleid");
     if (appbundleid) {
         static int alreadyfound = 0;
         if (!alreadyfound) {
-            char *appbundledesc = xmlGetProp(XML_ROOT(cur_info->config), "appbundledesc");
-            char *desc = xmlGetProp(XML_ROOT(cur_info->config), "desc");
-            int rc = FindAppBundlePath(appbundleid, appbundledesc, desc, AppBundlePath, sizeof (AppBundlePath));
+            char *appbundledesc = (char *) xmlGetProp(XML_ROOT(cur_info->config), BAD_CAST "appbundledesc");
+            char *desc = (char *) xmlGetProp(XML_ROOT(cur_info->config), BAD_CAST "desc");
+            int rc = FindAppBundlePath(appbundleid, appbundledesc, desc, (char *)AppBundlePath, sizeof (AppBundlePath));
             if (appbundledesc) xmlFree(appbundledesc);
             if (desc) xmlFree(desc);
             if (!rc) return;
@@ -370,12 +370,12 @@ static void init_install_path(void)
         // Sanity check that default folder actually exists...  --ryan.
         if (FSPathMakeRef(Path, &Ref, NULL) != noErr)
         {
-            /* "/Applications" (or whatever) doesn't exist? Try Home dir... */
-            Path = getenv("HOME");
+		  /* "/Applications" (or whatever) doesn't exist? Try Home dir... */
+			Path = (unsigned char *) getenv("HOME");
             if ((!Path) || (FSPathMakeRef(Path, &Ref, NULL) != noErr))
             {
                 /* oh well. Becomes "Macintosh HD" or whatever. */
-                Path = "/";
+			  Path = (unsigned char *) "/";
                 if (FSPathMakeRef(Path, &Ref, NULL) != noErr)
                 {
                     log_fatal(_("Can't find default install dir!"));
@@ -385,14 +385,14 @@ static void init_install_path(void)
         }
     }
 
-    if (Path != cur_info->install_path) // comparing pointers, not strings.
+    if (Path != (unsigned char *) cur_info->install_path) // comparing pointers, not strings.
     {
-        set_installpath(cur_info, Path, 1);
+		set_installpath(cur_info, (char *) Path, 1);
         update_space();
     }
 
     Path = GetSpecialPathName(Path);
-    carbon_SetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, Path);
+    carbon_SetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, (char *) Path);
     check_install_button();
 
     if (appbundleid) {
@@ -525,16 +525,16 @@ static void OnCommandCancel(void)
 
 static void OnCommandInstallPath(void)
 {
-    char InstallPath[INSTALLFOLDER_MAX_PATH];
+    unsigned char InstallPath[INSTALLFOLDER_MAX_PATH];
 
     carbon_debug("OnCommandInstallPath()\n");
     // Bring up dialog to prompt for new folder
     if(carbon_PromptForPath(InstallPath, INSTALLFOLDER_MAX_PATH))
     {
         // If user hit OK
-        set_installpath(cur_info, InstallPath, 1);
+        set_installpath(cur_info, (char *) InstallPath, 1);
 
-        carbon_SetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, GetSpecialPathName(InstallPath));
+        carbon_SetEntryText(MyRes, OPTION_INSTALL_PATH_ENTRY_ID, (char *) GetSpecialPathName(BAD_CAST InstallPath));
         update_space();
         check_install_button();
     }
@@ -542,14 +542,14 @@ static void OnCommandInstallPath(void)
 
 static void OnCommandSymlinkPath(void)
 {
-    char SymlinkPath[INSTALLFOLDER_MAX_PATH];
+    unsigned char SymlinkPath[INSTALLFOLDER_MAX_PATH];
 
     carbon_debug("OnCommandSymlinkPath()\n");
     // Bring up dialog to prompt for new folder
     if(carbon_PromptForPath(SymlinkPath, INSTALLFOLDER_MAX_PATH))
     {
         // If user hit OK
-        set_symlinkspath(cur_info, SymlinkPath);
+        set_symlinkspath(cur_info, (char *)SymlinkPath);
         carbon_SetEntryText(MyRes, OPTION_LINK_PATH_ENTRY_ID, cur_info->symlinks_path);
     }
 }
@@ -611,7 +611,7 @@ int OnOptionClickEvent(OptionsButton *ButtonWithEventClick)
 		child = XML_CHILDREN(data_node);
 		while(child)
 		{
-			if (!strcmp(child->name, "eula"))
+			if (!strcmp((char *) child->name, "eula"))
 			{
 				const char* name = GetProductEULANode(cur_info, data_node, NULL);
 				if(name)
@@ -661,7 +661,7 @@ int OnOptionClickEvent(OptionsButton *ButtonWithEventClick)
 		/* Recurse down any other options */
 		node = XML_CHILDREN(data_node);
 		while ( node ) {
-			if ( !strcmp(node->name, "option") ) {
+			if ( !strcmp((char *) node->name, "option") ) {
 				//GtkWidget *button;
 				//button = (GtkWidget*)gtk_object_get_data(GTK_OBJECT(window),
 				//										 get_option_name(cur_info, node, NULL, 0));
@@ -674,7 +674,7 @@ int OnOptionClickEvent(OptionsButton *ButtonWithEventClick)
                     carbon_OptionsSetValue(button, false);
                     DisableControl(button->Control);
 				}
-			} else if ( !strcmp(node->name, "exclusive") ) {
+			} else if ( !strcmp((char *) node->name, "exclusive") ) {
 				xmlNodePtr child;
 				for ( child = XML_CHILDREN(node); child; child = child->next) {
 					//GtkWidget *button;
@@ -709,7 +709,7 @@ static void OnCommandWebsite()
 static void OnCommandCDKeyContinue()
 {
     char CDKey[256];
-    char CDConfirmKey[256];
+    //char CDConfirmKey[256];
 
     carbon_GetEntryText(MyRes, CDKEY_ENTRY_ID, CDKey, sizeof (CDKey));
     //carbon_GetEntryText(MyRes, CDKEY_CONFIRM_ENTRY_ID, CDConfirmKey, sizeof (CDConfirmKey));
@@ -1123,39 +1123,39 @@ static install_state carbonui_setup(install_info *info)
         radio_list = NULL;
         in_setup = TRUE;
         while ( node ) {
-		    if ( ! strcmp(node->name, "option") ) {
+		    if ( ! strcmp((char *) node->name, "option") ) {
 			    parse_option(info, NULL, node, options, 0, NULL, 0, NULL);
-		    } else if ( ! strcmp(node->name, "exclusive") ) {
+		    } else if ( ! strcmp((char *) node->name, "exclusive") ) {
 			    xmlNodePtr child;
 			    RadioGroup *list = NULL;
 			    for ( child = XML_CHILDREN(node); child; child = child->next) {
 				    parse_option(info, NULL, child, options, 0, NULL, 1, &list);
 			    }
-		    } else if ( ! strcmp(node->name, "component") ) {
-                if ( match_arch(info, xmlGetProp(node, "arch")) &&
-                    match_libc(info, xmlGetProp(node, "libc")) && 
-				    match_distro(info, xmlGetProp(node, "distro")) ) {
+		    } else if ( ! strcmp((char *) node->name, "component") ) {
+                if ( match_arch(info, (char *)xmlGetProp(node, BAD_CAST "arch")) &&
+                    match_libc(info, (char *)xmlGetProp(node, BAD_CAST "libc")) && 
+				    match_distro(info, (char *)xmlGetProp(node, BAD_CAST "distro")) ) {
                     xmlNodePtr child;
-                    if ( xmlGetProp(node, "showname") ) {
+                    if ( xmlGetProp(node, BAD_CAST "showname") ) {
                         //GtkWidget *widget = gtk_hseparator_new();
                         //gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 0);
                         //gtk_widget_show(widget);                
                         carbon_OptionsNewSeparator(options);
-                        //widget = gtk_label_new(xmlGetProp(node, "name"));
+                        //widget = gtk_label_new(xmlGetProp(node, BAD_CAST "name"));
                         //gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 10);
                         //gtk_widget_show(widget);
-                        carbon_OptionsNewLabel(options, xmlGetProp(node, "name"));
+                        carbon_OptionsNewLabel(options, (char *)xmlGetProp(node, BAD_CAST "name"));
                     }
                     for ( child = XML_CHILDREN(node); child; child = child->next) {
-					    if ( ! strcmp(child->name, "option") ) {
-						    //parse_option(info, xmlGetProp(node, "name"), child, window, options, 0, NULL, 0, NULL);
-                            parse_option(info, xmlGetProp(node, "name"), child, options, 0, NULL, 0, NULL);
-					    } else if ( ! strcmp(child->name, "exclusive") ) {
+					    if ( ! strcmp((char *)child->name, "option") ) {
+						    //parse_option(info, xmlGetProp(node, BAD_CAST "name"), child, window, options, 0, NULL, 0, NULL);
+                            parse_option(info, (char *)xmlGetProp(node, BAD_CAST "name"), child, options, 0, NULL, 0, NULL);
+					    } else if ( ! strcmp((char *)child->name, "exclusive") ) {
 						    xmlNodePtr child2;
 						    RadioGroup *list = NULL;
 						    for ( child2 = XML_CHILDREN(child); child2; child2 = child2->next) {
-							    //parse_option(info, xmlGetProp(node, "name"), child2, window, options, 0, NULL, 1, &list);
-                                parse_option(info, xmlGetProp(node, "name"), child2, options, 0, NULL, 1, &list);
+							    //parse_option(info, xmlGetProp(node, BAD_CAST "name"), child2, window, options, 0, NULL, 1, &list);
+                                parse_option(info, (char *)xmlGetProp(node, BAD_CAST "name"), child2, options, 0, NULL, 1, &list);
 						    }
 					    }
                     }
@@ -1196,9 +1196,9 @@ static install_state carbonui_setup(install_info *info)
 static int carbonui_update(install_info *info, const char *path, size_t progress, size_t size, const char *current)
 {
     static float last_update = -1.0f;
-    int textlen;
-    char text[1024];
-    char *install_path;
+/*     int textlen; */
+/*     char text[1024]; */
+/*     char *install_path; */
     double new_update;
 
     static char LastCurrent[1024] = "";
@@ -1246,8 +1246,9 @@ static int carbonui_update(install_info *info, const char *path, size_t progress
             int percent;
             static char buf[1024];
             char *filename = strrchr(path, '/');
-            if(filename == NULL)
-                filename = path;
+
+            if (filename == NULL)
+                filename = (char *)path;
             else
                 filename++;     // Increment just after '/' to get filename
 
@@ -1431,7 +1432,7 @@ static install_state carbonui_complete(install_info *info)
     // Show the install complete page
     carbon_ShowInstallScreen(MyRes, DONE_PAGE);
     // Set the install directory label accordingly
-    carbon_SetLabelText(MyRes, DONE_INSTALL_DIR_LABEL_ID, GetSpecialPathName(info->install_path));
+    carbon_SetLabelText(MyRes, DONE_INSTALL_DIR_LABEL_ID, (char *)GetSpecialPathName(BAD_CAST info->install_path));
     // Set game label accordingly
     if (info->installed_symlink && info->symlinks_path && *info->symlinks_path)
         snprintf(text, sizeof(text), _("Type '%s' to start the program"), info->installed_symlink);

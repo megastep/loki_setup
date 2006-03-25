@@ -24,9 +24,9 @@ static int do_msgbox(const char *str, AlertType alert_type,
     const char *_title = desc ? desc : "Setup";
     int retval = 0;
     DialogItemIndex val = 0;
-    CFStringRef title = CFStringCreateWithBytes(NULL, _title, strlen(_title),
+    CFStringRef title = CFStringCreateWithBytes(NULL, BAD_CAST _title, strlen(_title),
                                                 kCFStringEncodingISOLatin1, 0);
-    CFStringRef msg = CFStringCreateWithBytes(NULL, str, strlen(str),
+    CFStringRef msg = CFStringCreateWithBytes(NULL, BAD_CAST str, strlen(str),
                                                 kCFStringEncodingISOLatin1, 0);
     if ((msg != NULL) && (title != NULL))
     {
@@ -115,7 +115,7 @@ static int manually_locate_product(const char *name, char *buf, size_t bufsize, 
         {
             /* !!! FIXME: Check return values here! */
             BlockMoveData(*desc.dataHandle, &fsref, sizeof (fsref));
-            FSRefMakePath(&fsref, buf, bufsize - 1);
+            FSRefMakePath(&fsref, BAD_CAST buf, bufsize - 1);
             buf[bufsize - 1] = '\0';
             AEDisposeDesc(&desc);
             retval = 1;
@@ -135,14 +135,14 @@ static int ask_launch_services(const char *appid, char *buf, size_t bufsize)
     /* Ask LaunchServices to find product by identifier... */
     OSStatus rc;
     CFURLRef url = NULL;
-    CFStringRef id = CFStringCreateWithBytes(NULL, appid, strlen(appid),
+    CFStringRef id = CFStringCreateWithBytes(NULL, BAD_CAST appid, strlen(appid),
                                              kCFStringEncodingISOLatin1, 0);
 
     rc = LSFindApplicationForInfo(kLSUnknownCreator, id, NULL, NULL, &url);
     CFRelease(id);
     if (rc == noErr)
     {
-        Boolean b = CFURLGetFileSystemRepresentation(url, TRUE, buf, bufsize);
+        Boolean b = CFURLGetFileSystemRepresentation(url, TRUE, BAD_CAST buf, bufsize);
         CFRelease(url);
         return(b != 0);
     } /* if */

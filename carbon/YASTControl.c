@@ -309,7 +309,7 @@ static OSStatus YASTControlSetData(
 				txnTabData.tabType = kTXNRightTab;
 				txnTabData.filler = 0;
 				err = TXNSetTXNObjectControls( varsp->fTXNObject,
-							false, 1, &txnControlTag, &txnTabData );
+											   false, 1, &txnControlTag, &txnTabData );
 			}
 			returnedResult = err;
 			break;
@@ -447,8 +447,7 @@ static OSStatus YASTControlGetData(
 				err = paramErr;
 			} else {
 				TXNTab txnTabData;
-				TXNControlTag txnControlTag;
-				txnControlTag = kTXNTabSettingsTag;
+				const TXNControlTag txnControlTag = kTXNTabSettingsTag;
 				err = TXNGetTXNObjectControls( varsp->fTXNObject, 1, &txnControlTag, &txnTabData );
 				if (err == noErr) {
 					* (SInt16*) inBuffer = txnTabData.value;

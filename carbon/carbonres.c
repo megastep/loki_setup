@@ -376,7 +376,7 @@ static pascal OSStatus MediaWindowEventHandler(EventHandlerCallRef HandlerRef, E
     OSStatus err = eventNotHandledErr;	// Default is event is not handled by this function
     HICommand command;
     CarbonRes *Res = (CarbonRes *)UserData;
-    char Path[CARBON_MAX_APP_PATH];
+    unsigned char Path[CARBON_MAX_APP_PATH];
     ControlRef TempCtrl;
     CFStringRef cfstr;
     ControlID ID;
@@ -394,7 +394,7 @@ static pascal OSStatus MediaWindowEventHandler(EventHandlerCallRef HandlerRef, E
             if(carbon_PromptForPath(Path, CARBON_MAX_APP_PATH))  // !!! FIXME: Supposed to be in brackets?  --ryan.
                 ID.id = MEDIA_DIR_ENTRY_ID;
                 GetControlByID(Res->MediaWindow, &ID, &TempCtrl);
-                cfstr = CFStringCreateWithCString(NULL, Path, kCFStringEncodingISOLatin1);
+                cfstr = CFStringCreateWithCString(NULL, (char *)Path, kCFStringEncodingISOLatin1);
                 SetControlData(TempCtrl, kControlEntireControl, kControlStaticTextCFStringTag, sizeof (CFStringRef), &cfstr);
                 CFRelease(cfstr);
                 Draw1Control(TempCtrl);
@@ -902,13 +902,10 @@ void carbon_UpdateImage(CarbonRes *Res, const char *Filename, const char *Path, 
     // Get application path
     carbon_GetAppPath(AppPath, CARBON_MAX_APP_PATH);
     // Append filename and base path (setup.data) to the full path
-    strcpy(FullPath, "file://");
-    strcat(FullPath, AppPath);
-    strcat(FullPath, Path);
-    strcat(FullPath, Filename);
+	snprintf(FullPath, sizeof(FullPath), "file://%s%s%s", AppPath, Path, Filename);
     //printf("carbon_UpdateImage() - Image Path: '%s'\n", FullPath);
     // Create URL to image
-    url = CFURLCreateWithBytes(kCFAllocatorDefault, FullPath, strlen(FullPath), kCFStringEncodingISOLatin1, NULL);
+    url = CFURLCreateWithBytes(kCFAllocatorDefault, (unsigned char *)FullPath, strlen(FullPath), kCFStringEncodingISOLatin1, NULL);
     if(url == NULL)
         carbon_debug("carbon_UpdateImage() - URL to image could not be generated.\n");
     else
@@ -1676,8 +1673,8 @@ int carbon_LaunchURL(const char *url)
     int ReturnValue;
     //printf("carbon_LaunchURL: %s", url);
 
-    CFURLRef theCFURL = CFURLCreateWithBytes(kCFAllocatorDefault, url, strlen(url),
-        kCFStringEncodingISOLatin1, NULL);
+    CFURLRef theCFURL = CFURLCreateWithBytes(kCFAllocatorDefault, (const unsigned char *)url, strlen((char *)url),
+											 kCFStringEncodingISOLatin1, NULL);
  
     if(LSOpenCFURLRef(theCFURL, NULL) == noErr)
         ReturnValue = 0;
@@ -1740,7 +1737,7 @@ void carbon_GetAppPath(char *Dest, int Length)
     strcpy(Dest, TempEXEPath);
 }
 
-int carbon_PromptForPath(char *Path, int PathLength)
+int carbon_PromptForPath(unsigned char *Path, int PathLength)
 {
     NavDialogCreationOptions DialogOptions;
     NavDialogRef Dialog;
