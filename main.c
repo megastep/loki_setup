@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.82 2006-03-14 01:33:57 megastep Exp $ */
+/* $Id: main.c,v 1.83 2006-03-27 22:09:15 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -105,7 +105,7 @@ void abort_install(void)
         UI.abort(info);
 	if ( info && ! info->install_complete )
 		uninstall(info);
-    exit_setup(1);
+    exit_setup(2);
 }
     
 /* List of UI drivers */
