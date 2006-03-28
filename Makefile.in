@@ -210,7 +210,7 @@ install-check: check
 
 # Copy loki_uninstall and the required files
 
-copy-image: install-image loki_uninstall po-image
+copy-loki_uninstall: loki_uninstall
 	@if [ -d $(IMAGE)/bin/$(os)/$(arch)/bin ]; then \
 	    cp loki_uninstall $(IMAGE)/bin/$(os)/$(arch)/bin/$(BRAND)-uninstall; \
 	    strip $(IMAGE)/bin/$(os)/$(arch)/bin/$(BRAND)-uninstall; \
@@ -222,6 +222,8 @@ copy-image: install-image loki_uninstall po-image
 	else \
 		echo No directory to copy the $(BRAND)-uninstall binary file to.; \
 	fi
+
+copy-image: install-image copy-loki_uninstall po-image
 
 install-loki_uninstall: loki_uninstall
 	@if [ -d $(IMAGE)/loki_uninstall/bin/$(arch)/$(libc)/ ]; then \
