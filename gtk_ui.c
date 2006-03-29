@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.119 2006-03-22 20:38:35 megastep Exp $
+   $Id: gtk_ui.c,v 1.120 2006-03-29 23:38:28 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -99,6 +99,7 @@
 #include "detect.h"
 #include "file.h"
 #include "copy.h"
+#include "bools.h"
 #include "loki_launchurl.h"
 
 #if defined(ENABLE_GTK2)
@@ -1386,7 +1387,7 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
     xmlNodePtr child;
     char text[1024] = "";
     const char *help;
-    const char *wanted;
+	char *wanted;
     gchar *name;
     int i;
     GtkWidget *button = NULL;
@@ -1399,18 +1400,31 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
     /* See if this node matches the current architecture */
     wanted = (char *)xmlGetProp(node, BAD_CAST "arch");
     if ( ! match_arch(info, wanted) ) {
+		xmlFree(wanted);
         return;
     }
-
+	xmlFree(wanted);
+		
     wanted = (char *)xmlGetProp(node, BAD_CAST "libc");
     if ( ! match_libc(info, wanted) ) {
+		xmlFree(wanted);
         return;
     }
+	xmlFree(wanted);
 
     wanted = (char *)xmlGetProp(node, BAD_CAST "distro");
     if ( ! match_distro(info, wanted) ) {
+		xmlFree(wanted);
         return;
     }
+	xmlFree(wanted);
+
+    wanted = (char *)xmlGetProp(node, BAD_CAST "if");
+    if ( ! match_condition(wanted) ) {
+		xmlFree(wanted);
+        return;
+    }
+	xmlFree(wanted);
 
     if ( ! get_option_displayed(info, node) ) {
 		return;
@@ -1626,6 +1640,12 @@ static install_state gtkui_init(install_info *info, int argc, char **argv, int n
         return SETUP_ABORT;
     }
     fclose(opened);
+
+#if GTK_MAJOR_VERSION > 1
+	setup_add_bool("gtk2", 1);
+#else
+	setup_add_bool("gtk1", 1);
+#endif
 
     setup_glade = GLADE_XML_NEW(glade_file, "setup_window"); 
 
@@ -1903,31 +1923,40 @@ static install_state gtkui_setup(install_info *info)
 				parse_option(info, NULL, child, window, options, 0, NULL, 1, reinst, &list);
 			}
 		} else if ( ! strcmp((char *)node->name, "component") ) {
-            if ( match_arch(info, (char *)xmlGetProp(node, BAD_CAST "arch")) &&
-                 match_libc(info, (char *)xmlGetProp(node, BAD_CAST "libc")) && 
-				 match_distro(info, (char *)xmlGetProp(node, BAD_CAST "distro")) ) {
+			char *arch = (char *)xmlGetProp(node, BAD_CAST "arch"),
+				*libc = (char *)xmlGetProp(node, BAD_CAST "libc"),
+				*distro = (char *)xmlGetProp(node, BAD_CAST "distro"),
+				*cond = (char *)xmlGetProp(node, BAD_CAST "if");
+
+			if ( match_arch(info, arch) &&
+				 match_libc(info, libc) &&
+				 match_distro(info, distro) && match_condition(cond) ) {
                 xmlNodePtr child;
+				char *name = (char *)xmlGetProp(node, BAD_CAST "name");
+
                 if ( xmlGetProp(node, BAD_CAST "showname") ) {
                     GtkWidget *widget = gtk_hseparator_new();
                     gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 0);
                     gtk_widget_show(widget);                
-                    widget = gtk_label_new((gchar *)xmlGetProp(node, BAD_CAST "name"));
+                    widget = gtk_label_new(name);
                     gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 10);
                     gtk_widget_show(widget);
                 }
                 for ( child = XML_CHILDREN(node); child; child = child->next) {
 					if ( ! strcmp((char *)child->name, "option") ) {
-						parse_option(info, (char *)xmlGetProp(node, BAD_CAST "name"), child, window, options, 0, NULL, 0, 0, NULL);
+						parse_option(info, name, child, window, options, 0, NULL, 0, 0, NULL);
 					} else if ( ! strcmp((char *)child->name, "exclusive") ) {
 						xmlNodePtr child2;
 						GSList *list = NULL;
 						int reinst = GetReinstallNode(info, child);
 						for ( child2 = XML_CHILDREN(child); child2; child2 = child2->next) {
-							parse_option(info, (char *)xmlGetProp(node, BAD_CAST "name"), child2, window, options, 0, NULL, 1, reinst, &list);
+							parse_option(info, name, child2, window, options, 0, NULL, 1, reinst, &list);
 						}
 					}
                 }
+				xmlFree(name);
             }
+			xmlFree(arch); xmlFree(libc); xmlFree(distro); xmlFree(cond);			
 		}
 		node = node->next;
     }

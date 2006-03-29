@@ -285,6 +285,9 @@ extern const char *IsReadyToInstall_explain(install_info *info, char** explanati
 
 extern int         CheckRequirements(install_info *info);
 
+/* Parse the XML file for <bool> definitions */
+extern int GetProductBooleans(install_info *info);
+
 /* Create the initial installation information */
 extern install_info *create_install(const char *configfile,
                                     const char *install_path,

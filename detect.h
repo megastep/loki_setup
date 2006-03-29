@@ -27,6 +27,8 @@ extern int match_distro(struct _install_info *info, const char *wanted);
 
 /* Detect the locale settings */
 extern void DetectLocale(void);
+/* Export some booleans for the locale */
+extern void SetLocaleBools(void);
 /* Matches a locale string against the current one */
 extern int match_locale(const char *str);
 

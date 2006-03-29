@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.34 2006-02-21 19:52:26 megastep Exp $
+ * $Id: dialog_ui.c,v 1.35 2006-03-29 23:38:28 megastep Exp $
  */
 
 #include <limits.h>
@@ -18,6 +18,7 @@
 #include "detect.h"
 #include "file.h"
 #include "copy.h"
+#include "bools.h"
 #include "loki_launchurl.h"
 #include "dialog/dialog.h"
 
@@ -43,12 +44,12 @@ static
 yesno_answer dialog_prompt(const char *txt, yesno_answer suggest)
 {
     if ( suggest == RESPONSE_OK ) {
-	dialog_msgbox(_("Message"), txt, count_lines(txt)+5, 50, 1);
-	return RESPONSE_OK;
+		dialog_msgbox(_("Message"), txt, count_lines(txt)+5, 50, 1);
+		return RESPONSE_OK;
     } else {
-	int ret = dialog_yesno(_("Request"), txt, count_lines(txt)+5, 50,
-			       suggest == RESPONSE_NO);
-	return (ret == 0) ? RESPONSE_YES : RESPONSE_NO;
+		int ret = dialog_yesno(_("Request"), txt, count_lines(txt)+5, 50,
+							   suggest == RESPONSE_NO);
+		return (ret == 0) ? RESPONSE_YES : RESPONSE_NO;
     }
 }
 
@@ -67,6 +68,8 @@ install_state dialog_init(install_info *info,int argc, char **argv,
 		snprintf(title, sizeof(title),
 				 _("%s Installation"), info->desc);
     }
+
+	setup_add_bool("dialog", 1);
 	
 	dialog_vars.cr_wrap = TRUE;
 	dialog_vars.tab_correct = FALSE;
@@ -169,6 +172,9 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr pa
 				continue;
 			 
 			if ( ! match_distro(info, (char *)xmlGetProp(node, BAD_CAST "distro")) )
+				continue;
+
+			if ( ! match_condition((char *)xmlGetProp(node, BAD_CAST "if")) )
 				continue;
 		
 			if ( ! get_option_displayed(info, node) ) {

@@ -28,6 +28,7 @@
 #include "detect.h"
 #include "file.h"
 #include "copy.h"
+#include "bools.h"
 #include "loki_launchurl.h"
 
 /* The README viewer program - on all Linux sytems */
@@ -122,7 +123,8 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
 	const char *help = "", *name;
     char line[BUFSIZ];
     char prompt[BUFSIZ];
-    const char *wanted, *warn;
+    const char *warn;
+	char *wanted;
 	xmlNodePtr kid;
 	int retval = 1;
     yesno_answer response = RESPONSE_INVALID, default_response = RESPONSE_INVALID;
@@ -135,18 +137,31 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
     /* See if this node matches the current architecture */
     wanted = (char *)xmlGetProp(node, BAD_CAST "arch");
     if ( ! match_arch(info, wanted) ) {
+		xmlFree(wanted);
         return retval;
     }
+	xmlFree(wanted);
 
     wanted = (char *)xmlGetProp(node, BAD_CAST "libc");
     if ( ! match_libc(info, wanted) ) {
+		xmlFree(wanted);
         return retval;
     }
+	xmlFree(wanted);
 
     wanted = (char *)xmlGetProp(node, BAD_CAST "distro");
     if ( ! match_distro(info, wanted) ) {
+		xmlFree(wanted);
         return retval;
     }
+	xmlFree(wanted);
+
+    wanted = (char *)xmlGetProp(node, BAD_CAST "if");
+    if ( ! match_condition(wanted) ) {
+		xmlFree(wanted);
+        return retval;
+    }
+	xmlFree(wanted);
 
     if ( ! get_option_displayed(info, node) ) {
 		return retval;
@@ -288,6 +303,8 @@ static int parse_option(install_info *info, const char *component, xmlNodePtr no
 static install_state console_init(install_info *info, int argc, char **argv, int noninteractive)
 {
     install_state state;
+
+	setup_add_bool("console", 1);
 
     if ( info->component ) {
         printf(_("----====== %s / %s installation program ======----\n"), info->desc,
@@ -521,10 +538,16 @@ static install_state console_setup(install_info *info)
 					for ( child = XML_CHILDREN(node); child && parse_option(info, NULL, child, 1, reinst); child = child->next)
 						;
 				} else if ( ! strcmp((char *)node->name, "component") ) {
-                    if ( match_arch(info, (char *)xmlGetProp(node, BAD_CAST "arch")) &&
-                         match_libc(info, (char *)xmlGetProp(node, BAD_CAST "libc")) &&
-				 match_distro(info, (char *)xmlGetProp(node, BAD_CAST "distro")) ) {
+					char *arch = (char *)xmlGetProp(node, BAD_CAST "arch"),
+						*libc = (char *)xmlGetProp(node, BAD_CAST "libc"),
+						*distro = (char *)xmlGetProp(node, BAD_CAST "distro"),
+						*cond = (char *)xmlGetProp(node, BAD_CAST "if");
+
+                    if ( match_arch(info, arch) &&
+                         match_libc(info, libc) &&
+						 match_distro(info, distro) && match_condition(cond) ) {
                         xmlNodePtr child;
+
                         if ( xmlGetProp(node, BAD_CAST "showname") ) {
 							const char *str = (char *)xmlGetProp(node, BAD_CAST "name");
 							if ( !str || !strcmp(str, "Default") ) { /* Show the name of the product instead */
@@ -536,6 +559,7 @@ static install_state console_setup(install_info *info)
                             parse_option(info, (char *)xmlGetProp(node, BAD_CAST "name"), child, 0, 0);
                         }
                     }
+					xmlFree(arch); xmlFree(libc); xmlFree(distro); xmlFree(cond);
                 }
 				node = node->next;
 			}

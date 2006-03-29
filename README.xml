@@ -277,6 +277,8 @@ There are also optional attributes :
   distro    This component is only available with the specified OS distribution.
             Look at the end of this file for a list of possible values.
 
+  if        Specify an expression that has to be satisfied. See the BOOL element for more details.
+
   preuninstall     The path to an optional pre-uninstall script for the component.
 
   postuninstall    The path to an optional post-uninstall script for the component.
@@ -336,6 +338,67 @@ This element takes one mandatory attribute :
   var       The name of the environment variable to save.
 
 
+The BOOL element :
+
+This element allows the user to create some complex expressions to guide the
+installer. This element allows the user to define boolean conditions, the values of
+which are defined by arbritrary scripts. These booleans can then be used as part
+of expressions used by other elements, like FILE or BINARY below, to define conditions.
+
+This element must be a direct child of the root INSTALL element. Booleans are global
+to a particular instance of the installer. Additionally, the installer itself defines
+a set of standard booleans, as described below.
+
+Booleans are intended to replace the previous filtering mechanisms, using "arch", "libc"
+and so on attributes, while providing additional flexibility.
+
+Booleans are case sensitive.
+
+The BOOL element takes one mandatory attribute :
+
+  name      The symbolic name for the boolean (variable name). May be up to 30 characters
+            long, and must start with an alphanumerical character. May not contain blank
+            spaces.
+
+Additionally, one of the following attributes must be used :
+
+  script    The command to be run to determine the value of the boolean. In the UNIX
+            tradition, it should return 0 for a TRUE value.
+
+  envvar    The name of an environment variable to query for the value of the boolean.
+            The value must be a non-zero number to map to be TRUE. If the variable is not
+            set in the environment, the boolean will likewise be set to FALSE.
+
+It also recognizes one optional attribute :
+
+  later     If set to "yes", the script will be executed at the time that the condition
+            referencing it is evaluated. The default is to run the script once immediately
+            upon initialization to gather the static value.
+
+Standard booleans defined by the installer :
+- Standard 'true' and 'false' booleans.
+- 'is-root' is TRUE if the installer is running as root.
+- 'reinstalling' is TRUE if the product is already installed.
+- 'bzip2' is TRUE if Bzip2 decompression is available in the installer.
+- One boolean corresponding to the selected user interface: gtk1, gtk2, carbon, dialog, console
+- One boolean for the CPU architecture: x86, ppc, sparc, alpha, etc
+- One boolean for the detected libc version: libc5, glibc-2.1, etc.
+- One boolean for the distribution / OS name : redhat, suse, aix, sco, etc.
+- A boolean for the OS name as returned by uname.
+- Two booleans representing the detection distribution version (not always meaningful) :
+   distro-major-<number> and distro-minor-<number>.
+= Booleans for the detected locale setting and its encoding, e.g. en_US, ISO-8859-1, etc.
+- On Linux, 'selinux' indicates whether SELinux is available and enabled.
+- If RPM support was compiled in, 'rpm-support' is set. If RPM 3.x, then 'rpm3-support' is
+  also set to TRUE.
+
+For example, on a Redhat Linux 7.3 sytem, the following bools would be defined to TRUE :
+ Linux, x86, redhat, distro-major-7, distro-minor-3
+
+For more information about how to write expressions referencing these booleans, refer
+to "About Boolean Expressions" below.
+            
+
 The REQUIRE element :
 
 This element allows to set prerequisite conditions for the installer, through the
@@ -368,6 +431,8 @@ This element takes some optional attributes :
   distro    This component applies only to the specified OS distribution.
             Look at the end of this file for a list of possible values.
 
+  condition Specify an expression that has to be satisfied. See the BOOL element for more details.
+
   version   [only for feature attribute] the minimum integer version number
             required for the specified feature.
 
@@ -393,6 +458,8 @@ This element takes some optional attributes :
 
   command   A shell commands whose return value will determine whether to display the message.
             A return value of 0 must be returned for the message to be displayed.
+
+  if        Specify an expression that has to be satisfied. See the BOOL element for more details.
 
   nogui     If set to 'true', then the message will not be displayed in a GUI environment (X11, Mac)
 
@@ -515,6 +582,8 @@ There are several optional attributes of the option element:
  distro     This option is only available with the specified OS distribution.
             Look at the end of this file for a list of possible values.
 
+ if         Specify an expression that has to be satisfied. See the BOOL element for more details.
+
  size       This is an optional size of the install option. The size can be
             expressed in megabytes (with a M suffix), kilobytes (K), gigabytes
             (G), or even bytes (B, or no suffix). Please note that versions of
@@ -636,6 +705,9 @@ There are several optional attributes of the binary element:
  distro     Files are only installed with the specified OS distribution.
             Look at the end of this file for a list of possible values.
 
+ if         Specify an expression that has to be satisfied. See the BOOL
+            element for more details.
+
  symlink    This is a symbolic link that is installed in the system path
             and points to the installed binary.
 
@@ -742,6 +814,9 @@ There are several optional attributes of the files element:
  distro     Files are only installed with the specified OS distribution.
             Look at the end of this file for a list of possible values.
 
+ if         Specify an expression that has to be satisfied. See the BOOL
+            element for more details.
+
  srcpath    This is a directory relative to the top of the CD where the files
             for this element should be copied from.
 
@@ -812,6 +887,22 @@ The following attributes are optional :
  symlink    A comma-separated list of symbolic links to create for this man page, in the same
             section. Use this when your man page covers several commands / functions.
 
+ arch       "any" is synonymous with the current architecture. You can also
+            use this attribute to force a precise architecture, for example
+            "ppc" or "sparc64". Matching can be negated with a leading !,
+            for instance "!x86".
+
+ libc       "any" is synonymous with the current libc version. This can
+            also be used to force a libc version for the binary, i.e
+            "glibc-2.0" or "glibc-2.1". Matching can be negated with a
+            leading !, for example "!glibc-2.0".
+
+ distro     Files are only installed with the specified OS distribution.
+            Look at the end of this file for a list of possible values.
+
+ if         Specify an expression that has to be satisfied. See the BOOL
+            element for more details.
+
 Note that the MANPAGE element does not take any children.
 Do not forget to set the "manpages" attribute to the root <install> element to "yes" to be able
 to use this feature.
@@ -838,6 +929,22 @@ There supported attributes for the script element are :
  lang       The script is only installed if the current locale matches the
             string of this attribute. See 'About localization' below for
             more details.
+
+ arch       "any" is synonymous with the current architecture. You can also
+            use this attribute to force a precise architecture, for example
+            "ppc" or "sparc64". Matching can be negated with a leading !,
+            for instance "!x86".
+
+ libc       "any" is synonymous with the current libc version. This can
+            also be used to force a libc version for the binary, i.e
+            "glibc-2.0" or "glibc-2.1". Matching can be negated with a
+            leading !, for example "!glibc-2.0".
+
+ distro     Files are only installed with the specified OS distribution.
+            Look at the end of this file for a list of possible values.
+
+ if         Specify an expression that has to be satisfied. See the BOOL
+            element for more details.
 
  size       If the script handles the installation of some files and you want
             the progress bar to reflect it, indicate the size here. The size
@@ -920,6 +1027,25 @@ Examples: redhat-7.1 (will match RedHat 7.1 and up)
           slackware-7.0-major (will match all Slackware 7.x releases, but not 8.x and up)
           caldera-3.1-exact (will match Caldera OpenLinux 3.1 only)
           linux-2.4 (requires a 2.4.x Linux kernel or above)
+
+About Boolean Expressions :
+
+Many elements support the 'if' or 'condition' attribute to reference complex expressions
+using the Setup boolean variables. The expressions have to follow the following syntax:
+
+expression := [!]<operator>(<expression1>,<expression2>) |
+              [!]<boolean name>
+
+Supported operators are : + (logical "and"), | (logical "or"), and ^ (logical "exclusive or").
+Any expression can be negated by a ! prefix.
+An undefined boolean is the same as a false boolean.
+
+Some examples :
+
+Match Fedora on PowerPC system:
+   +(fedora,ppc)
+Match one of SuSE, Redhat 9 or Fedora, on all but Intel:
+  +(^(suse,+(redhat,distro-major-9),fedora),!x86)
 
 About Meta-Installations :
 

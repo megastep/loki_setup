@@ -53,6 +53,7 @@
 #include "install_ui.h"
 #include "install_log.h"
 #include "detect.h"
+#include "bools.h"
 
 #ifndef MNTTYPE_CDROM
 #if defined(__FreeBSD__)
@@ -857,6 +858,25 @@ void DetectLocale(void)
 		fprintf(stderr, _("Detected locale is %s\n"), current_locale);
 #endif
 }
+
+void SetLocaleBools(void)
+{
+	if ( current_locale ) {
+		char *dup = strdup(current_locale), *ptr;
+
+		ptr = strchr(dup, '.');
+		if ( ptr ) {
+			*ptr = '\0';
+			setup_add_bool(dup, 1);
+		}
+		free(dup);
+		setup_add_bool(current_locale, 1);
+	}
+	if ( current_encoding ) {
+		setup_add_bool(current_encoding, 1);
+	}
+}
+
 
 /* Matches a locale string against the current one */
 

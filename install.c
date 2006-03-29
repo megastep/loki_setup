@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.164 2006-03-15 20:40:46 megastep Exp $ */
+/* $Id: install.c,v 1.165 2006-03-29 23:38:28 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -78,6 +78,7 @@
 #include "copy.h"
 #include "file.h"
 #include "network.h"
+#include "bools.h"
 #include "loki_launchurl.h"
 
 #if HARDCODE_TRANSLATION
@@ -139,6 +140,7 @@ typedef struct
 static SetupFeature features[] =
 {
 	{ "inline-scripts", 1 },
+	{ "booleans", 1 },
 	{ NULL, 0 }
 };
 
@@ -610,6 +612,65 @@ const char *GetProductREADME(install_info *info, int *keepdirs)
 	return NULL;
 }
 
+/* Parse the XML file for <bool> definitions */
+int GetProductBooleans(install_info *info)
+{
+	xmlNodePtr node;
+	char *name, *script, *later, *envvar;
+	int count = 0;
+
+	for(node = XML_CHILDREN(XML_ROOT(info->config)); node; node = node->next) {
+		if(! strcmp((char *)node->name, "bool") ) {
+			name = (char *)xmlGetProp(node, BAD_CAST "name");
+			script = (char *)xmlGetProp(node, BAD_CAST "script");
+			later = (char *)xmlGetProp(node, BAD_CAST "later");
+			envvar = (char *)xmlGetProp(node, BAD_CAST "env");
+
+			if ( script ) {
+				setup_bool *b = setup_new_bool(name);
+				if ( b ) {
+					count ++;
+					b->script = strdup(script);
+					if ( later && (!strcasecmp(later, "yes") || !strcasecmp(later, "true"))) {
+						b->once = 0;
+						log_debug("New delayed scripted bool: %s = '%s'", name, b->script);
+					} else {
+						b->once = 1;
+						setup_set_bool(b, run_script(info, script, 0, 0) == 0);
+						log_debug("New scripted bool: %s = %s", name, b->value ? "TRUE" : "FALSE");
+					}
+				} else {
+					log_fatal(_("Failed to allocate new bool"));
+				}
+			} else if ( envvar ) {
+				setup_bool *b = setup_new_bool(name);
+				if ( b ) {
+					char *env = getenv(envvar);
+
+					count ++;
+					b->once = 1;
+					if (env) {
+						setup_set_bool(b, atoi(env) != 0);
+					} else {
+						setup_set_bool(b, 0);
+					}
+					log_debug("New environment bool: %s = %s (from %s)", name, b->value ? "TRUE" : "FALSE", envvar);
+				}
+			} else {
+				log_warning(_("Must have at least 'script' or 'env' attribute for <bool>"));
+			}
+			xmlFree(name);
+			xmlFree(script);
+			xmlFree(later);
+			xmlFree(envvar);
+		}
+	}
+	if ( count > 0 ) {
+		log_debug("Parsed %d bools.", count);
+	}
+	return count;
+}
+
 const char *GetProductPostInstallMsg(install_info *info)
 {
 	xmlNodePtr node;
@@ -629,6 +690,15 @@ const char *GetProductPostInstallMsg(install_info *info)
 			prop = (char *)xmlGetProp(node, BAD_CAST "command");
 			if ( prop ) { /* Run the command */
 				if ( run_script(info, prop, 0, 1) != 0 ) { /* Failed, skip */
+					xmlFree(prop);
+					continue;
+				}
+				xmlFree(prop);
+			}
+			xmlFree(prop);
+			prop = (char *)xmlGetProp(node, BAD_CAST "if");
+			if ( prop ) { /* Evaluate the condition */
+				if ( !match_condition(prop)  ) { /* Failed, skip */
 					xmlFree(prop);
 					continue;
 				}
@@ -1343,7 +1413,7 @@ int enable_option(install_info *info, const char *option)
 int CheckRequirements(install_info *info)
 {
 	xmlNodePtr node = XML_CHILDREN(XML_ROOT(info->config));
-	char line[BUFSIZ], buf[BUFSIZ], *lang, *arch, *libc, *distro;
+	char line[BUFSIZ], buf[BUFSIZ], *lang, *arch, *libc, *distro, *cond;
     const char *text;
 
 	while ( node ) {
@@ -1351,10 +1421,12 @@ int CheckRequirements(install_info *info)
 		arch = (char *)xmlGetProp(node, BAD_CAST "arch");
 		libc = (char *)xmlGetProp(node, BAD_CAST "libc");
 		distro = (char *)xmlGetProp(node, BAD_CAST "distro");
+		cond = (char *)xmlGetProp(node, BAD_CAST "condition");
 		if ( !strcmp((char *)node->name, "require") && match_locale(lang) &&
 			 match_arch(info, arch) &&
 			 match_libc(info, libc) &&
-			 match_distro(info, distro) ) {
+			 match_distro(info, distro) &&
+			 match_condition(cond) ) {
 			char *commandprop = (char *)xmlGetProp(node, BAD_CAST "command");
 			char *featureprop = (char *)xmlGetProp(node, BAD_CAST "feature");
 			xmlFree(lang); xmlFree(arch); xmlFree(libc); xmlFree(distro);
@@ -1400,7 +1472,7 @@ int CheckRequirements(install_info *info)
 
 			xmlFree(featureprop);
 		} else {
-			xmlFree(lang); xmlFree(arch); xmlFree(libc); xmlFree(distro);
+			xmlFree(lang); xmlFree(arch); xmlFree(libc); xmlFree(distro); xmlFree(cond);
 		}
 		node = node->next;
 	}
@@ -1853,7 +1925,7 @@ static int tags_left;
 
 static void optionstag_sub(install_info *info, xmlNodePtr node)
 {
-	char *lang, *arch, *libc, *distro;
+	char *lang, *arch, *libc, *distro, *cond;
 
 	if ( tags_left <= 0 ) /* String full */ {
 		return;
@@ -1868,11 +1940,13 @@ static void optionstag_sub(install_info *info, xmlNodePtr node)
 				arch = (char *)xmlGetProp(node, BAD_CAST "arch");
 				libc = (char *)xmlGetProp(node, BAD_CAST "libc");
 				distro = (char *)xmlGetProp(node, BAD_CAST "distro");
+				cond = (char *)xmlGetProp(node, BAD_CAST "if");
 				if ( tag &&
 					 match_locale(lang) &&
 					 match_arch(info, arch) &&
 					 match_libc(info, libc) &&
-					 match_distro(info, distro)
+					 match_distro(info, distro) &&
+					 match_condition(cond)
 					 ) {
 					/* Do not add the tag if it's already in */
 					if  ( info->product ) {
@@ -1903,7 +1977,7 @@ static void optionstag_sub(install_info *info, xmlNodePtr node)
 						tags_left --;
 					}
 				}
-				xmlFree(lang); xmlFree(arch); xmlFree(libc); xmlFree(distro);
+				xmlFree(lang); xmlFree(arch); xmlFree(libc); xmlFree(distro); xmlFree(cond);
 				xmlFree(tag);
 			}
 			xmlFree(wanted);
@@ -1915,12 +1989,14 @@ static void optionstag_sub(install_info *info, xmlNodePtr node)
 			arch = (char *)xmlGetProp(node, BAD_CAST "arch");
 			libc = (char *)xmlGetProp(node, BAD_CAST "libc");
 			distro = (char *)xmlGetProp(node, BAD_CAST "distro");
+			cond = (char *)xmlGetProp(node, BAD_CAST "if");
             if ( match_arch(info, arch) &&
                  match_libc(info, libc) &&
-				 match_distro(info, distro) ) {
+				 match_distro(info, distro) &&
+				 match_condition(cond) ) {
 				optionstag_sub(info, XML_CHILDREN(node));
 			}
-			xmlFree(arch); xmlFree(libc); xmlFree(distro);
+			xmlFree(arch); xmlFree(libc); xmlFree(distro); xmlFree(cond);
 		}
 		node = node->next;
 	}

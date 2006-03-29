@@ -43,7 +43,7 @@ CFLAGS += $(OPTIMIZE) $(HEADERS) $(OPTIONS)
 CXXFLAGS = $(CFLAGS)
 
 COMMON_OBJS = log.o install_log.o
-CORE_OBJS   = detect.o plugins.o network.o install.o copy.o file.o loki_launchurl.o
+CORE_OBJS   = detect.o plugins.o network.o install.o copy.o file.o loki_launchurl.o bools.o
 OBJS 		= $(COMMON_OBJS) $(CORE_OBJS) main.o 
 LOKI_UNINSTALL_OBJS = loki_uninstall.o uninstall_ui.o
 CARBON_UNINSTALL_OBJS = $(COMMON_OBJS) carbon_uninstall.o uninstall_carbonui.o

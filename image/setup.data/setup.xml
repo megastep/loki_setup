@@ -7,6 +7,8 @@
   <eula>
    license.txt
   </eula>
+  <bool name="has-passwd" script="test -f /etc/passwd" later="yes"/>
+  <bool name="env-test" env="TEST_VALUE"/>
   <component name="Default" version="1.54" default="yes">
    <option install="true" required="false">
     Base Install
@@ -40,7 +42,7 @@
 	  </option>
     </exclusive>
    </option>
-   <option>
+   <option if="+(+(x86,Linux),has-passwd,!false)">
     Classic Campaign (can run from CD)
     <warn>Don't touch that
     or you may hurt yourself

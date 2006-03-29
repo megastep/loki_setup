@@ -10,6 +10,7 @@
 #include "detect.h"
 #include "file.h"
 #include "copy.h"
+#include "bools.h"
 #include "loki_launchurl.h"
 
 extern char gCDKeyString[128];
@@ -113,18 +114,31 @@ static void parse_option(install_info *info, const char *component, xmlNodePtr n
     /* See if this node matches the current architecture */
     wanted = (char *) xmlGetProp(node, BAD_CAST "arch");
     if ( ! match_arch(info, wanted) ) {
+		xmlFree(wanted);
         return;
     }
+	xmlFree(wanted);
 
     wanted = (char *) xmlGetProp(node, BAD_CAST "libc");
     if ( ! match_libc(info, wanted) ) {
+		xmlFree(wanted);
         return;
     }
+	xmlFree(wanted);
 
     wanted = (char *) xmlGetProp(node, BAD_CAST "distro");
     if ( ! match_distro(info, wanted) ) {
+		xmlFree(wanted);
         return;
     }
+	xmlFree(wanted);
+
+    wanted = (char *) xmlGetProp(node, BAD_CAST "if");
+    if ( ! match_condition(wanted) ) {
+		xmlFree(wanted);
+        return;
+    }
+	xmlFree(wanted);
 
     if ( ! get_option_displayed(info, node) ) {
 		return;
@@ -911,6 +925,8 @@ static install_state carbonui_init(install_info *info, int argc, char **argv, in
         return SETUP_ABORT;
     }
 
+	setup_add_bool("carbon", 1);
+
     // Save our state flag and install info structure
     cur_state = SETUP_INIT;
     cur_info = info;
@@ -1132,10 +1148,17 @@ static install_state carbonui_setup(install_info *info)
 				    parse_option(info, NULL, child, options, 0, NULL, 1, &list);
 			    }
 		    } else if ( ! strcmp((char *) node->name, "component") ) {
-                if ( match_arch(info, (char *)xmlGetProp(node, BAD_CAST "arch")) &&
-                    match_libc(info, (char *)xmlGetProp(node, BAD_CAST "libc")) && 
-				    match_distro(info, (char *)xmlGetProp(node, BAD_CAST "distro")) ) {
+				char *arch = (char *)xmlGetProp(node, BAD_CAST "arch"),
+					*libc = (char *)xmlGetProp(node, BAD_CAST "libc"),
+					*distro = (char *)xmlGetProp(node, BAD_CAST "distro"),
+					*cond = (char *)xmlGetProp(node, BAD_CAST "if");
+				
+				if ( match_arch(info, arch) &&
+					 match_libc(info, libc) &&
+					 match_distro(info, distro) && match_condition(cond) ) {
                     xmlNodePtr child;
+					char *name = (char *)xmlGetProp(node, BAD_CAST "name");
+
                     if ( xmlGetProp(node, BAD_CAST "showname") ) {
                         //GtkWidget *widget = gtk_hseparator_new();
                         //gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 0);
@@ -1144,22 +1167,24 @@ static install_state carbonui_setup(install_info *info)
                         //widget = gtk_label_new(xmlGetProp(node, BAD_CAST "name"));
                         //gtk_box_pack_start(GTK_BOX(options), GTK_WIDGET(widget), FALSE, FALSE, 10);
                         //gtk_widget_show(widget);
-                        carbon_OptionsNewLabel(options, (char *)xmlGetProp(node, BAD_CAST "name"));
+                        carbon_OptionsNewLabel(options, name);
                     }
                     for ( child = XML_CHILDREN(node); child; child = child->next) {
 					    if ( ! strcmp((char *)child->name, "option") ) {
 						    //parse_option(info, xmlGetProp(node, BAD_CAST "name"), child, window, options, 0, NULL, 0, NULL);
-                            parse_option(info, (char *)xmlGetProp(node, BAD_CAST "name"), child, options, 0, NULL, 0, NULL);
+                            parse_option(info, name, child, options, 0, NULL, 0, NULL);
 					    } else if ( ! strcmp((char *)child->name, "exclusive") ) {
 						    xmlNodePtr child2;
 						    RadioGroup *list = NULL;
 						    for ( child2 = XML_CHILDREN(child); child2; child2 = child2->next) {
 							    //parse_option(info, xmlGetProp(node, BAD_CAST "name"), child2, window, options, 0, NULL, 1, &list);
-                                parse_option(info, (char *)xmlGetProp(node, BAD_CAST "name"), child2, options, 0, NULL, 1, &list);
+                                parse_option(info, name, child2, options, 0, NULL, 1, &list);
 						    }
 					    }
                     }
+					xmlFree(name);
                 }
+				xmlFree(arch); xmlFree(libc); xmlFree(distro); xmlFree(cond);			
 		    }
 		    node = node->next;
         }

@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.83 2006-03-27 22:09:15 megastep Exp $ */
+/* $Id: main.c,v 1.84 2006-03-29 23:38:28 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -41,6 +41,7 @@ Modifications by Borland/Inprise Corp.:
 #include "file.h"
 #include "detect.h"
 #include "plugins.h"
+#include "bools.h"
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
@@ -80,6 +81,7 @@ void exit_setup(int ret)
     /* Cleanup afterwards */
     if ( info )
         delete_install(info);
+	setup_exit_bools();
     FreePlugins();
 	free_corrupt_files();
     unmount_filesystems();
@@ -292,6 +294,8 @@ int main(int argc, char **argv)
         exit(3);
     }
 
+	setup_init_bools(info);
+
     /* Get the appropriate setup UI */
     for ( i=0; GUI_okay[i]; ++i ) {
         if ( GUI_okay[i](&UI, &argc, &argv) ) {
@@ -414,6 +418,9 @@ int main(int argc, char **argv)
 					state = SETUP_EXIT;
 					break;
                 }
+
+				/* Initialize user-specified booleans */
+				GetProductBooleans(info);
 
 				if ( ! CheckRequirements(info) ) {
 					state = SETUP_ABORT;

@@ -100,6 +100,7 @@
 #include "plugins.h"
 #include "install_log.h"
 #include "install_ui.h"
+#include "bools.h"
 
 char current_option_txt[200];
 struct option_elem *current_option = NULL;
@@ -952,7 +953,8 @@ ssize_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
 		if ( lang_matched &&
 			 match_arch(info, (char *)xmlGetProp(node, BAD_CAST "arch")) &&
 			 match_libc(info, (char *)xmlGetProp(node, BAD_CAST "libc")) &&
-			 match_distro(info, (char *)xmlGetProp(node, BAD_CAST "distro"))) {
+			 match_distro(info, (char *)xmlGetProp(node, BAD_CAST "distro")) &&
+			 match_condition((char *)xmlGetProp(node, BAD_CAST "if")) ) {
 
 
 			if ( strcmp((char *)node->name, "files") == 0 ) {
@@ -1098,7 +1100,8 @@ ssize_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
 				log_fatal(_("Component element needs to have a version"));
 			if ( match_arch(info, (char *)xmlGetProp(node, BAD_CAST "arch")) &&
 				 match_libc(info, (char *)xmlGetProp(node, BAD_CAST "libc")) &&
-				 match_distro(info, (char *)xmlGetProp(node, BAD_CAST "distro")) )
+				 match_distro(info, (char *)xmlGetProp(node, BAD_CAST "distro")) &&
+				 match_condition((char *)xmlGetProp(node, BAD_CAST "if")) )
 			{
 				current_component = add_component_entry(info, name, version, 
 								xmlGetProp(node, BAD_CAST "default") != NULL,
@@ -1323,7 +1326,8 @@ unsigned long long size_node(install_info *info, xmlNodePtr node)
 			if ( lang_matched  &&
 				 match_arch(info, (char *)xmlGetProp(node, BAD_CAST "arch")) &&
 				 match_libc(info, (char *)xmlGetProp(node, BAD_CAST "libc")) &&
-				 match_distro(info, (char *)xmlGetProp(node, BAD_CAST "distro"))) {
+				 match_distro(info, (char *)xmlGetProp(node, BAD_CAST "distro")) && 
+				 match_condition((char *)xmlGetProp(node, BAD_CAST "if")) ) {
 				if ( strcmp((char *)node->name, "files") == 0 ) {
 					char* suffix = (char *)xmlGetProp(node, BAD_CAST "suffix");
 					size += size_list(info, from_cdrom, srcpath,
@@ -1363,7 +1367,8 @@ unsigned long long size_tree(install_info *info, xmlNodePtr node)
         } else if ( !strcmp((char *)node->name, "component") ) {
             if ( match_arch(info, (char *)xmlGetProp(node, BAD_CAST "arch")) &&
                  match_libc(info, (char *)xmlGetProp(node, BAD_CAST "libc")) &&
-		 match_distro(info, (char *)xmlGetProp(node, BAD_CAST "distro")) ) {
+				 match_distro(info, (char *)xmlGetProp(node, BAD_CAST "distro")) && 
+				 match_condition((char *)xmlGetProp(node, BAD_CAST "if")) ) {
                 size += size_tree(info, XML_CHILDREN(node));
             }
 		} else if ( !strcmp((char *)node->name, "readme") ||

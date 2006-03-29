@@ -1,4 +1,7 @@
 Current:
+Stephane Peter (Codehost) - Wed Mar 29 15:37:18 PST 2006
+ * Added booleans subsystem with support for complex expressions in
+   most installer tags.
 Stephane Peter (Codehost) - Wed Mar 15 12:39:34 PST 2006
  * Make fork on binary start optional, through root "fork" attribute.
 Stephane Peter (Codehost) - Thu Mar  9 11:09:13 PST 2006
