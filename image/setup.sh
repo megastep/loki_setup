@@ -265,16 +265,16 @@ then
 fi
 
 # Try to run the setup program
-try_run setup.gtk $args $*
+try_run setup.gtk $args $* 
 status=$?
-if [ $status -ne 2 ] ; then  # setup.gtk couldn't connect to X11 server - ignore
-	try_run setup $args $* || {
-		if [ $status -ne 2 ]; then
-			echo "The setup program seems to have failed on $arch/$libc"
-			echo
-			echo $FATAL_ERROR
-		fi
-		status=1
-	}
+if [ $status -ne 0 ] && [ $status -ne 2 ] ; then  # setup.gtk couldn't connect to X11 server - ignore
+	try_run setup $args $*
+	status=$?
+	if [ $status -ne 0 ] && [ $status -ne 2 ]; then
+		echo "The setup program seems to have failed on $arch/$libc"
+		echo
+		echo $FATAL_ERROR
+	fi
 fi
+
 exit $status
