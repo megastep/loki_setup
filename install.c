@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.166 2006-03-30 00:13:01 megastep Exp $ */
+/* $Id: install.c,v 1.167 2006-03-30 01:01:29 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -2408,6 +2408,24 @@ void mark_cmd_options(install_info *info, xmlNodePtr parent, int exclusive)
 						log_debug("Script run: '%s' returned %d\n", str, cmd);
 					} else {
 						log_fatal(_("Missing 'command' attribute for an option"));
+						xmlSetProp(child, BAD_CAST "install", BAD_CAST "false");
+					}
+				} else if ( !strcmp(str, "condition") ) {
+					/* Evaluate the expression and set to "true" if the return value is ok */
+					xmlFree(str);
+					str = (char *)xmlGetProp(child, BAD_CAST "condition");
+					if ( str ) {
+						setup_expression *xp = setup_parse_expression(str);
+						if ( xp ) {
+							cmd = !setup_evaluate(xp); /* Reverse because we are using Unix conventions */
+							xmlSetProp(child, BAD_CAST "install", cmd ? BAD_CAST "false" : BAD_CAST "true");
+							setup_free_expression(xp);
+						} else {
+							log_fatal(_("Expression '%s' did not parse"), str);
+							xmlSetProp(child, BAD_CAST "install", BAD_CAST "false");
+						}
+					} else {
+						log_fatal(_("Missing 'condition' attribute for an option"));
 						xmlSetProp(child, BAD_CAST "install", BAD_CAST "false");
 					}
 				} else if ( !strcmp(str, "true") ) {
