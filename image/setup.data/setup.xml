@@ -7,6 +7,8 @@
   <eula>
    license.txt
   </eula>
+
+  <bool name="unix" if="!|(Linux,FreeBSD)"/>
   <bool name="has-passwd" script="test -f /etc/passwd" later="yes"/>
   <bool name="env-test" env="TEST_VALUE"/>
   <component name="Default" version="1.54" default="yes">

@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.168 2006-03-30 01:12:36 megastep Exp $ */
+/* $Id: install.c,v 1.169 2006-03-30 01:26:17 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -658,6 +658,8 @@ int GetProductBooleans(install_info *info)
 						}
 						log_debug("New environment bool: %s = %s (from %s)", name, b->value ? "TRUE" : "FALSE", envvar);
 					}
+				} else if ( cond ) { /* We matched the condition - if all else fails, create the bool */
+					setup_add_bool(name, 1);
 				} else {
 					log_warning(_("Must have at least 'script' or 'env' attribute for <bool>"));
 				}

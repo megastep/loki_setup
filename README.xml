@@ -360,7 +360,7 @@ The BOOL element takes one mandatory attribute :
             long, and must start with an alphanumerical character. May not contain blank
             spaces.
 
-Additionally, one of the following attributes must be used :
+Additionally, one of the following attributes must be used, unless "if" below is in use :
 
   script    The command to be run to determine the value of the boolean. In the UNIX
             tradition, it should return 0 for a TRUE value.
@@ -379,6 +379,8 @@ It also recognizes two optional attributes :
             expression can reference any previously defined boolean. See below for more details
             about the syntax. If this expression evaluates to FALSE, then the script won't be
             run, or the environment queried, and the value will also be set to FALSE.
+            Note: if neither "script" or "envvar" are set for the element, the value will be set
+            to true if the condition is satisfied.
 
 Standard booleans defined by the installer :
 - Standard 'true' and 'false' booleans.
