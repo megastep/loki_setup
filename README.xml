@@ -369,11 +369,16 @@ Additionally, one of the following attributes must be used :
             The value must be a non-zero number to map to be TRUE. If the variable is not
             set in the environment, the boolean will likewise be set to FALSE.
 
-It also recognizes one optional attribute :
+It also recognizes two optional attributes :
 
   later     If set to "yes", the script will be executed at the time that the condition
             referencing it is evaluated. The default is to run the script once immediately
             upon initialization to gather the static value.
+
+  if        Additionally make this boolean dependent on another boolean expression. This
+            expression can reference any previously defined boolean. See below for more details
+            about the syntax. If this expression evaluates to FALSE, then the script won't be
+            run, or the environment queried, and the value will also be set to FALSE.
 
 Standard booleans defined by the installer :
 - Standard 'true' and 'false' booleans.

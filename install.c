@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.165 2006-03-29 23:38:28 megastep Exp $ */
+/* $Id: install.c,v 1.166 2006-03-30 00:13:01 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -616,7 +616,7 @@ const char *GetProductREADME(install_info *info, int *keepdirs)
 int GetProductBooleans(install_info *info)
 {
 	xmlNodePtr node;
-	char *name, *script, *later, *envvar;
+	char *name, *script, *later, *envvar, *cond;
 	int count = 0;
 
 	for(node = XML_CHILDREN(XML_ROOT(info->config)); node; node = node->next) {
@@ -625,44 +625,51 @@ int GetProductBooleans(install_info *info)
 			script = (char *)xmlGetProp(node, BAD_CAST "script");
 			later = (char *)xmlGetProp(node, BAD_CAST "later");
 			envvar = (char *)xmlGetProp(node, BAD_CAST "env");
+			cond = (char *)xmlGetProp(node, BAD_CAST "if");
 
-			if ( script ) {
-				setup_bool *b = setup_new_bool(name);
-				if ( b ) {
-					count ++;
-					b->script = strdup(script);
-					if ( later && (!strcasecmp(later, "yes") || !strcasecmp(later, "true"))) {
-						b->once = 0;
-						log_debug("New delayed scripted bool: %s = '%s'", name, b->script);
+			if ( match_condition(cond) ) {
+				if ( script ) {
+					setup_bool *b = setup_new_bool(name);
+					if ( b ) {
+						count ++;
+						b->script = strdup(script);
+						if ( later && (!strcasecmp(later, "yes") || !strcasecmp(later, "true"))) {
+							b->once = 0;
+							log_debug("New delayed scripted bool: %s = '%s'", name, b->script);
+						} else {
+							b->once = 1;
+							setup_set_bool(b, run_script(info, script, 0, 0) == 0);
+							log_debug("New scripted bool: %s = %s", name, b->value ? "TRUE" : "FALSE");
+						}
 					} else {
+						log_fatal(_("Failed to allocate new bool"));
+					}
+				} else if ( envvar ) {
+					setup_bool *b = setup_new_bool(name);
+					if ( b ) {
+						char *env = getenv(envvar);
+						
+						count ++;
 						b->once = 1;
-						setup_set_bool(b, run_script(info, script, 0, 0) == 0);
-						log_debug("New scripted bool: %s = %s", name, b->value ? "TRUE" : "FALSE");
+						if (env) {
+							setup_set_bool(b, atoi(env) != 0);
+						} else {
+							setup_set_bool(b, 0);
+						}
+						log_debug("New environment bool: %s = %s (from %s)", name, b->value ? "TRUE" : "FALSE", envvar);
 					}
 				} else {
-					log_fatal(_("Failed to allocate new bool"));
-				}
-			} else if ( envvar ) {
-				setup_bool *b = setup_new_bool(name);
-				if ( b ) {
-					char *env = getenv(envvar);
-
-					count ++;
-					b->once = 1;
-					if (env) {
-						setup_set_bool(b, atoi(env) != 0);
-					} else {
-						setup_set_bool(b, 0);
-					}
-					log_debug("New environment bool: %s = %s (from %s)", name, b->value ? "TRUE" : "FALSE", envvar);
+					log_warning(_("Must have at least 'script' or 'env' attribute for <bool>"));
 				}
 			} else {
-				log_warning(_("Must have at least 'script' or 'env' attribute for <bool>"));
+				setup_add_bool(name, 0);
+				log_debug("New bool '%s' set to FALSE because of condition '%s'", name, cond);
 			}
 			xmlFree(name);
 			xmlFree(script);
 			xmlFree(later);
 			xmlFree(envvar);
+			xmlFree(cond);
 		}
 	}
 	if ( count > 0 ) {
