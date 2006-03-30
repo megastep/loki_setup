@@ -576,6 +576,9 @@ There are several optional attributes of the option element:
             All suboptions are also affected by this setting. Note that default values
             and actual selection of the option (with the above tags) is not affected.
 
+ showif     Similar to the "show" attribute, except uses a boolean expression to evaluate
+            the condition.
+
  help       This attribute is a help string which is displayed to the
             user if the user requests more information about the option.
             This string can be translated to other languages using the 'help'

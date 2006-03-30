@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.167 2006-03-30 01:01:29 megastep Exp $ */
+/* $Id: install.c,v 1.168 2006-03-30 01:12:36 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1627,6 +1627,12 @@ int get_option_displayed(install_info *info, xmlNodePtr node)
 				ret = (run_script(info, txt, 0, 0) == 0);
 			}
 			xmlFree(txt);
+		} else { /* Look for conditional expression */
+			char *txt = (char *)xmlGetProp(node, BAD_CAST "showif");
+			if ( txt ) {
+				ret = match_condition(txt);
+				xmlFree(txt);
+			}
 		}
     }
     return ret;
