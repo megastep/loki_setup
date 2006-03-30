@@ -423,6 +423,8 @@ This element takes either of the following mandatory attributes :
  feature     Specify the name of a feature that must be present in the
              installer to be able to process this XML file.
 
+ condition   Specify an expression that has to be satisfied. See the BOOL element for more details.
+
 This element takes some optional attributes :
   lang      Specify the language for the message. Used for localization. The command will be executed
             only if the locale settings match.
@@ -438,8 +440,6 @@ This element takes some optional attributes :
   distro    This component applies only to the specified OS distribution.
             Look at the end of this file for a list of possible values.
 
-  condition Specify an expression that has to be satisfied. See the BOOL element for more details.
-
   version   [only for feature attribute] the minimum integer version number
             required for the specified feature.
 
@@ -450,6 +450,10 @@ Examples:
 
 <require command="/bin/false">
 This is always failing! Thus this message is always displayed.
+</require>
+
+<require condition="Linux">
+You need Linux for this installer!
 </require>
 
 <require feature="inline-scripts" version="1"/>

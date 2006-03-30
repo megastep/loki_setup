@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.169 2006-03-30 01:26:17 megastep Exp $ */
+/* $Id: install.c,v 1.170 2006-03-30 01:43:20 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1422,7 +1422,7 @@ int enable_option(install_info *info, const char *option)
 int CheckRequirements(install_info *info)
 {
 	xmlNodePtr node = XML_CHILDREN(XML_ROOT(info->config));
-	char line[BUFSIZ], buf[BUFSIZ], *lang, *arch, *libc, *distro, *cond;
+	char line[BUFSIZ], buf[BUFSIZ], *lang, *arch, *libc, *distro;
     const char *text;
 
 	while ( node ) {
@@ -1430,19 +1430,34 @@ int CheckRequirements(install_info *info)
 		arch = (char *)xmlGetProp(node, BAD_CAST "arch");
 		libc = (char *)xmlGetProp(node, BAD_CAST "libc");
 		distro = (char *)xmlGetProp(node, BAD_CAST "distro");
-		cond = (char *)xmlGetProp(node, BAD_CAST "condition");
 		if ( !strcmp((char *)node->name, "require") && match_locale(lang) &&
 			 match_arch(info, arch) &&
 			 match_libc(info, libc) &&
-			 match_distro(info, distro) &&
-			 match_condition(cond) ) {
+			 match_distro(info, distro) ) {
 			char *commandprop = (char *)xmlGetProp(node, BAD_CAST "command");
 			char *featureprop = (char *)xmlGetProp(node, BAD_CAST "feature");
+			char *cond = (char *)xmlGetProp(node, BAD_CAST "condition");
 			xmlFree(lang); xmlFree(arch); xmlFree(libc); xmlFree(distro);
-			if ( !commandprop && !featureprop ) {
-				log_fatal(_("XML: 'require' tag doesn't have a mandatory 'command' or 'feature' attribute"));
+			if ( !commandprop && !featureprop && !cond ) {
+				log_fatal(_("XML: 'require' tag doesn't have a mandatory 'command', 'condition' or 'feature' attribute"));
 			}
-			if(commandprop) {
+			if ( cond ) {
+				if ( !match_condition(cond) ) {
+					/* We failed: print out error message */
+					text = (char *)xmlNodeListGetString(info->config, XML_CHILDREN(node), 1);
+					if(text) {
+						*buf = '\0';
+						while ( *text ) {
+							parse_line(&text, line, sizeof(line));
+							strcat(buf, line);
+							strcat(buf, "\n");
+						}
+						UI.prompt(convert_encoding(buf), RESPONSE_OK);
+					}
+					xmlFree(cond);
+					return 0;
+				}
+			} else if ( commandprop ) {
 				/* Launch the command */
 				if ( run_script(info, commandprop, 0, 0) != 0 ) {
 					/* We failed: print out error message */
@@ -1459,8 +1474,7 @@ int CheckRequirements(install_info *info)
 					xmlFree(commandprop);
 					return 0;
 				}
-				xmlFree(commandprop);
-			} else if(featureprop) {
+			} else if (featureprop) {
 				char *verprop = (char *)xmlGetProp(node, BAD_CAST "version");
 				unsigned version = 1;
 				if(verprop) {
@@ -1479,9 +1493,11 @@ int CheckRequirements(install_info *info)
 				}
 			}
 
+			xmlFree(cond);
+			xmlFree(commandprop);
 			xmlFree(featureprop);
 		} else {
-			xmlFree(lang); xmlFree(arch); xmlFree(libc); xmlFree(distro); xmlFree(cond);
+			xmlFree(lang); xmlFree(arch); xmlFree(libc); xmlFree(distro);
 		}
 		node = node->next;
 	}
