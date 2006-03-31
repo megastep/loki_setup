@@ -23,6 +23,7 @@ IMAGE = @IMAGE@
 BRAND = @BRAND@
 UPDATES = /loki/updates/loki_uninstall
 CONVERT_IMAGE = /loki/patch-tools/convert-image
+SETUP_GTK = @SETUP_GTK@
 
 # The supported locales so far
 LOCALES = fr de es sv it nl ru en_GB
@@ -68,7 +69,7 @@ endif
 CARBON_LIBS = $(COMMON_LIBS) @LIBS@ @CARBON_LIBS@
 CONSOLE_LIBS = $(LIBS) @CONSOLE_LIBS@
 
-all: do-plugins @DO_DIALOG@ setup setup.gtk uninstall xsu
+all: do-plugins @DO_DIALOG@ setup $(SETUP_GTK) uninstall xsu
 
 testxml: testxml.o
 	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
@@ -109,7 +110,7 @@ testcd: testcd.o $(CORE_OBJS) $(COMMON_OBJS) $(COMMON_LIBS)
 setup: do-plugins @DO_DIALOG@ $(CONSOLE_OBJS) $(COMMON_LIBS)
 	$(LD) $(LDFLAGS) -o $@ $(CONSOLE_OBJS) $(CONSOLE_LIBS) @STATIC@
 
-setup.gtk: $(GUI_OBJS) $(COMMON_LIBS)
+$(SETUP_GTK): $(GUI_OBJS) $(COMMON_LIBS)
 	$(LD) $(LDFLAGS) -o $@ $(GUI_OBJS) $(GUI_LIBS)
 
 #!!!TODO - Take dependency of dialog libs out of carbon	
@@ -135,7 +136,7 @@ endif
 	@if [ -d image/setup.data/bin/$(os)/$(arch)/$(libc) ]; then \
 	    cp setup image/setup.data/bin/$(os)/$(arch); \
 	    cp uninstall image/setup.data/bin/$(os)/$(arch); \
-	    cp setup.gtk image/setup.data/bin/$(os)/$(arch)/$(libc); \
+	    cp $(SETUP_GTK) image/setup.data/bin/$(os)/$(arch)/$(libc); \
 	fi
 
 install: all
@@ -153,9 +154,9 @@ endif
 	    cp xsu image/setup.data/bin/$(os)/$(arch)/$(libc); \
 	    strip image/setup.data/bin/$(os)/$(arch)/$(libc)/xsu; \
 	    $(BRANDELF) -t $(os) image/setup.data/bin/$(os)/$(arch)/$(libc)/xsu; \
-	    cp setup.gtk image/setup.data/bin/$(os)/$(arch)/$(libc); \
-	    strip image/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk; \
-	    $(BRANDELF) -t $(os) image/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk; \
+	    cp $(SETUP_GTK) image/setup.data/bin/$(os)/$(arch)/$(libc); \
+	    strip image/setup.data/bin/$(os)/$(arch)/$(libc)/$(SETUP_GTK); \
+	    $(BRANDELF) -t $(os) image/setup.data/bin/$(os)/$(arch)/$(libc)/$(SETUP_GTK); \
 	else \
 		echo No directory to copy the binary files to.; \
 		echo   wanted image/setup.data/bin/${os}/${arch}/${libc}; \
@@ -192,8 +193,8 @@ endif
 	    	strip $(CONVERT_IMAGE)/bin/$(os)/$(arch)/uninstall; \
 	    	$(BRANDELF) -t $(os) $(CONVERT_IMAGE)/bin/$(os)/$(arch)/uninstall; \
 		fi; \
-	    cp setup.gtk $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc); \
-	    strip $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc)/setup.gtk; \
+	    cp $(SETUP_GTK) $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc); \
+	    strip $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc)/$(SETUP_GTK); \
 	else \
 		echo No directory to copy the binary files to.; \
 	fi
@@ -212,8 +213,13 @@ install-check: check
 
 copy-loki_uninstall: loki_uninstall
 	@if [ -d $(IMAGE)/bin/$(os)/$(arch)/bin ]; then \
-	    cp loki_uninstall $(IMAGE)/bin/$(os)/$(arch)/bin/$(BRAND)-uninstall; \
-	    strip $(IMAGE)/bin/$(os)/$(arch)/bin/$(BRAND)-uninstall; \
+		if [ -d $(IMAGE)/bin/$(os)/$(arch)/bin/@GTK_SUBDIR@ ]; then \
+		    cp loki_uninstall $(IMAGE)/bin/$(os)/$(arch)/bin/@GTK_SUBDIR@/$(BRAND)-uninstall; \
+		    strip $(IMAGE)/bin/$(os)/$(arch)/bin/@GTK_SUBDIR@/$(BRAND)-uninstall; \
+		else \
+		    cp loki_uninstall $(IMAGE)/bin/$(os)/$(arch)/bin/$(BRAND)-uninstall; \
+		    strip $(IMAGE)/bin/$(os)/$(arch)/bin/$(BRAND)-uninstall; \
+		fi; \
 	    for file in `find image/setup.data -name loki-uninstall.mo -print`; \
 	    do  path="$(IMAGE)/`dirname $$file | sed 's,image/setup.data/,,'`"; \
 	        mkdir -p $$path; \
@@ -271,7 +277,7 @@ clean:
 
 distclean: clean
 	rm -f Makefile config.cache config.status config.log
-	rm -f setup setup.gtk setup.carbon uninstall loki_uninstall testxml
+	rm -f setup $(SETUP_GTK) setup.carbon uninstall loki_uninstall testxml
 
 dist: distclean
 	cp -r . $(DISTDIR)/$(PACKAGE)

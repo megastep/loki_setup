@@ -81,6 +81,8 @@ else
 	LIBS="$LIBS -L/usr/local/lib"
 fi
 
+SETUP_GTK=setup.gtk
+GTK_SUBDIR=gtk1
 
 # Build some static binaries by default when possible
 STATIC="-static"
@@ -429,6 +431,8 @@ if test x$enable_gtk2 = xyes; then
                 GTK2_LIBS=`echo $GTK2_LIBS | sed "s/-lglade-2.0/$GLADE_STATIC -lglade-2.0 $BDYNAMIC/g"`
             fi
             GUI_LIBS="$GUI_LIBS $GTK2_LIBS"
+			SETUP_GTK="setup.gtk2"
+			GTK_SUBDIR=gtk2
 			XMLVER="2"
         else
             AC_MSG_ERROR([*** Either libglade-2.0 or gtk+-2.0 are not available.])
@@ -695,6 +699,8 @@ AC_SUBST(IMAGE)
 AC_SUBST(BRAND)
 AC_SUBST(BDYNAMIC)
 AC_SUBST(LD)
+AC_SUBST(SETUP_GTK)
+AC_SUBST(GTK_SUBDIR)
 
 AC_OUTPUT(Makefile plugins/Makefile dialog/Makefile)
 

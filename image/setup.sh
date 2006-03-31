@@ -264,16 +264,20 @@ then
   fi
 fi
 
-# Try to run the setup program
-try_run setup.gtk $args $* 
+# Try to run the setup program - first look for a GTK2 binary
+try_run setup.gtk2 $args $* 
 status=$?
-if [ $status -ne 0 ] && [ $status -ne 2 ] ; then  # setup.gtk couldn't connect to X11 server - ignore
-	try_run setup $args $*
+if [ $status -ne 0 ] && [ $status -ne 2 ] ; then 
+	try_run setup.gtk $args $* 
 	status=$?
-	if [ $status -ne 0 ] && [ $status -ne 2 ]; then
-		echo "The setup program seems to have failed on $arch/$libc"
-		echo
-		echo $FATAL_ERROR
+	if [ $status -ne 0 ] && [ $status -ne 2 ] ; then  # setup.gtk couldn't connect to X11 server - ignore
+		try_run setup $args $*
+		status=$?
+		if [ $status -ne 0 ] && [ $status -ne 2 ]; then
+			echo "The setup program seems to have failed on $arch/$libc"
+			echo
+			echo $FATAL_ERROR
+		fi
 	fi
 fi
 
