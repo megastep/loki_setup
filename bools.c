@@ -1,4 +1,4 @@
-/* $Id: bools.c,v 1.1 2006-03-29 23:38:28 megastep Exp $ */
+/* $Id: bools.c,v 1.2 2006-03-31 01:29:02 megastep Exp $ */
 
 /*
   Manage global installer booleans.
@@ -32,8 +32,10 @@ struct _setup_expression
 	struct _setup_expression *list, *next;
 };
 
+setup_bool *setup_booleans = NULL;
+
 static install_info *cur_info = NULL;
-static setup_bool *booleans = NULL, *setup_false = NULL, *setup_true = NULL;
+static setup_bool *setup_false = NULL, *setup_true = NULL;
 
 /* Fill up with standard booleans */
 void setup_init_bools(install_info *info)
@@ -41,6 +43,7 @@ void setup_init_bools(install_info *info)
 	char buf[80];
 
 	cur_info = info;
+	setup_booleans = NULL;
 
 	/* Basic bools */
 	setup_true = setup_add_bool("true", 1);
@@ -81,8 +84,8 @@ setup_bool *setup_new_bool(const char *name)
 	if ( ret ) {
 		memset(ret, 0, sizeof(*ret));
 		ret->name = strdup(name);
-		ret->next = booleans;
-		booleans = ret;
+		ret->next = setup_booleans;
+		setup_booleans = ret;
 	}
 	return ret;
 }
@@ -92,6 +95,7 @@ void setup_free_bool(setup_bool *b)
 	if (b) {
 		free(b->name);
 		free(b->script);
+		free(b->envvar);
 		free(b);
 	}
 }
@@ -110,7 +114,7 @@ setup_bool *setup_find_bool(const char *name)
 {
 	setup_bool *ret;
 
-	for ( ret = booleans; ret; ret = ret->next ) {
+	for ( ret = setup_booleans; ret; ret = ret->next ) {
 		if ( !strcmp(ret->name, name) ) {
 			return ret;
 		}
@@ -118,13 +122,15 @@ setup_bool *setup_find_bool(const char *name)
 	return NULL;
 }
 
-int setup_get_bool(const setup_bool *b)
+int setup_get_bool(setup_bool *b)
 {
 	if ( b ) {
 		if ( b->once ) {
 			return b->inited ? b->value : 0;
 		} else if (b->script) { /* Run the script to determine the value */
-			return (run_script(cur_info, b->script, 0, 0) == 0);
+			b->value = (run_script(cur_info, b->script, 0, 0) == 0);
+			b->inited = 1; /* Keep track of the last value */
+			return b->value;
 		}
 	}
 	return 0;
@@ -348,11 +354,11 @@ int match_condition(const char *expr)
 void setup_exit_bools(void)
 {
 	setup_bool *b;
-	while ( booleans ) {
-		b = booleans->next;
-		setup_free_bool(booleans);
-		booleans = b;
+	while ( setup_booleans ) {
+		b = setup_booleans->next;
+		setup_free_bool(setup_booleans);
+		setup_booleans = b;
 	}
 	cur_info = NULL;
-	booleans = NULL;
+	setup_booleans = NULL;
 }

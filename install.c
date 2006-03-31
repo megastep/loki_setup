@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.171 2006-03-30 01:53:52 megastep Exp $ */
+/* $Id: install.c,v 1.172 2006-03-31 01:29:02 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -616,8 +616,9 @@ const char *GetProductREADME(install_info *info, int *keepdirs)
 int GetProductBooleans(install_info *info)
 {
 	xmlNodePtr node;
-	char *name, *script, *later, *envvar, *cond;
+	char *name, *script, *later, *envvar, *envto, *cond;
 	int count = 0;
+	setup_bool *b = NULL;
 
 	for(node = XML_CHILDREN(XML_ROOT(info->config)); node; node = node->next) {
 		if(! strcmp((char *)node->name, "bool") ) {
@@ -625,11 +626,12 @@ int GetProductBooleans(install_info *info)
 			script = (char *)xmlGetProp(node, BAD_CAST "script");
 			later = (char *)xmlGetProp(node, BAD_CAST "later");
 			envvar = (char *)xmlGetProp(node, BAD_CAST "env");
+			envto = (char *)xmlGetProp(node, BAD_CAST "setenv");
 			cond = (char *)xmlGetProp(node, BAD_CAST "if");
 
 			if ( match_condition(cond) ) {
 				if ( script ) {
-					setup_bool *b = setup_new_bool(name);
+					b = setup_new_bool(name);
 					if ( b ) {
 						count ++;
 						b->script = strdup(script);
@@ -645,7 +647,7 @@ int GetProductBooleans(install_info *info)
 						log_fatal(_("Failed to allocate new bool"));
 					}
 				} else if ( envvar ) {
-					setup_bool *b = setup_new_bool(name);
+					b = setup_new_bool(name);
 					if ( b ) {
 						char *env = getenv(envvar);
 						
@@ -659,18 +661,21 @@ int GetProductBooleans(install_info *info)
 						log_debug("New environment bool: %s = %s (from %s)", name, b->value ? "TRUE" : "FALSE", envvar);
 					}
 				} else if ( cond ) { /* We matched the condition - if all else fails, create the bool */
-					setup_add_bool(name, 1);
+					b = setup_add_bool(name, 1);
 				} else {
 					log_warning(_("Must have at least 'script' or 'env' attribute for <bool>"));
 				}
 			} else {
-				setup_add_bool(name, 0);
+				b = setup_add_bool(name, 0);
 				log_debug("New bool '%s' set to FALSE because of condition '%s'", name, cond);
 			}
+			if ( b && envto ) 
+				b->envvar = strdup(envto);
 			xmlFree(name);
 			xmlFree(script);
 			xmlFree(later);
 			xmlFree(envvar);
+			xmlFree(envto);
 			xmlFree(cond);
 		}
 	}
@@ -2939,6 +2944,8 @@ int run_script(install_info *info, const char *script, int arg, int include_tags
 
         fp = fdopen(fd, "w");
         if ( fp ) {
+			setup_bool *b;
+
             fprintf(fp, /* Create script file, setting environment variables */
 					"#!/bin/sh\n"
 					"SETUP_PRODUCTNAME=\"%s\"\n"
@@ -2961,6 +2968,13 @@ int run_script(install_info *info, const char *script, int arg, int include_tags
 						"SETUP_OPTIONTAGS=\"%s\"\n"
 						"export SETUP_OPTIONTAGS\n", 
 						get_optiontags_string(info));
+			/* Set boolean environment variables */
+			for ( b = setup_booleans; b; b = b->next ) {
+				if (b->envvar && b->inited) { /* We are NOT running scripts at this point */
+					fprintf(fp,"%s=%d; export %s\n", b->envvar, b->value, b->envvar);
+				}
+			}
+
 			/* Append script itself */
 			fprintf(fp, "%s%s\n", 
 					working_dir, script);

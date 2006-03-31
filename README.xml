@@ -369,6 +369,11 @@ Additionally, one of the following attributes must be used, unless "if" below is
             The value must be a non-zero number to map to be TRUE. If the variable is not
             set in the environment, the boolean will likewise be set to FALSE.
 
+  setenv    The name of an environment variable that will be set with the value of the boolean
+            when running user scripts throughout the installer. The value of that variable will
+            be 0 or 1. This can be used for advanced scripting querying the internal state of
+            the installer.
+
 It also recognizes two optional attributes :
 
   later     If set to "yes", the script will be executed at the time that the condition

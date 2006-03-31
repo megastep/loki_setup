@@ -1,4 +1,4 @@
-/* $Id: bools.h,v 1.1 2006-03-29 23:38:28 megastep Exp $ */
+/* $Id: bools.h,v 1.2 2006-03-31 01:29:02 megastep Exp $ */
 
 /*
   Manage global installer booleans.
@@ -13,6 +13,7 @@
 typedef struct _setup_bool {
 	char *name;  /* Symbolic name */
 	char *script; /* A script to be run to determine the value, or NULL */
+	char *envvar; /* An environment variable to set with the value, if any */
 	unsigned value : 1; /* Boolean value */
 	unsigned once : 1; /* Whether the script has to be run every time the bool is evaluated, or just upon init */
 	unsigned inited : 1; /* Value was filled in */
@@ -24,6 +25,9 @@ typedef struct _setup_bool {
 struct _setup_expression;
 typedef struct _setup_expression setup_expression;
 
+/* Exported list of booleans */
+
+extern setup_bool *setup_booleans;
 
 /**** API functions *******/
 
@@ -39,7 +43,7 @@ setup_bool *setup_add_bool(const char *name, unsigned value);
 
 /* Manipulate booleans */
 setup_bool *setup_find_bool(const char *name);
-int         setup_get_bool(const setup_bool *b);
+int         setup_get_bool(setup_bool *b);
 void        setup_set_bool(setup_bool *b, unsigned value);
 
 
