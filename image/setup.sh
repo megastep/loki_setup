@@ -265,7 +265,7 @@ then
 fi
 
 # Try to run the setup program - first look for a GTK2 binary
-try_run setup.gtk2 $args $* 
+try_run setup.gtk2 $args $* 2> /dev/null
 status=$?
 if [ $status -ne 0 ] && [ $status -ne 2 ] ; then 
 	try_run setup.gtk $args $* 

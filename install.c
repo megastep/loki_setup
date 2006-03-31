@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.172 2006-03-31 01:29:02 megastep Exp $ */
+/* $Id: install.c,v 1.173 2006-03-31 23:20:45 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -692,13 +692,21 @@ const char *GetProductPostInstallMsg(install_info *info)
 
 	for(node = XML_CHILDREN(XML_ROOT(info->config)); node; node = node->next) {
 		if(! strcmp((char *)node->name, "post_install_msg") ) {
+			static char line[BUFSIZ], buf[BUFSIZ];
 			char *prop = NULL;
+
 			if ( UI.is_gui ) {
 				prop = (char *)xmlGetProp(node, BAD_CAST "nogui");
 				if ( prop && !strcmp(prop, "true") ){
 					xmlFree(prop);
 					continue;
 				}
+			}
+			xmlFree(prop);
+			prop = (char *)xmlGetProp(node, BAD_CAST "lang");
+			if ( !match_locale(prop) ) {
+				xmlFree(prop);
+				continue;
 			}
 			xmlFree(prop);
 			prop = (char *)xmlGetProp(node, BAD_CAST "if");
@@ -717,23 +725,18 @@ const char *GetProductPostInstallMsg(install_info *info)
 				}
 			}
 			xmlFree(prop);
-			prop = (char *)xmlGetProp(node, BAD_CAST "lang");
-			if ( match_locale(prop) ) {
-				static char line[BUFSIZ], buf[BUFSIZ];
 
-				text = (char *)xmlNodeListGetString(info->config, XML_CHILDREN(node), 1);
-				if (text) {
-					*buf = '\0';
-					while ( *text ) {
-						parse_line(&text, line, sizeof(line));
-						strcat(buf, line);
-						strcat(buf, "\n");
-					}
-					xmlFree(prop);
-					return convert_encoding(buf);
+			text = (char *)xmlNodeListGetString(info->config, XML_CHILDREN(node), 1);
+			if (text) {
+				*buf = '\0';
+				while ( *text ) {
+					parse_line(&text, line, sizeof(line));
+					strcat(buf, line);
+					strcat(buf, "\n");
 				}
+				xmlFree(prop);
+				return convert_encoding(buf);
 			}
-			xmlFree(prop);
 		}
 	}
 	return NULL;
@@ -1018,10 +1021,8 @@ install_info *create_install(const char *configfile,
         info->lookup = NULL;
     }
 
-	if ( !restoring_corrupt() ) {
-		/* Now run any auto-detection commands */	
-		mark_cmd_options(info, XML_ROOT(info->config), 0);
-	}
+	/* Init the booleans before starting to call commands */
+	setup_init_bools(info);
 
     /* That was easy.. :) */
     return(info);

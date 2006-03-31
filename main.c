@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.84 2006-03-29 23:38:28 megastep Exp $ */
+/* $Id: main.c,v 1.85 2006-03-31 23:20:45 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -294,8 +294,6 @@ int main(int argc, char **argv)
         exit(3);
     }
 
-	setup_init_bools(info);
-
     /* Get the appropriate setup UI */
     for ( i=0; GUI_okay[i]; ++i ) {
         if ( GUI_okay[i](&UI, &argc, &argv) ) {
@@ -425,6 +423,11 @@ int main(int argc, char **argv)
 				if ( ! CheckRequirements(info) ) {
 					state = SETUP_ABORT;
 					break;
+				}
+
+				if ( !restoring_corrupt() ) {
+					/* Now run any auto-detection commands */	
+					mark_cmd_options(info, XML_ROOT(info->config), 0);
 				}
 
                 if ( enabled_options ) {
