@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.120 2006-03-29 23:38:28 megastep Exp $
+   $Id: gtk_ui.c,v 1.121 2006-04-03 23:13:33 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -2183,11 +2183,11 @@ int gtkui_okay(Install_UI *UI, int *argc, char ***argv)
             UI->prompt = gtkui_prompt;
             UI->website = gtkui_website;
             UI->complete = gtkui_complete;
-	    UI->pick_class = gtkui_pick_class;
-	    UI->idle = gtkui_idle;
-	    UI->exit = NULL;
-	    UI->shutdown = gtkui_shutdown;
-	    UI->is_gui = 1;
+			UI->pick_class = gtkui_pick_class;
+			UI->idle = gtkui_idle;
+			UI->exit = NULL;
+			UI->shutdown = gtkui_shutdown;
+			UI->is_gui = 1;
 
             okay = 1;
         }

@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.85 2006-03-31 23:20:45 megastep Exp $ */
+/* $Id: main.c,v 1.86 2006-04-03 23:13:33 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -302,7 +302,7 @@ int main(int argc, char **argv)
     }
     if ( ! GUI_okay[i] ) {
         log_debug(_("No UI drivers available\n"));
-        exit(2);
+        exit(4); /* Must use different error code than 2 */
     }
 
     /* Setup the interrupt handlers */
