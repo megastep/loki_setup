@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.121 2006-04-03 23:13:33 megastep Exp $
+   $Id: gtk_ui.c,v 1.122 2006-05-18 00:36:34 icculus Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -800,7 +800,7 @@ void on_use_binary_toggled ( GtkWidget* widget, gpointer func_data)
     **      value and restash it into the global symlinkspath.
     **-----------------------------------------------------------------------*/
     if (GTK_TOGGLE_BUTTON(widget)->active) {
-        binary_entry = glade_xml_get_widget(setup_glade, "symlink_entry");
+        binary_entry = glade_xml_get_widget(setup_glade, "binary_entry");
         string = gtk_entry_get_text( GTK_ENTRY(binary_entry) );
     } else {
         string = NULL;

@@ -1,4 +1,6 @@
 Current:
+Ryan C. Gordon (???) - Wed May 17 17:33:25 PDT 2006
+ * Fixed an incorrect gladefile reference (gtk+ warning on symlink checkbox).
 Stephane Peter (Codehost) - Wed Mar 29 15:37:18 PST 2006
  * Added booleans subsystem with support for complex expressions in
    most installer tags.
