@@ -379,7 +379,7 @@ static install_state console_setup(install_info *info)
 
 	if ( express_setup ) {
 		/* Install desktop menu items */
-		if ( !GetProductHasNoBinaries(info) ) {
+		if((!GetProductHasNoBinaries(info)) && (GetProductInstallMenuItems(info))) {
 			info->options.install_menuitems = 1;
 		}
 		return SETUP_INSTALL;
@@ -565,7 +565,7 @@ static install_state console_setup(install_info *info)
 			}
 
 			/* Ask for desktop menu items */
-			if ( !GetProductHasNoBinaries(info) &&
+			if ( !GetProductHasNoBinaries(info) && (GetProductInstallMenuItems(info)) &&
 				 console_prompt(_("Do you want to install startup menu entries?"),
 								RESPONSE_YES) == RESPONSE_YES ) {
 				info->options.install_menuitems = 1;

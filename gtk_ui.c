@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.123 2006-05-18 12:25:06 icculus Exp $
+   $Id: gtk_ui.c,v 1.124 2006-05-18 19:49:46 icculus Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -405,7 +405,7 @@ void on_class_continue_clicked( GtkWidget  *w, gpointer data )
 		}
 	}
 	/* Install desktop menu items */
-	if ( !GetProductHasNoBinaries(cur_info)) {
+	if((!GetProductHasNoBinaries(cur_info)) && (GetProductInstallMenuItems(cur_info))) {
 		cur_info->options.install_menuitems = 1;
 	}
 	widget = glade_xml_get_widget(setup_glade, "setup_notebook");
@@ -1370,10 +1370,11 @@ static void init_menuitems_option(install_info *info)
 
     widget = glade_xml_get_widget(setup_glade, "setup_menuitems_checkbox");
     if ( widget ) {
-        if ( ! GetProductHasNoBinaries(info) ) {
+        if ( ( ! GetProductHasNoBinaries(info) ) && ( GetProductInstallMenuItems(info) ) ) {
             setup_checkbox_menuitems_slot(widget, NULL);
         } else {
             gtk_widget_hide(widget);
+            info->options.install_menuitems = 0;
         }
     } else {
         log_warning(_("Unable to locate 'setup_menuitems_checkbox'"));

@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.35 2006-03-29 23:38:28 megastep Exp $
+ * $Id: dialog_ui.c,v 1.36 2006-05-18 19:49:45 icculus Exp $
  */
 
 #include <limits.h>
@@ -536,7 +536,7 @@ install_state dialog_setup(install_info *info)
 
 				clear_the_screen();
 				/* Ask for desktop menu items */
-				if ( !GetProductHasNoBinaries(info) &&
+				if ( !GetProductHasNoBinaries(info) && (GetProductInstallMenuItems(info)) &&
 					 dialog_prompt(_("Do you want to install startup menu entries?"),
 								   RESPONSE_YES) == RESPONSE_YES ) {
 					info->options.install_menuitems = 1;
@@ -547,7 +547,7 @@ install_state dialog_setup(install_info *info)
 		}
 	} else { /* Express setup */
 		/* Install desktop menu items */
-		if ( !GetProductHasNoBinaries(info)) {
+		if((!GetProductHasNoBinaries(info)) && (GetProductInstallMenuItems(info))) {
 			info->options.install_menuitems = 1;
 		}
 	}

@@ -484,7 +484,7 @@ static void OnCommandContinue()
 	    }
 
         // Install desktop menu items
-	    if(!GetProductHasNoBinaries(cur_info))
+	    if((!GetProductHasNoBinaries(cur_info)) && (GetProductInstallMenuItems(cur_info)))
 		    cur_info->options.install_menuitems = 1;
 
         carbon_ShowInstallScreen(MyRes, OPTION_PAGE);

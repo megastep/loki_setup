@@ -210,6 +210,9 @@ There are several optional attributes of the install element:
  nopromptoverwrite  If set to 'yes' existing files will be overwritten without
                     prompting the user. This was the default before setup 1.6.4
 
+ nomenuitems  If set to 'yes', menu items for Gnome/KDE/etc will not be installed, and the
+              user will not be prompted about installing them.
+
  appbundleid  (CARBON ONLY) This string means that you are installing new files into an existing
               Application Bundle. If the bundle isn't found, the installation aborts, otherwise, all
               files are added relative to the base of the app bundle. The string specified here is

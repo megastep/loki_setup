@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.175 2006-05-18 12:25:06 icculus Exp $ */
+/* $Id: install.c,v 1.176 2006-05-18 19:49:46 icculus Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -379,6 +379,20 @@ int GetProductReinstallFast(install_info *info)
     }
     return ret;
 }
+
+int GetProductInstallMenuItems(install_info *info)
+{
+    int ret = 1; /* yes */
+    char *str = (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "nomenuitems");
+    if ( str && (!strcasecmp(str, "yes") || !strcasecmp(str, "true"))) {
+        ret = 0; /* no */
+    }
+    if (str) {
+        xmlFree(str);
+    }
+    return ret;
+}
+
 
 /* returns true if any deviant paths are not writable. If path_ret is non-NULL
  * it must point to a buffer of at least PATH_MAX characters. The first not
