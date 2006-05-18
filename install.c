@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.173 2006-03-31 23:20:45 megastep Exp $ */
+/* $Id: install.c,v 1.174 2006-05-18 10:57:36 icculus Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -514,6 +514,7 @@ const char *GetProductEULA(install_info *info, int *keepdirs)
 
 const char *GetProductEULANode(install_info *info, xmlNodePtr node, int *keepdirs)
 {
+	int ignoreonreinstall = 0;
 	const char *text;
 	char *eula;
 	static char name[BUFSIZ], matched_name[BUFSIZ];
@@ -529,16 +530,21 @@ const char *GetProductEULANode(install_info *info, xmlNodePtr node, int *keepdir
 	/* Look for EULA elements */
 	node = XML_CHILDREN(node);
 	while(node && !found) {
+		ignoreonreinstall = 0;
 		if(! strcmp((char *)node->name, "eula") ) {
+			char *str = NULL;
 			char *prop = (char *)xmlGetProp(node, BAD_CAST "lang");
 			if ( match_locale(prop) ) {
 				if (found == 1)
 					log_warning("Duplicate matching EULA entries in XML file!");
 				if ( keepdirs ) {
-					char *str = (char *)xmlGetProp(node, BAD_CAST "keepdirs");
+					str = (char *)xmlGetProp(node, BAD_CAST "keepdirs");
 					*keepdirs = ( str != NULL);
 					xmlFree(str);
 				}
+				str = (char *)xmlGetProp(node, BAD_CAST "ignoreonreinstall");
+				ignoreonreinstall = ( str != NULL);
+				xmlFree(str);
 				text = (char *)xmlNodeListGetString(info->config, XML_CHILDREN(node), 1);
 				if(text) {
 					*matched_name = '\0';
@@ -552,6 +558,11 @@ const char *GetProductEULANode(install_info *info, xmlNodePtr node, int *keepdir
 		}
 		node = node->next;
 	}
+
+	if ( ignoreonreinstall && info->options.reinstalling ) {
+		found = 0;
+	}
+
     if ( found ) {
 		snprintf(name, sizeof(name), "%s/%s", info->setup_path, matched_name);
 		if ( !access(name, R_OK) ) {

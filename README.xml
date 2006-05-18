@@ -302,6 +302,9 @@ Both elements accept these optional attributes :
              directory. If set to yes, then you can specify a relative path for the
              file, and have it installed in a sub-directory.
 
+ ignoreonreinstall  If set, when reinstalling, the EULA window will be skipped,
+                    as if the user accepted the agreement.
+
 The important thing to remember about those elements is that they are
 siblings of the OPTION element described below, and thus direct children
 of the INSTALL element. The README elements should NOT be inside an OPTION
