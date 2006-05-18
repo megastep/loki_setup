@@ -1378,7 +1378,7 @@
 		      <property name="spacing">5</property>
 
 		      <child>
-			<widget class="GtkButton" id="button12">
+			<widget class="GtkButton" id="cancel_progress_button">
 			  <property name="visible">True</property>
 			  <property name="can_default">True</property>
 			  <property name="can_focus">True</property>

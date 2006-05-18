@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.174 2006-05-18 10:57:36 icculus Exp $ */
+/* $Id: install.c,v 1.175 2006-05-18 12:25:06 icculus Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -362,6 +362,21 @@ int GetProductPromptOverwrite(install_info *info)
     }
 	if(needfree)
 		xmlFree(str);
+    return ret;
+}
+
+int GetProductReinstallFast(install_info *info)
+{
+    int ret = 0; /* no */
+    if ( info->options.reinstalling )  {
+        char *str = (char *)xmlGetProp(XML_ROOT(info->config), BAD_CAST "reinstallfast");
+        if ( str && (!strcasecmp(str, "yes") || !strcasecmp(str, "true"))) {
+            ret = 1; /* yes */
+        }
+        if (str) {
+            xmlFree(str);
+        }
+    }
     return ret;
 }
 

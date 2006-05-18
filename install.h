@@ -273,6 +273,9 @@ extern const char *GetProductPostInstallMsg(install_info *info);
 /** whether the user should be prompted when files already exist */
 extern int GetProductPromptOverwrite(install_info *info);
 
+/** whether the product should reinstall with _zero_ user interaction. */
+int GetProductReinstallFast(install_info *info);
+
 /** check if product can be installed. Returns NULL if product can be
  * installed, otherwise reason why not. */
 extern const char *IsReadyToInstall(install_info *info);

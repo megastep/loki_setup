@@ -186,6 +186,14 @@ There are several optional attributes of the install element:
  reinstallnowarning   If set to 'no' (the default), the install will warn the user
                       that a reinstall is about to occur.
 
+ reinstallfast  If set to 'yes' and this run is a reinstall, the installer will skip the options
+                screen and go directly to installation. This is good for automatic updates of
+                previously-installed software. Unless explicitly disabled (see eula's
+                ignoreonreinstall option), license agreements still need to be explicitly agreed
+                to before the reinstall can proceed. You still need to set several other options
+                in the install tag to get a fully automatic reinstall (reinstallnowarning,
+                nopromptoverwrite, etc).
+
  appbundle  (CARBON ONLY) If this is "yes", the destination folder does not include the product
             name as part of the path.  An application bundle is typically installed much like
             a single file would be...and so is treated as such.

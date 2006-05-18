@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.122 2006-05-18 00:36:34 icculus Exp $
+   $Id: gtk_ui.c,v 1.123 2006-05-18 12:25:06 icculus Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1902,6 +1902,11 @@ static install_state gtkui_setup(install_info *info)
     if ( express_setup ) {
 		GtkWidget *notebook = glade_xml_get_widget(setup_glade, "setup_notebook");
 		gtk_notebook_set_page(GTK_NOTEBOOK(notebook), COPY_PAGE);
+		/* Must hide cancel button if reinstalling/upgrading, or install can be mangled. */
+		if ( info->options.reinstalling ) {
+			GtkWidget *button = glade_xml_get_widget(setup_glade, "cancel_progress_button");
+			gtk_widget_hide(button);
+		}
 		return cur_state = SETUP_INSTALL;
     }
 
@@ -2141,6 +2146,14 @@ static install_state gtkui_complete(install_info *info)
         if(widget)
             gtk_widget_hide(widget);
     }
+
+    widget = glade_xml_get_widget(setup_glade, "setup_complete_label");
+    if (info->options.reinstalling)
+        strcpy(text, _("The update/reinstall was successfully completed!"));
+    else
+        strcpy(text, _("The installation was successfully completed!"));
+
+    gtk_label_set_text(GTK_LABEL(widget), text);
 
     /* TODO: Lots of cleanups here (free() mostly) */
 

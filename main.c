@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.86 2006-04-03 23:13:33 megastep Exp $ */
+/* $Id: main.c,v 1.87 2006-05-18 12:25:06 icculus Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -183,6 +183,7 @@ int main(int argc, char **argv)
 {
     int exit_status, get_out = 0;
     int i, c;
+    int noninteractive = 0;
     install_state state;
     char *xml_file = SETUP_CONFIG;
     log_level verbosity = LOG_NORMAL;
@@ -340,8 +341,10 @@ int main(int argc, char **argv)
                     add_cdrom_entry(info, info->name, info->desc, GetProductCDROMFile(info));
 					++ num_cds;
 				}
-
-                state = UI.init(info,argc,argv, enabled_options != NULL);
+                if (GetProductReinstallFast(info))
+                    express_setup = 1;
+                noninteractive = ( (enabled_options != NULL) || (GetProductReinstallFast(info)) );
+                state = UI.init(info, argc, argv, noninteractive);
                 if ( state == SETUP_ABORT ) {
                     exit_status = 3;
 					continue;
@@ -451,7 +454,7 @@ int main(int argc, char **argv)
 			state = UI.readme(info);
 			break;
 		case SETUP_OPTIONS:
-			state = UI.setup(info);
+   			state = UI.setup(info);
 			break;
 		case SETUP_INSTALL:
 			if ( info->install_path[0] ) {
