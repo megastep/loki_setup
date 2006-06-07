@@ -78,6 +78,9 @@ DetectLIBC()
 		  if fgrep GLIBC_2.1 /lib/libc.so.6* 2> $NULL >> $NULL; then
 	              echo "glibc-2.1"
 	              status=0
+		  elif fgrep GLIBC_2.2 /lib/libc.so.6* 2> $NULL >> $NULL; then
+	              echo "glibc-2.1"
+	              status=0
 	      else
 	              echo "glibc-2.0"
 	              status=0
