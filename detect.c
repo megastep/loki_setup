@@ -831,6 +831,10 @@ char *convert_encoding(char *str)
 
 void DetectLocale(void)
 {
+	/* Free previous values, in case we get called twice. */
+	free(current_locale);
+	free(current_encoding);
+
 	current_locale = setlocale(LC_MESSAGES, NULL);
 	if ( current_locale && (!strcmp(current_locale, "C") || !strcmp(current_locale,"POSIX")) ) {
 		current_locale = NULL;
@@ -843,14 +847,24 @@ void DetectLocale(void)
 		char *ptr = strchr(current_locale, '.');
 		if ( ptr ) {
 			current_encoding = ptr+1;
-			/* Special case */
+			/* Special cases */
 			if ( !strncasecmp(current_encoding, "iso88591", 9) ) 
 				current_encoding = "ISO-8859-1";
+			if ( !strncasecmp(current_encoding, "utf8", 9) )
+				current_encoding = "UTF-8";
 		} else {
-			current_encoding = "ISO-8859-1"; /* Assume Latin-1 */
+			current_encoding = "ISO-8859-1"; /* Assume Latin-1 !!! FIXME: UTF-8, now? */
 		}
 	}
 #endif
+
+	/*
+	 * setlocale() and nl_langinfo return internal glibc buffers...gtk+
+	 *  calls setlocale internally, which may cause our pointer to get
+	 *  free()'d, so make a copy.  --ryan.
+	 */
+	current_locale = ((current_locale) ? strdup(current_locale) : NULL);
+	current_encoding = ((current_encoding) ? strdup(current_encoding) : NULL);
 
 #if 0
 	/* log_debug doesn't work here as logging is initialized later */
@@ -877,19 +891,73 @@ void SetLocaleBools(void)
 	}
 }
 
+/*
+ * strncpy is silly...it doesn't null-terminate the string if (dst) is small,
+ *  and doesn't tell you. This function just promises null-termination.
+ */
+static char *xstrncpy(char *dst, const char *src, size_t size)
+{
+	strncpy(dst, src, size);
+	dst[size-1] = '\0';
+	return dst;
+}
+
+typedef struct locale_elements
+{
+	char language[32];
+	char territory[32];
+	char encoding[32];
+	char modifier[32];
+} locale_elements;
+
+/* split a locale string into it's fundamental parts. */
+static void split_locale_string(const char *_str, locale_elements *e)
+{
+	char *ptr;
+	char *str;
+
+	if (_str == NULL)
+		return;
+
+	str = (char *) alloca(strlen(_str) + 1);
+	strcpy(str, _str);
+
+	/* parse backwards from last element. */
+	memset(e, '\0', sizeof (locale_elements));
+	ptr = strchr(str, '@');
+	if (ptr) { *ptr=0; xstrncpy(e->modifier, ptr+1, sizeof (e->modifier)); }
+	ptr = strchr(str, '.');
+	if (ptr) { *ptr=0; xstrncpy(e->encoding, ptr+1, sizeof (e->encoding)); }
+	ptr = strchr(str, '_');
+	if (ptr) { *ptr=0; xstrncpy(e->territory, ptr+1, sizeof (e->territory)); }
+
+	xstrncpy(e->language, str, sizeof (e->language));
+}
 
 /* Matches a locale string against the current one */
-
 int match_locale(const char *str)
 {
-	if ( ! str )
+	int match = 1;
+	locale_elements e_cur, e_str;
+
+	if ( (!str) || (strcmp(str, "none") == 0) )
 		return 1;
-	if ( current_locale && !strncmp(current_locale, str, strlen(str))) {
-		return 1;
-	} else if ( !strcmp(str, "none") ) {
-		return 1;
-	}
-	return 0;
+
+	split_locale_string(current_locale, &e_cur);
+	split_locale_string(str, &e_str);
+
+	/*
+	 * We only care about the language and encoding. If the territory
+	 *  matches, hey, cool, but we'll go on without a match there.
+	 * So "fr.utf8" can match "fr_CA.utf8@blah"
+	 * !!! FIXME: I don't know what the "modifier" is, so I ignore it.
+	 */
+	if (strcmp(e_cur.encoding, e_str.encoding) != 0)
+		match = 0;
+	else if (strcmp(e_cur.language, e_str.language) != 0)
+		match = 0;
+
+	return match;
 }
 
 int match_arch(install_info *info, const char *wanted)

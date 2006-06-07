@@ -1023,11 +1023,13 @@ The 'lang' values are matched against the value of the LANG environment
 variable. The special value 'none' is matched only when there is no LANG
 environment variable set (the default locale).
 
+!!! FIXME: the next paragraph isn't true at this moment !!!
 A locale is matched if the specified value is found at the beginning of
 LANG. For example, "fr" will match both the "fr" and "fr_CA" values. In
 order for the more specialized locale values to be matched correctly,
-the longer values should be be specified last (i.e. if you have different
-translations, list "fr" before "fr_CA" in the XML file).
+the shorter values should be be specified last (i.e. if you have different
+translations, list "fr" after "fr_CA" in the XML file).
+!!! FIXME: the previous paragraph isn't true at this moment !!!
 
 About distributions :
 

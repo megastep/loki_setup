@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.124 2006-05-18 19:49:46 icculus Exp $
+   $Id: gtk_ui.c,v 1.125 2006-06-07 09:20:48 icculus Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -487,12 +487,18 @@ void setup_button_license_agree_slot( GtkWidget* widget, gpointer func_data )
 
 void setup_destroy_license_slot( GtkWidget* w, gpointer data )
 {
-    GtkWidget *widget;
-    
-    widget = glade_xml_get_widget(setup_glade_license, "license_dialog");
-    gtk_widget_hide(widget);
-    cur_state = SETUP_EXIT;
-	GLADE_XML_UNREF(setup_glade_license);
+    /* !!! FIXME: this gets called more than once if LANG is set...not sure
+     * !!! FIXME:  why, but we explicitly set setup_glade_license to NULL
+     * !!! FIXME:  here so we don't touch an unref'd var.
+     */
+    if (setup_glade_license) {
+        GtkWidget *widget;
+        widget = glade_xml_get_widget(setup_glade_license, "license_dialog");
+        gtk_widget_hide(widget);
+        cur_state = SETUP_EXIT;
+        GLADE_XML_UNREF(setup_glade_license);
+        setup_glade_license = NULL;
+    }
 }
 
 void setup_button_warning_continue_slot( GtkWidget* widget, gpointer func_data )
