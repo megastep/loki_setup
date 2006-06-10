@@ -916,6 +916,7 @@ static void split_locale_string(const char *_str, locale_elements *e)
 	char *ptr;
 	char *str;
 
+	memset(e, '\0', sizeof (*e));
 	if (_str == NULL)
 		return;
 
@@ -934,28 +935,35 @@ static void split_locale_string(const char *_str, locale_elements *e)
 	xstrncpy(e->language, str, sizeof (e->language));
 }
 
+static int strcmpifspecified(const char *a, const char *b)
+{
+	int retval = 0;
+	if ((a) && (*a))
+		retval = strcmp(a, b);
+	return retval;
+}
+
+
 /* Matches a locale string against the current one */
 int match_locale(const char *str)
 {
 	int match = 1;
-	locale_elements e_cur, e_str;
 
-	if ( (!str) || (strcmp(str, "none") == 0) )
-		return 1;
+	if ( (str) && (strcmp(str, "none") != 0) ) {
+		locale_elements elc, els;
+		split_locale_string(current_locale, &elc);
+		split_locale_string(str, &els);
 
-	split_locale_string(current_locale, &e_cur);
-	split_locale_string(str, &e_str);
-
-	/*
-	 * We only care about the language and encoding. If the territory
-	 *  matches, hey, cool, but we'll go on without a match there.
-	 * So "fr.utf8" can match "fr_CA.utf8@blah"
-	 * !!! FIXME: I don't know what the "modifier" is, so I ignore it.
-	 */
-	if (strcmp(e_cur.encoding, e_str.encoding) != 0)
-		match = 0;
-	else if (strcmp(e_cur.language, e_str.language) != 0)
-		match = 0;
+		/*
+		 * We only care about things explicitly specified in (str).
+		 * So a str of "fr.utf8" can match "fr_CA.utf8@blah" but "fr_CA.utf8@blah"
+		 *  won't match "fr.utf8"
+		 */
+		match = ( (strcmpifspecified(els.language, elc.language) == 0) &&
+		          (strcmpifspecified(els.territory, elc.territory) == 0) &&
+		          (strcmpifspecified(els.encoding, elc.encoding) == 0) &&
+		          (strcmpifspecified(els.modifier, elc.modifier) == 0) );
+	}
 
 	return match;
 }
