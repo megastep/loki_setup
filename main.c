@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.87 2006-05-18 12:25:06 icculus Exp $ */
+/* $Id: main.c,v 1.88 2006-06-11 08:28:33 icculus Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -107,7 +107,7 @@ void abort_install(void)
         UI.abort(info);
 	if ( info && ! info->install_complete )
 		uninstall(info);
-    exit_setup(2);
+    exit_setup(3);
 }
     
 /* List of UI drivers */
