@@ -1435,3 +1435,6 @@ msgstr ""
 #: plugins/tar.c:140
 msgid "Unexpected data in installation file!"
 msgstr ""
+
+msgid "Binary path:"
+msgstr ""

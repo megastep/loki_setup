@@ -1477,3 +1477,4 @@ msgstr ""
 
 #~ msgid "Binary directory:"
 #~ msgstr "Binaire directory:"
+

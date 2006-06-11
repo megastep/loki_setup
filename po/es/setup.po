@@ -1491,3 +1491,6 @@ msgstr "Se encontraron datos inesperados en el archivo de instalación."
 
 #~ msgid "Unable to find file '%s'"
 #~ msgstr "No se puede encontrar el archivo '%s'"
+
+msgid "Binary path:"
+msgstr "La ruta binaria:"
