@@ -903,11 +903,14 @@ ssize_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
 {
     ssize_t size, copied;
     char tmppath[PATH_MAX], *tmp;
+    char localized_node_name[200];
     const char *str;
 
+    localized_node_name[0] = '\0';
     if ( !strcmp((char *)node->name, "option") ) {
         str = (char *)xmlNodeListGetString(info->config, XML_CHILDREN(node), 1);    
         parse_line(&str, tmppath, sizeof(tmppath));
+        get_option_name(info, node, localized_node_name, sizeof (localized_node_name));
         current_option = add_option_entry(current_component, tmppath, tmp = (char *)xmlGetProp(node, BAD_CAST "tag"));
 		xmlFree(tmp);
     }
@@ -960,8 +963,12 @@ ssize_t copy_node(install_info *info, xmlNodePtr node, const char *dest,
 			if ( strcmp((char *)node->name, "files") == 0 ) {
 				char* suffix = (char *)xmlGetProp(node, BAD_CAST "suffix");
 				const char *str = (char *)xmlNodeListGetString(info->config, XML_CHILDREN(node->parent), 1);
+				if (localized_node_name[0])
+					strncpy(current_option_txt, localized_node_name, sizeof (current_option_txt));
+				else
+					parse_line(&str, current_option_txt, sizeof(current_option_txt));
+				current_option_txt[sizeof (current_option_txt)-1] = '\0';
 
-				parse_line(&str, current_option_txt, sizeof(current_option_txt));
 				copied = copy_list(info,
 								   (char *)xmlNodeListGetString(info->config, XML_CHILDREN(node), 1),
 								   path, from_cdrom, srcpath, strip_dirs, suffix,
