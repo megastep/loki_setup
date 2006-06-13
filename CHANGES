@@ -1,14 +1,14 @@
 Current:
-Ryan C. Gordon (???) - Sun Jun 11 01:42:49 PDT 2006
+Ryan C. Gordon (Google) - Sun Jun 11 01:42:49 PDT 2006
  * Still more localization fixes.
-Ryan C. Gordon (???) - Wed Jun  7 02:01:34 PDT 2006
+Ryan C. Gordon (Google) - Wed Jun  7 02:01:34 PDT 2006
  * Bunch of localization fixes.
-Ryan C. Gordon (???) - Thu May 18 03:37:58 PDT 2006
+Ryan C. Gordon (Google) - Thu May 18 03:37:58 PDT 2006
  * EULAs can be optionally skipped when doing a reinstall.
  * Reinstall can now be completely noninteractive, for automatic upgrades of
    existing installations to newer versions.
  * Added nomenuitems attribute to install tag.
-Ryan C. Gordon (???) - Wed May 17 17:33:25 PDT 2006
+Ryan C. Gordon (Google) - Wed May 17 17:33:25 PDT 2006
  * Fixed an incorrect gladefile reference (gtk+ warning on symlink checkbox).
 Stephane Peter (Codehost) - Wed Mar 29 15:37:18 PST 2006
  * Added booleans subsystem with support for complex expressions in
