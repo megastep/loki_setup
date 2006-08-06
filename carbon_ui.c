@@ -66,7 +66,7 @@ static const unsigned char *GetSpecialPathName(const unsigned char *Path)
 
         FSGetCatalogInfo(&Ref, kFSCatInfoNone, NULL, &SpecialPathHFS, NULL, NULL);
         CFStringRef cfs = CFStringCreateWithCharacters(kCFAllocatorDefault, SpecialPathHFS.unicode, SpecialPathHFS.length);
-        CFStringGetCString(cfs, (char *) SpecialPath, 1024, kCFStringEncodingISOLatin1);
+        CFStringGetCString(cfs, (char *) SpecialPath, 1024, kCFStringEncodingUTF8);
         CFRelease(cfs);
         return SpecialPath;
         /*//  Otherwise, it'll show /Users/joeshmo/Desktop.

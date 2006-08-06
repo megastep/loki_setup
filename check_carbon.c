@@ -2,7 +2,7 @@
  * Check and Rescue Tool for Loki Setup packages. Verifies the consistency of the files,
  * and optionally restores them from the original installation medium.
  *
- * $Id: check_carbon.c,v 1.7 2006-02-10 01:40:36 megastep Exp $
+ * $Id: check_carbon.c,v 1.8 2006-08-06 11:45:04 icculus Exp $
  */
 
 #include <stdlib.h>
@@ -149,7 +149,7 @@ static void add_message(const char *str, ...)
     printf("add_message() - CurMessage = '%s'\n", CurMessage);
     printf("add_message() - Length = %u\n", strlen(CurMessage));
     //STUPSetText(Res->InstalledFilesLabel, CurMessage, strlen(CurMessage));
-    CFStringRef CFMessage = CFStringCreateWithCString(NULL, CurMessage, kCFStringEncodingISOLatin1);
+    CFStringRef CFMessage = CFStringCreateWithCString(NULL, CurMessage, kCFStringEncodingUTF8);
     SetControlData(Res->InstalledFilesLabel, kControlEntireControl, kYASTControlAllUnicodeTextTag, sizeof(CFMessage), &CFMessage);
     CFRelease(CFMessage);
 }

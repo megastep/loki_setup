@@ -53,7 +53,7 @@ static const char *GetEXEPath()
     // Get EXE path as a CFString
     CFExePath = CFURLCopyFileSystemPath(url, kCFURLPOSIXPathStyle);
     // Convert it to a char *
-    CFStringGetCString(CFExePath, EXEPath, CARBON_MAX_APP_PATH, kCFStringEncodingISOLatin1);
+    CFStringGetCString(CFExePath, EXEPath, CARBON_MAX_APP_PATH, kCFStringEncodingUTF8);
     //printf("carbon_GetAppPath() - Executable path = '%s'\n", EXEPath);
 
     CFRelease(url);
@@ -394,7 +394,7 @@ static pascal OSStatus MediaWindowEventHandler(EventHandlerCallRef HandlerRef, E
             if(carbon_PromptForPath(Path, CARBON_MAX_APP_PATH))  // !!! FIXME: Supposed to be in brackets?  --ryan.
                 ID.id = MEDIA_DIR_ENTRY_ID;
                 GetControlByID(Res->MediaWindow, &ID, &TempCtrl);
-                cfstr = CFStringCreateWithCString(NULL, (char *)Path, kCFStringEncodingISOLatin1);
+                cfstr = CFStringCreateWithCString(NULL, (char *)Path, kCFStringEncodingUTF8);
                 SetControlData(TempCtrl, kControlEntireControl, kControlStaticTextCFStringTag, sizeof (CFStringRef), &cfstr);
                 CFRelease(cfstr);
                 Draw1Control(TempCtrl);
@@ -778,7 +778,7 @@ void carbon_SetWindowTitle(CarbonRes *Res, char *Title)
     carbon_debug("carbon_SetWindowTitle()\n");
 
     // Convert char* to a CFString
-    CFTitle = CFStringCreateWithCString(NULL, Title, kCFStringEncodingISOLatin1);
+    CFTitle = CFStringCreateWithCString(NULL, Title, kCFStringEncodingUTF8);
     // Set the window title
     SetWindowTitleWithCFString(Res->Window, CFTitle);
     // Release the string value from memory
@@ -905,7 +905,7 @@ void carbon_UpdateImage(CarbonRes *Res, const char *Filename, const char *Path, 
 	snprintf(FullPath, sizeof(FullPath), "file://%s%s%s", AppPath, Path, Filename);
     //printf("carbon_UpdateImage() - Image Path: '%s'\n", FullPath);
     // Create URL to image
-    url = CFURLCreateWithBytes(kCFAllocatorDefault, (unsigned char *)FullPath, strlen(FullPath), kCFStringEncodingISOLatin1, NULL);
+    url = CFURLCreateWithBytes(kCFAllocatorDefault, (unsigned char *)FullPath, strlen(FullPath), kCFStringEncodingUTF8, NULL);
     if(url == NULL)
         carbon_debug("carbon_UpdateImage() - URL to image could not be generated.\n");
     else
@@ -914,7 +914,7 @@ void carbon_UpdateImage(CarbonRes *Res, const char *Filename, const char *Path, 
         CFStringRef CFURLString = CFURLCopyPath(url);
         // Convert it to a char *
         char URLString[CARBON_MAX_APP_PATH];
-        CFStringGetCString(CFURLString, URLString, CARBON_MAX_APP_PATH, kCFStringEncodingISOLatin1);
+        CFStringGetCString(CFURLString, URLString, CARBON_MAX_APP_PATH, kCFStringEncodingUTF8);
         //printf("carbon_UpdateImage() - URL = '%s'\n", URLString);
 
         // Create provider for accessing file data
@@ -1000,7 +1000,7 @@ void carbon_SetLabelText(CarbonRes *Res, int LabelID, const char *Text)
     carbon_debug(Text);
     carbon_debug("\n");
 
-    cfstr = CFStringCreateWithCString(NULL, Text, kCFStringEncodingISOLatin1);
+    cfstr = CFStringCreateWithCString(NULL, Text, kCFStringEncodingUTF8);
     SetControlData(Ref, kControlEntireControl, kControlStaticTextCFStringTag, sizeof (CFStringRef), &cfstr);
     CFRelease(cfstr);
     Draw1Control(Ref);
@@ -1110,18 +1110,18 @@ int carbon_Prompt(CarbonRes *Res, PromptType Type, const char *Message, char *In
     IDStruct.signature = PROMPT_SIGNATURE; IDStruct.id = PROMPT_INPUT_ENTRY_ID;
     GetControlByID(Res->PromptWindow, &IDStruct, &InputEntry);
 
-    cfstr = CFStringCreateWithCString(NULL, Message, kCFStringEncodingISOLatin1);
+    cfstr = CFStringCreateWithCString(NULL, Message, kCFStringEncodingUTF8);
     SetControlData(MessageLabel, kControlEntireControl, kControlStaticTextCFStringTag, sizeof (CFStringRef), &cfstr);
     CFRelease(cfstr);
 
     // If Yes/No prompt requested
     if(Type == PromptType_YesNo)
     {
-        cfstr = CFStringCreateWithCString(NULL, _("Yes"), kCFStringEncodingISOLatin1);
+        cfstr = CFStringCreateWithCString(NULL, _("Yes"), kCFStringEncodingUTF8);
         SetControlTitleWithCFString(YesButton, cfstr);
         CFRelease(cfstr);
 
-        cfstr = CFStringCreateWithCString(NULL, _("No"), kCFStringEncodingISOLatin1);
+        cfstr = CFStringCreateWithCString(NULL, _("No"), kCFStringEncodingUTF8);
         SetControlTitleWithCFString(NoButton, cfstr);
         CFRelease(cfstr);
 
@@ -1132,11 +1132,11 @@ int carbon_Prompt(CarbonRes *Res, PromptType Type, const char *Message, char *In
     }
     else if(Type == PromptType_OKAbort)
     {
-        cfstr = CFStringCreateWithCString(NULL, _("OK"), kCFStringEncodingISOLatin1);
+        cfstr = CFStringCreateWithCString(NULL, _("OK"), kCFStringEncodingUTF8);
         SetControlTitleWithCFString(YesButton, cfstr);
         CFRelease(cfstr);
 
-        cfstr = CFStringCreateWithCString(NULL, _("Abort"), kCFStringEncodingISOLatin1);
+        cfstr = CFStringCreateWithCString(NULL, _("Abort"), kCFStringEncodingUTF8);
         SetControlTitleWithCFString(NoButton, cfstr);
         CFRelease(cfstr);
 
@@ -1218,7 +1218,9 @@ int carbon_ReadmeOrLicense(CarbonRes *Res, int ReadmeNotLicense, char *Message, 
     Boolean readonly = false;
     SetControlData(Res->MessageLabel, kControlEntireControl, kYASTControlReadOnlyTag, sizeof(Boolean), &readonly);
     SetControlData(Res->MessageLabel,  kControlLabelPart, kControlStaticTextTextTag, strlen(Message), Message);
-    CFStringRef CFMessage = CFStringCreateWithCString(NULL, Message, kCFStringEncodingISOLatin1);
+    // !!! FIXME: TextEdit assumes text files are MacRoman by default, so we force this limit here, too, so the
+    // !!! FIXME:  installed text files render correctly when the user double-clicks them from the Finder.
+    CFStringRef CFMessage = CFStringCreateWithCString(NULL, Message, kCFStringEncodingMacRoman);
     SetControlData(Res->MessageLabel, kControlEntireControl, kYASTControlAllUnicodeTextTag, sizeof(CFMessage), &CFMessage);
 
     YASTControlEditTextSelectionRec range = {1, 1};
@@ -1239,7 +1241,7 @@ int carbon_ReadmeOrLicense(CarbonRes *Res, int ReadmeNotLicense, char *Message, 
         ShowControl(CloseButton);
         HideControl(CancelButton);
         HideControl(AgreeButton);
-        cfstr = CFStringCreateWithCString(NULL, _("README"), kCFStringEncodingISOLatin1);
+        cfstr = CFStringCreateWithCString(NULL, _("README"), kCFStringEncodingUTF8);
         SetWindowTitleWithCFString(Res->ReadmeWindow, cfstr);
         CFRelease(cfstr);
     }
@@ -1249,7 +1251,7 @@ int carbon_ReadmeOrLicense(CarbonRes *Res, int ReadmeNotLicense, char *Message, 
         HideControl(CloseButton);
         ShowControl(CancelButton);
         ShowControl(AgreeButton);
-        cfstr = CFStringCreateWithCString(NULL, _("End User License Agreement"), kCFStringEncodingISOLatin1);
+        cfstr = CFStringCreateWithCString(NULL, _("End User License Agreement"), kCFStringEncodingUTF8);
         SetWindowTitleWithCFString(Res->ReadmeWindow, cfstr);
         CFRelease(cfstr);
     }
@@ -1286,7 +1288,7 @@ OptionsButton *carbon_OptionsNewLabel(OptionsBox *Box, const char *Name)
     // Create our option button
     OptionsButton *Button = malloc(sizeof(OptionsButton));
     // Create the physical button in the window
-    CFStringRef CFName = CFStringCreateWithCString(NULL, Name, kCFStringEncodingISOLatin1);
+    CFStringRef CFName = CFStringCreateWithCString(NULL, Name, kCFStringEncodingUTF8);
     // Create the static text control
     CreateStaticTextControl(Box->Res->Window, &DefaultBounds, CFName, NULL, &Button->Control);
     //ControlID ID = {LOKI_SETUP_SIG, Box->CurLabelID++};
@@ -1308,7 +1310,7 @@ OptionsButton *carbon_OptionsNewCheckButton(OptionsBox *Box, const char *Name)
     // Create our option button
     OptionsButton *Button = malloc(sizeof(OptionsButton));
     // Create the physical button in the window
-    CFStringRef CFName = CFStringCreateWithCString(NULL, Name, kCFStringEncodingISOLatin1);
+    CFStringRef CFName = CFStringCreateWithCString(NULL, Name, kCFStringEncodingUTF8);
     // Create the static text control
     CreateCheckBoxControl(Box->Res->Window, &DefaultBounds, CFName, false, true, &Button->Control);
     //ControlID ID = {LOKI_SETUP_SIG, Box->CurCheckID++};
@@ -1348,7 +1350,7 @@ OptionsButton *carbon_OptionsNewRadioButton(OptionsBox *Box, const char *Name, R
     // Create our option button
     OptionsButton *Button = malloc(sizeof(OptionsButton));
     // Create the physical button in the window
-    CFStringRef CFName = CFStringCreateWithCString(NULL, Name, kCFStringEncodingISOLatin1);
+    CFStringRef CFName = CFStringCreateWithCString(NULL, Name, kCFStringEncodingUTF8);
     // Create the static text control
     CreateRadioButtonControl(Box->Res->Window, &DefaultBounds, CFName, false, true, &Button->Control);
     //ControlID ID = {LOKI_SETUP_SIG, Box->CurRadioID++};
@@ -1521,7 +1523,7 @@ void carbon_OptionsSetTooltip(OptionsButton *Button, const char *Name)
     //printf("carbon_OptionsSetTooltip() - %s\n", Name);
 
     HMHelpContentRec Tooltip;
-    CFStringRef CFName = CFStringCreateWithCString(NULL, Name, kCFStringEncodingISOLatin1);
+    CFStringRef CFName = CFStringCreateWithCString(NULL, Name, kCFStringEncodingUTF8);
     
     Tooltip.version = kMacHelpVersion;
     Tooltip.tagSide = kHMDefaultSide;
@@ -1674,7 +1676,7 @@ int carbon_LaunchURL(const char *url)
     //printf("carbon_LaunchURL: %s", url);
 
     CFURLRef theCFURL = CFURLCreateWithBytes(kCFAllocatorDefault, (const unsigned char *)url, strlen((char *)url),
-											 kCFStringEncodingISOLatin1, NULL);
+											 kCFStringEncodingUTF8, NULL);
  
     if(LSOpenCFURLRef(theCFURL, NULL) == noErr)
         ReturnValue = 0;

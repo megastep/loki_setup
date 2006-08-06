@@ -1,4 +1,6 @@
 Current:
+Ryan C. Gordon (icculus.org) - Sun Aug  6 07:43:51 EDT 2006
+ * Changed most of the Carbon code to use UTF-8.
 Ryan C. Gordon (Google) - Sun Jun 11 01:42:49 PDT 2006
  * Still more localization fixes.
 Ryan C. Gordon (Google) - Wed Jun  7 02:01:34 PDT 2006

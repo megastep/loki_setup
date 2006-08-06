@@ -25,9 +25,9 @@ static int do_msgbox(const char *str, AlertType alert_type,
     int retval = 0;
     DialogItemIndex val = 0;
     CFStringRef title = CFStringCreateWithBytes(NULL, BAD_CAST _title, strlen(_title),
-                                                kCFStringEncodingISOLatin1, 0);
+                                                kCFStringEncodingUTF8, 0);
     CFStringRef msg = CFStringCreateWithBytes(NULL, BAD_CAST str, strlen(str),
-                                                kCFStringEncodingISOLatin1, 0);
+                                                kCFStringEncodingUTF8, 0);
     if ((msg != NULL) && (title != NULL))
     {
         DialogRef dlg = NULL;
@@ -136,7 +136,7 @@ static int ask_launch_services(const char *appid, char *buf, size_t bufsize)
     OSStatus rc;
     CFURLRef url = NULL;
     CFStringRef id = CFStringCreateWithBytes(NULL, BAD_CAST appid, strlen(appid),
-                                             kCFStringEncodingISOLatin1, 0);
+                                             kCFStringEncodingUTF8, 0);
 
     rc = LSFindApplicationForInfo(kLSUnknownCreator, id, NULL, NULL, &url);
     CFRelease(id);
