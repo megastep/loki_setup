@@ -910,6 +910,53 @@ static yesno_answer carbonui_prompt(const char *txt, yesno_answer suggest)
     return PromptResponse;
 }
 
+static int valid_macosx_version(install_info *info)
+{
+    char *ptr;
+    char *_minver = (char *) xmlGetProp(XML_ROOT(cur_info->config), BAD_CAST "requireosx");
+    if ((!_minver) || (!_minver[0]))
+        return 1;
+    else
+    {
+        long val;
+        char *minver = (char *) alloca(strlen(_minver) + 1);
+        long required = 0;
+        long osver = 0;
+	    OSErr err = Gestalt(gestaltSystemVersion, &osver);
+
+        if (err)
+            return 1;  // oh well.
+
+        strcpy(minver, _minver);
+        ptr = strchr(minver, '.');
+        if (ptr) *ptr = '\0';
+        val = (long) (atoi(minver) & 0xFF);
+        required |= (((val/10)*16) + (val%10)) << 8;
+        minver = ptr;
+        if (minver)
+        {
+            ptr = strchr(++minver, '.');
+            if (ptr) *ptr = '\0';
+            val = (long) (atoi(minver) & 0xF);
+            required |= (val << 4);
+            minver = ptr;
+            if (minver)
+            {
+                val = (long) (atoi(++minver) & 0xF);
+                required |= val;
+            }
+        }
+
+        if (osver < required)
+        {
+            log_fatal(_("This install requires Mac OS X %s or later."), _minver);
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
 static install_state carbonui_init(install_info *info, int argc, char **argv, int noninteractive)
 {
     char title[1024];
@@ -937,6 +984,11 @@ static install_state carbonui_init(install_info *info, int argc, char **argv, in
     else
         snprintf(title, sizeof(title), _("%s Setup"), info->desc);
     carbon_SetWindowTitle(MyRes, title);
+
+    if (!valid_macosx_version(info)) {
+        cur_state = SETUP_EXIT;
+        return cur_state;
+    }
 
     // Set the initial state
     if(noninteractive)

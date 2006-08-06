@@ -224,6 +224,9 @@ There are several optional attributes of the install element:
  appbundledesc (CARBON ONLY) This string is used with the "appbundleid" attribute...it's a human
                readable text describing the app bundle in question.
 
+ requireosx (CARBON ONLY) This string specifies the minimum version of Mac OS X
+            that must be installed on the system for the product to be installed.
+
 The CDROM element:
 
 An installer can fetch the necesary data files from one or more CDROM discs. As of setup 1.5.0,
