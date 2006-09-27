@@ -914,7 +914,7 @@ OSStatus YASTControlAttachToExistingControl(ControlRef theControl) {
 	if (err == noErr) {
 		err = TXNNewObject(NULL, varsp->fWindow, &varsp->fRTextArea,
 			kTXNWantVScrollBarMask | kTXNAlwaysWrapAtViewEdgeMask,
-			kTXNTextEditStyleFrameType, kTXNTextensionFile, kTXNSystemDefaultEncoding, 
+			kTXNTextEditStyleFrameType, kTXNTextensionFile, kTXNUnicodeEncoding,
 			&theTXNObject, &varsp->fTXNFrameID, (TXNObjectRefcon) varsp);
 		if (err == noErr) {
 			varsp->fTXNObject = theTXNObject;
@@ -934,8 +934,18 @@ OSStatus YASTControlAttachToExistingControl(ControlRef theControl) {
 	if (err == noErr) {
 		TXNControlData txnCControlData;
 		TXNControlTag txnControlTag = kTXNMarginsTag;
+        memset(&txnCControlData, '\0', sizeof (TXNControlData));
 		TXNMargins txnMargins = { 2, 3, 2, 1 };	/* t,l,b,r */
 		txnCControlData.marginsPtr	= &txnMargins; 
+		(void) TXNSetTXNObjectControls( varsp->fTXNObject, false, 1, &txnControlTag, &txnCControlData );
+	}
+
+		/* force font substitution, so (say) Japanese text renders on a U.S. desktop. */
+	if (err == noErr) {
+		TXNControlData txnCControlData;
+		TXNControlTag txnControlTag = kTXNDoFontSubstitution;
+        memset(&txnCControlData, '\0', sizeof (TXNControlData));
+		txnCControlData.uValue = 1;
 		(void) TXNSetTXNObjectControls( varsp->fTXNObject, false, 1, &txnControlTag, &txnCControlData );
 	}
 	
