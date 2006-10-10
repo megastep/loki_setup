@@ -695,8 +695,7 @@ int carbon_IterateForState(CarbonRes *Res, int *StateFlag)
     // Loop until the state flag has changed by some outside code or an error occurs
     while(*StateFlag == Start)
     {
-        carbon_HandlePendingEvents(Res);
-
+        carbon_HandlePendingEvents(Res, 1);
         // Update any thing on the window display that needs to be updated.
         //QDFlushPortBuffer(GetWindowPort(Res->Window), NULL);
     }
@@ -960,7 +959,7 @@ void carbon_UpdateImage(CarbonRes *Res, const char *Filename, const char *Path, 
     }
 }
 
-void carbon_HandlePendingEvents(CarbonRes *Res)
+void carbon_HandlePendingEvents(CarbonRes *Res, int sleepIfNone)
 {
     EventRef theEvent;
     EventTargetRef theTarget;
@@ -974,6 +973,10 @@ void carbon_HandlePendingEvents(CarbonRes *Res)
     {
         SendEventToEventTarget (theEvent, theTarget);
         ReleaseEvent(theEvent);
+    }
+    else if (sleepIfNone)
+    {
+        usleep(50000);
     }
 
     // readme/eula window was opened non-blocking. Handle.
@@ -1168,7 +1171,7 @@ int carbon_Prompt(CarbonRes *Res, PromptType Type, const char *Message, char *In
     // Wait for the prompt window to close
     // Wait for events until the prompt window has been responded to
     while(!PromptResponseValid)
-        carbon_HandlePendingEvents(Res);
+        carbon_HandlePendingEvents(Res, 1);
 
     // HandlePendingEvents will hide window.
 
@@ -1269,7 +1272,7 @@ int carbon_ReadmeOrLicense(CarbonRes *Res, int ReadmeNotLicense, char *Message, 
     // Wait for the prompt window to close
     // Wait for events until the prompt window has been responded to
     while(!PromptResponseValid)
-        carbon_HandlePendingEvents(Res);
+        carbon_HandlePendingEvents(Res, 1);
 
     // HandlePendingEvents will hide the window. What a mess.  --ryan.
 
@@ -1834,7 +1837,7 @@ int carbon_MediaPrompt(CarbonRes *Res, int *CDRomNotDir, char *Dir, int DirLengt
     // Wait for the prompt window to close
     // Wait for events until the prompt window has been responded to
     while(!PromptResponseValid)
-        carbon_HandlePendingEvents(Res);
+        carbon_HandlePendingEvents(Res, 1);
 
     // HandlePendingEvents will hide window.
 

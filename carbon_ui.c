@@ -1138,7 +1138,7 @@ static install_state carbonui_pick_class(install_info *info)
 static void carbonui_idle(install_info *info)
 {
     carbon_debug("***carbonui_idle()\n");
-    carbon_HandlePendingEvents(MyRes);
+    carbon_HandlePendingEvents(MyRes, 1);
 }
 
 static install_state carbonui_setup(install_info *info)
@@ -1349,7 +1349,7 @@ static int carbonui_update(install_info *info, const char *path, size_t progress
     }
 
     // Handle any UI events in queue
-    carbon_HandlePendingEvents(MyRes);
+    carbon_HandlePendingEvents(MyRes, 0);
 	return TRUE;
 /*
     int textlen;
@@ -1415,7 +1415,7 @@ static int carbonui_update(install_info *info, const char *path, size_t progress
     carbon_SetProgress(MyRes, COPY_TOTAL_PROGRESS_ID, info->installed_bytes, CurTotalSize);
 
     // Handle any UI events in queue
-    carbon_HandlePendingEvents(MyRes);
+    carbon_HandlePendingEvents(MyRes, 0);
 	return TRUE;*/
 }
 
@@ -1533,7 +1533,7 @@ static void carbonui_shutdown(install_info *info)
     carbon_debug("***carbonui_shutdown()\n");
     carbon_UnloadCarbonRes(MyRes);
 
-    carbon_HandlePendingEvents(MyRes);
+    carbon_HandlePendingEvents(MyRes, 0);
 }
 
 int carbonui_okay(Install_UI *UI, int *argc, char ***argv)

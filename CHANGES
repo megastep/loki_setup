@@ -1,4 +1,6 @@
 Current:
+Ryan C. Gordon (Running With Scissors) - Tue Oct 10 08:52:56 EDT 2006
+ * Carbon code no longer eats whole CPU while waiting for user input.
 Ryan C. Gordon (Gunnar Games) - Wed Sep 27 00:26:41 EDT 2006
  * Carbon code now completely supports Unicode.
 Ryan C. Gordon (Procedural Arts) - Sun Aug  6 07:43:51 EDT 2006

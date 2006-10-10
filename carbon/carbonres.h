@@ -229,7 +229,7 @@ void carbon_EnableControl(CarbonRes *, int);
 void carbon_SetInstallClass(CarbonRes *, int);
 int carbon_GetInstallClass(CarbonRes *);
 void carbon_UpdateImage(CarbonRes *, const char *, const char *, int);
-void carbon_HandlePendingEvents(CarbonRes *);
+void carbon_HandlePendingEvents(CarbonRes *, int);
 void carbon_SetLabelText(CarbonRes *, int, const char *);
 void carbon_GetLabelText(CarbonRes *, int, char *, int);
 void carbon_SetEntryText(CarbonRes *, int, const char *);

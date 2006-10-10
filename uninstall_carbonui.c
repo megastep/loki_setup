@@ -261,7 +261,7 @@ void OnCommandUninstall()
                 //set_status_text(text);
 
                 // See if the user wants to cancel the uninstall
-                carbon_HandlePendingEvents(Res);
+                carbon_HandlePendingEvents(Res, 1);
     			
 			    // Display an optional message to the user
 			    message = loki_getmessage_component(component->component);
@@ -294,7 +294,7 @@ void OnCommandUninstall()
                 //gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), FALSE);
 
                 // See if the user wants to cancel the uninstall
-                carbon_HandlePendingEvents(Res);
+                carbon_HandlePendingEvents(Res, 1);
             }
         } while((button = GoToNextComponent(button)));
 
@@ -316,7 +316,7 @@ void OnCommandUninstall()
                 //set_status_text(text);
 
                 // See if the user wants to cancel the uninstall
-                carbon_HandlePendingEvents(Res);
+                carbon_HandlePendingEvents(Res, 1);
     			
 			    // Display an optional message to the user
 			    message = loki_getmessage_component(component->component);
@@ -352,7 +352,7 @@ void OnCommandUninstall()
                 //gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), FALSE);
 
                 // See if the user wants to cancel the uninstall
-                carbon_HandlePendingEvents(Res);
+                carbon_HandlePendingEvents(Res, 1);
 
                 break;
             }

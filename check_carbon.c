@@ -2,7 +2,7 @@
  * Check and Rescue Tool for Loki Setup packages. Verifies the consistency of the files,
  * and optionally restores them from the original installation medium.
  *
- * $Id: check_carbon.c,v 1.8 2006-08-06 11:45:04 icculus Exp $
+ * $Id: check_carbon.c,v 1.9 2006-10-10 13:00:55 icculus Exp $
  */
 
 #include <stdlib.h>
@@ -389,7 +389,7 @@ int main(int argc, char *argv[])
 				  file;
 				  file = loki_getnext_file(file) ) {
 
-				carbon_HandlePendingEvents(Res);
+				carbon_HandlePendingEvents(Res, 1);
 				switch ( loki_check_file(file) ) {
 				case LOKI_REMOVED:
 					add_message(_("%s was REMOVED"), loki_getpath_file(file));
