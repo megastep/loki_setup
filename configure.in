@@ -419,8 +419,7 @@ if test x$enable_gtk2 = xyes; then
     AC_PATH_PROG(HAVEPKGCONFIG, pkg-config, $PATH)
 
     if test ! -z "$HAVEPKGCONFIG"; then
-        $HAVEPKGCONFIG --exists libglade-2.0 gtk+-2.0 
-        if test $? -eq 0 ; then
+        if $HAVEPKGCONFIG --exists libglade-2.0 gtk+-2.0 ; then
             GTK2_CFLAGS=`$HAVEPKGCONFIG --cflags libglade-2.0 gtk+-2.0`
             GTK2_LIBS=`$HAVEPKGCONFIG --libs libglade-2.0 gtk+-2.0`
 
@@ -461,15 +460,23 @@ if test ! -z "$HAVEXML"; then
     XML_CFLAGS=`$HAVEXML --cflags`
     XML_PREFIX=`$HAVEXML --prefix`
 
+	if "$HAVEXML" --help|grep libtool-libs > /dev/null; then
+		XML_LIBTOOL=`$HAVEXML --libtool-libs`
+		. "$XML_LIBTOOL"
+		XML_LIBS="$dependency_libs"
+	elif "$HAVEXML" --libs | grep thread > /dev/null; then
+		XML_LIBS="$PTHREAD -lm"
+	fi
+
     CFLAGS="$CFLAGS $XML_CFLAGS"
     if test "$STATIC" = ""; then
-        LIBS="$LIBS $XML_STATIC -L$XML_PREFIX/lib$LIBSUFFIX -lxml${XMLVER} $BDYNAMIC"
-        GUI_LIBS="$GUI_LIBS $XML_STATIC -L$XML_PREFIX/lib$LIBSUFFIX -lxml${XMLVER} $BDYNAMIC"
-        CARBON_LIBS="$CARBON_LIBS -L$XML_PREFIX/lib$LIBSUFFIX -lxml${XMLVER}"
+        LIBS="$LIBS $XML_STATIC -L$XML_PREFIX/lib$LIBSUFFIX -lxml${XMLVER} $BDYNAMIC $XML_LIBS"
+        GUI_LIBS="$GUI_LIBS $XML_STATIC -L$XML_PREFIX/lib$LIBSUFFIX -lxml${XMLVER} $BDYNAMIC $XML_LIBS"
+        CARBON_LIBS="$CARBON_LIBS -L$XML_PREFIX/lib$LIBSUFFIX -lxml${XMLVER} $XML_LIBS"
     else
-        LIBS="$LIBS $XML_PREFIX/lib$LIBSUFFIX/libxml${XMLVER}.a"
-        GUI_LIBS="$GUI_LIBS $XML_PREFIX/lib$LIBSUFFIX/libxml${XMLVER}.a"
-        CARBON_LIBS="$CARBON_LIBS $XML_PREFIX/lib$LIBSUFFIX/libxml${XMLVER}.a"
+        LIBS="$LIBS $XML_PREFIX/lib$LIBSUFFIX/libxml${XMLVER}.a $XML_LIBS"
+        GUI_LIBS="$GUI_LIBS $XML_PREFIX/lib$LIBSUFFIX/libxml${XMLVER}.a $XML_LIBS"
+        CARBON_LIBS="$CARBON_LIBS $XML_PREFIX/lib$LIBSUFFIX/libxml${XMLVER}.a $XML_LIBS"
     fi
 else
     AC_MSG_ERROR([*** xml${XMLVER}-config not found. You need a working libxml${XMLVER} installation.])

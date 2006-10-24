@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.125 2006-06-07 09:20:48 icculus Exp $
+   $Id: gtk_ui.c,v 1.126 2006-10-24 00:04:13 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -948,6 +948,7 @@ void setup_checkbox_menuitems_slot( GtkWidget* widget, gpointer func_data)
     cur_info->options.install_menuitems = (GTK_TOGGLE_BUTTON(widget)->active != 0);
 }
 
+#ifndef ENABLE_GTK2
 static yesno_answer prompt_response;
 
 static void prompt_button_slot( GtkWidget* widget, gpointer func_data)
@@ -969,10 +970,27 @@ static void prompt_okbutton_slot( GtkWidget* widget, gpointer func_data)
 {
     prompt_response = RESPONSE_OK;
 }
+#endif
 
 static yesno_answer gtkui_prompt(const char *txt, yesno_answer suggest)
 {
-    GtkWidget *dialog, *label, *yes_button, *no_button, *ok_button;
+	GtkWidget *dialog;
+#ifdef ENABLE_GTK2
+	gint ret;
+
+	dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, 
+									(suggest != RESPONSE_OK) ? GTK_MESSAGE_QUESTION : GTK_MESSAGE_INFO,
+									(suggest != RESPONSE_OK) ? GTK_BUTTONS_YES_NO : GTK_BUTTONS_OK,
+									txt);
+	ret = gtk_dialog_run(GTK_DIALOG(dialog));
+	gtk_widget_destroy(dialog);
+
+	if (ret==GTK_RESPONSE_YES || ret==GTK_RESPONSE_OK)
+		return RESPONSE_OK;
+	return RESPONSE_NO;
+
+#else
+    GtWidget *label, *yes_button, *no_button, *ok_button;
        
     /* Create the widgets */
     
@@ -1025,12 +1043,23 @@ static yesno_answer gtkui_prompt(const char *txt, yesno_answer suggest)
     }
     gtk_widget_destroy(dialog);
     return prompt_response;
+#endif
 }
 
 
 static void message_dialog(const char *txt, const char *title)
 {
-    GtkWidget *dialog, *label, *ok_button;
+    GtkWidget *dialog;
+#ifdef ENABLE_GTK2
+	dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, 
+									GTK_MESSAGE_INFO,
+									GTK_BUTTONS_OK,
+									txt);
+	gtk_window_set_title(GTK_WINDOW(dialog), title);
+	gtk_dialog_run(GTK_DIALOG(dialog));
+	gtk_widget_destroy(dialog);
+#else
+	GtkWidget *label, *ok_button;
        
     /* Create the widgets */
     
@@ -1063,6 +1092,7 @@ static void message_dialog(const char *txt, const char *title)
 	}
 
     gtk_widget_destroy(dialog);	
+#endif
 }
 
 
