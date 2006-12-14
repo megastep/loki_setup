@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.126 2006-10-24 00:04:13 megastep Exp $
+   $Id: gtk_ui.c,v 1.127 2006-12-14 19:33:36 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -990,7 +990,7 @@ static yesno_answer gtkui_prompt(const char *txt, yesno_answer suggest)
 	return RESPONSE_NO;
 
 #else
-    GtWidget *label, *yes_button, *no_button, *ok_button;
+    GtkWidget *label, *yes_button, *no_button, *ok_button;
        
     /* Create the widgets */
     
