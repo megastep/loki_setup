@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.127 2006-12-14 19:33:36 megastep Exp $
+   $Id: gtk_ui.c,v 1.128 2006-12-27 01:10:16 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -986,7 +986,7 @@ static yesno_answer gtkui_prompt(const char *txt, yesno_answer suggest)
 	gtk_widget_destroy(dialog);
 
 	if (ret==GTK_RESPONSE_YES || ret==GTK_RESPONSE_OK)
-		return RESPONSE_OK;
+		return (suggest==RESPONSE_OK) ? RESPONSE_OK : RESPONSE_YES;
 	return RESPONSE_NO;
 
 #else
