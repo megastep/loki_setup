@@ -611,7 +611,7 @@ if test ! -z "$USE_NCURSES"; then
 	if test "$STATIC" = ""; then
 		CONSOLE_LIBS="$CONSOLE_LIBS $NCURSES_STATIC -lncurses \$(BDYNAMIC)"
 	else
-		CONSOLE_LIBS="$CONSOLE_LIBS -lncurses"
+		CONSOLE_LIBS="$CONSOLE_LIBS $NCURSES_STATIC -lncurses"
 	fi
 else
 	if test "$STATIC" = ""; then
