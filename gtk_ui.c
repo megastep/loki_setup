@@ -1,5 +1,5 @@
 /* GTK-based UI
-   $Id: gtk_ui.c,v 1.128 2006-12-27 01:10:16 megastep Exp $
+   $Id: gtk_ui.c,v 1.129 2007-01-17 20:56:30 megastep Exp $
 */
 
 /* Modifications by Borland/Inprise Corp.
@@ -1677,12 +1677,6 @@ static install_state gtkui_init(install_info *info, int argc, char **argv, int n
         return SETUP_ABORT;
     }
     fclose(opened);
-
-#if GTK_MAJOR_VERSION > 1
-	setup_add_bool("gtk2", 1);
-#else
-	setup_add_bool("gtk1", 1);
-#endif
 
     setup_glade = GLADE_XML_NEW(glade_file, "setup_window"); 
 

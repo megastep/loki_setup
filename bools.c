@@ -1,4 +1,4 @@
-/* $Id: bools.c,v 1.2 2006-03-31 01:29:02 megastep Exp $ */
+/* $Id: bools.c,v 1.3 2007-01-17 20:56:30 megastep Exp $ */
 
 /*
   Manage global installer booleans.
@@ -62,6 +62,14 @@ void setup_init_bools(install_info *info)
 # if RPM_SUPPORT == 3
 	setup_add_bool("rpm3-support", 1);
 # endif
+#endif
+
+	/* We must define this here instead of in the backend in case we use a non-GTK installer for
+	   a GTK app that uses these flags */
+#ifdef ENABLE_GTK2
+	setup_add_bool("gtk2", 1);
+#else
+	setup_add_bool("gtk1", 1);
 #endif
 
 	/* Add arch, glibc, and os bools */
