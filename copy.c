@@ -82,6 +82,7 @@
 #include <fcntl.h>
 #include <ctype.h>
 #include <string.h>
+#include <errno.h>
 #ifdef HAVE_STRINGS_H
 #  include <strings.h>
 #endif
@@ -396,8 +397,12 @@ ssize_t copy_file(install_info *info, const char *cdrom, const char *path, const
 			context_t cont = context_new(se_context);
 			if ( cont ) {
 				security_context_t sec = context_str(cont);
-				if ( setfilecon(final, sec) ) {
-					log_warning(_("Failed to change SELinux context for file '%s'"), base);
+				if ( setfilecon(final, sec) < 0 ) {
+					if ( errno == ENOTSUP ) {
+						log_debug(_("Failed to change SELinux context for file '%s' - not supported"), base);
+					} else {
+						log_warning(_("Failed to change SELinux context for file '%s'"), base);
+					}
 				}
 				context_free(cont);
 			} else {
