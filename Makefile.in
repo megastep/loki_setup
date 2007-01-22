@@ -60,19 +60,19 @@ SRCS = $(OBJS:.o=.c) $(CONSOLE_OBJS:.o=.c) $(GUI_OBJS:.o=.c) $(CARBON_OBJS:.o=.c
 
 COMMON_LIBS = plugins/libplugins.a @COMMON_LIBS@ \
 	      $(SETUPDB)/$(arch)/libsetupdb.a
-LIBS =  $(COMMON_LIBS) @LIBS@ -lm
+LIBS =  $(COMMON_LIBS) @LIBS@
 ifeq ($(os),Linux)
 GUI_LIBS = $(COMMON_LIBS) @LIBS@ @GUI_LIBS@
 else
 GUI_LIBS = $(COMMON_LIBS) @GUI_LIBS@ @LIBS@
 endif
 CARBON_LIBS = $(COMMON_LIBS) @LIBS@ @CARBON_LIBS@
-CONSOLE_LIBS = $(LIBS) @CONSOLE_LIBS@
+CONSOLE_LIBS = $(LIBS) @CONSOLE_LIBS@ -lm
 
 all: do-plugins @DO_DIALOG@ setup $(SETUP_GTK) uninstall xsu
 
 testxml: testxml.o
-	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
+	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS) -lm
 
 loki_uninstall.o: uninstall.c
 	$(LD) $(LDFLAGS) -c -o $@ $^ $(CFLAGS) -DUNINSTALL_UI -DVERSION=\"$(UNINSTALL_VERSION)\"
