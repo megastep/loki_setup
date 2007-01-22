@@ -475,6 +475,14 @@ static void empty_container(GtkWidget *widget, gpointer data)
     gtk_container_remove(GTK_CONTAINER(data), widget);
 }
 
+static void log_handler(const gchar *log_domain,
+					 GLogLevelFlags log_level,
+					 const gchar *message,
+					 gpointer user_data)
+{
+	/*	log_debug("Glib-WARNING(%s): %s\n", log_domain, message); */
+}
+
 /* Run a GUI to select and uninstall products */
 int uninstall_ui(int argc, char *argv[])
 {
@@ -492,6 +500,9 @@ int uninstall_ui(int argc, char *argv[])
     char text[1024];
 
     gtk_init(&argc,&argv);
+
+	/* Disable GLib warnings that may be triggered by libglade */
+	g_log_set_handler ("libglade", G_LOG_LEVEL_WARNING | G_LOG_FLAG_RECURSION, log_handler, NULL);
 
     /* Initialize Glade */
     glade_init();
