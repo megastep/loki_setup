@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.88 2006-06-11 08:28:33 icculus Exp $ */
+/* $Id: main.c,v 1.89 2007-01-26 02:52:52 megastep Exp $ */
 
 /*
 Modifications by Borland/Inprise Corp.:
@@ -288,6 +288,17 @@ int main(int argc, char **argv)
 
     file_init();
 
+#ifdef __linux
+	/* See if we have a SELinux environment */
+# ifdef HAVE_SELINUX_SELINUX_H
+	have_selinux = is_selinux_enabled();
+# else
+	if ( !access("/usr/bin/chcon", X_OK) && !access("/usr/sbin/getenforce", X_OK) ) {
+		have_selinux = 1;
+	}
+# endif
+#endif
+
     /* Initialize the XML setup configuration */
     info = create_install(xml_file, install_path, binary_path, product_prefix);
     if ( info == NULL ) {
@@ -312,17 +323,6 @@ int main(int argc, char **argv)
     signal(SIGQUIT, signal_abort);
     signal(SIGHUP, signal_abort);
     signal(SIGTERM, signal_abort);
-
-#ifdef __linux
-	/* See if we have a SELinux environment */
-# ifdef HAVE_SELINUX_SELINUX_H
-	have_selinux = is_selinux_enabled();
-# else
-	if ( !access("/usr/bin/chcon", X_OK) && !access("/usr/sbin/getenforce", X_OK) ) {
-		have_selinux = 1;
-	}
-# endif
-#endif
 
     /* Run the little state machine */
     exit_status = 0;
