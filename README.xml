@@ -1019,6 +1019,10 @@ The following environment variables are defined while in the shell script:
                           name.
     SETUP_OPTIONTAGS    : A blank-separated list of the option tags for the
                           <option>'s selected for installation.
+    SETUP_ARCH          : Architecture of the installer binary. It might be
+                          different than the kernel's architecture. (ex:
+                          64 bit kernel and 32 bit userspace on an x86_64
+                          machine)
 
 About localization :
 

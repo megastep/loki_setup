@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.176 2006-05-18 19:49:46 icculus Exp $ */
+/* $Id: install.c,v 1.177 2007-02-20 18:34:53 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -2129,16 +2129,18 @@ static void output_script_header(FILE *f, install_info *info, product_component_
             "SETUP_SYMLINKSPATH=\"%s\"\n"
             "SETUP_CDROMPATH=\"%s\"\n"
             "SETUP_DISTRO=\"%s\"\n"
-			"SETUP_OPTIONTAGS=\"%s\"\n"
+            "SETUP_OPTIONTAGS=\"%s\"\n"
+            "SETUP_ARCH=\"%s\"\n"
             "export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_COMPONENTNAME SETUP_COMPONENTVER\n"
-            "export SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH SETUP_DISTRO SETUP_OPTIONTAGS\n",
+            "export SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH SETUP_DISTRO SETUP_OPTIONTAGS SETUP_ARCH\n",
             info->name, info->version,
             loki_getname_component(comp), loki_getversion_component(comp),
             info->install_path,
             info->symlinks_path,
             info->cdroms_list ? info->cdroms_list->mounted : "",
 			info->distro ? distribution_symbol[info->distro] : "",
-			get_optiontags_string(info)
+			get_optiontags_string(info),
+	    info->arch
 			);
 #ifdef RPM_SUPPORT
     if(strcmp(rpm_root,"/")) /* Emulate RPM environment for scripts */
@@ -2996,13 +2998,15 @@ int run_script(install_info *info, const char *script, int arg, int include_tags
 					"SETUP_CDROMPATH=\"%s\"\n"
 					"SETUP_DISTRO=\"%s\"\n"
 					"SETUP_REINSTALL=\"%s\"\n"
-					"export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH SETUP_DISTRO SETUP_REINSTALL\n",
+					"SETUP_ARCH=\"%s\"\n"
+					"export SETUP_PRODUCTNAME SETUP_PRODUCTVER SETUP_INSTALLPATH SETUP_SYMLINKSPATH SETUP_CDROMPATH SETUP_DISTRO SETUP_REINSTALL SETUP_ARCH\n",
 					info->name, info->version,
 					info->install_path,
 					info->symlinks_path,
 					info->cdroms_list ? info->cdroms_list->mounted : "",
 					info->distro ? distribution_symbol[info->distro] : "",
-					info->options.reinstalling ? "1" : "0");
+					info->options.reinstalling ? "1" : "0",
+					info->arch);
 
 			if ( include_tags )
 				fprintf(fp, 
