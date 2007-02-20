@@ -144,6 +144,31 @@ then
   fi
 fi
 
+# Optionally override the detected architecture. 
+
+if [ "$1" = "-arch" ]
+then
+  shift
+  if [ -z "$1" ] || echo "$1" | grep "^-" >/dev/null 2>&1
+  then
+    echo "$0: -arch needs an argument"
+    exit 1
+  fi
+  # some handy conversion copied from DetectARCH. 
+  case "$1" in
+  amd64)
+    arch="x86_64" ;;
+  i?86 | i86*)
+    arch="x86" ;;
+  90*/*) 
+    arch="hppa" ;;
+  *)
+    arch="$1" ;;
+  esac
+  shift
+fi
+
+
 # Find the installation program
 # try_run [-absolute] [-fatal] INSTALLER_NAME [PARAMETERS_PASSED]
 #   -absolute option: if what you are trying to execute has an absolute path
