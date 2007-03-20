@@ -2,7 +2,7 @@
  * "dialog"-based UI frontend for setup.
  * Dialog was turned into a library, shell commands are not called.
  *
- * $Id: dialog_ui.c,v 1.36 2006-05-18 19:49:45 icculus Exp $
+ * $Id: dialog_ui.c,v 1.37 2007-03-20 18:34:45 megastep Exp $
  */
 
 #include <limits.h>
@@ -84,7 +84,7 @@ install_state dialog_init(install_info *info,int argc, char **argv,
 	
     /* Welcome box */
 	clear_the_screen();
-    dialog_msgbox(title, msg, 6, 50, 1);
+    dialog_msgbox(title, msg, 7, 60, 1);
 
     info->install_size = size_tree(info, XML_CHILDREN(XML_ROOT(info->config)));
 
