@@ -107,6 +107,9 @@ int loki_launchURL(const char *url)
           "open %s" },
 #endif
         { RUNNING_X11,
+          "xdg-open",
+          "xdg-open %s &" },
+        { RUNNING_X11,
           "gnome-moz-remote",
           "gnome-moz-remote --newwin %s &" },
         { RUNNING_X11,
