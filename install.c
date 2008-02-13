@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.177 2007-02-20 18:34:53 megastep Exp $ */
+/* $Id: install.c,v 1.178 2008-02-13 00:34:03 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -141,6 +141,7 @@ static SetupFeature features[] =
 {
 	{ "inline-scripts", 1 },
 	{ "booleans", 1 },
+	{ "require-warn", 1 },
 	{ NULL, 0 }
 };
 
@@ -1479,9 +1480,14 @@ int CheckRequirements(install_info *info)
 			 match_arch(info, arch) &&
 			 match_libc(info, libc) &&
 			 match_distro(info, distro) ) {
+			int warning = 0;
 			char *commandprop = (char *)xmlGetProp(node, BAD_CAST "command");
 			char *featureprop = (char *)xmlGetProp(node, BAD_CAST "feature");
 			char *cond = (char *)xmlGetProp(node, BAD_CAST "condition");
+			char *warn = (char *)xmlGetProp(node, BAD_CAST "warn");
+			if (warn && !strcmp(warn, "yes"))
+				warning = 1;
+			xmlFree(warn);
 			xmlFree(lang); xmlFree(arch); xmlFree(libc); xmlFree(distro);
 			if ( !commandprop && !featureprop && !cond ) {
 				log_fatal(_("XML: 'require' tag doesn't have a mandatory 'command', 'condition' or 'feature' attribute"));
@@ -1500,7 +1506,8 @@ int CheckRequirements(install_info *info)
 						UI.prompt(convert_encoding(buf), RESPONSE_OK);
 					}
 					xmlFree(cond);
-					return 0;
+					if (!warning)
+						return 0;
 				}
 			} else if ( commandprop ) {
 				/* Launch the command */
@@ -1517,7 +1524,8 @@ int CheckRequirements(install_info *info)
 						UI.prompt(convert_encoding(buf), RESPONSE_OK);
 					}
 					xmlFree(commandprop);
-					return 0;
+					if (!warning)
+						return 0;
 				}
 			} else if (featureprop) {
 				char *verprop = (char *)xmlGetProp(node, BAD_CAST "version");
@@ -1534,7 +1542,8 @@ int CheckRequirements(install_info *info)
 								"(missing feature '%s' version '%u')"), featureprop, version);
 					UI.prompt(buf, RESPONSE_OK);
 					xmlFree(featureprop);
-					return 0;
+					if (!warning)
+						return 0;
 				}
 			}
 

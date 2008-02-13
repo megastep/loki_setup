@@ -436,7 +436,7 @@ are fulfilled.
 
 'require' elements have to be at the top level (right under the root 'install' element), and
 are parsed in sequential order. Installation will abort if any of the specified commands return
-a non-nil value.
+a non-nil value, unless the 'warn' attribute is set.
 
 This element takes either of the following mandatory attributes :
 
@@ -464,6 +464,9 @@ This element takes some optional attributes :
 
   version   [only for feature attribute] the minimum integer version number
             required for the specified feature.
+
+  warn      If set to 'yes', then the user will only be displayed the message as a warning and the
+            installation may continue regardless.
 
 The text specified in the element will be displayed to the user if the
 condition of the command attribute fails. It has no meaning for the feature
