@@ -1,4 +1,4 @@
-/* $Id: bools.c,v 1.3 2007-01-17 20:56:30 megastep Exp $ */
+/* $Id: bools.c,v 1.4 2008-02-28 03:05:43 icculus Exp $ */
 
 /*
   Manage global installer booleans.
@@ -370,3 +370,4 @@ void setup_exit_bools(void)
 	cur_info = NULL;
 	setup_booleans = NULL;
 }
+
