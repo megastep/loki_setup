@@ -767,7 +767,7 @@ ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, c
 
             if(binpath) {
                 // binary path specified, only try this location
-                strncpy(binarylocations[0], binpath, PATH_MAX);
+                snprintf(binarylocations[0], PATH_MAX, "%s/%s", binpath, final);
                 numlocations = 1;
             }
             else {

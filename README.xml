@@ -827,8 +827,8 @@ There are several optional attributes of the binary element:
  args       Specify optional arguments to be added on the command line when running the binary.
 
  inline     When set to 'yes' the text content of the element is used as script
-	    content instead of a path. The value of 'binarypath' is used as
-	    script name in this case
+            content instead of a path. The value of 'binarypath' is used as
+            script name in this case
 
 The FILES element:
 
