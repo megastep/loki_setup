@@ -1,4 +1,4 @@
-/* $Id: install.c,v 1.178 2008-02-13 00:34:03 megastep Exp $ */
+/* $Id: install.c,v 1.179 2008-06-20 23:48:01 megastep Exp $ */
 
 /* Modifications by Borland/Inprise Corp.:
     04/10/2000: Added code to expand ~ in a default path immediately after 
@@ -1505,9 +1505,10 @@ int CheckRequirements(install_info *info)
 						}
 						UI.prompt(convert_encoding(buf), RESPONSE_OK);
 					}
-					xmlFree(cond);
-					if (!warning)
+					if (!warning) {
+						xmlFree(cond);
 						return 0;
+					}
 				}
 			} else if ( commandprop ) {
 				/* Launch the command */
@@ -1523,9 +1524,10 @@ int CheckRequirements(install_info *info)
 						}
 						UI.prompt(convert_encoding(buf), RESPONSE_OK);
 					}
-					xmlFree(commandprop);
-					if (!warning)
+					if (!warning) {
+						xmlFree(commandprop);
 						return 0;
+					}
 				}
 			} else if (featureprop) {
 				char *verprop = (char *)xmlGetProp(node, BAD_CAST "version");
@@ -1541,9 +1543,10 @@ int CheckRequirements(install_info *info)
 							_("The installer is not suitable for installing this product "
 								"(missing feature '%s' version '%u')"), featureprop, version);
 					UI.prompt(buf, RESPONSE_OK);
-					xmlFree(featureprop);
-					if (!warning)
+					if (!warning) {
+						xmlFree(featureprop);
 						return 0;
+					}
 				}
 			}
 
