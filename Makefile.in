@@ -4,7 +4,7 @@ PACKAGE = setup-$(SETUP_VERSION)
 DATADIR = .
 LOCALEDIR = locale
 
-@SET_MAKE@
+# @SET_MAKE@
 arch := @ARCH@
 libc := @LIBC@
 os   := @OS@
@@ -15,6 +15,7 @@ UNINSTALL_VERSION = 1.0.4
 
 CC = @CC@
 CXX = @CXX@
+AR = @AR@
 
 # This indicates where the 'setupdb' CVS module is checked out
 SETUPDB	= @SETUPDB@

@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.5 2002-12-07 00:57:32 megastep Exp $
+# $Id: Makefile.in,v 1.6 2008-07-25 22:56:53 megastep Exp $
 # template makefile for DIALOG
 #
 SHELL		= /bin/sh
@@ -11,6 +11,7 @@ CC		= @CC@
 LDFLAGS		= @LDFLAGS@
 LIBS		= @LIBS@
 RANLIB		= @RANLIB@
+AR		= @AR@
 
 RM		= rm -f
 LINT		= lint
@@ -51,7 +52,7 @@ all	:: $(ALL)
 dialog.o $(OBJS) : dialog.h
 
 $(LIB) : $(OBJS)
-	ar crv $(LIB) $(OBJS)
+	$(AR) crv $(LIB) $(OBJS)
 	$(RANLIB) $@
 
 clean:

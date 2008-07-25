@@ -1,13 +1,14 @@
 #
 # Makefile for the setup plugins
-# $Id: Makefile.in,v 1.6 2002-12-07 00:57:32 megastep Exp $
+# $Id: Makefile.in,v 1.7 2008-07-25 22:56:53 megastep Exp $
 #
 
 @SET_MAKE@
 STATICS = cpio.c
 PLUGINS = @PLUGINS@
 CFLAGS  = -fPIC @CFLAGS@ -I..
-CC		= @CC@
+CC	= @CC@
+AR	= @AR@
 DYN_PLUGINS = @DYN_PLUGINS@
 
 arch := @ARCH@
@@ -51,7 +52,7 @@ install.dbg:
 endif
 
 libplugins.a: $(OBJS)
-	ar rcs libplugins.a $(OBJS)
+	$(AR) rcs libplugins.a $(OBJS)
 
 .c.so:
 	$(CC) -shared -o $@ $*.c $(CFLAGS)
