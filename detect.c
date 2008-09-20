@@ -343,10 +343,14 @@ void topmost_valid_path(char *target, const char *src)
 
 void unmount_filesystems(void)
 {
+    const char *fstab, *mtab, *mount_cmd, *mnttype;
+    FILE *mountfp;
+    struct mntent *mntent;
+
     struct mounted_elem *mnt = mounted_list, *oldmnt;
     while ( mnt ) {
         log_normal(_("Unmounting device %s"), mnt->device);
-        if ( run_command(NULL, UMOUNT_PATH, mnt->dir, NULL, 1) ) {
+        if ( run_command(NULL, UMOUNT_PATH, "-l", mnt->dir, 1) ) {
             log_warning(_("Failed to unmount device %s mounted on %s"), mnt->device, mnt->dir);
         }
         free(mnt->device);
@@ -355,6 +359,40 @@ void unmount_filesystems(void)
         mnt = mnt->next;
         free(oldmnt);
     }
+
+    //Now go through the list of filesystems left that may not be in fstab,
+    //such as ones automounted through the gnome automounter or manually
+    //mounted on loop - MS:LGP
+    if ( !access("/etc/pfs_fstab", F_OK) ) {
+		fstab = "/etc/pfs_fstab";
+		mtab = "/etc/pfs_mtab";
+		mount_cmd = "/usr/sbin/pfs_mount";
+		mnttype = "pfs-rrip";
+    } else {
+		fstab = SETUP_FSTAB;
+		mtab = MOUNTS_FILE;
+		mnttype = MNTTYPE_CDROM;
+		mount_cmd = MOUNT_PATH;
+    }
+
+    mountfp = setmntent( mtab, "r" );
+    if( mountfp != NULL ) {
+        while( (mntent = getmntent( mountfp )) != NULL ){
+            if ( !strcmp(mntent->mnt_type, mnttype) ) {
+                char *fsname = strdup(mntent->mnt_fsname);
+                char *dir = strdup(mntent->mnt_dir);
+
+		if ( ! run_command(NULL, UMOUNT_PATH, "-l", fsname, 1) ) 
+		  {
+		    log_warning(_("Failed to unmount device %s mounted on %s"), fsname, dir);
+		  }
+                free(fsname);
+                free(dir);
+            }
+        }
+        endmntent(mountfp);
+    }
+
     mounted_list = NULL;
 }
 
@@ -515,6 +553,7 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
         endmntent(mountfp);
     }
     
+
     mountfp = setmntent(mtab, "r" );
     if( mountfp != NULL ) {
         while( (mntent = getmntent( mountfp )) != NULL && num_cdroms < SETUP_MAX_DRIVES){
