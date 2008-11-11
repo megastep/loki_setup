@@ -375,6 +375,21 @@ void unmount_filesystems(void)
 		mount_cmd = MOUNT_PATH;
     }
 
+#if defined(__svr4__)
+	mountfp = fopen(MOUNTS_FILE, "r");
+	if ( mountfp != NULL ) {
+		struct mnttab mnt;
+
+		while ( getmntent(mountfp, &mnt)==0 ) {
+			if ( !strcmp(mnt.mnt_fstype, mnttype) ) {
+				if ( ! run_command(NULL, UMOUNT_PATH, "-l", mnt.mnt_special, 1) ) {
+					log_warning(_("Failed to unmount device %s mounted on %s"), mnt.mnt_special, mnt.mnt_mountp);
+				}
+			}
+		}
+ 		fclose(mountfp);
+	}
+#else
     mountfp = setmntent( mtab, "r" );
     if( mountfp != NULL ) {
         while( (mntent = getmntent( mountfp )) != NULL ){
@@ -382,16 +397,16 @@ void unmount_filesystems(void)
                 char *fsname = strdup(mntent->mnt_fsname);
                 char *dir = strdup(mntent->mnt_dir);
 
-		if ( ! run_command(NULL, UMOUNT_PATH, "-l", fsname, 1) ) 
-		  {
-		    log_warning(_("Failed to unmount device %s mounted on %s"), fsname, dir);
-		  }
+				if ( ! run_command(NULL, UMOUNT_PATH, "-l", fsname, 1) ) {
+					log_warning(_("Failed to unmount device %s mounted on %s"), fsname, dir);
+				}
                 free(fsname);
                 free(dir);
             }
         }
         endmntent(mountfp);
     }
+#endif
 
     mounted_list = NULL;
 }
