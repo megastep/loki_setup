@@ -148,7 +148,7 @@ case "$target" in
 	AC_DEFINE(NO_XOPEN_SOURCE, 1, XOPEN source breaks)
 	ARCH=mips ;;
     hppa*)
-        CFLAGS="$CFLAGS -D_XOPEN_SOURCE_EXTENDED -I/opt/zlib/include -I/opt/gettext/include"
+        CFLAGS="$CFLAGS -D_XOPEN_SOURCE_EXTENDED -Dhpux -Dhppa"
 	LDFLAGS="$LDFLAGS -Wl,-a,archive_shared"
 	LIBDL="-ldld"
 	STATIC="-Wl,-E -Wl,-a,archive_shared"
@@ -264,12 +264,12 @@ AC_CHECK_LIB(intl, gettext,
 			USE_LIBINTL=yes
 			LIBINTL="-lintl $LIBINTL",
 
-    if test -f /opt/gettext/lib/libintl.a; then
-        LIBINTL="/opt/gettext/lib/libintl.a /opt/libiconv/lib/libiconv.a"
+    if test -f /usr/local/lib/libintl.a; then
+        LIBINTL="/usr/local/lib/libintl.a /usr/local/lib/libiconv.a"
         LIBS="$LIBS $LIBINTL"
         GUILIBS="$GUI_LIBS $LIBINTL"
         CARBONLIBS="$CARBON_LIBS $LIBINTL"
-		CFLAGS="$CFLAGS -I/opt/gettext/include"
+#	CFLAGS="$CFLAGS -I/opt/gettext/include"
     fi
 )
 
