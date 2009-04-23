@@ -464,8 +464,12 @@ if test ! -z "$HAVEXML"; then
 
 	if "$HAVEXML" --help|grep libtool-libs > /dev/null; then
 		XML_LIBTOOL=`$HAVEXML --libtool-libs`
-		. "$XML_LIBTOOL"
-		XML_LIBS="$dependency_libs"
+		if test -f "$XML_LIBTOOL"; then
+			. "$XML_LIBTOOL"
+			XML_LIBS="$dependency_libs"
+		else
+			XML_LIBS="-lm"
+		fi
 	elif "$HAVEXML" --libs | grep thread > /dev/null; then
 		XML_LIBS="$PTHREAD -lm"
 	fi
