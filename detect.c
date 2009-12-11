@@ -634,6 +634,7 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
 				 || !strcmp(mntent->mnt_type, "efs")
 #endif
 				 || !strcmp(mntent->mnt_type, "cd9660")
+				 || !strcmp(mntent->mnt_type, "udf")
 				 || !strcmp(mntent->mnt_type, "auto"))
 				 && strncmp(mntent->mnt_fsname, DEVICE_FLOPPY, strlen(DEVICE_FLOPPY)) ) {
                 char *fsname = strdup(mntent->mnt_fsname);
