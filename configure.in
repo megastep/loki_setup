@@ -166,7 +166,7 @@ case "$target" in
     sparc*solaris*)
 	EXTRA_LIBS="-lsocket -lnsl -lresolv -ldl"
 	STATIC=""
-	RDYNAMIC="-Wl,-export-dynamic"
+	RDYNAMIC=""
 	LIBDL=""
 	ARCH=`uname -p` ;;
     *-apple-darwin*)
