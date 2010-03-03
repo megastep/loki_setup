@@ -1911,9 +1911,15 @@ static install_state gtkui_pick_class(install_info *info)
 
 static void gtkui_idle(install_info *info)
 {
+#ifdef ENABLE_GTK2
+    while( g_main_context_pending(NULL) ) {
+        g_main_context_iteration(NULL, FALSE);
+    }
+#else
     while( gtk_events_pending() ) {
         gtk_main_iteration();
     }
+#endif
 }
 
 static install_state gtkui_setup(install_info *info)
@@ -2078,9 +2084,7 @@ static int gtkui_update(install_info *info, const char *path, size_t progress, s
         widget = glade_xml_get_widget(setup_glade, "total_file_progress");
         gtk_progress_bar_update(GTK_PROGRESS_BAR(widget), new_update);
     }
-    while( gtk_events_pending() ) {
-        gtk_main_iteration();
-    }
+	gtkui_idle(info);
 	return TRUE;
 }
 
