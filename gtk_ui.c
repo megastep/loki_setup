@@ -1912,8 +1912,8 @@ static install_state gtkui_pick_class(install_info *info)
 static void gtkui_idle(install_info *info)
 {
 #ifdef ENABLE_GTK2
-    while( g_main_context_pending(NULL) ) {
-        g_main_context_iteration(NULL, FALSE);
+    if( gtk_events_pending() ) {
+        gtk_main_iteration_do(FALSE);
     }
 #else
     while( gtk_events_pending() ) {
