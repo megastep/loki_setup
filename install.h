@@ -425,6 +425,7 @@ extern void pop_curdir(void);
 
 /* Run a program in the background */
 int run_command(install_info *info, const char *cmd, const char *arg1, const char *arg2, int warn);
+int run_command3(install_info *info, const char *cmd, const char *arg1, const char *arg2, const char *arg3, int warn);
 
 /* Manage the list of corrupt files if we're restoring */
 extern void add_corrupt_file(const product_t *prod, const char *path, const char *option);

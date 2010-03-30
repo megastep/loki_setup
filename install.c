@@ -3053,17 +3053,23 @@ int run_script(install_info *info, const char *script, int arg, int include_tags
 
 int run_command(install_info *info, const char *cmd, const char *arg1, const char *arg2, int warn)
 {
+	return run_command3(info, cmd, arg1, arg2, NULL, warn);
+}
+
+int run_command3(install_info *info, const char *cmd, const char *arg1, const char *arg2, const char *arg3, int warn)
+{
     int exitval = 0;
     pid_t child;
 
-	log_debug("Running command: '%s' '%s' '%s'\n", cmd, arg1 ? arg1 : "", arg2 ? arg2 : "");
+	log_debug("Running command: '%s' '%s' '%s' '%s'\n", cmd, arg1 ? arg1 : "", arg2 ? arg2 : "", arg3 ? arg3 : "");
     switch( child = fork() ) {
     case 0: {/* Inside the child */
         char *argv[4];
         argv[0] = strdup(cmd);
         argv[1] = arg1 ? strdup(arg1) : NULL;
         argv[2] = arg2 ? strdup(arg2) : NULL;
-        argv[3] = NULL;
+		argv[3] = arg3 ? strdup(arg3) : NULL;
+        argv[4] = NULL;
         execvp(cmd, argv);
 		if ( warn ) {
 			perror("execv");
@@ -3074,6 +3080,8 @@ int run_command(install_info *info, const char *cmd, const char *arg1, const cha
 			free(argv[1]);
 		if (arg2)
 			free(argv[2]);
+		if (arg3)
+			free(argv[3]);
 		_exit(1);
     }
     case -1: /* Error */

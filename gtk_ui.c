@@ -1912,11 +1912,14 @@ static install_state gtkui_pick_class(install_info *info)
 static void gtkui_idle(install_info *info)
 {
 #ifdef ENABLE_GTK2
+	/*	if (g_main_context_pending(NULL)) 
+	  g_main_context_iteration(NULL, FALSE); */
+	/*
     if( gtk_events_pending() ) {
-        gtk_main_iteration_do(FALSE);
-    }
+        gtk_main_iteration();
+		}  */
 #else
-    while( gtk_events_pending() ) {
+    while( gtk_events_pending() == TRUE) {
         gtk_main_iteration();
     }
 #endif
@@ -2210,7 +2213,11 @@ static void gtkui_shutdown(install_info *info)
 		window = glade_xml_get_widget(setup_glade_license, "license_dialog");
 		gtk_widget_hide(window);
     }
-    gtkui_idle(info);
+	/* This seems to work better on GTK2 */
+    while( gtk_events_pending() == TRUE) {
+        gtk_main_iteration();
+    }
+	// gtkui_idle(info);
 }
 
 int gtkui_okay(Install_UI *UI, int *argc, char ***argv)

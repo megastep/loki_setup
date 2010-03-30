@@ -328,7 +328,7 @@ ssize_t copy_file(install_info *info, const char *cdrom, const char *path, const
 			mode = (int) strtol(mode_str, NULL, 8);
 		} 
 
-		while ( (copied=file_read(info, buf, BUFSIZ, input)) > 0 ) {
+		while ( (copied=file_read(info, buf, sizeof(buf), input)) > 0 ) {
 			if ( file_write(info, buf, copied, output) != copied ) {
 				break;
 			}
@@ -409,7 +409,7 @@ ssize_t copy_file(install_info *info, const char *cdrom, const char *path, const
 				log_warning(_("Invalid SELinux context '%s' for file '%s'"), se_context, base);
 			}
 # else
-			run_command(info, "chcon", se_context, final, 0);
+			run_command3(info, "chcon", "-ht", se_context, final, 0);
 # endif
 		}
 #endif
