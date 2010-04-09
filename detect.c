@@ -46,6 +46,14 @@
 
 #endif
 
+#ifdef HAVE_OSRELDATE_H
+# include <osreldate.h>
+# if defined(__FreeBSD_version) && !defined(__FreeBSD__)
+#  define __FreeBSD__
+# endif
+#endif
+
+
 /* From libxml */
 #include <libxml/encoding.h>
 
