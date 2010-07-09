@@ -90,6 +90,9 @@
 /* Define to 1 if you have the `openpty' function. */
 #undef HAVE_OPENPTY
 
+/* Define to 1 if you have the <osreldate.h> header file. */
+#undef HAVE_OSRELDATE_H
+
 /* Define to 1 if you have the `ptsname_r' function. */
 #undef HAVE_PTSNAME_R
 
