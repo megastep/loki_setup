@@ -186,6 +186,8 @@ case "$target" in
     *ppc* | *powerpc*)
         ARCH=ppc ;;
     *i?86*)
+	BSTATIC=""
+	BDYNAMIC=""
         ARCH=x86 ;;
     *x86_64*)
 	STATIC=""
