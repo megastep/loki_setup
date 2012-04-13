@@ -89,12 +89,16 @@
 #define MOUNTS_FILE MNT_MNTTAB
 #elif defined(MOUNTED)
 #define MOUNTS_FILE MOUNTED
+#elif defined(__FreeBSD__)
+#define MOUNTS_FILE ""
 #else
 #define MOUNTS_FILE _PATH_MOUNTED
 #endif
 
 #ifdef MNTTAB
 #define SETUP_FSTAB MNTTAB
+#elif defined(__FreeBSD__)
+#define SETUP_FSTAB  ""
 #else
 #define SETUP_FSTAB _PATH_MNTTAB
 #endif
@@ -397,7 +401,7 @@ void unmount_filesystems(void)
 		}
  		fclose(mountfp);
 	}
-#else
+#elif !defined(__FreeBSD__) // FIXME
     mountfp = setmntent( mtab, "r" );
     if( mountfp != NULL ) {
         while( (mntent = getmntent( mountfp )) != NULL ){
