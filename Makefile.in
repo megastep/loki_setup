@@ -122,7 +122,7 @@ setup.carbon: do-plugins @DO_DIALOG@ $(CARBON_OBJS) $(COMMON_LIBS)
 	cp setup.carbon setup.APP/Contents/MacOS
 
 xsu: $(XSU_OBJS)
-	$(LD) $(LDFLAGS) -o $@ $^ @GUI_LIBS@ @LIBUTIL@ @X11_LIBS@ @LIBINTL@ @EXTRA_LIBS@
+	$(LD) $(LDFLAGS) -o $@ $^ @LIBS@ @GUI_LIBS@ @LIBUTIL@ @X11_LIBS@ @LIBINTL@ @EXTRA_LIBS@
 
 do-plugins:
 	$(MAKE) -C plugins all
