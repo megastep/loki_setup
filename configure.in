@@ -152,7 +152,7 @@ case "$target" in
     hppa*)
         CFLAGS="$CFLAGS -D_XOPEN_SOURCE_EXTENDED -Dhpux -Dhppa"
 	LDFLAGS="$LDFLAGS -Wl,-a,archive_shared"
-	LIBDL="-ldld"
+	LIBDL="-ldld -lpthread"
 	STATIC="-Wl,-E -Wl,-a,archive_shared"
 	RDYNAMIC="-Wl,-E"
 	BSTATIC=""
