@@ -392,7 +392,8 @@ ssize_t copy_file(install_info *info, const char *cdrom, const char *path, const
 		}
 #ifdef __linux
 		if ( se_context && have_selinux ) {
-# ifdef HAVE_SELINUX_SELINUX_H
+//# ifdef HAVE_SELINUX_SELINUX_H
+#if 0 // Using chcon directly seems more reliable
 			/* Use the selinux library */
 			context_t cont = context_new(se_context);
 			if ( cont ) {
