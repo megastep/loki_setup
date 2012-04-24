@@ -149,7 +149,7 @@ case "$target" in
 	AC_DEFINE(NO_POSIX_C_SOURCE, 1, POSIX C source breaks)
 	AC_DEFINE(NO_XOPEN_SOURCE, 1, XOPEN source breaks)
 	ARCH=mips ;;
-    hppa*)
+    hppa*hpux*)
         CFLAGS="$CFLAGS -D_XOPEN_SOURCE_EXTENDED -Dhpux -Dhppa"
 	LDFLAGS="$LDFLAGS -Wl,-a,archive_shared"
 	LIBDL="-ldld -lpthread"
@@ -159,6 +159,18 @@ case "$target" in
 	BDYNAMIC="-Wl,-a,archive_shared"
 	CONSOLE_LIBS="$LIBDL"
 	ARCH=hppa ;;
+    ia64*hpux*)
+        LIBSUFFIX=/hpux32
+        CFLAGS="$CFLAGS -D_XOPEN_SOURCE_EXTENDED -Dhpux -Dia64"
+	LDFLAGS="$LDFLAGS -Wl,-a,archive_shared"
+	LIBDL="-ldld -lpthread"
+	LIBS="-L/usr/local/lib$LIBSUFFIX $LIBS"
+	STATIC="-Wl,-E -Wl,-a,archive_shared"
+	RDYNAMIC="-Wl,-E"
+	BSTATIC=""
+	BDYNAMIC="-Wl,-a,archive_shared"
+	CONSOLE_LIBS="$LIBDL"
+	ARCH=ia64 ;;
     i?86*solaris*)
 	EXTRA_LIBS="-lsocket -lnsl -lresolv -ldl"
 	STATIC=""
