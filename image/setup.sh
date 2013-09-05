@@ -66,37 +66,11 @@ DetectARCH()
 	return $status
 }
 
-# Return the appropriate version string
+# Return the appropriate libc string - completely obsolete, assume glibc-2.1 for compatibility
 DetectLIBC()
 {
-    status=1
-	  if [ `uname -s` != Linux ]; then
-		  echo "glibc-2.1"
-		  return $status
-	  fi
-	  if [ -d /lib64 ]; then
-		  libcpath=/lib64/libc.so.6
-	  else
-		  libcpath=/lib/libc.so.6
-	  fi
-      if [ -f `echo $libcpath* | tail -n 1` ]; then
-		  if fgrep GLIBC_2.1 $libcpath* 2> $NULL >> $NULL; then
-	              echo "glibc-2.1"
-	              status=0
-		  elif fgrep GLIBC_2.2 $libcpath* 2> $NULL >> $NULL; then
-	              echo "glibc-2.1"
-	              status=0
-	      else
-	              echo "glibc-2.0"
-	              status=0
-	      fi
-      elif [ -f /lib/libc.so.5 ]; then
-	      echo "libc5"
-	      status=0
-      else
-	      echo "unknown"
-      fi
-      return $status
+	echo "glibc-2.1"
+	return 1
 }
 
 DetectOS()
