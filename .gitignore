@@ -1,0 +1,10 @@
+*.o
+*~
+*.a
+.depend
+configure
+Makefile
+autom4te.cache
+config.h
+config.log
+config.status
