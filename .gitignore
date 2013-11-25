@@ -8,3 +8,7 @@ autom4te.cache
 config.h
 config.log
 config.status
+setup
+setup.gtk
+xsu
+loki_uninstall
