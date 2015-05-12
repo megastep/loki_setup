@@ -1654,7 +1654,13 @@ static install_state gtkui_init(install_info *info, int argc, char **argv, int n
     cur_state = SETUP_INIT;
     cur_info = info;
 
-	gtk_set_locale();
+#ifdef ENABLE_GTK2
+   // Turn off any themes
+   setenv("GTK2_RC_FILES", "", 1);
+   setenv("GTK_DATA_PREFIX", "", 1);
+#endif
+    
+    gtk_set_locale();
     gtk_init(&argc,&argv);
 
 	/* Disable GLib warnings that may be triggered by libglade */

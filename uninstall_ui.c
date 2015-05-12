@@ -499,10 +499,16 @@ int uninstall_ui(int argc, char *argv[])
     component_list *component_list, *addon_list;
     char text[1024];
 
+#ifdef ENABLE_GTK2
+    // Turn off any themes
+    setenv("GTK2_RC_FILES", "", 1);
+    setenv("GTK_DATA_PREFIX", "", 1);
+#endif
+
     gtk_init(&argc,&argv);
 
-	/* Disable GLib warnings that may be triggered by libglade */
-	g_log_set_handler ("libglade", G_LOG_LEVEL_WARNING | G_LOG_FLAG_RECURSION, log_handler, NULL);
+    /* Disable GLib warnings that may be triggered by libglade */
+    g_log_set_handler ("libglade", G_LOG_LEVEL_WARNING | G_LOG_FLAG_RECURSION, log_handler, NULL);
 
     /* Initialize Glade */
     glade_init();
