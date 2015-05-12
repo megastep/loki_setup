@@ -10,5 +10,7 @@ config.log
 config.status
 setup
 setup.gtk
+setup.gtk2
 xsu
 loki_uninstall
+uninstall
