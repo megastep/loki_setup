@@ -124,6 +124,7 @@ case "$target" in
 	BSTATIC=""
 	BDYNAMIC=""
 	RDYNAMIC="-Wl,-bexpall"
+	LDFLAGS="$LDFLAGS -lpthread"
 	AC_DEFINE(NO_XOPEN_SOURCE, 1, XOPEN source breaks)
 	AC_DEFINE(NO_POSIX_C_SOURCE, 1, POSIX C source breaks)
 	AC_DEFINE(NO_POSIX_SOURCE, 1, POSIX source breaks)
