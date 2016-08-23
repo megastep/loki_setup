@@ -177,13 +177,13 @@
 /* Define to 1 if you have the `waitpid' function. */
 #undef HAVE_WAITPID
 
-/* Define to 1 if you have the file `AC_File'. */
+/* Define to 1 if you have the file `/dev/ptc'. */
 #undef HAVE__DEV_PTC
 
-/* Define to 1 if you have the file `AC_File'. */
+/* Define to 1 if you have the file `/dev/ptmx'. */
 #undef HAVE__DEV_PTMX
 
-/* Define to 1 if you have the file `AC_File'. */
+/* Define to 1 if you have the file `/dev/pts'. */
 #undef HAVE__DEV_PTS
 
 /* Define to 1 if you have the `_getpty' function. */
@@ -212,6 +212,9 @@
 
 /* Define to the one symbol short name of this package. */
 #undef PACKAGE_TARNAME
+
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION

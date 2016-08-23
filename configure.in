@@ -137,6 +137,10 @@ case "$target" in
 	LIBDL=""
 	AC_DEFINE(USE_BSD_PTY, 1, Use BSD-style ptys)
         ARCH=x86 ;;
+    amd64*freebsd*)
+	LIBDL=""
+	AC_DEFINE(USE_BSD_PTY, 1, Use BSD-style ptys)
+        ARCH=x86_64 ;;
     *alpha*)
         CFLAGS="$CFLAGS -mcpu=ev4 -Wa,-mall"
         ARCH=alpha ;;
