@@ -1,25 +1,30 @@
+# The Loki Setup Installer 1.5.8
 
-The Loki Setup Installer 1.5.8
-Written by Sam Lantinga and Stéphane Peter
+### Written by Sam Lantinga and Stephane Peter
+
 ------------------------------------------
 
 New since 1.4:
+
  * Added an uninstall program
  * Details about the product are saved to an XML install database
 
 New since 1.3:
+
  * Added support for multiple operating systems (i.e. FreeBSD)
  * Archive extracting subsystem now uses plugin architecture
  * Improved RPM support
  * Lots of other miscellaneous enhancements and fixes
 
 New since 1.2:
+
  * Added internationalization support
    - German, Spanish, French, Italian and Swedish are included
  * Fixed potential security problem
  * Various pathing fixes and other miscellaneous improvements.
 
 New since 1.1:
+
  * Improved C library detection
  * Support for loading install files from CD-ROM
  * Additional attributes for the binary element
@@ -48,6 +53,7 @@ CD image, and modify for the game you are distributing.
 
 CD-ROM install file layout:
 
+```
 setup.sh	(A shell script to run the correct setup binary)
 setup.data/
    setup.xml            (XML file defining the install options)
@@ -65,6 +71,7 @@ win32/
 bin/
 bin/<OS>/<arch>/*
 bin/<OS>/<arch>/<libc>/* (Directories holding the binaries for the program)
+```
 
 --
 You should edit the setup.data/setup.xml file to match your product,
@@ -80,8 +87,12 @@ on the CD.  The appropriate binary for the current architecture will
 be chosen at install time.  The <libc> portion of the path is optional.
 For example, if your binary is called 'rt2', you could have both x86
 and PPC versions for Linux as:
-	bin/Linux/x86/glibc-2.1/rt2
-	bin/Linux/ppc/rt2
+
+```bash
+bin/Linux/x86/glibc-2.1/rt2
+bin/Linux/ppc/rt2
+```
+
 and the appropriate binary would be chosen.
 
 The install process creates an uninstall script in the install directory
