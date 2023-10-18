@@ -183,12 +183,33 @@ int loki_launchURL(const char *url)
         }
     }
     if ( command ) {
-		if ( strstr(command, "%s") ) {
-			snprintf(command_string, sizeof(command_string), command, url, url);
-		} else {
-			snprintf(command_string, sizeof(command_string), "%s %s", command, url);
-		}
+      if ( strstr(command, "%s") ) {
+        snprintf(command_string, sizeof(command_string), command, url, url);
+      } else {
+        snprintf(command_string, sizeof(command_string), "%s %s", command, url);
+      }
+      if (geteuid() == 0) { // Attempt to drop privileges with setpriv or sudo
+        const char *sudo_uid = getenv("SUDO_UID");
+        if (sudo_uid) {
+          const char *setpriv_path = loki_valid_program("setpriv");
+          if (setpriv_path) {
+            char setpriv_string[4*PATH_MAX];
+            snprintf(setpriv_string, sizeof(setpriv_string), "%s --reuid %s %s", setpriv_path, sudo_uid, command_string);
+            status = system(setpriv_string);
+          }
+        } else { // Attempt to use sudo instead
+          const char *user = getenv("USER");
+          if (user && strcmp(user, "root")) {
+            char sudo_string[4*PATH_MAX];
+            snprintf(sudo_string, sizeof(sudo_string), "sudo -E -u %s %s", user, command_string);
+            status = system(sudo_string);
+          } else { // Last ditch effort
+            status = system(command_string);
+          }
+        }
+      } else {
         status = system(command_string);
+      }
     }
     return status;
 }
