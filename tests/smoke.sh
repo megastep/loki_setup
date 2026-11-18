@@ -13,7 +13,11 @@ cp "$root/image/setup.sh" "$work/media/"
 cd "$work/media"
 
 printf '%s\n' 'Loki Setup build test' > payload.txt
-COPYFILE_DISABLE=1 tar --format=ustar -czf payload.tar.gz payload.txt
+case "$(uname -s)" in
+    OpenBSD) set -- -F ustar ;;
+    *) set -- --format=ustar ;;
+esac
+COPYFILE_DISABLE=1 tar "$@" -czf payload.tar.gz payload.txt
 mv payload.txt "$work/expected"
 cat > setup.data/setup.xml <<'XML'
 <install product="setup-build-test" desc="Setup build test" version="1">
@@ -30,3 +34,4 @@ test ! -e "$work/installed/payload.txt"
 registration="$SETUPDB_ROOT/installed/setup-build-test.xml"
 test ! -e "$registration"
 test ! -L "$registration"
+printf '%s\n' 'Staged install and uninstall passed'

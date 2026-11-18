@@ -147,7 +147,13 @@ jobs:
             gmake -j2 all testcd testxml
             case "$(uname -s)" in
               FreeBSD) script -q -e /dev/null gmake smoke </dev/null ;;
-              OpenBSD) script -c 'gmake smoke' /dev/null </dev/null ;;
+              OpenBSD)
+                # script can return before the command exits on EOF.
+                smoke_log=$(mktemp)
+                trap 'rm -f "$smoke_log"' EXIT
+                script -c 'gmake smoke' /dev/null </dev/null | tee "$smoke_log"
+                tr -d '\r' < "$smoke_log" | grep -Fxq 'Staged install and uninstall passed'
+                ;;
               *) exit 1 ;;
             esac
       - name: Build and test on OpenBSD
