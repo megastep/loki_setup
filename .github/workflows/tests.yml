@@ -1,0 +1,109 @@
+name: Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: ${{ matrix.runner }} / ${{ matrix.variant }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            variant: GTK 2
+            configure_args: --enable-gtk2
+          - runner: ubuntu-24.04-arm
+            variant: Console with dynamic plugins
+            configure_args: --disable-gtk --disable-dialog --enable-dynamic-plugins
+          - runner: macos-15
+            variant: Console with ncurses
+            configure_args: --disable-gtk
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: loki_setup
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          path: loki_setup
+          persist-credentials: false
+      - name: Read the SetupDB revision
+        id: setupdb_revision
+        working-directory: loki_setup
+        shell: bash
+        run: |
+          revision=$(cat setupdb.rev)
+          if [[ ! "$revision" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "Record a full, published SetupDB commit SHA in setupdb.rev." >&2
+            exit 1
+          fi
+          echo "sha=$revision" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v7
+        with:
+          repository: megastep/loki_setupdb
+          ref: ${{ steps.setupdb_revision.outputs.sha }}
+          path: loki_setupdb
+          persist-credentials: false
+
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        env:
+          VARIANT: ${{ matrix.variant }}
+        run: |
+          packages=(autoconf automake pkg-config libxml2-dev zlib1g-dev)
+          if [[ "$VARIANT" == 'GTK 2' ]]; then
+            packages+=(libncurses-dev libglade2-dev)
+          fi
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends "${packages[@]}"
+      - name: Install macOS dependencies
+        if: runner.os == 'macOS'
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: '1'
+        run: |
+          brew install autoconf automake pkgconf libxml2
+          echo "PKG_CONFIG_PATH=$(brew --prefix libxml2)/lib/pkgconfig" >> "$GITHUB_ENV"
+
+      - name: Build SetupDB
+        working-directory: loki_setupdb
+        run: |
+          ./autogen.sh
+          ./configure --with-libxml2
+          make -j2
+      - name: Build installer and diagnostic tools
+        env:
+          CONFIGURE_ARGS: ${{ matrix.configure_args }}
+        run: |
+          read -r -a configure_args <<< "$CONFIGURE_ARGS"
+          ./autogen.sh
+          ./configure "${configure_args[@]}"
+          make -j2 all testcd testxml
+      - name: Build GTK verification and uninstall tools
+        if: matrix.variant == 'GTK 2'
+        run: make -j2 check loki_uninstall
+      - name: Test the staged launcher and XML parser
+        run: |
+          make install
+          ./image/setup.sh -V
+          fixture=$(mktemp -d)
+          trap 'rm -rf "$fixture"' EXIT
+          cp image/setup.data/setup.xml "$fixture/"
+          (cd "$fixture" && "$GITHUB_WORKSPACE/loki_setup/testxml" && test -s foo.xml)
+      - name: Run installer smoke test
+        run: |
+          if [[ "$RUNNER_OS" == macOS ]]; then
+            script -q -e /dev/null make smoke </dev/null
+          else
+            script -qec 'make smoke' /dev/null </dev/null
+          fi

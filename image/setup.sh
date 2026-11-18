@@ -3,7 +3,7 @@
 # Product setup script
 #
 # Go to the proper setup directory (if not already there)
-cd `dirname $0`
+cd "$(dirname "$0")" || exit 1
 
 # defaults
 FATAL_ERROR="Fatal error, no tech support email configured in this setup"
@@ -36,6 +36,9 @@ DetectARCH()
 {
 	status=1
 	case `uname -m` in
+	    arm64 | aarch64)
+		echo "aarch64"
+		status=0;;
 	    amd64 | x86_64)
 		echo "x86_64"
 		status=0;;
@@ -88,7 +91,6 @@ DetectOS()
 arch=`DetectARCH`
 libc=`DetectLIBC`
 os=`DetectOS`
-
 args=""
 
 # Import preferences from a secondary script
@@ -135,6 +137,8 @@ then
   fi
   # some handy conversion copied from DetectARCH. 
   case "$1" in
+  arm64 | aarch64)
+    arch="aarch64" ;;
   amd64)
     arch="x86_64" ;;
   i?86 | i86*)
@@ -203,11 +207,12 @@ __EOF__
       # Try to run the binary ($setup_bin)
       # The executable is here but we can't execute it from CD
       # NOTE TTimo: this is dangerous, we also use $setup to store the name of the try_run
-      setup="$HOME/.setup$$"
-      rm -f "$setup"
-      cp "$setup_bin" "$setup"    
-      chmod 700 "$setup"
-	  trap "rm -f $setup" 1 2 3 15
+      setup=$(mktemp "${SETUP_EXEC_TMPDIR:-$HOME}/.setup.XXXXXX") || return 1
+      if ! cp "$setup_bin" "$setup" || ! chmod 700 "$setup"; then
+          rm -f "$setup"
+          return 1
+      fi
+      trap 'rm -f "$setup"; exit 1' 1 2 3 15
     fi
 	# echo Running "$setup" "$@"
     if [ "$fatal" -eq 0 ]; then
@@ -222,6 +227,7 @@ __EOF__
       # don't attempt removal when we are passed an absolute path
       # no, I don't want to imagine a faulty try_run as root on /bin/su
       rm -f "$setup"
+      trap - 1 2 3 15
     fi
     return "$failed"
 }
@@ -272,13 +278,13 @@ then
 fi
 
 # Try to run the setup program - first look for a GTK2 binary
-try_run setup.gtk2 $args $* 2> /dev/null
+try_run setup.gtk2 $args "$@" 2> /dev/null
 status=$?
 if [ $status -ne 0 ] && [ $status -ne 2 ] ; then 
-	try_run setup.gtk $args $* 
+	try_run setup.gtk $args "$@"
 	status=$?
 	if [ $status -ne 0 ] && [ $status -ne 2 ] ; then  # setup.gtk couldn't connect to X11 server - ignore
-		try_run setup $args $*
+		try_run setup $args "$@"
 		status=$?
 		if [ $status -ne 0 ] && [ $status -ne 2 ]; then
 			echo "The setup program seems to have failed on $arch/$libc"

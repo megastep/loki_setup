@@ -1,29 +1,21 @@
-AC_INIT
-AC_CONFIG_HEADER(config.h)
+AC_PREREQ([2.69])
+AC_INIT([Loki Setup], [1.6.5], [], [setup])
+AC_CONFIG_SRCDIR([main.c])
+AC_CONFIG_HEADERS([config.h])
 
-dnl Define the release numbers here
+SETUP_VERSION_MAJOR=`echo "$PACKAGE_VERSION" | cut -d. -f1`
+SETUP_VERSION_MINOR=`echo "$PACKAGE_VERSION" | cut -d. -f2`
+SETUP_VERSION_RELEASE=`echo "$PACKAGE_VERSION" | cut -d. -f3`
 
-SETUP_VERSION_MAJOR=1
-SETUP_VERSION_MINOR=6
-SETUP_VERSION_RELEASE=5
-
-PACKAGE_NAME="Loki Setup"
-PACKAGE_TARNAME="setup"
-PACKAGE_VERSION="$SETUP_VERSION_MAJOR.$SETUP_VERSION_MINOR.$SETUP_VERSION_RELEASE"
-
-dnl Detect the canonical host and target build environment
 AC_CANONICAL_HOST
-AC_CANONICAL_TARGET
 
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_RANLIB
-AC_PROG_MAKE_SET
 AC_PROG_INSTALL
 
-AC_PATH_PROGS(AR, [ar gar])
+AC_CHECK_TOOL([AR], [ar])
 
-AC_PATH_XTRA
 AC_CHECK_HEADERS(unistd.h)
 AC_CHECK_HEADERS(strings.h)
 AC_CHECK_HEADERS(pwd.h)
@@ -48,7 +40,6 @@ AC_CHECK_HEADERS(libgen.h)
 AC_CHECK_HEADERS(pty.h)
 AC_CHECK_HEADERS(sys/ptms.h)
 AC_CHECK_HEADERS(sys/stropts.h)
-AC_CHECK_HEADERS(selinux/selinux.h)
 AC_CHECK_HEADERS(getopt.h)
 AC_CHECK_HEADERS(osreldate.h)
 AC_CHECK_FILES(/dev/ptmx)
@@ -69,35 +60,20 @@ AC_PATH_PROG(UMOUNT_PATH, umount, /sbin/umount, $PATH:/usr/sbin:/sbin)
 AC_PATH_PROG(BRANDELF, brandelf, true)
 
 LD="$CC"
-CFLAGS="-fsigned-char -funroll-loops -Wall -g -O2 -I. $X_CFLAGS"
+CFLAGS="$CFLAGS -fsigned-char -Wall -I."
 CONSOLE_LIBS=""
-if test -d /usr/codehost/lib; then
-	LIBS="-L/usr/codehost/lib"
-elif test -d /opt/codehost/lib; then
-	LIBS="-L/opt/codehost/lib"
-elif test -d /sw/lib; then
-	case "$target" in
-	    *-apple-darwin*)
-		LIBS="-L/sw/lib" ;;
-	esac
-else
-	LIBS="$LIBS -L/usr/local/lib"
-fi
 
-SETUP_GTK=setup.gtk
 GTK_SUBDIR=gtk1
 
-# Build some static binaries by default when possible
-STATIC="-static"
+STATIC=""
 RDYNAMIC="-rdynamic"
 BSTATIC="-Wl,-Bstatic"
 BDYNAMIC="-Wl,-Bdynamic"
 LIBDL="-ldl"
-LIBTINFO=""
 EXTRA_LIBS=""
 REENTRANT="-D_REENTRANT"
 
-case "$target" in
+case "$host" in
     *i?86*OpenUNIX*)
 	STATIC=""
 	CFLAGS="$CFLAGS -Dsco"
@@ -137,7 +113,7 @@ case "$target" in
 	LIBDL=""
 	AC_DEFINE(USE_BSD_PTY, 1, Use BSD-style ptys)
         ARCH=x86 ;;
-    amd64*freebsd*)
+    amd64*freebsd* | x86_64*freebsd*)
 	LIBDL=""
 	AC_DEFINE(USE_BSD_PTY, 1, Use BSD-style ptys)
         ARCH=x86_64 ;;
@@ -189,15 +165,26 @@ case "$target" in
 	LIBDL=""
 	ARCH=`uname -p` ;;
     *-apple-darwin*)
-	STATIC="-static"
-	RDYNAMIC="-Wl,-Sn"
-	BSTATIC=""
-	BDYNAMIC=""
-	REENTRANT=""
-	CFLAGS="$CFLAGS -I/sw/include -Ddarwin"
-	LDFLAGS="$LDFLAGS -framework Carbon -framework Security -framework IOKit"
-	COMMON_LIBS="carbon/carbonres.o carbon/carbondebug.o carbon/STUPControl.o carbon/YASTControl.o carbon/appbundle.o"
-	ARCH=`uname -p` ;;
+	STATIC=""
+	RDYNAMIC=""
+        BSTATIC=""
+        BDYNAMIC=""
+        CFLAGS="$CFLAGS -Ddarwin"
+        LIBS="$LIBS -framework CoreFoundation -framework IOKit"
+        ARCH=$host_cpu
+        case "$host_cpu" in
+            powerpc*) ARCH=ppc ;;
+            i?86) ARCH=x86 ;;
+            arm64) ARCH=aarch64 ;;
+        esac
+        case "$host_cpu" in
+            powerpc | i?86)
+                CFLAGS="$CFLAGS -DLOKI_CARBON"
+                LIBS="$LIBS -framework Carbon -framework Security"
+                COMMON_LIBS="carbon/carbonres.o carbon/carbondebug.o carbon/STUPControl.o carbon/YASTControl.o carbon/appbundle.o" ;;
+        esac ;;
+    aarch64* | arm64*)
+        ARCH=aarch64 ;;
     *ppc64* | *powerpc64*)
         ARCH=ppc64 ;;
     *ppc* | *powerpc*)
@@ -208,30 +195,21 @@ case "$target" in
         ARCH=x86 ;;
     *x86_64*)
 	STATIC=""
-	LIBTINFO="-ltinfo"
 	LIBSUFFIX=64
         ARCH=x86_64 ;;
     *)
-        ARCH=`uname -p 2> /dev/null || uname -m` ;;
-esac
-
-GTK_STATIC=$BSTATIC
-case "$target" in
-	*i?86*linux*)
-# Newer glibc's require to depend at least on them
-		STATIC=""
-		GTK_STATIC="\$(BDYNAMIC)" ;;
+        ARCH=$host_cpu ;;
 esac
 
 CFLAGS="$CFLAGS $REENTRANT"
 
 AC_CHECK_FUNCS(getopt)
-AC_CHECK_LIB(gnugetopt, getopt_long, LIBS="$LIBS $BSTATIC -lgnugetopt $BDYNAMIC")
+AC_CHECK_LIB(gnugetopt, getopt_long, LIBS="$LIBS -lgnugetopt")
 AC_CHECK_FUNCS(getopt_long)
 
 AC_CHECK_LIB(util, forkpty, LIBUTIL="-lutil"; LIBS="$LIBS -lutil")
 AC_CHECK_FUNCS(openpty)
-AC_CHECK_LIB(selinux, is_selinux_enabled, LIBS="$LIBS $BSTATIC -lselinux $BDYNAMIC")
+AC_CHECK_LIB([selinux], [is_selinux_enabled], [AC_CHECK_HEADERS([selinux/selinux.h], [LIBS="$LIBS -lselinux"])])
 
 SETUPDB_NAME=loki_setupdb
 SETUPDB="`pwd`/../loki_setupdb-$PACKAGE_VERSION"
@@ -246,22 +224,21 @@ fi
 AC_ARG_WITH(setupdb,
 [  --with-setupdb            with setupdb library at  [default=../loki_setupdb]],
               ,   with_setupdb=$SETUPDB)
-if test x$with_setupdb != x$SETUPDB; then
-        SETUPDB=$with_setupdb
-fi
+AS_IF([test ! -d "$with_setupdb"], [AC_MSG_ERROR([SetupDB directory not found: $with_setupdb])])
+SETUPDB=`cd "$with_setupdb" && pwd`
 
 dnl Check for correct setupdb installation
 
-if test -f $SETUPDB/$ARCH/libsetupdb.a; then
-    for ac_SETUPDB_INCDIR in $SETUPDB $SETUPDB/include
+if test -f "$SETUPDB/$ARCH/libsetupdb.a"; then
+    for ac_SETUPDB_INCDIR in "$SETUPDB" "$SETUPDB/include"
     do
-        if test -f $ac_SETUPDB_INCDIR/setupdb.h; then
+        if test -f "$ac_SETUPDB_INCDIR/setupdb.h"; then
             SETUPDB_INCDIR=$ac_SETUPDB_INCDIR
             break
         fi
     done
-    if test x$SETUPDB_INCDIR = x; then
-        AC_MSG_ERROR([*** $SSETUPDB_NAME headers not found. ***])
+    if test -z "$SETUPDB_INCDIR"; then
+        AC_MSG_ERROR([*** $SETUPDB_NAME headers not found. ***])
     else
         AC_MSG_RESULT([SetupDB library found in $SETUPDB/$ARCH])
     fi
@@ -271,55 +248,21 @@ fi
 
 CFLAGS="$CFLAGS -I$SETUPDB_INCDIR"
 
-GUI_LIBS=$GTK_STATIC
-GTK_LIBS=$GTK_STATIC
+GUI_LIBS=
 #!!!TODO - Add carbon libs as necessary
 CARBON_LIBS=
 
 LIBS="$LIBS $EXTRA_LIBS"
 
-AC_CHECK_LIB(iconv, iconv_open, 
-		LIBINTL="-liconv"
-		LIBS="$LIBS $BSTATIC $LIBINTL"
-)
-
-AC_CHECK_LIB(intl, gettext, 
-			USE_LIBINTL=yes
-			LIBINTL="-lintl $LIBINTL",
-
-    if test -f /usr/local/lib/libintl.a; then
-        LIBINTL="/usr/local/lib/libintl.a /usr/local/lib/libiconv.a"
-        LIBS="$LIBS $LIBINTL"
-        GUILIBS="$GUI_LIBS $LIBINTL"
-        CARBONLIBS="$CARBON_LIBS $LIBINTL"
-#	CFLAGS="$CFLAGS -I/opt/gettext/include"
-    fi
-)
-
-case "$target" in
-	powerpc-apple-darwin*)
-    if test -f /sw/lib/libintl.a; then
-        LIBINTL="/sw/lib/libintl.a /sw/lib/libiconv.a"
-        LIBS="$LIBS $LIBINTL"
-        GUILIBS="$GUI_LIBS $LIBINTL"
-        CARBONLIBS="$CARBON_LIBS $LIBINTL"
-		CFLAGS="$CFLAGS -I/sw/include"
-    fi		
-esac
-
-AC_CHECK_HEADERS(libintl.h)
+AC_SEARCH_LIBS([gettext], [intl], [AC_CHECK_HEADERS([libintl.h])])
 AC_CHECK_HEADERS(langinfo.h)
 AC_CHECK_HEADERS(locale.h)
 
 AC_CHECK_LIB(gpm, Gpm_Open, USE_GPM=yes)
 
 dnl If NCURSES_MOUSE_VERSION is defined, we don't use GPM, so let's not link it in
-AC_TRY_COMPILE([#include <ncurses.h>], [int n = NCURSES_MOUSE_VERSION;], unset USE_GPM)
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <ncurses.h>]], [[return NCURSES_MOUSE_VERSION;]])], [unset USE_GPM])
 
-dnl Check for gtk12 libraries in case those are available (FreeBSD)
-AC_CHECK_LIB(glib12, g_log, GTK12="12")
-
-AC_CHECK_LIB(dl, dlopen, USE_LIBDL=yes)
 
 AC_ARG_ENABLE(bzip2,
 [  --enable-bzip2            enable bzip2 support  [default=no]],
@@ -351,52 +294,35 @@ elif test x$enable_bzip2 = xdlopen; then
   BZIP2_DLOPEN="yes"
 fi
 
-dnl Detect the LibC version
-AC_MSG_CHECKING(libc version)
-if test `uname -s` != Linux; then
-    LIBC=glibc-2.1
-else
-      if test -f `echo /lib/libc.so.6* | tail -n 1`; then
-dnl This should cover all other releases post 2.1
-              if grep GLIBC_2.1 /lib/libc.so.6* 2>&1 >/dev/null; then
-                      LIBC="glibc-2.1"
-              else
-                      LIBC="glibc-2.0"
-              fi        
-      elif [ -f /lib/libc.so.5 ]; then
-              LIBC="libc5"
-      else
-              LIBC="unknown"
-      fi
-fi
-AC_MSG_RESULT($LIBC)
+# Media layout uses the same compatibility name as detect_libc() and setup.sh.
+LIBC=glibc-2.1
 
 PLUGINS="tar.c"
 
 AC_ARG_WITH(ncurses,
-[  --with-ncurses            specify ncurses library location], 
+[  --with-ncurses            specify ncurses library location],
 	CONSOLE_LIBS="$CONSOLE_LIBS -L$with_ncurses/lib$LIBSUFFIX"
 	CFLAGS="$CFLAGS -I$with_ncurses/include"
 	USE_NCURSES=yes
-)	
+)
 
 AC_ARG_ENABLE(libglade-static,
-[  --enable-libglade-static            whether to statically link libglade (default=yes)],,
-enable_libglade_static=yes)
+[  --enable-libglade-static            whether to statically link libglade (default=no)],,
+enable_libglade_static=no)
 if test "x$enable_libglade_static" = "xyes"; then
 	GLADE_STATIC="$BSTATIC"
 fi
 
 AC_ARG_ENABLE(libxml-static,
-[  --enable-libxml-static            whether to statically link libxml (default=yes)],,
-enable_libxml_static=yes)
+[  --enable-libxml-static            whether to statically link libxml (default=no)],,
+enable_libxml_static=no)
 if test "x$enable_libxml_static" = "xyes"; then
 	XML_STATIC="$BSTATIC"
 fi
 
 AC_ARG_ENABLE(libncurses-static,
-[  --enable-libncurses-static            whether to statically link libncurses (default=yes)],,
-enable_libncurses_static=yes)
+[  --enable-libncurses-static            whether to statically link libncurses (default=no)],,
+enable_libncurses_static=no)
 if test "x$enable_libncurses_static" = "xyes"; then
 	NCURSES_STATIC="$BSTATIC"
 fi
@@ -406,112 +332,80 @@ AC_CHECK_HEADERS(ncurses/curses.h)
 AC_CHECK_HEADERS(ncurses.h)
 AC_CHECK_LIB(ncurses, keypad, USE_NCURSES=yes)
 
-dnl Check for libglade 1
-
-AC_PATH_PROG(HAVEGLADE, libglade-config, $PATH)
-if test ! -z "$HAVEGLADE"; then
-    GLADE_CFLAGS=`$HAVEGLADE --cflags`
-    GLADE_PREFIX=`$HAVEGLADE --prefix`
-
-else
-    AC_MSG_ERROR([*** libglade-config not found. You need a working libglade installation.])
-fi
-
-dnl Check for GTK 1.X
-AC_PATH_PROG(HAVEGTK, gtk$GTK12-config, $PATH)
-AC_PATH_PROG(HAVEGLIB, glib$GTK12-config, $PATH)
-if test ! -z "$HAVEGTK"; then
-    GTK_CFLAGS=`$HAVEGTK --cflags`
-    GTK_PREFIX=`$HAVEGTK --prefix`
-    GLIB_PREFIX=`$HAVEGLIB --prefix`
-
-    GTK_LIBS="$GTK_LIBS -L$GTK_PREFIX/lib$LIBSUFFIX -L$GLIB_PREFIX/lib$LIBSUFFIX -lgtk$GTK12 -lgdk$GTK12 $RDYNAMIC -lgmodule$GTK12 -lglib$GTK12"
-else
-    AC_MSG_ERROR([*** gtk-config not found. You need a working GTK+ 1.2 installation.])
-fi
-
-XMLVER=""
-
-AC_ARG_ENABLE(gtk2,
-[  --enable-gtk2            Use gtk2 support, not gtk1  [default=no]],
-              , enable_gtk2=no)
-if test x$enable_gtk2 = xyes; then
-
-    AC_DEFINE(ENABLE_GTK2, 1, GTK2 support.)
-
-    dnl Check for glade2 and gtk2 libraries
-
-    AC_PATH_PROG(HAVEPKGCONFIG, pkg-config, $PATH)
-
-    if test ! -z "$HAVEPKGCONFIG"; then
-        if $HAVEPKGCONFIG --exists libglade-2.0 gtk+-2.0 ; then
-            GTK2_CFLAGS=`$HAVEPKGCONFIG --cflags libglade-2.0 gtk+-2.0`
-            GTK2_LIBS=`$HAVEPKGCONFIG --libs libglade-2.0 gtk+-2.0`
-
-            dnl Pkg-config is supposed to add the export-dynamic, but it doesn't, at least on my system
-            LDFLAGS="$LDFLAGS -Wl,-export-dynamic"
-            CFLAGS="$CFLAGS $GTK2_CFLAGS"
-            if test ! -z "GLADE_STATIC"  ; then
-                GTK2_LIBS=`echo $GTK2_LIBS | sed "s/-lglade-2.0/$GLADE_STATIC -lglade-2.0 $BDYNAMIC/g"`
-            fi
-	    dnl Ignore unnecessary dependency on libpng12, not used by our binaries, creates problems with newer distros
-	    GTK2_LIBS=`echo $GTK2_LIBS | sed "s/-lpng12//g"`
-            GUI_LIBS="$GUI_LIBS $GTK2_LIBS"
-			SETUP_GTK="setup.gtk2"
-			GTK_SUBDIR=gtk2
-			XMLVER="2"
-        else
-            AC_MSG_ERROR([*** Either libglade-2.0 or gtk+-2.0 are not available.])
+AC_ARG_ENABLE([gtk], AS_HELP_STRING([--disable-gtk], [build only the console installer and uninstaller]), [], [enable_gtk=auto])
+AC_ARG_ENABLE([gtk2], AS_HELP_STRING([--enable-gtk2], [require GTK 2 and libglade 2 (--disable-gtk2 selects GTK 1)]), [], [enable_gtk2=auto])
+AC_PATH_TOOL([PKG_CONFIG], [pkg-config])
+SETUP_GTK=
+if test "$enable_gtk" != no; then
+    if test "$enable_gtk2" != no && test -n "$PKG_CONFIG" && "$PKG_CONFIG" --exists gtk+-2.0 libglade-2.0; then
+        AC_DEFINE([ENABLE_GTK2], [1], [GTK2 support.])
+        CFLAGS="$CFLAGS `$PKG_CONFIG --cflags gtk+-2.0 libglade-2.0`"
+        GUI_LIBS="`$PKG_CONFIG --libs gtk+-2.0 libglade-2.0`"
+        if test -n "$GLADE_STATIC"; then
+            GUI_LIBS="$GLADE_STATIC -lglade-2.0 $BDYNAMIC $GUI_LIBS"
         fi
+        SETUP_GTK=setup.gtk2
+        GTK_SUBDIR=gtk2
+    elif test "$enable_gtk2" = yes; then
+        AC_MSG_ERROR([--enable-gtk2 requires gtk+-2.0 and libglade-2.0])
     else
-        AC_MSG_ERROR([*** pkg-config not found. Cannot probe for libglade-2.0 or gtk+-2.0.])
+        AC_PATH_PROG([HAVEGLADE], [libglade-config])
+        if test -n "$HAVEGLADE"; then
+            CFLAGS="$CFLAGS `$HAVEGLADE --cflags`"
+            GUI_LIBS="$GLADE_STATIC `$HAVEGLADE --libs` $BDYNAMIC"
+            SETUP_GTK=setup.gtk
+            : ${with_libxml2:=no}
+        elif test "$enable_gtk" = yes || test "$enable_gtk2" = no; then
+            AC_MSG_ERROR([requested GTK frontend dependencies are unavailable])
+        fi
     fi
-
-else
-    CFLAGS="$CFLAGS $GLADE_CFLAGS $GTK_CFLAGS"
-    GUI_LIBS="$GUI_LIBS $GLADE_STATIC -L$GLADE_PREFIX/lib$LIBSUFFIX -lglade $BDYNAMIC $GTK_LIBS"
 fi
-
-dnl Look for the XML libraries
-
-AC_ARG_WITH(libxml2,
-[  --with-libxml2          use libxml2 [default=libxml1 unless GTK2 is enabled]],
-	,	with_libxml2=no)
-if test x$with_libxml2 != xno; then
-	XMLVER="2"
-	EXTRA_LIBS="$EXTRA_LIBS -lm"
+if test "$SETUP_GTK" = setup.gtk2 && test "$with_libxml2" = no; then
+    AC_MSG_ERROR([GTK 2 requires libxml2])
 fi
+AC_MSG_NOTICE([GTK installer: ${SETUP_GTK:-disabled}])
 
-AC_PATH_PROG(HAVEXML, xml${XMLVER}-config, $PATH)
-if test ! -z "$HAVEXML"; then
-    XML_CFLAGS=`$HAVEXML --cflags`
-    XML_PREFIX=`$HAVEXML --prefix`
-
-	if "$HAVEXML" --help|grep libtool-libs > /dev/null; then
-		XML_LIBTOOL=`$HAVEXML --libtool-libs`
-		if test -f "$XML_LIBTOOL"; then
-			. "$XML_LIBTOOL"
-			XML_LIBS="$dependency_libs"
-		else
-			XML_LIBS="-lm"
-		fi
-	elif "$HAVEXML" --libs | grep thread > /dev/null; then
-		XML_LIBS="$PTHREAD -lm"
-	fi
-
-    CFLAGS="$CFLAGS $XML_CFLAGS"
-    if test "$STATIC" = ""; then
-        LIBS="$LIBS $XML_STATIC -L$XML_PREFIX/lib$LIBSUFFIX -lxml${XMLVER} $BDYNAMIC $XML_LIBS"
-        GUI_LIBS="$GUI_LIBS $XML_STATIC -L$XML_PREFIX/lib$LIBSUFFIX -lxml${XMLVER} $BDYNAMIC $XML_LIBS"
-        CARBON_LIBS="$CARBON_LIBS -L$XML_PREFIX/lib$LIBSUFFIX -lxml${XMLVER} $XML_LIBS"
+AC_ARG_WITH([libxml2], AS_HELP_STRING([--without-libxml2], [use legacy libxml 1 instead]), [], [: ${with_libxml2:=yes}])
+if test "$with_libxml2" != no && test -n "$PKG_CONFIG" && "$PKG_CONFIG" --exists libxml-2.0; then
+    XML_CFLAGS=`$PKG_CONFIG --cflags libxml-2.0`
+    if test -n "$XML_STATIC"; then
+        XML_LIBS=`$PKG_CONFIG --static --libs libxml-2.0 | sed "s/-lxml2/$XML_STATIC -lxml2 $BDYNAMIC/"`
     else
-        LIBS="$LIBS $XML_PREFIX/lib$LIBSUFFIX/libxml${XMLVER}.a $XML_LIBS"
-        GUI_LIBS="$GUI_LIBS $XML_PREFIX/lib$LIBSUFFIX/libxml${XMLVER}.a $XML_LIBS"
-        CARBON_LIBS="$CARBON_LIBS $XML_PREFIX/lib$LIBSUFFIX/libxml${XMLVER}.a $XML_LIBS"
+        XML_LIBS=`$PKG_CONFIG --libs libxml-2.0`
     fi
 else
-    AC_MSG_ERROR([*** xml${XMLVER}-config not found. You need a working libxml${XMLVER} installation.])
+    if test "$with_libxml2" = no; then
+        AC_PATH_PROG([XML_CONFIG], [xml-config])
+    else
+        AC_PATH_PROG([XML2_CONFIG], [xml2-config])
+        XML_CONFIG=$XML2_CONFIG
+    fi
+    AS_IF([test -z "$XML_CONFIG"], [AC_MSG_ERROR([install the libxml development files and pkg-config])])
+    XML_CFLAGS=`$XML_CONFIG --cflags`
+    XML_LIBS=`$XML_CONFIG --libs`
+    if test -n "$XML_STATIC"; then
+        xml_lib=-lxml2
+        test "$with_libxml2" = no && xml_lib=-lxml
+        XML_LIBS=`echo "$XML_LIBS" | sed "s/$xml_lib/$XML_STATIC $xml_lib $BDYNAMIC/"`
+    fi
 fi
+CPPFLAGS="$CPPFLAGS $XML_CFLAGS"
+LIBS="$XML_LIBS $LIBS"
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <libxml/parser.h>]], [[xmlParseFile("conftest.xml");]])], [],
+    [AC_MSG_ERROR([cannot compile and link with the selected libxml library])])
+
+AC_COMPUTE_INT([SETUP_XML_MAJOR], [LIBXML_VERSION / 10000],
+    [[#include <libxml/parser.h>]], [AC_MSG_ERROR([cannot determine the installer libxml ABI])])
+AS_IF([test ! -r "$SETUPDB/$ARCH/xml-major"],
+    [AC_MSG_ERROR([SetupDB XML build metadata is missing. Build SetupDB with make all first.])])
+read -r setupdb_xml_major < "$SETUPDB/$ARCH/xml-major"
+AS_IF([test "$setupdb_xml_major" != "$SETUP_XML_MAJOR"],
+    [AC_MSG_ERROR([SetupDB uses libxml $setupdb_xml_major but the installer uses libxml $SETUP_XML_MAJOR. Rebuild both with the same libxml major version.])])
+
+AC_SEARCH_LIBS([iconv], [iconv], [], [AC_MSG_ERROR([install iconv development files])])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <iconv.h>
+extern size_t iconv(iconv_t, const char **, size_t *, char **, size_t *);]], [[]])],
+    [AC_DEFINE([ICONV_INPUT_CONST], [1], [Define if iconv takes a const input pointer.])])
 
 if test x$HAVE_BZIP2_SUPPORT = xyes; then
   AC_DEFINE(HAVE_BZIP2_SUPPORT, 1, libbz2 support.)
@@ -529,14 +423,14 @@ if test x$HAVE_BZIP2_SUPPORT = xyes; then
 
     # Use static version of BZIP2 under Carbon if it's available, otherwise
     # just stick with the dynamic version
-    case "$target" in
+    case "$host" in
        powerpc-apple-darwin*)
        if test -f /usr/lib/libbz2.a; then
 	   BZ2LIB=""
 	   LIBS="$LIBS /usr/lib/libbz2.a"
 	   GUI_LIBS="$GUI_LIBS /usr/lib/libbz2.a"
 	   CARBON_LIBS="$CARBON_LIBS /usr/lib/libbz2.a"
-       fi		
+       fi
     esac
   fi
 fi
@@ -548,7 +442,7 @@ if test x$enable_dialog = xyes; then
 	CFLAGS="$CFLAGS -DENABLE_DIALOG"
 	COMMON_LIBS="$COMMON_LIBS dialog/libdialog.a"
 	CONSOLE_OBJS="dialog_ui.o"
-	DO_DIALOG="do-dialog"
+
 fi
 
 dnl enable ZIP support
@@ -600,7 +494,7 @@ fi
 dnl RPM 4.x support, needs additional libraries
 AC_ARG_ENABLE(rpm4,
 [  --enable-rpm4             enable RPM4 archives support [default=no]],
-              , enable_rpm=no)
+              , enable_rpm4=no)
 if test x$enable_rpm4 = xyes; then
         if test x$HAVE_BZIP2_SUPPORT != xyes; then
              AC_MSG_ERROR([*** You need libbz2 to have RPM 4.x support.])
@@ -620,100 +514,61 @@ if test x$enable_rpm4 = xyes; then
         AC_DEFINE(ENABLE_RPM, 1, RPM support.)
 fi
 
-LIBS="$LIBS $BZ2_STATIC $BZ2LIB $BDYNAMIC"
+LIBS="$LIBS $BZ2LIB"
 
-if test ! -z "$USE_LIBINTL"; then
-	LIBINTL="$BSTATIC $LIBINTL -lz \$(BDYNAMIC)"
-	LIBS="$LIBS $LIBINTL"
-	GUI_LIBS="$GUI_LIBS $LIBINTL"
-	CARBON_LIBS="$CARBON_LIBS $LIBINTL"
-else
-	if test "$STATIC" = ""; then
-		LIBS="$LIBS $BSTATIC -lz \$(BDYNAMIC)"
-	else
-		LIBS="$LIBS -lz"
-	fi
-	GUI_LIBS="$GUI_LIBS $BSTATIC -lz \$(BDYNAMIC)"
-	CARBON_LIBS="$CARBON_LIBS $BSTATIC -lz \$(BDYNAMIC)"
+AC_CHECK_LIB([z], [gzopen], [], [AC_MSG_ERROR([install the zlib development files])])
+if test "$enable_dialog" = yes; then
+    if test "$USE_NCURSES" != yes; then
+        AC_MSG_ERROR([install ncurses or use --disable-dialog])
+    fi
+    if test -n "$NCURSES_STATIC" && test -n "$PKG_CONFIG" && "$PKG_CONFIG" --exists ncurses; then
+        CURSES_LIBS=`$PKG_CONFIG --static --libs ncurses | sed "s/-lncurses/$NCURSES_STATIC -lncurses $BDYNAMIC/"`
+    else
+        CURSES_LIBS="$NCURSES_STATIC -lncurses $BDYNAMIC"
+    fi
+    CONSOLE_LIBS="$CONSOLE_LIBS $CURSES_LIBS"
+    if test -n "$USE_GPM"; then
+        AC_CHECK_HEADERS([gpm.h])
+        CONSOLE_LIBS="$CONSOLE_LIBS -lgpm"
+    fi
 fi
-
-
-if test ! -z "$USE_NCURSES"; then
-	if test "$STATIC" = ""; then
-		CONSOLE_LIBS="$CONSOLE_LIBS $NCURSES_STATIC -lncurses $LIBTINFO \$(BDYNAMIC)"
-	else
-		CONSOLE_LIBS="$CONSOLE_LIBS $NCURSES_STATIC -lncurses $LIBTINFO"
-	fi
-else
-	if test "$STATIC" = ""; then
-		CONSOLE_LIBS="$CONSOLE_LIBS $BSTATIC -lcurses \$(BDYNAMIC)"
-	else
-		CONSOLE_LIBS="$CONSOLE_LIBS -lcurses"
-	fi
-fi
-
-if test ! -z "$USE_GPM"; then
-	AC_CHECK_HEADERS(gpm.h)
-	CONSOLE_LIBS="$CONSOLE_LIBS -lgpm $LIBDL"
-else
-	CONSOLE_LIBS="$CONSOLE_LIBS $LIBDL"
-fi
-
-X11_LIBS="\$(BDYNAMIC) $X_PRE_LIBS -L$x_libraries -lXi -lXext -lX11 -lm"
-GUI_LIBS="$GUI_LIBS $X11_LIBS"
-if test ! -z "$HAVEGTK"; then
-    GUI_LIBS="$GUI_LIBS $LIBDL"
-    GTK_LIBS="$GTK_LIBS \$(BDYNAMIC) $LIBDL $BSTATIC"
-fi
-
-dnl Check for various options
-
-dnl enable dynamic plugins ?
+CONSOLE_LIBS="$CONSOLE_LIBS $LIBDL"
+GUI_LIBS="$GUI_LIBS $RDYNAMIC $LIBDL"
 
 DYN_PLUGINS=false
 AC_ARG_ENABLE(dynamic-plugins,
 [  --enable-dynamic-plugins  enable dynamic plugins       [default=no]],
-              , enable_dynamic=no)
-if test x$enable_dynamic = xyes; then
+              , enable_dynamic_plugins=no)
+if test x$enable_dynamic_plugins = xyes; then
         CFLAGS="$CFLAGS -DDYNAMIC_PLUGINS"
-        LIBS="$LIBS -ldl"
-        GUI_LIBS="$GUI_LIBS -ldl"
-        CARBON_LIBS="$CARBON_LIBS -ldl"
+        CONSOLE_LIBS="$CONSOLE_LIBS $RDYNAMIC"
+        LIBS="$LIBS $LIBDL"
         DYN_PLUGINS=true
         AC_DEFINE(DYNAMIC_PLUGINS, 1, Dynamic plugin support.)
 fi
 
 AC_ARG_WITH(image,
-[  --with-image              specifiy the CD image path  [default=../../spp/private/image]], 
+[  --with-image              specifiy the CD image path  [default=../../spp/private/image]],
 	,   with_image=../../spp/private/image)
 IMAGE="$with_image"
 
 AC_ARG_WITH(vendor,
-[  --with-vendor             specify the vendor prefix  [default=loki]], 
+[  --with-vendor             specify the vendor prefix  [default=loki]],
 	,   with_vendor=loki)
 BRAND="$with_vendor"
 
-#dnl enable the Outrage plugin (proprietary)
-#AC_ARG_ENABLE(outrage,
-#[  --enable-outrage          enable the Outrage plugin    [default=no]],
-#              , enable_outrage=no)
-#if test x$enable_outrage = xyes; then
-#        CFLAGS="$CFLAGS -DOUTRAGE_SUPPORT"
-#        PLUGINS="$PLUGINS outrage.c"
-#        AC_DEFINE(ENABLE_OUTRAGE, 1, Outrage package decoder.)
-#fi
-
 OS=`uname -s`
-
-CXXFLAGS="$CFLAGS"
 
 AC_SUBST(SETUPDB)
 AC_SUBST(PLUGINS)
+PLUGIN_LDFLAGS="-shared"
+case "$host_os" in
+    darwin*) PLUGIN_LDFLAGS="-bundle -undefined dynamic_lookup" ;;
+esac
+AC_SUBST([PLUGIN_LDFLAGS])
 AC_SUBST(DYN_PLUGINS)
 AC_SUBST(GUI_LIBS)
 AC_SUBST(CARBON_LIBS)
-AC_SUBST(GTK_LIBS)
-AC_SUBST(X11_LIBS)
 AC_SUBST(EXTRA_LIBS)
 AC_SUBST(CONSOLE_LIBS)
 AC_SUBST(CONSOLE_OBJS)
@@ -724,7 +579,6 @@ AC_SUBST(LIBC)
 AC_SUBST(OS)
 AC_SUBST(STATIC)
 AC_SUBST(LIBUTIL)
-AC_SUBST(LIBINTL)
 AC_SUBST(SU_PATH)
 AC_SUBST(MOUNT_PATH)
 AC_SUBST(UMOUNT_PATH)
@@ -732,7 +586,6 @@ AC_SUBST(SETUP_VERSION_MAJOR)
 AC_SUBST(SETUP_VERSION_MINOR)
 AC_SUBST(SETUP_VERSION_RELEASE)
 AC_SUBST(BRANDELF)
-AC_SUBST(DO_DIALOG)
 AC_SUBST(IMAGE)
 AC_SUBST(BRAND)
 AC_SUBST(BDYNAMIC)
@@ -740,7 +593,7 @@ AC_SUBST(LD)
 AC_SUBST(SETUP_GTK)
 AC_SUBST(GTK_SUBDIR)
 
-AC_OUTPUT(Makefile plugins/Makefile dialog/Makefile)
-
-
-
+AS_IF([test "$GCC" = yes], [DEPFLAGS="-MMD -MP"])
+AC_SUBST([DEPFLAGS])
+AC_CONFIG_FILES([Makefile plugins/Makefile dialog/Makefile])
+AC_OUTPUT

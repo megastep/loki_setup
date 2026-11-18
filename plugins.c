@@ -8,6 +8,7 @@
 #ifdef DYNAMIC_PLUGINS
 #include <dlfcn.h>
 #include <glob.h>
+#include <unistd.h>
 #endif
 
 struct plugin_list {
@@ -125,17 +126,22 @@ int InitPlugins(void)
 #ifdef DYNAMIC_PLUGINS
 	/* Dynamic plugins */
 	{
-		glob_t glb;
-		const char *arch = detect_arch(), *libc = detect_libc();
-		char pattern[128];
-		
-		/* First look for glibc-specific plugins */
-		snprintf(pattern, sizeof(pattern), "setup.data/bin/%s/%s/plugins/*.so", arch, libc);
-		glob(pattern, 0, NULL, &glb);
-		
-		/* Then look for arch-specific plugins */
-		snprintf(pattern, sizeof(pattern), "setup.data/bin/%s/plugins/*.so", arch);
-		glob(pattern, GLOB_APPEND, NULL, &glb);
+        glob_t glb = {0};
+        const char *arch = detect_arch(), *libc = detect_libc();
+        char directory[128], pattern[160];
+
+        snprintf(directory, sizeof(directory), "setup.data/bin/%s/%s/%s/plugins",
+                 detect_os(), arch, libc);
+        if (access(directory, F_OK) == 0) {
+            snprintf(pattern, sizeof(pattern), "%s/*.so", directory);
+            glob(pattern, 0, NULL, &glb);
+        } else {
+            /* Older media stored plugins without the OS directory. */
+            snprintf(pattern, sizeof(pattern), "setup.data/bin/%s/%s/plugins/*.so", arch, libc);
+            int result = glob(pattern, 0, NULL, &glb);
+            snprintf(pattern, sizeof(pattern), "setup.data/bin/%s/plugins/*.so", arch);
+            glob(pattern, result == 0 ? GLOB_APPEND : 0, NULL, &glb);
+        }
 
 		for( i = 0; i < glb.gl_pathc; ++i ) {
 			void *dl = dlopen(glb.gl_pathv[i], RTLD_NOW | RTLD_GLOBAL );

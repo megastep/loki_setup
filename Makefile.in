@@ -4,7 +4,6 @@ PACKAGE = setup-$(SETUP_VERSION)
 DATADIR = .
 LOCALEDIR = locale
 
-# @SET_MAKE@
 arch := @ARCH@
 libc := @LIBC@
 os   := @OS@
@@ -17,7 +16,7 @@ CC = @CC@
 CXX = @CXX@
 AR = @AR@
 
-# This indicates where the 'setupdb' CVS module is checked out
+# Sibling SetupDB build used by both console and graphical targets.
 SETUPDB	= @SETUPDB@
 
 IMAGE = @IMAGE@
@@ -25,15 +24,16 @@ BRAND = @BRAND@
 UPDATES = /loki/updates/loki_uninstall
 CONVERT_IMAGE = /loki/patch-tools/convert-image
 SETUP_GTK = @SETUP_GTK@
+GTK_TOOLS = $(if $(SETUP_GTK),xsu $(SETUP_GTK))
+DYN_PLUGINS = @DYN_PLUGINS@
 
 # The supported locales so far
 LOCALES = fr de es sv it nl ru en_GB
 
 LD = @LD@
-OPTIMIZE = @CFLAGS@
 LDFLAGS = @LDFLAGS@
 BDYNAMIC = @BDYNAMIC@
-HEADERS = -I/usr/X11R6/include -I/usr/local/include
+CPPFLAGS = @CPPFLAGS@ @DEPFLAGS@
 OPTIONS = -DSTUB_UI -DSETUP_VERSION_MAJOR=@SETUP_VERSION_MAJOR@ \
 		  -DSETUP_VERSION_MINOR=@SETUP_VERSION_MINOR@ \
 		  -DSETUP_VERSION_RELEASE=@SETUP_VERSION_RELEASE@ \
@@ -41,11 +41,11 @@ OPTIONS = -DSTUB_UI -DSETUP_VERSION_MAJOR=@SETUP_VERSION_MAJOR@ \
 		  -DMOUNT_PATH=\"@MOUNT_PATH@\" -DUMOUNT_PATH=\"@UMOUNT_PATH@\" \
 		  -DDATADIR=\"$(DATADIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\" -DLOKI_PREFIX=\"$(BRAND)\"
 
-CFLAGS += $(OPTIMIZE) $(HEADERS) $(OPTIONS)
-CXXFLAGS = $(CFLAGS)
+CFLAGS = @CFLAGS@ $(OPTIONS)
+CXXFLAGS = @CXXFLAGS@ -DRARDLL -DSILENT
 
 COMMON_OBJS = log.o install_log.o
-CORE_OBJS   = detect.o plugins.o network.o install.o copy.o file.o loki_launchurl.o bools.o
+CORE_OBJS   = detect.o encoding.o plugins.o network.o install.o copy.o file.o loki_launchurl.o bools.o
 OBJS 		= $(COMMON_OBJS) $(CORE_OBJS) main.o 
 LOKI_UNINSTALL_OBJS = loki_uninstall.o uninstall_ui.o
 CARBON_UNINSTALL_OBJS = $(COMMON_OBJS) carbon_uninstall.o uninstall_carbonui.o
@@ -70,21 +70,30 @@ endif
 CARBON_LIBS = $(COMMON_LIBS) @LIBS@ @CARBON_LIBS@
 CONSOLE_LIBS = $(LIBS) @CONSOLE_LIBS@ -lm
 
-all: do-plugins @DO_DIALOG@ setup $(SETUP_GTK) uninstall xsu
+all: setup uninstall $(GTK_TOOLS)
 
-testxml: testxml.o
-	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS) -lm
+smoke: export TEST_MAKE = $(MAKE)
+smoke: all testencoding
+	./testencoding
+	$(MAKE) -C "$(SETUPDB)" setupdb
+	sh tests/smoke.sh "$(SETUPDB)/setupdb"
+
+testencoding: tests/testencoding.o encoding.o
+	$(CC) $(LDFLAGS) -o $@ $^ @LIBS@
+
+testxml: testxml.o $(COMMON_LIBS)
+	$(LD) $(LDFLAGS) -o $@ testxml.o $(LIBS) -lm
 
 loki_uninstall.o: uninstall.c
-	$(LD) $(LDFLAGS) -c -o $@ $^ $(CFLAGS) -DUNINSTALL_UI -DVERSION=\"$(UNINSTALL_VERSION)\"
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $< -DUNINSTALL_UI -DVERSION=\"$(UNINSTALL_VERSION)\"
 
-loki_uninstall: $(LOKI_UNINSTALL_OBJS) $(SETUPDB)/$(arch)/libsetupdb.a
+loki_uninstall: $(LOKI_UNINSTALL_OBJS) $(COMMON_LIBS)
 	$(LD) $(LDFLAGS) -o $@ $(LOKI_UNINSTALL_OBJS) $(GUI_LIBS)
 
 carbon_uninstall.o: uninstall.c
-	$(LD) $(LDFLAGS) -c -o $@ $^ $(CFLAGS) -DUNINSTALL_CARBONUI -DUNINSTALL_UI -DVERSION=\"$(UNINSTALL_VERSION)\"
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $< -DUNINSTALL_CARBONUI -DUNINSTALL_UI -DVERSION=\"$(UNINSTALL_VERSION)\"
 
-carbon_uninstall: $(CARBON_UNINSTALL_OBJS) $(SETUPDB)/$(arch)/libsetupdb.a
+carbon_uninstall: $(CARBON_UNINSTALL_OBJS) $(COMMON_LIBS)
 	$(LD) $(LDFLAGS) -o $@ $(CARBON_UNINSTALL_OBJS) $(CARBON_LIBS)
 	rm -f -R ./uninstall.APP
 	cp -R ./setup.APP ./uninstall.APP
@@ -108,96 +117,62 @@ check.carbon: $(CHECK_CARBON_OBJS)  $(COMMON_LIBS)
 testcd: testcd.o $(CORE_OBJS) $(COMMON_OBJS) $(COMMON_LIBS)
 	$(LD) $(LDFLAGS) -o $@ $^ @LIBS@ @CONSOLE_LIBS@ @STATIC@
 
-setup: do-plugins @DO_DIALOG@ $(CONSOLE_OBJS) $(COMMON_LIBS)
+setup: $(CONSOLE_OBJS) $(COMMON_LIBS)
 	$(LD) $(LDFLAGS) -o $@ $(CONSOLE_OBJS) $(CONSOLE_LIBS) @STATIC@
 
+ifneq ($(SETUP_GTK),)
 $(SETUP_GTK): $(GUI_OBJS) $(COMMON_LIBS)
 	$(LD) $(LDFLAGS) -o $@ $(GUI_OBJS) $(GUI_LIBS)
+
+endif
 
 #!!!TODO - Take dependency of dialog libs out of carbon	
 #!!!TODO - Should we include setup.carbon as part of "all", "install", etc...?
 # Carbon needs to be a target all its own
-setup.carbon: do-plugins @DO_DIALOG@ $(CARBON_OBJS) $(COMMON_LIBS)
+setup.carbon: $(CARBON_OBJS) $(COMMON_LIBS)
 	$(LD) $(LDFLAGS) -o $@ $(CARBON_OBJS) $(CARBON_LIBS) 
 	cp setup.carbon setup.APP/Contents/MacOS
 
 xsu: $(XSU_OBJS)
-	$(LD) $(LDFLAGS) -o $@ $^ @LIBS@ @GUI_LIBS@ @LIBUTIL@ @X11_LIBS@ @LIBINTL@ @EXTRA_LIBS@
+	$(LD) $(LDFLAGS) -o $@ $^ @LIBS@ @GUI_LIBS@ @LIBUTIL@ @EXTRA_LIBS@
 
-do-plugins:
+plugins/libplugins.a: FORCE
 	$(MAKE) -C plugins all
 
-do-dialog:
+dialog/libdialog.a: FORCE
 	$(MAKE) -C dialog all
 
-install.dbg: all
-ifeq ($(DYN_PLUGINS),true)
-	$(MAKE) -C plugins install.dbg
-endif
-	@if [ -d image/setup.data/bin/$(os)/$(arch)/$(libc) ]; then \
-	    cp setup image/setup.data/bin/$(os)/$(arch); \
-	    cp uninstall image/setup.data/bin/$(os)/$(arch); \
-	    cp $(SETUP_GTK) image/setup.data/bin/$(os)/$(arch)/$(libc); \
-	fi
+do-plugins: plugins/libplugins.a
+do-dialog: dialog/libdialog.a
 
-install: all
-ifeq ($(DYN_PLUGINS),true)
-	$(MAKE) -C plugins install
-endif
-	@mkdir -p image/setup.data/bin/$(os)/$(arch)/$(libc) 
-	@if [ -d image/setup.data/bin/$(os)/$(arch)/$(libc) ]; then \
-	    cp setup image/setup.data/bin/$(os)/$(arch); \
-	    strip image/setup.data/bin/$(os)/$(arch)/setup; \
-	    $(BRANDELF) -t $(os) image/setup.data/bin/$(os)/$(arch)/setup; \
-	    cp uninstall image/setup.data/bin/$(os)/$(arch); \
-	    strip image/setup.data/bin/$(os)/$(arch)/uninstall; \
-	    $(BRANDELF) -t $(os) image/setup.data/bin/$(os)/$(arch)/uninstall; \
-	    cp xsu image/setup.data/bin/$(os)/$(arch)/$(libc); \
-	    strip image/setup.data/bin/$(os)/$(arch)/$(libc)/xsu; \
-	    $(BRANDELF) -t $(os) image/setup.data/bin/$(os)/$(arch)/$(libc)/xsu; \
-	    cp $(SETUP_GTK) image/setup.data/bin/$(os)/$(arch)/$(libc); \
-	    strip image/setup.data/bin/$(os)/$(arch)/$(libc)/$(SETUP_GTK); \
-	    $(BRANDELF) -t $(os) image/setup.data/bin/$(os)/$(arch)/$(libc)/$(SETUP_GTK); \
-	else \
-		echo No directory to copy the binary files to.; \
-		echo   wanted image/setup.data/bin/${os}/${arch}/${libc}; \
-	fi
+.PHONY: all smoke clean dist distclean do-plugins do-dialog FORCE
+FORCE:
 
+# Keep one staging recipe for both the in-tree and external media.
+MEDIA_ROOT = image
+MEDIA_TOOLS = setup uninstall $(GTK_TOOLS)
+MEDIA_PLUGINS = $(if $(filter true,$(DYN_PLUGINS)),$(patsubst %.c,plugins/%.so,@PLUGINS@))
+STRIP_MEDIA = yes
+
+.PHONY: install install.dbg install-image install-setup install-uninstall
+install install.dbg install-image: all
+install-image install-setup install-uninstall: MEDIA_ROOT = $(IMAGE)
+install.dbg: STRIP_MEDIA = no
+install-setup: MEDIA_TOOLS = setup
+install-uninstall: MEDIA_TOOLS = uninstall
+install-setup install-uninstall: MEDIA_PLUGINS =
 install-setup: setup
-	@if [ -d $(IMAGE)/setup.data/bin/$(os)/$(arch) ]; then \
-	    cp setup $(IMAGE)/setup.data/bin/$(os)/$(arch); \
-	    strip $(IMAGE)/setup.data/bin/$(os)/$(arch)/setup; \
-	    $(BRANDELF) -t $(os) $(IMAGE)/setup.data/bin/$(os)/$(arch)/setup; \
-	else \
-		echo No directory to copy the setup binary file to.; \
-	fi
-
 install-uninstall: uninstall
-	@if [ -d $(IMAGE)/setup.data/bin/$(os)/$(arch)/ ]; then \
-	    cp uninstall $(IMAGE)/setup.data/bin/$(os)/$(arch)/uninstall; \
-	    strip $(IMAGE)/setup.data/bin/$(os)/$(arch)/uninstall; \
-	    $(BRANDELF) -t $(os) $(IMAGE)/setup.data/bin/$(os)/$(arch)/uninstall; \
-	else \
-		echo No directory to copy the uninstall binary file to.; \
-	fi
 
-install-image: all install-setup install-uninstall
-ifeq ($(DYN_PLUGINS),true)
-	$(MAKE) -C plugins install
-endif
-	@if [ -d $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc) ]; then \
-	    cp xsu $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc); \
-	    strip $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc)/xsu; \
-	    $(BRANDELF) -t $(os) $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc)/xsu; \
-		if [ $(os) = Linux -a -d $(CONVERT_IMAGE) ]; then \
-	    	cp uninstall $(CONVERT_IMAGE)/bin/$(os)/$(arch); \
-	    	strip $(CONVERT_IMAGE)/bin/$(os)/$(arch)/uninstall; \
-	    	$(BRANDELF) -t $(os) $(CONVERT_IMAGE)/bin/$(os)/$(arch)/uninstall; \
-		fi; \
-	    cp $(SETUP_GTK) $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc); \
-	    strip $(IMAGE)/setup.data/bin/$(os)/$(arch)/$(libc)/$(SETUP_GTK); \
-	else \
-		echo No directory to copy the binary files to.; \
+install install.dbg install-image install-setup install-uninstall:
+	BRANDELF="$(BRANDELF)" STRIP_MEDIA="$(STRIP_MEDIA)" \
+	  sh extras/stage-media.sh "$(MEDIA_ROOT)" "$(os)" "$(arch)" "$(libc)" "$@" $(MEDIA_TOOLS) $(MEDIA_PLUGINS)
+
+	@if [ "$@" = install-image ] && [ "$(os)" = Linux ] && [ -d "$(CONVERT_IMAGE)" ]; then \
+	    set -e; mkdir -p "$(CONVERT_IMAGE)/bin/$(os)/$(arch)"; \
+	    cp uninstall "$(CONVERT_IMAGE)/bin/$(os)/$(arch)/"; \
+	    strip "$(CONVERT_IMAGE)/bin/$(os)/$(arch)/uninstall"; \
+	    $(BRANDELF) -t "$(os)" "$(CONVERT_IMAGE)/bin/$(os)/$(arch)/uninstall"; \
 	fi
 
 # Pretty LPP-specific
@@ -230,7 +205,7 @@ copy-loki_uninstall: loki_uninstall
 		echo No directory to copy the $(BRAND)-uninstall binary file to.; \
 	fi
 
-copy-image: install-image copy-loki_uninstall po-image
+copy-image: install-image $(if $(SETUP_GTK),copy-loki_uninstall) po-image
 
 install-loki_uninstall: loki_uninstall
 	@if [ -d $(IMAGE)/loki_uninstall/bin/$(arch)/$(libc)/ ]; then \
@@ -272,20 +247,26 @@ po-image:
 clean:
 	$(MAKE) -C plugins clean
 	$(MAKE) -C dialog clean
-	rm -f foo.xml core tags *.o
-	rm -f carbon/*.o
-	rm -f unrar/*.o
+	rm -f foo.xml core tags *.o *.d
+	rm -f carbon/*.o carbon/*.d
+	rm -f unrar/*.o unrar/*.d tests/*.o tests/*.d
 
 distclean: clean
-	rm -f Makefile config.cache config.status config.log
-	rm -f setup $(SETUP_GTK) setup.carbon uninstall loki_uninstall testxml
+	rm -f Makefile dialog/Makefile plugins/Makefile .depend dialog/.depend plugins/.depend config.h config.cache config.status config.log
+	rm -f setup setup.gtk setup.gtk2 setup.carbon uninstall loki_uninstall testxml testcd testencoding xsu check check.carbon carbon_uninstall
 
-dist: distclean
-	cp -r . $(DISTDIR)/$(PACKAGE)
-	(cd $(DISTDIR)/$(PACKAGE) && rm -r `find . -name CVS`)
-	(cd $(DISTDIR)/$(PACKAGE) && rm -r `find . -name .cvsignore`)
-	(cd $(DISTDIR) && tar zcvf $(PACKAGE).tar.gz $(PACKAGE))
-	rm -rf $(DISTDIR)/$(PACKAGE)
+DISTFILES = $(wildcard *.c *.h *.glade README*) configure.ac configure config.h.in \
+            config.guess config.sub install-sh autogen.sh Makefile Makefile.in \
+            BUGS CHANGES COPYING Patches icon.xpm loki_uninstall.spec setupdb.rev .github .gitignore \
+            carbon dialog extras image makeself plugins po setup.APP tests unrar
+
+dist:
+	@set -e; work=$$(mktemp -d); trap 'rm -rf "$$work"' 0; \
+	mkdir "$$work/$(PACKAGE)"; \
+	cp -R $(DISTFILES) "$$work/$(PACKAGE)/"; \
+	$(MAKE) -C "$$work/$(PACKAGE)" distclean; \
+	tar -C "$$work" -czf "$$work/release.tar.gz" "$(PACKAGE)"; \
+	mv "$$work/release.tar.gz" "$(DISTDIR)/$(PACKAGE).tar.gz"
 
 po/setup.po: $(SRCS) image/setup.data/setup.glade
 	libglade-xgettext image/setup.data/setup.glade > po/setup.po
@@ -310,13 +291,9 @@ update-po: po/setup.po po/loki-uninstall.po
 		mv po/$$lang/tmp po/$$lang/loki-uninstall.po; \
 	done
 
-dep: depend
+.PHONY: dep depend
+dep depend: all
 
-depend:
-	$(MAKE) -C plugins depend
-	$(MAKE) -C dialog depend
-	$(CC) -MM $(CFLAGS) $(SRCS) > .depend
-
-ifeq ($(wildcard .depend),.depend)
-include .depend
-endif
+# Recompile when configuration or a header used by an object changes.
+$(sort $(SRCS:.c=.o) $(UNINSTALL_OBJS) $(CHECK_OBJS) $(LOKI_UNINSTALL_OBJS) testxml.o testcd.o tests/testencoding.o $(filter %.o,$(COMMON_LIBS))): Makefile config.h
+-include $(wildcard *.d carbon/*.d unrar/*.d tests/*.d)

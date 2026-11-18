@@ -1,4 +1,4 @@
-# The Loki Setup Installer 1.5.8
+# The Loki Setup Installer 1.6.5
 
 ### Written by Sam Lantinga and Stephane Peter
 
@@ -36,17 +36,34 @@ New since 1.1:
 This installer uses an XML description file to describe a package,
 and provides both a console and a GTk front-end to install it.
 
-The installer requires libxml 1.4.0 to parse the XML configuration,
-and libglade 0.7 to dynamically load the GTk user interface definition.
-Source archives for these libraries can be found in ./libs, and newer
-versions may also work.  You should only install static versions of
-these libraries, so they will not be required on the user systems.
+## Building the installer
 
-Building the installer:
-Type 'make; make install'
-This builds a static version of the console installer, and a dynamically
-linked version of the GUI installer, and installs them in the appropriate
-CD-image subdirectory for this architecture and version of libc.
+Install a C/C++ toolchain, GNU Make, Autoconf, Automake, pkg-config, and
+development files for libxml2, zlib, and ncurses. Check out
+[loki_setupdb](https://github.com/megastep/loki_setupdb) beside this repository.
+From this directory run:
+
+```sh
+(cd ../loki_setupdb && ./autogen.sh && ./configure --with-libxml2 && make)
+./autogen.sh && ./configure && make -j4
+make smoke
+make install
+```
+
+Run `make smoke` in a terminal. It stages a media image, installs a compressed
+fixture, verifies its registration, and runs the generated uninstaller.
+The test uses a temporary SetupDB registry. `make install` stages binaries
+under `image/setup.data/bin/<OS>/<arch>/` for the media launcher.
+
+Configure detects GTK 2 and libglade 2 when installed. Use `--enable-gtk2`
+to require that front end, `--disable-gtk` for a console-only build, or
+`--disable-dialog` to omit the ncurses UI. Use `--with-setupdb=/path/to/loki_setupdb`
+for a different library checkout. See `./configure --help` for archive
+formats and static-link options. Builds use shared system libraries by default.
+Build both projects with the same libxml major version.
+Before distributing installation media, check the staged binaries with
+`ldd` on Linux or `otool -L` on macOS. Run `make dist` to create a source
+archive in the parent directory with the generated configure script.
 
 The image subdirectory contains a set of files that you can copy to your
 CD image, and modify for the game you are distributing.
@@ -108,3 +125,7 @@ the makeself subdirectory.  We use this at Loki to generate patches.
 Play with it, and enjoy!
 
 -- Sam Lantinga, Lead Programmer, Loki Entertainment Software
+
+The GitHub Actions test and CodeQL workflows read SetupDB’s full commit SHA
+from `setupdb.rev`. Record a published revision that generates the
+`xml-major` build metadata.

@@ -65,7 +65,7 @@ size_t copy_cpio_stream(install_info *info, stream *input, const char *dest, con
     int dir_len = strlen(dest) + 1;
     size_t nread, left, copied;
     size_t size = 0;
-    char buf[PATH_MAX];
+    char buf[BUFSIZ];
     int count = 0;
 	unsigned int user_mode = 0;
     /* Optional MD5 sum can be specified in the XML file */
@@ -157,9 +157,9 @@ size_t copy_cpio_stream(install_info *info, stream *input, const char *dest, con
 						copied = file_write(info, buf, nread, output);
 						left -= nread;
 						if(has_crc && file_hdr.c_chksum){
-							int i;
-							for(i=0; i<BUFSIZ; i++)
-								chk += buf[i];
+							size_t i;
+							for (i = 0; i < nread; ++i)
+								chk += (unsigned char)buf[i];
 						}
 				
 						info->installed_bytes += copied;

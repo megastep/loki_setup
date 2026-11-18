@@ -413,7 +413,7 @@ int main(int argc, char *argv[])
 		{ 0, 0, 0, 0 }
 	};
 
-#if defined(darwin)
+#if defined(LOKI_CARBON)
 	printf("Your command line:\n");
 	{ 
 		int i; for (i = 0; i < argc; i++) { printf("argv[%d] == \"%s\"\n", i, argv[i]); } } 

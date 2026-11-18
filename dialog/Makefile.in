@@ -6,7 +6,7 @@ SHELL		= /bin/sh
 VERSION		= $(shell cat VERSION)
 
 CFLAGS		= @CFLAGS@ -DHAVE_COLOR -I. -I..
-CPPFLAGS	= @CPPFLAGS@ @DEFS@ -DLOCALEDIR=\"locale\" -DVERSION=\"$(VERSION)\"
+CPPFLAGS	= @CPPFLAGS@ @DEPFLAGS@ @DEFS@ -DLOCALEDIR=\"locale\" -DVERSION=\"$(VERSION)\"
 CC		= @CC@
 LDFLAGS		= @LDFLAGS@
 LIBS		= @LIBS@
@@ -49,14 +49,14 @@ ALL	= $(LIB) $(PROG)
 
 all	:: $(ALL)
 
-dialog.o $(OBJS) : dialog.h
+dialog.o $(OBJS) : dialog.h Makefile ../config.h
 
 $(LIB) : $(OBJS)
 	$(AR) crv $(LIB) $(OBJS)
 	$(RANLIB) $@
 
 clean:
-	rm -f core *.o *~ tags TAGS $(ALL)
+	rm -f core *.o *.d *~ tags TAGS $(ALL)
 
 tags:
 	ctags $(SRCS) $(HDRS)
@@ -68,9 +68,7 @@ lint:
 	$(LINT) $(CPPFLAGS) *.c
 
 
-depend:
-	$(CC) -MM $(CFLAGS) $(SRCS) > .depend
+.PHONY: dep depend
+dep depend: all
 
-ifeq ($(wildcard .depend),.depend)
-include .depend
-endif
+-include $(wildcard *.d)

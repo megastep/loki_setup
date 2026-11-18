@@ -1303,7 +1303,7 @@ void add_bin_entry(install_info *info, struct option_elem *comp, struct file_ele
 					info->installed_symlink = symlink;
 					if ( !strcmp(play, "yes") || 
 					     (!strcmp(play, "gui") && UI.is_gui) ) {
-						if (info->symlinks_path && *info->symlinks_path ) {
+						if ( *info->symlinks_path ) {
 							snprintf(info->play_binary, PATH_MAX, "%s/%s", info->symlinks_path, symlink);
 						} else {
 							strncpy(info->play_binary, symlink, PATH_MAX);
@@ -1317,7 +1317,7 @@ void add_bin_entry(install_info *info, struct option_elem *comp, struct file_ele
 			}
         } else if ( symlink && !info->installed_symlink ) { /* Defaults to 'yes' */
 			info->installed_symlink = symlink;
-			if (info->symlinks_path && *info->symlinks_path ) {
+			if ( *info->symlinks_path ) {
 				snprintf(info->play_binary, PATH_MAX, "%s/%s", info->symlinks_path, symlink);
 			} else {
 				strncpy(info->play_binary, symlink, PATH_MAX);
@@ -2980,9 +2980,9 @@ int run_script(install_info *info, const char *script, int arg, int include_tags
     working_dir[0] = '\0'; 
     if ( *script != '/' && access(script, R_OK) == 0 ) {
         if ( getcwd(working_dir, sizeof(working_dir)) == NULL ) {
-			perror("run_script: getcwd");
-		}
-        strncat(working_dir, "/", sizeof(working_dir)-strlen(working_dir));
+            perror("run_script: getcwd");
+            return -1;
+        }
     }
 
     snprintf(script_file, PATH_MAX, "%s/tmp_script_XXXXXX", info->install_path);
@@ -3033,8 +3033,7 @@ int run_script(install_info *info, const char *script, int arg, int include_tags
 			}
 
 			/* Append script itself */
-			fprintf(fp, "%s%s\n", 
-					working_dir, script);
+			fprintf(fp, "%s%s%s\n", working_dir, working_dir[0] ? "/" : "", script);
             fchmod(fileno(fp),0755); /* Turn on executable bit */
             fclose(fp);
 			if ( arg >= 0 ) {
@@ -3064,7 +3063,7 @@ int run_command3(install_info *info, const char *cmd, const char *arg1, const ch
 	log_debug("Running command: '%s' '%s' '%s' '%s'\n", cmd, arg1 ? arg1 : "", arg2 ? arg2 : "", arg3 ? arg3 : "");
     switch( child = fork() ) {
     case 0: {/* Inside the child */
-        char *argv[4];
+        char *argv[5];
         argv[0] = strdup(cmd);
         argv[1] = arg1 ? strdup(arg1) : NULL;
         argv[2] = arg2 ? strdup(arg2) : NULL;

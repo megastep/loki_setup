@@ -3,38 +3,24 @@
 # $Id: Makefile.in,v 1.7 2008-07-25 22:56:53 megastep Exp $
 #
 
-@SET_MAKE@
 STATICS = cpio.c
 PLUGINS = @PLUGINS@
+CPPFLAGS = @CPPFLAGS@ @DEPFLAGS@
 CFLAGS  = -fPIC @CFLAGS@ -I..
 CC	= @CC@
 AR	= @AR@
 DYN_PLUGINS = @DYN_PLUGINS@
 
-arch := @ARCH@
-libc := @LIBC@
-
 .SUFFIXES: .so .o .c
 
 OBJS	= $(STATICS:.c=.o)
 
-ifeq ($DYN_PLUGINS,true)
+ifeq ($(DYN_PLUGINS),true)
 
 # Build all plugins as .so files
 SOBJS = $(PLUGINS:.c=.so)
 
 all: $(SOBJS) libplugins.a
-
-install: all
-	for a in $(SOBJS); do \
-		cp -v $$a ../image/setup.data/bin/$(arch)/$(libc)/plugins; \
-		strip ../image/setup.data/bin/$(arch)/$(libc)/plugins/$$a; \
-	done
-
-install.dbg: all
-	for a in $(SOBJS); do \
-		cp -v $$a ../image/setup.data/bin/$(arch)/$(libc)/plugins; \
-	done
 
 else
 
@@ -43,28 +29,22 @@ OBJS += $(PLUGINS:.c=.o)
 
 all: libplugins.a
 
-install:
-	true
-
-install.dbg:
-	true
-
 endif
 
-libplugins.a: $(OBJS)
-	$(AR) rcs libplugins.a $(OBJS)
+libplugins.a: $(OBJS) Makefile
+	rm -f $@
+	$(AR) rcs $@ $(OBJS)
 
 .c.so:
-	$(CC) -shared -o $@ $*.c $(CFLAGS)
+	$(CC) @LDFLAGS@ @PLUGIN_LDFLAGS@ -o $@ $*.c $(CPPFLAGS) $(CFLAGS)
 .c.o:
-	$(CC) -o $@ -c $*.c $(CFLAGS)
+	$(CC) -o $@ -c $*.c $(CPPFLAGS) $(CFLAGS)
 
 clean:
-	rm -f *.o *.so *.a *~
+	rm -f *.o *.d *.so *.a *~
 
-depend:
-	$(CC) -MM $(CFLAGS) $(OBJS:.o=.c) > .depend
+.PHONY: dep depend
+dep depend: all
 
-ifeq ($(wildcard .depend),.depend)
-include .depend
-endif
+$(OBJS) $(SOBJS): Makefile ../config.h
+-include $(wildcard *.d)

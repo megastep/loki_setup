@@ -54,13 +54,11 @@
 #endif
 
 
-/* From libxml */
-#include <libxml/encoding.h>
-
 #include "install.h"
 #include "install_ui.h"
 #include "install_log.h"
 #include "detect.h"
+#include "encoding.h"
 #include "bools.h"
 
 #ifndef MNTTYPE_CDROM
@@ -135,7 +133,7 @@ extern Install_UI UI;
  *  http://developer.apple.com/samplecode/Sample_Code/Devices_and_Hardware/Disks/VolumeToBSDNode/VolumeToBSDNode.c.htm
  */
 #    include <CoreFoundation/CoreFoundation.h>
-#    include <CoreServices/CoreServices.h>
+#    include <IOKit/IOBSD.h>
 #    include <IOKit/IOKitLib.h>
 #    include <IOKit/storage/IOMedia.h>
 #    include <IOKit/storage/IOCDMedia.h>
@@ -355,10 +353,6 @@ void topmost_valid_path(char *target, const char *src)
 
 void unmount_filesystems(void)
 {
-    const char *fstab, *mtab, *mount_cmd, *mnttype;
-    FILE *mountfp;
-    struct mntent *mntent;
-
     struct mounted_elem *mnt = mounted_list, *oldmnt;
     while ( mnt ) {
         log_normal(_("Unmounting device %s"), mnt->device);
@@ -372,19 +366,18 @@ void unmount_filesystems(void)
         free(oldmnt);
     }
 
+#if defined(HAVE_MNTENT_H) || defined(__svr4__)
+    const char *mtab, *mnttype;
+    FILE *mountfp;
     //Now go through the list of filesystems left that may not be in fstab,
     //such as ones automounted through the gnome automounter or manually
     //mounted on loop - MS:LGP
     if ( !access("/etc/pfs_fstab", F_OK) ) {
-		fstab = "/etc/pfs_fstab";
 		mtab = "/etc/pfs_mtab";
-		mount_cmd = "/usr/sbin/pfs_mount";
 		mnttype = "pfs-rrip";
     } else {
-		fstab = SETUP_FSTAB;
 		mtab = MOUNTS_FILE;
 		mnttype = MNTTYPE_CDROM;
-		mount_cmd = MOUNT_PATH;
     }
 
 #if defined(__svr4__)
@@ -401,7 +394,8 @@ void unmount_filesystems(void)
 		}
  		fclose(mountfp);
 	}
-#elif !defined(__FreeBSD__) // FIXME
+#else
+    struct mntent *mntent;
     mountfp = setmntent( mtab, "r" );
     if( mountfp != NULL ) {
         while( (mntent = getmntent( mountfp )) != NULL ){
@@ -420,6 +414,7 @@ void unmount_filesystems(void)
     }
 #endif
 
+#endif
     mounted_list = NULL;
 }
 
@@ -870,30 +865,11 @@ const char *get_cdrom(install_info *info, const char *id)
 
 char *convert_encoding(char *str)
 {
-	static xmlCharEncodingHandlerPtr handler = NULL;
-	static char buf[1024];
+    static char buf[1024];
 
-	if ( handler == NULL && current_encoding ) {
-		handler = xmlFindCharEncodingHandler(current_encoding);
-	}
-
-/*  	fprintf(stderr, "convert_encoding(%s) handler=%s\n", str, handler->name); */
-	if ( handler && handler->output ) {
-		int outlen = sizeof(buf), inlen = strlen(str)+1;
-		if ( 
-#if LIBXML_VERSION < 20000
-			handler->output((unsigned char*)buf, outlen, (unsigned char*)str, inlen) 
-#else
-			handler->output((unsigned char*)buf, &outlen, (unsigned char*)str, &inlen) 
-#endif
-			< 0 ) {
-			return str;
-		} else {
-/*  			fprintf(stderr, "Converted to %s\n", buf); */
-			return buf;
-		}
-	}
-	return str;
+    if (!current_encoding || !strcasecmp(current_encoding, "UTF-8"))
+        return str;
+    return convert_utf8(str, current_encoding, buf, sizeof(buf));
 }
 
 void DetectLocale(void)

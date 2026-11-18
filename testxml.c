@@ -2,6 +2,7 @@
 #include "config.h"
 #include <stdio.h>
 #include <ctype.h>
+#include <string.h>
 
 #include "setup-xml.h"
 
@@ -12,21 +13,21 @@ int copy_line(const char **srcpp, char *buf, int maxlen)
 
     /* Skip leading whitespace */
     srcp = *srcpp;
-    while ( *srcp && isspace(*srcp) ) {
+    while ( *srcp && isspace((unsigned char)*srcp) ) {
         ++srcp;
     }
 
     /* Copy the line */
     dstp = buf;
     while ( *srcp && (*srcp != '\r') && (*srcp != '\n') ) {
-        if ( (dstp-buf) >= maxlen ) {
+        if ( (dstp-buf) >= maxlen - 1 ) {
             break;
         }
         *dstp++ = *srcp++;
     }
 
     /* Trim whitespace */
-    while ( (dstp > buf) && isspace(*dstp) ) {
+    while ( (dstp > buf) && isspace((unsigned char)dstp[-1]) ) {
         --dstp;
     }
     *dstp = '\0';
@@ -61,10 +62,12 @@ void ParseNode(xmlDocPtr doc, xmlNodePtr cur, int level)
             printf("Parsing %s node at level %d { \n", cur->name, level);
             data =  xmlNodeListGetString(doc, XML_CHILDREN(cur), 1);
             if ( data ) {
-                while ( copy_line(&data, buf, BUFSIZ) ) {
+                const char *line = data;
+                while ( copy_line(&line, buf, BUFSIZ) ) {
                     PrefixLevel(level);
                     printf(" Data: %s\n", buf);
                 }
+                xmlFree((void *)data);
             }
             if ( XML_CHILDREN(cur) ) {
                 ParseNode(doc, XML_CHILDREN(cur), level+1);
@@ -117,13 +120,22 @@ int main(void)
 
     doc = xmlParseFile("setup.xml");
     if ( doc ) {
-        printf("Description: %s\n", GetNodeText(doc, XML_ROOT(doc), "desc"));
-        cur = doc->root;
+        const char *desc = GetNodeText(doc, XML_ROOT(doc), "desc");
+        if (desc) {
+            printf("Description: %s\n", desc);
+            xmlFree((void *)desc);
+        }
+        cur = XML_ROOT(doc);
         if ( cur ) {
             printf("Root node name: %s\n", cur->name);
             ParseNode(doc, cur, 0);
         }
     }
-    xmlSaveFile("foo.xml", doc);
+    if ( !doc )
+        return 1;
+    int result = xmlSaveFile("foo.xml", doc);
+    xmlFreeDoc(doc);
+    if ( result < 0 )
+        return 1;
 	return 0;
 }

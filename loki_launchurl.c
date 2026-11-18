@@ -191,10 +191,9 @@ int loki_launchURL(const char *url)
       if (geteuid() == 0) { // Attempt to drop privileges with setpriv or sudo
         const char *sudo_uid = getenv("SUDO_UID");
         if (sudo_uid) {
-          const char *setpriv_path = loki_valid_program("setpriv");
-          if (setpriv_path) {
+          if (loki_valid_program("setpriv")) {
             char setpriv_string[4*PATH_MAX];
-            snprintf(setpriv_string, sizeof(setpriv_string), "%s --reuid %s %s", setpriv_path, sudo_uid, command_string);
+            snprintf(setpriv_string, sizeof(setpriv_string), "setpriv --reuid %s %s", sudo_uid, command_string);
             status = system(setpriv_string);
           }
         } else { // Attempt to use sudo instead

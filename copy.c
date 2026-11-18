@@ -742,21 +742,17 @@ ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, c
 
 			copied = 0;
 		
-			strncpy(fdest, dest, sizeof(fdest));
-
-			strncpy(current_option_txt, final, sizeof(current_option_txt));
-			strncat(current_option_txt, " binary", sizeof(current_option_txt)-strlen(current_option_txt));
-
-			if ( keepdirs ) { /* Append the subdirectory to the final destination */
-				char *slash = strrchr(final, '/');
-				if(slash) {
-					*slash = '\0';
-					strncat(fdest, "/", sizeof(fdest)-strlen(fdest));
-					strncat(fdest, final, sizeof(fdest)-strlen(fdest));
-					/* Restore the slash */
-					*slash = '/';
-				}
-			}
+            snprintf(current_option_txt, sizeof(current_option_txt), "%s binary", final);
+            const char *slash = keepdirs ? strrchr(final, '/') : NULL;
+            int len;
+            if (slash)
+                len = snprintf(fdest, sizeof(fdest), "%s/%.*s", dest, (int)(slash - final), final);
+            else
+                len = snprintf(fdest, sizeof(fdest), "%s", dest);
+            if (len < 0 || (size_t)len >= sizeof(fdest)) {
+                log_fatal(_("Binary install path is too long"));
+                goto copy_binary_exit;
+            }
 
 			if ( from_cdrom ) {
 				cdpath = get_cdrom(info, from_cdrom);

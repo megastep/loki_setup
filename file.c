@@ -439,7 +439,7 @@ int file_eof(install_info *info, stream *streamp)
     if ( streamp->fp ) {
         eof = feof(streamp->fp);
     } else if ( streamp->zfp ) {
-        eof = gzeof(streamp->fp);
+        eof = gzeof(streamp->zfp);
     #ifdef HAVE_BZIP2_SUPPORT
     } else if ( streamp->bzfp ) {
 		int err;

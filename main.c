@@ -21,7 +21,7 @@ Modifications by Borland/Inprise Corp.:
 		work as if RPM was not present.
 
  */
-#if defined(darwin)
+#if defined(LOKI_CARBON)
 #include "carbon/carbonres.h"
 #endif
 
@@ -191,7 +191,7 @@ int main(int argc, char **argv)
     char binary_path[PATH_MAX];
 	const char *product_prefix = NULL, *str;
     struct enabled_option *enabled_opt;
-#if defined(darwin)
+#if defined(LOKI_CARBON)
     // If we're on Mac OS, we need to make sure the current working directoy
     //  is the same directoy as the .APP is in.  With Mac OS X, running from
     //  the finder and most other places makes the current directory to root.
@@ -360,7 +360,7 @@ int main(int argc, char **argv)
 				/* Check if we should be root.  Under the Mac, we'll do the standard authorization
                    stuff that most installers do at startup. */
                 if ( GetProductRequireRoot(info) && geteuid()!=0 ) {
-#if defined(darwin)
+#if defined(LOKI_CARBON)
 					carbon_AuthorizeUser();
 					state = SETUP_EXIT;
 					break;

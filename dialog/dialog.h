@@ -142,7 +142,8 @@
 #define ACS_DARROW 'v'
 #endif
 
-/* these definitions really would work for ncurses 1.8.6, etc. */
+#if !defined(NCURSES_OPAQUE) || !NCURSES_OPAQUE
+/* Fallbacks for old curses implementations with public WINDOW fields. */
 #ifndef getparyx
 #define getparyx(win,y,x)	(y = (win)?(win)->_pary:ERR, x = (win)?(win)->_parx:ERR)
 #endif
@@ -161,6 +162,8 @@
 
 #ifndef getcury
 #define getcury(win)		((win)?(win)->_cury:ERR)
+#endif
+
 #endif
 
 /*
