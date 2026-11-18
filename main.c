@@ -164,7 +164,7 @@ _("Usage: %s [options]\n\n"
 
 static void init_locale()
 {
-	char locale[PATH_MAX] = "setup.data/" LOCALEDIR;
+	char locale[PATH_MAX] = SETUP_BASE LOCALEDIR;
 
 	setlocale (LC_ALL, "");
 

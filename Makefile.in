@@ -29,6 +29,9 @@ DYN_PLUGINS = @DYN_PLUGINS@
 
 # The supported locales so far
 LOCALES = fr de es sv it nl ru en_GB
+XGETTEXT = xgettext
+MSGMERGE = msgmerge
+MSGFMT = msgfmt
 
 LD = @LD@
 LDFLAGS = @LDFLAGS@
@@ -239,9 +242,16 @@ install-loki_uninstall: loki_uninstall
 	@echo "Don't forget to update the version in setup.xml to $(UNINSTALL_VERSION)"
 
 po-image:
-	for lang in $(LOCALES); do \
-		cp -f image/setup.data/locale/$$lang/LC_MESSAGES/*.mo $(IMAGE)/setup.data/locale/$$lang/LC_MESSAGES/; \
-		if test -d $(CONVERT_IMAGE); then cp -f image/setup.data/locale/$$lang/LC_MESSAGES/loki-uninstall.mo $(CONVERT_IMAGE)/locale/$$lang/LC_MESSAGES/; fi \
+	@set -e; for lang in $(LOCALES); do \
+		dir="locale/$$lang/LC_MESSAGES"; \
+		mkdir -p "$(IMAGE)/setup.data/$$dir"; \
+		if ! test "image/setup.data/$$dir" -ef "$(IMAGE)/setup.data/$$dir"; then \
+			cp -f image/setup.data/"$$dir"/*.mo "$(IMAGE)/setup.data/$$dir/"; \
+		fi; \
+		if test -d "$(CONVERT_IMAGE)"; then \
+			mkdir -p "$(CONVERT_IMAGE)/$$dir"; \
+			cp -f "image/setup.data/$$dir/loki-uninstall.mo" "$(CONVERT_IMAGE)/$$dir/"; \
+		fi; \
 	done
 
 clean:
@@ -268,27 +278,35 @@ dist:
 	tar -C "$$work" -czf "$$work/release.tar.gz" "$(PACKAGE)"; \
 	mv "$$work/release.tar.gz" "$(DISTDIR)/$(PACKAGE).tar.gz"
 
-po/setup.po: $(SRCS) image/setup.data/setup.glade
-	libglade-xgettext image/setup.data/setup.glade > po/setup.po
-	xgettext -p po -j -d setup --keyword=_ $(SRCS) plugins/*.c
+PO_PLUGINS = $(wildcard plugins/*.c)
+PO_SETUP = $(sort $(SRCS) dialog_ui.c $(PO_PLUGINS) $(wildcard image/setup.data/setup*.glade))
+PO_UNINSTALL = $(sort $(CHECK_OBJS:.o=.c) check_carbon.c uninstall.c uninstall_ui.c \
+                    uninstall_carbonui.c $(PO_PLUGINS) $(wildcard check*.glade uninstall*.glade))
+XGETTEXT_FLAGS = --from-code=UTF-8 --keyword=_ --keyword=gettext_noop \
+                 --add-comments=TRANSLATORS: --package-name='Loki Setup' \
+                 --package-version=$(SETUP_VERSION)
 
-po/loki-uninstall.po: uninstall.c uninstall_ui.c uninstall.glade
-	libglade-xgettext uninstall.glade > po/loki-uninstall.po
-	xgettext -p po -j -d loki-uninstall --keyword=_ uninstall.c uninstall_ui.c
+po/setup.pot: $(PO_SETUP) Makefile.in
+	$(XGETTEXT) $(XGETTEXT_FLAGS) -o $@ $(PO_SETUP)
 
-gettext: po/setup.po po/loki-uninstall.po
-	for lang in $(LOCALES); do \
-		msgfmt -f po/$$lang/setup.po -o image/setup.data/locale/$$lang/LC_MESSAGES/setup.mo; \
-		msgfmt -f po/$$lang/loki-uninstall.po -o image/setup.data/locale/$$lang/LC_MESSAGES/loki-uninstall.mo; \
+po/loki-uninstall.pot: $(PO_UNINSTALL) Makefile.in
+	$(XGETTEXT) $(XGETTEXT_FLAGS) -o $@ $(PO_UNINSTALL)
+
+.PHONY: gettext update-po po-image
+gettext:
+	@set -e; for lang in $(LOCALES); do \
+		dir="image/setup.data/locale/$$lang/LC_MESSAGES"; \
+		mkdir -p "$$dir"; \
+		for domain in setup loki-uninstall; do \
+			$(MSGFMT) --check -o "$$dir/$$domain.mo" "po/$$lang/$$domain.po"; \
+		done; \
 	done
 
-# This rule merges changes from the newest PO file in all the translated PO files
-update-po: po/setup.po po/loki-uninstall.po
-	for lang in $(LOCALES); do \
-		msgmerge po/$$lang/setup.po po/setup.po > po/$$lang/tmp; \
-		mv po/$$lang/tmp po/$$lang/setup.po; \
-		msgmerge po/$$lang/loki-uninstall.po po/loki-uninstall.po > po/$$lang/tmp; \
-		mv po/$$lang/tmp po/$$lang/loki-uninstall.po; \
+update-po: po/setup.pot po/loki-uninstall.pot
+	@set -e; for lang in $(LOCALES); do \
+		for domain in setup loki-uninstall; do \
+			$(MSGMERGE) --update --backup=none --previous "po/$$lang/$$domain.po" "po/$$domain.pot"; \
+		done; \
 	done
 
 .PHONY: dep depend

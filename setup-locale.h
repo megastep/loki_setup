@@ -6,6 +6,10 @@
 #ifndef _setup_locale_h_
 #define _setup_locale_h_
 
+#include <stdlib.h>
+#include <wchar.h>
+#include <wctype.h>
+
 /*#define HARDCODE_TRANSLATION 1*/
 
 #if HARDCODE_TRANSLATION
@@ -29,6 +33,15 @@ const char *translation_lookup_table(const char *str);
 
 #define gettext_noop(String) (String)
 
+static inline int response_matches(const char *response, const char *shortcut)
+{
+    wchar_t answer, key;
+
+    return mbstowcs(&answer, response, 1) == 1 &&
+           mbstowcs(&key, shortcut, 1) == 1 &&
+           towupper(answer) == towupper(key);
+}
+
 /* The prefix for all our setup data files */
 #define SETUP_BASE          "setup.data/"
 
@@ -36,7 +49,7 @@ const char *translation_lookup_table(const char *str);
 
 #define PACKAGE "setup"
 #ifndef LOCALEDIR
-#define LOCALEDIR SETUP_BASE "locale"
+#define LOCALEDIR "locale"
 #endif
 
 #endif

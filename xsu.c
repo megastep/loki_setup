@@ -563,6 +563,7 @@ int main (int argc, char *argv[])
 			  *arg_username = "root",
 			  *arg_iconfile = "";
 	gint 	  x;
+	const char *locale_dir = getenv("SETUP_LOCALEDIR");
 	gboolean  command_in=FALSE, 
 			  username_in=FALSE,
 			  icon_in=FALSE, 
@@ -573,7 +574,7 @@ int main (int argc, char *argv[])
 
 	/* Set the locale */
 	setlocale (LC_ALL, "");
-	bindtextdomain (PACKAGE, LOCALEDIR);
+	bindtextdomain (PACKAGE, locale_dir ? locale_dir : SETUP_BASE LOCALEDIR);
 	textdomain (PACKAGE);
 
     /*	Nope..no popt, maybe next time. Oh and getopt stuff is not

@@ -184,7 +184,7 @@ void DoMediaCheck(const char *Dir)
 		snprintf(path, sizeof(path), "%s/setup.data/setup.xml", Dir);
 		if ( access( path, R_OK) ) {
 			/* Doesn't look like a setup archive */
-            carbon_SetLabelText(Res, CHECK_STATUS_LABEL_ID, _("Unable to identify an installation media."));
+            carbon_SetLabelText(Res, CHECK_STATUS_LABEL_ID, _("Unable to identify the installation media."));
 			return;
 		}
 		strncpy(root, Dir, sizeof(root));
@@ -256,10 +256,10 @@ void DoMediaCheck(const char *Dir)
 	}
 
 	/* Print end message and disable the "Rescue" button */
-    carbon_SetLabelText(Res, CHECK_STATUS_LABEL_ID, _("Files successfully restored !"));
+    carbon_SetLabelText(Res, CHECK_STATUS_LABEL_ID, _("Files successfully restored!"));
     carbon_DisableControl(Res, CHECK_RESCUE_BUTTON_ID);
 
-	carbon_Prompt(Res, PromptType_OK, _("Files successfully restored !"), NULL, 0);
+	carbon_Prompt(Res, PromptType_OK, _("Files successfully restored!"), NULL, 0);
 
 	/* Unmount filesystems that may have been mounted */
 	unmount_filesystems();

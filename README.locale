@@ -1,21 +1,18 @@
-How to add support for a new locale in setup :
-----------------------------------------------
+# Translating Loki Setup
 
-* Create a new directory for your locale under 'po', i.e if you want to 
-  add Russian translations :
+After configuring the build, run `make update-po` with GNU gettext installed.
+This extracts C and Glade strings into `po/setup.pot` and
+`po/loki-uninstall.pot` and merges changes into the locale catalogs.
 
-   mkdir po/ru
+Edit `po/<locale>/setup.po` for the installer and `po/<locale>/loki-uninstall.po`
+for the uninstaller and Check and Rescue. Use UTF-8, preserve format placeholders
+and review entries marked `fuzzy`. Remove that flag after verifying the
+translation. Untranslated and fuzzy messages display in English.
 
-* Edit the Makefile and add your locale name to the 'LOCALES = ' line.
+Run `make gettext` to validate and compile the catalogs in
+`image/setup.data/locale/`. Commit the updated catalogs with their `.mo` files
+so packaged installers use the current translations.
 
-* Copy the po/setup.po file to your new directory under 'po'. i.e. :
-
-  cp po/setup.po po/ru/
-
-* Edit the setup.po file in your directory and add translations for
-  all of the strings.
-
-* Run 'make gettext' to generate the corresponding MO files in the
-  setup image.
-
-* That's it ! :)
+To add a locale, add its name to `LOCALES` in `Makefile.in`, create
+`po/<locale>/`, and use `msginit --locale=<locale> --input=po/<domain>.pot
+--output-file=po/<locale>/<domain>.po` for each domain.

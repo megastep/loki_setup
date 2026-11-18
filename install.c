@@ -446,8 +446,8 @@ static char* explain_nowritepermission(const char* path)
 {
     struct stat st;
 	char* buf = NULL;
-	// translator: directory, user name, user name
-	const char* msg = _("%s is owned by %s."
+	/* TRANSLATORS: The placeholders are a directory, its owner, and the suggested user. */
+	const char* msg = _("%s is owned by %s. "
 	"You may need to run this installer as user %s or choose another directory.");
 
 	if(stat(path, &st) == 0) {
@@ -2402,7 +2402,7 @@ void generate_uninstall(install_info *info)
         }
 
         snprintf(buf, sizeof(buf), "setup.data/bin/%s/%s/uninstall", detect_os(), detect_arch());
-        loki_upgrade_uninstall(product, buf, "setup.data/" LOCALEDIR);
+        loki_upgrade_uninstall(product, buf, SETUP_BASE LOCALEDIR);
 		/* We must call the following in all cases - component installs even, as we have to save the changes */
 		loki_closeproduct(product);
 		/* product might have pointed to info->product. Reopen it so

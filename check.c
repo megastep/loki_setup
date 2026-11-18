@@ -155,7 +155,7 @@ static void message_dialog(const char *txt, const char *title)
     
     dialog = gtk_dialog_new();
     label = gtk_label_new (txt);
-    ok_button = gtk_button_new_with_label("OK");
+    ok_button = gtk_button_new_with_label(_("OK"));
 
     prompt_response = 0;
     
@@ -253,7 +253,7 @@ on_media_ok_clicked (GtkButton       *button,
 		snprintf(path, sizeof(path), "%s/setup.data/setup.xml", str);
 		if ( access( path, R_OK) ) {
 			/* Doesn't look like a setup archive */
-			gtk_label_set_text(GTK_LABEL(diag), _("Unable to identify an installation media."));
+			gtk_label_set_text(GTK_LABEL(diag), _("Unable to identify the installation media."));
 			gtk_widget_hide(glade_xml_get_widget(rescue_glade, "media_select"));
 			return;
 		}
@@ -324,11 +324,11 @@ on_media_ok_clicked (GtkButton       *button,
 	}
 
 	/* Print end message and disable the "Rescue" button */
-	gtk_label_set_text(GTK_LABEL(diag), _("Files successfully restored !"));
+	gtk_label_set_text(GTK_LABEL(diag), _("Files successfully restored!"));
 	gtk_widget_set_sensitive(glade_xml_get_widget(check_glade, "rescue_button"), FALSE);
 	gtk_widget_hide(glade_xml_get_widget(rescue_glade, "media_select"));
 
-	message_dialog(_("Files successfully restored !"), _("Success"));
+	message_dialog(_("Files successfully restored!"), _("Success"));
 
 	/* Unmount filesystems that may have been mounted */
 	unmount_filesystems();

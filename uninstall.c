@@ -46,14 +46,13 @@ void abort_install(void)
 
 static void print_usage(const char *argv0)
 {
-	printf( _("Usage: %s [args]\n"
-			  "args can be any of the following:\n\n"
-			  "  -h      : Print this help message.\n"
-			  "  -l      : List all installed products and components.\n"
-			  "  -v      : Get version information.\n"
-			  "  product [component1] [component2] ... : Uninstalls the specified product, or its subcomponent(s).\n"
-			  "  product < -l > : List installed subcomponents of product.\n"
-			  ), argv0);
+	printf(_("Usage: %s [options] [product [component ...]]\n\n"
+			 "  -h, --help             Show this help.\n"
+			 "  -l, --list             List installed products or a product's components.\n"
+			 "  -v, --version          Show version information.\n"
+			 "  -L, --locale product   Use translations from the product's installation.\n\n"
+			 "Without --list, specify a product to uninstall it or name individual components.\n"),
+		   argv0);
 }
 
 static void log_file(const char *name, const char *reason)
@@ -219,11 +218,11 @@ static int check_for_message(product_component_t *comp)
 		if ( isatty(STDIN_FILENO) ) { /* If we have a TTY, try to get user input */
 			char answer[5];
 			puts(message);
-			printf(_("Uninstall ? [Y/n] "));
-			fflush(stdin);
-			setbuf(stdin, NULL);
+			/* TRANSLATORS: The negative shortcut in brackets must match "N". */
+			printf(_("Uninstall? [Y/n] "));
+			fflush(stdout);
 			if ( fgets(answer, sizeof(answer), stdin) && 
-				 (!strncmp(answer, _("n"), 1) || !strncmp(answer, _("N"), 1)) ) {
+				 (response_matches(answer, _("N")) || response_matches(answer, "N")) ) {
 				printf(_("Aborted.\n"));
 				return 0;
 			}
@@ -538,6 +537,7 @@ int main(int argc, char *argv[])
 	while ( (c=getopt_long(argc, argv, "hlL:v", long_options, NULL)) != EOF ) {
 		switch(c) {
 		case 'h':
+			init_locale(use_locale);
 			print_usage(argv[0]);
 			return 0;
 		case 'v':
@@ -659,7 +659,7 @@ full_uninstall:
             if ( ! check_permissions(info, 1) )
                 return 1;
             if ( ! perform_uninstall(prod, info, 1) ) {
-                fprintf(stderr, _("An error occured during the uninstallation process.\n"));
+                fprintf(stderr, _("Uninstallation did not complete.\n"));
                 ret = 1;
                 loki_closeproduct(prod);
             } else {
