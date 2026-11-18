@@ -1,5 +1,5 @@
 AC_PREREQ([2.69])
-AC_INIT([Loki Setup], [1.6.5], [], [setup])
+AC_INIT([Loki Setup], [2.0.0], [], [setup])
 AC_CONFIG_SRCDIR([main.c])
 AC_CONFIG_HEADERS([config.h])
 
@@ -333,11 +333,11 @@ AC_CHECK_HEADERS(ncurses.h)
 AC_CHECK_LIB(ncurses, keypad, USE_NCURSES=yes)
 
 AC_ARG_ENABLE([gtk], AS_HELP_STRING([--disable-gtk], [build only the console installer and uninstaller]), [], [enable_gtk=auto])
-AC_ARG_ENABLE([gtk2], AS_HELP_STRING([--enable-gtk2], [require GTK 2 and libglade 2 (--disable-gtk2 selects GTK 1)]), [], [enable_gtk2=auto])
+AC_ARG_ENABLE([gtk2], AS_HELP_STRING([--enable-gtk2], [require GTK 2 and libglade 2]), [], [enable_gtk2=auto])
 AC_PATH_TOOL([PKG_CONFIG], [pkg-config])
 SETUP_GTK=
-if test "$enable_gtk" != no; then
-    if test "$enable_gtk2" != no && test -n "$PKG_CONFIG" && "$PKG_CONFIG" --exists gtk+-2.0 libglade-2.0; then
+if test "$enable_gtk" != no && test "$enable_gtk2" != no; then
+    if test -n "$PKG_CONFIG" && "$PKG_CONFIG" --exists gtk+-2.0 libglade-2.0; then
         AC_DEFINE([ENABLE_GTK2], [1], [GTK2 support.])
         CFLAGS="$CFLAGS `$PKG_CONFIG --cflags gtk+-2.0 libglade-2.0`"
         GUI_LIBS="`$PKG_CONFIG --libs gtk+-2.0 libglade-2.0`"
@@ -346,27 +346,15 @@ if test "$enable_gtk" != no; then
         fi
         SETUP_GTK=setup.gtk2
         GTK_SUBDIR=gtk2
-    elif test "$enable_gtk2" = yes; then
-        AC_MSG_ERROR([--enable-gtk2 requires gtk+-2.0 and libglade-2.0])
-    else
-        AC_PATH_PROG([HAVEGLADE], [libglade-config])
-        if test -n "$HAVEGLADE"; then
-            CFLAGS="$CFLAGS `$HAVEGLADE --cflags`"
-            GUI_LIBS="$GLADE_STATIC `$HAVEGLADE --libs` $BDYNAMIC"
-            SETUP_GTK=setup.gtk
-            : ${with_libxml2:=no}
-        elif test "$enable_gtk" = yes || test "$enable_gtk2" = no; then
-            AC_MSG_ERROR([requested GTK frontend dependencies are unavailable])
-        fi
+    elif test "$enable_gtk2" = yes || test "$enable_gtk" = yes; then
+        AC_MSG_ERROR([the GTK installer requires gtk+-2.0 and libglade-2.0])
     fi
-fi
-if test "$SETUP_GTK" = setup.gtk2 && test "$with_libxml2" = no; then
-    AC_MSG_ERROR([GTK 2 requires libxml2])
 fi
 AC_MSG_NOTICE([GTK installer: ${SETUP_GTK:-disabled}])
 
-AC_ARG_WITH([libxml2], AS_HELP_STRING([--without-libxml2], [use legacy libxml 1 instead]), [], [: ${with_libxml2:=yes}])
-if test "$with_libxml2" != no && test -n "$PKG_CONFIG" && "$PKG_CONFIG" --exists libxml-2.0; then
+AC_ARG_WITH([libxml2], AS_HELP_STRING([--with-libxml2], [use libxml2 (required)]), [], [with_libxml2=yes])
+AS_IF([test "$with_libxml2" = no], [AC_MSG_ERROR([libxml2 is required])])
+if test -n "$PKG_CONFIG" && "$PKG_CONFIG" --exists libxml-2.0; then
     XML_CFLAGS=`$PKG_CONFIG --cflags libxml-2.0`
     if test -n "$XML_STATIC"; then
         XML_LIBS=`$PKG_CONFIG --static --libs libxml-2.0 | sed "s/-lxml2/$XML_STATIC -lxml2 $BDYNAMIC/"`
@@ -374,19 +362,12 @@ if test "$with_libxml2" != no && test -n "$PKG_CONFIG" && "$PKG_CONFIG" --exists
         XML_LIBS=`$PKG_CONFIG --libs libxml-2.0`
     fi
 else
-    if test "$with_libxml2" = no; then
-        AC_PATH_PROG([XML_CONFIG], [xml-config])
-    else
-        AC_PATH_PROG([XML2_CONFIG], [xml2-config])
-        XML_CONFIG=$XML2_CONFIG
-    fi
-    AS_IF([test -z "$XML_CONFIG"], [AC_MSG_ERROR([install the libxml development files and pkg-config])])
+    AC_PATH_PROG([XML_CONFIG], [xml2-config])
+    AS_IF([test -z "$XML_CONFIG"], [AC_MSG_ERROR([install the libxml2 development files and pkg-config])])
     XML_CFLAGS=`$XML_CONFIG --cflags`
     XML_LIBS=`$XML_CONFIG --libs`
     if test -n "$XML_STATIC"; then
-        xml_lib=-lxml2
-        test "$with_libxml2" = no && xml_lib=-lxml
-        XML_LIBS=`echo "$XML_LIBS" | sed "s/$xml_lib/$XML_STATIC $xml_lib $BDYNAMIC/"`
+        XML_LIBS=`echo "$XML_LIBS" | sed "s/-lxml2/$XML_STATIC -lxml2 $BDYNAMIC/"`
     fi
 fi
 CPPFLAGS="$CPPFLAGS $XML_CFLAGS"

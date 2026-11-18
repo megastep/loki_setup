@@ -1,4 +1,4 @@
-# The Loki Setup Installer 1.6.5
+# The Loki Setup Installer 2.0.0
 
 ### Written by Sam Lantinga and Stephane Peter
 

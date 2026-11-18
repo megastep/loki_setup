@@ -25,7 +25,7 @@ XML
 cmp "$work/expected" "$work/installed/payload.txt"
 "$setupdb" setup-build-test listfiles > "$work/registered"
 grep -F "$work/installed/payload.txt" "$work/registered"
-(unset SETUPDB_ROOT; "$work/installed/uninstall")
+"$work/installed/uninstall"
 test ! -e "$work/installed/payload.txt"
 registration="$SETUPDB_ROOT/installed/setup-build-test.xml"
 test ! -e "$registration"
