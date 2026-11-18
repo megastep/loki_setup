@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Loki Setup 2.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-18 05:06-0800\n"
+"POT-Creation-Date: 2026-11-18 05:22-0800\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -170,20 +170,17 @@ msgstr "----====== %s programa de instalación ======----\n"
 #: console_ui.c:319
 #, c-format
 msgid "You are running a %s machine with %s (%s)\n"
-msgstr ""
-"Está usando un equipo %s con %s (%s)\n"
+msgstr "Está usando un equipo %s con %s (%s)\n"
 
 #: console_ui.c:321
 #, c-format
 msgid "You are running a %s machine (%s)\n"
-msgstr ""
-"Está usando un equipo %s (%s)\n"
+msgstr "Está usando un equipo %s (%s)\n"
 
 #: console_ui.c:323
 #, c-format
 msgid "Press Ctrl+C at any time to cancel installation.\n"
-msgstr ""
-"Pulse Ctrl+C en cualquier momento para cancelar la instalación.\n"
+msgstr "Pulse Ctrl+C en cualquier momento para cancelar la instalación.\n"
 
 #: console_ui.c:361 dialog_ui.c:130
 #, c-format
@@ -351,7 +348,9 @@ msgstr "Se produjo un error al ejecutar el comando del proceso: %s"
 #: copy.c:403
 #, c-format
 msgid "Failed to change SELinux context for file '%s' - not supported"
-msgstr "No se pudo cambiar el contexto SELinux del archivo «%s». La operación no es compatible."
+msgstr ""
+"No se pudo cambiar el contexto SELinux del archivo «%s». La operación no es "
+"compatible."
 
 #: copy.c:405
 #, c-format
@@ -493,8 +492,7 @@ msgstr ""
 #: detect.c:892
 #, c-format
 msgid "Detected locale is %s\n"
-msgstr ""
-"Configuración regional detectada: %s\n"
+msgstr "Configuración regional detectada: %s\n"
 
 #: detect.c:1069
 #, c-format
@@ -754,8 +752,7 @@ msgstr "Escribir error en %s"
 #: file.c:492
 #, c-format
 msgid "Trying to create a symbolic link on the same file: %s\n"
-msgstr ""
-"Se intentó crear un enlace simbólico al mismo archivo: %s\n"
+msgstr "Se intentó crear un enlace simbólico al mismo archivo: %s\n"
 
 #: file.c:497
 #, c-format
@@ -865,7 +862,7 @@ msgstr ""
 msgid "Please respond to the license dialog"
 msgstr "Responda al cuadro de diálogo de la licencia"
 
-#: gtk_ui.c:1001 xsu.c:498
+#: gtk_ui.c:1001
 msgid "OK"
 msgstr "Aceptar"
 
@@ -944,7 +941,6 @@ msgstr ""
 
 #: image/setup.data/setup.glade:207 image/setup.data/setup.glade:815
 #: image/setup.data/setup.glade:1120 image/setup.data/setup.glade:1601
-#: xsu.c:505
 msgid "Cancel"
 msgstr "Cancelar"
 
@@ -1156,7 +1152,9 @@ msgstr "Pulse «Salir» para eliminar los archivos temporales."
 msgid ""
 "%s is owned by %s. You may need to run this installer as user %s or choose "
 "another directory."
-msgstr "%s pertenece a %s. Es posible que deba ejecutar el instalador como usuario %s o elegir otro directorio."
+msgstr ""
+"%s pertenece a %s. Es posible que deba ejecutar el instalador como usuario "
+"%s o elegir otro directorio."
 
 #: install.c:478
 msgid "No destination directory selected"
@@ -1261,7 +1259,9 @@ msgstr ""
 msgid ""
 "The installer is not suitable for installing this product (missing feature "
 "'%s' version '%u')"
-msgstr "Este instalador no puede instalar el producto. Falta la función «%s», versión «%u»."
+msgstr ""
+"Este instalador no puede instalar el producto. Falta la función «%s», "
+"versión «%u»."
 
 #: install.c:1586
 msgid "XML: 'lang' tag does not have a mandatory 'lang' attribute"
@@ -1617,51 +1617,41 @@ msgstr "Tar: '%s' es un tipo de archivo desconocido: %c"
 msgid "Unexpected data in installation file!"
 msgstr "Se encontraron datos inesperados en el archivo de instalación."
 
-#: xsu.c:381
-msgid "Login Prompt"
-msgstr "Mensaje de inicio de sesión"
+#~ msgid "Login Prompt"
+#~ msgstr "Mensaje de inicio de sesión"
 
-#: xsu.c:393
-msgid "Username : "
-msgstr "Nombre de usuario : "
+#~ msgid "Username : "
+#~ msgstr "Nombre de usuario : "
 
-#: xsu.c:405
-msgid "Command :"
-msgstr "Comando :"
+#~ msgid "Command :"
+#~ msgstr "Comando :"
 
-#: xsu.c:420
-msgid ""
-"This installer requires root privileges.\n"
-"Please enter the correct password for it\n"
-"below and press [Return] or click OK."
-msgstr ""
-"Este instalador requiere privilegios de raíz.\n"
-"Escriba la contraseña correcta para él\n"
-"a continuación y presione [Volver] o haga clic en Aceptar."
+#~ msgid ""
+#~ "This installer requires root privileges.\n"
+#~ "Please enter the correct password for it\n"
+#~ "below and press [Return] or click OK."
+#~ msgstr ""
+#~ "Este instalador requiere privilegios de raíz.\n"
+#~ "Escriba la contraseña correcta para él\n"
+#~ "a continuación y presione [Volver] o haga clic en Aceptar."
 
-#: xsu.c:455
-msgid "Type the password here"
-msgstr "Escriba la contraseña aquí"
+#~ msgid "Type the password here"
+#~ msgstr "Escriba la contraseña aquí"
 
-#: xsu.c:468
-msgid "Type the username here"
-msgstr "Escriba el nombre de usuario aquí"
+#~ msgid "Type the username here"
+#~ msgstr "Escriba el nombre de usuario aquí"
 
-#: xsu.c:480
-msgid "Type the command here"
-msgstr "Escriba el comando aquí"
+#~ msgid "Type the command here"
+#~ msgstr "Escriba el comando aquí"
 
-#: xsu.c:503
-msgid "Press this button when finished"
-msgstr "Presione este botón al finalizar"
+#~ msgid "Press this button when finished"
+#~ msgstr "Presione este botón al finalizar"
 
-#: xsu.c:509
-msgid "Press this button to Cancel"
-msgstr "Presione este botón para Cancelar"
+#~ msgid "Press this button to Cancel"
+#~ msgstr "Presione este botón para Cancelar"
 
-#: xsu.c:511
-msgid "Password :"
-msgstr "Contraseña :"
+#~ msgid "Password :"
+#~ msgstr "Contraseña :"
 
 #~ msgid "Link path:"
 #~ msgstr "Revisión del vínculo:"

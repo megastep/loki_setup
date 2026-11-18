@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Loki Setup 2.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-18 05:06-0800\n"
+"POT-Creation-Date: 2026-11-18 05:22-0800\n"
 "PO-Revision-Date: 2004-09-09 21:34+0100\n"
 "Last-Translator: Ulrik Norgren <ulrik@linuxmail.org>\n"
 "Language-Team: Swedish\n"
@@ -171,20 +171,17 @@ msgstr "----====== %s installationsprogram ======----\n"
 #: console_ui.c:319
 #, c-format
 msgid "You are running a %s machine with %s (%s)\n"
-msgstr ""
-"Du använder en %s-dator med %s (%s)\n"
+msgstr "Du använder en %s-dator med %s (%s)\n"
 
 #: console_ui.c:321
 #, c-format
 msgid "You are running a %s machine (%s)\n"
-msgstr ""
-"Du använder en %s-dator (%s)\n"
+msgstr "Du använder en %s-dator (%s)\n"
 
 #: console_ui.c:323
 #, c-format
 msgid "Press Ctrl+C at any time to cancel installation.\n"
-msgstr ""
-"Tryck på Ctrl+C när som helst för att avbryta installationen.\n"
+msgstr "Tryck på Ctrl+C när som helst för att avbryta installationen.\n"
 
 #: console_ui.c:361 dialog_ui.c:130
 #, c-format
@@ -350,7 +347,9 @@ msgstr "Fel vid försök att köra kommando: %s"
 #: copy.c:403
 #, c-format
 msgid "Failed to change SELinux context for file '%s' - not supported"
-msgstr "Det gick inte att ändra SELinux-kontexten för filen ”%s”. Åtgärden stöds inte."
+msgstr ""
+"Det gick inte att ändra SELinux-kontexten för filen ”%s”. Åtgärden stöds "
+"inte."
 
 #: copy.c:405
 #, c-format
@@ -490,8 +489,7 @@ msgstr ""
 #: detect.c:892
 #, c-format
 msgid "Detected locale is %s\n"
-msgstr ""
-"Identifierad språkinställning: %s\n"
+msgstr "Identifierad språkinställning: %s\n"
 
 #: detect.c:1069
 #, c-format
@@ -748,8 +746,7 @@ msgstr "Misslyckad skrivning till %s"
 #: file.c:492
 #, c-format
 msgid "Trying to create a symbolic link on the same file: %s\n"
-msgstr ""
-"Försök att skapa en symbolisk länk till samma fil: %s\n"
+msgstr "Försök att skapa en symbolisk länk till samma fil: %s\n"
 
 #: file.c:497
 #, c-format
@@ -854,7 +851,7 @@ msgstr ""
 msgid "Please respond to the license dialog"
 msgstr "Vad god att svara på licensdialogen"
 
-#: gtk_ui.c:1001 xsu.c:498
+#: gtk_ui.c:1001
 msgid "OK"
 msgstr "OK"
 
@@ -931,7 +928,6 @@ msgstr ""
 
 #: image/setup.data/setup.glade:207 image/setup.data/setup.glade:815
 #: image/setup.data/setup.glade:1120 image/setup.data/setup.glade:1601
-#: xsu.c:505
 msgid "Cancel"
 msgstr "_Avbryt"
 
@@ -1143,7 +1139,9 @@ msgstr "Tryck på ”Avsluta” för att ta bort tillfälliga filer."
 msgid ""
 "%s is owned by %s. You may need to run this installer as user %s or choose "
 "another directory."
-msgstr "%s ägs av %s. Du kan behöva köra installationsprogrammet som användaren %s eller välja en annan katalog."
+msgstr ""
+"%s ägs av %s. Du kan behöva köra installationsprogrammet som användaren %s "
+"eller välja en annan katalog."
 
 #: install.c:478
 msgid "No destination directory selected"
@@ -1248,7 +1246,9 @@ msgstr ""
 msgid ""
 "The installer is not suitable for installing this product (missing feature "
 "'%s' version '%u')"
-msgstr "Installationsprogrammet kan inte installera produkten. Funktionen ”%s” version ”%u” saknas."
+msgstr ""
+"Installationsprogrammet kan inte installera produkten. Funktionen ”%s” "
+"version ”%u” saknas."
 
 #: install.c:1586
 msgid "XML: 'lang' tag does not have a mandatory 'lang' attribute"
@@ -1594,51 +1594,41 @@ msgstr "Tar: '%s' är av okänd filtyp: %c"
 msgid "Unexpected data in installation file!"
 msgstr "Oförväntad data i installationsfilen!"
 
-#: xsu.c:381
-msgid "Login Prompt"
-msgstr "Login prompt"
+#~ msgid "Login Prompt"
+#~ msgstr "Login prompt"
 
-#: xsu.c:393
-msgid "Username : "
-msgstr "Användarnamn : "
+#~ msgid "Username : "
+#~ msgstr "Användarnamn : "
 
-#: xsu.c:405
-msgid "Command :"
-msgstr "Kommando : "
+#~ msgid "Command :"
+#~ msgstr "Kommando : "
 
-#: xsu.c:420
-msgid ""
-"This installer requires root privileges.\n"
-"Please enter the correct password for it\n"
-"below and press [Return] or click OK."
-msgstr ""
-"Den här installationen kräver root privilegier.\n"
-"Skriv in lösenordet för root nedan och\n"
-"tryck på [Enter] eller klicka på OK."
+#~ msgid ""
+#~ "This installer requires root privileges.\n"
+#~ "Please enter the correct password for it\n"
+#~ "below and press [Return] or click OK."
+#~ msgstr ""
+#~ "Den här installationen kräver root privilegier.\n"
+#~ "Skriv in lösenordet för root nedan och\n"
+#~ "tryck på [Enter] eller klicka på OK."
 
-#: xsu.c:455
-msgid "Type the password here"
-msgstr "Skriv lösenordet här"
+#~ msgid "Type the password here"
+#~ msgstr "Skriv lösenordet här"
 
-#: xsu.c:468
-msgid "Type the username here"
-msgstr "Skriv användarnamnet här"
+#~ msgid "Type the username here"
+#~ msgstr "Skriv användarnamnet här"
 
-#: xsu.c:480
-msgid "Type the command here"
-msgstr "Skriv kommandot här"
+#~ msgid "Type the command here"
+#~ msgstr "Skriv kommandot här"
 
-#: xsu.c:503
-msgid "Press this button when finished"
-msgstr "Tryck på denna knapp när det är klart"
+#~ msgid "Press this button when finished"
+#~ msgstr "Tryck på denna knapp när det är klart"
 
-#: xsu.c:509
-msgid "Press this button to Cancel"
-msgstr "Tryck på denna knapp för att Avbryta"
+#~ msgid "Press this button to Cancel"
+#~ msgstr "Tryck på denna knapp för att Avbryta"
 
-#: xsu.c:511
-msgid "Password :"
-msgstr "Lösenord : "
+#~ msgid "Password :"
+#~ msgstr "Lösenord : "
 
 #~ msgid "Link path:"
 #~ msgstr "Länkbibliotek:"

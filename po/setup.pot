@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Loki Setup 2.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-18 05:06-0800\n"
+"POT-Creation-Date: 2026-11-18 05:22-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -819,7 +819,7 @@ msgstr ""
 msgid "Please respond to the license dialog"
 msgstr ""
 
-#: gtk_ui.c:1001 xsu.c:498
+#: gtk_ui.c:1001
 msgid "OK"
 msgstr ""
 
@@ -893,7 +893,6 @@ msgstr ""
 
 #: image/setup.data/setup.glade:207 image/setup.data/setup.glade:815
 #: image/setup.data/setup.glade:1120 image/setup.data/setup.glade:1601
-#: xsu.c:505
 msgid "Cancel"
 msgstr ""
 
@@ -1496,47 +1495,4 @@ msgstr ""
 
 #: plugins/tar.c:140
 msgid "Unexpected data in installation file!"
-msgstr ""
-
-#: xsu.c:381
-msgid "Login Prompt"
-msgstr ""
-
-#: xsu.c:393
-msgid "Username : "
-msgstr ""
-
-#: xsu.c:405
-msgid "Command :"
-msgstr ""
-
-#: xsu.c:420
-msgid ""
-"This installer requires root privileges.\n"
-"Please enter the correct password for it\n"
-"below and press [Return] or click OK."
-msgstr ""
-
-#: xsu.c:455
-msgid "Type the password here"
-msgstr ""
-
-#: xsu.c:468
-msgid "Type the username here"
-msgstr ""
-
-#: xsu.c:480
-msgid "Type the command here"
-msgstr ""
-
-#: xsu.c:503
-msgid "Press this button when finished"
-msgstr ""
-
-#: xsu.c:509
-msgid "Press this button to Cancel"
-msgstr ""
-
-#: xsu.c:511
-msgid "Password :"
 msgstr ""

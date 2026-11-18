@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Loki Setup 2.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-18 05:06-0800\n"
+"POT-Creation-Date: 2026-11-18 05:22-0800\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -170,20 +170,17 @@ msgstr "----====== %s installation programme ======----\n"
 #: console_ui.c:319
 #, c-format
 msgid "You are running a %s machine with %s (%s)\n"
-msgstr ""
-"You are running a %s machine with %s (%s)\n"
+msgstr "You are running a %s machine with %s (%s)\n"
 
 #: console_ui.c:321
 #, c-format
 msgid "You are running a %s machine (%s)\n"
-msgstr ""
-"You are running a %s machine (%s)\n"
+msgstr "You are running a %s machine (%s)\n"
 
 #: console_ui.c:323
 #, c-format
 msgid "Press Ctrl+C at any time to cancel installation.\n"
-msgstr ""
-"Press Ctrl+C at any time to cancel installation.\n"
+msgstr "Press Ctrl+C at any time to cancel installation.\n"
 
 #: console_ui.c:361 dialog_ui.c:130
 #, c-format
@@ -490,8 +487,7 @@ msgstr ""
 #: detect.c:892
 #, c-format
 msgid "Detected locale is %s\n"
-msgstr ""
-"Detected locale is %s\n"
+msgstr "Detected locale is %s\n"
 
 #: detect.c:1069
 #, c-format
@@ -747,8 +743,7 @@ msgstr "Write failure on %s"
 #: file.c:492
 #, c-format
 msgid "Trying to create a symbolic link on the same file: %s\n"
-msgstr ""
-"Trying to create a symbolic link on the same file: %s\n"
+msgstr "Trying to create a symbolic link on the same file: %s\n"
 
 #: file.c:497
 #, c-format
@@ -853,7 +848,7 @@ msgstr ""
 msgid "Please respond to the license dialog"
 msgstr "Please respond to the license dialog"
 
-#: gtk_ui.c:1001 xsu.c:498
+#: gtk_ui.c:1001
 msgid "OK"
 msgstr "OK"
 
@@ -929,7 +924,6 @@ msgstr ""
 
 #: image/setup.data/setup.glade:207 image/setup.data/setup.glade:815
 #: image/setup.data/setup.glade:1120 image/setup.data/setup.glade:1601
-#: xsu.c:505
 msgid "Cancel"
 msgstr "Cancel"
 
@@ -1141,7 +1135,9 @@ msgstr "Press 'Quit' to clean up temporary files."
 msgid ""
 "%s is owned by %s. You may need to run this installer as user %s or choose "
 "another directory."
-msgstr "%s is owned by %s. You may need to run this installer as user %s or choose another directory."
+msgstr ""
+"%s is owned by %s. You may need to run this installer as user %s or choose "
+"another directory."
 
 #: install.c:478
 msgid "No destination directory selected"
@@ -1246,7 +1242,9 @@ msgstr ""
 msgid ""
 "The installer is not suitable for installing this product (missing feature "
 "'%s' version '%u')"
-msgstr "The installer is not suitable for installing this product (missing feature '%s' version '%u')"
+msgstr ""
+"The installer is not suitable for installing this product (missing feature "
+"'%s' version '%u')"
 
 #: install.c:1586
 msgid "XML: 'lang' tag does not have a mandatory 'lang' attribute"
@@ -1593,51 +1591,41 @@ msgstr "Tar: '%s' is unknown file type: %c"
 msgid "Unexpected data in installation file!"
 msgstr "Unexpected data in installation file!"
 
-#: xsu.c:381
-msgid "Login Prompt"
-msgstr "Login Prompt"
+#~ msgid "Login Prompt"
+#~ msgstr "Login Prompt"
 
-#: xsu.c:393
-msgid "Username : "
-msgstr "Username : "
+#~ msgid "Username : "
+#~ msgstr "Username : "
 
-#: xsu.c:405
-msgid "Command :"
-msgstr "Command :"
+#~ msgid "Command :"
+#~ msgstr "Command :"
 
-#: xsu.c:420
-msgid ""
-"This installer requires root privileges.\n"
-"Please enter the correct password for it\n"
-"below and press [Return] or click OK."
-msgstr ""
-"This installer requires root privileges.\n"
-"Please enter the correct password for it\n"
-"below and press [Return] or click OK."
+#~ msgid ""
+#~ "This installer requires root privileges.\n"
+#~ "Please enter the correct password for it\n"
+#~ "below and press [Return] or click OK."
+#~ msgstr ""
+#~ "This installer requires root privileges.\n"
+#~ "Please enter the correct password for it\n"
+#~ "below and press [Return] or click OK."
 
-#: xsu.c:455
-msgid "Type the password here"
-msgstr "Type the password here"
+#~ msgid "Type the password here"
+#~ msgstr "Type the password here"
 
-#: xsu.c:468
-msgid "Type the username here"
-msgstr "Type the username here"
+#~ msgid "Type the username here"
+#~ msgstr "Type the username here"
 
-#: xsu.c:480
-msgid "Type the command here"
-msgstr "Type the command here"
+#~ msgid "Type the command here"
+#~ msgstr "Type the command here"
 
-#: xsu.c:503
-msgid "Press this button when finished"
-msgstr "Press this button when finished"
+#~ msgid "Press this button when finished"
+#~ msgstr "Press this button when finished"
 
-#: xsu.c:509
-msgid "Press this button to Cancel"
-msgstr "Press this button to Cancel"
+#~ msgid "Press this button to Cancel"
+#~ msgstr "Press this button to Cancel"
 
-#: xsu.c:511
-msgid "Password :"
-msgstr "Password :"
+#~ msgid "Password :"
+#~ msgstr "Password :"
 
 #~ msgid "Link path:"
 #~ msgstr "Link path:"

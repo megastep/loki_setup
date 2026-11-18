@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Loki Setup 2.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-18 05:06-0800\n"
+"POT-Creation-Date: 2026-11-18 05:22-0800\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Anatoly Zhigunov <anatol_z@mail.ru>\n"
 "Language-Team: \n"
@@ -145,8 +145,7 @@ msgstr "Продолжить?"
 #: console_ui.c:183
 #, c-format
 msgid "Previously installed option '%s' will be installed.\n"
-msgstr ""
-"Ранее установленный параметр «%s» будет установлен снова.\n"
+msgstr "Ранее установленный параметр «%s» будет установлен снова.\n"
 
 # console_ui.c:168
 #: console_ui.c:213
@@ -157,8 +156,7 @@ msgstr "Параметр '%s' будет удалён\n"
 #: console_ui.c:218
 #, c-format
 msgid "'%s' :\n"
-msgstr ""
-"«%s»:\n"
+msgstr "«%s»:\n"
 
 #: console_ui.c:226
 #, c-format
@@ -191,20 +189,17 @@ msgstr "----====== %s программа установки ======----\n"
 #: console_ui.c:319
 #, c-format
 msgid "You are running a %s machine with %s (%s)\n"
-msgstr ""
-"Вы используете компьютер %s с %s (%s)\n"
+msgstr "Вы используете компьютер %s с %s (%s)\n"
 
 #: console_ui.c:321
 #, c-format
 msgid "You are running a %s machine (%s)\n"
-msgstr ""
-"Вы используете компьютер %s (%s)\n"
+msgstr "Вы используете компьютер %s (%s)\n"
 
 #: console_ui.c:323
 #, c-format
 msgid "Press Ctrl+C at any time to cancel installation.\n"
-msgstr ""
-"Чтобы отменить установку, нажмите Ctrl+C.\n"
+msgstr "Чтобы отменить установку, нажмите Ctrl+C.\n"
 
 # console_ui.c:277
 #: console_ui.c:361 dialog_ui.c:130
@@ -306,8 +301,7 @@ msgstr "Введите ключ CD"
 #: console_ui.c:605 gtk_ui.c:607
 #, c-format
 msgid "ERROR: vcdk is missing. Installation aborted.\n"
-msgstr ""
-"ОШИБКА: программа vcdk не найдена. Установка прервана.\n"
+msgstr "ОШИБКА: программа vcdk не найдена. Установка прервана.\n"
 
 #: console_ui.c:612 dialog_ui.c:587
 #, c-format
@@ -399,7 +393,8 @@ msgstr "Ошибка при выполнении команды: %s"
 #: copy.c:403
 #, c-format
 msgid "Failed to change SELinux context for file '%s' - not supported"
-msgstr "Не удалось изменить контекст SELinux файла «%s»: операция не поддерживается."
+msgstr ""
+"Не удалось изменить контекст SELinux файла «%s»: операция не поддерживается."
 
 #: copy.c:405
 #, c-format
@@ -461,7 +456,8 @@ msgstr "Атрибут «binpath» обязателен для встроенн�
 
 #: copy.c:715
 msgid "'binpath' attribute must not contain slashes for inline 'binary' tag"
-msgstr "Атрибут «binpath» встроенного тега «binary» не должен содержать косые черты"
+msgstr ""
+"Атрибут «binpath» встроенного тега «binary» не должен содержать косые черты"
 
 #: copy.c:753
 msgid "Binary install path is too long"
@@ -492,8 +488,7 @@ msgstr "Выполняется сценарий. Подождите…"
 
 #: copy.c:1088
 msgid "The remove_msg element should be within a component!\n"
-msgstr ""
-"Элемент remove_msg должен находиться внутри компонента.\n"
+msgstr "Элемент remove_msg должен находиться внутри компонента.\n"
 
 # copy.c:642
 #: copy.c:1106
@@ -507,7 +502,8 @@ msgstr "Элемент компонента должен иметь версию
 
 #: copy.c:1133
 msgid "Malformed 'environment' element in XML file : missing 'var' property"
-msgstr "Некорректный элемент «environment» в XML-файле: отсутствует свойство «var»"
+msgstr ""
+"Некорректный элемент «environment» в XML-файле: отсутствует свойство «var»"
 
 # copy.c:797
 #: copy.c:1310
@@ -560,8 +556,7 @@ msgstr ""
 #: detect.c:892
 #, c-format
 msgid "Detected locale is %s\n"
-msgstr ""
-"Обнаружена локаль: %s\n"
+msgstr "Обнаружена локаль: %s\n"
 
 #: detect.c:1069
 #, c-format
@@ -631,8 +626,7 @@ msgstr ""
 #: dialog_ui.c:280
 #, c-format
 msgid "Option-specific EULA not found for '%s', can't toggle\n"
-msgstr ""
-"Не найдено лицензионное соглашение для «%s». Изменить выбор нельзя.\n"
+msgstr "Не найдено лицензионное соглашение для «%s». Изменить выбор нельзя.\n"
 
 #: dialog_ui.c:281 dialog_ui.c:502 dialog_ui.c:514 dialog_ui.c:580
 msgid "Error"
@@ -645,8 +639,7 @@ msgstr "Выберите параметры"
 #: dialog_ui.c:301
 #, c-format
 msgid "Option '%s' is required.\n"
-msgstr ""
-"Параметр «%s» обязателен.\n"
+msgstr "Параметр «%s» обязателен.\n"
 
 # console_ui.c:457
 #: dialog_ui.c:338
@@ -801,7 +794,9 @@ msgstr "Не удалось открыть файл %s"
 #: file.c:213
 #, c-format
 msgid "File '%s' may be in BZIP2 format, but support was not compiled in!"
-msgstr "Возможно, файл «%s» имеет формат BZIP2, поддержка которого не включена в эту сборку."
+msgstr ""
+"Возможно, файл «%s» имеет формат BZIP2, поддержка которого не включена в эту "
+"сборку."
 
 # file.c:127
 #: file.c:224
@@ -856,8 +851,7 @@ msgstr "Ошибка записи в %s"
 #: file.c:492
 #, c-format
 msgid "Trying to create a symbolic link on the same file: %s\n"
-msgstr ""
-"Попытка создать символическую ссылку на тот же файл: %s\n"
+msgstr "Попытка создать символическую ссылку на тот же файл: %s\n"
 
 # file.c:279
 #: file.c:497
@@ -923,7 +917,8 @@ msgstr "BZ2: попытка открыть %s"
 
 #: file.c:773
 msgid "BZ2: *** Unable to open bzip2 library. bzip2 support disabled"
-msgstr "BZ2: *** Не удалось открыть библиотеку bzip2. Поддержка bzip2 отключена."
+msgstr ""
+"BZ2: *** Не удалось открыть библиотеку bzip2. Поддержка bzip2 отключена."
 
 #: file.c:777
 #, c-format
@@ -972,7 +967,7 @@ msgstr ""
 msgid "Please respond to the license dialog"
 msgstr "Пожалуйста ответьте на лицензионное соглашение"
 
-#: gtk_ui.c:1001 xsu.c:498
+#: gtk_ui.c:1001
 msgid "OK"
 msgstr "ОК"
 
@@ -994,7 +989,8 @@ msgstr "Сделайте выбор"
 msgid ""
 "Warning: program_to_start is only meaningful when there are no symlinks.\n"
 msgstr ""
-"Предупреждение: program_to_start используется только при отсутствии символических ссылок.\n"
+"Предупреждение: program_to_start используется только при отсутствии "
+"символических ссылок.\n"
 
 # gtk_ui.c:806
 #: gtk_ui.c:1197
@@ -1059,7 +1055,6 @@ msgstr "Вы сможете выбрать пути и параметры уст
 # image/setup.data/setup.glade:1273 image/setup.data/setup.glade:1777
 #: image/setup.data/setup.glade:207 image/setup.data/setup.glade:815
 #: image/setup.data/setup.glade:1120 image/setup.data/setup.glade:1601
-#: xsu.c:505
 msgid "Cancel"
 msgstr "Отмена"
 
@@ -1315,7 +1310,9 @@ msgstr "Нажмите «Выход», чтобы удалить временн�
 msgid ""
 "%s is owned by %s. You may need to run this installer as user %s or choose "
 "another directory."
-msgstr "Владелец %s — %s. Возможно, нужно запустить установщик от имени пользователя %s или выбрать другой каталог."
+msgstr ""
+"Владелец %s — %s. Возможно, нужно запустить установщик от имени пользователя "
+"%s или выбрать другой каталог."
 
 # gtk_ui.c:524
 #: install.c:478
@@ -1428,14 +1425,18 @@ msgstr "Невозможно найти домашний каталог %s"
 msgid ""
 "XML: 'require' tag doesn't have a mandatory 'command', 'condition' or "
 "'feature' attribute"
-msgstr "XML: в теге «require» необходимо указать атрибут «command», «condition» или «feature»"
+msgstr ""
+"XML: в теге «require» необходимо указать атрибут «command», «condition» или "
+"«feature»"
 
 #: install.c:1543
 #, c-format
 msgid ""
 "The installer is not suitable for installing this product (missing feature "
 "'%s' version '%u')"
-msgstr "Установщик не может установить этот продукт: отсутствует функция «%s» версии «%u»."
+msgstr ""
+"Установщик не может установить этот продукт: отсутствует функция «%s» версии "
+"«%u»."
 
 # install.c:833
 #: install.c:1586
@@ -1581,7 +1582,8 @@ msgstr ""
 "   -p префикс Использовать указанный префикс пути на установочном носителе\n"
 "   -r каталог Указать корневой каталог для распаковки RPM (по умолчанию: /)\n"
 "   -v n       Установить уровень подробности вывода. Допустимые значения:\n"
-"              0: Отладка  1: Тихий режим  2: Обычный  3: Предупреждения  4: Критические ошибки\n"
+"              0: Отладка  1: Тихий режим  2: Обычный  3: Предупреждения  4: "
+"Критические ошибки\n"
 "   -V         Показать версию установщика и выйти\n"
 
 # main.c:136
@@ -1618,7 +1620,8 @@ msgstr ""
 "              без запросов. Этот параметр можно указать несколько раз.\n"
 "   -p префикс Использовать указанный префикс пути на установочном носителе\n"
 "   -v n       Установить уровень подробности вывода. Допустимые значения:\n"
-"              0: Отладка  1: Тихий режим  2: Обычный  3: Предупреждения  4: Критические ошибки\n"
+"              0: Отладка  1: Тихий режим  2: Обычный  3: Предупреждения  4: "
+"Критические ошибки\n"
 "   -V         Показать версию установщика и выйти\n"
 
 # main.c:271
@@ -1790,8 +1793,7 @@ msgstr "Ошибка загрузки модуля %s: %s\n"
 # plugins/outrage.c:73
 #: plugins/cpio.c:113
 msgid "Invalid CPIO header\n"
-msgstr ""
-"Недопустимый заголовок CPIO\n"
+msgstr "Недопустимый заголовок CPIO\n"
 
 # plugins/cpio.c:155
 #: plugins/cpio.c:173
@@ -1821,50 +1823,40 @@ msgstr "Tar: '%s' неизвестный тип файла: %c"
 msgid "Unexpected data in installation file!"
 msgstr "Неожиданные данные в файле установки."
 
-#: xsu.c:381
-msgid "Login Prompt"
-msgstr "Вход в систему"
+#~ msgid "Login Prompt"
+#~ msgstr "Вход в систему"
 
-#: xsu.c:393
-msgid "Username : "
-msgstr "Имя пользователя: "
+#~ msgid "Username : "
+#~ msgstr "Имя пользователя: "
 
-#: xsu.c:405
-msgid "Command :"
-msgstr "Команда:"
+#~ msgid "Command :"
+#~ msgstr "Команда:"
 
-#: xsu.c:420
-msgid ""
-"This installer requires root privileges.\n"
-"Please enter the correct password for it\n"
-"below and press [Return] or click OK."
-msgstr ""
-"Для установки нужны права суперпользователя.\n"
-"Введите пароль и нажмите Enter или кнопку «ОК»."
+#~ msgid ""
+#~ "This installer requires root privileges.\n"
+#~ "Please enter the correct password for it\n"
+#~ "below and press [Return] or click OK."
+#~ msgstr ""
+#~ "Для установки нужны права суперпользователя.\n"
+#~ "Введите пароль и нажмите Enter или кнопку «ОК»."
 
-#: xsu.c:455
-msgid "Type the password here"
-msgstr "Введите пароль"
+#~ msgid "Type the password here"
+#~ msgstr "Введите пароль"
 
-#: xsu.c:468
-msgid "Type the username here"
-msgstr "Введите имя пользователя"
+#~ msgid "Type the username here"
+#~ msgstr "Введите имя пользователя"
 
-#: xsu.c:480
-msgid "Type the command here"
-msgstr "Введите команду"
+#~ msgid "Type the command here"
+#~ msgstr "Введите команду"
 
-#: xsu.c:503
-msgid "Press this button when finished"
-msgstr "Нажмите эту кнопку, когда закончите"
+#~ msgid "Press this button when finished"
+#~ msgstr "Нажмите эту кнопку, когда закончите"
 
-#: xsu.c:509
-msgid "Press this button to Cancel"
-msgstr "Нажмите для отмены"
+#~ msgid "Press this button to Cancel"
+#~ msgstr "Нажмите для отмены"
 
-#: xsu.c:511
-msgid "Password :"
-msgstr "Пароль:"
+#~ msgid "Password :"
+#~ msgstr "Пароль:"
 
 # image/setup.data/setup.glade:193
 #~ msgid "Link path:"

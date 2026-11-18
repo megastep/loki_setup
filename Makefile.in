@@ -24,7 +24,6 @@ BRAND = @BRAND@
 UPDATES = /loki/updates/loki_uninstall
 CONVERT_IMAGE = /loki/patch-tools/convert-image
 SETUP_GTK = @SETUP_GTK@
-GTK_TOOLS = $(if $(SETUP_GTK),xsu $(SETUP_GTK))
 DYN_PLUGINS = @DYN_PLUGINS@
 
 # The supported locales so far
@@ -40,7 +39,7 @@ CPPFLAGS = @CPPFLAGS@ @DEPFLAGS@
 OPTIONS = -DSTUB_UI -DSETUP_VERSION_MAJOR=@SETUP_VERSION_MAJOR@ \
 		  -DSETUP_VERSION_MINOR=@SETUP_VERSION_MINOR@ \
 		  -DSETUP_VERSION_RELEASE=@SETUP_VERSION_RELEASE@ \
-		  -DSETUP_VERSION=\"$(SETUP_VERSION)\" -DSU_PATH=\"@SU_PATH@\" \
+		  -DSETUP_VERSION=\"$(SETUP_VERSION)\" \
 		  -DMOUNT_PATH=\"@MOUNT_PATH@\" -DUMOUNT_PATH=\"@UMOUNT_PATH@\" \
 		  -DDATADIR=\"$(DATADIR)\" -DLOCALEDIR=\"$(LOCALEDIR)\" -DLOKI_PREFIX=\"$(BRAND)\"
 
@@ -58,9 +57,7 @@ CHECK_CARBON_OBJS	= $(COMMON_OBJS) $(CORE_OBJS) check_carbon.o
 CONSOLE_OBJS 		= $(OBJS) console_ui.o @CONSOLE_OBJS@
 GUI_OBJS 			= $(OBJS) gtk_ui.o
 CARBON_OBJS          = $(OBJS) carbon_ui.o
-XSU_OBJS			= xsu.o pseudo.o
-
-SRCS = $(OBJS:.o=.c) $(CONSOLE_OBJS:.o=.c) $(GUI_OBJS:.o=.c) $(CARBON_OBJS:.o=.c) $(XSU_OBJS:.o=.c) testcd.c
+SRCS = $(OBJS:.o=.c) $(CONSOLE_OBJS:.o=.c) $(GUI_OBJS:.o=.c) $(CARBON_OBJS:.o=.c) testcd.c
 
 COMMON_LIBS = plugins/libplugins.a @COMMON_LIBS@ \
 	      $(SETUPDB)/$(arch)/libsetupdb.a
@@ -73,11 +70,12 @@ endif
 CARBON_LIBS = $(COMMON_LIBS) @LIBS@ @CARBON_LIBS@
 CONSOLE_LIBS = $(LIBS) @CONSOLE_LIBS@ -lm
 
-all: setup uninstall $(GTK_TOOLS)
+all: setup uninstall $(SETUP_GTK)
 
 smoke: export TEST_MAKE = $(MAKE)
 smoke: all testencoding
 	./testencoding
+	sh tests/launcher.sh
 	$(MAKE) -C "$(SETUPDB)" setupdb
 	sh tests/smoke.sh "$(SETUPDB)/setupdb"
 
@@ -136,9 +134,6 @@ setup.carbon: $(CARBON_OBJS) $(COMMON_LIBS)
 	$(LD) $(LDFLAGS) -o $@ $(CARBON_OBJS) $(CARBON_LIBS) 
 	cp setup.carbon setup.APP/Contents/MacOS
 
-xsu: $(XSU_OBJS)
-	$(LD) $(LDFLAGS) -o $@ $^ @LIBS@ @GUI_LIBS@ @LIBUTIL@ @EXTRA_LIBS@
-
 plugins/libplugins.a: FORCE
 	$(MAKE) -C plugins all
 
@@ -153,7 +148,7 @@ FORCE:
 
 # Keep one staging recipe for both the in-tree and external media.
 MEDIA_ROOT = image
-MEDIA_TOOLS = setup uninstall $(GTK_TOOLS)
+MEDIA_TOOLS = setup uninstall $(SETUP_GTK)
 MEDIA_PLUGINS = $(if $(filter true,$(DYN_PLUGINS)),$(patsubst %.c,plugins/%.so,@PLUGINS@))
 STRIP_MEDIA = yes
 

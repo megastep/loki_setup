@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Loki Setup 2.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-18 05:06-0800\n"
+"POT-Creation-Date: 2026-11-18 05:22-0800\n"
 "PO-Revision-Date: 2000-05-10 01:11+1\n"
 "Last-Translator: MARTIJN DE MEULDER <MARTIJN@NL.LINUX.ORG>\n"
 "Language-Team: \n"
@@ -864,7 +864,7 @@ msgstr ""
 msgid "Please respond to the license dialog"
 msgstr "Antwoord alstublieft op de licentie-dialoog"
 
-#: gtk_ui.c:1001 xsu.c:498
+#: gtk_ui.c:1001
 msgid "OK"
 msgstr "OK"
 
@@ -942,7 +942,6 @@ msgstr "Hier kunt u zelf de installatiepaden en -opties kiezen "
 
 #: image/setup.data/setup.glade:207 image/setup.data/setup.glade:815
 #: image/setup.data/setup.glade:1120 image/setup.data/setup.glade:1601
-#: xsu.c:505
 msgid "Cancel"
 msgstr "Breek af"
 
@@ -1621,51 +1620,41 @@ msgstr "Tar: '%s' is een onbekend bestandstype: %c"
 msgid "Unexpected data in installation file!"
 msgstr "Onverwachte gegevens in het installatiebestand."
 
-#: xsu.c:381
-msgid "Login Prompt"
-msgstr "Aanmelden"
+#~ msgid "Login Prompt"
+#~ msgstr "Aanmelden"
 
-#: xsu.c:393
-msgid "Username : "
-msgstr "Gebruikersnaam: "
+#~ msgid "Username : "
+#~ msgstr "Gebruikersnaam: "
 
-#: xsu.c:405
-msgid "Command :"
-msgstr "Opdracht:"
+#~ msgid "Command :"
+#~ msgstr "Opdracht:"
 
-#: xsu.c:420
-msgid ""
-"This installer requires root privileges.\n"
-"Please enter the correct password for it\n"
-"below and press [Return] or click OK."
-msgstr ""
-"Dit installatieprogramma vereist rootrechten.\n"
-"Voer hieronder het wachtwoord in en druk op Enter\n"
-"of klik op OK."
+#~ msgid ""
+#~ "This installer requires root privileges.\n"
+#~ "Please enter the correct password for it\n"
+#~ "below and press [Return] or click OK."
+#~ msgstr ""
+#~ "Dit installatieprogramma vereist rootrechten.\n"
+#~ "Voer hieronder het wachtwoord in en druk op Enter\n"
+#~ "of klik op OK."
 
-#: xsu.c:455
-msgid "Type the password here"
-msgstr "Voer hier het wachtwoord in"
+#~ msgid "Type the password here"
+#~ msgstr "Voer hier het wachtwoord in"
 
-#: xsu.c:468
-msgid "Type the username here"
-msgstr "Voer hier de gebruikersnaam in"
+#~ msgid "Type the username here"
+#~ msgstr "Voer hier de gebruikersnaam in"
 
-#: xsu.c:480
-msgid "Type the command here"
-msgstr "Voer hier de opdracht in"
+#~ msgid "Type the command here"
+#~ msgstr "Voer hier de opdracht in"
 
-#: xsu.c:503
-msgid "Press this button when finished"
-msgstr "Klik op deze knop wanneer u klaar bent"
+#~ msgid "Press this button when finished"
+#~ msgstr "Klik op deze knop wanneer u klaar bent"
 
-#: xsu.c:509
-msgid "Press this button to Cancel"
-msgstr "Klik hier om te annuleren"
+#~ msgid "Press this button to Cancel"
+#~ msgstr "Klik hier om te annuleren"
 
-#: xsu.c:511
-msgid "Password :"
-msgstr "Wachtwoord:"
+#~ msgid "Password :"
+#~ msgstr "Wachtwoord:"
 
 #, fuzzy
 #~ msgid "Link path:"

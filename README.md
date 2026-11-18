@@ -65,6 +65,21 @@ Before distributing installation media, check the staged binaries with
 `ldd` on Linux or `otool -L` on macOS. Run `make dist` to create a source
 archive in the parent directory with the generated configure script.
 
+## Administrator access
+
+Install to a user-writable directory when the package permits it. To request
+administrator access, set `GET_ROOT` in the media's `setup.data/config.sh`.
+`0` uses the current privileges, `1` requests elevation and continues without
+it if authorization fails, and `2` requires elevation. Set `superuser="yes"`
+in the package XML as well if the requirement applies when launching the
+installer binary directly.
+
+Run `./setup.sh` from a terminal to authenticate with `sudo`, or with `doas`
+on OpenBSD. Automatic elevation uses the terminal UI. You can also run
+`sudo ./setup.sh -n` or `doas ./setup.sh -n` directly for trusted media.
+
+## Installation media
+
 The image subdirectory contains a set of files that you can copy to your
 CD image, and modify for the game you are distributing.
 

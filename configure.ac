@@ -34,27 +34,14 @@ AC_CHECK_HEADERS(sys/ucred.h)
 AC_CHECK_HEADERS(mntent.h)
 AC_CHECK_HEADERS(fstab.h)
 AC_CHECK_HEADERS(dir.h)
-AC_CHECK_HEADERS(util.h)
-AC_CHECK_HEADERS(libutil.h)
 AC_CHECK_HEADERS(libgen.h)
-AC_CHECK_HEADERS(pty.h)
-AC_CHECK_HEADERS(sys/ptms.h)
-AC_CHECK_HEADERS(sys/stropts.h)
 AC_CHECK_HEADERS(getopt.h)
 AC_CHECK_HEADERS(osreldate.h)
-AC_CHECK_FILES(/dev/ptmx)
-AC_CHECK_FILES(/dev/pts)
-AC_CHECK_FILES(/dev/ptc)
 
 AC_CHECK_FUNCS(strcasecmp)
-AC_CHECK_FUNCS(ptsname_r)
-AC_CHECK_FUNCS(vhangup)
-AC_CHECK_FUNCS(_getpty)
-AC_CHECK_FUNCS(ttyname_r)
 AC_CHECK_FUNCS(nl_langinfo)
 AC_CHECK_FUNCS(strlcpy)
 AC_CHECK_FUNCS(waitpid)
-AC_PATH_PROG(SU_PATH, su, /bin/su, $PATH:/usr/sbin:/sbin)
 AC_PATH_PROG(MOUNT_PATH, mount, /sbin/mount, $PATH:/usr/sbin:/sbin)
 AC_PATH_PROG(UMOUNT_PATH, umount, /sbin/umount, $PATH:/usr/sbin:/sbin)
 AC_PATH_PROG(BRANDELF, brandelf, true)
@@ -79,10 +66,6 @@ case "$host" in
 	CFLAGS="$CFLAGS -Dsco"
 	RDYNAMIC="-Wl,-Bexport"
 	EXTRA_LIBS="-lsocket -lnsl -lresolv -lcdfs"
-	AC_DEFINE(USE_BSD_PTY, 1, Use BSD-style ptys)
-	AC_DEFINE(NO_XOPEN_SOURCE, 1, XOPEN source breaks)
-	AC_DEFINE(NO_POSIX_C_SOURCE, 1, POSIX C source breaks)
-	AC_DEFINE(NO_POSIX_SOURCE, 1, POSIX source breaks)
 	ARCH=x86 ;;
     *i?86*sco*)
 	STATIC=""
@@ -90,10 +73,6 @@ case "$host" in
 	RDYNAMIC="-Wl,-Bexport"
 	LIBDL=""
 	EXTRA_LIBS="-L/udk/usr/lib -lsocket -lnsl -lresolv -lgen"
-	AC_DEFINE(USE_BSD_PTY, 1, Use BSD-style ptys)
-	AC_DEFINE(NO_XOPEN_SOURCE, 1, XOPEN source breaks)
-	AC_DEFINE(NO_POSIX_C_SOURCE, 1, POSIX C source breaks)
-	AC_DEFINE(NO_POSIX_SOURCE, 1, POSIX source breaks)
 	ARCH=x86 ;;
     *aix*)
 	STATIC=""
@@ -101,9 +80,6 @@ case "$host" in
 	BDYNAMIC=""
 	RDYNAMIC="-Wl,-bexpall"
 	LDFLAGS="$LDFLAGS -lpthread"
-	AC_DEFINE(NO_XOPEN_SOURCE, 1, XOPEN source breaks)
-	AC_DEFINE(NO_POSIX_C_SOURCE, 1, POSIX C source breaks)
-	AC_DEFINE(NO_POSIX_SOURCE, 1, POSIX source breaks)
 	ARCH=`uname -p`
         if test "$ARCH" = powerpc; then
                 ARCH=ppc
@@ -111,11 +87,9 @@ case "$host" in
 	;;
     *i?86*freebsd*)
 	LIBDL=""
-	AC_DEFINE(USE_BSD_PTY, 1, Use BSD-style ptys)
         ARCH=x86 ;;
     amd64*freebsd* | x86_64*freebsd*)
 	LIBDL=""
-	AC_DEFINE(USE_BSD_PTY, 1, Use BSD-style ptys)
         ARCH=x86_64 ;;
     *alpha*)
         CFLAGS="$CFLAGS -mcpu=ev4 -Wa,-mall"
@@ -126,9 +100,6 @@ case "$host" in
 	EXTRA_LIBS="-L/usr/freeware/lib$LIBSUFFIX"
 	RDYNAMIC=""
 	STATIC=""
-	AC_DEFINE(NO_POSIX_SOURCE, 1, POSIX source breaks)
-	AC_DEFINE(NO_POSIX_C_SOURCE, 1, POSIX C source breaks)
-	AC_DEFINE(NO_XOPEN_SOURCE, 1, XOPEN source breaks)
 	ARCH=mips ;;
     hppa*hpux*)
         CFLAGS="$CFLAGS -D_XOPEN_SOURCE_EXTENDED -Dhpux -Dhppa"
@@ -215,8 +186,6 @@ AC_CHECK_FUNCS(getopt)
 AC_CHECK_LIB(gnugetopt, getopt_long, LIBS="$LIBS -lgnugetopt")
 AC_CHECK_FUNCS(getopt_long)
 
-AC_CHECK_LIB(util, forkpty, LIBUTIL="-lutil"; LIBS="$LIBS -lutil")
-AC_CHECK_FUNCS(openpty)
 AC_CHECK_LIB([selinux], [is_selinux_enabled], [AC_CHECK_HEADERS([selinux/selinux.h], [LIBS="$LIBS -lselinux"])])
 
 SETUPDB_NAME=loki_setupdb
@@ -568,8 +537,6 @@ AC_SUBST(ARCH)
 AC_SUBST(LIBC)
 AC_SUBST(OS)
 AC_SUBST(STATIC)
-AC_SUBST(LIBUTIL)
-AC_SUBST(SU_PATH)
 AC_SUBST(MOUNT_PATH)
 AC_SUBST(UMOUNT_PATH)
 AC_SUBST(SETUP_VERSION_MAJOR)

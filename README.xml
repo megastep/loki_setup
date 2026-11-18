@@ -168,6 +168,9 @@ There are several optional attributes of the install element:
  superuser  If set to 'yes', then the installer will refuse to start if not run as
             the super-user (root).
 
+            To have setup.sh request administrator access from a terminal, also set
+            GET_ROOT=2 in setup.data/config.sh.
+
             (CARBON ONLY) This option causes the installer to prompt the user for
             appropriate credentials.  This is a standard thing for Mac and should
             typically be done instead of "running as root".

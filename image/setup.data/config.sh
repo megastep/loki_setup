@@ -4,13 +4,11 @@
 
 # override some defaults
 
-# try to get root prior to running setup?
-# 0: no
-# 1: prompt, but run anyway if fails
-# 2: require, abort if root fails
+# Request administrator access from a terminal using sudo or doas.
+# 0 runs with the current privileges.
+# 1 continues with the current privileges if elevation fails.
+# 2 stops if administrator access is unavailable.
 #GET_ROOT=1
 
 #FATAL_ERROR="Please contact your software vendor"
-
-#XSU_ICON="-i icon.xpm"
 

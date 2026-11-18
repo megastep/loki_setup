@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Loki Setup 2.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-18 05:06-0800\n"
+"POT-Creation-Date: 2026-11-18 05:22-0800\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -170,20 +170,17 @@ msgstr "----====== %s Installationsprogramm ======----\n"
 #: console_ui.c:319
 #, c-format
 msgid "You are running a %s machine with %s (%s)\n"
-msgstr ""
-"Sie verwenden ein %s-System mit %s (%s)\n"
+msgstr "Sie verwenden ein %s-System mit %s (%s)\n"
 
 #: console_ui.c:321
 #, c-format
 msgid "You are running a %s machine (%s)\n"
-msgstr ""
-"Sie verwenden ein %s-System (%s)\n"
+msgstr "Sie verwenden ein %s-System (%s)\n"
 
 #: console_ui.c:323
 #, c-format
 msgid "Press Ctrl+C at any time to cancel installation.\n"
-msgstr ""
-"Drücken Sie jederzeit Strg+C, um die Installation abzubrechen.\n"
+msgstr "Drücken Sie jederzeit Strg+C, um die Installation abzubrechen.\n"
 
 #: console_ui.c:361 dialog_ui.c:130
 #, c-format
@@ -354,7 +351,9 @@ msgstr "Fehler beim Verarbeitungsbefehl: %s"
 #: copy.c:403
 #, c-format
 msgid "Failed to change SELinux context for file '%s' - not supported"
-msgstr "Der SELinux-Kontext der Datei „%s“ konnte nicht geändert werden. Diese Funktion wird nicht unterstützt."
+msgstr ""
+"Der SELinux-Kontext der Datei „%s“ konnte nicht geändert werden. Diese "
+"Funktion wird nicht unterstützt."
 
 #: copy.c:405
 #, c-format
@@ -496,8 +495,7 @@ msgstr ""
 #: detect.c:892
 #, c-format
 msgid "Detected locale is %s\n"
-msgstr ""
-"Ermittelte Spracheinstellung: %s\n"
+msgstr "Ermittelte Spracheinstellung: %s\n"
 
 #: detect.c:1069
 #, c-format
@@ -757,8 +755,7 @@ msgstr "Schreibfehler bei %s"
 #: file.c:492
 #, c-format
 msgid "Trying to create a symbolic link on the same file: %s\n"
-msgstr ""
-"Versuch, einen symbolischen Link auf dieselbe Datei zu erstellen: %s\n"
+msgstr "Versuch, einen symbolischen Link auf dieselbe Datei zu erstellen: %s\n"
 
 #: file.c:497
 #, c-format
@@ -867,7 +864,7 @@ msgstr ""
 msgid "Please respond to the license dialog"
 msgstr "Bitte antworten Sie auf den Lizenz-Dialog"
 
-#: gtk_ui.c:1001 xsu.c:498
+#: gtk_ui.c:1001
 msgid "OK"
 msgstr "OK"
 
@@ -915,7 +912,8 @@ msgstr "Kann %s nicht öffnen, Abbruch!\n"
 
 #: gtk_ui.c:2197
 msgid "The update/reinstall was successfully completed!"
-msgstr "Die Aktualisierung oder Neuinstallation wurde erfolgreich abgeschlossen!"
+msgstr ""
+"Die Aktualisierung oder Neuinstallation wurde erfolgreich abgeschlossen!"
 
 #: gtk_ui.c:2199 image/setup.data/setup.glade:1302
 #: image/setup.data/setup.gtk2.glade:1826
@@ -945,7 +943,6 @@ msgstr ""
 
 #: image/setup.data/setup.glade:207 image/setup.data/setup.glade:815
 #: image/setup.data/setup.glade:1120 image/setup.data/setup.glade:1601
-#: xsu.c:505
 msgid "Cancel"
 msgstr "Abbruch"
 
@@ -1157,7 +1154,9 @@ msgstr "Klicken Sie auf „Beenden“, um temporäre Dateien zu entfernen."
 msgid ""
 "%s is owned by %s. You may need to run this installer as user %s or choose "
 "another directory."
-msgstr "%s gehört %s. Führen Sie das Installationsprogramm bei Bedarf als Benutzer %s aus oder wählen Sie ein anderes Verzeichnis."
+msgstr ""
+"%s gehört %s. Führen Sie das Installationsprogramm bei Bedarf als Benutzer "
+"%s aus oder wählen Sie ein anderes Verzeichnis."
 
 #: install.c:478
 msgid "No destination directory selected"
@@ -1263,7 +1262,9 @@ msgstr ""
 msgid ""
 "The installer is not suitable for installing this product (missing feature "
 "'%s' version '%u')"
-msgstr "Dieses Installationsprogramm kann das Produkt nicht installieren. Die Funktion „%s“ in Version „%u“ fehlt."
+msgstr ""
+"Dieses Installationsprogramm kann das Produkt nicht installieren. Die "
+"Funktion „%s“ in Version „%u“ fehlt."
 
 #: install.c:1586
 msgid "XML: 'lang' tag does not have a mandatory 'lang' attribute"
@@ -1527,7 +1528,8 @@ msgstr "Option konnte nicht aktiviert werden: %s"
 
 #: main.c:465
 msgid "No installation path was specified. Aborting."
-msgstr "Es wurde kein Installationspfad angegeben. Die Installation wird abgebrochen."
+msgstr ""
+"Es wurde kein Installationspfad angegeben. Die Installation wird abgebrochen."
 
 #: network.c:156
 msgid "Out of memory, no network check"
@@ -1614,51 +1616,41 @@ msgstr "Tar: '%s' ist unbekannter Dateityp: %c"
 msgid "Unexpected data in installation file!"
 msgstr "Unerwartete Daten in Installationsdatei!"
 
-#: xsu.c:381
-msgid "Login Prompt"
-msgstr "Login Eingabeaufforderung"
+#~ msgid "Login Prompt"
+#~ msgstr "Login Eingabeaufforderung"
 
-#: xsu.c:393
-msgid "Username : "
-msgstr "Username: "
+#~ msgid "Username : "
+#~ msgstr "Username: "
 
-#: xsu.c:405
-msgid "Command :"
-msgstr "Befehl:"
+#~ msgid "Command :"
+#~ msgstr "Befehl:"
 
-#: xsu.c:420
-msgid ""
-"This installer requires root privileges.\n"
-"Please enter the correct password for it\n"
-"below and press [Return] or click OK."
-msgstr ""
-"Dieses Installations-Instrument erfordert Root-Privilegien.\n"
-"Bitte geben Sie unten das korrekte Passwort hierfür ein\n"
-"und drücken Sie [Return] oder klicken Sie auf OK."
+#~ msgid ""
+#~ "This installer requires root privileges.\n"
+#~ "Please enter the correct password for it\n"
+#~ "below and press [Return] or click OK."
+#~ msgstr ""
+#~ "Dieses Installations-Instrument erfordert Root-Privilegien.\n"
+#~ "Bitte geben Sie unten das korrekte Passwort hierfür ein\n"
+#~ "und drücken Sie [Return] oder klicken Sie auf OK."
 
-#: xsu.c:455
-msgid "Type the password here"
-msgstr "Passwort hier eingeben"
+#~ msgid "Type the password here"
+#~ msgstr "Passwort hier eingeben"
 
-#: xsu.c:468
-msgid "Type the username here"
-msgstr "Username hier eingeben"
+#~ msgid "Type the username here"
+#~ msgstr "Username hier eingeben"
 
-#: xsu.c:480
-msgid "Type the command here"
-msgstr "Befehl hier eingeben"
+#~ msgid "Type the command here"
+#~ msgstr "Befehl hier eingeben"
 
-#: xsu.c:503
-msgid "Press this button when finished"
-msgstr "Hier klicken, wenn beendet"
+#~ msgid "Press this button when finished"
+#~ msgstr "Hier klicken, wenn beendet"
 
-#: xsu.c:509
-msgid "Press this button to Cancel"
-msgstr "Hier klicken für Abbruch"
+#~ msgid "Press this button to Cancel"
+#~ msgstr "Hier klicken für Abbruch"
 
-#: xsu.c:511
-msgid "Password :"
-msgstr "Passwort:"
+#~ msgid "Password :"
+#~ msgstr "Passwort:"
 
 #~ msgid "Link path:"
 #~ msgstr "Link Pfad:"
