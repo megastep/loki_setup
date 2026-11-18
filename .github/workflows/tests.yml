@@ -34,11 +34,13 @@ jobs:
         working-directory: loki_setup
 
     steps:
-      - uses: actions/checkout@v7
+      - &checkout_installer
+        uses: actions/checkout@v7
         with:
           path: loki_setup
           persist-credentials: false
-      - name: Read the SetupDB revision
+      - &read_setupdb_revision
+        name: Read the SetupDB revision
         id: setupdb_revision
         working-directory: loki_setup
         shell: bash
@@ -49,7 +51,8 @@ jobs:
             exit 1
           fi
           echo "sha=$revision" >> "$GITHUB_OUTPUT"
-      - uses: actions/checkout@v7
+      - &checkout_setupdb
+        uses: actions/checkout@v7
         with:
           repository: megastep/loki_setupdb
           ref: ${{ steps.setupdb_revision.outputs.sha }}
@@ -107,3 +110,52 @@ jobs:
           else
             script -qec 'make smoke' /dev/null </dev/null
           fi
+
+  bsd:
+    name: ${{ matrix.os }} / VMActions
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [FreeBSD, OpenBSD]
+    steps:
+      - *checkout_installer
+      - *read_setupdb_revision
+      - *checkout_setupdb
+      - name: Build and test on FreeBSD
+        if: matrix.os == 'FreeBSD'
+        uses: vmactions/freebsd-vm@811efaaac0668df8bfb8308c3ec997b5ab50037b # v1.6.0
+        with:
+          release: '15.1'
+          sync: rsync
+          copyback: false
+          prepare: pkg install -y autoconf automake gmake libxml2 pkgconf
+          run: &bsd_build |
+            set -eu
+            if [ "$(uname -s)" = OpenBSD ]; then
+              export AUTOCONF_VERSION=2.73 AUTOMAKE_VERSION=1.19
+            fi
+            cd loki_setupdb
+            ./autogen.sh
+            ./configure
+            gmake -j2
+
+            cd ../loki_setup
+            ./autogen.sh
+            ./configure --disable-gtk --disable-dialog
+            gmake -j2 all testcd testxml
+            case "$(uname -s)" in
+              FreeBSD) script -q -e /dev/null gmake smoke </dev/null ;;
+              OpenBSD) script -c 'gmake smoke' /dev/null </dev/null ;;
+              *) exit 1 ;;
+            esac
+      - name: Build and test on OpenBSD
+        if: matrix.os == 'OpenBSD'
+        uses: vmactions/openbsd-vm@f1ca8bc8ecc5b6ef7218e5b914836e067e1546d3 # v1.4.9
+        with:
+          release: '8.0'
+          sync: rsync
+          copyback: false
+          prepare: pkg_add autoconf%2.73 automake%1.19 gmake libxml libiconv pkgconfig
+          run: *bsd_build

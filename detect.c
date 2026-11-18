@@ -62,7 +62,7 @@
 #include "bools.h"
 
 #ifndef MNTTYPE_CDROM
-#if defined(__FreeBSD__)
+#if defined(__FreeBSD__) || defined(__OpenBSD__)
 #define MNTTYPE_CDROM    "cd9660"
 #elif defined(hpux)
 #define MNTTYPE_CDROM    "cdfs"
@@ -242,11 +242,11 @@ int mounted_filesystems(void)
 int is_fs_mounted(const char *dev)
 {
     int found = 0;
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(darwin)
     int count, i;
     struct statfs *mntbuf;
 
-    count = getmntinfo(&mntbuf, 0);
+    count = getmntinfo(&mntbuf, MNT_NOWAIT);
     if ( count > 0 ) {
         for ( i = 0; i < count; ++i ) {
             if ( !strcmp(mntbuf[i].f_mntfromname, dev) ) {
@@ -302,20 +302,6 @@ int is_fs_mounted(const char *dev)
 		}
 		fclose(mtab);
 	}
-#elif defined(darwin)
-    // Taken from FreeBSD section (since Darwin is based on FreeBSD)
-    int count, i;
-    struct statfs *mntbuf;
-
-    count = getmntinfo(&mntbuf, 0);
-    if ( count > 0 ) {
-        for ( i = 0; i < count; ++i ) {
-            if ( !strcmp(mntbuf[i].f_mntfromname, dev) ) {
-                found = 1;
-                break;
-            }
-        }
-    }
 #else
     struct mntent *mnt;
     FILE *mtab = setmntent(MOUNTS_FILE, "r" );
@@ -463,8 +449,8 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
 {
 	int num_cdroms = 0;
 
-#ifdef __FreeBSD__
-	int mounted;
+#if defined(__FreeBSD__) || defined(__OpenBSD__)
+    struct statfs *mounts;
     struct fstab *fstab;
 
     /* Try to mount unmounted CDROM filesystems */
@@ -480,19 +466,10 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
     }
     endfsent();
 
-    mounted = getfsstat(NULL, 0, MNT_WAIT);
-    if ( mounted > 0 ) {
-        int i;
-		struct statfs *mnts = (struct statfs *)malloc(sizeof(struct statfs) * mounted);
-
-		mounted = getfsstat(mnts, mounted * sizeof(struct statfs), MNT_WAIT);
-		for ( i = 0; i < mounted && num_cdroms < SETUP_MAX_DRIVES; ++ i ) {
-			if ( ! strcmp(mnts[i].f_fstypename, MNTTYPE_CDROM) ) {
-				path[num_cdroms ++] = strdup(mnts[i].f_mntonname);
-			}
-		}
-		
-		free(mnts);
+    int mounted = getmntinfo(&mounts, MNT_WAIT);
+    for (int i = 0; i < mounted && num_cdroms < SETUP_MAX_DRIVES; ++i) {
+        if (!strcmp(mounts[i].f_fstypename, MNTTYPE_CDROM))
+            path[num_cdroms++] = strdup(mounts[i].f_mntonname);
     }
 #elif defined(darwin)
 {

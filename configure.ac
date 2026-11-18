@@ -201,6 +201,14 @@ case "$host" in
         ARCH=$host_cpu ;;
 esac
 
+case "$host_os" in
+    openbsd*)
+        LIBDL=""
+        CPPFLAGS="$CPPFLAGS -I/usr/local/include"
+        LDFLAGS="$LDFLAGS -L/usr/local/lib"
+        ;;
+esac
+
 CFLAGS="$CFLAGS $REENTRANT"
 
 AC_CHECK_FUNCS(getopt)
@@ -383,7 +391,8 @@ read -r setupdb_xml_major < "$SETUPDB/$ARCH/xml-major"
 AS_IF([test "$setupdb_xml_major" != "$SETUP_XML_MAJOR"],
     [AC_MSG_ERROR([SetupDB uses libxml $setupdb_xml_major but the installer uses libxml $SETUP_XML_MAJOR. Rebuild both with the same libxml major version.])])
 
-AC_SEARCH_LIBS([iconv], [iconv], [], [AC_MSG_ERROR([install iconv development files])])
+AC_SEARCH_LIBS([iconv], [iconv], [],
+    [AC_SEARCH_LIBS([libiconv], [iconv], [], [AC_MSG_ERROR([install iconv development files])])])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <iconv.h>
 extern size_t iconv(iconv_t, const char **, size_t *, char **, size_t *);]], [[]])],
     [AC_DEFINE([ICONV_INPUT_CONST], [1], [Define if iconv takes a const input pointer.])])
