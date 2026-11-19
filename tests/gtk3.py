@@ -147,7 +147,29 @@ exit 0
         return proc
 
     try:
+        css = media / "setup.data/setup.gtk3.css"
+        theme = "window.loki-setup > box { min-width: 790px; }\n"
+
+        def license_width():
+            license_window = widget("License Agreement", "License Agreement", "frame")
+            return license_window.queryComponent().getExtents(pyatspi.DESKTOP_COORDS).width
+
+        baseline = launch("./setup.sh", "-i", str(installed), cwd=media)
+        system_width = license_width()
+        click("License Agreement", "Cancel")
+        assert baseline.wait(timeout=10) == 0
+
+        css.write_text(theme + "window { unknown-property: 1; }\n")
+        invalid_theme = launch("./setup.sh", "-i", str(installed), cwd=media)
+        assert license_width() == system_width
+        click("License Agreement", "Cancel")
+        assert invalid_theme.wait(timeout=10) == 0
+        logs[-1].seek(0)
+        assert b"Ignoring stylesheet setup.data/setup.gtk3.css" in logs[-1].read()
+
+        css.write_text(theme)
         setup = launch("./setup.sh", "-i", str(installed), cwd=media)
+        assert license_width() >= 790
         click("License Agreement", "Agree")
         click("GTK3 Smoke Setup", "View Readme")
         click("Readme", "Close")

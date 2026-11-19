@@ -302,7 +302,7 @@ distclean: clean
 	rm -f Makefile dialog/Makefile plugins/Makefile .depend dialog/.depend plugins/.depend config.h config.cache config.status config.log
 	rm -f setup setup.gtk setup.gtk2 setup.gtk3 setup.carbon uninstall loki_uninstall loki_uninstall.gtk2 loki_uninstall.gtk3 testxml testcd testencoding testrepair xsu check check.gtk2 check.gtk3 check.carbon carbon_uninstall
 
-DISTFILES = $(wildcard *.c *.h *.glade *.ui README*) configure.ac configure config.h.in \
+DISTFILES = $(wildcard *.c *.h *.glade *.ui README*) THEMING.md configure.ac configure config.h.in \
             config.guess config.sub install-sh autogen.sh Makefile Makefile.in \
             BUGS CHANGES COPYING Patches icon.xpm loki_uninstall.spec setupdb.rev .github .gitignore \
             carbon dialog extras image makeself plugins po setup.APP tests unrar

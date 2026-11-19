@@ -101,6 +101,7 @@ setup.sh	(A shell script to run the correct setup binary)
 setup.data/
    setup.xml            (XML file defining the install options)
    setup.gtk3.ui        (GtkBuilder layout for the GTK 3 installer)
+   setup.gtk3.css       (Optional GTK 3 stylesheet)
    setup.gtk2.glade     (libglade layout for the GTK 2 installer)
    setup.glade          (libglade layout for legacy GTK 1 media)
    splash.xpm           (Optional splash image for the GTk UI)
@@ -132,6 +133,8 @@ matches each installer binary. To customize GTK 3, edit
 binds actions in C and finds notebook pages by ID. Set `SETUP_GTK3_UI_FILE` to use a different
 GtkBuilder file. Media that sets `SETUP_GLADE_FILE` can supply both overrides
 to offer its customized layouts in both toolkits.
+
+See [THEMING.md](THEMING.md) for GTK 3 package styling and a sample stylesheet.
 
 The binaries for your product are expected to be in bin/<OS>/<arch>/<libc>/
 on the CD.  The appropriate binary for the current architecture will

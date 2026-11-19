@@ -35,6 +35,10 @@ for source do
             if [ ! -e "$media/setup.data/$layout" ]; then
                 cp "image/setup.data/$layout" "$media/setup.data/$layout"
             fi
+            if [ "$source" = setup.gtk3 ] && [ -f image/setup.data/setup.gtk3.css ] &&
+                [ ! -e "$media/setup.data/setup.gtk3.css" ]; then
+                cp image/setup.data/setup.gtk3.css "$media/setup.data/"
+            fi
             ;;
         *) dest=$libc_bin/$source ;;
     esac

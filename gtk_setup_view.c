@@ -180,12 +180,31 @@ gboolean gtk_setup_probe(int *argc, char ***argv)
     return layout != NULL;
 }
 
+static void load_package_css(GtkWidget *window)
+{
+    const char *path = SETUP_BASE "setup.gtk3.css";
+    if (!g_file_test(path, G_FILE_TEST_EXISTS))
+        return;
+
+    GtkCssProvider *provider = gtk_css_provider_new();
+    GError *error = NULL;
+    if (gtk_css_provider_load_from_path(provider, path, &error)) {
+        gtk_style_context_add_provider_for_screen(gtk_widget_get_screen(window),
+                                                  GTK_STYLE_PROVIDER(provider),
+                                                  GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+    } else {
+        fprintf(stderr, _("Ignoring stylesheet %s: %s\n"), path, error->message);
+        g_error_free(error);
+    }
+    g_object_unref(provider);
+}
+
 gboolean gtk_setup_init_view(int argc, char **argv)
 {
     GtkEntry *install = gtk_setup_path_entry(gtk_setup_widget("install_path"));
     GtkEntry *binary = gtk_setup_path_entry(gtk_setup_widget("binary_path"));
     GtkEntry *man = gtk_setup_path_entry(gtk_setup_widget("manpage_combo"));
-    GtkWindow *parent = GTK_WINDOW(gtk_setup_widget("setup_window"));
+    GtkWidget *window = gtk_setup_widget("setup_window");
 
     g_signal_connect(install, "changed", G_CALLBACK(setup_install_path_changed), NULL);
     g_signal_connect(install, "focus-out-event", G_CALLBACK(setup_entry_installpath_slot), NULL);
@@ -193,8 +212,13 @@ gboolean gtk_setup_init_view(int argc, char **argv)
     g_signal_connect(binary, "focus-out-event", G_CALLBACK(setup_entry_binarypath_slot), NULL);
     g_signal_connect(man, "focus-out-event", G_CALLBACK(on_manpage_entry_focus_out_event), NULL);
 
-    for (gsize i = 0; i < G_N_ELEMENTS(document_windows); ++i)
-        gtk_window_set_transient_for(GTK_WINDOW(gtk_setup_widget(document_windows[i])), parent);
+    gtk_style_context_add_class(gtk_widget_get_style_context(window), "loki-setup");
+    for (gsize i = 0; i < G_N_ELEMENTS(document_windows); ++i) {
+        GtkWidget *dialog = gtk_setup_widget(document_windows[i]);
+        gtk_style_context_add_class(gtk_widget_get_style_context(dialog), "loki-setup");
+        gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(window));
+    }
+    load_package_css(window);
     return TRUE;
 }
 
