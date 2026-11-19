@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <unistd.h>
 #include <dirent.h>
 #include <time.h>
@@ -18,6 +19,7 @@
 #include "config.h"
 
 #include "file.h"
+#include "safe_path.h"
 #include "install_log.h"
 #include "install_ui.h"
 
@@ -80,8 +82,9 @@ void file_create_hierarchy(install_info *info, const char *path)
   /* Create higher-level directories as needed */
   char buf[PATH_MAX], *bufp;
   
-  strncpy(buf, path, PATH_MAX);
-  buf[PATH_MAX-1] = '\0';
+  if (strlen(path) >= sizeof(buf))
+    return;
+  strcpy(buf, path);
   for ( bufp = &buf[1]; *bufp; ++bufp ) {
 	if ( *bufp == '/' ) {
 	  *bufp = '\0';
@@ -95,8 +98,9 @@ void dir_create_hierarchy(install_info *info, const char *path, int mode)
   /* Create higher-level directories as needed */
   char buf[PATH_MAX], *bufp;
   
-  strncpy(buf, path, PATH_MAX);
-  buf[PATH_MAX-1] = '\0';
+  if (strlen(path) >= sizeof(buf))
+    return;
+  strcpy(buf, path);
   for ( bufp = &buf[1]; *bufp; ++bufp ) {
 	if ( *bufp == '/' ) {
 	  *bufp = '\0';
@@ -132,8 +136,41 @@ stream *file_fdopen(install_info *info, const char *path, FILE *fd, gzFile zfd, 
 
 static int prompt_overwrite = -1;
 
+static FILE *open_repair_output(stream *output)
+{
+    static unsigned int serial;
+    char leaf[PATH_MAX], name[64];
+    int fd;
+    FILE *fp = NULL;
+
+    output->repair_parent = open_parent(output->path, leaf);
+    if (output->repair_parent < 0)
+        return NULL;
+    snprintf(name, sizeof(name), ".loki-repair.%ld.%u", (long)getpid(), serial++);
+    fd = openat(output->repair_parent, name,
+                O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC, 0600);
+    if (fd >= 0) {
+        output->repair_temp = strdup(name);
+        if (output->repair_temp)
+            fp = fdopen(fd, "wb");
+        if (!fp) {
+            close(fd);
+            unlinkat(output->repair_parent, name, 0);
+            free(output->repair_temp);
+            output->repair_temp = NULL;
+        }
+    }
+    if (!fp)
+        close(output->repair_parent);
+    return fp;
+}
+
 stream *file_open_install(install_info *info, const char *path, const char *mode)
 {
+    if (restoring_corrupt()) {
+        return file_is_corrupt(path) ? file_open(info, path, mode) : NULL;
+    }
+
 	if ( file_exists(path) ) {
 		if( prompt_overwrite == -1 ) {
 			prompt_overwrite = GetProductPromptOverwrite(info);
@@ -149,8 +186,6 @@ stream *file_open_install(install_info *info, const char *path, const char *mode
 			log_debug(_("File exists: '%s'"), path);
 		}
 
-		/* To avoid problem with busy binary files, remove them first if they exist */
-		unlink(path);
 	}
 	return file_open(info, path, mode);
 }
@@ -226,18 +261,25 @@ stream *file_open(install_info *info, const char *path, const char *mode)
         }
 		streamp->elem = NULL;
     } else {
-	    file_create_hierarchy(info, path);
+        if (restoring_corrupt() &&
+            !repair_metadata(path, streamp->repair_digest, &streamp->repair_mode)) {
+            file_close(info, streamp);
+            return NULL;
+        }
+        file_create_hierarchy(info, path);
 
         /* Open the file for writing */
         log_quiet(_("Installing file %s"), path);
-        streamp->fp = fopen(path, "wb");
+        streamp->fp = restoring_corrupt() ? open_repair_output(streamp) :
+                      replace_file(path, mode[1] == 's' ? 0600 : 0666);
         if ( streamp->fp == NULL ) {
 		    streamp->size = 0;
             file_close(info, streamp);
             log_warning(_("Couldn't write to file: %s"), path);
             return(NULL);
         }
-        streamp->elem = add_file_entry(info, current_option, path, NULL, mode[1] == 'm' );
+        if (!restoring_corrupt())
+            streamp->elem = add_file_entry(info, current_option, path, NULL, mode[1] == 'm');
 		md5_init(&streamp->md5);
     }
     return(streamp);
@@ -439,7 +481,7 @@ int file_eof(install_info *info, stream *streamp)
     if ( streamp->fp ) {
         eof = feof(streamp->fp);
     } else if ( streamp->zfp ) {
-        eof = gzeof(streamp->fp);
+        eof = gzeof(streamp->zfp);
     #ifdef HAVE_BZIP2_SUPPORT
     } else if ( streamp->bzfp ) {
 		int err;
@@ -452,9 +494,19 @@ int file_eof(install_info *info, stream *streamp)
 
 int file_close(install_info *info, stream *streamp)
 {
+    int result = 0;
+
     if ( streamp ) {
+        if (streamp->repair_temp) {
+            md5_final(&streamp->md5);
+            if (memcmp(streamp->md5.buf, streamp->repair_digest, sizeof(streamp->repair_digest)) ||
+                fflush(streamp->fp) != 0 ||
+                fchmod(fileno(streamp->fp), streamp->repair_mode) != 0)
+                result = -1;
+        }
         if ( streamp->fp ) {
             if ( fclose(streamp->fp) != 0 ) {
+                result = -1;
                 if ( streamp->mode == 'w' ) {
                     log_warning(_("Short write on %s"), streamp->path);
                 }
@@ -477,10 +529,23 @@ int file_close(install_info *info, stream *streamp)
 			md5_final(&streamp->md5);
 			memcpy(streamp->elem->md5sum, streamp->md5.buf, 16);
 		}
+        if (streamp->repair_temp) {
+            const char *leaf = strrchr(streamp->path, '/');
+            leaf = leaf ? leaf + 1 : streamp->path;
+            if (result == 0 && renameat(streamp->repair_parent, streamp->repair_temp,
+                                        streamp->repair_parent, leaf) == 0) {
+                repair_committed(streamp->path);
+            } else {
+                result = -1;
+                unlinkat(streamp->repair_parent, streamp->repair_temp, 0);
+            }
+            close(streamp->repair_parent);
+            free(streamp->repair_temp);
+        }
         free(streamp->path);
         free(streamp);
     }
-	return 0;
+    return result;
 }
 
 int file_symlink(install_info *info, const char *oldpath, const char *newpath)
@@ -488,7 +553,10 @@ int file_symlink(install_info *info, const char *oldpath, const char *newpath)
     int retval;
     struct stat st;
 
-	if ( !strcmp(oldpath, newpath) ) {
+    if (restoring_corrupt()) {
+        return -1;
+    }
+    if ( !strcmp(oldpath, newpath) ) {
 		log_quiet(_("Trying to create a symbolic link on the same file: %s\n"), newpath);
 		return 0;
 	}
@@ -499,13 +567,14 @@ int file_symlink(install_info *info, const char *oldpath, const char *newpath)
     /* Do the action */
 	file_create_hierarchy(info,newpath);
 
-    /* If a symbolic link already exists, try to remove it */
-    if( lstat(newpath, &st)==0 && S_ISLNK(st.st_mode) )
-    {
-        if( unlink(newpath) < 0 )
-            log_warning(_("Can't remove existing symlink %s: %s"), newpath, strerror(errno));
-    }
-    retval = symlink(oldpath, newpath);
+    char leaf[PATH_MAX];
+    int parent = open_parent(newpath, leaf);
+    if (parent < 0)
+        return -1;
+    if (fstatat(parent, leaf, &st, AT_SYMLINK_NOFOLLOW) == 0 && S_ISLNK(st.st_mode))
+        unlinkat(parent, leaf, 0);
+    retval = symlinkat(oldpath, parent, leaf);
+    close(parent);
     if ( retval < 0 ) {
         log_warning(_("Can't create %s: %s"), newpath, strerror(errno));
     } else {
@@ -525,74 +594,129 @@ int file_issymlink(install_info *info, const char *path)
 
 int file_mkdir(install_info *info, const char *path, int mode)
 {
-    struct stat sb;
-    int retval;
+    char leaf[PATH_MAX];
+    int parent = open_parent(path, leaf);
+    struct stat st;
+    int result;
 
-    /* Only create the directory if we need to */
-    retval = 0;
-    if ( (stat(path, &sb) != 0) || !S_ISDIR(sb.st_mode) ) {
-        /* Log the action */
-        log_quiet(_("Creating directory: %s\n"), path);
-
-        /* Do the action */
-        retval = mkdir(path, mode);
-        if ( retval < 0 ) {
-		  if(errno != EEXIST)
-            log_warning(_("Can't create %s: %s"), path, strerror(errno));
-        } else {
-            add_dir_entry(info, current_option, path);
-        }
+    if (parent < 0)
+        return -1;
+    result = mkdirat(parent, leaf, mode);
+    if (result == 0) {
+        add_dir_entry(info, current_option, path);
+    } else if (errno == EEXIST &&
+               fstatat(parent, leaf, &st, AT_SYMLINK_NOFOLLOW) == 0 &&
+               S_ISDIR(st.st_mode)) {
+        result = 0;
     }
-    return(retval);
-}
-
-int file_mkfifo(install_info *info, const char *path, int mode)
-{
-	int retval;
-
-	/* Log the action */
-	log_quiet(_("Creating FIFO: %s\n"), path);
-  
-	/* Do the action */
-	file_create_hierarchy(info, path);
-	retval = mkfifo(path, mode);
-	if ( retval < 0 ) {
-		if(errno != EEXIST)
-			log_warning(_("Can't create %s: %s"), path, strerror(errno));
-	} else {
-		add_file_entry(info, current_option, path, "FIFO", 0);
-	}
-	return(retval);
-}
-
-int file_mknod(install_info *info, const char *path, int mode, dev_t dev)
-{
-	int retval;
-
-	/* Log the action */
-	log_quiet(_("Creating device: %s\n"), path);
-  
-	/* Do the action */
-	file_create_hierarchy(info, path);
-	retval = mknod(path, mode, dev);
-	if ( retval < 0 ) {
-		if(errno != EEXIST)
-			log_warning(_("Can't create %s: %s"), path, strerror(errno));
-	} else {
-		add_file_entry(info, current_option, path, "Device", 0);
-	}
-	return(retval);
+    close(parent);
+    return result;
 }
 
 int file_chmod(install_info *info, const char *path, int mode)
 {
-	int retval;
-	
-	retval = chmod(path, mode);
-    if ( retval < 0 ) {
+    char leaf[PATH_MAX];
+    int parent;
+    int fd, result = -1;
+
+    if (restoring_corrupt())
+        return 0;
+    parent = open_parent(path, leaf);
+    if (parent >= 0) {
+        fd = openat(parent, leaf, O_RDONLY | O_NONBLOCK | O_NOFOLLOW | O_CLOEXEC);
+        if (fd >= 0) {
+            struct stat st;
+            if (fstat(fd, &st) == 0 && S_ISREG(st.st_mode))
+                result = fchmod(fd, mode & 0777);
+            close(fd);
+        }
+        close(parent);
+    }
+    if (result < 0)
         log_warning(_("Can't change permissions for %s: %s"), path, strerror(errno));
-	}
-	return retval;
+    return result;
+}
+
+/* Count path components, allowing link targets to back up only inside the archive. */
+static int archive_depth(const char *path, int depth, int allow_parent)
+{
+    const char *end;
+    size_t len;
+
+    if (!*path || *path == '/')
+        return -1;
+    for (; *path; path = end + strspn(end, "/")) {
+        len = strcspn(path, "/");
+        end = path + len;
+        if (len == 1 && path[0] == '.')
+            continue;
+        if (len == 2 && path[0] == '.' && path[1] == '.') {
+            if (!allow_parent || depth == 0)
+                return -1;
+            --depth;
+        } else {
+            ++depth;
+        }
+    }
+    return depth;
+}
+
+int archive_path(char out[PATH_MAX], const char *dest, const char *name)
+{
+    int len;
+
+    if (archive_depth(name, 0, 0) < 0)
+        return 0;
+    while (name[0] == '.' && name[1] == '/')
+        name += 2 + strspn(name + 2, "/");
+    len = snprintf(out, PATH_MAX, "%s/%s", dest, name);
+    return len >= 0 && len < PATH_MAX;
+}
+
+int archive_symlink(install_info *info, const char *dest, const char *name,
+                    const char *target, const char *path)
+{
+    int depth = archive_depth(name, 0, 0);
+    char root[PATH_MAX], candidate[PATH_MAX], resolved[PATH_MAX], *end;
+    struct stat st;
+    size_t len;
+    int parent;
+
+    if (depth < 1 || archive_depth(target, depth - 1, 1) < 0)
+        return -1;
+    file_create_hierarchy(info, path);
+    parent = open_parent(path, resolved);
+    if (parent < 0)
+        return -1;
+    close(parent);
+    end = strrchr(path, '/');
+    if (!end || !realpath(dest, root) ||
+        snprintf(candidate, sizeof(candidate), "%.*s/%s", (int)(end - path), path, target) >= sizeof(candidate))
+        return -1;
+    /* Check the full target or its nearest existing ancestor for dangling links. */
+    while (!realpath(candidate, resolved)) {
+        if (errno != ENOENT || lstat(candidate, &st) == 0)
+            return -1;
+        end = strrchr(candidate, '/');
+        if (!end || end == candidate)
+            return -1;
+        *end = '\0';
+    }
+    len = strlen(root);
+    if (strcmp(root, "/") && (strncmp(root, resolved, len) ||
+        (resolved[len] && resolved[len] != '/')))
+        return -1;
+    return file_symlink(info, target, path);
+}
+
+void file_verify_checksum(stream *output, const char *expected)
+{
+    if (expected && !restoring_corrupt()) {
+        MD5_CONTEXT md5 = output->md5;
+        md5_final(&md5);
+        if (strcasecmp(expected, get_md5(md5.buf)))
+            log_fatal(_("File '%s' has an invalid checksum! Aborting."), output->path);
+    }
 }
 
 /* The uncompressed file size */
@@ -790,66 +914,46 @@ static char tmpdirname[PATH_MAX] = "\0";
 
 const char* dir_mktmp(void)
 {
-	unsigned count;
+    char leaf[PATH_MAX];
+    int parent;
 
-	if(*tmpdirname)
-		return tmpdirname;
+    if (*tmpdirname)
+        return tmpdirname;
 
-	srand(time(NULL));
-	for(count = 0; count < 1000; ++count)
-	{
-		snprintf(tmpdirname, sizeof(tmpdirname), "/tmp/setuptmp.%06X", rand());
-		if(mkdir(tmpdirname, 0700) == 0)
-		{
-			log_debug("temporary directory %s created", tmpdirname);
-			return tmpdirname;
-		}
-	}
-	log_fatal(_("Unable to create temporary directory: %s"), strerror(errno));
-	
-	return NULL;
+    parent = open_parent("/tmp/.loki-temp", leaf);
+    if (parent < 0)
+        log_fatal(_("Unable to create temporary directory: %s"), strerror(errno));
+    close(parent);
+    strcpy(tmpdirname, "/tmp/loki-setup.XXXXXX");
+    if (!mkdtemp(tmpdirname)) {
+        *tmpdirname = '\0';
+        log_fatal(_("Unable to create temporary directory: %s"), strerror(errno));
+    }
+    return tmpdirname;
 }
 
 int dir_cleantmp(void)
 {
-	DIR* dir;
-	struct dirent *entry;
-	char cwd[PATH_MAX];
+    DIR *dir;
+    struct dirent *entry;
+    int result;
 
-	if(!*tmpdirname)
-		return 0;
-
-	if(!getcwd(cwd, sizeof(cwd)))
-		cwd[0] = '\0';
-
-	if(chdir(tmpdirname) == -1)
-	{
-		log_warning(_("Can not chdir to temporary directory: %s"), strerror(errno));
-		return -1;
-	}
-
-	dir = opendir(tmpdirname);
-	if(!dir)
-	{
-		log_warning(_("Can not open temporary directory: %s"), strerror(errno));
-		return -1;
-	}
-
-	while((entry = readdir(dir)) != NULL)
-	{
-		if(!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
-			continue;
-
-		log_debug("unlink temporary file %s", entry->d_name);
-		if(unlink(entry->d_name) == -1)
-			log_warning(_("Can not remove %s/%s: %s"), tmpdirname, entry->d_name, strerror(errno));
-	}
-
-	closedir(dir);
-
-	if(*cwd)
-		chdir(cwd);
-
-	return rmdir(tmpdirname);
+    if (!*tmpdirname)
+        return 0;
+    dir = opendir(tmpdirname);
+    if (!dir) {
+        log_warning(_("Can not open temporary directory: %s"), strerror(errno));
+        return -1;
+    }
+    while ((entry = readdir(dir)) != NULL) {
+        if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
+            continue;
+        if (unlinkat(dirfd(dir), entry->d_name, 0) < 0)
+            log_warning(_("Can not remove %s/%s: %s"), tmpdirname, entry->d_name, strerror(errno));
+    }
+    closedir(dir);
+    result = remove_path(tmpdirname, 1);
+    if (result == 0)
+        *tmpdirname = '\0';
+    return result;
 }
-

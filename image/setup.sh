@@ -2,8 +2,50 @@
 #
 # Product setup script
 #
+uid=$(/usr/bin/id -u) || exit 1
+if [ "$uid" = 0 ]; then
+    PATH=/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/local/sbin
+    export PATH
+fi
+
+# The same check runs on both sides of the authorization boundary.
+trusted_path_code='
+trusted_path()
+(
+    path=$1
+    kind=$2
+    trust_owner=0
+    case "$path" in /*) ;; *) return 1 ;; esac
+    [ "$kind" = directory ] && [ -d "$path" ] ||
+        { [ "$kind" = file ] && [ -f "$path" ]; } || return 1
+    while :; do
+        [ ! -L "$path" ] || return 1
+        metadata=$(/usr/bin/stat -c "%u %a" "$path" 2>/dev/null) ||
+            metadata=$(/usr/bin/stat -f "%u %Op" "$path" 2>/dev/null) || return 1
+        set -- $metadata
+        [ "$#" = 2 ] && [ "$1" = "$trust_owner" ] || return 1
+        case "$2" in ""|*[!0-7]*) return 1 ;; esac
+        mode=$((0$2))
+        if [ $((mode & 022)) -ne 0 ]; then
+            [ "$kind" = ancestor ] && [ $((mode & 01000)) -ne 0 ] || return 1
+        fi
+        [ "$path" = / ] && return 0
+        path=${path%/*}
+        path=${path:-/}
+        kind=ancestor
+    done
+)
+'
+eval "$trusted_path_code"
+
 # Go to the proper setup directory (if not already there)
-cd `dirname $0`
+CDPATH= cd "$(dirname "$0")" || exit 1
+media_dir=$(pwd -P) || exit 1
+launcher=$media_dir/${0##*/}
+if [ "$uid" = 0 ] && ! trusted_path "$launcher" file; then
+    printf '%s\n' "Administrator access requires protected installation media." >&2
+    exit 1
+fi
 
 # defaults
 FATAL_ERROR="Fatal error, no tech support email configured in this setup"
@@ -12,20 +54,6 @@ FATAL_ERROR="Fatal error, no tech support email configured in this setup"
 # 1: prompt, but run anyway if fails
 # 2: require, abort if root fails
 GET_ROOT=0
-XSU_ICON=""
-# You may want to set USE_XHOST to 1 if you want an X11 application to
-# be launched with root privileges right after installation
-USE_XHOST=0
-# this is the message for su call, printf
-SU_MESSAGE="You need to run this installation as the super user.\nPlease enter the root password."
-
-if test -x /bin/su; then
-	SU_CMD=/bin/su
-else
-	SU_CMD=/usr/bin/su
-fi
-
-NULL=/dev/null
 # See if we have the XPG4 utilities (Solaris)
 if test -d /usr/xpg4/bin; then
 	PATH=/usr/xpg4/bin:$PATH
@@ -36,6 +64,9 @@ DetectARCH()
 {
 	status=1
 	case `uname -m` in
+	    arm64 | aarch64)
+		echo "aarch64"
+		status=0;;
 	    amd64 | x86_64)
 		echo "x86_64"
 		status=0;;
@@ -88,53 +119,99 @@ DetectOS()
 arch=`DetectARCH`
 libc=`DetectLIBC`
 os=`DetectOS`
-
 args=""
 
 # Import preferences from a secondary script
 if [ -f setup.data/config.sh ]; then
+    [ "$uid" != 0 ] || trusted_path "$media_dir/setup.data/config.sh" file || exit 1
     . setup.data/config.sh
 elif [ -f SETUP.DAT/CONFIG.SH\;1 ]; then
 	# HP-UX and other systems unable to get LFN correctly
+    [ "$uid" != 0 ] || trusted_path "$media_dir/SETUP.DAT/CONFIG.SH;1" file || exit 1
 	. SETUP.DAT/CONFIG.SH\;1
 fi
 
 # Add some standard paths for compatibility
 PATH=$PATH:/usr/ucb
 
-# call setup with -auth when ran through su/xsu
-auth=0
-if [ "$1" = "-auth" ]
-then
-  auth=1
-  shift
+# Prefer the platform's usual authorization tool, using system paths.
+find_root_helper()
+{
+    if [ "$os" = OpenBSD ] && [ -x /usr/bin/doas ] && trusted_path /usr/bin/doas file; then
+        printf '%s\n' /usr/bin/doas
+        return
+    fi
+    for helper in /usr/bin/sudo /usr/local/bin/sudo /usr/bin/doas /usr/local/bin/doas; do
+        if [ -x "$helper" ] && trusted_path "$helper" file; then
+            printf '%s\n' "$helper"
+            return
+        fi
+    done
+    return 1
+}
+
+console_only=0
+if [ "${1-}" = "-auth" ]; then
+    # Private re-entry flag. The authorization helper must actually grant root.
+    [ "$uid" = 0 ] || exit 1
+    console_only=1
+    shift
 fi
 
-if [ "$auth" -eq 1 ]
-then
-  # if root is absolutely required
-  # this happens if xsu/su execs setup.sh but it still doesn't have root rights
-  if [ "$GET_ROOT" -eq 2 ]
-  then
-    # NOTE TTimo: this causes the following error message in some cases:
-    # return: can only `return' from a function or sourced script
-    # BUT: in other cases, the return is legit, if you replace by an exit call, it's broken
-    exit 1
-  fi
-fi
+case "$GET_ROOT" in
+    0) ;;
+    1|2)
+        if [ "$uid" = 0 ]; then
+            console_only=1
+        else
+            if [ -t 0 ] && trusted_path "$launcher" file && helper=$(find_root_helper); then
+                home_option=
+                case "$helper" in */sudo) home_option=-H ;; esac
+                # Both helpers return 1 for authorization failures. Keep a
+                # launched installer's status 1 distinct so it cannot retry.
+                "$helper" ${home_option:+"$home_option"} -u root -- /bin/sh -c "$trusted_path_code"'
+                    [ "$(/usr/bin/id -u)" = 0 ] || exit 1
+                    unset SETUP_EXEC_TMPDIR TMPDIR
+                    trusted_path "$0" file || exit 125
+                    /bin/sh "$0" -auth "$@"
+                    status=$?
+                    [ "$status" -ne 1 ] || exit 125
+                    exit "$status"
+                ' "$launcher" "$@"
+                status=$?
+                case "$status" in
+                    1) ;;
+                    125) exit 1 ;;
+                    *) exit "$status" ;;
+                esac
+            fi
+            if [ "$GET_ROOT" = 2 ]; then
+                printf '%s\n' "Administrator access is required. Run this installer from a terminal with sudo or doas." >&2
+                exit 1
+            fi
+            printf '%s\n' "Continuing without administrator access." >&2
+        fi
+        ;;
+    *)
+        printf '%s\n' "GET_ROOT must be 0, 1, or 2." >&2
+        exit 1
+        ;;
+esac
 
 # Optionally override the detected architecture. 
 
-if [ "$1" = "-arch" ]
+if [ "${1-}" = "-arch" ]
 then
   shift
-  if [ -z "$1" ] || echo "$1" | grep "^-" >/dev/null 2>&1
+  if [ -z "${1-}" ] || echo "$1" | grep "^-" >/dev/null 2>&1
   then
     echo "$0: -arch needs an argument"
     exit 1
   fi
   # some handy conversion copied from DetectARCH. 
   case "$1" in
+  arm64 | aarch64)
+    arch="aarch64" ;;
   amd64)
     arch="x86_64" ;;
   i?86 | i86*)
@@ -147,145 +224,59 @@ then
   shift
 fi
 
+case "$arch" in
+    ''|*[!a-zA-Z0-9_.-]*|.|..) exit 1 ;;
+esac
 
-# Find the installation program
-# try_run [-absolute] [-fatal] INSTALLER_NAME [PARAMETERS_PASSED]
-#   -absolute option: if what you are trying to execute has an absolute path
-#   NOTE: maybe try_run_absolute would be easier
-#   -fatal option: if you want verbose messages in case
-#      - the script could not be found
-#      - it's execution would fail
-#   INSTALLER_NAME: setup.gtk or setup
-#   PARAMETERS_PASSED: additional arguments passed to the setup script
+
+# Copy the selected binary off media that may be mounted noexec.
 try_run()
 {
-    absolute=0
-    if [ "$1" = "-absolute" ]; then
-      absolute=1
-      shift
-    fi
-
-    fatal=0
-    # older bash < 2.* don't like == operator, using =
-    if [ "$1" = "-fatal" ]; then
-      # got fatal
-      fatal=1
-      shift
-    fi
-
     setup=$1
     shift
-    
-    # First find the binary we want to run
-    failed=0
-    if [ "$absolute" -eq 0 ]
-    then
-      setup_bin="setup.data/bin/$os/$arch/$libc/$setup"
-      # trying $setup_bin
-      if [ ! -f "$setup_bin" ]; then
-          setup_bin="setup.data/bin/$os/$arch/$setup"
-        	# libc dependant version failed, trying again
-          if [ ! -f "$setup_bin" ]; then
-              failed=1
-          fi
-      fi
-      if [ "$failed" -eq 1 ]; then
-          if [ "$fatal" -eq 1 ]; then
-              cat <<__EOF__
-This installation doesn't support $libc on $os / $arch
-(tried to run $setup)
-$FATAL_ERROR
-__EOF__
-          fi
-          return $failed
-      fi
+    setup_bin="setup.data/bin/$os/$arch/$libc/$setup"
+    if [ ! -f "$setup_bin" ]; then
+        setup_bin="setup.data/bin/$os/$arch/$setup"
+        [ -f "$setup_bin" ] || return 1
+    fi
 
-      # Try to run the binary ($setup_bin)
-      # The executable is here but we can't execute it from CD
-      # NOTE TTimo: this is dangerous, we also use $setup to store the name of the try_run
-      setup="$HOME/.setup$$"
-      rm -f "$setup"
-      cp "$setup_bin" "$setup"    
-      chmod 700 "$setup"
-	  trap "rm -f $setup" 1 2 3 15
+    tmpbase=${SETUP_EXEC_TMPDIR:-$HOME}
+    if [ "$uid" = 0 ]; then
+        trusted_path "$media_dir/$setup_bin" file || return 1
+        tmpbase=$(CDPATH= cd "$HOME" && pwd -P) || return 1
+        trusted_path "$tmpbase" directory || return 1
     fi
-	# echo Running "$setup" "$@"
-    if [ "$fatal" -eq 0 ]; then
-        "$setup" "$@"
-        failed="$?"
-    else
-        "$setup" "$@" 2>> $NULL
-        failed="$?"
+    setup=$(mktemp "$tmpbase/.setup.XXXXXX") || return 1
+    if ! cp "$setup_bin" "$setup" || ! chmod 700 "$setup"; then
+        rm -f "$setup"
+        return 1
     fi
-    if [ "$absolute" -eq 0 ]
-    then
-      # don't attempt removal when we are passed an absolute path
-      # no, I don't want to imagine a faulty try_run as root on /bin/su
-      rm -f "$setup"
-    fi
+    trap 'rm -f "$setup"; exit 1' 1 2 3 15
+    "$setup" "$@"
+    failed=$?
+    rm -f "$setup"
+    trap - 1 2 3 15
     return "$failed"
 }
 
-# if we have not been through the auth yet, and if we need to get root, then prompt
-if [ "$auth" -eq 0 ] && [ "$GET_ROOT" -ne 0 ]
-then
-  GOT_ROOT=`id -u`
-  if [ "$GOT_ROOT" != "0" ]
-  then
-	if [ "$USE_XHOST" -eq 1 ]; then
-		xhost +127.0.0.1 2> $NULL > $NULL
-	fi
-    try_run xsu -e -a -u root -c "sh `pwd`/setup.sh -auth" $XSU_ICON
-    status="$?"
-    # echo "got $status"
-    # if try_run successfully executed xsu, it will return xsu's exit code
-    # xsu returns 2 if ran and cancelled (i.e. the user 'doesn't want' to auth)
-    # it will return 0 if the command was executed correctly
-    # summing up, if we get 1, something failed
-    if [ "$status" -eq 0 ]
-    then
-      # the auth command was properly executed
-      exit 0
-    elif [ "$status" -eq 1 ]
-    then
-      # xsu wasn't found, or failed to run
-      # if xsu actually ran and the auth was cancelled, $status is 2
-      # try with su
-      printf "$SU_MESSAGE\n"
-      try_run -absolute $SU_CMD root -c "export DISPLAY=$DISPLAY;sh `pwd`/setup.sh -auth"
-      status="$?"
-	  if [ "$status" -eq 0 ]; then
-		# the auth command was properly executed
-		exit 0
-	  else
-	    exit 1
-	  fi
-    elif [ "$status" -eq 3 ]
-    then
-      # the auth failed or was canceled
-      # we don't want to even start the setup if not root
-      echo "Please run this installation as the super user"
-      exit 1
+if [ "$console_only" = 1 ]; then
+    try_run setup $args -n "$@"
+    status=$?
+else
+    try_run setup.gtk2 $args "$@" 2> /dev/null
+    status=$?
+    if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then
+        try_run setup.gtk $args "$@"
+        status=$?
+        if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then
+            try_run setup $args "$@"
+            status=$?
+        fi
     fi
-    # continue running as is
-  fi
 fi
 
-# Try to run the setup program - first look for a GTK2 binary
-try_run setup.gtk2 $args $* 2> /dev/null
-status=$?
-if [ $status -ne 0 ] && [ $status -ne 2 ] ; then 
-	try_run setup.gtk $args $* 
-	status=$?
-	if [ $status -ne 0 ] && [ $status -ne 2 ] ; then  # setup.gtk couldn't connect to X11 server - ignore
-		try_run setup $args $*
-		status=$?
-		if [ $status -ne 0 ] && [ $status -ne 2 ]; then
-			echo "The setup program seems to have failed on $arch/$libc"
-			echo
-			echo $FATAL_ERROR
-		fi
-	fi
+if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then
+    printf '%s\n\n%s\n' "The setup program seems to have failed on $arch/$libc" "$FATAL_ERROR" >&2
 fi
 
-exit $status
+exit "$status"

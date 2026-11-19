@@ -42,8 +42,8 @@ void setup_init_bools(install_info *info)
 {
 	char buf[80];
 
+	setup_exit_bools();
 	cur_info = info;
-	setup_booleans = NULL;
 
 	/* Basic bools */
 	setup_true = setup_add_bool("true", 1);

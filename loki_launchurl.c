@@ -17,7 +17,11 @@
     Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <errno.h>
+#include <grp.h>
 #include <limits.h>
+#include <pwd.h>
+#include <sys/wait.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -42,6 +46,8 @@ int loki_valid_program(const char *program)
 
     found = 0;
     path = getenv("PATH");
+    if (!path)
+        return 0;
     do {
         /* Initialize our filename variable */
         temppath[0] = '\0';
@@ -79,17 +85,7 @@ int loki_valid_program(const char *program)
     return found;
 }
 
-/* This function launches the user's web browser with the given URL.
-   The browser detection can be overridden by the LOKI_BROWSER environment
-   variable, which is used as the format string: %s is replaced with the
-   URL to be launched.
-   This function returns -1 if a browser could not be found, or the return
-   value of system("browser command") if one is available.
-   There is no way to tell whether or not the URL was valid.
-
-   WARNING: This function should NOT be called when a video mode is set.
- */
-int loki_launchURL(const char *url)
+static int browser_command(const char *url, char *command_string, size_t capacity)
 {
     /* List of programs and command strings to try */
     struct {
@@ -154,9 +150,7 @@ int loki_launchURL(const char *url)
     };
     environment running = RUNNING_X11;  /* default for BeOS */
     int i;
-    int status = -1;
     char *command;
-    char command_string[4*PATH_MAX];
 
     /* Check for DISPLAY environment variable - assume X11 if exists */
 /* BeOS will default to "X11", which is a little white lie. */
@@ -182,34 +176,64 @@ int loki_launchURL(const char *url)
             }
         }
     }
-    if ( command ) {
-      if ( strstr(command, "%s") ) {
-        snprintf(command_string, sizeof(command_string), command, url, url);
-      } else {
-        snprintf(command_string, sizeof(command_string), "%s %s", command, url);
-      }
-      if (geteuid() == 0) { // Attempt to drop privileges with setpriv or sudo
-        const char *sudo_uid = getenv("SUDO_UID");
-        if (sudo_uid) {
-          const char *setpriv_path = loki_valid_program("setpriv");
-          if (setpriv_path) {
-            char setpriv_string[4*PATH_MAX];
-            snprintf(setpriv_string, sizeof(setpriv_string), "%s --reuid %s %s", setpriv_path, sudo_uid, command_string);
-            status = system(setpriv_string);
-          }
-        } else { // Attempt to use sudo instead
-          const char *user = getenv("USER");
-          if (user && strcmp(user, "root")) {
-            char sudo_string[4*PATH_MAX];
-            snprintf(sudo_string, sizeof(sudo_string), "sudo -E -u %s %s", user, command_string);
-            status = system(sudo_string);
-          } else { // Last ditch effort
-            status = system(command_string);
-          }
-        }
-      } else {
-        status = system(command_string);
-      }
+    if (!command)
+        return -1;
+    int length;
+    if (strstr(command, "%s"))
+        length = snprintf(command_string, capacity, command, url, url);
+    else
+        length = snprintf(command_string, capacity, "%s %s", command, url);
+    return length >= 0 && (size_t)length < capacity ? 0 : -1;
+}
+
+/* This function launches the user's web browser with the given URL.
+   The browser detection can be overridden by the LOKI_BROWSER environment
+   variable, which is used as the format string: %s is replaced with the
+   URL to be launched.
+   This function returns -1 if a browser could not be found, or the return
+   value of system("browser command") if one is available.
+   There is no way to tell whether or not the URL was valid.
+
+   WARNING: This function should NOT be called when a video mode is set.
+ */
+int loki_launchURL(const char *url)
+{
+    char command[4 * PATH_MAX];
+
+    if (geteuid() != 0)
+        return browser_command(url, command, sizeof(command)) == 0 ? system(command) : -1;
+
+    /* Resolve the invoking user before forking. All browser discovery and
+       command handling in the child must happen after privileges are dropped. */
+    const char *sudo_uid = getenv("SUDO_UID");
+    if (!sudo_uid || !*sudo_uid || sudo_uid[strspn(sudo_uid, "0123456789")])
+        return -1;
+    errno = 0;
+    unsigned long id = strtoul(sudo_uid, NULL, 10);
+    uid_t uid = (uid_t)id;
+    if (errno || !uid || uid == (uid_t)-1 || (unsigned long)uid != id)
+        return -1;
+    struct passwd *user = getpwuid(uid);
+    if (!user || user->pw_gid == 0)
+        return -1;
+    gid_t gid = user->pw_gid;
+
+    pid_t child = fork();
+    if (child < 0)
+        return -1;
+    if (child == 0) {
+        if (setgroups(0, NULL) < 0 || setgid(gid) < 0 || setuid(uid) < 0)
+            _exit(126);
+        if (browser_command(url, command, sizeof(command)) < 0)
+            _exit(127);
+        execl("/bin/sh", "sh", "-c", command, (char *)NULL);
+        _exit(127);
+    }
+
+    int status;
+    while (waitpid(child, &status, 0) < 0) {
+        if (errno != EINTR)
+            return -1;
     }
     return status;
 }

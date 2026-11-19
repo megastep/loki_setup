@@ -3,58 +3,974 @@
 # This file is distributed under the same license as the PACKAGE package.
 # David Hedbor <david@hedbor.org>, 2000.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2004-09-08 14:44-0700\n"
+"Project-Id-Version: Loki Setup 2.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-18 05:13-0800\n"
 "PO-Revision-Date: 2004-09-09 21:34+0100\n"
 "Last-Translator: Ulrik Norgren <ulrik@linuxmail.org>\n"
 "Language-Team: Swedish\n"
+"Language: sv\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-# SOME DESCRIPTIVE TITLE
-#: uninstall.glade:310
-msgid "%P %%"
-msgstr "%P %%"
+#: check.c:126 check_carbon.c:116 uninstall.c:529
+#, c-format
+msgid "Couldn't change to install directory\n"
+msgstr "Kunde inte byta till installationskatalogen\n"
 
-#: uninstall.glade:99
+#: check.c:158 uninstall_ui.c:79
+msgid "OK"
+msgstr "OK"
+
+#: check.c:256 check_carbon.c:187
+msgid "Unable to identify the installation media."
+msgstr "Det gick inte att identifiera installationsmediet."
+
+#: check.c:278 check_carbon.c:212
+msgid "Installation media doesn't match the product."
+msgstr "Installationsmediet stämmer inte överens med produkten."
+
+#: check.c:283 check_carbon.c:216
+msgid "Restoring files..."
+msgstr "Återställer filer …"
+
+#: check.c:292 check_carbon.c:224
+#, c-format
+msgid "Unable to change to directory %s\n"
+msgstr ""
+"Det gick inte att byta till katalogen %s\n"
+
+#: check.c:327 check.c:331 check_carbon.c:259 check_carbon.c:262
+msgid "Files successfully restored!"
+msgstr "Filerna har återställts!"
+
+#: check.c:331
+msgid "Success"
+msgstr "Klart"
+
+#: check.c:347
+#, c-format
+msgid "Warning: '%s' is not an accessible directory."
+msgstr "Varning: katalogen ”%s” är inte tillgänglig."
+
+#: check.c:348
+msgid "Warning"
+msgstr "Varning"
+
+#: check.c:356
+msgid "Please select a directory"
+msgstr "Välj en katalog"
+
+#: check.c:429 check_carbon.c:353
+#, c-format
+msgid "Usage: %s product\n"
+msgstr ""
+"Användning: %s produkt\n"
+
+#: check.c:458 check_carbon.c:366
+msgid ""
+"Impossible to locate the product information.\n"
+"Maybe another user installed it?"
+msgstr ""
+"Produktinformationen hittades inte.\n"
+"Kan en annan användare ha installerat produkten?"
+
+#: check.c:459
+msgid "Error"
+msgstr "Fel"
+
+#: check.c:476 check_carbon.c:380
+#, c-format
+msgid "---> Checking component '%s'..."
+msgstr "---> Kontrollerar komponenten ”%s” …"
+
+#: check.c:482 check_carbon.c:386
+#, c-format
+msgid "-> Checking option '%s'..."
+msgstr "-> Kontrollerar alternativet ”%s” …"
+
+#: check.c:491 check_carbon.c:395
+#, c-format
+msgid "%s was REMOVED"
+msgstr "%s har TAGITS BORT"
+
+#: check.c:496 check_carbon.c:400
+#, c-format
+msgid "%s was MODIFIED"
+msgstr "%s har ÄNDRATS"
+
+#: check.c:501 check_carbon.c:405
+#, c-format
+msgid "%s is OK"
+msgstr "%s är OK"
+
+#: check.c:511 check_carbon.c:415
+#, c-format
+msgid "Changes detected: %d files removed, %d files modified."
+msgstr "Upptäckta ändringar: borttagna filer: %d, ändrade filer: %d."
+
+#: check.c:516 check_carbon.c:421
+msgid "No problems were found."
+msgstr "Inga problem hittades."
+
+#: check.glade:26 check.gtk2.glade:8
+msgid "Check And Rescue"
+msgstr "Kontroll och återställning"
+
+#: check.glade:80 check.gtk2.glade:83
+msgid "_Dismiss"
+msgstr "_Stäng"
+
+#: check.glade:103 check.gtk2.glade:155
+msgid "_Rescue"
+msgstr "_Återställ"
+
+#: check.glade:131 check.gtk2.glade:261
+msgid "Checking installed files"
+msgstr "Kontrollerar installerade filer"
+
+#: check.glade:174
+msgid "..."
+msgstr ""
+
+#: check.glade:199 check.gtk2.glade:317
+msgid "Media Selection"
+msgstr "Välj installationsmedium"
+
+#: check.glade:254
+msgid "_Cancel"
+msgstr "_Avbryt"
+
+#: check.glade:277
+msgid "_OK"
+msgstr ""
+
+#: check.glade:302 check.gtk2.glade:388
+msgid "Please indicate where the original package is located :"
+msgstr "Ange var originalpaketet finns:"
+
+#: check.glade:325
+msgid "CD-ROM"
+msgstr ""
+
+#: check.glade:356 check.gtk2.glade:494
+msgid "Other directory: "
+msgstr "Annan katalog: "
+
+#: check.glade:391 check.gtk2.glade:576
+msgid "_Pick..."
+msgstr "_Välj …"
+
+#: check.gtk2.glade:455
+msgid "CD-ROM / DVD-ROM"
+msgstr ""
+
+#: copy.c:301
+#, c-format
+msgid "Unable to create %s symlink pointing to %s"
+msgstr "Kunde inte skapa symlänken %s som pekar på %s"
+
+#: copy.c:382
+#, c-format
+msgid "Failed to update check sum for %s"
+msgstr "Kunde ej uppdatera checksumman för %s"
+
+#: copy.c:386
+#, c-format
+msgid "Error while running process command: %s"
+msgstr "Fel vid försök att köra kommando: %s"
+
+#: copy.c:403
+#, c-format
+msgid "Failed to change SELinux context for file '%s' - not supported"
+msgstr "Det gick inte att ändra SELinux-kontexten för filen ”%s”. Åtgärden stöds inte."
+
+#: copy.c:405
+#, c-format
+msgid "Failed to change SELinux context for file '%s'"
+msgstr "Det gick inte att ändra SELinux-kontexten för filen ”%s”."
+
+#: copy.c:410
+#, c-format
+msgid "Invalid SELinux context '%s' for file '%s'"
+msgstr "Ogiltig SELinux-kontext ”%s” för filen ”%s”."
+
+#: copy.c:420 plugins/cpio.c:181 plugins/rar.c:248 plugins/tar.c:120
+#: plugins/uz2.c:203 plugins/zip.c:887
+#, c-format
+msgid "File '%s' has an invalid checksum! Aborting."
+msgstr "Filen '%s' har en felaktig checksumma! Avbryter."
+
+#: copy.c:463
+#, c-format
+msgid "Unable to copy directory '%s'"
+msgstr "Kan inte kopiera katalogen '%s'"
+
+#: copy.c:498
+#, c-format
+msgid "1 Unable to find file '%s' in '%s'"
+msgstr "1 Kan inte hitta filen '%s' i '%s'"
+
+#: copy.c:543
+#, c-format
+msgid "Unable to find file '%s' on any of the CDROM drives"
+msgstr "Kan inte hitta filen '%s' i någon av cd-rom spelarna"
+
+#: copy.c:561
+#, c-format
+msgid "2 Unable to find file '%s' in '%s'"
+msgstr "2 Kan inte hitta filen '%s' i '%s'"
+
+#: copy.c:616 copy.c:617
+#, c-format
+msgid "Unable to copy man page '%s'"
+msgstr "Kunde inte kopiera mansidan '%s'"
+
+#: copy.c:660 copy.c:667
+#, c-format
+msgid "Could not create temporary script: %s"
+msgstr "Det gick inte att skapa det tillfälliga skriptet: %s"
+
+#: copy.c:710
+msgid "'binpath' attribute is mandatory for inline 'binary' tag"
+msgstr ""
+
+#: copy.c:715
+msgid "'binpath' attribute must not contain slashes for inline 'binary' tag"
+msgstr ""
+
+#: copy.c:753
+msgid "Binary install path is too long"
+msgstr "Installationssökvägen för körbara filer är för lång"
+
+#: copy.c:790
+#, c-format
+msgid "find '%s'"
+msgstr "sök '%s'"
+
+#: copy.c:812 copy.c:813
+#, c-format
+msgid "Unable to find file '%s' in '%s'"
+msgstr "Kan inte hitta filen '%s' i '%s'"
+
+#: copy.c:834 copy.c:835
+#, c-format
+msgid "Unable to copy file '%s'"
+msgstr "Kan inte kopiera filen '%s'"
+
+#: copy.c:884
+msgid "Running script. Please wait..."
+msgstr "Skriptet körs. Vänta …"
+
+#: copy.c:1088
+msgid "The remove_msg element should be within a component!\n"
+msgstr "Ta_bort_meddelande elementet skall vara i komponenten!\n"
+
+#: copy.c:1106
+msgid "Component element needs to have a name"
+msgstr "Komponentelementet måste ha ett namn"
+
+#: copy.c:1109
+msgid "Component element needs to have a version"
+msgstr "Komponentelementet måste ha ett versionnummer"
+
+#: copy.c:1133
+msgid "Malformed 'environment' element in XML file : missing 'var' property"
+msgstr "Fel 'environment'-element i XML filen : saknar 'var'"
+
+#: copy.c:1310
+#, c-format
+msgid "Suspect size value for option %s\n"
+msgstr "Konstigt storleksvärde för valmöljlighet %s\n"
+
+#: detect.c:344
+#, c-format
+msgid "Unmounting device %s"
+msgstr "Avmonterar enhet %s"
+
+#: detect.c:346 detect.c:377 detect.c:393
+#, c-format
+msgid "Failed to unmount device %s mounted on %s"
+msgstr "Kunde ej avmontera enheten %s monterad på %s"
+
+#: detect.c:462 detect.c:545 detect.c:585 detect.c:629
+#, c-format
+msgid "Mounted device %s"
+msgstr "Monterade enhet %s"
+
+#: detect.c:820 detect.c:824
+#, c-format
+msgid ""
+"\n"
+"Please insert %s.\n"
+"Choose Yes to retry, No to cancel"
+msgstr ""
+"\n"
+"Var snäll och sätt in %s.\n"
+"Välj Ja för att försöka igen, Nej för att abryta."
+
+#: detect.c:827
+#, c-format
+msgid ""
+"\n"
+"Please mount %s.\n"
+"Choose Yes to retry, No to cancel"
+msgstr ""
+"\n"
+"Var snäll och montera cd-rom %s.\n"
+"Välj Ja för att försöka igen, Nej för att abryta."
+
+#: detect.c:892
+#, c-format
+msgid "Detected locale is %s\n"
+msgstr ""
+"Identifierad språkinställning: %s\n"
+
+#: detect.c:1069
+#, c-format
+msgid "Invalid matching policy: %s"
+msgstr "Ogiltig: %s"
+
+#: file.c:119 file.c:165 file.c:172 install.c:1196 install.c:1218
+#: install.c:1240 install.c:1261 install.c:1276 install.c:1327
+msgid "Out of memory"
+msgstr "Slut på minne"
+
+#: file.c:144
+#, c-format
+msgid "File '%25s' already exists, overwrite?"
+msgstr "Filen ”%25s” finns redan. Vill du skriva över den?"
+
+#: file.c:149
+#, c-format
+msgid "File exists: '%s'"
+msgstr "Filen ”%s” finns redan"
+
+#: file.c:183
+#, c-format
+msgid "Failed to open file %s"
+msgstr "Kan inte öppna filen %s"
+
+#: file.c:213
+#, c-format
+msgid "File '%s' may be in BZIP2 format, but support was not compiled in!"
+msgstr ""
+"Filen '%s' kan vara i BZIP2 format, men stöd för detta är inte kompilerat in!"
+
+#: file.c:224
+#, c-format
+msgid "Couldn't read from file: %s"
+msgstr "Kunde inte läsa från fil: %s"
+
+#: file.c:232
+#, c-format
+msgid "Installing file %s"
+msgstr "Installerar filen %s"
+
+#: file.c:237
+#, c-format
+msgid "Couldn't write to file: %s"
+msgstr "Kunde inte skriva till fil: %s"
+
+#: file.c:263
+msgid "Read on write stream"
+msgstr "Läsning från oläsbar dataström"
+
+#: file.c:302
+#, c-format
+msgid "Read failure on %s"
+msgstr "Läsfel på %s"
+
+#: file.c:373
+msgid "Skip zeroes on write stream"
+msgstr "Hoppa över nollor från oläsbar dataström"
+
+#: file.c:393 file.c:459 file.c:466
+#, c-format
+msgid "Short write on %s"
+msgstr "Misslyckad skrivning till %s"
+
+#: file.c:399
+msgid "Write on read stream"
+msgstr "Skrivning till läsbar dataström"
+
+#: file.c:429
+#, c-format
+msgid "Write failure on %s"
+msgstr "Misslyckad skrivning till %s"
+
+#: file.c:492
+#, c-format
+msgid "Trying to create a symbolic link on the same file: %s\n"
+msgstr ""
+"Försök att skapa en symbolisk länk till samma fil: %s\n"
+
+#: file.c:497
+#, c-format
+msgid "Creating symbolic link: %s --> %s\n"
+msgstr "Skapar mjuk länk: %s --> %s\n"
+
+#: file.c:506
+#, c-format
+msgid "Can't remove existing symlink %s: %s"
+msgstr "Kan inte ta bort existerande mjuk länk %s: %s"
+
+#: file.c:510 file.c:541 file.c:561 file.c:580
+#, c-format
+msgid "Can't create %s: %s"
+msgstr "Kan inte skapa %s: %s"
+
+#: file.c:535
+#, c-format
+msgid "Creating directory: %s\n"
+msgstr "Skapar bibliotek: %s\n"
+
+#: file.c:554
+#, c-format
+msgid "Creating FIFO: %s\n"
+msgstr "Skapar FIFO: %s\n"
+
+#: file.c:573
+#, c-format
+msgid "Creating device: %s\n"
+msgstr "Skapar enhet: %s\n"
+
+#: file.c:593
+#, c-format
+msgid "Can't change permissions for %s: %s"
+msgstr "Kan inte byta rättigheter på %s: %s"
+
+#: file.c:627 file.c:651
+#, c-format
+msgid "Unable to read %s"
+msgstr "Kan inte läsa %s"
+
+#: file.c:729
+msgid "BZ2 support not available"
+msgstr "BZ2 stöd saknas"
+
+#: file.c:754
+#, c-format
+msgid "BZ2: *** Symbol \"%s\" not found, bzip2 support disabled"
+msgstr "Kan inte hitta BZ2: *** Symbol \"%s\", stöds ej"
+
+#: file.c:767
+#, c-format
+msgid "BZ2: Try open %s"
+msgstr "BZ2: Försök öppna %s"
+
+#: file.c:773
+msgid "BZ2: *** Unable to open bzip2 library. bzip2 support disabled"
+msgstr "BZ2: *** Kan ej öppna bzip2 biblioteket. bzip2 stöds ej"
+
+#: file.c:777
+#, c-format
+msgid "BZ2: got %s"
+msgstr "BZ2: fick %s"
+
+#: file.c:808
+#, c-format
+msgid "Unable to create temporary directory: %s"
+msgstr "Det gick inte att skapa den tillfälliga katalogen: %s"
+
+#: file.c:827
+#, c-format
+msgid "Can not chdir to temporary directory: %s"
+msgstr "Det gick inte att byta till den tillfälliga katalogen: %s"
+
+#: file.c:834
+#, c-format
+msgid "Can not open temporary directory: %s"
+msgstr "Det gick inte att öppna den tillfälliga katalogen: %s"
+
+#: file.c:845
+#, c-format
+msgid "Can not remove %s/%s: %s"
+msgstr "Det gick inte att ta bort %s/%s: %s"
+
+#. TRANSLATORS: The placeholders are a directory, its owner, and the suggested user.
+#: install.c:450
+#, c-format
+msgid ""
+"%s is owned by %s. You may need to run this installer as user %s or choose "
+"another directory."
+msgstr "%s ägs av %s. Du kan behöva köra installationsprogrammet som användaren %s eller välja en annan katalog."
+
+#: install.c:478
+msgid "No destination directory selected"
+msgstr "Inget destinationsbibliotek valt"
+
+#: install.c:481
+msgid "Please select at least one option"
+msgstr "Välj minst ett paket"
+
+#: install.c:484
+msgid "Not enough free space for the selected options."
+msgstr "Otillräckligt diskutrymme för de valda paketen."
+
+#: install.c:486
+msgid "Install path is not a directory."
+msgstr "Installationsbiblioteket är inte ett bibliotek."
+
+#: install.c:487 install.c:508
+msgid "Please choose an existing directory."
+msgstr "Välj en befintlig katalog."
+
+#: install.c:489
+msgid "No write permissions on the install directory."
+msgstr "Inga skrivrättigheter i installationsbiblioteket."
+
+#: install.c:492
+msgid "Binary path and install path must be different."
+msgstr "Programbibliotek och installationsbiblioteken måste vara olika."
+
+#: install.c:494
+msgid "No write permissions to install a selected package."
+msgstr "Inga skrivrättigheter för installation av ett valt paket."
+
+#: install.c:499
+msgid "Binary path is not a directory."
+msgstr "Sökvägen till de körbara filerna är inte en katalog."
+
+#: install.c:502
+msgid "No write permissions on the binary directory."
+msgstr "Inga skrivrättigheter i programbiblioteket."
+
+#: install.c:507
+msgid "Binary directory does not exist."
+msgstr "Katalogen för de körbara filerna finns inte."
+
+#: install.c:688
+msgid "Failed to allocate new bool"
+msgstr ""
+
+#: install.c:707
+msgid "Must have at least 'script' or 'env' attribute for <bool>"
+msgstr ""
+
+#: install.c:959 install_log.c:19
+#, c-format
+msgid "Out of memory\n"
+msgstr "Slut på minne\n"
+
+#: install.c:981
+#, c-format
+msgid "Detected distribution: %s %d.%d"
+msgstr "Funnen distribution: %s %d.%d"
+
+#: install.c:1150
+#, c-format
+msgid ""
+"Could not find default component. Make sure to define components for all "
+"entries."
+msgstr ""
+"Kunde ej hitta de förvalda komponenterna. Du måste definiera komponenter för "
+"alla poster."
+
+#: install.c:1301
+msgid "You must use a 'symlink' attribute with 'play'"
+msgstr "Du måste använda ett 'symlink'-attribut med 'play'"
+
+#: install.c:1313
+msgid "There can be only one binary with a 'play' attribute"
+msgstr "Det får bara finnas en binär med ett 'play'-attribut"
+
+#: install.c:1316
+msgid "The only valid values for the 'play' attribute are yes, gui and no"
+msgstr "De enda rätta värderna för 'play'-attributet är 'yes','gui' och 'no'"
+
+#: install.c:1345
+msgid "Couldn't find your home directory"
+msgstr "Kunde inte hitta ditt hembibliotek"
+
+#: install.c:1363
+#, c-format
+msgid "Couldn't find home directory for %s"
+msgstr "Kunde inte hitta hembiblioteket för %s"
+
+#: install.c:1493
+msgid ""
+"XML: 'require' tag doesn't have a mandatory 'command', 'condition' or "
+"'feature' attribute"
+msgstr ""
+
+#: install.c:1543
+#, c-format
+msgid ""
+"The installer is not suitable for installing this product (missing feature "
+"'%s' version '%u')"
+msgstr "Installationsprogrammet kan inte installera produkten. Funktionen ”%s” version ”%u” saknas."
+
+#: install.c:1586
+msgid "XML: 'lang' tag does not have a mandatory 'lang' attribute"
+msgstr "XML: 'lang'-taggen saknar det obligatoriska 'lang'-attibutet"
+
+#: install.c:1595
+#, c-format
+msgid "XML: option listed without translated description for locale '%s'"
+msgstr "XML: valmöjligheten saknar översatt beskrivning för '%s'"
+
+#: install.c:1603
+msgid "XML: option listed without description"
+msgstr "XML: valmöjlighet utan beskrivning"
+
+#: install.c:1865
+msgid "CDKey file could not be opened."
+msgstr "Filen med CD nyckeln kunde inte öppnas"
+
+#: install.c:1972 install.c:1978 install.c:1997
+#, c-format
+msgid "Unable to remove '%s'"
+msgstr "Kan inte ta bort '%s'"
+
+#: install.c:1988
+#, c-format
+msgid "The '%s' RPM was installed or upgraded (version %s, release %d)"
+msgstr ""
+"RPM-filen '%s' installerades eller uppgraderas (version %s, release %d)"
+
+#: install.c:2121
+msgid "Options tag string maxed out!"
+msgstr "Inställnings taggen är för lång!"
+
+#: install.c:2172 install.c:2321 install.c:2349
+msgid "Could not create temporary script"
+msgstr "Kunde inte skriva ett temporärt skript"
+
+#: install.c:2298
+#, c-format
+msgid "Could not register binary: %s"
+msgstr "Kunde inte registrera binärfil: %s"
+
+#: install.c:2340
+#, c-format
+msgid "Could not write temporary pre-uninstall script in %s"
+msgstr "Kunde inte skriva ett temporärt pre-uninstall skript i %s"
+
+#: install.c:2365
+#, c-format
+msgid "Could not write post-uninstall script in %s"
+msgstr "Kunde inte skriva ett post-uninstall skript i %s"
+
+#: install.c:2412
+msgid "Could not create install log"
+msgstr "Kunde inte skapa installationslogg"
+
+#: install.c:2439
+#, c-format
+msgid "Please visit %s"
+msgstr "Besök %s"
+
+#: install.c:2493
+msgid "Missing 'command' attribute for an option"
+msgstr "'command'-attribut sakans för inställningen"
+
+#: install.c:2507
+#, c-format
+msgid "Expression '%s' did not parse"
+msgstr ""
+
+#: install.c:2511
+msgid "Missing 'condition' attribute for an option"
+msgstr ""
+
+#: install.c:2752 install.c:2818
+#, c-format
+msgid "Unable to create desktop file '%s'"
+msgstr "Kan inte skapa skrivbordsfilen '%s'"
+
+#: install.c:2885 install.c:2888
+#, c-format
+msgid "Unable to create CDE desktop file '%s'"
+msgstr "Kan inte skapa skrivbordsfilen '%s'"
+
+#: install.c:2924
+#, c-format
+msgid "Unable to create ToolChest menu file '%s'"
+msgstr "Kan inte skapa skrivbordsfilen '%s'"
+
+#: log.c:47
+msgid "loki_setup: "
+msgstr "loki_setup: "
+
+#: network.c:156
+msgid "Out of memory, no network check"
+msgstr "Slut på minne, ingen närverkskontroll"
+
+#: network.c:166
+msgid "Unable to create pipe, no network check"
+msgstr "Kan inte skapa en pipa, ingen närverkskontroll"
+
+#: network.c:180
+msgid "Fork failed, no network check"
+msgstr "Fork misslyckades, ingen nätverkskontroll"
+
+#: plugins.c:96
+#, c-format
+msgid ""
+"Registered plugins :\n"
+"\n"
+msgstr ""
+"Registrerade plugins :\n"
+"\n"
+
+#: plugins.c:98
+#, c-format
+msgid ""
+"\tDescription: %s\n"
+"\tVersion: %s\n"
+"\tAuthor: %s\n"
+msgstr ""
+"\tBeskrivning: %s\n"
+"\tVersion: %s\n"
+"\tFörfattare: %s\n"
+
+#: plugins.c:101
+#, c-format
+msgid "\tPlugin is statically linked.\n"
+msgstr "\tPluginen är statiskt länkad.\n"
+
+#: plugins.c:103
+#, c-format
+msgid "\tRecognizes %d extensions: "
+msgstr "\tKänner igen %d utökningar: "
+
+#: plugins.c:153
+#, c-format
+msgid "Error registering %s plugin: %s\n"
+msgstr "Fel uppstod vid registrering av pluginen %s: %s\n"
+
+#: plugins.c:156
+#, c-format
+msgid "Error initializing %s plugin"
+msgstr "Kunde ej starta pluginen %s"
+
+#: plugins.c:160
+#, c-format
+msgid "Error trying to load %s plugin: %s\n"
+msgstr "Fel vid laddning av pluginen %s: %s\n"
+
+#: plugins/cpio.c:113
+msgid "Invalid CPIO header\n"
+msgstr "OPKG: Felaktigt pakethuvud\n"
+
+#: plugins/cpio.c:173
+#, c-format
+msgid "Bad checksum for file '%s'"
+msgstr "Felaktig checksumma för filen '%s'"
+
+#: plugins/rpm.c:73 plugins/rpm.c:107
+#, c-format
+msgid "RPM error: %s"
+msgstr "RPM-fel: %s"
+
+#: plugins/rpm.c:156 plugins/rpm.c:163
+#, c-format
+msgid "Unable to install RPM file: '%s'"
+msgstr "Kan inte installera RPM-filen: '%s'"
+
+#: plugins/tar.c:138
+#, c-format
+msgid "Tar: '%s' is unknown file type: %c"
+msgstr "Tar: '%s' är av okänd filtyp: %c"
+
+#: plugins/tar.c:140
+msgid "Unexpected data in installation file!"
+msgstr "Oförväntad data i installationsfilen!"
+
+#: uninstall.c:49
+#, c-format
+msgid ""
+"Usage: %s [options] [product [component ...]]\n"
+"\n"
+"  -h, --help             Show this help.\n"
+"  -l, --list             List installed products or a product's components.\n"
+"  -v, --version          Show version information.\n"
+"  -L, --locale product   Use translations from the product's installation.\n"
+"\n"
+"Without --list, specify a product to uninstall it or name individual "
+"components.\n"
+msgstr ""
+"Användning: %s [alternativ] [produkt [komponent ...]]\n"
+"\n"
+"  -h, --help             Visa den här hjälpen.\n"
+"  -l, --list             Lista installerade produkter eller komponenterna i en produkt.\n"
+"  -v, --version          Visa versionsinformation.\n"
+"  -L, --locale produkt   Använd översättningarna från produktens installation.\n"
+"\n"
+"Ange en produkt att avinstallera eller namnge enskilda komponenter när --list inte används.\n"
+
+#: uninstall.c:123
+#, c-format
+msgid "Signal %d caught. Aborting.\n"
+msgstr "Signal %d fångad. Avbryter.\n"
+
+#: uninstall.c:138
+#, c-format
+msgid "Could not change to directory: %s\n"
+msgstr "Kunde inte byta bibliotek till: %s\n"
+
+#: uninstall.c:163
+#, c-format
+msgid "Notice: the %s RPM was installed for this product.\n"
+msgstr "Notera: RPM-filen %s installedes för den här produkten.\n"
+
+#: uninstall.c:196
+#, c-format
+msgid "Post-uninstall scripts for %s have failed.\n"
+msgstr ""
+"Skripten som körs efter avinstallationen av %s misslyckades.\n"
+
+#: uninstall.c:201
+#, c-format
+msgid ""
+"Component %s has been successfully uninstalled.\n"
+"\n"
+msgstr ""
+"Komponenten %s har avinstallerats.\n"
+"\n"
+
+#. TRANSLATORS: The negative shortcut in brackets must match "N".
+#: uninstall.c:222
+#, c-format
+msgid "Uninstall? [Y/n] "
+msgstr "Avinstallera? [J/n] "
+
+#: uninstall.c:225
+msgid "N"
+msgstr "N"
+
+#: uninstall.c:226
+#, c-format
+msgid "Aborted.\n"
+msgstr ""
+"Avbröts.\n"
+
+#: uninstall.c:276
+#, c-format
+msgid ""
+"No write access to the installation directory.\n"
+"Aborting.\n"
+msgstr ""
+"Kan inte skriva till installationskatalogen.\n"
+"Avbryter.\n"
+
+#: uninstall.c:284
+#, c-format
+msgid ""
+"No write access to the registry file: %s.\n"
+"Aborting.\n"
+msgstr ""
+"Kan inte skriva till registerfilen: %s.\n"
+"Avbryter.\n"
+
+#: uninstall.c:509
+#, c-format
+msgid "Warning: Unable to replicate uninstallation program.\n"
+msgstr "Varning: Kan inte göra en replika av avinstallationsprogrammet.\n"
+
+#: uninstall.c:513
+#, c-format
+msgid "Unable to open %s for writing.\n"
+msgstr "Kan inte hitta komponent %s\n"
+
+#: uninstall.c:517
+#, c-format
+msgid "Unable to open %s for copying.\n"
+msgstr "Kan inte hitta komponent %s\n"
+
+#: uninstall.c:581
+#, c-format
+msgid "Installed products:\n"
+msgstr "Installerade produkter:\n"
+
+#: uninstall.c:589
+#, c-format
+msgid ""
+"installed in %s\n"
+"\tComponents:\n"
+msgstr ""
+"installerad i %s\n"
+"\tKomponenter:\n"
+
+#: uninstall.c:596
+#, c-format
+msgid " Error while accessing product info\n"
+msgstr " Fel vid hämtning av produktinformation\n"
+
+#: uninstall.c:600
+#, c-format
+msgid ""
+"No products could be found. Maybe you need to run as a different user?\n"
+msgstr "Inga produkter funna. Du behöver kanske köra som en annan användare?\n"
+
+#: uninstall.c:612
+#, c-format
+msgid "Could not open product information for %s\n"
+msgstr "Kunde inte öppna produktinformation för %s\n"
+
+#: uninstall.c:620
+#, c-format
+msgid ""
+"Product: %s\n"
+"Installed in %s\n"
+msgstr ""
+"Produkt: %s\n"
+"Installerad i %s\n"
+
+#: uninstall.c:626
+#, c-format
+msgid "Components:\n"
+msgstr "Komponenter:\n"
+
+#: uninstall.c:648
+#, c-format
+msgid "Failed to properly uninstall component %s\n"
+msgstr ""
+"Det gick inte att avinstallera komponenten %s helt.\n"
+
+#: uninstall.c:651
+#, c-format
+msgid "Unable to find component %s\n"
+msgstr "Kan inte hitta komponent %s\n"
+
+#: uninstall.c:662
+#, c-format
+msgid "Uninstallation did not complete.\n"
+msgstr ""
+"Avinstallationen slutfördes inte.\n"
+
+#: uninstall.c:666
+#, c-format
+msgid ""
+"%s has been successfully uninstalled.\n"
+"\n"
+msgstr ""
+"%s har avinstallerats.\n"
+"\n"
+
+#: uninstall.glade:28 uninstall.gtk2.glade:8
+msgid "Uninstall Tool"
+msgstr "Avinstallationsverktyg"
+
+#: uninstall.glade:56 uninstall.gtk2.glade:31
+msgid "Please select the packages you would like to uninstall:"
+msgstr "Välj de paket du vill avinstallera:"
+
+#: uninstall.glade:99 uninstall.gtk2.glade:61
 msgid "... LOADING PRODUCT LIST ..."
-msgstr "... LADDAR PRODUKTLISTA ..."
+msgstr "… LÄSER IN PRODUKTLISTAN …"
 
-#: uninstall.glade:147
+#: uninstall.glade:130 uninstall.gtk2.glade:92
+msgid "Recovered space: "
+msgstr "Frigjort utrymme: "
+
+#: uninstall.glade:147 uninstall.gtk2.glade:105
 msgid "0 MB"
 msgstr "0 MB"
-
-#: uninstall.glade:369
-msgid "Cancel"
-msgstr "Avbryt"
-
-#: uninstall.glade:383
-msgid "Finished"
-msgstr "Klar"
-
-#: uninstall.glade:241
-msgid "Performing uninstall:"
-msgstr "Utf�r avinstallation:"
-
-#: uninstall.glade:56
-msgid "Please select the packages you would like to uninstall:"
-msgstr "V�lj de paket du vill avinstallera:"
-
-#: uninstall.glade:130
-msgid "Recovered space: "
-msgstr "Frigjort diskutrymme: "
-
-#: uninstall.glade:28
-msgid "Uninstall Tool"
-msgstr "Loki Avinstallationsverktyg"
-
-#: uninstall.glade:275
-msgid "[current component]"
-msgstr "[aktuell komponent]"
 
 #: uninstall.glade:198
 msgid "_Exit"
@@ -64,200 +980,54 @@ msgstr "_Avsluta"
 msgid "_Uninstall"
 msgstr "_Avinstallera"
 
-#: uninstall.c:49
-#, c-format
-msgid ""
-"Usage: %s [args]\n"
-"args can be any of the following:\n"
-"\n"
-"  -h      : Print this help message.\n"
-"  -l      : List all installed products and components.\n"
-"  -v      : Get version information.\n"
-"  product [component1] [component2] ... : Uninstalls the specified product, "
-"or its subcomponent(s).\n"
-"  product < -l > : List installed subcomponents of product.\n"
-msgstr ""
-"Anv�ndning: %s [argument]\n"
-"\n"
-"Argument kan vara ett eller flera av dessa:\n"
-"  -h      : Skriver ut detta hj�lpmeddelande.\n"
-"  -l      : Listar alla installerade produkter och komponenter.\n"
-"  -v      : H�mtar versionsinformation.\n"
-"  produkt [komponent1] [komponent2] ... : Avinstallerar den specifika produkten, "
-"eller dess komponent.\n"
-"  produkt < -l > : Listar installerade komponenter till en produkt.\n"
+#: uninstall.glade:241 uninstall.gtk2.glade:198
+msgid "Performing uninstall:"
+msgstr "Utför avinstallation:"
 
-#: uninstall.c:129
-#, c-format
-msgid "Signal %d caught. Aborting.\n"
-msgstr "Signal %d f�ngad. Avbryter.\n"
+#: uninstall.glade:275 uninstall.gtk2.glade:226
+msgid "[current component]"
+msgstr "[aktuell komponent]"
 
-#: uninstall.c:144
-#, c-format
-msgid "Could not change to directory: %s\n"
-msgstr "Kunde inte byta bibliotek till: %s\n"
+# SOME DESCRIPTIVE TITLE
+#: uninstall.glade:310
+msgid "%P %%"
+msgstr "%P %%"
 
-#: uninstall.c:169
-#, c-format
-msgid "Notice: the %s RPM was installed for this product.\n"
-msgstr "Notera: RPM-filen %s installedes f�r den h�r produkten.\n"
+#: uninstall.glade:369
+msgid "Cancel"
+msgstr "Avbryt"
 
-#: uninstall.c:202
-#, c-format
-msgid "Post-uninstall scripts for %s have failed.\n"
-msgstr "Post-avinstallationsskriptet f�r %s har misslyckats.\n"
+#: uninstall.glade:383
+msgid "Finished"
+msgstr "Klar"
 
-#: uninstall.c:207
-#, c-format
-msgid ""
-"Component %s has been successfully uninstalled.\n"
-"\n"
-msgstr "Komponenten %s har avinstallerats.\n"
-"\n"
+#: uninstall.gtk2.glade:151
+msgid "Uninstall"
+msgstr "Avinstallera"
 
-#: uninstall.c:227
-#, c-format
-msgid "Uninstall ? [Y/n] "
-msgstr "Avinstallera ? [J/n] "
-
-#: uninstall.c:231
-msgid "n"
-msgstr "n"
-
-#: uninstall.c:231
-msgid "N"
-msgstr "N"
-
-#: uninstall.c:232
-#, c-format
-msgid "Aborted.\n"
-msgstr "Avbruten.\n"
-
-#: uninstall.c:282
-#, c-format
-msgid ""
-"No write access to the installation directory.\n"
-"Aborting.\n"
-msgstr ""
-"Kan inte skriva till installationskatalogen.\n"
-"Avbryter.\n"
-
-#: uninstall.c:290
-#, c-format
-msgid ""
-"No write access to the registry file: %s.\n"
-"Aborting.\n"
-msgstr ""
-"Kan inte skriva till registerfilen: %s.\n"
-"Avbryter.\n"
-
-#: uninstall.c:514
-msgid "Warning: Unable to replicate uninstallation program.\n"
-msgstr "Varning: Kan inte g�ra en replika av avinstallationsprogrammet.\n"
-
-#: uninstall.c:518
-#, c-format
-msgid "Unable to open %s for writing.\n"
-msgstr "Kan inte hitta komponent %s\n"
-
-#: uninstall.c:522
-#, c-format
-msgid "Unable to open %s for copying.\n"
-msgstr "Kan inte hitta komponent %s\n"
-
-#: uninstall.c:534
-msgid "Couldn't change to install directory\n"
-msgstr "Kunde inte byta till installationskatalogen\n"
-
-#: uninstall.c:585
-msgid "Installed products:\n"
-msgstr "Installerade produkter:\n"
-
-#: uninstall.c:593
-#, c-format
-msgid ""
-"installed in %s\n"
-"\tComponents:\n"
-msgstr ""
-"installerad i %s\n"
-"\tKomponenter:\n"
-
-#: uninstall.c:600
-msgid " Error while accessing product info\n"
-msgstr " Fel vid h�mtning av produktinformation\n"
-
-#: uninstall.c:604
-msgid ""
-"No products could be found. Maybe you need to run as a different user?\n"
-msgstr "Inga produkter funna. Du beh�ver kanske k�ra som en annan anv�ndare?\n"
-
-#: uninstall.c:616
-#, c-format
-msgid "Could not open product information for %s\n"
-msgstr "Kunde inte �ppna produktinformation f�r %s\n"
-
-#: uninstall.c:624
-#, c-format
-msgid ""
-"Product: %s\n"
-"Installed in %s\n"
-msgstr ""
-"Produkt: %s\n"
-"Installerad i %s\n"
-
-#: uninstall.c:630
-msgid "Components:\n"
-msgstr "Komponenter:\n"
-
-#: uninstall.c:652
-#, c-format
-msgid "Failed to properly uninstall component %s\n"
-msgstr "Kan inte avinstallera komponent %s helt\n"
-
-#: uninstall.c:655
-#, c-format
-msgid "Unable to find component %s\n"
-msgstr "Kan inte hitta komponent %s\n"
-
-#: uninstall.c:666
-msgid "An error occured during the uninstallation process.\n"
-msgstr "Ett fel uppstod under avinstallationen.\n"
-
-#: uninstall.c:670
-#, c-format
-msgid ""
-"%s has been successfully uninstalled.\n"
-"\n"
-msgstr "Avinstallation av %s lyckades.\n"
-"\n"
-
-#: uninstall_ui.c:71
-msgid "OK"
-msgstr "OK"
-
-#: uninstall_ui.c:78
+#: uninstall_ui.c:86
 msgid "Abort"
 msgstr "Avbryt"
 
-#: uninstall_ui.c:93
+#: uninstall_ui.c:101
 msgid "Message"
 msgstr "Meddelande"
 
-#: uninstall_ui.c:228
+#: uninstall_ui.c:236
 #, c-format
 msgid "%d MB"
 msgstr "%d MB"
 
-#: uninstall_ui.c:337
+#: uninstall_ui.c:345
 #, c-format
 msgid ""
 "Uninstallation of component %s has failed!\n"
 "The whole uninstallation may be incomplete.\n"
 msgstr ""
 "Avinstallation av %s misslyckades!\n"
-"Avinstallationen kan vara ofullst�ndig.\n"
+"Avinstallationen kan vara ofullständig.\n"
 
-#: uninstall_ui.c:389
+#: uninstall_ui.c:397
 #, c-format
 msgid ""
 "Uninstallation of product %s has failed!\n"
@@ -266,32 +1036,63 @@ msgstr ""
 "Avinstallation av %s misslyckades!\n"
 "Avbryter resterande avinstallation.\n"
 
-#: uninstall_ui.c:416
+#: uninstall_ui.c:424
 msgid "Uninstall cancelled"
-msgstr "Avinstallation avbruten"
+msgstr "Avinstallationen avbröts"
 
-#: uninstall_ui.c:419
+#: uninstall_ui.c:427
 msgid "Uninstall aborted"
-msgstr "Avinstallation avbruten"
+msgstr "Avinstallationen avbröts"
 
-#: uninstall_ui.c:422
+#: uninstall_ui.c:430
 msgid "Uninstall complete"
-msgstr "Avinstallation klar"
+msgstr "Avinstallationen slutfördes"
 
-#: uninstall_ui.c:515
+#: uninstall_ui.c:540
 #, c-format
 msgid "No uninstall_vbox in glade file!\n"
 msgstr "Ingen uninstall_vbox i glade-filen!\n"
 
-#: uninstall_ui.c:547
+#: uninstall_ui.c:572
 msgid "Complete uninstall"
-msgstr "Komplett avinstallation"
+msgstr "Fullständig avinstallation"
 
-#: uninstall_ui.c:584
+#: uninstall_ui.c:609
 msgid ""
 "No products were installed by this user.\n"
 "You may need to run this tool as an administrator."
 msgstr ""
-"Inga produkter �r installerade av denna anv�ndare.\n"
-"Kanske du m�ste anv�nda detta verktyg som administrat�r."
+"Den här användaren har inte installerat några produkter.\n"
+"Du kan behöva köra verktyget som administratör."
 
+#, c-format
+#~ msgid ""
+#~ "Usage: %s [args]\n"
+#~ "args can be any of the following:\n"
+#~ "\n"
+#~ "  -h      : Print this help message.\n"
+#~ "  -l      : List all installed products and components.\n"
+#~ "  -v      : Get version information.\n"
+#~ "  product [component1] [component2] ... : Uninstalls the specified "
+#~ "product, or its subcomponent(s).\n"
+#~ "  product < -l > : List installed subcomponents of product.\n"
+#~ msgstr ""
+#~ "Användning: %s [argument]\n"
+#~ "\n"
+#~ "Argument kan vara ett eller flera av dessa:\n"
+#~ "  -h      : Skriver ut detta hjälpmeddelande.\n"
+#~ "  -l      : Listar alla installerade produkter och komponenter.\n"
+#~ "  -v      : Hämtar versionsinformation.\n"
+#~ "  produkt [komponent1] [komponent2] ... : Avinstallerar den specifika "
+#~ "produkten, eller dess komponent.\n"
+#~ "  produkt < -l > : Listar installerade komponenter till en produkt.\n"
+
+#, c-format
+#~ msgid "Uninstall ? [Y/n] "
+#~ msgstr "Avinstallera ? [J/n] "
+
+#~ msgid "n"
+#~ msgstr "n"
+
+#~ msgid "An error occured during the uninstallation process.\n"
+#~ msgstr "Ett fel uppstod under avinstallationen.\n"

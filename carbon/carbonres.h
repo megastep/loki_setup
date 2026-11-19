@@ -326,6 +326,5 @@ void carbon_SetProperWindowSize(CarbonRes *, OptionsBox *);
 void carbon_SetUninstallWindowSize(OptionsBox *);
 OptionsButton *carbon_GetButtonByName(OptionsBox *, const char *);
 void carbon_RefreshOptions(OptionsBox *);
-void carbon_AuthorizeUser();
 
 #endif

@@ -14,3 +14,13 @@ setup.gtk2
 xsu
 loki_uninstall
 uninstall
+config.guess
+config.sub
+install-sh
+config.h.in
+testcd
+testxml
+*.d
+
+/testencoding
+/testrepair

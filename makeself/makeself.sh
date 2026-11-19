@@ -292,7 +292,10 @@ none)
     ;;
 esac
 
-tmpfile="${TMPDIR:=/tmp}/mkself$$"
+tmpwork=$(mktemp -d "${TMPDIR:-/tmp}/makeself.XXXXXX") || exit 1
+trap 'rm -rf "$tmpwork"' 0
+trap 'exit 1' 1 2 3 15
+tmpfile="$tmpwork/payload"
 
 if test -f "$HEADER"; then
 	oldarchname="$archname"
@@ -320,7 +323,7 @@ if test "$APPEND" = n; then
     fi
 fi
 
-USIZE=`du -ks $archdir | awk '{print $1}'`
+USIZE=`du -ks "$archdir" | awk '{print $1}'`
 DATE=`LC_ALL=C date`
 
 if test "." = "$archdirname"; then
@@ -332,7 +335,7 @@ fi
 test -d "$archdir" || { echo "Error: $archdir does not exist."; rm -f "$tmpfile"; exit 1; }
 echo About to compress $USIZE KB of data...
 echo Adding files to archive named \"$archname\"...
-exec 3<> "$tmpfile"
+exec 3<> "$tmpfile" || exit 1
 (cd "$archdir" && ( tar $TAR_ARGS - . | eval "$GZIP_CMD" >&3 ) ) || { echo Aborting: Archive directory not found or temporary file: "$tmpfile" could not be created.; exec 3>&-; rm -f "$tmpfile"; exit 1; }
 exec 3>&- # try to close the archive
 

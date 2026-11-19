@@ -1,3 +1,4 @@
+#include "safe_path.h"
 /* ZIP plugin for setup */
 /* $Id: zip.c,v 1.13 2005-08-23 00:48:00 megastep Exp $ */
 
@@ -330,7 +331,8 @@ static int zip_load_entry(FILE *in, ZIPentry *entry, uint32 ofs_fixup)
 
     entry->name = (char *) malloc(fnamelen + 1);
     BAIL_IF_MACRO(entry->name == NULL, ERR_OUT_OF_MEMORY, 0);
-    if (fread(entry->name, fnamelen, 1, in) != 1)
+    if (!fnamelen || fread(entry->name, fnamelen, 1, in) != 1 ||
+        memchr(entry->name, '\0', fnamelen))
         goto zip_load_entry_puked;
 
     entry->name[fnamelen] = '\0';  /* null-terminate the filename. */
@@ -364,6 +366,7 @@ static int zip_load_entries(FILE *in, ZIPinfo *info,
         if (!zip_load_entry(in, &info->entries[i], data_ofs))
         {
             zip_free_entries(info->entries, i);
+            info->entries = NULL;
             return(0);
         } /* if */
     } /* for */
@@ -532,65 +535,6 @@ static int zip_parse_end_of_central_dir(install_info *info, const char *path,
  * Expand relative paths in symlinks, so people can't link outside of
  *  zip archive (for security reasons).
  */
-static void zip_expand_symlink_path(char *path)
-{
-    char *ptr = path;
-    char *prevptr = path;
-
-    while (1)
-    {
-        ptr = strchr(ptr, '/');
-        if (ptr == NULL)
-            break;
-
-        if (*(ptr + 1) == '.')
-        {
-            if (*(ptr + 2) == '/')
-            {
-                /* current dir in middle of string: ditch it. */
-                memmove(ptr, ptr + 2, strlen(ptr + 2) + 1);
-            } /* else if */
-
-            else if (*(ptr + 2) == '\0')
-            {
-                /* current dir at end of string: ditch it. */
-                *ptr = '\0';
-            } /* else if */
-
-            else if (*(ptr + 2) == '.')
-            {
-                if (*(ptr + 3) == '/')
-                {
-                    /* parent dir in middle: move back one, if possible. */
-                    memmove(prevptr, ptr + 4, strlen(ptr + 4) + 1);
-                    ptr = prevptr;
-                    while (prevptr != path)
-                    {
-                        prevptr--;
-                        if (*prevptr == '/')
-                        {
-                            prevptr++;
-                            break;
-                        } /* if */
-                    } /* while */
-                } /* if */
-
-                if (*(ptr + 3) == '\0')
-                {
-                    /* parent dir at end: move back one, if possible. */
-                    *prevptr = '\0';
-                } /* if */
-            } /* if */
-        } /* if */
-        else
-        {
-            prevptr = ptr;
-        } /* else */
-    } /* while */
-} /* zip_expand_symlink_path */
-
-
-
 /* Loki Setup plugin interface... */
 
 /* Initialize the plugin */
@@ -714,12 +658,14 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
         int symlnk = 0;
 
         compressed_position = 0;
-        snprintf(final, sizeof(final), "%s/%s", dest, entry->name);
+        if (!archive_path(final, dest, entry->name))
+            log_fatal(_("Unexpected data in installation file!"));
 
         if (entry->name[strlen(entry->name) - 1] == '/')
         {
             final[strlen(final) - 1] = '\0';  /* lose '/' at end. */
-            dir_create_hierarchy(info, final, 0755);
+            if (!restoring_corrupt())
+                dir_create_hierarchy(info, final, 0755);
             continue;
         } /* if */
 
@@ -729,9 +675,12 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
         if (fseek(in->fp, entry->offset, SEEK_SET) == -1)
             continue;
 
-        file_create_hierarchy(info, final);
-
         symlnk = zip_has_symlink_attr(entry);
+        if (symlnk && restoring_corrupt())
+            continue;
+        if (symlnk && (!entry->uncompressed_size ||
+                       entry->uncompressed_size >= ZIP_WRITEBUFSIZE))
+            log_fatal(_("Unexpected data in installation file!"));
 
         if (entry->compression_method != COMPMETH_NONE)
         {
@@ -751,21 +700,28 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
                int flen = strlen(final);
                char *p = &final[flen - 1];
                while ((*p != '/') && (flen > 0)) {
-                  *p = tolower(*p);
+                  *p = tolower((unsigned char)*p);
                   if (--flen)
                       p--;
                } /* while */
             } /* if */
+            if (restoring_corrupt() && !file_is_corrupt(final)) {
+                if (entry->compression_method != COMPMETH_NONE)
+                    inflateEnd(&zstr);
+                continue;
+            }
             out = file_open_install(info, final, (mut && *mut=='y') ? "wm" : "wb");
             if (!out)
             {
                 log_debug("ZIP: failed to open [%s] for write.", final);
-                inflateEnd(&zstr);
+                if (entry->compression_method != COMPMETH_NONE)
+                    inflateEnd(&zstr);
                 continue;
             } /* if */
         } /* if */
 
-        update(info, final, 0, entry->uncompressed_size, current_option);
+        if (update)
+            update(info, final, 0, entry->uncompressed_size, current_option);
 
         while (bw < entry->uncompressed_size)
         {
@@ -790,7 +746,8 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
                 } /* if */
 
                 bw += w;
-                update(info, final, bw, entry->uncompressed_size, current_option);
+                if (update)
+                    update(info, final, bw, entry->uncompressed_size, current_option);
             } /* if */
 
             else  /* compressed entry. */
@@ -802,7 +759,6 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
                     br = entry->compressed_size - compressed_position;
                     if (br == 0)  /* no more compressed data? */
                     {
-                        assert(zstr.avail_out == ZIP_WRITEBUFSIZE);
                         break;
                     } /* if */
                     else
@@ -831,63 +787,57 @@ static size_t ZIPCopy(install_info *info, const char *path, const char *dest, co
                 if (zstr.avail_out < ZIP_WRITEBUFSIZE)
                 {
                     int bytes_to_write = ZIP_WRITEBUFSIZE - zstr.avail_out;
-                    if ((symlnk) && (zstr.avail_out == 0))
-                    {
-                        assert(0);
-	                    log_debug("ZIP: out of buffer space reading symlink.");
-                        break;  /* no buffer, can't write yet: screwed. */
+                    if (symlnk) {
+                        if (rc == Z_STREAM_END) {
+                            bw = bytes_to_write;
+                            break;
+                        }
+                        if (zstr.avail_out == 0)
+                            break;
+                        continue;
                     }
-
+                    if ((uint32)bytes_to_write > entry->uncompressed_size - bw)
+                        break;
                     w = file_write(info, zip_buf_out, bytes_to_write, out);
-                    if (w != bytes_to_write)
+                    if (w != (size_t)bytes_to_write)
                         break;
                     info->installed_bytes += w;
 
                     bw += bytes_to_write;
-                    update(info, final, bw, entry->uncompressed_size, current_option);
+                    if (update)
+                        update(info, final, bw, entry->uncompressed_size, current_option);
                     zstr.next_out = zip_buf_out;
                     zstr.avail_out = ZIP_WRITEBUFSIZE;
                 } /* if */
+                if (rc == Z_STREAM_END)
+                    break;
             } /* else */
         } /* while */
 
         if (entry->compression_method != COMPMETH_NONE)
             inflateEnd(&zstr);
 
-        if (!symlnk)
+        if (bw != entry->uncompressed_size ||
+            (entry->compression_method != COMPMETH_NONE && symlnk && rc != Z_STREAM_END)) {
             file_close(info, out);
+            if (out && !restoring_corrupt())
+                remove_path(final, 0);
+            log_fatal(_("Unexpected data in installation file!"));
+        }
 
-        if (bw < entry->uncompressed_size)
-        {
-            log_debug("ZIP: Failed to fully write [%s]!", final);
-            if (!symlnk)
-                unlink(final);
-        } /* if */
-
-        if (symlnk)
-        {
-            char lnkname[PATH_MAX];
-            /* null-terminate string. */
-            zip_buf_out[entry->uncompressed_size] = '\0';
-            zip_expand_symlink_path((char *)zip_buf_out);
-            snprintf(lnkname, sizeof (lnkname), "%s/%s", dest, zip_buf_out);
-            file_symlink(info, lnkname, final);
-        } /* if */
-        else
-        {
-            retval += entry->uncompressed_size;
-			if ( user_mode )
-				file_chmod(info, final, user_mode);
-
-			if ( md5 ) { /* Verify the output file */
-			  char sum[CHECKSUM_SIZE+1];
-			  
-			  strcpy(sum, get_md5(out->md5.buf));
-			  if ( strcasecmp(md5, sum) ) {
-				log_fatal(_("File '%s' has an invalid checksum! Aborting."), final);
-			  }
-			}
-        } /* else */
+        if (symlnk) {
+            if (memchr(zip_buf_out, '\0', bw))
+                log_fatal(_("Unexpected data in installation file!"));
+            zip_buf_out[bw] = '\0';
+            if (archive_symlink(info, dest, entry->name, (char *)zip_buf_out, final) < 0)
+                log_fatal(_("Unexpected data in installation file!"));
+        } else {
+            file_verify_checksum(out, md5);
+            file_close(info, out);
+            retval += bw;
+            if (user_mode)
+                file_chmod(info, final, user_mode);
+        }
     } /* for */
 
 zip_zipsize_end:

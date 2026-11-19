@@ -1,0 +1,1578 @@
+# Portuguese translation for Loki Setup.
+# This file is distributed under the same license as the loki_setup package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Loki Setup 2.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-18 05:22-0800\n"
+"PO-Revision-Date: 2026-11-18 17:00-0800\n"
+"Last-Translator: Loki Setup contributors\n"
+"Language-Team: Portuguese\n"
+"Language: pt\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: carbon_ui.c:315 gtk_ui.c:707
+msgid "Ready to install!"
+msgstr "Pronto para instalar!"
+
+#: carbon_ui.c:337 carbon_ui.c:349 gtk_ui.c:724 gtk_ui.c:738
+#, c-format
+msgid "%d MB"
+msgstr "%d MB"
+
+#: carbon_ui.c:374
+msgid "Can't find install dir!"
+msgstr "Não foi possível encontrar a pasta de instalação!"
+
+#: carbon_ui.c:395
+msgid "Can't find default install dir!"
+msgstr "Não foi possível encontrar a pasta de instalação predefinida!"
+
+#: carbon_ui.c:478 console_ui.c:695 dialog_ui.c:710 gtk_ui.c:399
+#, c-format
+msgid ""
+"Installation could not proceed due to the following error:\n"
+"%s\n"
+"Try to use 'Expert' installation."
+msgstr ""
+"A instalação não pôde continuar devido ao seguinte erro:\n"
+"%s\n"
+"Experimente a instalação «Avançada»."
+
+#: carbon_ui.c:524 gtk_ui.c:573
+msgid ""
+"Are you sure you want to abort\n"
+"this installation?"
+msgstr ""
+"Tem a certeza de que pretende cancelar\n"
+"esta instalação?"
+
+#: carbon_ui.c:733
+msgid "CD keys do not match.  Please try again."
+msgstr "As chaves do CD não coincidem. Tente novamente."
+
+#: carbon_ui.c:735
+msgid "Please specify a CD key!"
+msgstr "Introduza uma chave do CD!"
+
+#: carbon_ui.c:753
+msgid "CD key is invalid!"
+msgstr "A chave do CD é inválida!"
+
+#: carbon_ui.c:952
+#, c-format
+msgid "This install requires Mac OS X %s or later."
+msgstr "Esta instalação requer o Mac OS X %s ou posterior."
+
+#: carbon_ui.c:983 gtk_ui.c:1732
+#, c-format
+msgid "%s / %s Setup"
+msgstr "Instalação de %s / %s"
+
+#: carbon_ui.c:985 gtk_ui.c:1734
+#, c-format
+msgid "%s Setup"
+msgstr "Instalação de %s"
+
+#: carbon_ui.c:1335
+#, c-format
+msgid "Installing %s : %d%%"
+msgstr "A instalar %s: %d%%"
+
+#: carbon_ui.c:1515 gtk_ui.c:2172 gtk_ui.c:2175
+#, c-format
+msgid "Type '%s' to start the program"
+msgstr "Digite «%s» para iniciar o programa"
+
+#. TRANSLATORS: Use the single-character shortcut shown in the yes/no prompts.
+#: console_ui.c:39
+msgid "Y"
+msgstr "S"
+
+#. TRANSLATORS: Use the single-character shortcut shown in the yes/no prompts.
+#: console_ui.c:41
+msgid "N"
+msgstr "N"
+
+#: console_ui.c:65
+msgid "Y/n"
+msgstr "S/n"
+
+#: console_ui.c:68
+msgid "N/y"
+msgstr "N/s"
+
+#: console_ui.c:71
+#, c-format
+msgid "%s [Press Enter] "
+msgstr "%s [Prima Enter] "
+
+#: console_ui.c:75 console_ui.c:101
+#, c-format
+msgid "Warning, invalid yesno prompt: %s\n"
+msgstr "Aviso: pergunta de sim ou não inválida: %s\n"
+
+#: console_ui.c:95
+msgid "Y/n/?"
+msgstr "S/n/?"
+
+#: console_ui.c:98
+msgid "N/y/?"
+msgstr "N/s/?"
+
+#: console_ui.c:118
+msgid "Continue?"
+msgstr "Continuar?"
+
+#: console_ui.c:183
+#, c-format
+msgid "Previously installed option '%s' will be installed.\n"
+msgstr "A opção «%s», instalada anteriormente, será instalada.\n"
+
+#: console_ui.c:213
+#, c-format
+msgid "'%s' option will be installed.\n"
+msgstr "A opção «%s» será instalada.\n"
+
+#: console_ui.c:218
+#, c-format
+msgid "'%s' :\n"
+msgstr "«%s»:\n"
+
+#: console_ui.c:226
+#, c-format
+msgid "Option: '%s' ?"
+msgstr "Opção «%s»?"
+
+#: console_ui.c:247 console_ui.c:342 dialog_ui.c:104 dialog_ui.c:274
+msgid "Do you agree with the license?"
+msgstr "Aceita o acordo de licença?"
+
+#: console_ui.c:292
+#, c-format
+msgid "No help available\n"
+msgstr "Não há ajuda disponível\n"
+
+#: console_ui.c:312
+#, c-format
+msgid "----====== %s / %s installation program ======----\n"
+msgstr "----====== Programa de instalação de %s / %s ======----\n"
+
+#: console_ui.c:315
+#, c-format
+msgid "----====== %s installation program ======----\n"
+msgstr "----====== Programa de instalação de %s ======----\n"
+
+#: console_ui.c:319
+#, c-format
+msgid "You are running a %s machine with %s (%s)\n"
+msgstr "Está a utilizar um computador %s com %s (%s)\n"
+
+#: console_ui.c:321
+#, c-format
+msgid "You are running a %s machine (%s)\n"
+msgstr "Está a utilizar um computador %s (%s)\n"
+
+#: console_ui.c:323
+#, c-format
+msgid "Press Ctrl+C at any time to cancel installation.\n"
+msgstr "Prima Ctrl+C a qualquer momento para cancelar a instalação.\n"
+
+#: console_ui.c:361 dialog_ui.c:130
+#, c-format
+msgid "Would you like to read the %s file ?"
+msgstr "Pretende ler o ficheiro %s?"
+
+#: console_ui.c:408
+msgid "Please choose the product to install, or Q to quit. "
+msgstr "Escolha o produto a instalar ou prima Q para sair. "
+
+#: console_ui.c:438 dialog_ui.c:419
+msgid "Please enter the installation path"
+msgstr "Introduza o caminho de instalação"
+
+#: console_ui.c:443
+#, c-format
+msgid "Install path set to: %s\n"
+msgstr "Caminho de instalação definido como %s\n"
+
+#: console_ui.c:458 console_ui.c:522 dialog_ui.c:439 dialog_ui.c:511
+#, c-format
+msgid "No write permission to %s\n"
+msgstr "Sem permissão de escrita em %s\n"
+
+#: console_ui.c:484 dialog_ui.c:466
+msgid "Do you want to install symbolic links to a directory in your path?"
+msgstr "Pretende criar ligações simbólicas numa pasta do seu PATH?"
+
+#: console_ui.c:491 dialog_ui.c:475
+msgid "Please enter the path in which to create the symbolic links"
+msgstr "Introduza o caminho onde devem ser criadas as ligações simbólicas"
+
+#: console_ui.c:496
+#, c-format
+msgid "Binary path set to: %s\n"
+msgstr "Caminho dos executáveis definido como %s\n"
+
+#: console_ui.c:503
+msgid "Please enter the path in which to install manual pages for this product"
+msgstr "Introduza o caminho onde devem ser instaladas as páginas de manual deste produto"
+
+#: console_ui.c:513 dialog_ui.c:502
+#, c-format
+msgid ""
+"Binary path must be different than the install path.\n"
+"The binary path must be an existing directory.\n"
+msgstr ""
+"O caminho dos executáveis deve ser diferente do caminho de instalação.\n"
+"A pasta dos executáveis tem de existir.\n"
+
+#: console_ui.c:558
+#, c-format
+msgid ""
+"\n"
+"%s component\n"
+"\n"
+msgstr ""
+"\n"
+"Componente %s\n"
+"\n"
+
+#: console_ui.c:571 dialog_ui.c:540
+msgid "Do you want to install startup menu entries?"
+msgstr "Pretende adicionar entradas ao menu de aplicações?"
+
+#: console_ui.c:577
+#, c-format
+msgid "Installing to %s\n"
+msgstr "A instalar em %s\n"
+
+#: console_ui.c:578
+#, c-format
+msgid "%d MB available, %d MB will be installed.\n"
+msgstr "%d MB disponíveis. Serão instalados %d MB.\n"
+
+#: console_ui.c:581
+msgid "Continue install?"
+msgstr "Continuar a instalação?"
+
+#: console_ui.c:597 dialog_ui.c:567
+msgid "Please enter your CD key"
+msgstr "Introduza a chave do CD"
+
+#: console_ui.c:605 gtk_ui.c:607
+#, c-format
+msgid "ERROR: vcdk is missing. Installation aborted.\n"
+msgstr "ERRO: Não foi encontrado o programa vcdk. Instalação interrompida.\n"
+
+#: console_ui.c:612 dialog_ui.c:587
+#, c-format
+msgid ""
+"CD key is invalid!\n"
+"Please double check your key and enter it again.\n"
+msgstr ""
+"A chave do CD é inválida!\n"
+"Verifique a chave e introduza-a novamente.\n"
+
+#: console_ui.c:636
+#, c-format
+msgid "Installing %s ...\n"
+msgstr "A instalar %s...\n"
+
+#: console_ui.c:657 dialog_ui.c:648
+#, c-format
+msgid "Install aborted - cleaning up files\n"
+msgstr "Instalação interrompida. A remover os ficheiros.\n"
+
+#: console_ui.c:665
+#, c-format
+msgid "Installation complete.\n"
+msgstr "Instalação concluída.\n"
+
+#: console_ui.c:669
+msgid "Would you like to start now?"
+msgstr "Pretende iniciar o programa agora?"
+
+#: console_ui.c:674
+msgid ""
+"If you run the program as root, the preferences will be stored in\n"
+"root's home directory instead of your user account directory."
+msgstr ""
+"Se executar o programa como root, as preferências serão guardadas na\n"
+"pasta pessoal de root em vez da sua pasta pessoal."
+
+#: console_ui.c:690
+msgid "Do you want to proceed with Recommended installation?"
+msgstr "Pretende continuar com a instalação recomendada?"
+
+#: console_ui.c:707
+#, c-format
+msgid "Thank you for installing %s!\n"
+msgstr "Obrigado por instalar %s!\n"
+
+#: console_ui.c:712
+#, c-format
+msgid "Please visit our website for updates and support.\n"
+msgstr "Visite o nosso site para obter atualizações e assistência.\n"
+
+#: console_ui.c:717
+msgid "Would you like to launch web browser?"
+msgstr "Pretende abrir o navegador?"
+
+#: console_ui.c:728
+#, c-format
+msgid "Standard input is not a terminal!\n"
+msgstr "A entrada padrão não é um terminal!\n"
+
+#: copy.c:301
+#, c-format
+msgid "Unable to create %s symlink pointing to %s"
+msgstr "Não foi possível criar a ligação simbólica %s para %s"
+
+#: copy.c:382
+#, c-format
+msgid "Failed to update check sum for %s"
+msgstr "Não foi possível atualizar a soma de verificação de %s"
+
+#: copy.c:386
+#, c-format
+msgid "Error while running process command: %s"
+msgstr "Erro ao executar o comando de processamento: %s"
+
+#: copy.c:403
+#, c-format
+msgid "Failed to change SELinux context for file '%s' - not supported"
+msgstr "Não foi possível alterar o contexto SELinux do ficheiro «%s»: operação não suportada"
+
+#: copy.c:405
+#, c-format
+msgid "Failed to change SELinux context for file '%s'"
+msgstr "Não foi possível alterar o contexto SELinux do ficheiro «%s»"
+
+#: copy.c:410
+#, c-format
+msgid "Invalid SELinux context '%s' for file '%s'"
+msgstr "Contexto SELinux «%s» inválido para o ficheiro «%s»"
+
+#: copy.c:420 plugins/cpio.c:181 plugins/rar.c:248 plugins/tar.c:120
+#: plugins/uz2.c:203 plugins/zip.c:887
+#, c-format
+msgid "File '%s' has an invalid checksum! Aborting."
+msgstr "O ficheiro «%s» tem uma soma de verificação inválida! A interromper."
+
+#: copy.c:463
+#, c-format
+msgid "Unable to copy directory '%s'"
+msgstr "Não foi possível copiar a pasta «%s»"
+
+#: copy.c:498
+#, c-format
+msgid "1 Unable to find file '%s' in '%s'"
+msgstr "1 Não foi possível encontrar o ficheiro «%s» em «%s»"
+
+#: copy.c:543
+#, c-format
+msgid "Unable to find file '%s' on any of the CDROM drives"
+msgstr "Não foi possível encontrar o ficheiro «%s» em nenhuma unidade de CD-ROM"
+
+#: copy.c:561
+#, c-format
+msgid "2 Unable to find file '%s' in '%s'"
+msgstr "2 Não foi possível encontrar o ficheiro «%s» em «%s»"
+
+#: copy.c:616 copy.c:617
+#, c-format
+msgid "Unable to copy man page '%s'"
+msgstr "Não foi possível copiar a página de manual «%s»"
+
+#: copy.c:660 copy.c:667
+#, c-format
+msgid "Could not create temporary script: %s"
+msgstr "Não foi possível criar o script temporário: %s"
+
+#: copy.c:710
+msgid "'binpath' attribute is mandatory for inline 'binary' tag"
+msgstr "O atributo «binpath» é obrigatório na etiqueta «binary» quando o executável está incorporado"
+
+#: copy.c:715
+msgid "'binpath' attribute must not contain slashes for inline 'binary' tag"
+msgstr "O atributo «binpath» não pode conter barras na etiqueta «binary» quando o executável está incorporado"
+
+#: copy.c:753
+msgid "Binary install path is too long"
+msgstr "O caminho de instalação dos executáveis é demasiado longo"
+
+#: copy.c:790
+#, c-format
+msgid "find '%s'"
+msgstr "procurar «%s»"
+
+#: copy.c:812 copy.c:813
+#, c-format
+msgid "Unable to find file '%s' in '%s'"
+msgstr "Não foi possível encontrar o ficheiro «%s» em «%s»"
+
+#: copy.c:834 copy.c:835
+#, c-format
+msgid "Unable to copy file '%s'"
+msgstr "Não foi possível copiar o ficheiro «%s»"
+
+#: copy.c:884
+msgid "Running script. Please wait..."
+msgstr "A executar o script. Aguarde..."
+
+#: copy.c:1088
+msgid "The remove_msg element should be within a component!\n"
+msgstr "O elemento remove_msg deve estar dentro de um componente!\n"
+
+#: copy.c:1106
+msgid "Component element needs to have a name"
+msgstr "O elemento component tem de ter um nome"
+
+#: copy.c:1109
+msgid "Component element needs to have a version"
+msgstr "O elemento component tem de ter uma versão"
+
+#: copy.c:1133
+msgid "Malformed 'environment' element in XML file : missing 'var' property"
+msgstr "Elemento «environment» inválido no XML: falta o atributo «var»"
+
+#: copy.c:1310
+#, c-format
+msgid "Suspect size value for option %s\n"
+msgstr "Valor de tamanho suspeito para a opção %s\n"
+
+#: detect.c:344
+#, c-format
+msgid "Unmounting device %s"
+msgstr "A desmontar o dispositivo %s"
+
+#: detect.c:346 detect.c:377 detect.c:393
+#, c-format
+msgid "Failed to unmount device %s mounted on %s"
+msgstr "Não foi possível desmontar o dispositivo %s montado em %s"
+
+#: detect.c:462 detect.c:545 detect.c:585 detect.c:629
+#, c-format
+msgid "Mounted device %s"
+msgstr "Dispositivo %s montado"
+
+#: detect.c:820 detect.c:824
+#, c-format
+msgid ""
+"\n"
+"Please insert %s.\n"
+"Choose Yes to retry, No to cancel"
+msgstr ""
+"\n"
+"Insira %s.\n"
+"Escolha Sim para tentar novamente ou Não para cancelar"
+
+#: detect.c:827
+#, c-format
+msgid ""
+"\n"
+"Please mount %s.\n"
+"Choose Yes to retry, No to cancel"
+msgstr ""
+"\n"
+"Monte %s.\n"
+"Escolha Sim para tentar novamente ou Não para cancelar"
+
+#: detect.c:892
+#, c-format
+msgid "Detected locale is %s\n"
+msgstr "Definição regional detetada: %s\n"
+
+#: detect.c:1069
+#, c-format
+msgid "Invalid matching policy: %s"
+msgstr "Critério de correspondência inválido: %s"
+
+#: dialog_ui.c:47 gtk_ui.c:1030
+msgid "Message"
+msgstr "Mensagem"
+
+#: dialog_ui.c:50
+msgid "Request"
+msgstr "Pedido"
+
+#: dialog_ui.c:65
+#, c-format
+msgid "%s / %s Installation"
+msgstr "Instalação de %s / %s"
+
+#: dialog_ui.c:69
+#, c-format
+msgid "%s Installation"
+msgstr "Instalação de %s"
+
+#: dialog_ui.c:80
+#, c-format
+msgid ""
+"You are running a %s machine with %s\n"
+"Operating System: %s %d.%d"
+msgstr ""
+"Está a utilizar um computador %s com %s\n"
+"Sistema operativo: %s %d.%d"
+
+#: dialog_ui.c:101 dialog_ui.c:272 image/setup.data/setup.glade:2319
+#: image/setup.data/setup.gtk2.glade:8
+msgid "License Agreement"
+msgstr "Acordo de licença"
+
+#: dialog_ui.c:132
+msgid "README"
+msgstr "README"
+
+#: dialog_ui.c:224
+msgid "Component"
+msgstr "Componente"
+
+#: dialog_ui.c:243 dialog_ui.c:700
+#, c-format
+msgid "Installation of %s"
+msgstr "Instalação de %s"
+
+#: dialog_ui.c:245
+msgid ""
+"No installation options detected. If the product is already\n"
+"installed, please uninstall it before reinstalling.\n"
+msgstr ""
+"Não foram detetadas opções de instalação. Se o produto já estiver\n"
+"instalado, desinstale-o antes de o reinstalar.\n"
+
+#: dialog_ui.c:280
+#, c-format
+msgid "Option-specific EULA not found for '%s', can't toggle\n"
+msgstr "Não foi encontrado um acordo de licença específico para «%s». Não é possível alterar a seleção.\n"
+
+#: dialog_ui.c:281 dialog_ui.c:502 dialog_ui.c:514 dialog_ui.c:580
+msgid "Error"
+msgstr "Erro"
+
+#: dialog_ui.c:299 dialog_ui.c:311
+msgid "Choose the options"
+msgstr "Escolher as opções"
+
+#: dialog_ui.c:301
+#, c-format
+msgid "Option '%s' is required.\n"
+msgstr "A opção «%s» é obrigatória.\n"
+
+#: dialog_ui.c:338
+#, c-format
+msgid "Component: %s"
+msgstr "Componente: %s"
+
+#: dialog_ui.c:387
+msgid "Choose the product"
+msgstr "Escolher o produto"
+
+#: dialog_ui.c:388
+msgid "Please pick a product to install"
+msgstr "Selecione um produto para instalar"
+
+#: dialog_ui.c:418
+msgid "Installation path"
+msgstr "Caminho de instalação"
+
+#: dialog_ui.c:440
+msgid "Failed permissions"
+msgstr "Permissões insuficientes"
+
+#: dialog_ui.c:474
+msgid "Symlink path"
+msgstr "Caminho das ligações simbólicas"
+
+#: dialog_ui.c:490
+msgid "Manual path"
+msgstr "Caminho das páginas de manual"
+
+#: dialog_ui.c:491
+msgid "Please enter the path in which to install manual pages"
+msgstr "Introduza o caminho onde devem ser instaladas as páginas de manual"
+
+#: dialog_ui.c:527
+msgid "Please choose the components to install"
+msgstr "Escolha os componentes a instalar"
+
+#: dialog_ui.c:529
+msgid "Please choose the options to install"
+msgstr "Escolha as opções a instalar"
+
+#: dialog_ui.c:566
+msgid "CD Key"
+msgstr "Chave do CD"
+
+#: dialog_ui.c:580
+msgid "vcdk is missing. Installation aborted.\n"
+msgstr "Não foi encontrado o programa vcdk. Instalação interrompida.\n"
+
+#: dialog_ui.c:587 gtk_ui.c:607 gtk_ui.c:616
+msgid "Problem"
+msgstr "Problema"
+
+#: dialog_ui.c:630
+#, c-format
+msgid "Installing %s ..."
+msgstr "A instalar %s..."
+
+#: dialog_ui.c:631 dialog_ui.c:633
+msgid "Installing..."
+msgstr "A instalar..."
+
+#: dialog_ui.c:648
+msgid "Aborting"
+msgstr "A interromper"
+
+#: dialog_ui.c:658
+msgid "Would you like to launch a Web browser?"
+msgstr "Pretende abrir o navegador?"
+
+#: dialog_ui.c:672
+msgid ""
+"Installation complete!\n"
+"Would you like to start now?"
+msgstr ""
+"Instalação concluída!\n"
+"Pretende iniciar o programa agora?"
+
+#: dialog_ui.c:676
+msgid "Finished"
+msgstr "Terminado"
+
+#: dialog_ui.c:676
+msgid "Installation complete!"
+msgstr "Instalação concluída!"
+
+#: dialog_ui.c:685 image/setup.data/setup.glade:152
+#: image/setup.data/setup.gtk2.glade:410
+msgid "Recommended"
+msgstr "Recomendada"
+
+#: dialog_ui.c:685
+msgid "Express installation using detected defaults"
+msgstr "Instalação rápida com as predefinições detetadas"
+
+#: dialog_ui.c:686 image/setup.data/setup.glade:169
+#: image/setup.data/setup.gtk2.glade:431
+msgid "Expert"
+msgstr "Avançada"
+
+#: dialog_ui.c:686
+msgid "Full control over the installation parameters"
+msgstr "Controlo total dos parâmetros de instalação"
+
+#: dialog_ui.c:701
+msgid "Please select the class of installation"
+msgstr "Selecione o tipo de instalação"
+
+#: file.c:119 file.c:165 file.c:172 install.c:1196 install.c:1218
+#: install.c:1240 install.c:1261 install.c:1276 install.c:1327
+msgid "Out of memory"
+msgstr "Memória insuficiente"
+
+#: file.c:144
+#, c-format
+msgid "File '%25s' already exists, overwrite?"
+msgstr "O ficheiro «%25s» já existe. Substituí-lo?"
+
+#: file.c:149
+#, c-format
+msgid "File exists: '%s'"
+msgstr "O ficheiro existe: «%s»"
+
+#: file.c:183
+#, c-format
+msgid "Failed to open file %s"
+msgstr "Não foi possível abrir o ficheiro %s"
+
+#: file.c:213
+#, c-format
+msgid "File '%s' may be in BZIP2 format, but support was not compiled in!"
+msgstr "O ficheiro «%s» pode estar no formato BZIP2, mas o programa foi compilado sem suporte para esse formato!"
+
+#: file.c:224
+#, c-format
+msgid "Couldn't read from file: %s"
+msgstr "Não foi possível ler o ficheiro: %s"
+
+#: file.c:232
+#, c-format
+msgid "Installing file %s"
+msgstr "A instalar o ficheiro %s"
+
+#: file.c:237
+#, c-format
+msgid "Couldn't write to file: %s"
+msgstr "Não foi possível escrever no ficheiro: %s"
+
+#: file.c:263
+msgid "Read on write stream"
+msgstr "Tentativa de leitura num fluxo de escrita"
+
+#: file.c:302
+#, c-format
+msgid "Read failure on %s"
+msgstr "Falha de leitura em %s"
+
+#: file.c:373
+msgid "Skip zeroes on write stream"
+msgstr "Tentativa de ignorar zeros num fluxo de escrita"
+
+#: file.c:393 file.c:459 file.c:466
+#, c-format
+msgid "Short write on %s"
+msgstr "Escrita incompleta em %s"
+
+#: file.c:399
+msgid "Write on read stream"
+msgstr "Tentativa de escrita num fluxo de leitura"
+
+#: file.c:429
+#, c-format
+msgid "Write failure on %s"
+msgstr "Falha de escrita em %s"
+
+#: file.c:492
+#, c-format
+msgid "Trying to create a symbolic link on the same file: %s\n"
+msgstr "Tentativa de criar uma ligação simbólica para o próprio ficheiro: %s\n"
+
+#: file.c:497
+#, c-format
+msgid "Creating symbolic link: %s --> %s\n"
+msgstr "A criar a ligação simbólica: %s --> %s\n"
+
+#: file.c:506
+#, c-format
+msgid "Can't remove existing symlink %s: %s"
+msgstr "Não foi possível remover a ligação simbólica existente %s: %s"
+
+#: file.c:510 file.c:541 file.c:561 file.c:580
+#, c-format
+msgid "Can't create %s: %s"
+msgstr "Não foi possível criar %s: %s"
+
+#: file.c:535
+#, c-format
+msgid "Creating directory: %s\n"
+msgstr "A criar a pasta: %s\n"
+
+#: file.c:554
+#, c-format
+msgid "Creating FIFO: %s\n"
+msgstr "A criar o canal FIFO: %s\n"
+
+#: file.c:573
+#, c-format
+msgid "Creating device: %s\n"
+msgstr "A criar o dispositivo: %s\n"
+
+#: file.c:593
+#, c-format
+msgid "Can't change permissions for %s: %s"
+msgstr "Não foi possível alterar as permissões de %s: %s"
+
+#: file.c:627 file.c:651
+#, c-format
+msgid "Unable to read %s"
+msgstr "Não foi possível ler %s"
+
+#: file.c:729
+msgid "BZ2 support not available"
+msgstr "O suporte para BZ2 não está disponível"
+
+#: file.c:754
+#, c-format
+msgid "BZ2: *** Symbol \"%s\" not found, bzip2 support disabled"
+msgstr "BZ2: *** O símbolo «%s» não foi encontrado. Suporte para bzip2 desativado."
+
+#: file.c:767
+#, c-format
+msgid "BZ2: Try open %s"
+msgstr "BZ2: A tentar abrir %s"
+
+#: file.c:773
+msgid "BZ2: *** Unable to open bzip2 library. bzip2 support disabled"
+msgstr "BZ2: *** Não foi possível abrir a biblioteca bzip2. Suporte para bzip2 desativado."
+
+#: file.c:777
+#, c-format
+msgid "BZ2: got %s"
+msgstr "BZ2: %s encontrado"
+
+#: file.c:808
+#, c-format
+msgid "Unable to create temporary directory: %s"
+msgstr "Não foi possível criar a pasta temporária: %s"
+
+#: file.c:827
+#, c-format
+msgid "Can not chdir to temporary directory: %s"
+msgstr "Não foi possível mudar para a pasta temporária: %s"
+
+#: file.c:834
+#, c-format
+msgid "Can not open temporary directory: %s"
+msgstr "Não foi possível abrir a pasta temporária: %s"
+
+#: file.c:845
+#, c-format
+msgid "Can not remove %s/%s: %s"
+msgstr "Não foi possível remover %s/%s: %s"
+
+#: gtk_ui.c:539
+msgid ""
+"If you run this as root, the preferences will be stored in\n"
+"root's home directory instead of your user account directory."
+msgstr ""
+"Se executar este programa como root, as preferências serão guardadas na\n"
+"pasta pessoal de root em vez da sua pasta pessoal."
+
+#: gtk_ui.c:616
+msgid ""
+"CD key is invalid!\n"
+"Please double check your key and enter it again."
+msgstr ""
+"A chave do CD é inválida!\n"
+"Verifique a chave e introduza-a novamente."
+
+#: gtk_ui.c:688
+msgid "Please respond to the license dialog"
+msgstr "Responda à caixa de diálogo da licença"
+
+#: gtk_ui.c:1001
+msgid "OK"
+msgstr "OK"
+
+#: gtk_ui.c:1014
+msgid "Yes"
+msgstr "Sim"
+
+#: gtk_ui.c:1015
+msgid "No"
+msgstr "Não"
+
+#: gtk_ui.c:1026
+msgid "Choice Requested"
+msgstr "Selecione uma opção"
+
+#: gtk_ui.c:1133
+msgid ""
+"Warning: program_to_start is only meaningful when there are no symlinks.\n"
+msgstr "Aviso: program_to_start só se aplica quando não há ligações simbólicas.\n"
+
+#: gtk_ui.c:1197
+#, c-format
+msgid "Fatal error:  out of memory\n"
+msgstr "Erro fatal: memória insuficiente\n"
+
+#: gtk_ui.c:1206
+#, c-format
+msgid "Error: maximum of %d install_path entries exceeded\n"
+msgstr "Erro: foi excedido o máximo de %d entradas install_path\n"
+
+#: gtk_ui.c:1396
+msgid "Warning: No writable targets in path... You may want to be root.\n"
+msgstr "Aviso: não existem destinos com permissão de escrita no caminho. Poderá ter de executar o instalador como root.\n"
+
+#: gtk_ui.c:1417
+msgid "Unable to locate 'setup_menuitems_checkbox'"
+msgstr "Não foi possível localizar «setup_menuitems_checkbox»"
+
+#: gtk_ui.c:1683 gtk_ui.c:2115
+#, c-format
+msgid "Unable to open %s, aborting!\n"
+msgstr "Não foi possível abrir %s. A interromper!\n"
+
+#: gtk_ui.c:2197
+msgid "The update/reinstall was successfully completed!"
+msgstr "A atualização ou reinstalação foi concluída!"
+
+#: gtk_ui.c:2199 image/setup.data/setup.glade:1302
+#: image/setup.data/setup.gtk2.glade:1826
+msgid "The installation was successfully completed!"
+msgstr "A instalação foi concluída!"
+
+#: image/setup.data/setup.glade:58 image/setup.data/setup.glade:96
+#: image/setup.data/setup.gtk2.glade:299 image/setup.data/setup.gtk2.glade:338
+msgid "[image area]"
+msgstr "[área da imagem]"
+
+#: image/setup.data/setup.glade:132 image/setup.data/setup.gtk2.glade:382
+msgid "Please choose the class of installation."
+msgstr "Escolha o tipo de instalação."
+
+#: image/setup.data/setup.glade:150 image/setup.data/setup.gtk2.glade:408
+msgid "This will install the product with the default options and paths"
+msgstr "Instala o produto com as opções e os caminhos predefinidos"
+
+#: image/setup.data/setup.glade:167 image/setup.data/setup.gtk2.glade:429
+msgid ""
+"This will allow you to pick the installation paths and options to be "
+"installed "
+msgstr "Permite escolher os caminhos e as opções de instalação "
+
+#: image/setup.data/setup.glade:207 image/setup.data/setup.glade:815
+#: image/setup.data/setup.glade:1120 image/setup.data/setup.glade:1601
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: image/setup.data/setup.glade:231 image/setup.data/setup.glade:834
+#: image/setup.data/setup.glade:1139 image/setup.data/setup.glade:1225
+#: image/setup.data/setup.glade:1754 image/setup.data/setup.gtk2.glade:477
+#: image/setup.data/setup.gtk2.glade:1195
+#: image/setup.data/setup.gtk2.glade:1609
+#: image/setup.data/setup.gtk2.glade:1690
+#: image/setup.data/setup.gtk2.glade:2391
+msgid "_View Readme"
+msgstr "_Ver ficheiro README"
+
+#: image/setup.data/setup.glade:256 image/setup.data/setup.gtk2.glade:2448
+msgid "_Continue"
+msgstr "_Continuar"
+
+#: image/setup.data/setup.glade:292 image/setup.data/setup.gtk2.glade:903
+msgid "Global Options"
+msgstr "Opções gerais"
+
+#: image/setup.data/setup.glade:323 image/setup.data/setup.gtk2.glade:640
+msgid "Install path:"
+msgstr "Caminho de instalação:"
+
+#: image/setup.data/setup.glade:390 image/setup.data/setup.gtk2.glade:719
+msgid "Binary path:"
+msgstr "Caminho dos executáveis:"
+
+#: image/setup.data/setup.glade:441 image/setup.data/setup.gtk2.glade:756
+msgid "Symbolic links to installed binaries are placed here"
+msgstr "As ligações simbólicas para os executáveis instalados são criadas aqui"
+
+#: image/setup.data/setup.glade:466 image/setup.data/setup.gtk2.glade:801
+msgid "Install a symbolic link into the path"
+msgstr "Criar uma ligação simbólica no caminho"
+
+#: image/setup.data/setup.glade:488 image/setup.data/setup.gtk2.glade:823
+msgid "Man page path:"
+msgstr "Caminho das páginas de manual:"
+
+#: image/setup.data/setup.glade:557 image/setup.data/setup.gtk2.glade:1141
+msgid "Options"
+msgstr "Opções"
+
+#: image/setup.data/setup.glade:588 image/setup.data/setup.glade:614
+#: image/setup.data/setup.gtk2.glade:951 image/setup.data/setup.gtk2.glade:979
+msgid "0 MB"
+msgstr "0 MB"
+
+#: image/setup.data/setup.glade:660 image/setup.data/setup.gtk2.glade:1013
+msgid "[packages go here]"
+msgstr "[lista de pacotes]"
+
+#: image/setup.data/setup.glade:678 image/setup.data/setup.gtk2.glade:1046
+msgid "Free space:"
+msgstr "Espaço livre:"
+
+#: image/setup.data/setup.glade:704 image/setup.data/setup.gtk2.glade:1074
+msgid "Estimated size:"
+msgstr "Tamanho estimado:"
+
+#: image/setup.data/setup.glade:736 image/setup.data/setup.gtk2.glade:1103
+msgid "Startup menu entries (KDE/Gnome/CDE)"
+msgstr "Entradas no menu de aplicações (KDE/GNOME/CDE)"
+
+#: image/setup.data/setup.glade:848 image/setup.data/setup.gtk2.glade:1251
+msgid "_Begin Install"
+msgstr "_Iniciar instalação"
+
+#: image/setup.data/setup.glade:856 image/setup.data/setup.gtk2.glade:1292
+msgid "[options status]"
+msgstr "[estado das opções]"
+
+#: image/setup.data/setup.glade:905 image/setup.data/setup.gtk2.glade:1555
+msgid "Install Progress"
+msgstr "Progresso da instalação"
+
+#: image/setup.data/setup.glade:961 image/setup.data/setup.gtk2.glade:1403
+msgid "[current option]"
+msgstr "[opção atual]"
+
+#: image/setup.data/setup.glade:995 image/setup.data/setup.gtk2.glade:1453
+msgid "[current file]"
+msgstr "[ficheiro atual]"
+
+#: image/setup.data/setup.glade:1019 image/setup.data/setup.glade:1068
+msgid "%P %%"
+msgstr "%P %%"
+
+#: image/setup.data/setup.glade:1044 image/setup.data/setup.gtk2.glade:1506
+msgid "Total Install"
+msgstr "Progresso total"
+
+#: image/setup.data/setup.glade:1206 image/setup.data/setup.glade:1470
+#: image/setup.data/setup.glade:1735
+msgid "_Quit"
+msgstr "_Sair"
+
+#: image/setup.data/setup.glade:1249 image/setup.data/setup.gtk2.glade:1747
+msgid "_Start"
+msgstr "_Iniciar"
+
+#: image/setup.data/setup.glade:1257 image/setup.data/setup.gtk2.glade:1978
+msgid "Install Complete"
+msgstr "Instalação concluída"
+
+#: image/setup.data/setup.glade:1285 image/setup.data/setup.gtk2.glade:1801
+msgid "Congratulations!"
+msgstr "Parabéns!"
+
+#: image/setup.data/setup.glade:1336 image/setup.data/setup.gtk2.glade:1876
+msgid "The product was installed in:"
+msgstr "O produto foi instalado em:"
+
+#: image/setup.data/setup.glade:1353 image/setup.data/setup.gtk2.glade:1901
+msgid "[install directory]"
+msgstr "[pasta de instalação]"
+
+#: image/setup.data/setup.glade:1387 image/setup.data/setup.gtk2.glade:1951
+msgid "Type '[game]' to start."
+msgstr "Digite «[game]» para iniciar."
+
+#: image/setup.data/setup.glade:1478 image/setup.data/setup.gtk2.glade:2144
+msgid "Install Aborted"
+msgstr "Instalação interrompida"
+
+#: image/setup.data/setup.glade:1506 image/setup.data/setup.gtk2.glade:2092
+msgid "This installation has been aborted."
+msgstr "Esta instalação foi interrompida."
+
+#: image/setup.data/setup.glade:1523
+msgid "Press 'Exit' to clean up temporary files."
+msgstr "Prima «Sair» para remover os ficheiros temporários."
+
+#: image/setup.data/setup.glade:1621 image/setup.data/setup.glade:1769
+#: image/setup.data/setup.glade:2042
+msgid "Continue"
+msgstr "Continuar"
+
+#: image/setup.data/setup.glade:1629 image/setup.data/setup.gtk2.glade:2299
+msgid "Warning"
+msgstr "Aviso"
+
+#: image/setup.data/setup.glade:1657 image/setup.data/setup.gtk2.glade:2272
+msgid "[warning text]"
+msgstr "[texto do aviso]"
+
+#: image/setup.data/setup.glade:1777 image/setup.data/setup.gtk2.glade:2718
+msgid "Product Website"
+msgstr "Site do produto"
+
+#: image/setup.data/setup.glade:1833 image/setup.data/setup.gtk2.glade:2533
+msgid "Thank you for installing "
+msgstr "Obrigado por instalar "
+
+#: image/setup.data/setup.glade:1850 image/setup.data/setup.gtk2.glade:2558
+msgid "[product]"
+msgstr "[produto]"
+
+#: image/setup.data/setup.glade:1868 image/setup.data/setup.gtk2.glade:2590
+msgid "Please visit our website for updates and support."
+msgstr "Visite o nosso site para obter atualizações e assistência."
+
+#: image/setup.data/setup.glade:1919 image/setup.data/setup.gtk2.glade:2665
+msgid "Launching browser, please wait..."
+msgstr "A abrir o navegador. Aguarde..."
+
+#: image/setup.data/setup.glade:1958 image/setup.data/setup.gtk2.glade:2698
+msgid "Launch _Browser"
+msgstr "Abrir _navegador"
+
+#: image/setup.data/setup.glade:2027 image/setup.data/setup.glade:2378
+msgid "_Cancel"
+msgstr "_Cancelar"
+
+#: image/setup.data/setup.glade:2050 image/setup.data/setup.gtk2.glade:3067
+msgid "CD key"
+msgstr "Chave do CD"
+
+#: image/setup.data/setup.glade:2095 image/setup.data/setup.gtk2.glade:2932
+msgid "Please enter your CD key."
+msgstr "Introduza a chave do CD."
+
+#: image/setup.data/setup.glade:2226 image/setup.data/setup.gtk2.glade:179
+msgid "Readme File"
+msgstr "Ficheiro README"
+
+#: image/setup.data/setup.glade:2275
+msgid "_Close"
+msgstr "_Fechar"
+
+#: image/setup.data/setup.glade:2407 image/setup.data/setup.gtk2.glade:103
+msgid "_I Agree"
+msgstr "_Aceito"
+
+#: image/setup.data/setup.gtk2.glade:540 image/setup.data/setup.gtk2.glade:2853
+msgid "C_ontinue"
+msgstr "C_ontinuar"
+
+#: image/setup.data/setup.gtk2.glade:2117
+msgid "Press 'Quit' to clean up temporary files."
+msgstr "Prima «Sair» para remover os ficheiros temporários."
+
+#. TRANSLATORS: The placeholders are a directory, its owner, and the suggested user.
+#: install.c:450
+#, c-format
+msgid ""
+"%s is owned by %s. You may need to run this installer as user %s or choose "
+"another directory."
+msgstr "%s pertence a %s. Poderá ter de executar o instalador como %s ou escolher outra pasta."
+
+#: install.c:478
+msgid "No destination directory selected"
+msgstr "Nenhuma pasta de destino selecionada"
+
+#: install.c:481
+msgid "Please select at least one option"
+msgstr "Selecione pelo menos uma opção"
+
+#: install.c:484
+msgid "Not enough free space for the selected options."
+msgstr "Não há espaço livre suficiente para as opções selecionadas."
+
+#: install.c:486
+msgid "Install path is not a directory."
+msgstr "O caminho de instalação não é uma pasta."
+
+#: install.c:487 install.c:508
+msgid "Please choose an existing directory."
+msgstr "Escolha uma pasta existente."
+
+#: install.c:489
+msgid "No write permissions on the install directory."
+msgstr "Sem permissão de escrita na pasta de instalação."
+
+#: install.c:492
+msgid "Binary path and install path must be different."
+msgstr "Os caminhos de instalação e dos executáveis têm de ser diferentes."
+
+#: install.c:494
+msgid "No write permissions to install a selected package."
+msgstr "Sem permissão de escrita para instalar um dos pacotes selecionados."
+
+#: install.c:499
+msgid "Binary path is not a directory."
+msgstr "O caminho dos executáveis não é uma pasta."
+
+#: install.c:502
+msgid "No write permissions on the binary directory."
+msgstr "Sem permissão de escrita na pasta dos executáveis."
+
+#: install.c:507
+msgid "Binary directory does not exist."
+msgstr "A pasta dos executáveis não existe."
+
+#: install.c:688
+msgid "Failed to allocate new bool"
+msgstr "Não foi possível reservar memória para um novo valor booleano"
+
+#: install.c:707
+msgid "Must have at least 'script' or 'env' attribute for <bool>"
+msgstr "O elemento <bool> deve ter pelo menos um atributo «script» ou «env»"
+
+#: install.c:959 install_log.c:19
+#, c-format
+msgid "Out of memory\n"
+msgstr "Memória insuficiente\n"
+
+#: install.c:981
+#, c-format
+msgid "Detected distribution: %s %d.%d"
+msgstr "Distribuição detetada: %s %d.%d"
+
+#: install.c:1150
+#, c-format
+msgid ""
+"Could not find default component. Make sure to define components for all "
+"entries."
+msgstr "Não foi possível encontrar o componente predefinido. Defina um componente para cada entrada."
+
+#: install.c:1301
+msgid "You must use a 'symlink' attribute with 'play'"
+msgstr "É necessário utilizar o atributo «symlink» com «play»"
+
+#: install.c:1313
+msgid "There can be only one binary with a 'play' attribute"
+msgstr "Só pode existir um executável com o atributo «play»"
+
+#: install.c:1316
+msgid "The only valid values for the 'play' attribute are yes, gui and no"
+msgstr "Os únicos valores válidos para o atributo «play» são yes, gui e no"
+
+#: install.c:1345
+msgid "Couldn't find your home directory"
+msgstr "Não foi possível encontrar a sua pasta pessoal"
+
+#: install.c:1363
+#, c-format
+msgid "Couldn't find home directory for %s"
+msgstr "Não foi possível encontrar a pasta pessoal de %s"
+
+#: install.c:1493
+msgid ""
+"XML: 'require' tag doesn't have a mandatory 'command', 'condition' or "
+"'feature' attribute"
+msgstr "XML: falta um atributo obrigatório «command», «condition» ou «feature» na etiqueta «require»"
+
+#: install.c:1543
+#, c-format
+msgid ""
+"The installer is not suitable for installing this product (missing feature "
+"'%s' version '%u')"
+msgstr "Este instalador não pode instalar o produto (falta a funcionalidade «%s», versão «%u»)"
+
+#: install.c:1586
+msgid "XML: 'lang' tag does not have a mandatory 'lang' attribute"
+msgstr "XML: falta o atributo obrigatório «lang» na etiqueta «lang»"
+
+#: install.c:1595
+#, c-format
+msgid "XML: option listed without translated description for locale '%s'"
+msgstr "XML: opção indicada sem descrição traduzida para a definição regional «%s»"
+
+#: install.c:1603
+msgid "XML: option listed without description"
+msgstr "XML: opção indicada sem descrição"
+
+#: install.c:1865
+msgid "CDKey file could not be opened."
+msgstr "Não foi possível abrir o ficheiro da chave do CD."
+
+#: install.c:1972 install.c:1978 install.c:1997
+#, c-format
+msgid "Unable to remove '%s'"
+msgstr "Não foi possível remover «%s»"
+
+#: install.c:1988
+#, c-format
+msgid "The '%s' RPM was installed or upgraded (version %s, release %d)"
+msgstr "O RPM «%s» foi instalado ou atualizado (versão %s, revisão %d)"
+
+#: install.c:2121
+msgid "Options tag string maxed out!"
+msgstr "A lista de etiquetas das opções atingiu o limite!"
+
+#: install.c:2172 install.c:2321 install.c:2349
+msgid "Could not create temporary script"
+msgstr "Não foi possível criar o script temporário"
+
+#: install.c:2298
+#, c-format
+msgid "Could not register binary: %s"
+msgstr "Não foi possível registar o executável: %s"
+
+#: install.c:2340
+#, c-format
+msgid "Could not write temporary pre-uninstall script in %s"
+msgstr "Não foi possível escrever o script temporário de pré-desinstalação em %s"
+
+#: install.c:2365
+#, c-format
+msgid "Could not write post-uninstall script in %s"
+msgstr "Não foi possível escrever o script de pós-desinstalação em %s"
+
+#: install.c:2412
+msgid "Could not create install log"
+msgstr "Não foi possível criar o registo da instalação"
+
+#: install.c:2439
+#, c-format
+msgid "Please visit %s"
+msgstr "Visite %s"
+
+#: install.c:2493
+msgid "Missing 'command' attribute for an option"
+msgstr "Falta o atributo «command» numa opção"
+
+#: install.c:2507
+#, c-format
+msgid "Expression '%s' did not parse"
+msgstr "Não foi possível interpretar a expressão «%s»"
+
+#: install.c:2511
+msgid "Missing 'condition' attribute for an option"
+msgstr "Falta o atributo «condition» numa opção"
+
+#: install.c:2752 install.c:2818
+#, c-format
+msgid "Unable to create desktop file '%s'"
+msgstr "Não foi possível criar o ficheiro de atalho «%s»"
+
+#: install.c:2885 install.c:2888
+#, c-format
+msgid "Unable to create CDE desktop file '%s'"
+msgstr "Não foi possível criar o ficheiro de atalho CDE «%s»"
+
+#: install.c:2924
+#, c-format
+msgid "Unable to create ToolChest menu file '%s'"
+msgstr "Não foi possível criar o ficheiro de menu ToolChest «%s»"
+
+#: log.c:47
+msgid "loki_setup: "
+msgstr "loki_setup: "
+
+#: main.c:130
+#, c-format
+msgid ""
+"Usage: %s [options]\n"
+"\n"
+"Options can be one or more of the following:\n"
+"   -b path  Set the binary path to <path>\n"
+"   -h       Display this help message\n"
+"   -i path  Set the install path to <path>\n"
+"   -c cwd   Use an alternate current directory for the install\n"
+"   -f file  Use an alternative XML file (default %s)\n"
+"   -m       Force manual extraction of RPM packages, do not update RPM "
+"database\n"
+"   -n       Force the text-only user interface\n"
+"   -o opt   Enable the option named \"opt\" from the XML file. Also enables "
+"non\n"
+"            interactive operation. Can be used multiple times.\n"
+"   -p pref  Specify a path prefix in the installation media.\n"
+"   -r root  Set the root directory for extracting RPM files (default is /)\n"
+"   -v n     Set verbosity level to n. Available values :\n"
+"            0: Debug  1: Quiet  2: Normal 3: Warnings 4: Fatal\n"
+"   -V       Print the version of the setup program and exit\n"
+msgstr ""
+"Utilização: %s [opções]\n"
+"\n"
+"Opções disponíveis:\n"
+"   -b path  Define o caminho dos executáveis como <path>\n"
+"   -h       Mostra esta ajuda\n"
+"   -i path  Define o caminho de instalação como <path>\n"
+"   -c cwd   Usa outra pasta de trabalho para a instalação\n"
+"   -f file  Usa outro ficheiro XML (predefinição: %s)\n"
+"   -m       Força a extração manual dos pacotes RPM e deixa a base de dados RPM intacta\n"
+"   -n       Usa a interface em modo de texto\n"
+"   -o opt   Ativa a opção «opt» do ficheiro XML e o modo não interativo.\n"
+"            Pode ser usada várias vezes.\n"
+"   -p pref  Especifica um prefixo de caminho no suporte de instalação.\n"
+"   -r root  Define a pasta raiz para extrair ficheiros RPM (predefinição: /)\n"
+"   -v n     Define o nível de detalhe. Valores disponíveis:\n"
+"            0: Depuração  1: Silencioso  2: Normal  3: Avisos  4: Erros fatais\n"
+"   -V       Mostra a versão do instalador e sai\n"
+
+#: main.c:147
+#, c-format
+msgid ""
+"Usage: %s [options]\n"
+"\n"
+"Options can be one or more of the following:\n"
+"   -b path  Set the binary path to <path>\n"
+"   -h       Display this help message\n"
+"   -i path  Set the install path to <path>\n"
+"   -c cwd   Use an alternate current directory for the install\n"
+"   -f file  Use an alternative XML file (default %s)\n"
+"   -n       Force the text-only user interface\n"
+"   -o opt   Enable the option named \"opt\" from the XML file. Also enables "
+"non\n"
+"            interactive operation. Can be used multiple times.\n"
+"   -p pref  Specify a path prefix in the installation media.\n"
+"   -v n     Set verbosity level to n. Available values :\n"
+"            0: Debug  1: Quiet  2: Normal 3: Warnings 4: Fatal\n"
+"   -V       Print the version of the setup program and exit\n"
+msgstr ""
+"Utilização: %s [opções]\n"
+"\n"
+"Opções disponíveis:\n"
+"   -b path  Define o caminho dos executáveis como <path>\n"
+"   -h       Mostra esta ajuda\n"
+"   -i path  Define o caminho de instalação como <path>\n"
+"   -c cwd   Usa outra pasta de trabalho para a instalação\n"
+"   -f file  Usa outro ficheiro XML (predefinição: %s)\n"
+"   -n       Usa a interface em modo de texto\n"
+"   -o opt   Ativa a opção «opt» do ficheiro XML e o modo não interativo.\n"
+"            Pode ser usada várias vezes.\n"
+"   -p pref  Especifica um prefixo de caminho no suporte de instalação.\n"
+"   -v n     Define o nível de detalhe. Valores disponíveis:\n"
+"            0: Depuração  1: Silencioso  2: Normal  3: Avisos  4: Erros fatais\n"
+"   -V       Mostra a versão do instalador e sai\n"
+
+#: main.c:244
+#, c-format
+msgid "Out of range value, setting verbosity level to normal.\n"
+msgstr "Valor fora do intervalo. A usar o nível de detalhe normal.\n"
+
+#: main.c:305
+#, c-format
+msgid "Couldn't load '%s'\n"
+msgstr "Não foi possível carregar «%s»\n"
+
+#: main.c:316
+msgid "No UI drivers available\n"
+msgstr "Não há interfaces de utilizador disponíveis\n"
+
+#: main.c:339
+msgid ""
+"The 'cdromfile' attribute is now mandatory when using the 'cdrom' attribute."
+msgstr "O atributo «cdromfile» é obrigatório ao utilizar o atributo «cdrom»."
+
+#: main.c:354
+msgid ""
+"Unable to determine the current directory.\n"
+"Please check the permissions of the parent directories.\n"
+msgstr ""
+"Não foi possível determinar a pasta atual.\n"
+"Verifique as permissões das pastas superiores.\n"
+
+#: main.c:368
+msgid "You need to run this installer as the super-user.\n"
+msgstr "Tem de executar este instalador como superutilizador.\n"
+
+#: main.c:375
+msgid ""
+"\n"
+"This product is already installed.\n"
+"Uninstall it before running this program again.\n"
+msgstr ""
+"\n"
+"Este produto já está instalado.\n"
+"Desinstale-o antes de voltar a executar o instalador.\n"
+
+#: main.c:380
+msgid ""
+"Warning: You are about to reinstall\n"
+"on top of an existing installation. Continue?\n"
+msgstr ""
+"Aviso: está prestes a reinstalar o produto\n"
+"sobre uma instalação existente. Continuar?\n"
+
+#: main.c:392
+msgid ""
+"\n"
+"Illegal installation: do not mix components with a component installation.\n"
+msgstr ""
+"\n"
+"Instalação inválida: não inclua outros componentes numa instalação de componente.\n"
+
+#: main.c:397
+#, c-format
+msgid ""
+"\n"
+"The %s component is already installed.\n"
+"Please uninstall it beforehand.\n"
+msgstr ""
+"\n"
+"O componente %s já está instalado.\n"
+"Desinstale-o primeiro.\n"
+
+#: main.c:405
+#, c-format
+msgid ""
+"\n"
+"You must install %s before running this\n"
+"installation program.\n"
+msgstr ""
+"\n"
+"Tem de instalar %s antes de executar\n"
+"este instalador.\n"
+
+#: main.c:440
+#, c-format
+msgid "Could not enable option: %s"
+msgstr "Não foi possível ativar a opção: %s"
+
+#: main.c:465
+msgid "No installation path was specified. Aborting."
+msgstr "Não foi indicado um caminho de instalação. A interromper."
+
+#: network.c:156
+msgid "Out of memory, no network check"
+msgstr "Memória insuficiente para verificar a rede"
+
+#: network.c:166
+msgid "Unable to create pipe, no network check"
+msgstr "Não foi possível criar um canal para verificar a rede"
+
+#: network.c:180
+msgid "Fork failed, no network check"
+msgstr "Não foi possível criar um processo para verificar a rede"
+
+#: plugins.c:96
+#, c-format
+msgid ""
+"Registered plugins :\n"
+"\n"
+msgstr ""
+"Módulos registados:\n"
+"\n"
+
+#: plugins.c:98
+#, c-format
+msgid ""
+"\tDescription: %s\n"
+"\tVersion: %s\n"
+"\tAuthor: %s\n"
+msgstr ""
+"\tDescrição: %s\n"
+"\tVersão: %s\n"
+"\tAutor: %s\n"
+
+#: plugins.c:101
+#, c-format
+msgid "\tPlugin is statically linked.\n"
+msgstr "\tMódulo ligado estaticamente.\n"
+
+#: plugins.c:103
+#, c-format
+msgid "\tRecognizes %d extensions: "
+msgstr "\tReconhece %d extensões: "
+
+#: plugins.c:153
+#, c-format
+msgid "Error registering %s plugin: %s\n"
+msgstr "Erro ao registar o módulo %s: %s\n"
+
+#: plugins.c:156
+#, c-format
+msgid "Error initializing %s plugin"
+msgstr "Erro ao inicializar o módulo %s"
+
+#: plugins.c:160
+#, c-format
+msgid "Error trying to load %s plugin: %s\n"
+msgstr "Erro ao tentar carregar o módulo %s: %s\n"
+
+#: plugins/cpio.c:113
+msgid "Invalid CPIO header\n"
+msgstr "Cabeçalho CPIO inválido\n"
+
+#: plugins/cpio.c:173
+#, c-format
+msgid "Bad checksum for file '%s'"
+msgstr "Soma de verificação incorreta para o ficheiro «%s»"
+
+#: plugins/rpm.c:73 plugins/rpm.c:107
+#, c-format
+msgid "RPM error: %s"
+msgstr "Erro do RPM: %s"
+
+#: plugins/rpm.c:156 plugins/rpm.c:163
+#, c-format
+msgid "Unable to install RPM file: '%s'"
+msgstr "Não foi possível instalar o ficheiro RPM: «%s»"
+
+#: plugins/tar.c:138
+#, c-format
+msgid "Tar: '%s' is unknown file type: %c"
+msgstr "Tar: «%s» tem um tipo de ficheiro desconhecido: %c"
+
+#: plugins/tar.c:140
+msgid "Unexpected data in installation file!"
+msgstr "Dados inesperados no ficheiro de instalação!"

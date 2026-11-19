@@ -3,6 +3,7 @@
 
 #include "plugins.h"
 #include "file.h"
+#include "safe_path.h"
 #include "cpio.h"
 #include "install_log.h"
 #include "md5.h"
@@ -12,6 +13,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 #include <zlib.h>
 
@@ -101,6 +103,9 @@ static size_t RPMCopy(install_info *info, const char *path, const char *dest, co
 	int autoremove = (autorm && !strcasecmp(autorm, "true"));
 	int nodeps = (depsoff && !strcasecmp(depsoff, "true"));
 
+    if (restoring_corrupt() || (geteuid() == 0 && !trusted_path(path, 0)))
+        return 0;
+
     fdi = fdOpen(path, O_RDONLY, 0644);
     rc = rpmReadPackageHeader(fdi, &hd, &isSource, NULL, NULL);
     if ( rc ) {
@@ -110,14 +115,14 @@ static size_t RPMCopy(install_info *info, const char *path, const char *dest, co
 
     size = 0;
     if ( rpm_access && ! force_manual ) { /* We can call RPM directly */
-        char cmd[300];
+        char token[64], relocation[PATH_MAX + 3];
+        char *args[13];
+        int argc = 0;
+        pid_t child;
         FILE *fp;
         float percent = 0.0;
-		double bytes_copied = 0.0;
 		double previous_bytes = 0.0;
         char *name = "", *version = "", *release = "";
-		char *options = (char *) malloc(PATH_MAX);
-		options[0] = '\0';
 
         headerGetEntry(hd, RPMTAG_SIZE, &type, &p, &c);
         if(type==RPM_INT32_TYPE){
@@ -137,42 +142,43 @@ static size_t RPMCopy(install_info *info, const char *path, const char *dest, co
         }
         fdClose(fdi);
 
-		if (relocate) { /* force relocating RPM to install directory */
-			sprintf(options, " --relocate /=%s --badreloc ", dest);
-		}
+        args[argc++] = "/usr/bin/rpm";
+        args[argc++] = "-U";
+        args[argc++] = "--percent";
+        args[argc++] = "--root";
+        args[argc++] = rpm_root;
+        if (relocate) {
+            if (snprintf(relocation, sizeof(relocation), "/=%s", dest) >= sizeof(relocation))
+                return 0;
+            args[argc++] = "--relocate";
+            args[argc++] = relocation;
+            args[argc++] = "--badreloc";
+        }
+        if (nodeps)
+            args[argc++] = "--nodeps";
+        args[argc++] = "--";
+        args[argc++] = (char *)path;
+        args[argc] = NULL;
 
-		if (nodeps) {
-			strcat(options, " --nodeps ");
-		}
-
-		snprintf(cmd,sizeof(cmd),"rpm -U --percent --root %s %s %s", rpm_root,
-				 options, path);
-
-		fp = popen(cmd, "r");
-		while ( percent < 100.0 ) {
-			if(!fp || feof(fp)){
-				pclose(fp);
-				free(options);
-				log_warning(_("Unable to install RPM file: '%s'"), path);
-				return 0;
-			}
-			fscanf(fp,"%s", cmd);
-			if(strcmp(cmd,"%%")){
-				pclose(fp);
-				free(options);
-				log_warning(_("Unable to install RPM file: '%s'"), path);
-				return 0;
-			}
-			fscanf(fp,"%f", &percent);
-			/* calculate the bytes installed in this pass of the loop */
-			bytes_copied = (percent/100.0)*size - previous_bytes;
-			previous_bytes += bytes_copied;
-			info->installed_bytes += bytes_copied;
-			if ( ! update(info, path, (percent/100.0)*size, size, current_option_name) )
-				break;
-		}
-		pclose(fp);
-		free (options);
+        fp = open_command(args, &child);
+        if (!fp) {
+            log_warning(_("Unable to install RPM file: '%s'"), path);
+            return 0;
+        }
+        while (fscanf(fp, "%63s %f", token, &percent) == 2 &&
+               !strcmp(token, "%%") && percent >= 0.0f && percent <= 100.0f) {
+            double progress = (percent / 100.0) * size;
+            if (progress >= previous_bytes) {
+                info->installed_bytes += progress - previous_bytes;
+                previous_bytes = progress;
+            }
+            if (update)
+                update(info, path, progress, size, current_option_name);
+        }
+        if (close_command(fp, child) != 0) {
+            log_warning(_("Unable to install RPM file: '%s'"), path);
+            return 0;
+        }
 		/* Log the RPM installation */
 		add_rpm_entry(info, current_option, name, version, atoi(release), autoremove);
     } else { /* Manually install the RPM file */

@@ -96,6 +96,9 @@
 
 
 #include "file.h"
+#include "safe_path.h"
+#include <sys/wait.h>
+#include <fcntl.h>
 #include "copy.h"
 #include "detect.h"
 #include "plugins.h"
@@ -108,76 +111,107 @@ struct option_elem *current_option = NULL;
 struct component_elem *current_component = NULL;
 
 /* We maintain a list of files to be fixed */
-typedef struct _corrupt_list {
-	char *path, *option;
-	struct _corrupt_list *next;
-} corrupt_list;
+typedef struct corrupt_file {
+    char *path, *option;
+    unsigned char digest[16];
+    unsigned int mode;
+    int restored;
+    struct corrupt_file *next;
+} corrupt_file;
 
-static corrupt_list *corrupts = NULL;
+static corrupt_file *corrupts;
+static int repairing;
 
-static void copy_binary_finish(install_info* info, xmlNodePtr node, const char* fn, struct file_elem *file);
+static void copy_binary_finish(install_info *info, xmlNodePtr node, const char *fn, struct file_elem *file);
 
-void add_corrupt_file(const product_t *prod, const char *path, const char *option)
+void add_corrupt_file(product_file_t *file, const char *option)
 {
-	corrupt_list *item;
-	/* TODO: Should we look at sorting this list to optimize ? */
-	item = (corrupt_list *) malloc(sizeof(corrupt_list));
-	item->path = strdup(loki_remove_root(prod, path));
-	item->option = strdup(option);
-	item->next = corrupts;
-	corrupts = item;
+    corrupt_file *item;
+    const unsigned char *digest;
+
+    if (loki_gettype_file(file) != LOKI_FILE_REGULAR || !(digest = loki_getmd5_file(file)))
+        return;
+    item = calloc(1, sizeof(*item));
+    if (!item)
+        log_fatal(_("Out of memory"));
+    item->path = strdup(loki_getpath_file(file));
+    item->option = strdup(option);
+    if (!item->path || !item->option)
+        log_fatal(_("Out of memory"));
+    memcpy(item->digest, digest, sizeof(item->digest));
+    item->mode = loki_getmode_file(file);
+    item->next = corrupts;
+    corrupts = item;
 }
 
 void free_corrupt_files(void)
 {
-	corrupt_list *next;
-	while ( corrupts ) {
-		next = corrupts->next;
-		free(corrupts->path);
-		free(corrupts->option);
-		free(corrupts);
-		corrupts = next;
-	}
+    while (corrupts) {
+        corrupt_file *next = corrupts->next;
+        free(corrupts->path);
+        free(corrupts->option);
+        free(corrupts);
+        corrupts = next;
+    }
+    repairing = 0;
 }
 
-int file_is_corrupt(const product_t *prod, const char *path)
+static corrupt_file *pending_repair(const char *path)
 {
-	/* If found, return TRUE and remove it from the list */
-	corrupt_list *i = corrupts, *prev = NULL;
+    corrupt_file *item;
+    for (item = corrupts; item; item = item->next)
+        if (!item->restored && !strcmp(path, item->path))
+            return item;
+    return NULL;
+}
 
-	path = loki_remove_root(prod, path);
-	while ( i ) {
-		if ( !strcmp(path, i->path) ) {
-			/* Remove */
-			if ( prev ) {
-				prev->next = i->next;
-			} else {
-				corrupts = i->next;
-			}
-			free(i->path);
-			free(i->option);
-			free(i);
-			return 1;
-		}
-		prev = i;
-		i = i->next;
-	}
-	return 0;
+int file_is_corrupt(const char *path)
+{
+    return pending_repair(path) != NULL;
+}
+
+int repair_metadata(const char *path, unsigned char digest[16], unsigned int *mode)
+{
+    corrupt_file *item = pending_repair(path);
+    if (!item)
+        return 0;
+    memcpy(digest, item->digest, sizeof(item->digest));
+    *mode = item->mode & 0777;
+    return 1;
+}
+
+void repair_committed(const char *path)
+{
+    corrupt_file *item = pending_repair(path);
+    if (item)
+        item->restored = 1;
+}
+
+int repair_complete(void)
+{
+    corrupt_file *item;
+    for (item = corrupts; item; item = item->next)
+        if (!item->restored)
+            return 0;
+    return corrupts != NULL;
+}
+
+void begin_repair(void)
+{
+    repairing = 1;
 }
 
 void select_corrupt_options(install_info *info)
 {
-	corrupt_list *i = corrupts;
-	while ( i ) {
-		/* Locate and enable the option */
-		enable_option(info, i->option); /* This could be optimized */
-		i = i->next;
-	}
+    corrupt_file *item;
+    for (item = corrupts; item; item = item->next)
+        if (!item->restored)
+            enable_option(info, item->option);
 }
 
 int restoring_corrupt(void)
 {
-	return corrupts != NULL;
+    return repairing;
 }
 
 void getToken(const char *src, const char **end) {
@@ -274,21 +308,30 @@ ssize_t copy_file(install_info *info, const char *cdrom, const char *path, const
     } else {
         base = path;
     }
-    sprintf(final, "%s/%s", dest, base);
+    if (snprintf(final, PATH_MAX, "%s/%s", dest, base) >= PATH_MAX) {
+        final[0] = '\0';
+        errno = ENAMETOOLONG;
+        return -1;
+    }
 
-	if ( corrupts && !file_is_corrupt(info->product, final) ) { /* We are actually restoring corrupted files */
+	if ( restoring_corrupt() && !file_is_corrupt(final) ) { /* We are actually restoring corrupted files */
 		return 0;
 	}
 
 	//fprintf(stderr, "copy_file %s\n", final);
 
     if ( cdrom ) {
-        snprintf(fullpath, sizeof(fullpath), "%s/%s", cdrom, path);
+        if (snprintf(fullpath, sizeof(fullpath), "%s/%s", cdrom, path) >= sizeof(fullpath))
+            return -1;
     } else {
+        if (strlen(path) >= sizeof(fullpath))
+            return -1;
         strcpy(fullpath, path);
     }
 
 	if ( file_issymlink(info, fullpath) ) {
+        if (restoring_corrupt())
+            return 0;
 		/* Copy the symlink */
 		int len = readlink(fullpath, buf, sizeof(buf)-1);
 		if ( len >= 0 ) {
@@ -343,9 +386,16 @@ ssize_t copy_file(install_info *info, const char *cdrom, const char *path, const
         if ( elem ) { /* Give the pointer to the element, for what it's worth (binaries mostly) */
             *elem = output->elem;
         }
-		output_elem = output->elem;
-		file_close(info, output);
-		file_close(info, input);
+        output_elem = output->elem;
+        int written = file_close(info, output) == 0;
+        file_close(info, input);
+        if (restoring_corrupt()) {
+            xmlFree(md5); xmlFree(mut); xmlFree(uncompress); xmlFree(mode_str);
+#ifdef __linux
+            xmlFree(se_context);
+#endif
+            return written ? size : 0;
+        }
 
 		if ( uncompress ) {
 			char *dir = strdup(final), *slash;
@@ -446,9 +496,11 @@ static size_t copy_directory(install_info *info, const char *path, const char *d
 	err = glob(fpat, GLOB_NOSORT | GLOB_NOCHECK, NULL, &globbed);
     if ( err == 0 ) {
 		if ( globbed.gl_pathc==1 && !strcmp(globbed.gl_pathv[0], fpat) ) { /* No match, empty directory */
-			snprintf(fpat, sizeof(fpat), "%s/%s", dest, path);
-			file_create_hierarchy(info, fpat);
-			file_mkdir(info, fpat, 0755);
+            if (!restoring_corrupt() &&
+                snprintf(fpat, sizeof(fpat), "%s/%s", dest, path) < sizeof(fpat)) {
+                file_create_hierarchy(info, fpat);
+                file_mkdir(info, fpat, 0755);
+            }
 		} else {
 			for ( i=0; i<globbed.gl_pathc; ++i ) {
 				copied = copy_path(info, globbed.gl_pathv[i], dest, cdrom, 0,
@@ -477,7 +529,7 @@ ssize_t copy_path(install_info *info, const char *path, const char *dest,
     
 	//fprintf(stderr, "copy_path %s\n", path);
 
-    if ( ! stat(path, &sb) ) {
+    if ( ! lstat(path, &sb) ) {
         if ( S_ISDIR(sb.st_mode) ) {
             copied = copy_directory(info, path, dest, cdrom, suffix, node, update);
         } else {
@@ -568,24 +620,35 @@ static ssize_t copy_list(install_info *info, const char *filedesc, const char *d
     return size;
 }
 
-static void check_dynamic(const char *fpat, char *bin)
+static void check_dynamic(const char *fpat, char *bin, int primary_media)
 {
-    int use_dynamic;
-    char test[PATH_MAX], testcmd[PATH_MAX];
+    char test[PATH_MAX];
+    int status;
+    pid_t child, result;
 
-    use_dynamic = 0;
-	snprintf(test, sizeof(test), "%s.check-dynamic.sh", fpat);
-    if ( access(test, R_OK) == 0 ) {
-        snprintf(testcmd, sizeof(testcmd), "sh %s >/dev/null 2>&1", test);
-        if ( system(testcmd) == 0 ) {
-			sprintf(bin, "%s.dynamic", fpat);
-            if ( access(bin, R_OK) == 0 ) {
-                use_dynamic = 1;
-            }
-        }
+    strcpy(bin, fpat);
+    if (!primary_media || restoring_corrupt() ||
+        snprintf(test, sizeof(test), "%s.check-dynamic.sh", fpat) >= sizeof(test) ||
+        access(test, R_OK) != 0 || (geteuid() == 0 && !trusted_path(test, 0)))
+        return;
+    child = fork();
+    if (child == 0) {
+        int fd = open("/dev/null", O_WRONLY);
+        if (fd < 0 || dup2(fd, STDOUT_FILENO) < 0 || dup2(fd, STDERR_FILENO) < 0)
+            _exit(1);
+        if (fd > STDERR_FILENO)
+            close(fd);
+        execl("/bin/sh", "sh", "--", test, (char *)NULL);
+        _exit(1);
     }
-    if ( ! use_dynamic ) {
-        strcpy(bin, fpat);
+    if (child < 0)
+        return;
+    do {
+        result = waitpid(child, &status, 0);
+    } while (result < 0 && errno == EINTR);
+    if (result == child && WIFEXITED(status) && WEXITSTATUS(status) == 0) {
+        if (snprintf(bin, PATH_MAX, "%s.dynamic", fpat) >= PATH_MAX || access(bin, R_OK) != 0)
+            strcpy(bin, fpat);
     }
 }
 
@@ -615,7 +678,7 @@ ssize_t copy_manpage(install_info *info, xmlNodePtr node, const char *dest,
 	if ( copied < 0 ) {
 		log_warning(_("Unable to copy man page '%s'"), fpat);
 		ui_fatal_error(_("Unable to copy man page '%s'"), fpat);
-	} else if ( copied > 0 ) {
+	} else if (copied > 0 && !restoring_corrupt()) {
 		/* Process symlinks here */
 		if ( *info->man_path ) {
 			snprintf(fpat, sizeof(fpat), "%s/man%s/%s.%s", info->man_path, section, name, section);
@@ -719,6 +782,8 @@ ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, c
 		strncpy(fdest, dest, sizeof(fdest));
 		fdest[sizeof(fdest)-1] = '\0';
 
+        if (restoring_corrupt())
+            goto copy_binary_exit;
 		if(!write_temp_script(binpath, bin, filedesc, strlen(filedesc)))
 			goto copy_binary_exit;
 
@@ -742,21 +807,17 @@ ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, c
 
 			copied = 0;
 		
-			strncpy(fdest, dest, sizeof(fdest));
-
-			strncpy(current_option_txt, final, sizeof(current_option_txt));
-			strncat(current_option_txt, " binary", sizeof(current_option_txt)-strlen(current_option_txt));
-
-			if ( keepdirs ) { /* Append the subdirectory to the final destination */
-				char *slash = strrchr(final, '/');
-				if(slash) {
-					*slash = '\0';
-					strncat(fdest, "/", sizeof(fdest)-strlen(fdest));
-					strncat(fdest, final, sizeof(fdest)-strlen(fdest));
-					/* Restore the slash */
-					*slash = '/';
-				}
-			}
+            snprintf(current_option_txt, sizeof(current_option_txt), "%s binary", final);
+            const char *slash = keepdirs ? strrchr(final, '/') : NULL;
+            int len;
+            if (slash)
+                len = snprintf(fdest, sizeof(fdest), "%s/%.*s", dest, (int)(slash - final), final);
+            else
+                len = snprintf(fdest, sizeof(fdest), "%s", dest);
+            if (len < 0 || (size_t)len >= sizeof(fdest)) {
+                log_fatal(_("Binary install path is too long"));
+                goto copy_binary_exit;
+            }
 
 			if ( from_cdrom ) {
 				cdpath = get_cdrom(info, from_cdrom);
@@ -783,6 +844,7 @@ ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, c
                 numlocations = 4;
             }
 
+            int primary_media = 1;
             // check each path in turn
             for ( i = 0; i < numlocations; ++i)
             {
@@ -794,6 +856,7 @@ ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, c
 					log_debug(_("find '%s'"), fpat);
 					if ( stat(fpat, &sb) == 0 ) {
 						// found it
+                        primary_media = !tryagain;
 						tryagain = 0;
 						i = numlocations;
 					} else if(!tryagain && from_cdrom) {
@@ -809,7 +872,7 @@ ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, c
             }
 
             if(fpat[0]) {
-                check_dynamic(fpat, bin);
+                check_dynamic(fpat, bin, primary_media);
                 copied = copy_file(info, NULL, bin, fdest, final, 1, 1, node, update, &file);
             } else {
                 getcwd(bin, sizeof(bin));
@@ -817,6 +880,8 @@ ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, c
                 ui_fatal_error(_("Unable to find file '%s' in '%s'"), binarylocations[0], bin);
             }
 		} else {  /* if inrpm="true" */
+            if (restoring_corrupt())
+                continue;
 			if (strncmp("$INSTALLDIR", final, 11 ) == 0) {
 				strcpy(fpat, info->install_path);
 				i = strlen(fpat);
@@ -840,7 +905,8 @@ ssize_t copy_binary(install_info *info, xmlNodePtr node, const char *filedesc, c
         } else if ( copied > 0 || in_rpm ) {
             size += copied;
 
-			copy_binary_finish(info, node, final, file);
+            if (!restoring_corrupt())
+                copy_binary_finish(info, node, final, file);
         }
     }
  copy_binary_exit:
@@ -859,7 +925,8 @@ static void copy_binary_finish(install_info* info, xmlNodePtr node, const char* 
 	/* Create the symlink */
 	if ( *info->symlinks_path && symlink ) {
 		snprintf(sym_to, sizeof(sym_to), "%s/%s", info->symlinks_path, symlink);
-		file_symlink(info, fn, sym_to);
+        if (file_symlink(info, fn, sym_to) != 0)
+            log_debug("Binary link was not created: %s", sym_to);
 	}
 	add_bin_entry(info, current_option, file, symlink,
 			(char *)xmlGetProp(node, BAD_CAST "desc"),
@@ -878,7 +945,7 @@ static int copy_script(install_info *info, xmlNodePtr node, const char *script, 
     struct cdrom_elem *cdrom_start;
     int rc;
 
-	if ( corrupts ) { /* Don't run any scripts while restoring files */
+	if (restoring_corrupt()) {
 		return 0;
 	}
 	if ( update ) {
@@ -1031,6 +1098,11 @@ ssize_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
 			if ( xmlNodePropIsTrue(node, "install") ) {
 				char *product = (char *)xmlGetProp(node, BAD_CAST "product");
 				if ( product ) {
+                    if (restoring_corrupt()) {
+                        xmlFree(product);
+                        node = node->next;
+                        continue;
+                    }
 					if ( GetProductIsMeta(info) ) {
 						char *dir = (char *)xmlGetProp(node, BAD_CAST "productdir");
 						// XXX sucks
@@ -1083,11 +1155,11 @@ ssize_t copy_tree(install_info *info, xmlNodePtr node, const char *dest,
 			if ( copied > 0 ) {
 				size += copied;
 			}
-		} else if ( ! strcmp((char *)node->name, "remove_msg" ) ) {
+		} else if ( !restoring_corrupt() && !strcmp((char *)node->name, "remove_msg") ) {
 			const char *text;
 			static char line[BUFSIZ], buf[BUFSIZ];
 			char *prop = (char *)xmlGetProp(node, BAD_CAST "lang");
-			if ( current_component->message==NULL && match_locale(prop) ) {
+			if (current_component && current_component->message == NULL && match_locale(prop) ) {
 				if ( ! current_component ) {
 					log_fatal(_("The remove_msg element should be within a component!\n"));
 				}

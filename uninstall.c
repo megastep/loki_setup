@@ -16,6 +16,9 @@
 
 #include "arch.h"
 #include "install.h"
+#include "registry.h"
+#include "safe_path.h"
+#include <sys/wait.h>
 #include "install_ui.h"
 #include "setupdb.h"
 #ifdef UNINSTALL_UICARBON
@@ -46,14 +49,13 @@ void abort_install(void)
 
 static void print_usage(const char *argv0)
 {
-	printf( _("Usage: %s [args]\n"
-			  "args can be any of the following:\n\n"
-			  "  -h      : Print this help message.\n"
-			  "  -l      : List all installed products and components.\n"
-			  "  -v      : Get version information.\n"
-			  "  product [component1] [component2] ... : Uninstalls the specified product, or its subcomponent(s).\n"
-			  "  product < -l > : List installed subcomponents of product.\n"
-			  ), argv0);
+	printf(_("Usage: %s [options] [product [component ...]]\n\n"
+			 "  -h, --help             Show this help.\n"
+			 "  -l, --list             List installed products or a product's components.\n"
+			 "  -v, --version          Show version information.\n"
+			 "  -L, --locale product   Use translations from the product's installation.\n\n"
+			 "Without --list, specify a product to uninstall it or name individual components.\n"),
+		   argv0);
 }
 
 static void log_file(const char *name, const char *reason)
@@ -134,6 +136,9 @@ int uninstall_component(product_component_t *comp, product_info_t *info)
     product_option_t *opt;
     struct dir_entry *list = NULL, *freeable;
 
+    if (!check_permissions(info, 1))
+        return 0;
+
     /* Go to the install directory, so the log appears in the right place */
     if ( chdir(info->root) < 0) {
         fprintf(stderr, _("Could not change to directory: %s\n"), info->root);
@@ -166,7 +171,7 @@ int uninstall_component(product_component_t *comp, product_info_t *info)
                     break;
                 default:
                     // printf("Removing file: %s\n", loki_getpath_file(file));
-                    if ( unlink(fname) < 0 ) {
+                    if ( remove_path(fname, 0) < 0 ) {
                         log_file(fname, strerror(errno));
                     }
                     break;
@@ -185,7 +190,7 @@ int uninstall_component(product_component_t *comp, product_info_t *info)
         list = list->next;
         
         // printf("Removing directory: %s\n", loki_getpath_file(freeable->dir));
-        if ( rmdir(loki_getpath_file(freeable->dir)) < 0 ) {
+        if ( remove_path(loki_getpath_file(freeable->dir), 1) < 0 ) {
             log_file(loki_getpath_file(freeable->dir), strerror(errno));  
         }
         loki_unregister_file(freeable->dir);
@@ -219,11 +224,11 @@ static int check_for_message(product_component_t *comp)
 		if ( isatty(STDIN_FILENO) ) { /* If we have a TTY, try to get user input */
 			char answer[5];
 			puts(message);
-			printf(_("Uninstall ? [Y/n] "));
-			fflush(stdin);
-			setbuf(stdin, NULL);
+			/* TRANSLATORS: The negative shortcut in brackets must match "N". */
+			printf(_("Uninstall? [Y/n] "));
+			fflush(stdout);
 			if ( fgets(answer, sizeof(answer), stdin) && 
-				 (!strncmp(answer, _("n"), 1) || !strncmp(answer, _("N"), 1)) ) {
+				 (response_matches(answer, _("N")) || response_matches(answer, "N")) ) {
 				printf(_("Aborted.\n"));
 				return 0;
 			}
@@ -261,7 +266,7 @@ int perform_uninstall(product_t *prod, product_info_t *info, int console)
 	if ( ret ) {
 		/* Remove all product-related files from the manifest, i.e. the XML file and associated scripts
 		 */
-		if ( unlink("uninstall") < 0 )
+		if ( remove_path("uninstall", 0) < 0 )
 			log_file("uninstall", strerror(errno));
 		
 		loki_removeproduct(prod);
@@ -271,7 +276,7 @@ int perform_uninstall(product_t *prod, product_info_t *info, int console)
 
 int check_permissions(product_info_t *info, int verbose)
 {
-    if ( access(info->root, W_OK) < 0 ) {
+    if (access(info->root, W_OK) < 0 || !trusted_product_files(info)) {
         if ( verbose ) {
             fprintf(stderr,
             _("No write access to the installation directory.\nAborting.\n"));
@@ -302,7 +307,7 @@ static void init_locale(const char *product)
 		locale[sizeof(locale)-1]='\0';
 	}
 	else if ( product ) { /* Use the installation directory from the product */
-        product_t *prod = loki_openproduct(product);
+        product_t *prod = open_registered_product(product);
 		if ( prod ) {
 			product_info_t *info = loki_getinfo_product(prod);
 
@@ -413,7 +418,7 @@ int main(int argc, char *argv[])
 		{ 0, 0, 0, 0 }
 	};
 
-#if defined(darwin)
+#if defined(LOKI_CARBON)
 	printf("Your command line:\n");
 	{ 
 		int i; for (i = 0; i < argc; i++) { printf("argv[%d] == \"%s\"\n", i, argv[i]); } } 
@@ -435,89 +440,54 @@ int main(int argc, char *argv[])
 #endif
 	
 #ifdef SETUP_COPY_UNINSTALL
-	/* HP-UX wouldn't allow us to uninstall ourselves unless we copy the binary some other place */
+    /* HP-UX cannot remove a running executable. Run a private copy and wait. */
+    env = getenv("SETUP_DONT_COPY");
+    if (!env || !atoi(env)) {
+        const char *installpath = get_installpath(argv[0]);
+        char directory[] = "/tmp/loki-uninstall.XXXXXX";
+        char source[PATH_MAX], target[sizeof(directory) + sizeof("/uninstall")];
+        FILE *in = NULL, *out = NULL;
+        int result = 1;
 
-	/* See if we have already being run from the script */
-	env = getenv("SETUP_DONT_COPY");
-	if ( env==NULL || atoi(env)==0 ) {
-		char tmpscript[PATH_MAX] = "/tmp/uninstXXXXXX", tmpbin[PATH_MAX] = "/tmp/uninstbinXXXXXX";
-		char source[PATH_MAX], *basename;
-		const char *installpath;
-		FILE *f;
-
-		env = getenv("TMPDIR");
-		if ( env ) {
-			snprintf(tmpscript, sizeof(tmpscript), "%s/uninstXXXXXX", env);
-			snprintf(tmpbin, sizeof(tmpbin), "%s/uninstbinXXXXXX", env);
-		}
-		/* First create the bootstrap script */
-		if ( *mktemp(tmpscript) == '\0' )
-			perror("mktemp(script)");
-		if ( *mktemp(tmpbin) == '\0' )
-			perror("mktemp(bin)");
-
-		/* Copy ourselves to a temporary location */
-		basename = strrchr(argv[0], '/');
-		if ( basename ) {
-			basename ++;
-		} else {
-			basename = argv[0];
-		}
-		installpath = get_installpath(argv[0]);
-		snprintf(source, sizeof(source), "%s/%s", installpath, basename);
-		f = fopen(source, "rb");
-		if ( f ) {
-			FILE *o = fopen(tmpbin, "wb");
-			if ( o ) {
-				char buf[1024];
-				int cnt;
-				while ( (cnt = fread(buf, 1, sizeof(buf), f)) > 0 ) {
-					if ( fwrite(buf, 1, cnt, o) == 0 ) {
-						perror("fwrite");
-						unlink(tmpbin);
-						break;
-					}
-				}
-				fchmod(fileno(o), 0755);
-				fclose(o);
-
-				o = fopen(tmpscript, "w");
-				if ( o ) {
-					int i;
-
-					fprintf(o,
-							"#!/bin/sh\n\n"
-							"SETUP_DONT_COPY=1\n"
-							"export SETUP_DONT_COPY\n"
-							"cd \"%s\"\n"
-							"\"%s\" ",
-							installpath, tmpbin);
-					for ( i=1; i < argc; ++i ) {
-						fprintf(o, "\"%s\" ", argv[i]);
-					}
-					fprintf(o,"\n"
-							"rm -f \"%s\" \"%s\"\n",
-							 tmpbin, tmpscript);
-					fchmod(fileno(o), 0755);
-					fclose(o);
-					
-					/* Finally exit this program and run the script */
-					execv(tmpscript, argv);
-					perror("execv"); /* Something has gone wrong :( */
-					unlink(tmpscript);
-					unlink(tmpbin);
-				} else {
-					fprintf(stderr, _("Warning: Unable to replicate uninstallation program.\n"));
-				}
-
-			} else {
-				fprintf(stderr, _("Unable to open %s for writing.\n"), tmpbin);
-			}
-			fclose(f);
-		} else {
-			fprintf(stderr, _("Unable to open %s for copying.\n"), source);
-		}
-	}
+        if (!installpath ||
+            snprintf(source, sizeof(source), "%s/%s", installpath, loki_basename(argv[0])) >= sizeof(source) ||
+            (geteuid() == 0 && !trusted_path(source, 0)) ||
+            !mkdtemp(directory))
+            return 1;
+        snprintf(target, sizeof(target), "%s/uninstall", directory);
+        in = fopen(source, "rb");
+        if (in)
+            out = replace_file(target, 0700);
+        if (out) {
+            char buf[8192];
+            size_t len;
+            while ((len = fread(buf, 1, sizeof(buf), in)) && fwrite(buf, 1, len, out) == len)
+                ;
+            int copied = !ferror(in) && !ferror(out);
+            if (fclose(out) == 0 && copied) {
+                pid_t child = fork();
+                if (child == 0) {
+                    if (setenv("SETUP_DONT_COPY", "1", 1) == 0 && chdir(installpath) == 0)
+                        execv(target, argv);
+                    _exit(1);
+                }
+                if (child > 0) {
+                    pid_t waited;
+                    int status;
+                    do {
+                        waited = waitpid(child, &status, 0);
+                    } while (waited < 0 && errno == EINTR);
+                    if (waited == child && WIFEXITED(status))
+                        result = WEXITSTATUS(status);
+                }
+            }
+        }
+        if (in)
+            fclose(in);
+        unlink(target);
+        rmdir(directory);
+        return result;
+    }
 #endif
 
 #ifdef UNINSTALL_UI
@@ -538,6 +508,7 @@ int main(int argc, char *argv[])
 	while ( (c=getopt_long(argc, argv, "hlL:v", long_options, NULL)) != EOF ) {
 		switch(c) {
 		case 'h':
+			init_locale(use_locale);
 			print_usage(argv[0]);
 			return 0;
 		case 'v':
@@ -580,7 +551,7 @@ int main(int argc, char *argv[])
 				const char *product;
 				printf(_("Installed products:\n"));
 				for( product = loki_getfirstproduct(); product; product = loki_getnextproduct() ) {
-					prod = loki_openproduct(product);
+					prod = open_registered_product(product);
 					printf("\t%s: ", product);
 					if ( prod ) {
 						product_component_t *comp;
@@ -607,7 +578,7 @@ int main(int argc, char *argv[])
     } else {
 		product_component_t *comp;
 
-        prod = loki_openproduct(argv[optind]);
+        prod = open_registered_product(argv[optind]);
         if ( ! prod ) {
             fprintf(stderr, _("Could not open product information for %s\n"), argv[optind]);
             return 1;
@@ -659,7 +630,7 @@ full_uninstall:
             if ( ! check_permissions(info, 1) )
                 return 1;
             if ( ! perform_uninstall(prod, info, 1) ) {
-                fprintf(stderr, _("An error occured during the uninstallation process.\n"));
+                fprintf(stderr, _("Uninstallation did not complete.\n"));
                 ret = 1;
                 loki_closeproduct(prod);
             } else {

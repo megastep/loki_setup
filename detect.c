@@ -54,17 +54,15 @@
 #endif
 
 
-/* From libxml */
-#include <libxml/encoding.h>
-
 #include "install.h"
 #include "install_ui.h"
 #include "install_log.h"
 #include "detect.h"
+#include "encoding.h"
 #include "bools.h"
 
 #ifndef MNTTYPE_CDROM
-#if defined(__FreeBSD__)
+#if defined(__FreeBSD__) || defined(__OpenBSD__)
 #define MNTTYPE_CDROM    "cd9660"
 #elif defined(hpux)
 #define MNTTYPE_CDROM    "cdfs"
@@ -135,7 +133,7 @@ extern Install_UI UI;
  *  http://developer.apple.com/samplecode/Sample_Code/Devices_and_Hardware/Disks/VolumeToBSDNode/VolumeToBSDNode.c.htm
  */
 #    include <CoreFoundation/CoreFoundation.h>
-#    include <CoreServices/CoreServices.h>
+#    include <IOKit/IOBSD.h>
 #    include <IOKit/IOKitLib.h>
 #    include <IOKit/storage/IOMedia.h>
 #    include <IOKit/storage/IOCDMedia.h>
@@ -244,11 +242,11 @@ int mounted_filesystems(void)
 int is_fs_mounted(const char *dev)
 {
     int found = 0;
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(darwin)
     int count, i;
     struct statfs *mntbuf;
 
-    count = getmntinfo(&mntbuf, 0);
+    count = getmntinfo(&mntbuf, MNT_NOWAIT);
     if ( count > 0 ) {
         for ( i = 0; i < count; ++i ) {
             if ( !strcmp(mntbuf[i].f_mntfromname, dev) ) {
@@ -304,20 +302,6 @@ int is_fs_mounted(const char *dev)
 		}
 		fclose(mtab);
 	}
-#elif defined(darwin)
-    // Taken from FreeBSD section (since Darwin is based on FreeBSD)
-    int count, i;
-    struct statfs *mntbuf;
-
-    count = getmntinfo(&mntbuf, 0);
-    if ( count > 0 ) {
-        for ( i = 0; i < count; ++i ) {
-            if ( !strcmp(mntbuf[i].f_mntfromname, dev) ) {
-                found = 1;
-                break;
-            }
-        }
-    }
 #else
     struct mntent *mnt;
     FILE *mtab = setmntent(MOUNTS_FILE, "r" );
@@ -355,14 +339,10 @@ void topmost_valid_path(char *target, const char *src)
 
 void unmount_filesystems(void)
 {
-    const char *fstab, *mtab, *mount_cmd, *mnttype;
-    FILE *mountfp;
-    struct mntent *mntent;
-
     struct mounted_elem *mnt = mounted_list, *oldmnt;
     while ( mnt ) {
         log_normal(_("Unmounting device %s"), mnt->device);
-        if ( run_command(NULL, UMOUNT_PATH, "-l", mnt->dir, 1) ) {
+        if ( run_command(NULL, UMOUNT_PATH, mnt->dir, NULL, 1) ) {
             log_warning(_("Failed to unmount device %s mounted on %s"), mnt->device, mnt->dir);
         }
         free(mnt->device);
@@ -371,54 +351,6 @@ void unmount_filesystems(void)
         mnt = mnt->next;
         free(oldmnt);
     }
-
-    //Now go through the list of filesystems left that may not be in fstab,
-    //such as ones automounted through the gnome automounter or manually
-    //mounted on loop - MS:LGP
-    if ( !access("/etc/pfs_fstab", F_OK) ) {
-		fstab = "/etc/pfs_fstab";
-		mtab = "/etc/pfs_mtab";
-		mount_cmd = "/usr/sbin/pfs_mount";
-		mnttype = "pfs-rrip";
-    } else {
-		fstab = SETUP_FSTAB;
-		mtab = MOUNTS_FILE;
-		mnttype = MNTTYPE_CDROM;
-		mount_cmd = MOUNT_PATH;
-    }
-
-#if defined(__svr4__)
-	mountfp = fopen(MOUNTS_FILE, "r");
-	if ( mountfp != NULL ) {
-		struct mnttab mnt;
-
-		while ( getmntent(mountfp, &mnt)==0 ) {
-			if ( !strcmp(mnt.mnt_fstype, mnttype) ) {
-				if ( ! run_command(NULL, UMOUNT_PATH, "-l", mnt.mnt_special, 1) ) {
-					log_warning(_("Failed to unmount device %s mounted on %s"), mnt.mnt_special, mnt.mnt_mountp);
-				}
-			}
-		}
- 		fclose(mountfp);
-	}
-#elif !defined(__FreeBSD__) // FIXME
-    mountfp = setmntent( mtab, "r" );
-    if( mountfp != NULL ) {
-        while( (mntent = getmntent( mountfp )) != NULL ){
-            if ( !strcmp(mntent->mnt_type, mnttype) ) {
-                char *fsname = strdup(mntent->mnt_fsname);
-                char *dir = strdup(mntent->mnt_dir);
-
-				if ( ! run_command(NULL, UMOUNT_PATH, "-l", fsname, 1) ) {
-					log_warning(_("Failed to unmount device %s mounted on %s"), fsname, dir);
-				}
-                free(fsname);
-                free(dir);
-            }
-        }
-        endmntent(mountfp);
-    }
-#endif
 
     mounted_list = NULL;
 }
@@ -468,8 +400,8 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
 {
 	int num_cdroms = 0;
 
-#ifdef __FreeBSD__
-	int mounted;
+#if defined(__FreeBSD__) || defined(__OpenBSD__)
+    struct statfs *mounts;
     struct fstab *fstab;
 
     /* Try to mount unmounted CDROM filesystems */
@@ -485,19 +417,10 @@ int detect_and_mount_cdrom(char *path[SETUP_MAX_DRIVES])
     }
     endfsent();
 
-    mounted = getfsstat(NULL, 0, MNT_WAIT);
-    if ( mounted > 0 ) {
-        int i;
-		struct statfs *mnts = (struct statfs *)malloc(sizeof(struct statfs) * mounted);
-
-		mounted = getfsstat(mnts, mounted * sizeof(struct statfs), MNT_WAIT);
-		for ( i = 0; i < mounted && num_cdroms < SETUP_MAX_DRIVES; ++ i ) {
-			if ( ! strcmp(mnts[i].f_fstypename, MNTTYPE_CDROM) ) {
-				path[num_cdroms ++] = strdup(mnts[i].f_mntonname);
-			}
-		}
-		
-		free(mnts);
+    int mounted = getmntinfo(&mounts, MNT_WAIT);
+    for (int i = 0; i < mounted && num_cdroms < SETUP_MAX_DRIVES; ++i) {
+        if (!strcmp(mounts[i].f_fstypename, MNTTYPE_CDROM))
+            path[num_cdroms++] = strdup(mounts[i].f_mntonname);
     }
 #elif defined(darwin)
 {
@@ -870,30 +793,11 @@ const char *get_cdrom(install_info *info, const char *id)
 
 char *convert_encoding(char *str)
 {
-	static xmlCharEncodingHandlerPtr handler = NULL;
-	static char buf[1024];
+    static char buf[1024];
 
-	if ( handler == NULL && current_encoding ) {
-		handler = xmlFindCharEncodingHandler(current_encoding);
-	}
-
-/*  	fprintf(stderr, "convert_encoding(%s) handler=%s\n", str, handler->name); */
-	if ( handler && handler->output ) {
-		int outlen = sizeof(buf), inlen = strlen(str)+1;
-		if ( 
-#if LIBXML_VERSION < 20000
-			handler->output((unsigned char*)buf, outlen, (unsigned char*)str, inlen) 
-#else
-			handler->output((unsigned char*)buf, &outlen, (unsigned char*)str, &inlen) 
-#endif
-			< 0 ) {
-			return str;
-		} else {
-/*  			fprintf(stderr, "Converted to %s\n", buf); */
-			return buf;
-		}
-	}
-	return str;
+    if (!current_encoding || !strcasecmp(current_encoding, "UTF-8"))
+        return str;
+    return convert_utf8(str, current_encoding, buf, sizeof(buf));
 }
 
 void DetectLocale(void)

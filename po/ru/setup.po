@@ -2,878 +2,1550 @@
 # Copyright (C) YEAR Free Software Foundation, Inc.
 # Anatoly Zhigunov <anatol_z@mail.ru>, 2001.
 # Created with FAR 1.70 beta 2
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2004-08-03 19:38-0700\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Project-Id-Version: Loki Setup 2.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-18 05:22-0800\n"
+"PO-Revision-Date: \n"
 "Last-Translator: Anatoly Zhigunov <anatol_z@mail.ru>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language-Team: \n"
+"Language: ru\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=KOI8-R\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-# SOME DESCRIPTIVE TITLE
-# image/setup.data/setup.glade:742 image/setup.data/setup.glade:791
-#: image/setup.data/setup.glade:979 image/setup.data/setup.glade:1028
-msgid "%P %%"
-msgstr "%P %%"
+# gtk_ui.c:550
+#: carbon_ui.c:315 gtk_ui.c:707
+msgid "Ready to install!"
+msgstr "п⌠п╬я┌п╬п╡ п╨ я┐я│я┌п╟п╫п╬п╡п╨п╣!"
 
-# image/setup.data/setup.glade:324 image/setup.data/setup.glade:350
-#: image/setup.data/setup.glade:548 image/setup.data/setup.glade:574
-msgid "0 MB"
-msgstr "0 Мб"
+# gtk_ui.c:563 gtk_ui.c:577
+#: carbon_ui.c:337 carbon_ui.c:349 gtk_ui.c:724 gtk_ui.c:738
+#, c-format
+msgid "%d MB"
+msgstr "%d п°п╠"
 
-#: image/setup.data/setup.glade:2010
-msgid "CD key"
+#: carbon_ui.c:374
+msgid "Can't find install dir!"
+msgstr "п п╟я┌п╟п╩п╬пЁ я┐я│я┌п╟п╫п╬п╡п╨п╦ п╫п╣ п╫п╟п╧п╢п╣п╫."
+
+#: carbon_ui.c:395
+msgid "Can't find default install dir!"
+msgstr "п²п╣ я┐п╢п╟п╩п╬я│я▄ п╫п╟п╧я┌п╦ п╨п╟я┌п╟п╩п╬пЁ я┐я│я┌п╟п╫п╬п╡п╨п╦ п©п╬ я┐п╪п╬п╩я┤п╟п╫п╦я▌."
+
+#: carbon_ui.c:478 console_ui.c:695 dialog_ui.c:710 gtk_ui.c:399
+#, c-format
+msgid ""
+"Installation could not proceed due to the following error:\n"
+"%s\n"
+"Try to use 'Expert' installation."
 msgstr ""
+"п²п╣ я┐п╢п╟п╩п╬я│я▄ п©я─п╬п╢п╬п╩п╤п╦я┌я▄ я┐я│я┌п╟п╫п╬п╡п╨я┐ п╦п╥-п╥п╟ я│п╩п╣п╢я┐я▌я┴п╣п╧ п╬я┬п╦п╠п╨п╦:\n"
+"%s\n"
+"п÷п╬п©я─п╬п╠я┐п╧я┌п╣ я─п╟я│я┬п╦я─п╣п╫п╫я▀п╧ я─п╣п╤п╦п╪ я┐я│я┌п╟п╫п╬п╡п╨п╦."
 
-# image/setup.data/setup.glade:546 image/setup.data/setup.glade:838
-# image/setup.data/setup.glade:1273 image/setup.data/setup.glade:1777
-#: image/setup.data/setup.glade:167 image/setup.data/setup.glade:775
-#: image/setup.data/setup.glade:1080 image/setup.data/setup.glade:1561
-#: xsu.c:460
-msgid "Cancel"
-msgstr "Отмена"
+#: carbon_ui.c:524 gtk_ui.c:573
+msgid ""
+"Are you sure you want to abort\n"
+"this installation?"
+msgstr "п÷я─п╣я─п╡п╟я┌я▄ я┐я│я┌п╟п╫п╬п╡п╨я┐?"
 
-# image/setup.data/setup.glade:973
-#: image/setup.data/setup.glade:1245
-msgid "Congratulations!"
-msgstr "Поздравляем!"
+#: carbon_ui.c:733
+msgid "CD keys do not match.  Please try again."
+msgstr "п▓п╡п╣п╢я▒п╫п╫я▀п╣ п╨п╩я▌я┤п╦ CD п╫п╣ я│п╬п╡п©п╟п╢п╟я▌я┌. п÷п╬п©я─п╬п╠я┐п╧я┌п╣ п╣я┴я▒ я─п╟п╥."
 
-# image/setup.data/setup.glade:1286 image/setup.data/setup.glade:1420
-#: image/setup.data/setup.glade:1581 image/setup.data/setup.glade:1729
-#: image/setup.data/setup.glade:2002
-msgid "Continue"
-msgstr "Продолжить"
+#: carbon_ui.c:735
+msgid "Please specify a CD key!"
+msgstr "п▓п╡п╣п╢п╦я┌п╣ п╨п╩я▌я┤ CD."
 
-# image/setup.data/setup.glade:440
-#: image/setup.data/setup.glade:664
-msgid "Estimated size:"
-msgstr "Примерный размер:"
+#: carbon_ui.c:753
+msgid "CD key is invalid!"
+msgstr "п²п╣п╢п╣п╧я│я┌п╡п╦я┌п╣п╩я▄п╫я▀п╧ п╨п╩я▌я┤ CD."
 
-# image/setup.data/setup.glade:912 image/setup.data/setup.glade:1148
-# image/setup.data/setup.glade:1394
-#: image/setup.data/setup.glade:129 dialog_ui.c:639
-#, fuzzy
-msgid "Expert"
-msgstr "Выход"
+#: carbon_ui.c:952
+#, c-format
+msgid "This install requires Mac OS X %s or later."
+msgstr "п■п╩я▐ я█я┌п╬п╧ я┐я│я┌п╟п╫п╬п╡п╨п╦ я┌я─п╣п╠я┐п╣я┌я│я▐ Mac OS X %s п╦п╩п╦ п╫п╬п╡п╣п╣."
 
-# image/setup.data/setup.glade:414
-#: image/setup.data/setup.glade:638
-msgid "Free space:"
-msgstr "Свободное место:"
+# gtk_ui.c:1163
+#: carbon_ui.c:983 gtk_ui.c:1732
+#, c-format
+msgid "%s / %s Setup"
+msgstr "%s / %s пёя│я┌п╟п╫п╬п╡п╨п╟"
 
-# image/setup.data/setup.glade:95
-#: image/setup.data/setup.glade:252
-msgid "Global Options"
-msgstr "Глобальные параметры"
+# gtk_ui.c:1165
+#: carbon_ui.c:985 gtk_ui.c:1734
+#, c-format
+msgid "%s Setup"
+msgstr "%s пёя│я┌п╟п╫п╬п╡п╨п╟"
 
-# image/setup.data/setup.glade:1155
-#: image/setup.data/setup.glade:1438
-msgid "Install Aborted"
-msgstr "Установка прервана"
+# console_ui.c:493
+#: carbon_ui.c:1335
+#, c-format
+msgid "Installing %s : %d%%"
+msgstr "пёя│я┌п╟п╫п╬п╡п╨п╟ %s: %d%%"
 
-# image/setup.data/setup.glade:945
-#: image/setup.data/setup.glade:1217
-msgid "Install Complete"
-msgstr "Установка завершена"
+# gtk_ui.c:1477
+#: carbon_ui.c:1515 gtk_ui.c:2172 gtk_ui.c:2175
+#, c-format
+msgid "Type '%s' to start the program"
+msgstr "п²п╟п╠п╣я─п╦я┌п╣ '%s' п╢п╩я▐ п╥п╟п©я┐я│п╨п╟ п©я─п╬пЁя─п╟п╪п╪я▀"
 
-# image/setup.data/setup.glade:628
-#: image/setup.data/setup.glade:865
-msgid "Install Progress"
-msgstr ""
+# console_ui.c:31
+#. TRANSLATORS: Use the single-character shortcut shown in the yes/no prompts.
+#: console_ui.c:39
+msgid "Y"
+msgstr "п■"
 
-# image/setup.data/setup.glade:269
-#: image/setup.data/setup.glade:426
-msgid "Install a symbolic link into the path"
-msgstr "Установка символьной ссылки"
+# console_ui.c:32
+#. TRANSLATORS: Use the single-character shortcut shown in the yes/no prompts.
+#: console_ui.c:41
+msgid "N"
+msgstr "п²"
 
-# image/setup.data/setup.glade:126
-#: image/setup.data/setup.glade:283
-msgid "Install path:"
-msgstr "Путь установки:"
+# console_ui.c:59
+#: console_ui.c:65
+msgid "Y/n"
+msgstr "п■/п╫"
 
-# image/setup.data/setup.glade:1608
-#: image/setup.data/setup.glade:1918
-#, fuzzy
-msgid "Launch _Browser"
-msgstr "Запустить обозреватель"
+# console_ui.c:62
+#: console_ui.c:68
+msgid "N/y"
+msgstr "п²/п╢"
 
-# image/setup.data/setup.glade:1569
-#: image/setup.data/setup.glade:1879
-msgid "Launching browser, please wait..."
-msgstr "Запуск обозревателя, подождите..."
+# console_ui.c:65
+#: console_ui.c:71
+#, c-format
+msgid "%s [Press Enter] "
+msgstr "%s [п²п╟п╤п╪п╦я┌п╣ 'п▓п╡п╬п╢'] "
 
-# image/setup.data/setup.glade:1723
-#: image/setup.data/setup.glade:2278 dialog_ui.c:97 dialog_ui.c:263
-msgid "License Agreement"
-msgstr "Лицензионное соглашение"
+# console_ui.c:69 console_ui.c:95
+#: console_ui.c:75 console_ui.c:101
+#, c-format
+msgid "Warning, invalid yesno prompt: %s\n"
+msgstr "п÷я─п╣п╢я┐п©я─п╣п╤п╢п╣п╫п╦п╣: п╫п╣п©я─п╡п╟п╩я▄п╫я▀п╧ п╡п╡п╬п╢ п╢п╟п╫п╣я┌: %s\n"
 
-# image/setup.data/setup.glade:193
-#: image/setup.data/setup.glade:350
-msgid "Link path:"
-msgstr "Путь связи:"
+# console_ui.c:89
+#: console_ui.c:95
+msgid "Y/n/?"
+msgstr "п■/п╫/?"
 
-#: image/setup.data/setup.glade:448
-msgid "Man page path:"
-msgstr ""
+# console_ui.c:92
+#: console_ui.c:98
+msgid "N/y/?"
+msgstr "п²/п╢/?"
 
-# image/setup.data/setup.glade:95
-#: image/setup.data/setup.glade:517
-#, fuzzy
-msgid "Options"
-msgstr "Глобальные параметры"
+# console_ui.c:112
+#: console_ui.c:118
+msgid "Continue?"
+msgstr "п÷я─п╬п╢п╬п╩п╤п╦я┌я▄?"
+
+# console_ui.c:168
+#: console_ui.c:183
+#, c-format
+msgid "Previously installed option '%s' will be installed.\n"
+msgstr "п═п╟п╫п╣п╣ я┐я│я┌п╟п╫п╬п╡п╩п╣п╫п╫я▀п╧ п©п╟я─п╟п╪п╣я┌я─ б╚%sб╩ п╠я┐п╢п╣я┌ я┐я│я┌п╟п╫п╬п╡п╩п╣п╫ я│п╫п╬п╡п╟.\n"
+
+# console_ui.c:168
+#: console_ui.c:213
+#, c-format
+msgid "'%s' option will be installed.\n"
+msgstr "п÷п╟я─п╟п╪п╣я┌я─ '%s' п╠я┐п╢п╣я┌ я┐п╢п╟п╩я▒п╫\n"
+
+#: console_ui.c:218
+#, c-format
+msgid "'%s' :\n"
+msgstr "б╚%sб╩:\n"
+
+#: console_ui.c:226
+#, c-format
+msgid "Option: '%s' ?"
+msgstr "пёя│я┌п╟п╫п╬п╡п╦я┌я▄ б╚%sб╩?"
+
+# console_ui.c:260
+#: console_ui.c:247 console_ui.c:342 dialog_ui.c:104 dialog_ui.c:274
+msgid "Do you agree with the license?"
+msgstr "п▓я▀ я│п╬пЁп╩п╟я│п╫я▀ я│ п©п╬п╩п╬п╤п╣п╫п╦я▐п╪п╦ п╩п╦я├п╣п╫п╥п╦п╬п╫п╫п╬пЁп╬ я│п╬пЁп╩п╟я┬п╣п╫п╦я▐?"
+
+# console_ui.c:217
+#: console_ui.c:292
+#, c-format
+msgid "No help available\n"
+msgstr "п║п©я─п╟п╡п╨п╟ п╬я┌я│я┐я┌я│я┌п╡я┐п╣я┌\n"
+
+# console_ui.c:235
+#: console_ui.c:312
+#, c-format
+msgid "----====== %s / %s installation program ======----\n"
+msgstr "----====== %s / %s п©я─п╬пЁя─п╟п╪п╪п╟ я┐я│я┌п╟п╫п╬п╡п╨п╦ ======----\n"
+
+# console_ui.c:238
+#: console_ui.c:315
+#, c-format
+msgid "----====== %s installation program ======----\n"
+msgstr "----====== %s п©я─п╬пЁя─п╟п╪п╪п╟ я┐я│я┌п╟п╫п╬п╡п╨п╦ ======----\n"
+
+#: console_ui.c:319
+#, c-format
+msgid "You are running a %s machine with %s (%s)\n"
+msgstr "п▓я▀ п╦я│п©п╬п╩я▄п╥я┐п╣я┌п╣ п╨п╬п╪п©я▄я▌я┌п╣я─ %s я│ %s (%s)\n"
+
+#: console_ui.c:321
+#, c-format
+msgid "You are running a %s machine (%s)\n"
+msgstr "п▓я▀ п╦я│п©п╬п╩я▄п╥я┐п╣я┌п╣ п╨п╬п╪п©я▄я▌я┌п╣я─ %s (%s)\n"
+
+#: console_ui.c:323
+#, c-format
+msgid "Press Ctrl+C at any time to cancel installation.\n"
+msgstr "п╖я┌п╬п╠я▀ п╬я┌п╪п╣п╫п╦я┌я▄ я┐я│я┌п╟п╫п╬п╡п╨я┐, п╫п╟п╤п╪п╦я┌п╣ Ctrl+C.\n"
+
+# console_ui.c:277
+#: console_ui.c:361 dialog_ui.c:130
+#, c-format
+msgid "Would you like to read the %s file ?"
+msgstr "п▓я▀ я┘п╬я┌п╦я┌п╣ п©я─п╬я┤п╦я┌п╟я┌я▄ я└п╟п╧п╩ %s?"
 
 # console_ui.c:328
-#: image/setup.data/setup.glade:92
-#, fuzzy
-msgid "Please choose the class of installation."
-msgstr "Выберите программу для установки или Q для выхода"
+#: console_ui.c:408
+msgid "Please choose the product to install, or Q to quit. "
+msgstr "п▓я▀п╠п╣я─п╦я┌п╣ п©я─п╬пЁя─п╟п╪п╪я┐ п╢п╩я▐ я┐я│я┌п╟п╫п╬п╡п╨п╦ п╦п╩п╦ Q п╢п╩я▐ п╡я▀я┘п╬п╢п╟"
 
-#: image/setup.data/setup.glade:2055
-msgid "Please enter your CD key."
-msgstr ""
+# console_ui.c:358
+#: console_ui.c:438 dialog_ui.c:419
+msgid "Please enter the installation path"
+msgstr "п▓п╡п╣п╢п╦я┌п╣ п©я┐я┌я▄ я┐я│я┌п╟п╫п╬п╡п╨п╦"
 
-# image/setup.data/setup.glade:1518
-#: image/setup.data/setup.glade:1828
-msgid "Please visit our website for updates and support."
-msgstr ""
-"Посетите наш сайт в интернете для получения обновлений и технической "
-"поддержки"
-
-# image/setup.data/setup.glade:1200
-#: image/setup.data/setup.glade:1483
-msgid "Press 'Exit' to clean up temporary files."
-msgstr "Нажмите 'Выход' для удаления временных файлов"
-
-# image/setup.data/setup.glade:1427
-#: image/setup.data/setup.glade:1737
-msgid "Product Website"
-msgstr "Сайт программы в интернете"
-
-# image/setup.data/setup.glade:1641
-#: image/setup.data/setup.glade:2185
-msgid "Readme File"
-msgstr "Файл 'Прочти Меня'"
-
-#: image/setup.data/setup.glade:112 dialog_ui.c:638
-msgid "Recommended"
-msgstr ""
-
-# image/setup.data/setup.glade:472
-#: image/setup.data/setup.glade:696
-#, fuzzy
-msgid "Startup menu entries (KDE/Gnome/CDE)"
-msgstr "Элементы меню рабочего стола (КДЕ/Гном)"
-
-# image/setup.data/setup.glade:244
-#: image/setup.data/setup.glade:401
-msgid "Symbolic links to installed binaries are placed here"
-msgstr "Символьные ссылки на установленные файлы здесь"
-
-# image/setup.data/setup.glade:1483
-#: image/setup.data/setup.glade:1793
-msgid "Thank you for installing "
-msgstr "Спасибо за установку"
-
-# image/setup.data/setup.glade:990
-#: image/setup.data/setup.glade:1262
-msgid "The installation was successfully completed!"
-msgstr "Установка была успешно завершена"
-
-# image/setup.data/setup.glade:1024
-#: image/setup.data/setup.glade:1296
-msgid "The product was installed in:"
-msgstr "Программа была установлена в"
-
-# image/setup.data/setup.glade:1183
-#: image/setup.data/setup.glade:1466
-msgid "This installation has been aborted."
-msgstr "Установка была прервана"
-
-#: image/setup.data/setup.glade:127
-msgid ""
-"This will allow you to pick the installation paths and options to be "
-"installed "
-msgstr ""
-
-#: image/setup.data/setup.glade:110
-msgid "This will install the product with the default options and paths"
-msgstr ""
-
-# image/setup.data/setup.glade:767
-#: image/setup.data/setup.glade:1004
-msgid "Total Install"
-msgstr "Результат установки"
-
-# image/setup.data/setup.glade:1075
-#: image/setup.data/setup.glade:1347
-#, fuzzy
-msgid "Type '[game]' to start."
-msgstr "Наберите '[game]' для запуска игры"
-
-# image/setup.data/setup.glade:1293
-#: image/setup.data/setup.glade:1589
-msgid "Warning"
-msgstr "Предупреждение"
-
-# image/setup.data/setup.glade:718
-#: image/setup.data/setup.glade:955
-msgid "[current file]"
-msgstr "[current file]"
-
-# image/setup.data/setup.glade:684
-#: image/setup.data/setup.glade:921
-msgid "[current option]"
-msgstr "[current option]"
-
-# image/setup.data/setup.glade:56
-#: image/setup.data/setup.glade:56
-msgid "[image area]"
-msgstr "[image area]"
-
-# image/setup.data/setup.glade:1041
-#: image/setup.data/setup.glade:1313
-msgid "[install directory]"
-msgstr "[install directory]"
-
-# image/setup.data/setup.glade:579
-#: image/setup.data/setup.glade:816
-msgid "[options status]"
-msgstr "[options status]"
-
-# image/setup.data/setup.glade:396
-#: image/setup.data/setup.glade:620
-msgid "[packages go here]"
-msgstr "[packages go here]"
-
-# image/setup.data/setup.glade:1500
-#: image/setup.data/setup.glade:1810
-msgid "[product]"
-msgstr "[product]"
-
-# image/setup.data/setup.glade:1321
-#: image/setup.data/setup.glade:1617
-msgid "[warning text]"
-msgstr "[warning text]"
-
-# image/setup.data/setup.glade:572
-#: image/setup.data/setup.glade:808
-#, fuzzy
-msgid "_Begin Install"
-msgstr "Начало установки"
-
-# image/setup.data/setup.glade:546 image/setup.data/setup.glade:838
-# image/setup.data/setup.glade:1273 image/setup.data/setup.glade:1777
-#: image/setup.data/setup.glade:1987 image/setup.data/setup.glade:2337
-#, fuzzy
-msgid "_Cancel"
-msgstr "Отмена"
-
-# image/setup.data/setup.glade:1680
-#: image/setup.data/setup.glade:2234
-#, fuzzy
-msgid "_Close"
-msgstr "Закрыть"
-
-# image/setup.data/setup.glade:1286 image/setup.data/setup.glade:1420
-#: image/setup.data/setup.glade:216
-#, fuzzy
-msgid "_Continue"
-msgstr "Продолжить"
-
-# image/setup.data/setup.glade:912 image/setup.data/setup.glade:1148
-# image/setup.data/setup.glade:1394
-#: image/setup.data/setup.glade:1166 image/setup.data/setup.glade:1430
-#: image/setup.data/setup.glade:1695
-#, fuzzy
-msgid "_Exit"
-msgstr "Выход"
-
-# image/setup.data/setup.glade:1790
-#: image/setup.data/setup.glade:2366
-#, fuzzy
-msgid "_I Agree"
-msgstr "Согласен"
-
-#: image/setup.data/setup.glade:1209
-msgid "_Start"
-msgstr ""
-
-# image/setup.data/setup.glade:559 image/setup.data/setup.glade:851
-# image/setup.data/setup.glade:925 image/setup.data/setup.glade:1407
-#: image/setup.data/setup.glade:191 image/setup.data/setup.glade:794
-#: image/setup.data/setup.glade:1099 image/setup.data/setup.glade:1185
-#: image/setup.data/setup.glade:1714
-#, fuzzy
-msgid "_View Readme"
-msgstr "Просмотреть файл 'Прочти Меня'"
-
-#: log.c:47
-msgid "loki_setup: "
-msgstr ""
-
-# install.c:399 install.c:407
-#: install_log.c:19 install.c:714
-msgid "Out of memory\n"
-msgstr "Нехватка памяти\n"
-
-# detect.c:73
-#: detect.c:326
+# console_ui.c:363
+#: console_ui.c:443
 #, c-format
-msgid "Unmounting device %s"
-msgstr "Размонтирование устройства %s"
+msgid "Install path set to: %s\n"
+msgstr "п÷я┐я┌я▄ я┐я│я┌п╟п╫п╬п╡п╨п╦: %s\n"
+
+# console_ui.c:378 console_ui.c:432
+#: console_ui.c:458 console_ui.c:522 dialog_ui.c:439 dialog_ui.c:511
+#, c-format
+msgid "No write permission to %s\n"
+msgstr "п²п╣я┌ п©я─п╟п╡п╟ п╫п╟ п╥п╟п©п╦я│я▄ п╡ %s\n"
+
+# console_ui.c:404
+#: console_ui.c:484 dialog_ui.c:466
+msgid "Do you want to install symbolic links to a directory in your path?"
+msgstr "п▓я▀ я┘п╬я┌п╦я┌п╣ я┐я│я┌п╟п╫п╬п╡п╦я┌я▄ я│п╦п╪п╡п╬п╩я▄п╫я┐я▌ я│п╡я▐п╥я▄ п╫п╟ п╨п╟я┌п╟п╩п╬пЁ п╡ п╡п╟я┬п╣п╪ п©я┐я┌п╦?"
+
+# console_ui.c:411
+#: console_ui.c:491 dialog_ui.c:475
+msgid "Please enter the path in which to create the symbolic links"
+msgstr "п▓п╡п╣п╢п╦я┌п╣ п©я┐я┌я▄, п╡ п╨п╬я┌п╬я─п╬п╪ п╫я┐п╤п╫п╬ я│п╬п╥п╢п╟я┌я▄ я│п╦п╪п╡п╬п╩я▄п╫я┐я▌ я│п╡я▐п╥я▄"
+
+# console_ui.c:416
+#: console_ui.c:496
+#, c-format
+msgid "Binary path set to: %s\n"
+msgstr "п÷я┐я┌я▄ я└п╟п╧п╩п╬п╡ п©я─п╬пЁя─п╟п╪п╪я▀ я┐я│я┌п╟п╫п╬п╡п╩п╣п╫ п╡: %s\n"
+
+# console_ui.c:411
+#: console_ui.c:503
+msgid "Please enter the path in which to install manual pages for this product"
+msgstr "пёп╨п╟п╤п╦я┌п╣ п©я┐я┌я▄ п╢п╩я▐ я┐я│я┌п╟п╫п╬п╡п╨п╦ я│п©я─п╟п╡п╬я┤п╫я▀я┘ я│я┌я─п╟п╫п╦я├ man я█я┌п╬пЁп╬ п©я─п╬п╢я┐п╨я┌п╟"
+
+# console_ui.c:423
+#: console_ui.c:513 dialog_ui.c:502
+#, c-format
+msgid ""
+"Binary path must be different than the install path.\n"
+"The binary path must be an existing directory.\n"
+msgstr ""
+"п÷я┐я┌я▄ п©я─п╬пЁя─п╟п╪п╪п╫я▀я┘ я└п╟п╧п╩п╬п╡ п╦ я┐я│я┌п╟п╫п╬п╡п╨п╦ п╢п╬п╩п╤п╫я▀ п╠я▀я┌я▄ я─п╟п╥п╩п╦я┤п╫я▀.\n"
+"п÷я┐я┌я▄ п©я─п╬пЁя─п╟п╪п╪п╫я▀я┘ я└п╟п╧п╩п╬п╡ п╢п╬п╩п╤п╣п╫ п╠я▀я┌я▄ я│я┐я┴п╣я│я┌п╡я┐я▌я┴п╦п╪ п╨п╟я┌п╟п╩п╬пЁп╬п╪.\n"
+
+# console_ui.c:457
+#: console_ui.c:558
+#, c-format
+msgid ""
+"\n"
+"%s component\n"
+"\n"
+msgstr ""
+"\n"
+"%s п╨п╬п╪п©п╬п╫п╣п╫я┌\n"
+"\n"
+
+# console_ui.c:469
+#: console_ui.c:571 dialog_ui.c:540
+msgid "Do you want to install startup menu entries?"
+msgstr "п■п╬п╠п╟п╡п╦я┌я▄ п©я┐п╫п╨я┌я▀ п╡ п╪п╣п╫я▌ п╥п╟п©я┐я│п╨п╟?"
+
+# console_ui.c:475
+#: console_ui.c:577
+#, c-format
+msgid "Installing to %s\n"
+msgstr "пёя│я┌п╟п╫п╬п╡п╨п╟ п╡ %s\n"
+
+# console_ui.c:476
+#: console_ui.c:578
+#, c-format
+msgid "%d MB available, %d MB will be installed.\n"
+msgstr "%d п°п╠ я│п╡п╬п╠п╬п╢п╫п╬, %d п°п╠ п╠я┐п╢п╣я┌ я┐я│я┌п╟п╫п╬п╡п╩п╣п╫п╬.\n"
+
+# console_ui.c:479
+#: console_ui.c:581
+msgid "Continue install?"
+msgstr "п÷я─п╬п╢п╬п╩п╤п╦я┌я▄ я┐я│я┌п╟п╫п╬п╡п╨я┐?"
+
+#: console_ui.c:597 dialog_ui.c:567
+msgid "Please enter your CD key"
+msgstr "п▓п╡п╣п╢п╦я┌п╣ п╨п╩я▌я┤ CD"
+
+#: console_ui.c:605 gtk_ui.c:607
+#, c-format
+msgid "ERROR: vcdk is missing. Installation aborted.\n"
+msgstr "п·п╗п≤п▒п п░: п©я─п╬пЁя─п╟п╪п╪п╟ vcdk п╫п╣ п╫п╟п╧п╢п╣п╫п╟. пёя│я┌п╟п╫п╬п╡п╨п╟ п©я─п╣я─п╡п╟п╫п╟.\n"
+
+#: console_ui.c:612 dialog_ui.c:587
+#, c-format
+msgid ""
+"CD key is invalid!\n"
+"Please double check your key and enter it again.\n"
+msgstr ""
+"п²п╣п╢п╣п╧я│я┌п╡п╦я┌п╣п╩я▄п╫я▀п╧ п╨п╩я▌я┤ CD.\n"
+"п÷я─п╬п╡п╣я─я▄я┌п╣ п╨п╩я▌я┤ п╦ п╡п╡п╣п╢п╦я┌п╣ п╣пЁп╬ я│п╫п╬п╡п╟.\n"
+
+# console_ui.c:493
+#: console_ui.c:636
+#, c-format
+msgid "Installing %s ...\n"
+msgstr "пёя│я┌п╟п╫п╬п╡п╨п╟ %s ...\n"
+
+# console_ui.c:508
+#: console_ui.c:657 dialog_ui.c:648
+#, c-format
+msgid "Install aborted - cleaning up files\n"
+msgstr "пёя│я┌п╟п╫п╬п╡п╨п╟ п©я─п╣я─п╡п╟п╫п╟ - я┐п╢п╟п╩п╣п╫п╦п╣ п╡я─п╣п╪п╣п╫п╫я▀я┘ я└п╟п╧п╩п╬п╡\n"
+
+# console_ui.c:516
+#: console_ui.c:665
+#, c-format
+msgid "Installation complete.\n"
+msgstr "пёя│я┌п╟п╫п╬п╡п╨п╟ п╥п╟п╡п╣я─я┬п╣п╫п╟.\n"
+
+# console_ui.c:520
+#: console_ui.c:669
+msgid "Would you like to start now?"
+msgstr "п≈п╟п©я┐я│я┌п╦я┌я▄ п©я─п╬пЁя─п╟п╪п╪я┐ я│п╣п╧я┤п╟я│?"
+
+# console_ui.c:525
+#: console_ui.c:674
+msgid ""
+"If you run the program as root, the preferences will be stored in\n"
+"root's home directory instead of your user account directory."
+msgstr ""
+"п÷я─п╦ п╥п╟п©я┐я│п╨п╣ п©я─п╬пЁя─п╟п╪п╪я▀ п╬я┌ п╦п╪п╣п╫п╦ root п╫п╟я│я┌я─п╬п╧п╨п╦ я│п╬я┘я─п╟п╫я▐я┌я│я▐\n"
+"п╡ п╢п╬п╪п╟я┬п╫п╣п╪ п╨п╟я┌п╟п╩п╬пЁп╣ root, п╟ п╫п╣ п╡ п╡п╟я┬п╣п╪ п╢п╬п╪п╟я┬п╫п╣п╪ п╨п╟я┌п╟п╩п╬пЁп╣."
+
+#: console_ui.c:690
+msgid "Do you want to proceed with Recommended installation?"
+msgstr "п÷я─п╬п╢п╬п╩п╤п╦я┌я▄ я─п╣п╨п╬п╪п╣п╫п╢я┐п╣п╪я┐я▌ я┐я│я┌п╟п╫п╬п╡п╨я┐?"
+
+# console_ui.c:541
+#: console_ui.c:707
+#, c-format
+msgid "Thank you for installing %s!\n"
+msgstr "п║п©п╟я│п╦п╠п╬ п╥п╟ я┐я│я┌п╟п╫п╬п╡п╨я┐ %s!\n"
+
+# console_ui.c:546
+#: console_ui.c:712
+#, c-format
+msgid "Please visit our website for updates and support.\n"
+msgstr ""
+"п÷п╬я│п╣я┌п╦я┌п╣ п╫п╟я┬ я│п╟п╧я┌ п╡ п╦п╫я┌п╣я─п╫п╣я┌п╣ п╢п╩я▐ п©п╬п╩я┐я┤п╣п╫п╦я▐ п╬п╠п╫п╬п╡п╩п╣п╫п╦п╧ п╦ я┌п╣я┘п╫п╦я┤п╣я│п╨п╬п╧ "
+"п©п╬п╢п╢п╣я─п╤п╨п╦\n"
+
+# console_ui.c:551
+#: console_ui.c:717
+msgid "Would you like to launch web browser?"
+msgstr "п·я┌п╨я─я▀я┌я▄ п╠я─п╟я┐п╥п╣я─?"
+
+# console_ui.c:562
+#: console_ui.c:728
+#, c-format
+msgid "Standard input is not a terminal!\n"
+msgstr "п║я┌п╟п╫п╢п╟я─я┌п╫я▀п╧ п╡п╡п╬п╢ п╫п╣ я┌п╣я─п╪п╦п╫п╟п╩!\n"
+
+# copy.c:207
+#: copy.c:301
+#, c-format
+msgid "Unable to create %s symlink pointing to %s"
+msgstr "п²п╣п╡п╬п╥п╪п╬п╤п╫п╬ я│п╬п╥п╢п╟я┌я▄ я│п╦п╪п╡п╬п╩я▄п╫я┐я▌ я│я│я▀п╩п╨я┐ %s, я┐п╨п╟п╥я▀п╡п╟я▌я┴я┐я▌ п╫п╟ %s"
 
 # detect.c:75
-#: detect.c:328
+#: copy.c:382
+#, c-format
+msgid "Failed to update check sum for %s"
+msgstr "п²п╣ я┐п╢п╟п╩п╬я│я▄ п╬п╠п╫п╬п╡п╦я┌я▄ п╨п╬п╫я┌я─п╬п╩я▄п╫я┐я▌ я│я┐п╪п╪я┐ п╢п╩я▐ %s"
+
+#: copy.c:386
+#, c-format
+msgid "Error while running process command: %s"
+msgstr "п·я┬п╦п╠п╨п╟ п©я─п╦ п╡я▀п©п╬п╩п╫п╣п╫п╦п╦ п╨п╬п╪п╟п╫п╢я▀: %s"
+
+#: copy.c:403
+#, c-format
+msgid "Failed to change SELinux context for file '%s' - not supported"
+msgstr ""
+"п²п╣ я┐п╢п╟п╩п╬я│я▄ п╦п╥п╪п╣п╫п╦я┌я▄ п╨п╬п╫я┌п╣п╨я│я┌ SELinux я└п╟п╧п╩п╟ б╚%sб╩: п╬п©п╣я─п╟я├п╦я▐ п╫п╣ п©п╬п╢п╢п╣я─п╤п╦п╡п╟п╣я┌я│я▐."
+
+#: copy.c:405
+#, c-format
+msgid "Failed to change SELinux context for file '%s'"
+msgstr "п²п╣ я┐п╢п╟п╩п╬я│я▄ п╦п╥п╪п╣п╫п╦я┌я▄ п╨п╬п╫я┌п╣п╨я│я┌ SELinux я└п╟п╧п╩п╟ б╚%sб╩."
+
+#: copy.c:410
+#, c-format
+msgid "Invalid SELinux context '%s' for file '%s'"
+msgstr "п²п╣п╢п╬п©я┐я│я┌п╦п╪я▀п╧ п╨п╬п╫я┌п╣п╨я│я┌ SELinux б╚%sб╩ п╢п╩я▐ я└п╟п╧п╩п╟ б╚%sб╩."
+
+#: copy.c:420 plugins/cpio.c:181 plugins/rar.c:248 plugins/tar.c:120
+#: plugins/uz2.c:203 plugins/zip.c:887
+#, c-format
+msgid "File '%s' has an invalid checksum! Aborting."
+msgstr "п²п╣п╢п╣п╧я│я┌п╡п╦я┌п╣п╩я▄п╫п╟я▐ п╨п╬п╫я┌я─п╬п╩я▄п╫п╟я▐ я│я┐п╪п╪п╟ я└п╟п╧п╩п╟ б╚%sб╩. п·п©п╣я─п╟я├п╦я▐ п©я─п╣я─п╡п╟п╫п╟."
+
+# copy.c:269
+#: copy.c:463
+#, c-format
+msgid "Unable to copy directory '%s'"
+msgstr "п²п╣п╡п╬п╥п╪п╬п╤п╫п╬ я│п╨п╬п©п╦я─п╬п╡п╟я┌я▄ п╨п╟я┌п╟п╩п╬пЁ '%s'"
+
+# copy.c:298 copy.c:346 copy.c:445 copy.c:446 copy.c:449 copy.c:450
+# copy.c:462 copy.c:463 copy.c:466 copy.c:467
+#: copy.c:498
+#, c-format
+msgid "1 Unable to find file '%s' in '%s'"
+msgstr "1 п²п╣ я┐п╢п╟п╩п╬я│я▄ п╫п╟п╧я┌п╦ я└п╟п╧п╩ б╚%sб╩ п╡ б╚%sб╩"
+
+# copy.c:332
+#: copy.c:543
+#, c-format
+msgid "Unable to find file '%s' on any of the CDROM drives"
+msgstr "п╓п╟п╧п╩ '%s' п╫п╣ п╫п╟п╧п╢п╣п╫ п╫п╦ п╫п╟ п╬п╢п╫п╬п╪ п©я─п╦п╡п╬п╢п╣ CDROM"
+
+# copy.c:298 copy.c:346 copy.c:445 copy.c:446 copy.c:449 copy.c:450
+# copy.c:462 copy.c:463 copy.c:466 copy.c:467
+#: copy.c:561
+#, c-format
+msgid "2 Unable to find file '%s' in '%s'"
+msgstr "2 п²п╣ я┐п╢п╟п╩п╬я│я▄ п╫п╟п╧я┌п╦ я└п╟п╧п╩ б╚%sб╩ п╡ б╚%sб╩"
+
+# copy.c:298 copy.c:346 copy.c:445 copy.c:446 copy.c:449 copy.c:450
+# copy.c:462 copy.c:463 copy.c:466 copy.c:467
+#: copy.c:616 copy.c:617
+#, c-format
+msgid "Unable to copy man page '%s'"
+msgstr "п²п╣ я┐п╢п╟п╩п╬я│я▄ я│п╨п╬п©п╦я─п╬п╡п╟я┌я▄ я│п©я─п╟п╡п╬я┤п╫я┐я▌ я│я┌я─п╟п╫п╦я├я┐ man б╚%sб╩"
+
+#: copy.c:660 copy.c:667
+#, c-format
+msgid "Could not create temporary script: %s"
+msgstr "п²п╣ я┐п╢п╟п╩п╬я│я▄ я│п╬п╥п╢п╟я┌я▄ п╡я─п╣п╪п╣п╫п╫я▀п╧ я│я├п╣п╫п╟я─п╦п╧: %s"
+
+#: copy.c:710
+msgid "'binpath' attribute is mandatory for inline 'binary' tag"
+msgstr "п░я┌я─п╦п╠я┐я┌ б╚binpathб╩ п╬п╠я▐п╥п╟я┌п╣п╩п╣п╫ п╢п╩я▐ п╡я│я┌я─п╬п╣п╫п╫п╬пЁп╬ я┌п╣пЁп╟ б╚binaryб╩"
+
+#: copy.c:715
+msgid "'binpath' attribute must not contain slashes for inline 'binary' tag"
+msgstr ""
+"п░я┌я─п╦п╠я┐я┌ б╚binpathб╩ п╡я│я┌я─п╬п╣п╫п╫п╬пЁп╬ я┌п╣пЁп╟ б╚binaryб╩ п╫п╣ п╢п╬п╩п╤п╣п╫ я│п╬п╢п╣я─п╤п╟я┌я▄ п╨п╬я│я▀п╣ я┤п╣я─я┌я▀"
+
+#: copy.c:753
+msgid "Binary install path is too long"
+msgstr "п÷я┐я┌я▄ я┐я│я┌п╟п╫п╬п╡п╨п╦ п╦я│п©п╬п╩п╫я▐п╣п╪я▀я┘ я└п╟п╧п╩п╬п╡ я│п╩п╦я┬п╨п╬п╪ п╢п╩п╦п╫п╫я▀п╧"
+
+#: copy.c:790
+#, c-format
+msgid "find '%s'"
+msgstr "find '%s'"
+
+# copy.c:298 copy.c:346 copy.c:445 copy.c:446 copy.c:449 copy.c:450
+# copy.c:462 copy.c:463 copy.c:466 copy.c:467
+#: copy.c:812 copy.c:813
+#, c-format
+msgid "Unable to find file '%s' in '%s'"
+msgstr "п²п╣ я┐п╢п╟п╩п╬я│я▄ п╫п╟п╧я┌п╦ я└п╟п╧п╩ б╚%sб╩ п╡ б╚%sб╩"
+
+# copy.c:298 copy.c:346 copy.c:445 copy.c:446 copy.c:449 copy.c:450
+# copy.c:462 copy.c:463 copy.c:466 copy.c:467
+#: copy.c:834 copy.c:835
+#, c-format
+msgid "Unable to copy file '%s'"
+msgstr "п²п╣ я┐п╢п╟п╩п╬я│я▄ я│п╨п╬п©п╦я─п╬п╡п╟я┌я▄ я└п╟п╧п╩ б╚%sб╩"
+
+#: copy.c:884
+msgid "Running script. Please wait..."
+msgstr "п▓я▀п©п╬п╩п╫я▐п╣я┌я│я▐ я│я├п╣п╫п╟я─п╦п╧. п÷п╬п╢п╬п╤п╢п╦я┌п╣Б─╕"
+
+#: copy.c:1088
+msgid "The remove_msg element should be within a component!\n"
+msgstr "п╜п╩п╣п╪п╣п╫я┌ remove_msg п╢п╬п╩п╤п╣п╫ п╫п╟я┘п╬п╢п╦я┌я▄я│я▐ п╡п╫я┐я┌я─п╦ п╨п╬п╪п©п╬п╫п╣п╫я┌п╟.\n"
+
+# copy.c:642
+#: copy.c:1106
+msgid "Component element needs to have a name"
+msgstr "п╜п╩п╣п╪п╣п╫я┌ п╨п╬п╪п©п╬п╫п╣п╫я┌п╟ п╢п╬п╩п╤п╣п╫ п╦п╪п╣я┌я▄ п╦п╪я▐"
+
+# copy.c:645
+#: copy.c:1109
+msgid "Component element needs to have a version"
+msgstr "п╜п╩п╣п╪п╣п╫я┌ п╨п╬п╪п©п╬п╫п╣п╫я┌п╟ п╢п╬п╩п╤п╣п╫ п╦п╪п╣я┌я▄ п╡п╣я─я│п╦я▌"
+
+#: copy.c:1133
+msgid "Malformed 'environment' element in XML file : missing 'var' property"
+msgstr ""
+"п²п╣п╨п╬я─я─п╣п╨я┌п╫я▀п╧ я█п╩п╣п╪п╣п╫я┌ б╚environmentб╩ п╡ XML-я└п╟п╧п╩п╣: п╬я┌я│я┐я┌я│я┌п╡я┐п╣я┌ я│п╡п╬п╧я│я┌п╡п╬ б╚varб╩"
+
+# copy.c:797
+#: copy.c:1310
+#, c-format
+msgid "Suspect size value for option %s\n"
+msgstr "п÷п╬п╢п╬п╥я─п╦я┌п╣п╩я▄п╫п╬п╣ п╥п╫п╟я┤п╣п╫п╦п╣ п©п╟я─п╟п╪п╣я┌я─п╟ %s\n"
+
+# detect.c:73
+#: detect.c:344
+#, c-format
+msgid "Unmounting device %s"
+msgstr "п═п╟п╥п╪п╬п╫я┌п╦я─п╬п╡п╟п╫п╦п╣ я┐я│я┌я─п╬п╧я│я┌п╡п╟ %s"
+
+# detect.c:75
+#: detect.c:346 detect.c:377 detect.c:393
 #, c-format
 msgid "Failed to unmount device %s mounted on %s"
-msgstr "Ошибка при размантировании устройства %s примонтированного к %s"
+msgstr "п·я┬п╦п╠п╨п╟ п©я─п╦ я─п╟п╥п╪п╟п╫я┌п╦я─п╬п╡п╟п╫п╦п╦ я┐я│я┌я─п╬п╧я│я┌п╡п╟ %s п©я─п╦п╪п╬п╫я┌п╦я─п╬п╡п╟п╫п╫п╬пЁп╬ п╨ %s"
 
 # detect.c:167 detect.c:209
-#: detect.c:394 detect.c:486 detect.c:525 detect.c:568
+#: detect.c:462 detect.c:545 detect.c:585 detect.c:629
 #, c-format
 msgid "Mounted device %s"
-msgstr "Примонтированное устройство %s"
+msgstr "п÷я─п╦п╪п╬п╫я┌п╦я─п╬п╡п╟п╫п╫п╬п╣ я┐я│я┌я─п╬п╧я│я┌п╡п╬ %s"
 
 # main.c:176
-#: detect.c:759 detect.c:763
-#, fuzzy, c-format
+#: detect.c:820 detect.c:824
+#, c-format
 msgid ""
 "\n"
 "Please insert %s.\n"
 "Choose Yes to retry, No to cancel"
 msgstr ""
 "\n"
-"Вставьте CDROM %s.\n"
-"Выберите Да для повтора, Нет для отмены"
+"п▓я│я┌п╟п╡я▄я┌п╣ %s.\n"
+"п▓я▀п╠п╣я─п╦я┌п╣ б╚п■п╟б╩ п╢п╩я▐ п©п╬п╡я┌п╬я─п╫п╬п╧ п©п╬п©я▀я┌п╨п╦ п╦п╩п╦ б╚п²п╣я┌б╩ п╢п╩я▐ п╬я┌п╪п╣п╫я▀"
 
 # main.c:179
-#: detect.c:766
-#, fuzzy, c-format
+#: detect.c:827
+#, c-format
 msgid ""
 "\n"
 "Please mount %s.\n"
 "Choose Yes to retry, No to cancel"
 msgstr ""
 "\n"
-"Примонтируйте CDROM %s.\n"
-"Выберите Да для повтора, Нет для отмены"
+"п÷п╬п╢п╨п╩я▌я┤п╦я┌п╣ %s.\n"
+"п▓я▀п╠п╣я─п╦я┌п╣ б╚п■п╟б╩ п╢п╩я▐ п©п╬п╡я┌п╬я─п╫п╬п╧ п©п╬п©я▀я┌п╨п╦ п╦п╩п╦ б╚п²п╣я┌б╩ п╢п╩я▐ п╬я┌п╪п╣п╫я▀"
 
-# main.c:318
-#: detect.c:792
+#: detect.c:892
 #, c-format
-msgid "Detected locale is %s"
-msgstr "Распознанная кодировка %s"
+msgid "Detected locale is %s\n"
+msgstr "п·п╠п╫п╟я─я┐п╤п╣п╫п╟ п╩п╬п╨п╟п╩я▄: %s\n"
 
-#: detect.c:867
+#: detect.c:1069
 #, c-format
 msgid "Invalid matching policy: %s"
-msgstr ""
+msgstr "п²п╣п╢п╬п©я┐я│я┌п╦п╪п╬п╣ п©я─п╟п╡п╦п╩п╬ я│п╬п©п╬я│я┌п╟п╡п╩п╣п╫п╦я▐: %s"
 
-# plugins.c:96
-#: plugins.c:96
-msgid ""
-"Registered plugins :\n"
-"\n"
-msgstr ""
-"Установленные модули:\n"
-"\n"
+#: dialog_ui.c:47 gtk_ui.c:1030
+msgid "Message"
+msgstr "п║п╬п╬п╠я┴п╣п╫п╦п╣"
 
-# plugins.c:98
-#: plugins.c:98
+#: dialog_ui.c:50
+msgid "Request"
+msgstr "п≈п╟п©я─п╬я│"
+
+# image/setup.data/setup.glade:293
+#: dialog_ui.c:65
+#, c-format
+msgid "%s / %s Installation"
+msgstr "пёя│я┌п╟п╫п╬п╡п╨п╟ %s / %s"
+
+# image/setup.data/setup.glade:293
+#: dialog_ui.c:69
+#, c-format
+msgid "%s Installation"
+msgstr "пёя│я┌п╟п╫п╬п╡п╨п╟ %s"
+
+# console_ui.c:241
+#: dialog_ui.c:80
 #, c-format
 msgid ""
-"\tDescription: %s\n"
-"\tVersion: %s\n"
-"\tAuthor: %s\n"
+"You are running a %s machine with %s\n"
+"Operating System: %s %d.%d"
 msgstr ""
-"\tОписание: %s\n"
-"\tВерсия: %s\n"
-"\tАвтор: %s\n"
+"п▓я▀ п╦я│п©п╬п╩я▄п╥я┐п╣я┌п╣ п╨п╬п╪п©я▄я▌я┌п╣я─ %s я│ %s\n"
+"п·п©п╣я─п╟я├п╦п╬п╫п╫п╟я▐ я│п╦я│я┌п╣п╪п╟: %s %d.%d"
 
-# plugins.c:101
-#: plugins.c:101
-msgid "\tPlugin is statically linked.\n"
-msgstr "\tМодуль статически связан.\n"
+# image/setup.data/setup.glade:1723
+#: dialog_ui.c:101 dialog_ui.c:272 image/setup.data/setup.glade:2319
+#: image/setup.data/setup.gtk2.glade:8
+msgid "License Agreement"
+msgstr "п⌡п╦я├п╣п╫п╥п╦п╬п╫п╫п╬п╣ я│п╬пЁп╩п╟я┬п╣п╫п╦п╣"
 
-# plugins.c:103
-#: plugins.c:103
+#: dialog_ui.c:132
+msgid "README"
+msgstr "README"
+
+# console_ui.c:457
+#: dialog_ui.c:224
+msgid "Component"
+msgstr "п п╬п╪п©п╬п╫п╣п╫я┌"
+
+# console_ui.c:475
+#: dialog_ui.c:243 dialog_ui.c:700
 #, c-format
-msgid "\tRecognizes %d extensions: "
-msgstr "\tРаспознаны %d расширения: "
+msgid "Installation of %s"
+msgstr "пёя│я┌п╟п╫п╬п╡п╨п╟ %s"
 
-# plugins.c:148
-#: plugins.c:148
+# main.c:356
+#: dialog_ui.c:245
+msgid ""
+"No installation options detected. If the product is already\n"
+"installed, please uninstall it before reinstalling.\n"
+msgstr ""
+"п÷п╟я─п╟п╪п╣я┌я─я▀ я┐я│я┌п╟п╫п╬п╡п╨п╦ п╫п╣ п╫п╟п╧п╢п╣п╫я▀. п∙я│п╩п╦ п©я─п╬п╢я┐п╨я┌ я┐п╤п╣ я┐я│я┌п╟п╫п╬п╡п╩п╣п╫,\n"
+"я┐п╢п╟п╩п╦я┌п╣ п╣пЁп╬ п©п╣я─п╣п╢ п©п╬п╡я┌п╬я─п╫п╬п╧ я┐я│я┌п╟п╫п╬п╡п╨п╬п╧.\n"
+
+#: dialog_ui.c:280
 #, c-format
-msgid "Error registering %s plugin: %s\n"
-msgstr "Ошибка регистрации модуля %s: %s\n"
+msgid "Option-specific EULA not found for '%s', can't toggle\n"
+msgstr "п²п╣ п╫п╟п╧п╢п╣п╫п╬ п╩п╦я├п╣п╫п╥п╦п╬п╫п╫п╬п╣ я│п╬пЁп╩п╟я┬п╣п╫п╦п╣ п╢п╩я▐ б╚%sб╩. п≤п╥п╪п╣п╫п╦я┌я▄ п╡я▀п╠п╬я─ п╫п╣п╩я▄п╥я▐.\n"
 
-# plugins.c:151
-#: plugins.c:151
+#: dialog_ui.c:281 dialog_ui.c:502 dialog_ui.c:514 dialog_ui.c:580
+msgid "Error"
+msgstr "п·я┬п╦п╠п╨п╟"
+
+#: dialog_ui.c:299 dialog_ui.c:311
+msgid "Choose the options"
+msgstr "п▓я▀п╠п╣я─п╦я┌п╣ п©п╟я─п╟п╪п╣я┌я─я▀"
+
+#: dialog_ui.c:301
 #, c-format
-msgid "Error initializing %s plugin"
-msgstr "Ошибка инициализации модуля %s"
+msgid "Option '%s' is required.\n"
+msgstr "п÷п╟я─п╟п╪п╣я┌я─ б╚%sб╩ п╬п╠я▐п╥п╟я┌п╣п╩п╣п╫.\n"
 
-# plugins.c:155
-#: plugins.c:155
+# console_ui.c:457
+#: dialog_ui.c:338
 #, c-format
-msgid "Error trying to load %s plugin: %s\n"
-msgstr "Ошибка загрузки модуля %s: %s\n"
+msgid "Component: %s"
+msgstr "п п╬п╪п©п╬п╫п╣п╫я┌: %s"
 
-# network.c:142
-#: network.c:156
-msgid "Out of memory, no network check"
-msgstr "Нехватка памяти, проверка наличия сети не производится"
+#: dialog_ui.c:387
+msgid "Choose the product"
+msgstr "п▓я▀п╠п╣я─п╦я┌п╣ п©я─п╬п╢я┐п╨я┌"
 
-# network.c:152
-#: network.c:166
-msgid "Unable to create pipe, no network check"
-msgstr "Невозможно создать поток, проверка наличия сети не производится"
+# console_ui.c:328
+#: dialog_ui.c:388
+msgid "Please pick a product to install"
+msgstr "п▓я▀п╠п╣я─п╦я┌п╣ п©я─п╬п╢я┐п╨я┌ п╢п╩я▐ я┐я│я┌п╟п╫п╬п╡п╨п╦"
 
-# network.c:166
-#: network.c:180
-msgid "Fork failed, no network check"
-msgstr "Ошибка fork. Проверка наличия сети не производится"
+# image/setup.data/setup.glade:126
+#: dialog_ui.c:418
+msgid "Installation path"
+msgstr "п÷я┐я┌я▄ я┐я│я┌п╟п╫п╬п╡п╨п╦"
 
-# gtk_ui.c:524
-#: install.c:360
-msgid "No destination directory selected"
-msgstr "Не выбран каталог назначения"
+# console_ui.c:378 console_ui.c:432
+#: dialog_ui.c:440
+msgid "Failed permissions"
+msgstr "п²п╣п╢п╬я│я┌п╟я┌п╬я┤п╫п╬ п©я─п╟п╡"
+
+# image/setup.data/setup.glade:193
+#: dialog_ui.c:474
+msgid "Symlink path"
+msgstr "п÷я┐я┌я▄ п╢п╩я▐ я│п╦п╪п╡п╬п╩п╦я┤п╣я│п╨п╦я┘ я│я│я▀п╩п╬п╨"
+
+# image/setup.data/setup.glade:126
+#: dialog_ui.c:490
+msgid "Manual path"
+msgstr "п÷я┐я┌я▄ п╢п╩я▐ я│п©я─п╟п╡п╬я┤п╫я▀я┘ я│я┌я─п╟п╫п╦я├ man"
+
+# console_ui.c:411
+#: dialog_ui.c:491
+msgid "Please enter the path in which to install manual pages"
+msgstr "пёп╨п╟п╤п╦я┌п╣ п©я┐я┌я▄ я┐я│я┌п╟п╫п╬п╡п╨п╦ я│п©я─п╟п╡п╬я┤п╫я▀я┘ я│я┌я─п╟п╫п╦я├ man"
+
+# console_ui.c:328
+#: dialog_ui.c:527
+msgid "Please choose the components to install"
+msgstr "п▓я▀п╠п╣я─п╦я┌п╣ п╨п╬п╪п©п╬п╫п╣п╫я┌я▀ п╢п╩я▐ я┐я│я┌п╟п╫п╬п╡п╨п╦"
+
+# console_ui.c:328
+#: dialog_ui.c:529
+msgid "Please choose the options to install"
+msgstr "п▓я▀п╠п╣я─п╦я┌п╣ п©п╟я─п╟п╪п╣я┌я─я▀ я┐я│я┌п╟п╫п╬п╡п╨п╦"
+
+#: dialog_ui.c:566
+msgid "CD Key"
+msgstr "п п╩я▌я┤ CD"
+
+# image/setup.data/setup.glade:1183
+#: dialog_ui.c:580
+msgid "vcdk is missing. Installation aborted.\n"
+msgstr "п÷я─п╬пЁя─п╟п╪п╪п╟ vcdk п╫п╣ п╫п╟п╧п╢п╣п╫п╟. пёя│я┌п╟п╫п╬п╡п╨п╟ п©я─п╣я─п╡п╟п╫п╟.\n"
+
+#: dialog_ui.c:587 gtk_ui.c:607 gtk_ui.c:616
+msgid "Problem"
+msgstr "п÷я─п╬п╠п╩п╣п╪п╟"
+
+# console_ui.c:493
+#: dialog_ui.c:630
+#, c-format
+msgid "Installing %s ..."
+msgstr "пёя│я┌п╟п╫п╬п╡п╨п╟ %sБ─╕"
+
+# console_ui.c:493
+#: dialog_ui.c:631 dialog_ui.c:633
+msgid "Installing..."
+msgstr "п▓я▀п©п╬п╩п╫я▐п╣я┌я│я▐ я┐я│я┌п╟п╫п╬п╡п╨п╟Б─╕"
+
+#: dialog_ui.c:648
+msgid "Aborting"
+msgstr "п÷я─п╣я─я▀п╡п╟п╫п╦п╣"
+
+# console_ui.c:520
+#: dialog_ui.c:658
+msgid "Would you like to launch a Web browser?"
+msgstr "п·я┌п╨я─я▀я┌я▄ п╠я─п╟я┐п╥п╣я─?"
+
+#: dialog_ui.c:672
+msgid ""
+"Installation complete!\n"
+"Would you like to start now?"
+msgstr ""
+"пёя│я┌п╟п╫п╬п╡п╨п╟ п╥п╟п╡п╣я─я┬п╣п╫п╟!\n"
+"п≈п╟п©я┐я│я┌п╦я┌я▄ п©я─п╬пЁя─п╟п╪п╪я┐ я│п╣п╧я┤п╟я│?"
+
+#: dialog_ui.c:676
+msgid "Finished"
+msgstr "п⌠п╬я┌п╬п╡п╬"
+
+# console_ui.c:516
+#: dialog_ui.c:676
+msgid "Installation complete!"
+msgstr "пёя│я┌п╟п╫п╬п╡п╨п╟ п╥п╟п╡п╣я─я┬п╣п╫п╟!"
+
+#: dialog_ui.c:685 image/setup.data/setup.glade:152
+#: image/setup.data/setup.gtk2.glade:410
+msgid "Recommended"
+msgstr "п═п╣п╨п╬п╪п╣п╫п╢я┐п╣п╪п╟я▐"
+
+#: dialog_ui.c:685
+msgid "Express installation using detected defaults"
+msgstr "п▒я▀я│я┌я─п╟я▐ я┐я│я┌п╟п╫п╬п╡п╨п╟ я│ п╟п╡я┌п╬п╪п╟я┌п╦я┤п╣я│п╨п╦ п©п╬п╢п╬п╠я─п╟п╫п╫я▀п╪п╦ п╫п╟я│я┌я─п╬п╧п╨п╟п╪п╦"
+
+# image/setup.data/setup.glade:912 image/setup.data/setup.glade:1148
+# image/setup.data/setup.glade:1394
+#: dialog_ui.c:686 image/setup.data/setup.glade:169
+#: image/setup.data/setup.gtk2.glade:431
+msgid "Expert"
+msgstr "п═п╟я│я┬п╦я─п╣п╫п╫п╟я▐"
+
+# console_ui.c:358
+#: dialog_ui.c:686
+msgid "Full control over the installation parameters"
+msgstr "п÷п╬п╩п╫п╬п╣ я┐п©я─п╟п╡п╩п╣п╫п╦п╣ п©п╟я─п╟п╪п╣я┌я─п╟п╪п╦ я┐я│я┌п╟п╫п╬п╡п╨п╦"
 
 # gtk_ui.c:527
-#: install.c:363
+#: dialog_ui.c:701
+msgid "Please select the class of installation"
+msgstr "п▓я▀п╠п╣я─п╦я┌п╣ я┌п╦п© я┐я│я┌п╟п╫п╬п╡п╨п╦"
+
+# file.c:66 file.c:86 file.c:93 install.c:599 install.c:621 install.c:643
+# install.c:664 install.c:703
+#: file.c:119 file.c:165 file.c:172 install.c:1196 install.c:1218
+#: install.c:1240 install.c:1261 install.c:1276 install.c:1327
+msgid "Out of memory"
+msgstr "п²п╣я┘п╡п╟я┌п╨п╟ п©п╟п╪я▐я┌п╦"
+
+#: file.c:144
+#, c-format
+msgid "File '%25s' already exists, overwrite?"
+msgstr "п╓п╟п╧п╩ б╚%25sб╩ я┐п╤п╣ я│я┐я┴п╣я│я┌п╡я┐п╣я┌. п÷п╣я─п╣п╥п╟п©п╦я│п╟я┌я▄?"
+
+#: file.c:149
+#, c-format
+msgid "File exists: '%s'"
+msgstr "п╓п╟п╧п╩ б╚%sб╩ я┐п╤п╣ я│я┐я┴п╣я│я┌п╡я┐п╣я┌"
+
+# copy.c:298 copy.c:346 copy.c:445 copy.c:446 copy.c:449 copy.c:450
+# copy.c:462 copy.c:463 copy.c:466 copy.c:467
+#: file.c:183
+#, c-format
+msgid "Failed to open file %s"
+msgstr "п²п╣ я┐п╢п╟п╩п╬я│я▄ п╬я┌п╨я─я▀я┌я▄ я└п╟п╧п╩ %s"
+
+#: file.c:213
+#, c-format
+msgid "File '%s' may be in BZIP2 format, but support was not compiled in!"
+msgstr ""
+"п▓п╬п╥п╪п╬п╤п╫п╬, я└п╟п╧п╩ б╚%sб╩ п╦п╪п╣п╣я┌ я└п╬я─п╪п╟я┌ BZIP2, п©п╬п╢п╢п╣я─п╤п╨п╟ п╨п╬я┌п╬я─п╬пЁп╬ п╫п╣ п╡п╨п╩я▌я┤п╣п╫п╟ п╡ я█я┌я┐ "
+"я│п╠п╬я─п╨я┐."
+
+# file.c:127
+#: file.c:224
+#, c-format
+msgid "Couldn't read from file: %s"
+msgstr "п²п╣п╡п╬п╥п╪п╬п╤п╫п╬ п©я─п╬я┤п╦я┌п╟я┌я▄ я└п╟п╧п╩ %s"
+
+# file.c:135
+#: file.c:232
+#, c-format
+msgid "Installing file %s"
+msgstr "пёя│я┌п╟п╫п╬п╡п╨п╟ я└п╟п╧п╩п╟ %s"
+
+# file.c:140
+#: file.c:237
+#, c-format
+msgid "Couldn't write to file: %s"
+msgstr "п²п╣п╡п╬п╥п╪п╬п╤п╫п╬ п╥п╟п©п╦я│п╟я┌я▄ п╡ я└п╟п╧п╩ %s"
+
+# file.c:161
+#: file.c:263
+msgid "Read on write stream"
+msgstr "п╖я┌п╣п╫п╦п╣ п╦п╥ п©п╬я┌п╬п╨п╟ я┌п╬п╩я▄п╨п╬ п╢п╩я▐ п╥п╟п©п╦я│п╦"
+
+#: file.c:302
+#, c-format
+msgid "Read failure on %s"
+msgstr "п·я┬п╦п╠п╨п╟ я┤я┌п╣п╫п╦я▐ п╦п╥ %s"
+
+# file.c:204
+#: file.c:373
+msgid "Skip zeroes on write stream"
+msgstr "п÷я─п╬п©я┐я│п╨ п╫я┐п╩п╣п╧ п╡ п©п╬я┌п╬п╨п╣ я┌п╬п╩я▄п╨п╬ п╢п╩я▐ п╥п╟п©п╦я│п╦"
+
+# file.c:221 file.c:252 file.c:259
+#: file.c:393 file.c:459 file.c:466
+#, c-format
+msgid "Short write on %s"
+msgstr "п п╬я─п╬я┌п╨п╟я▐ п╥п╟п©п╦я│я▄ п╡ %s"
+
+# file.c:227
+#: file.c:399
+msgid "Write on read stream"
+msgstr "п≈п╟п©п╦я│я▄ п╡ п©п╬я┌п╬п╨ я┌п╬п╩я▄п╨п╬ п╢п╩я▐ я┤я┌п╣п╫п╦я▐"
+
+# file.c:221 file.c:252 file.c:259
+#: file.c:429
+#, c-format
+msgid "Write failure on %s"
+msgstr "п·я┬п╦п╠п╨п╟ п╥п╟п©п╦я│п╦ п╡ %s"
+
+#: file.c:492
+#, c-format
+msgid "Trying to create a symbolic link on the same file: %s\n"
+msgstr "п÷п╬п©я▀я┌п╨п╟ я│п╬п╥п╢п╟я┌я▄ я│п╦п╪п╡п╬п╩п╦я┤п╣я│п╨я┐я▌ я│я│я▀п╩п╨я┐ п╫п╟ я┌п╬я┌ п╤п╣ я└п╟п╧п╩: %s\n"
+
+# file.c:279
+#: file.c:497
+#, c-format
+msgid "Creating symbolic link: %s --> %s\n"
+msgstr "п║п╬п╥п╢п╟п╫п╦п╣ я│п╦п╪п╡п╬п╩я▄п╫п╬п╧ я│я│я▀п╩п╨п╦: %s --> %s\n"
+
+# file.c:288
+#: file.c:506
+#, c-format
+msgid "Can't remove existing symlink %s: %s"
+msgstr "п²п╣п╡п╬п╥п╪п╬п╤п╫п╬ я┐п╢п╟п╩п╦я┌я▄ я│я┐я┴п╣я│я┌п╡я┐я▌я┴я┐я▌ я│п╦п╪п╡п╬п╩я▄п╫я┐я▌ я│п╡я▐п╥я▄ %s: %s"
+
+# file.c:292 file.c:323 file.c:343 file.c:362
+#: file.c:510 file.c:541 file.c:561 file.c:580
+#, c-format
+msgid "Can't create %s: %s"
+msgstr "п²п╣п╡п╬п╥п╪п╬п╤п╫п╬ я│п╬п╥п╢п╟я┌я▄ %s: %s"
+
+# file.c:317
+#: file.c:535
+#, c-format
+msgid "Creating directory: %s\n"
+msgstr "п║п╬п╥п╢п╟п╫п╦п╣ п╨п╟я┌п╟п╩п╬пЁп╟: %s\n"
+
+# file.c:336
+#: file.c:554
+#, c-format
+msgid "Creating FIFO: %s\n"
+msgstr "п║п╬п╥п╢п╟п╫п╦п╣ я│я┌я█п╨п╟: %s\n"
+
+# file.c:355
+#: file.c:573
+#, c-format
+msgid "Creating device: %s\n"
+msgstr "п║п╬п╥п╢п╟п╫п╦п╣ я┐я│я┌я─п╬п╧я│я┌п╡п╟: %s\n"
+
+# file.c:375
+#: file.c:593
+#, c-format
+msgid "Can't change permissions for %s: %s"
+msgstr "п²п╣п╡п╬п╥п╪п╬п╤п╫п╬ п╦п╥п╪п╣п╫п╦я┌я▄ п©я─п╟п╡п╟ п╢п╩я▐ %s: %s"
+
+# file.c:409 file.c:433
+#: file.c:627 file.c:651
+#, c-format
+msgid "Unable to read %s"
+msgstr "п²п╣п╡п╬п╥п╪п╬п╤п╫п╬ п©я─п╬я┤п╦я┌п╟я┌я▄ %s"
+
+#: file.c:729
+msgid "BZ2 support not available"
+msgstr "п÷п╬п╢п╢п╣я─п╤п╨п╟ BZ2 п╫п╣п╢п╬я│я┌я┐п©п╫п╟"
+
+#: file.c:754
+#, c-format
+msgid "BZ2: *** Symbol \"%s\" not found, bzip2 support disabled"
+msgstr "BZ2: *** п║п╦п╪п╡п╬п╩ б╚%sб╩ п╫п╣ п╫п╟п╧п╢п╣п╫. п÷п╬п╢п╢п╣я─п╤п╨п╟ bzip2 п╬я┌п╨п╩я▌я┤п╣п╫п╟."
+
+#: file.c:767
+#, c-format
+msgid "BZ2: Try open %s"
+msgstr "BZ2: п©п╬п©я▀я┌п╨п╟ п╬я┌п╨я─я▀я┌я▄ %s"
+
+#: file.c:773
+msgid "BZ2: *** Unable to open bzip2 library. bzip2 support disabled"
+msgstr ""
+"BZ2: *** п²п╣ я┐п╢п╟п╩п╬я│я▄ п╬я┌п╨я─я▀я┌я▄ п╠п╦п╠п╩п╦п╬я┌п╣п╨я┐ bzip2. п÷п╬п╢п╢п╣я─п╤п╨п╟ bzip2 п╬я┌п╨п╩я▌я┤п╣п╫п╟."
+
+#: file.c:777
+#, c-format
+msgid "BZ2: got %s"
+msgstr "BZ2: п©п╬п╩я┐я┤п╣п╫п╬ %s"
+
+#: file.c:808
+#, c-format
+msgid "Unable to create temporary directory: %s"
+msgstr "п²п╣ я┐п╢п╟п╩п╬я│я▄ я│п╬п╥п╢п╟я┌я▄ п╡я─п╣п╪п╣п╫п╫я▀п╧ п╨п╟я┌п╟п╩п╬пЁ: %s"
+
+#: file.c:827
+#, c-format
+msgid "Can not chdir to temporary directory: %s"
+msgstr "п²п╣ я┐п╢п╟п╩п╬я│я▄ п©п╣я─п╣п╧я┌п╦ п╡п╬ п╡я─п╣п╪п╣п╫п╫я▀п╧ п╨п╟я┌п╟п╩п╬пЁ: %s"
+
+#: file.c:834
+#, c-format
+msgid "Can not open temporary directory: %s"
+msgstr "п²п╣ я┐п╢п╟п╩п╬я│я▄ п╬я┌п╨я─я▀я┌я▄ п╡я─п╣п╪п╣п╫п╫я▀п╧ п╨п╟я┌п╟п╩п╬пЁ: %s"
+
+#: file.c:845
+#, c-format
+msgid "Can not remove %s/%s: %s"
+msgstr "п²п╣ я┐п╢п╟п╩п╬я│я▄ я┐п╢п╟п╩п╦я┌я▄ %s/%s: %s"
+
+# gtk_ui.c:408
+#: gtk_ui.c:539
+msgid ""
+"If you run this as root, the preferences will be stored in\n"
+"root's home directory instead of your user account directory."
+msgstr ""
+"п∙я│п╩п╦ п╡я▀ п╥п╟п©я┐я│я┌п╦я┌п╣ п©я─п╬пЁя─п╟п╪п╪я┐ я│ п©я─п╟п╡п╟п╪п╦ root, я┐я│я┌п╟п╫п╬п╡п╨п╦ п╠я┐п╢я┐я┌ я│п╬я┘я─п╟п╫п╣п╫я▀ п╡\n"
+"п╢п╬п╪п╟я┬п╫п╦п╧ п╨п╟я┌п╟п╩п╬пЁ root, п╟ п╫п╣ п╡ п╡п╟я┬ п╨п╟я┌п╟п╩п╬пЁ п©п╬п╩я▄п╥п╬п╡п╟я┌п╣п╩я▐."
+
+#: gtk_ui.c:616
+msgid ""
+"CD key is invalid!\n"
+"Please double check your key and enter it again."
+msgstr ""
+"п²п╣п╢п╣п╧я│я┌п╡п╦я┌п╣п╩я▄п╫я▀п╧ п╨п╩я▌я┤ CD.\n"
+"п÷я─п╬п╡п╣я─я▄я┌п╣ п╨п╩я▌я┤ п╦ п╡п╡п╣п╢п╦я┌п╣ п╣пЁп╬ я│п╫п╬п╡п╟."
+
+# gtk_ui.c:522
+#: gtk_ui.c:688
+msgid "Please respond to the license dialog"
+msgstr "п÷п╬п╤п╟п╩я┐п╧я│я┌п╟ п╬я┌п╡п╣я┌я▄я┌п╣ п╫п╟ п╩п╦я├п╣п╫п╥п╦п╬п╫п╫п╬п╣ я│п╬пЁп╩п╟я┬п╣п╫п╦п╣"
+
+#: gtk_ui.c:1001
+msgid "OK"
+msgstr "п·п "
+
+# gtk_ui.c:730
+#: gtk_ui.c:1014
+msgid "Yes"
+msgstr "п■п╟"
+
+# gtk_ui.c:731
+#: gtk_ui.c:1015
+msgid "No"
+msgstr "п²п╣я┌"
+
+#: gtk_ui.c:1026
+msgid "Choice Requested"
+msgstr "п║п╢п╣п╩п╟п╧я┌п╣ п╡я▀п╠п╬я─"
+
+#: gtk_ui.c:1133
+msgid ""
+"Warning: program_to_start is only meaningful when there are no symlinks.\n"
+msgstr ""
+"п÷я─п╣п╢я┐п©я─п╣п╤п╢п╣п╫п╦п╣: program_to_start п╦я│п©п╬п╩я▄п╥я┐п╣я┌я│я▐ я┌п╬п╩я▄п╨п╬ п©я─п╦ п╬я┌я│я┐я┌я│я┌п╡п╦п╦ "
+"я│п╦п╪п╡п╬п╩п╦я┤п╣я│п╨п╦я┘ я│я│я▀п╩п╬п╨.\n"
+
+# gtk_ui.c:806
+#: gtk_ui.c:1197
+#, c-format
+msgid "Fatal error:  out of memory\n"
+msgstr "п╓п╟я┌п╟п╩я▄п╫п╟я▐ п╬я┬п╦п╠п╨п╟:  п╫п╣я┘п╡п╟я┌п╨п╟ п©п╟п╪я▐я┌п╦\n"
+
+# gtk_ui.c:813
+#: gtk_ui.c:1206
+#, c-format
+msgid "Error: maximum of %d install_path entries exceeded\n"
+msgstr "п·я┬п╦п╠п╨п╟: п╪п╟п╨я│п╦п╪п╟п╩я▄п╫п╬п╣ я┤п╦я│п╩п╬ %d  п╡я┘п╬п╤п╢п╣п╫п╦п╧ install_path п©я─п╣п╡я▀я┬п╣п╫п╬\n"
+
+# gtk_ui.c:931
+#: gtk_ui.c:1396
+msgid "Warning: No writable targets in path... You may want to be root.\n"
+msgstr "п÷я─п╣п╢я┐п©я─п╣п╤п╢п╣п╫п╦п╣: п▓п╬п╥п╪п╬п╤п╫п╬ я┐ п╡п╟я│ п╢п╬п╩п╤п╫я▀ п╠я▀я┌я▄ п©я─п╟п╡п╟ root\n"
+
+# gtk_ui.c:950
+#: gtk_ui.c:1417
+msgid "Unable to locate 'setup_menuitems_checkbox'"
+msgstr "п²п╣п╡п╬п╥п╪п╬п╤п╫п╬ п╫п╟п╧я┌п╦ 'setup_menuitems_checkbox'"
+
+# gtk_ui.c:1422
+#: gtk_ui.c:1683 gtk_ui.c:2115
+#, c-format
+msgid "Unable to open %s, aborting!\n"
+msgstr "п²п╣п╡п╬п╥п╪п╬п╤п╫п╬ п╬я┌п╨я─я▀я┌я▄ %s, п©я─п╣п╨я─п╟я┴п╣п╫п╦п╣ я─п╟п╠п╬я┌я▀!\n"
+
+#: gtk_ui.c:2197
+msgid "The update/reinstall was successfully completed!"
+msgstr "п·п╠п╫п╬п╡п╩п╣п╫п╦п╣ п╦п╩п╦ п©п╬п╡я┌п╬я─п╫п╟я▐ я┐я│я┌п╟п╫п╬п╡п╨п╟ п╥п╟п╡п╣я─я┬п╣п╫я▀."
+
+# image/setup.data/setup.glade:990
+#: gtk_ui.c:2199 image/setup.data/setup.glade:1302
+#: image/setup.data/setup.gtk2.glade:1826
+msgid "The installation was successfully completed!"
+msgstr "пёя│я┌п╟п╫п╬п╡п╨п╟ п╠я▀п╩п╟ я┐я│п©п╣я┬п╫п╬ п╥п╟п╡п╣я─я┬п╣п╫п╟"
+
+# image/setup.data/setup.glade:56
+#: image/setup.data/setup.glade:58 image/setup.data/setup.glade:96
+#: image/setup.data/setup.gtk2.glade:299 image/setup.data/setup.gtk2.glade:338
+msgid "[image area]"
+msgstr "[image area]"
+
+# console_ui.c:328
+#: image/setup.data/setup.glade:132 image/setup.data/setup.gtk2.glade:382
+msgid "Please choose the class of installation."
+msgstr "п▓я▀п╠п╣я─п╦я┌п╣ я┌п╦п© я┐я│я┌п╟п╫п╬п╡п╨п╦."
+
+#: image/setup.data/setup.glade:150 image/setup.data/setup.gtk2.glade:408
+msgid "This will install the product with the default options and paths"
+msgstr "п÷я─п╬п╢я┐п╨я┌ п╠я┐п╢п╣я┌ я┐я│я┌п╟п╫п╬п╡п╩п╣п╫ я│ п©п╟я─п╟п╪п╣я┌я─п╟п╪п╦ п╦ п©я┐я┌я▐п╪п╦ п©п╬ я┐п╪п╬п╩я┤п╟п╫п╦я▌"
+
+#: image/setup.data/setup.glade:167 image/setup.data/setup.gtk2.glade:429
+msgid ""
+"This will allow you to pick the installation paths and options to be "
+"installed "
+msgstr "п▓я▀ я│п╪п╬п╤п╣я┌п╣ п╡я▀п╠я─п╟я┌я▄ п©я┐я┌п╦ п╦ п©п╟я─п╟п╪п╣я┌я─я▀ я┐я│я┌п╟п╫п╬п╡п╨п╦ "
+
+# image/setup.data/setup.glade:546 image/setup.data/setup.glade:838
+# image/setup.data/setup.glade:1273 image/setup.data/setup.glade:1777
+#: image/setup.data/setup.glade:207 image/setup.data/setup.glade:815
+#: image/setup.data/setup.glade:1120 image/setup.data/setup.glade:1601
+msgid "Cancel"
+msgstr "п·я┌п╪п╣п╫п╟"
+
+# image/setup.data/setup.glade:559 image/setup.data/setup.glade:851
+# image/setup.data/setup.glade:925 image/setup.data/setup.glade:1407
+#: image/setup.data/setup.glade:231 image/setup.data/setup.glade:834
+#: image/setup.data/setup.glade:1139 image/setup.data/setup.glade:1225
+#: image/setup.data/setup.glade:1754 image/setup.data/setup.gtk2.glade:477
+#: image/setup.data/setup.gtk2.glade:1195
+#: image/setup.data/setup.gtk2.glade:1609
+#: image/setup.data/setup.gtk2.glade:1690
+#: image/setup.data/setup.gtk2.glade:2391
+msgid "_View Readme"
+msgstr "_п·я┌п╨я─я▀я┌я▄ README"
+
+# image/setup.data/setup.glade:1286 image/setup.data/setup.glade:1420
+#: image/setup.data/setup.glade:256 image/setup.data/setup.gtk2.glade:2448
+msgid "_Continue"
+msgstr "_п÷я─п╬п╢п╬п╩п╤п╦я┌я▄"
+
+# image/setup.data/setup.glade:95
+#: image/setup.data/setup.glade:292 image/setup.data/setup.gtk2.glade:903
+msgid "Global Options"
+msgstr "п⌠п╩п╬п╠п╟п╩я▄п╫я▀п╣ п©п╟я─п╟п╪п╣я┌я─я▀"
+
+# image/setup.data/setup.glade:126
+#: image/setup.data/setup.glade:323 image/setup.data/setup.gtk2.glade:640
+msgid "Install path:"
+msgstr "п÷я┐я┌я▄ я┐я│я┌п╟п╫п╬п╡п╨п╦:"
+
+#: image/setup.data/setup.glade:390 image/setup.data/setup.gtk2.glade:719
+msgid "Binary path:"
+msgstr "п÷я┐я┌я▄ п╢п╩я▐ п╦я│п©п╬п╩п╫я▐п╣п╪я▀я┘ я└п╟п╧п╩п╬п╡:"
+
+# image/setup.data/setup.glade:244
+#: image/setup.data/setup.glade:441 image/setup.data/setup.gtk2.glade:756
+msgid "Symbolic links to installed binaries are placed here"
+msgstr "п║п╦п╪п╡п╬п╩я▄п╫я▀п╣ я│я│я▀п╩п╨п╦ п╫п╟ я┐я│я┌п╟п╫п╬п╡п╩п╣п╫п╫я▀п╣ я└п╟п╧п╩я▀ п╥п╢п╣я│я▄"
+
+# image/setup.data/setup.glade:269
+#: image/setup.data/setup.glade:466 image/setup.data/setup.gtk2.glade:801
+msgid "Install a symbolic link into the path"
+msgstr "пёя│я┌п╟п╫п╬п╡п╨п╟ я│п╦п╪п╡п╬п╩я▄п╫п╬п╧ я│я│я▀п╩п╨п╦"
+
+#: image/setup.data/setup.glade:488 image/setup.data/setup.gtk2.glade:823
+msgid "Man page path:"
+msgstr "п÷я┐я┌я▄ п╢п╩я▐ я│п©я─п╟п╡п╬я┤п╫я▀я┘ я│я┌я─п╟п╫п╦я├ man:"
+
+# image/setup.data/setup.glade:95
+#: image/setup.data/setup.glade:557 image/setup.data/setup.gtk2.glade:1141
+msgid "Options"
+msgstr "п÷п╟я─п╟п╪п╣я┌я─я▀"
+
+# image/setup.data/setup.glade:324 image/setup.data/setup.glade:350
+#: image/setup.data/setup.glade:588 image/setup.data/setup.glade:614
+#: image/setup.data/setup.gtk2.glade:951 image/setup.data/setup.gtk2.glade:979
+msgid "0 MB"
+msgstr "0 п°п╠"
+
+# image/setup.data/setup.glade:396
+#: image/setup.data/setup.glade:660 image/setup.data/setup.gtk2.glade:1013
+msgid "[packages go here]"
+msgstr "[packages go here]"
+
+# image/setup.data/setup.glade:414
+#: image/setup.data/setup.glade:678 image/setup.data/setup.gtk2.glade:1046
+msgid "Free space:"
+msgstr "п║п╡п╬п╠п╬п╢п╫п╬п╣ п╪п╣я│я┌п╬:"
+
+# image/setup.data/setup.glade:440
+#: image/setup.data/setup.glade:704 image/setup.data/setup.gtk2.glade:1074
+msgid "Estimated size:"
+msgstr "п÷я─п╦п╪п╣я─п╫я▀п╧ я─п╟п╥п╪п╣я─:"
+
+# image/setup.data/setup.glade:472
+#: image/setup.data/setup.glade:736 image/setup.data/setup.gtk2.glade:1103
+msgid "Startup menu entries (KDE/Gnome/CDE)"
+msgstr "п÷я┐п╫п╨я┌я▀ п╪п╣п╫я▌ п╥п╟п©я┐я│п╨п╟ (KDE/GNOME/CDE)"
+
+# image/setup.data/setup.glade:572
+#: image/setup.data/setup.glade:848 image/setup.data/setup.gtk2.glade:1251
+msgid "_Begin Install"
+msgstr "_п²п╟я┤п╟я┌я▄ я┐я│я┌п╟п╫п╬п╡п╨я┐"
+
+# image/setup.data/setup.glade:579
+#: image/setup.data/setup.glade:856 image/setup.data/setup.gtk2.glade:1292
+msgid "[options status]"
+msgstr "[options status]"
+
+# image/setup.data/setup.glade:628
+#: image/setup.data/setup.glade:905 image/setup.data/setup.gtk2.glade:1555
+msgid "Install Progress"
+msgstr "п╔п╬п╢ я┐я│я┌п╟п╫п╬п╡п╨п╦"
+
+# image/setup.data/setup.glade:684
+#: image/setup.data/setup.glade:961 image/setup.data/setup.gtk2.glade:1403
+msgid "[current option]"
+msgstr "[current option]"
+
+# image/setup.data/setup.glade:718
+#: image/setup.data/setup.glade:995 image/setup.data/setup.gtk2.glade:1453
+msgid "[current file]"
+msgstr "[current file]"
+
+# SOME DESCRIPTIVE TITLE
+# image/setup.data/setup.glade:742 image/setup.data/setup.glade:791
+#: image/setup.data/setup.glade:1019 image/setup.data/setup.glade:1068
+msgid "%P %%"
+msgstr "%P %%"
+
+# image/setup.data/setup.glade:767
+#: image/setup.data/setup.glade:1044 image/setup.data/setup.gtk2.glade:1506
+msgid "Total Install"
+msgstr "п═п╣п╥я┐п╩я▄я┌п╟я┌ я┐я│я┌п╟п╫п╬п╡п╨п╦"
+
+#: image/setup.data/setup.glade:1206 image/setup.data/setup.glade:1470
+#: image/setup.data/setup.glade:1735
+msgid "_Quit"
+msgstr "_п▓я▀я┘п╬п╢"
+
+#: image/setup.data/setup.glade:1249 image/setup.data/setup.gtk2.glade:1747
+msgid "_Start"
+msgstr "_п≈п╟п©я┐я│я┌п╦я┌я▄"
+
+# image/setup.data/setup.glade:945
+#: image/setup.data/setup.glade:1257 image/setup.data/setup.gtk2.glade:1978
+msgid "Install Complete"
+msgstr "пёя│я┌п╟п╫п╬п╡п╨п╟ п╥п╟п╡п╣я─я┬п╣п╫п╟"
+
+# image/setup.data/setup.glade:973
+#: image/setup.data/setup.glade:1285 image/setup.data/setup.gtk2.glade:1801
+msgid "Congratulations!"
+msgstr "п÷п╬п╥п╢я─п╟п╡п╩я▐п╣п╪!"
+
+# image/setup.data/setup.glade:1024
+#: image/setup.data/setup.glade:1336 image/setup.data/setup.gtk2.glade:1876
+msgid "The product was installed in:"
+msgstr "п÷я─п╬пЁя─п╟п╪п╪п╟ п╠я▀п╩п╟ я┐я│я┌п╟п╫п╬п╡п╩п╣п╫п╟ п╡"
+
+# image/setup.data/setup.glade:1041
+#: image/setup.data/setup.glade:1353 image/setup.data/setup.gtk2.glade:1901
+msgid "[install directory]"
+msgstr "[install directory]"
+
+# image/setup.data/setup.glade:1075
+#: image/setup.data/setup.glade:1387 image/setup.data/setup.gtk2.glade:1951
+msgid "Type '[game]' to start."
+msgstr "п■п╩я▐ п╥п╟п©я┐я│п╨п╟ п╡п╡п╣п╢п╦я┌п╣ б╚[game]б╩."
+
+# image/setup.data/setup.glade:1155
+#: image/setup.data/setup.glade:1478 image/setup.data/setup.gtk2.glade:2144
+msgid "Install Aborted"
+msgstr "пёя│я┌п╟п╫п╬п╡п╨п╟ п©я─п╣я─п╡п╟п╫п╟"
+
+# image/setup.data/setup.glade:1183
+#: image/setup.data/setup.glade:1506 image/setup.data/setup.gtk2.glade:2092
+msgid "This installation has been aborted."
+msgstr "пёя│я┌п╟п╫п╬п╡п╨п╟ п╠я▀п╩п╟ п©я─п╣я─п╡п╟п╫п╟"
+
+# image/setup.data/setup.glade:1200
+#: image/setup.data/setup.glade:1523
+msgid "Press 'Exit' to clean up temporary files."
+msgstr "п²п╟п╤п╪п╦я┌п╣ 'п▓я▀я┘п╬п╢' п╢п╩я▐ я┐п╢п╟п╩п╣п╫п╦я▐ п╡я─п╣п╪п╣п╫п╫я▀я┘ я└п╟п╧п╩п╬п╡"
+
+# image/setup.data/setup.glade:1286 image/setup.data/setup.glade:1420
+#: image/setup.data/setup.glade:1621 image/setup.data/setup.glade:1769
+#: image/setup.data/setup.glade:2042
+msgid "Continue"
+msgstr "п÷я─п╬п╢п╬п╩п╤п╦я┌я▄"
+
+# image/setup.data/setup.glade:1293
+#: image/setup.data/setup.glade:1629 image/setup.data/setup.gtk2.glade:2299
+msgid "Warning"
+msgstr "п÷я─п╣п╢я┐п©я─п╣п╤п╢п╣п╫п╦п╣"
+
+# image/setup.data/setup.glade:1321
+#: image/setup.data/setup.glade:1657 image/setup.data/setup.gtk2.glade:2272
+msgid "[warning text]"
+msgstr "[warning text]"
+
+# image/setup.data/setup.glade:1427
+#: image/setup.data/setup.glade:1777 image/setup.data/setup.gtk2.glade:2718
+msgid "Product Website"
+msgstr "п║п╟п╧я┌ п©я─п╬пЁя─п╟п╪п╪я▀ п╡ п╦п╫я┌п╣я─п╫п╣я┌п╣"
+
+# image/setup.data/setup.glade:1483
+#: image/setup.data/setup.glade:1833 image/setup.data/setup.gtk2.glade:2533
+msgid "Thank you for installing "
+msgstr "п║п©п╟я│п╦п╠п╬ п╥п╟ я┐я│я┌п╟п╫п╬п╡п╨я┐"
+
+# image/setup.data/setup.glade:1500
+#: image/setup.data/setup.glade:1850 image/setup.data/setup.gtk2.glade:2558
+msgid "[product]"
+msgstr "[product]"
+
+# image/setup.data/setup.glade:1518
+#: image/setup.data/setup.glade:1868 image/setup.data/setup.gtk2.glade:2590
+msgid "Please visit our website for updates and support."
+msgstr ""
+"п÷п╬я│п╣я┌п╦я┌п╣ п╫п╟я┬ я│п╟п╧я┌ п╡ п╦п╫я┌п╣я─п╫п╣я┌п╣ п╢п╩я▐ п©п╬п╩я┐я┤п╣п╫п╦я▐ п╬п╠п╫п╬п╡п╩п╣п╫п╦п╧ п╦ я┌п╣я┘п╫п╦я┤п╣я│п╨п╬п╧ "
+"п©п╬п╢п╢п╣я─п╤п╨п╦"
+
+# image/setup.data/setup.glade:1569
+#: image/setup.data/setup.glade:1919 image/setup.data/setup.gtk2.glade:2665
+msgid "Launching browser, please wait..."
+msgstr "п≈п╟п©я┐я│п╨ п╬п╠п╬п╥я─п╣п╡п╟я┌п╣п╩я▐, п©п╬п╢п╬п╤п╢п╦я┌п╣..."
+
+# image/setup.data/setup.glade:1608
+#: image/setup.data/setup.glade:1958 image/setup.data/setup.gtk2.glade:2698
+msgid "Launch _Browser"
+msgstr "п·я┌п╨я─я▀я┌я▄ _п╠я─п╟я┐п╥п╣я─"
+
+# image/setup.data/setup.glade:546 image/setup.data/setup.glade:838
+# image/setup.data/setup.glade:1273 image/setup.data/setup.glade:1777
+#: image/setup.data/setup.glade:2027 image/setup.data/setup.glade:2378
+msgid "_Cancel"
+msgstr "_п·я┌п╪п╣п╫п╟"
+
+#: image/setup.data/setup.glade:2050 image/setup.data/setup.gtk2.glade:3067
+msgid "CD key"
+msgstr "п п╩я▌я┤ CD"
+
+#: image/setup.data/setup.glade:2095 image/setup.data/setup.gtk2.glade:2932
+msgid "Please enter your CD key."
+msgstr "п▓п╡п╣п╢п╦я┌п╣ п╨п╩я▌я┤ CD."
+
+# image/setup.data/setup.glade:1641
+#: image/setup.data/setup.glade:2226 image/setup.data/setup.gtk2.glade:179
+msgid "Readme File"
+msgstr "п╓п╟п╧п╩ 'п÷я─п╬я┤я┌п╦ п°п╣п╫я▐'"
+
+# image/setup.data/setup.glade:1680
+#: image/setup.data/setup.glade:2275
+msgid "_Close"
+msgstr "_п≈п╟п╨я─я▀я┌я▄"
+
+# image/setup.data/setup.glade:1790
+#: image/setup.data/setup.glade:2407 image/setup.data/setup.gtk2.glade:103
+msgid "_I Agree"
+msgstr "_п÷я─п╦п╫п╦п╪п╟я▌"
+
+#: image/setup.data/setup.gtk2.glade:540 image/setup.data/setup.gtk2.glade:2853
+msgid "C_ontinue"
+msgstr "_п÷я─п╬п╢п╬п╩п╤п╦я┌я▄"
+
+#: image/setup.data/setup.gtk2.glade:2117
+msgid "Press 'Quit' to clean up temporary files."
+msgstr "п²п╟п╤п╪п╦я┌п╣ б╚п▓я▀я┘п╬п╢б╩, я┤я┌п╬п╠я▀ я┐п╢п╟п╩п╦я┌я▄ п╡я─п╣п╪п╣п╫п╫я▀п╣ я└п╟п╧п╩я▀."
+
+#. TRANSLATORS: The placeholders are a directory, its owner, and the suggested user.
+#: install.c:450
+#, c-format
+msgid ""
+"%s is owned by %s. You may need to run this installer as user %s or choose "
+"another directory."
+msgstr ""
+"п▓п╩п╟п╢п╣п╩п╣я├ %s Б─■ %s. п▓п╬п╥п╪п╬п╤п╫п╬, п╫я┐п╤п╫п╬ п╥п╟п©я┐я│я┌п╦я┌я▄ я┐я│я┌п╟п╫п╬п╡я┴п╦п╨ п╬я┌ п╦п╪п╣п╫п╦ п©п╬п╩я▄п╥п╬п╡п╟я┌п╣п╩я▐ "
+"%s п╦п╩п╦ п╡я▀п╠я─п╟я┌я▄ п╢я─я┐пЁп╬п╧ п╨п╟я┌п╟п╩п╬пЁ."
+
+# gtk_ui.c:524
+#: install.c:478
+msgid "No destination directory selected"
+msgstr "п²п╣ п╡я▀п╠я─п╟п╫ п╨п╟я┌п╟п╩п╬пЁ п╫п╟п╥п╫п╟я┤п╣п╫п╦я▐"
+
+# gtk_ui.c:527
+#: install.c:481
 msgid "Please select at least one option"
-msgstr "Выберите по крайней мере одну опцию"
+msgstr "п▓я▀п╠п╣я─п╦я┌п╣ п©п╬ п╨я─п╟п╧п╫п╣п╧ п╪п╣я─п╣ п╬п╢п╫я┐ п╬п©я├п╦я▌"
 
 # gtk_ui.c:530
-#: install.c:366
+#: install.c:484
 msgid "Not enough free space for the selected options."
-msgstr "Недостаточно свободного пространства для выбранных опций."
+msgstr "п²п╣п╢п╬я│я┌п╟я┌п╬я┤п╫п╬ я│п╡п╬п╠п╬п╢п╫п╬пЁп╬ п©я─п╬я│я┌я─п╟п╫я│я┌п╡п╟ п╢п╩я▐ п╡я▀п╠я─п╟п╫п╫я▀я┘ п╬п©я├п╦п╧."
 
 # gtk_ui.c:532
-#: install.c:368
+#: install.c:486
 msgid "Install path is not a directory."
-msgstr "Путь установки не каталог."
+msgstr "п÷я┐я┌я▄ я┐я│я┌п╟п╫п╬п╡п╨п╦ п╫п╣ п╨п╟я┌п╟п╩п╬пЁ."
+
+#: install.c:487 install.c:508
+msgid "Please choose an existing directory."
+msgstr "п▓я▀п╠п╣я─п╦я┌п╣ я│я┐я┴п╣я│я┌п╡я┐я▌я┴п╦п╧ п╨п╟я┌п╟п╩п╬пЁ."
 
 # gtk_ui.c:534
-#: install.c:370
+#: install.c:489
 msgid "No write permissions on the install directory."
-msgstr "Нет прав на запись в каталог установки."
+msgstr "п²п╣я┌ п©я─п╟п╡ п╫п╟ п╥п╟п©п╦я│я▄ п╡ п╨п╟я┌п╟п╩п╬пЁ я┐я│я┌п╟п╫п╬п╡п╨п╦."
 
 # gtk_ui.c:536
-#: install.c:372
+#: install.c:492
 msgid "Binary path and install path must be different."
-msgstr "Путь программных файлов и установки должны быть различны."
+msgstr "п÷я┐я┌я▄ п©я─п╬пЁя─п╟п╪п╪п╫я▀я┘ я└п╟п╧п╩п╬п╡ п╦ я┐я│я┌п╟п╫п╬п╡п╨п╦ п╢п╬п╩п╤п╫я▀ п╠я▀я┌я▄ я─п╟п╥п╩п╦я┤п╫я▀."
 
 # gtk_ui.c:538
-#: install.c:374
+#: install.c:494
 msgid "No write permissions to install a selected package."
-msgstr "Нет прав на запись для установки выбранного компонента."
+msgstr "п²п╣я┌ п©я─п╟п╡ п╫п╟ п╥п╟п©п╦я│я▄ п╢п╩я▐ я┐я│я┌п╟п╫п╬п╡п╨п╦ п╡я▀п╠я─п╟п╫п╫п╬пЁп╬ п╨п╬п╪п©п╬п╫п╣п╫я┌п╟."
+
+#: install.c:499
+msgid "Binary path is not a directory."
+msgstr "п÷я┐я┌я▄ п╨ п╦я│п©п╬п╩п╫я▐п╣п╪я▀п╪ я└п╟п╧п╩п╟п╪ п╫п╣ я▐п╡п╩я▐п╣я┌я│я▐ п╨п╟я┌п╟п╩п╬пЁп╬п╪."
 
 # gtk_ui.c:541
-#: install.c:377
+#: install.c:502
 msgid "No write permissions on the binary directory."
-msgstr "Нет прав на запись в каталоге прогрпммных файлов."
+msgstr "п²п╣я┌ п©я─п╟п╡ п╫п╟ п╥п╟п©п╦я│я▄ п╡ п╨п╟я┌п╟п╩п╬пЁп╣ п©я─п╬пЁя─п©п╪п╪п╫я▀я┘ я└п╟п╧п╩п╬п╡."
 
-#: install.c:736
+#: install.c:507
+msgid "Binary directory does not exist."
+msgstr "п п╟я┌п╟п╩п╬пЁ п╦я│п©п╬п╩п╫я▐п╣п╪я▀я┘ я└п╟п╧п╩п╬п╡ п╫п╣ я│я┐я┴п╣я│я┌п╡я┐п╣я┌."
+
+#: install.c:688
+msgid "Failed to allocate new bool"
+msgstr "п²п╣ я┐п╢п╟п╩п╬я│я▄ п╡я▀п╢п╣п╩п╦я┌я▄ п©п╟п╪я▐я┌я▄ п╢п╩я▐ п╫п╬п╡п╬пЁп╬ п╩п╬пЁп╦я┤п╣я│п╨п╬пЁп╬ п╥п╫п╟я┤п╣п╫п╦я▐"
+
+#: install.c:707
+msgid "Must have at least 'script' or 'env' attribute for <bool>"
+msgstr "п■п╩я▐ я█п╩п╣п╪п╣п╫я┌п╟ <bool> п╫п╣п╬п╠я┘п╬п╢п╦п╪п╬ я┐п╨п╟п╥п╟я┌я▄ п╟я┌я─п╦п╠я┐я┌ б╚scriptб╩ п╦п╩п╦ б╚envб╩"
+
+# install.c:399 install.c:407
+#: install.c:959 install_log.c:19
+#, c-format
+msgid "Out of memory\n"
+msgstr "п²п╣я┘п╡п╟я┌п╨п╟ п©п╟п╪я▐я┌п╦\n"
+
+#: install.c:981
 #, c-format
 msgid "Detected distribution: %s %d.%d"
-msgstr ""
+msgstr "п·п╠п╫п╟я─я┐п╤п╣п╫ п╢п╦я│я┌я─п╦п╠я┐я┌п╦п╡: %s %d.%d"
 
 # install.c:561
-#: install.c:906
+#: install.c:1150
+#, c-format
 msgid ""
 "Could not find default component. Make sure to define components for all "
 "entries."
 msgstr ""
-"Невозможно найти компонет по умолчанию. Убедитесь, что определили компоненты "
-"для всех вхождений."
-
-# file.c:66 file.c:86 file.c:93 install.c:599 install.c:621 install.c:643
-# install.c:664 install.c:703
-#: install.c:947 install.c:969 install.c:991 install.c:1012 install.c:1027
-#: install.c:1070 file.c:117 file.c:138 file.c:145
-msgid "Out of memory"
-msgstr "Нехватка памяти"
+"п²п╣п╡п╬п╥п╪п╬п╤п╫п╬ п╫п╟п╧я┌п╦ п╨п╬п╪п©п╬п╫п╣я┌ п©п╬ я┐п╪п╬п╩я┤п╟п╫п╦я▌. пёп╠п╣п╢п╦я┌п╣я│я▄, я┤я┌п╬ п╬п©я─п╣п╢п╣п╩п╦п╩п╦ п╨п╬п╪п©п╬п╫п╣п╫я┌я▀ "
+"п╢п╩я▐ п╡я│п╣я┘ п╡я┘п╬п╤п╢п╣п╫п╦п╧."
 
 # install.c:688
-#: install.c:1052
+#: install.c:1301
 msgid "You must use a 'symlink' attribute with 'play'"
-msgstr "Вы должны использовать символьную связь для атрибута 'play'"
+msgstr "п▓я▀ п╢п╬п╩п╤п╫я▀ п╦я│п©п╬п╩я▄п╥п╬п╡п╟я┌я▄ я│п╦п╪п╡п╬п╩я▄п╫я┐я▌ я│п╡я▐п╥я▄ п╢п╩я▐ п╟я┌я─п╦п╠я┐я┌п╟ 'play'"
 
 # install.c:693
-#: install.c:1060
+#: install.c:1313
 msgid "There can be only one binary with a 'play' attribute"
-msgstr "Может быть только один двоичный файл с атрибутом 'play'"
+msgstr "п°п╬п╤п╣я┌ п╠я▀я┌я▄ я┌п╬п╩я▄п╨п╬ п╬п╢п╦п╫ п╢п╡п╬п╦я┤п╫я▀п╧ я└п╟п╧п╩ я│ п╟я┌я─п╦п╠я┐я┌п╬п╪ 'play'"
 
 # install.c:696
-#: install.c:1063
-#, fuzzy
+#: install.c:1316
 msgid "The only valid values for the 'play' attribute are yes, gui and no"
-msgstr "Единственные корректые значения для атрибута 'play': да и нет"
+msgstr "п■п╬п©я┐я│я┌п╦п╪я▀п╣ п╥п╫п╟я┤п╣п╫п╦я▐ п╟я┌я─п╦п╠я┐я┌п╟ б╚playб╩: yes, gui п╦ no"
 
 # install.c:721
-#: install.c:1088
+#: install.c:1345
 msgid "Couldn't find your home directory"
-msgstr "Невозможно найти ваш домашний каталог"
+msgstr "п²п╣п╡п╬п╥п╪п╬п╤п╫п╬ п╫п╟п╧я┌п╦ п╡п╟я┬ п╢п╬п╪п╟я┬п╫п╦п╧ п╨п╟я┌п╟п╩п╬пЁ"
 
 # install.c:739
-#: install.c:1106
+#: install.c:1363
 #, c-format
 msgid "Couldn't find home directory for %s"
-msgstr "Невозможно найти домашний каталог %s"
+msgstr "п²п╣п╡п╬п╥п╪п╬п╤п╫п╬ п╫п╟п╧я┌п╦ п╢п╬п╪п╟я┬п╫п╦п╧ п╨п╟я┌п╟п╩п╬пЁ %s"
+
+#: install.c:1493
+msgid ""
+"XML: 'require' tag doesn't have a mandatory 'command', 'condition' or "
+"'feature' attribute"
+msgstr ""
+"XML: п╡ я┌п╣пЁп╣ б╚requireб╩ п╫п╣п╬п╠я┘п╬п╢п╦п╪п╬ я┐п╨п╟п╥п╟я┌я▄ п╟я┌я─п╦п╠я┐я┌ б╚commandб╩, б╚conditionб╩ п╦п╩п╦ "
+"б╚featureб╩"
+
+#: install.c:1543
+#, c-format
+msgid ""
+"The installer is not suitable for installing this product (missing feature "
+"'%s' version '%u')"
+msgstr ""
+"пёя│я┌п╟п╫п╬п╡я┴п╦п╨ п╫п╣ п╪п╬п╤п╣я┌ я┐я│я┌п╟п╫п╬п╡п╦я┌я▄ я█я┌п╬я┌ п©я─п╬п╢я┐п╨я┌: п╬я┌я│я┐я┌я│я┌п╡я┐п╣я┌ я└я┐п╫п╨я├п╦я▐ б╚%sб╩ п╡п╣я─я│п╦п╦ "
+"б╚%uб╩."
 
 # install.c:833
-#: install.c:1226
-#, fuzzy
-msgid "XML: 'require' tag doesn't have a mandatory 'command' attribute"
-msgstr "XML: тэг 'lang' не имеет обязательного атрибута 'lang'"
-
-# install.c:833
-#: install.c:1276
+#: install.c:1586
 msgid "XML: 'lang' tag does not have a mandatory 'lang' attribute"
-msgstr "XML: тэг 'lang' не имеет обязательного атрибута 'lang'"
+msgstr "XML: я┌я█пЁ 'lang' п╫п╣ п╦п╪п╣п╣я┌ п╬п╠я▐п╥п╟я┌п╣п╩я▄п╫п╬пЁп╬ п╟я┌я─п╦п╠я┐я┌п╟ 'lang'"
 
 # install.c:841
-#: install.c:1285
+#: install.c:1595
 #, c-format
 msgid "XML: option listed without translated description for locale '%s'"
-msgstr "XML: указан параметр без перевода для кодировки '%s'"
+msgstr "XML: я┐п╨п╟п╥п╟п╫ п©п╟я─п╟п╪п╣я┌я─ п╠п╣п╥ п©п╣я─п╣п╡п╬п╢п╟ п╢п╩я▐ п╨п╬п╢п╦я─п╬п╡п╨п╦ '%s'"
 
 # install.c:848
-#: install.c:1293
+#: install.c:1603
 msgid "XML: option listed without description"
-msgstr "XML: параметр без описания"
+msgstr "XML: п©п╟я─п╟п╪п╣я┌я─ п╠п╣п╥ п╬п©п╦я│п╟п╫п╦я▐"
 
-#: install.c:1536
+#: install.c:1865
 msgid "CDKey file could not be opened."
-msgstr ""
+msgstr "п²п╣ я┐п╢п╟п╩п╬я│я▄ п╬я┌п╨я─я▀я┌я▄ я└п╟п╧п╩ CDKey."
 
 # install.c:1054 install.c:1060 install.c:1077
-#: install.c:1641 install.c:1647 install.c:1666
+#: install.c:1972 install.c:1978 install.c:1997
 #, c-format
 msgid "Unable to remove '%s'"
-msgstr "Невозможно удалить '%s'"
+msgstr "п²п╣п╡п╬п╥п╪п╬п╤п╫п╬ я┐п╢п╟п╩п╦я┌я▄ '%s'"
 
 # install.c:1068
-#: install.c:1657
+#: install.c:1988
 #, c-format
 msgid "The '%s' RPM was installed or upgraded (version %s, release %d)"
-msgstr "RPM '%s' был установлен или обновлён (версия %s, релиз %d)"
+msgstr "RPM '%s' п╠я▀п╩ я┐я│я┌п╟п╫п╬п╡п╩п╣п╫ п╦п╩п╦ п╬п╠п╫п╬п╡п╩я▒п╫ (п╡п╣я─я│п╦я▐ %s, я─п╣п╩п╦п╥ %d)"
 
-#: install.c:1786
+#: install.c:2121
 msgid "Options tag string maxed out!"
-msgstr ""
+msgstr "п÷я─п╣п╡я▀я┬п╣п╫п╟ п╢п╬п©я┐я│я┌п╦п╪п╟я▐ п╢п╩п╦п╫п╟ я│я┌я─п╬п╨п╦ я│ я┌п╣пЁп╟п╪п╦ п©п╟я─п╟п╪п╣я┌я─п╬п╡."
 
 # install.c:1217
-#: install.c:1835 install.c:1979 install.c:2007
-#, fuzzy
+#: install.c:2172 install.c:2321 install.c:2349
 msgid "Could not create temporary script"
-msgstr "Невозможно записать временный сценарий удаления в %s"
+msgstr "п²п╣ я┐п╢п╟п╩п╬я│я▄ я│п╬п╥п╢п╟я┌я▄ п╡я─п╣п╪п╣п╫п╫я▀п╧ я│я├п╣п╫п╟я─п╦п╧"
 
 # install.c:1179
-#: install.c:1956
+#: install.c:2298
 #, c-format
 msgid "Could not register binary: %s"
-msgstr "Невозможно зарегистрировать двоичный файл: %s"
+msgstr "п²п╣п╡п╬п╥п╪п╬п╤п╫п╬ п╥п╟я─п╣пЁп╦я│я┌я─п╦я─п╬п╡п╟я┌я▄ п╢п╡п╬п╦я┤п╫я▀п╧ я└п╟п╧п╩: %s"
 
 # install.c:1217
-#: install.c:1998
+#: install.c:2340
 #, c-format
 msgid "Could not write temporary pre-uninstall script in %s"
-msgstr "Невозможно записать временный сценарий удаления в %s"
+msgstr "п²п╣п╡п╬п╥п╪п╬п╤п╫п╬ п╥п╟п©п╦я│п╟я┌я▄ п╡я─п╣п╪п╣п╫п╫я▀п╧ я│я├п╣п╫п╟я─п╦п╧ я┐п╢п╟п╩п╣п╫п╦я▐ п╡ %s"
 
 # install.c:1238
-#: install.c:2023
+#: install.c:2365
 #, c-format
 msgid "Could not write post-uninstall script in %s"
-msgstr "Невозможно записать сценарий удаления в %s"
+msgstr "п²п╣п╡п╬п╥п╪п╬п╤п╫п╬ п╥п╟п©п╦я│п╟я┌я▄ я│я├п╣п╫п╟я─п╦п╧ я┐п╢п╟п╩п╣п╫п╦я▐ п╡ %s"
 
 # install.c:1302
-#: install.c:2057
+#: install.c:2412
 msgid "Could not create install log"
-msgstr "Невозможно создать журнал установки"
+msgstr "п²п╣п╡п╬п╥п╪п╬п╤п╫п╬ я│п╬п╥п╢п╟я┌я▄ п╤я┐я─п╫п╟п╩ я┐я│я┌п╟п╫п╬п╡п╨п╦"
 
 # install.c:1329
-#: install.c:2084
+#: install.c:2439
 #, c-format
 msgid "Please visit %s"
-msgstr "Посетите %s"
+msgstr "п÷п╬я│п╣я┌п╦я┌п╣ %s"
 
-#: install.c:2138
+#: install.c:2493
 msgid "Missing 'command' attribute for an option"
-msgstr ""
+msgstr "пё п©п╟я─п╟п╪п╣я┌я─п╟ п╬я┌я│я┐я┌я│я┌п╡я┐п╣я┌ п╟я┌я─п╦п╠я┐я┌ б╚commandб╩"
+
+#: install.c:2507
+#, c-format
+msgid "Expression '%s' did not parse"
+msgstr "п²п╣ я┐п╢п╟п╩п╬я│я▄ я─п╟п╥п╬п╠я─п╟я┌я▄ п╡я▀я─п╟п╤п╣п╫п╦п╣ б╚%sб╩"
+
+#: install.c:2511
+msgid "Missing 'condition' attribute for an option"
+msgstr "пё п©п╟я─п╟п╪п╣я┌я─п╟ п╬я┌я│я┐я┌я│я┌п╡я┐п╣я┌ п╟я┌я─п╦п╠я┐я┌ б╚conditionб╩"
 
 # install.c:1531
-#: install.c:2371 install.c:2434
+#: install.c:2752 install.c:2818
 #, c-format
 msgid "Unable to create desktop file '%s'"
-msgstr "Невозможно создать файл '%s' на рабочем столе"
+msgstr "п²п╣п╡п╬п╥п╪п╬п╤п╫п╬ я│п╬п╥п╢п╟я┌я▄ я└п╟п╧п╩ '%s' п╫п╟ я─п╟п╠п╬я┤п╣п╪ я│я┌п╬п╩п╣"
 
 # install.c:1531
-#: install.c:2497 install.c:2500
-#, fuzzy, c-format
+#: install.c:2885 install.c:2888
+#, c-format
 msgid "Unable to create CDE desktop file '%s'"
-msgstr "Невозможно создать файл '%s' на рабочем столе"
+msgstr "п²п╣ я┐п╢п╟п╩п╬я│я▄ я│п╬п╥п╢п╟я┌я▄ я└п╟п╧п╩ я─п╟п╠п╬я┤п╣пЁп╬ я│я┌п╬п╩п╟ CDE б╚%sб╩"
 
 # install.c:1531
-#: install.c:2534
-#, fuzzy, c-format
+#: install.c:2924
+#, c-format
 msgid "Unable to create ToolChest menu file '%s'"
-msgstr "Невозможно создать файл '%s' на рабочем столе"
+msgstr "п²п╣ я┐п╢п╟п╩п╬я│я▄ я│п╬п╥п╢п╟я┌я▄ я└п╟п╧п╩ п╪п╣п╫я▌ ToolChest б╚%sб╩"
 
-# copy.c:207
-#: copy.c:292
-#, c-format
-msgid "Unable to create %s symlink pointing to %s"
-msgstr "Невозможно создать символьную ссылку %s, указывающую на %s"
-
-# detect.c:75
-#: copy.c:373
-#, fuzzy, c-format
-msgid "Failed to update check sum for %s"
-msgstr "Ошибка при размантировании устройства %s примонтированного к %s"
-
-#: copy.c:377
-#, c-format
-msgid "Error while running process command: %s"
-msgstr ""
-
-#: copy.c:387 plugins/cpio.c:181 plugins/tar.c:120 plugins/uz2.c:203
-#: plugins/zip.c:865
-#, c-format
-msgid "File '%s' has an invalid checksum! Aborting."
-msgstr ""
-
-# copy.c:269
-#: copy.c:427
-#, c-format
-msgid "Unable to copy directory '%s'"
-msgstr "Невозможно скопировать каталог '%s'"
-
-# copy.c:298 copy.c:346 copy.c:445 copy.c:446 copy.c:449 copy.c:450
-# copy.c:462 copy.c:463 copy.c:466 copy.c:467
-#: copy.c:462
-#, fuzzy, c-format
-msgid "1 Unable to find file '%s' in '%s'"
-msgstr "Невозможно найти файл '%s'"
-
-# copy.c:332
-#: copy.c:505
-#, c-format
-msgid "Unable to find file '%s' on any of the CDROM drives"
-msgstr "Файл '%s' не найден ни на одном приводе CDROM"
-
-# copy.c:298 copy.c:346 copy.c:445 copy.c:446 copy.c:449 copy.c:450
-# copy.c:462 copy.c:463 copy.c:466 copy.c:467
-#: copy.c:523
-#, fuzzy, c-format
-msgid "2 Unable to find file '%s' in '%s'"
-msgstr "Невозможно найти файл '%s'"
-
-# copy.c:298 copy.c:346 copy.c:445 copy.c:446 copy.c:449 copy.c:450
-# copy.c:462 copy.c:463 copy.c:466 copy.c:467
-#: copy.c:577 copy.c:578
-#, fuzzy, c-format
-msgid "Unable to copy man page '%s'"
-msgstr "Невозможно найти файл '%s'"
-
-#: copy.c:681
-#, c-format
-msgid "find '%s'"
-msgstr ""
-
-# copy.c:298 copy.c:346 copy.c:445 copy.c:446 copy.c:449 copy.c:450
-# copy.c:462 copy.c:463 copy.c:466 copy.c:467
-#: copy.c:703 copy.c:704
-#, fuzzy, c-format
-msgid "Unable to find file '%s' in '%s'"
-msgstr "Невозможно найти файл '%s'"
-
-# copy.c:298 copy.c:346 copy.c:445 copy.c:446 copy.c:449 copy.c:450
-# copy.c:462 copy.c:463 copy.c:466 copy.c:467
-#: copy.c:719 copy.c:720
-#, fuzzy, c-format
-msgid "Unable to copy file '%s'"
-msgstr "Невозможно найти файл '%s'"
-
-# copy.c:508
-#: copy.c:760
-msgid "Running script"
-msgstr "Выполнение сценария"
-
-#: copy.c:949
-msgid "The remove_msg element should be within a component!\n"
-msgstr ""
-
-#: copy.c:952
-msgid "Only one remove_msg per component is allowed.\n"
-msgstr ""
-
-# copy.c:642
-#: copy.c:970
-msgid "Component element needs to have a name"
-msgstr "Элемент компонента должен иметь имя"
-
-# copy.c:645
-#: copy.c:973
-msgid "Component element needs to have a version"
-msgstr "Элемент компонента должен иметь версию"
-
-#: copy.c:995
-msgid "Malformed 'environment' element in XML file : missing 'var' property"
-msgstr ""
-
-# copy.c:797
-#: copy.c:1170
-#, c-format
-msgid "Suspect size value for option %s\n"
-msgstr "Подозрительное значение параметра %s\n"
-
-# copy.c:298 copy.c:346 copy.c:445 copy.c:446 copy.c:449 copy.c:450
-# copy.c:462 copy.c:463 copy.c:466 copy.c:467
-#: file.c:156
-#, fuzzy, c-format
-msgid "Failed to open file %s"
-msgstr "Невозможно найти файл '%s'"
-
-#: file.c:186
-#, c-format
-msgid "File '%s' may be in BZIP2 format, but support was not compiled in!"
-msgstr ""
-
-# file.c:127
-#: file.c:197
-#, c-format
-msgid "Couldn't read from file: %s"
-msgstr "Невозможно прочитать файл %s"
-
-# file.c:135
-#: file.c:205
-#, c-format
-msgid "Installing file %s"
-msgstr "Установка файла %s"
-
-# file.c:140
-#: file.c:210
-#, c-format
-msgid "Couldn't write to file: %s"
-msgstr "Невозможно записать в файл %s"
-
-# file.c:161
-#: file.c:236
-msgid "Read on write stream"
-msgstr "Чтение из потока только для записи"
-
-#: file.c:275
-#, c-format
-msgid "Read failure on %s"
-msgstr ""
-
-# file.c:204
-#: file.c:346
-msgid "Skip zeroes on write stream"
-msgstr "Пропуск нулей в потоке только для записи"
-
-# file.c:221 file.c:252 file.c:259
-#: file.c:366 file.c:432 file.c:439
-#, c-format
-msgid "Short write on %s"
-msgstr "Короткая запись в %s"
-
-# file.c:227
-#: file.c:372
-msgid "Write on read stream"
-msgstr "Запись в поток только для чтения"
-
-# file.c:221 file.c:252 file.c:259
-#: file.c:402
-#, fuzzy, c-format
-msgid "Write failure on %s"
-msgstr "Короткая запись в %s"
-
-#: file.c:465
-#, c-format
-msgid "Trying to create a symbolic link on the same file: %s\n"
-msgstr ""
-
-# file.c:279
-#: file.c:470
-#, c-format
-msgid "Creating symbolic link: %s --> %s\n"
-msgstr "Создание символьной ссылки: %s --> %s\n"
-
-# file.c:288
-#: file.c:479
-#, c-format
-msgid "Can't remove existing symlink %s: %s"
-msgstr "Невозможно удалить существующую символьную связь %s: %s"
-
-# file.c:292 file.c:323 file.c:343 file.c:362
-#: file.c:483 file.c:514 file.c:534 file.c:553
-#, c-format
-msgid "Can't create %s: %s"
-msgstr "Невозможно создать %s: %s"
-
-# file.c:317
-#: file.c:508
-#, c-format
-msgid "Creating directory: %s\n"
-msgstr "Создание каталога: %s\n"
-
-# file.c:336
-#: file.c:527
-#, c-format
-msgid "Creating FIFO: %s\n"
-msgstr "Создание стэка: %s\n"
-
-# file.c:355
-#: file.c:546
-#, c-format
-msgid "Creating device: %s\n"
-msgstr "Создание устройства: %s\n"
-
-# file.c:375
-#: file.c:566
-#, c-format
-msgid "Can't change permissions for %s: %s"
-msgstr "Невозможно изменить права для %s: %s"
-
-# file.c:409 file.c:433
-#: file.c:600 file.c:624
-#, c-format
-msgid "Unable to read %s"
-msgstr "Невозможно прочитать %s"
-
-#: file.c:702
-msgid "BZ2 support not available"
-msgstr ""
-
-#: file.c:727
-#, c-format
-msgid "BZ2: *** Symbol \"%s\" not found, bzip2 support disabled"
-msgstr ""
-
-#: file.c:740
-#, c-format
-msgid "BZ2: Try open %s"
-msgstr ""
-
-#: file.c:746
-msgid "BZ2: *** Unable to open bzip2 library. bzip2 support disabled"
-msgstr ""
-
-#: file.c:750
-#, c-format
-msgid "BZ2: got %s"
-msgstr ""
+#: log.c:47
+msgid "loki_setup: "
+msgstr "loki_setup: "
 
 # main.c:120
-#: main.c:119
-#, fuzzy, c-format
+#: main.c:130
+#, c-format
 msgid ""
 "Usage: %s [options]\n"
 "\n"
@@ -895,28 +1567,28 @@ msgid ""
 "            0: Debug  1: Quiet  2: Normal 3: Warnings 4: Fatal\n"
 "   -V       Print the version of the setup program and exit\n"
 msgstr ""
-"Использование: %s [параметры]\n"
+"п≤я│п©п╬п╩я▄п╥п╬п╡п╟п╫п╦п╣: %s [п©п╟я─п╟п╪п╣я┌я─я▀]\n"
 "\n"
-"Параметрами могут быть один или несколько ключей:\n"
-"   -b путь  Set the binary path to <path>\n"
-"   -h       Вывести этот экран со справкой\n"
-"   -i путь  Установть путь установки в <путь>\n"
-"   -c cwd   Использовать альтернативный текущий каталог для установки\n"
-"   -f файл  Использовать альтернативный файл XML (по умолчанию %s)\n"
-"   -m       Включить ручную распаковку пакетов RPM, не обновлять базу RPM \n"
-"   -n       Включить текстовый режим интерфейса\n"
-"   -o opt   Вклютить параметр \"opt\" из файл XML. Также включается\n"
-"            интеракивная операция. Может использоваться несколько раз.\n"
-"   -r root  Установить корневой каталог для распаковки файлов RPM (по "
-"умолчанию /)\n"
-"   -v n     Установить уровень вывода n. Доступные значения :\n"
-"            0: Отладочный  1: Тихий  2: Нормальный 3: Предупреждения 4: "
-"Фатальные ошибки\n"
-"   -V       Вывести версию программы установки и выйти\n"
+"п°п╬п╤п╫п╬ я┐п╨п╟п╥п╟я┌я▄ п╬п╢п╦п╫ п╦п╩п╦ п╫п╣я│п╨п╬п╩я▄п╨п╬ п©п╟я─п╟п╪п╣я┌я─п╬п╡:\n"
+"   -b п©я┐я┌я▄    пёп╨п╟п╥п╟я┌я▄ п©я┐я┌я▄ п╢п╩я▐ п╦я│п©п╬п╩п╫я▐п╣п╪я▀я┘ я└п╟п╧п╩п╬п╡\n"
+"   -h         п÷п╬п╨п╟п╥п╟я┌я▄ я█я┌я┐ я│п©я─п╟п╡п╨я┐\n"
+"   -i п©я┐я┌я▄    пёп╨п╟п╥п╟я┌я▄ п©я┐я┌я▄ я┐я│я┌п╟п╫п╬п╡п╨п╦\n"
+"   -c п╨п╟я┌п╟п╩п╬пЁ п≤я│п©п╬п╩я▄п╥п╬п╡п╟я┌я▄ п╢я─я┐пЁп╬п╧ я─п╟п╠п╬я┤п╦п╧ п╨п╟я┌п╟п╩п╬пЁ п╢п╩я▐ я┐я│я┌п╟п╫п╬п╡п╨п╦\n"
+"   -f я└п╟п╧п╩    п≤я│п©п╬п╩я▄п╥п╬п╡п╟я┌я▄ п╢я─я┐пЁп╬п╧ XML-я└п╟п╧п╩ (п©п╬ я┐п╪п╬п╩я┤п╟п╫п╦я▌: %s)\n"
+"   -m         п═п╟я│п©п╟п╨п╬п╡п╟я┌я▄ п©п╟п╨п╣я┌я▀ RPM п╠п╣п╥ п╬п╠п╫п╬п╡п╩п╣п╫п╦я▐ п╠п╟п╥я▀ п╢п╟п╫п╫я▀я┘ RPM\n"
+"   -n         п≤я│п©п╬п╩я▄п╥п╬п╡п╟я┌я▄ я┌п╬п╩я▄п╨п╬ я┌п╣п╨я│я┌п╬п╡я▀п╧ п╦п╫я┌п╣я─я└п╣п╧я│\n"
+"   -o п╬п©я├п╦я▐   п▓п╨п╩я▌я┤п╦я┌я▄ я┐п╨п╟п╥п╟п╫п╫я┐я▌ п╬п©я├п╦я▌ п╦п╥ XML-я└п╟п╧п╩п╟ п╦ я┐я│я┌п╟п╫п╬п╡п╦я┌я▄ п©я─п╬п╢я┐п╨я┌\n"
+"              п╠п╣п╥ п╥п╟п©я─п╬я│п╬п╡. п╜я┌п╬я┌ п©п╟я─п╟п╪п╣я┌я─ п╪п╬п╤п╫п╬ я┐п╨п╟п╥п╟я┌я▄ п╫п╣я│п╨п╬п╩я▄п╨п╬ я─п╟п╥.\n"
+"   -p п©я─п╣я└п╦п╨я│ п≤я│п©п╬п╩я▄п╥п╬п╡п╟я┌я▄ я┐п╨п╟п╥п╟п╫п╫я▀п╧ п©я─п╣я└п╦п╨я│ п©я┐я┌п╦ п╫п╟ я┐я│я┌п╟п╫п╬п╡п╬я┤п╫п╬п╪ п╫п╬я│п╦я┌п╣п╩п╣\n"
+"   -r п╨п╟я┌п╟п╩п╬пЁ пёп╨п╟п╥п╟я┌я▄ п╨п╬я─п╫п╣п╡п╬п╧ п╨п╟я┌п╟п╩п╬пЁ п╢п╩я▐ я─п╟я│п©п╟п╨п╬п╡п╨п╦ RPM (п©п╬ я┐п╪п╬п╩я┤п╟п╫п╦я▌: /)\n"
+"   -v n       пёя│я┌п╟п╫п╬п╡п╦я┌я▄ я┐я─п╬п╡п╣п╫я▄ п©п╬п╢я─п╬п╠п╫п╬я│я┌п╦ п╡я▀п╡п╬п╢п╟. п■п╬п©я┐я│я┌п╦п╪я▀п╣ п╥п╫п╟я┤п╣п╫п╦я▐:\n"
+"              0: п·я┌п╩п╟п╢п╨п╟  1: п╒п╦я┘п╦п╧ я─п╣п╤п╦п╪  2: п·п╠я▀я┤п╫я▀п╧  3: п÷я─п╣п╢я┐п©я─п╣п╤п╢п╣п╫п╦я▐  4: "
+"п я─п╦я┌п╦я┤п╣я│п╨п╦п╣ п╬я┬п╦п╠п╨п╦\n"
+"   -V         п÷п╬п╨п╟п╥п╟я┌я▄ п╡п╣я─я│п╦я▌ я┐я│я┌п╟п╫п╬п╡я┴п╦п╨п╟ п╦ п╡я▀п╧я┌п╦\n"
 
 # main.c:136
-#: main.c:136
-#, fuzzy, c-format
+#: main.c:147
+#, c-format
 msgid ""
 "Usage: %s [options]\n"
 "\n"
@@ -935,87 +1607,90 @@ msgid ""
 "            0: Debug  1: Quiet  2: Normal 3: Warnings 4: Fatal\n"
 "   -V       Print the version of the setup program and exit\n"
 msgstr ""
-"Использование: %s [параметры]\n"
+"п≤я│п©п╬п╩я▄п╥п╬п╡п╟п╫п╦п╣: %s [п©п╟я─п╟п╪п╣я┌я─я▀]\n"
 "\n"
-"Параметрами могут быть один или несколько ключей:\n"
-"   -b путь  Set the binary path to <path>\n"
-"   -h       Вывести этот экран со справкой\n"
-"   -i путь  Установть путь установки в <путь>\n"
-"   -c cwd   Использовать альтернативный текущий каталог для установки\n"
-"   -f файл  Использовать альтернативный файл XML (по умолчанию %s)\n"
-"   -n       Включить текстовый режим интерфейса\n"
-"   -o opt   Вклютить параметр \"opt\" из файл XML. Также включается\n"
-"            интеракивная операция. Может использоваться несколько раз.\n"
-"   -r root  Установить корневой каталог для распаковки файлов RPM (по "
-"умолчанию /)\n"
-"   -v n     Установить уровень вывода n. Доступные значения :\n"
-"            0: Отладочный  1: Тихий  2: Нормальный 3: Предупреждения 4: "
-"Фатальные ошибки\n"
-"   -V       Вывести версию программы установки и выйти\n"
+"п°п╬п╤п╫п╬ я┐п╨п╟п╥п╟я┌я▄ п╬п╢п╦п╫ п╦п╩п╦ п╫п╣я│п╨п╬п╩я▄п╨п╬ п©п╟я─п╟п╪п╣я┌я─п╬п╡:\n"
+"   -b п©я┐я┌я▄    пёп╨п╟п╥п╟я┌я▄ п©я┐я┌я▄ п╢п╩я▐ п╦я│п©п╬п╩п╫я▐п╣п╪я▀я┘ я└п╟п╧п╩п╬п╡\n"
+"   -h         п÷п╬п╨п╟п╥п╟я┌я▄ я█я┌я┐ я│п©я─п╟п╡п╨я┐\n"
+"   -i п©я┐я┌я▄    пёп╨п╟п╥п╟я┌я▄ п©я┐я┌я▄ я┐я│я┌п╟п╫п╬п╡п╨п╦\n"
+"   -c п╨п╟я┌п╟п╩п╬пЁ п≤я│п©п╬п╩я▄п╥п╬п╡п╟я┌я▄ п╢я─я┐пЁп╬п╧ я─п╟п╠п╬я┤п╦п╧ п╨п╟я┌п╟п╩п╬пЁ п╢п╩я▐ я┐я│я┌п╟п╫п╬п╡п╨п╦\n"
+"   -f я└п╟п╧п╩    п≤я│п©п╬п╩я▄п╥п╬п╡п╟я┌я▄ п╢я─я┐пЁп╬п╧ XML-я└п╟п╧п╩ (п©п╬ я┐п╪п╬п╩я┤п╟п╫п╦я▌: %s)\n"
+"   -n         п≤я│п©п╬п╩я▄п╥п╬п╡п╟я┌я▄ я┌п╬п╩я▄п╨п╬ я┌п╣п╨я│я┌п╬п╡я▀п╧ п╦п╫я┌п╣я─я└п╣п╧я│\n"
+"   -o п╬п©я├п╦я▐   п▓п╨п╩я▌я┤п╦я┌я▄ я┐п╨п╟п╥п╟п╫п╫я┐я▌ п╬п©я├п╦я▌ п╦п╥ XML-я└п╟п╧п╩п╟ п╦ я┐я│я┌п╟п╫п╬п╡п╦я┌я▄ п©я─п╬п╢я┐п╨я┌\n"
+"              п╠п╣п╥ п╥п╟п©я─п╬я│п╬п╡. п╜я┌п╬я┌ п©п╟я─п╟п╪п╣я┌я─ п╪п╬п╤п╫п╬ я┐п╨п╟п╥п╟я┌я▄ п╫п╣я│п╨п╬п╩я▄п╨п╬ я─п╟п╥.\n"
+"   -p п©я─п╣я└п╦п╨я│ п≤я│п©п╬п╩я▄п╥п╬п╡п╟я┌я▄ я┐п╨п╟п╥п╟п╫п╫я▀п╧ п©я─п╣я└п╦п╨я│ п©я┐я┌п╦ п╫п╟ я┐я│я┌п╟п╫п╬п╡п╬я┤п╫п╬п╪ п╫п╬я│п╦я┌п╣п╩п╣\n"
+"   -v n       пёя│я┌п╟п╫п╬п╡п╦я┌я▄ я┐я─п╬п╡п╣п╫я▄ п©п╬п╢я─п╬п╠п╫п╬я│я┌п╦ п╡я▀п╡п╬п╢п╟. п■п╬п©я┐я│я┌п╦п╪я▀п╣ п╥п╫п╟я┤п╣п╫п╦я▐:\n"
+"              0: п·я┌п╩п╟п╢п╨п╟  1: п╒п╦я┘п╦п╧ я─п╣п╤п╦п╪  2: п·п╠я▀я┤п╫я▀п╧  3: п÷я─п╣п╢я┐п©я─п╣п╤п╢п╣п╫п╦я▐  4: "
+"п я─п╦я┌п╦я┤п╣я│п╨п╦п╣ п╬я┬п╦п╠п╨п╦\n"
+"   -V         п÷п╬п╨п╟п╥п╟я┌я▄ п╡п╣я─я│п╦я▌ я┐я│я┌п╟п╫п╬п╡я┴п╦п╨п╟ п╦ п╡я▀п╧я┌п╦\n"
 
 # main.c:271
-#: main.c:220
+#: main.c:244
+#, c-format
 msgid "Out of range value, setting verbosity level to normal.\n"
 msgstr ""
-"Значение не соответствует допустимому диапазону, уровень нормальный уровень "
-"вывода.\n"
+"п≈п╫п╟я┤п╣п╫п╦п╣ п╫п╣ я│п╬п╬я┌п╡п╣я┌я│я┌п╡я┐п╣я┌ п╢п╬п©я┐я│я┌п╦п╪п╬п╪я┐ п╢п╦п╟п©п╟п╥п╬п╫я┐, я┐я─п╬п╡п╣п╫я▄ п╫п╬я─п╪п╟п╩я▄п╫я▀п╧ я┐я─п╬п╡п╣п╫я▄ "
+"п╡я▀п╡п╬п╢п╟.\n"
 
 # main.c:314
-#: main.c:270
+#: main.c:305
 #, c-format
 msgid "Couldn't load '%s'\n"
-msgstr "Невозможно загрузить '%s'\n"
+msgstr "п²п╣п╡п╬п╥п╪п╬п╤п╫п╬ п╥п╟пЁя─я┐п╥п╦я┌я▄ '%s'\n"
 
 # main.c:327
-#: main.c:281
+#: main.c:316
 msgid "No UI drivers available\n"
-msgstr "Нет доступных драйверов UI\n"
+msgstr "п²п╣я┌ п╢п╬я│я┌я┐п©п╫я▀я┘ п╢я─п╟п╧п╡п╣я─п╬п╡ UI\n"
 
 # main.c:376
-#: main.c:304
+#: main.c:339
 msgid ""
 "The 'cdromfile' attribute is now mandatory when using the 'cdrom' attribute."
-msgstr "Атрибут 'cdromfile' обязателен при использовании атрибута 'cdrom'"
+msgstr "п░я┌я─п╦п╠я┐я┌ 'cdromfile' п╬п╠я▐п╥п╟я┌п╣п╩п╣п╫ п©я─п╦ п╦я│п©п╬п╩я▄п╥п╬п╡п╟п╫п╦п╦ п╟я┌я─п╦п╠я┐я┌п╟ 'cdrom'"
 
-#: main.c:316
+#: main.c:354
 msgid ""
 "Unable to determine the current directory.\n"
 "Please check the permissions of the parent directories.\n"
 msgstr ""
+"п²п╣ я┐п╢п╟п╩п╬я│я▄ п╬п©я─п╣п╢п╣п╩п╦я┌я▄ я┌п╣п╨я┐я┴п╦п╧ я─п╟п╠п╬я┤п╦п╧ п╨п╟я┌п╟п╩п╬пЁ.\n"
+"п÷я─п╬п╡п╣я─я▄я┌п╣ п©я─п╟п╡п╟ п╢п╬я│я┌я┐п©п╟ п╨ я─п╬п╢п╦я┌п╣п╩я▄я│п╨п╦п╪ п╨п╟я┌п╟п╩п╬пЁп╟п╪.\n"
 
-#: main.c:330
+#: main.c:368
 msgid "You need to run this installer as the super-user.\n"
-msgstr ""
+msgstr "п≈п╟п©я┐я│я┌п╦я┌п╣ я┐я│я┌п╟п╫п╬п╡я┴п╦п╨ п╬я┌ п╦п╪п╣п╫п╦ я│я┐п©п╣я─п©п╬п╩я▄п╥п╬п╡п╟я┌п╣п╩я▐.\n"
 
 # main.c:356
-#: main.c:337
-#, fuzzy
+#: main.c:375
 msgid ""
 "\n"
 "This product is already installed.\n"
 "Uninstall it before running this program again.\n"
 msgstr ""
 "\n"
-"Компонент %s уже установлен.\n"
-"Сначала удалите его.\n"
+"п╜я┌п╬я┌ п©я─п╬п╢я┐п╨я┌ я┐п╤п╣ я┐я│я┌п╟п╫п╬п╡п╩п╣п╫.\n"
+"пёп╢п╟п╩п╦я┌п╣ п╣пЁп╬, п©я─п╣п╤п╢п╣ я┤п╣п╪ я│п╫п╬п╡п╟ п╥п╟п©я┐я│п╨п╟я┌я▄ я┐я│я┌п╟п╫п╬п╡я┴п╦п╨.\n"
 
-#: main.c:342
+#: main.c:380
 msgid ""
 "Warning: You are about to reinstall\n"
-"on top of an existing installation.\n"
+"on top of an existing installation. Continue?\n"
 msgstr ""
+"п▓п╫п╦п╪п╟п╫п╦п╣: п©я─п╬п╢я┐п╨я┌ п╠я┐п╢п╣я┌ я┐я│я┌п╟п╫п╬п╡п╩п╣п╫ п©п╬п╡п╣я─я┘ я│я┐я┴п╣я│я┌п╡я┐я▌я┴п╣п╧ я┐я│я┌п╟п╫п╬п╡п╨п╦.\n"
+"п÷я─п╬п╢п╬п╩п╤п╦я┌я▄?\n"
 
 # main.c:352
-#: main.c:354
+#: main.c:392
 msgid ""
 "\n"
 "Illegal installation: do not mix components with a component installation.\n"
 msgstr ""
 "\n"
-"Недопустимая установка: не смешивайте компоненты с установкой компонент\n"
+"п²п╣п╢п╬п©я┐я│я┌п╦п╪п╟я▐ я┐я│я┌п╟п╫п╬п╡п╨п╟: п╫п╣ я│п╪п╣я┬п╦п╡п╟п╧я┌п╣ п╨п╬п╪п©п╬п╫п╣п╫я┌я▀ я│ я┐я│я┌п╟п╫п╬п╡п╨п╬п╧ п╨п╬п╪п©п╬п╫п╣п╫я┌\n"
 
 # main.c:356
-#: main.c:359
+#: main.c:397
 #, c-format
 msgid ""
 "\n"
@@ -1023,11 +1698,11 @@ msgid ""
 "Please uninstall it beforehand.\n"
 msgstr ""
 "\n"
-"Компонент %s уже установлен.\n"
-"Сначала удалите его.\n"
+"п п╬п╪п©п╬п╫п╣п╫я┌ %s я┐п╤п╣ я┐я│я┌п╟п╫п╬п╡п╩п╣п╫.\n"
+"п║п╫п╟я┤п╟п╩п╟ я┐п╢п╟п╩п╦я┌п╣ п╣пЁп╬.\n"
 
 # main.c:363
-#: main.c:367
+#: main.c:405
 #, c-format
 msgid ""
 "\n"
@@ -1035,717 +1710,228 @@ msgid ""
 "installation program.\n"
 msgstr ""
 "\n"
-"Вы должны установить %s перед установкой\n"
-"этой программы.\n"
+"п▓я▀ п╢п╬п╩п╤п╫я▀ я┐я│я┌п╟п╫п╬п╡п╦я┌я▄ %s п©п╣я─п╣п╢ я┐я│я┌п╟п╫п╬п╡п╨п╬п╧\n"
+"я█я┌п╬п╧ п©я─п╬пЁя─п╟п╪п╪я▀.\n"
 
 # main.c:392
-#: main.c:394
+#: main.c:440
 #, c-format
 msgid "Could not enable option: %s"
-msgstr "Невозможно включить параметр %s"
+msgstr "п²п╣п╡п╬п╥п╪п╬п╤п╫п╬ п╡п╨п╩я▌я┤п╦я┌я▄ п©п╟я─п╟п╪п╣я┌я─ %s"
 
-# console_ui.c:31
-#: console_ui.c:37
-msgid "Y"
-msgstr "Д"
+#: main.c:465
+msgid "No installation path was specified. Aborting."
+msgstr "п÷я┐я┌я▄ я┐я│я┌п╟п╫п╬п╡п╨п╦ п╫п╣ я┐п╨п╟п╥п╟п╫. пёя│я┌п╟п╫п╬п╡п╨п╟ п©я─п╣я─п╡п╟п╫п╟."
 
-# console_ui.c:32
-#: console_ui.c:38
-msgid "N"
-msgstr "Н"
+# network.c:142
+#: network.c:156
+msgid "Out of memory, no network check"
+msgstr "п²п╣я┘п╡п╟я┌п╨п╟ п©п╟п╪я▐я┌п╦, п©я─п╬п╡п╣я─п╨п╟ п╫п╟п╩п╦я┤п╦я▐ я│п╣я┌п╦ п╫п╣ п©я─п╬п╦п╥п╡п╬п╢п╦я┌я│я▐"
 
-# console_ui.c:59
-#: console_ui.c:62
-msgid "Y/n"
-msgstr "Д/н"
+# network.c:152
+#: network.c:166
+msgid "Unable to create pipe, no network check"
+msgstr "п²п╣п╡п╬п╥п╪п╬п╤п╫п╬ я│п╬п╥п╢п╟я┌я▄ п©п╬я┌п╬п╨, п©я─п╬п╡п╣я─п╨п╟ п╫п╟п╩п╦я┤п╦я▐ я│п╣я┌п╦ п╫п╣ п©я─п╬п╦п╥п╡п╬п╢п╦я┌я│я▐"
 
-# console_ui.c:62
-#: console_ui.c:65
-msgid "N/y"
-msgstr "Н/д"
+# network.c:166
+#: network.c:180
+msgid "Fork failed, no network check"
+msgstr "п·я┬п╦п╠п╨п╟ fork. п÷я─п╬п╡п╣я─п╨п╟ п╫п╟п╩п╦я┤п╦я▐ я│п╣я┌п╦ п╫п╣ п©я─п╬п╦п╥п╡п╬п╢п╦я┌я│я▐"
 
-# console_ui.c:65
-#: console_ui.c:68
-#, c-format
-msgid "%s [Press Enter] "
-msgstr "%s [Нажмите 'Ввод'] "
-
-# console_ui.c:69 console_ui.c:95
-#: console_ui.c:72 console_ui.c:98
-#, c-format
-msgid "Warning, invalid yesno prompt: %s\n"
-msgstr "Предупреждение: непрвальный ввод данет: %s\n"
-
-# console_ui.c:89
-#: console_ui.c:92
-msgid "Y/n/?"
-msgstr "Д/н/?"
-
-# console_ui.c:92
-#: console_ui.c:95
-msgid "N/y/?"
-msgstr "Н/д/?"
-
-# console_ui.c:112
-#: console_ui.c:115
-msgid "Continue?"
-msgstr "Продолжить?"
-
-# console_ui.c:168
-#: console_ui.c:166
-#, fuzzy, c-format
-msgid "Previously installed option '%s' will be installed.\n"
-msgstr "Параметр '%s' будет удалён\n"
-
-# console_ui.c:168
-#: console_ui.c:196
-#, c-format
-msgid "'%s' option will be installed.\n"
-msgstr "Параметр '%s' будет удалён\n"
-
-#: console_ui.c:201
-#, c-format
-msgid "'%s' :\n"
-msgstr ""
-
-#: console_ui.c:209
-#, c-format
-msgid "Option: '%s' ?"
-msgstr ""
-
-# console_ui.c:260
-#: console_ui.c:230 console_ui.c:319 dialog_ui.c:100 dialog_ui.c:265
-msgid "Do you agree with the license?"
-msgstr "Вы согласны с положениями лицензионного соглашения?"
-
-# console_ui.c:217
-#: console_ui.c:275
-msgid "No help available\n"
-msgstr "Справка отсутствует\n"
-
-# console_ui.c:235
-#: console_ui.c:293
-#, c-format
-msgid "----====== %s / %s installation program ======----\n"
-msgstr "----====== %s / %s программа установки ======----\n"
-
-# console_ui.c:238
-#: console_ui.c:296
-#, c-format
-msgid "----====== %s installation program ======----\n"
-msgstr "----====== %s программа установки ======----\n"
-
-# console_ui.c:241
-#: console_ui.c:299
-#, c-format
-msgid "You are running a %s machine with %s\n"
-msgstr "У вас запущена %s машина с %s\n"
-
-# console_ui.c:242
-#: console_ui.c:300
-msgid "Hit Control-C anytime to cancel this installation program.\n"
-msgstr "Вы можете нажать ^C для прекращения установки\n"
-
-# console_ui.c:277
-#: console_ui.c:338 dialog_ui.c:126
-#, c-format
-msgid "Would you like to read the %s file ?"
-msgstr "Вы хотите прочитать файл %s?"
-
-# console_ui.c:328
-#: console_ui.c:385
-msgid "Please choose the product to install, or Q to quit. "
-msgstr "Выберите программу для установки или Q для выхода"
-
-# console_ui.c:358
-#: console_ui.c:415 dialog_ui.c:372
-msgid "Please enter the installation path"
-msgstr "Введите путь установки"
-
-# console_ui.c:363
-#: console_ui.c:420
-#, c-format
-msgid "Install path set to: %s\n"
-msgstr "Путь установки: %s\n"
-
-# console_ui.c:378 console_ui.c:432
-#: console_ui.c:435 console_ui.c:499 dialog_ui.c:392 dialog_ui.c:464
-#, c-format
-msgid "No write permission to %s\n"
-msgstr "Нет права на запись в %s\n"
-
-# console_ui.c:404
-#: console_ui.c:461 dialog_ui.c:419
-msgid "Do you want to install symbolic links to a directory in your path?"
-msgstr "Вы хотите установить символьную связь на каталог в вашем пути?"
-
-# console_ui.c:411
-#: console_ui.c:468 dialog_ui.c:428
-msgid "Please enter the path in which to create the symbolic links"
-msgstr "Введите путь, в котором нужно создать символьную связь"
-
-# console_ui.c:416
-#: console_ui.c:473
-#, c-format
-msgid "Binary path set to: %s\n"
-msgstr "Путь файлов программы установлен в: %s\n"
-
-# console_ui.c:411
-#: console_ui.c:480
-#, fuzzy
-msgid "Please enter the path in which to install manual pages for this product"
-msgstr "Введите путь, в котором нужно создать символьную связь"
-
-# console_ui.c:423
-#: console_ui.c:490 dialog_ui.c:455
-msgid ""
-"Binary path must be different than the install path.\n"
-"The binary path must be an existing directory.\n"
-msgstr ""
-"Путь программных файлов и установки должны быть различны.\n"
-"Путь программных файлов должен быть существующим каталогом.\n"
-
-# console_ui.c:457
-#: console_ui.c:529
+# plugins.c:96
+#: plugins.c:96
 #, c-format
 msgid ""
-"\n"
-"%s component\n"
+"Registered plugins :\n"
 "\n"
 msgstr ""
+"пёя│я┌п╟п╫п╬п╡п╩п╣п╫п╫я▀п╣ п╪п╬п╢я┐п╩п╦:\n"
 "\n"
-"%s компонент\n"
-"\n"
 
-# console_ui.c:469
-#: console_ui.c:541 dialog_ui.c:493
-#, fuzzy
-msgid "Do you want to install startup menu entries?"
-msgstr "Вы хотите установить элементы рабочего стола?"
-
-# console_ui.c:475
-#: console_ui.c:547
-#, c-format
-msgid "Installing to %s\n"
-msgstr "Установка в %s\n"
-
-# console_ui.c:476
-#: console_ui.c:548
-#, c-format
-msgid "%d MB available, %d MB will be installed.\n"
-msgstr "%d Мб свободно, %d Мб будет установлено.\n"
-
-# console_ui.c:479
-#: console_ui.c:551
-msgid "Continue install?"
-msgstr "Продолжить установку?"
-
-#: console_ui.c:567 dialog_ui.c:520
-msgid "Please enter your CD key"
-msgstr ""
-
-#: console_ui.c:575 gtk_ui.c:515
-msgid "ERROR: vcdk is missing. Installation aborted.\n"
-msgstr ""
-
-#: console_ui.c:582 dialog_ui.c:540
-msgid ""
-"CD key is invalid!\n"
-"Please double check your key and enter it again.\n"
-msgstr ""
-
-# console_ui.c:493
-#: console_ui.c:606
-#, c-format
-msgid "Installing %s ...\n"
-msgstr "Установка %s ...\n"
-
-# console_ui.c:508
-#: console_ui.c:627 dialog_ui.c:601
-msgid "Install aborted - cleaning up files\n"
-msgstr "Установка прервана - удаление временных файлов\n"
-
-# console_ui.c:516
-#: console_ui.c:635
-msgid "Installation complete.\n"
-msgstr "Установка завершена.\n"
-
-# console_ui.c:520
-#: console_ui.c:639
-#, fuzzy
-msgid "Would you like to start now?"
-msgstr "Вы хотите запустить игру?"
-
-# console_ui.c:525
-#: console_ui.c:644
-#, fuzzy
-msgid ""
-"If you run the program as root, the preferences will be stored in\n"
-"root's home directory instead of your user account directory."
-msgstr ""
-"Если вы запустите игру с правами root, установки будут сохранены в\n"
-"домашний каталог root, а не в ваш каталог пользователя."
-
-#: console_ui.c:660
-msgid "Do you want to proceed with Recommended installation?"
-msgstr ""
-
-#: console_ui.c:665 dialog_ui.c:663 gtk_ui.c:318 carbon_ui.c:433
+# plugins.c:98
+#: plugins.c:98
 #, c-format
 msgid ""
-"Installation could not proceed due to the following error:\n"
-"%s\n"
-"Try to use 'Expert' installation."
+"\tDescription: %s\n"
+"\tVersion: %s\n"
+"\tAuthor: %s\n"
 msgstr ""
+"\tп·п©п╦я│п╟п╫п╦п╣: %s\n"
+"\tп▓п╣я─я│п╦я▐: %s\n"
+"\tп░п╡я┌п╬я─: %s\n"
 
-# console_ui.c:541
-#: console_ui.c:677
+# plugins.c:101
+#: plugins.c:101
 #, c-format
-msgid "Thank you for installing %s!\n"
-msgstr "Спасибо за установку %s!\n"
+msgid "\tPlugin is statically linked.\n"
+msgstr "\tп°п╬п╢я┐п╩я▄ я│я┌п╟я┌п╦я┤п╣я│п╨п╦ я│п╡я▐п╥п╟п╫.\n"
 
-# console_ui.c:546
-#: console_ui.c:682
-msgid "Please visit our website for updates and support.\n"
-msgstr ""
-"Посетите наш сайт в интернете для получения обновлений и технической "
-"поддержки\n"
-
-# console_ui.c:551
-#: console_ui.c:687
-msgid "Would you like to launch web browser?"
-msgstr ""
-
-# console_ui.c:562
-#: console_ui.c:698
-msgid "Standard input is not a terminal!\n"
-msgstr "Стандартный ввод не терминал!\n"
-
-#: dialog_ui.c:46 gtk_ui.c:892
-msgid "Message"
-msgstr ""
-
-#: dialog_ui.c:49
-msgid "Request"
-msgstr ""
-
-# image/setup.data/setup.glade:293
-#: dialog_ui.c:64
-#, fuzzy, c-format
-msgid "%s / %s Installation"
-msgstr "Параметры установки"
-
-# image/setup.data/setup.glade:293
-#: dialog_ui.c:68
-#, fuzzy, c-format
-msgid "%s Installation"
-msgstr "Параметры установки"
-
-# console_ui.c:241
-#: dialog_ui.c:77
+# plugins.c:103
+#: plugins.c:103
 #, c-format
-msgid ""
-"You are running a %s machine with %s\n"
-"Operating System: %s %d.%d"
-msgstr ""
+msgid "\tRecognizes %d extensions: "
+msgstr "\tп═п╟я│п©п╬п╥п╫п╟п╫я▀ %d я─п╟я│я┬п╦я─п╣п╫п╦я▐: "
 
-#: dialog_ui.c:128
-msgid "README"
-msgstr ""
-
-# console_ui.c:457
-#: dialog_ui.c:215
-msgid "Component"
-msgstr ""
-
-# console_ui.c:475
-#: dialog_ui.c:234 dialog_ui.c:653
+# plugins.c:148
+#: plugins.c:153
 #, c-format
-msgid "Installation of %s"
-msgstr ""
+msgid "Error registering %s plugin: %s\n"
+msgstr "п·я┬п╦п╠п╨п╟ я─п╣пЁп╦я│я┌я─п╟я├п╦п╦ п╪п╬п╢я┐п╩я▐ %s: %s\n"
 
-# main.c:356
-#: dialog_ui.c:236
-msgid ""
-"No installation options detected. If the product is already\n"
-"installed, please uninstall it before reinstalling.\n"
-msgstr ""
-
-#: dialog_ui.c:271
+# plugins.c:151
+#: plugins.c:156
 #, c-format
-msgid "Option-specific EULA not found for '%s', can't toggle\n"
-msgstr ""
+msgid "Error initializing %s plugin"
+msgstr "п·я┬п╦п╠п╨п╟ п╦п╫п╦я├п╦п╟п╩п╦п╥п╟я├п╦п╦ п╪п╬п╢я┐п╩я▐ %s"
 
-#: dialog_ui.c:272 dialog_ui.c:455 dialog_ui.c:467 dialog_ui.c:533
-msgid "Error"
-msgstr ""
-
-#: dialog_ui.c:290
+# plugins.c:155
+#: plugins.c:160
 #, c-format
-msgid "Option '%s' is required.\n"
-msgstr ""
-
-# console_ui.c:457
-#: dialog_ui.c:306
-#, c-format
-msgid "Component: %s"
-msgstr ""
-
-#: dialog_ui.c:355
-msgid "Choose the product"
-msgstr ""
-
-# console_ui.c:328
-#: dialog_ui.c:356
-#, fuzzy
-msgid "Please pick a product to install"
-msgstr "Выберите программу для установки или Q для выхода"
-
-# image/setup.data/setup.glade:126
-#: dialog_ui.c:371
-#, fuzzy
-msgid "Installation path"
-msgstr "Путь установки:"
-
-# console_ui.c:378 console_ui.c:432
-#: dialog_ui.c:393
-msgid "Failed permissions"
-msgstr ""
-
-# image/setup.data/setup.glade:193
-#: dialog_ui.c:427
-#, fuzzy
-msgid "Symlink path"
-msgstr "Путь связи:"
-
-# image/setup.data/setup.glade:126
-#: dialog_ui.c:443
-#, fuzzy
-msgid "Manual path"
-msgstr "Путь установки:"
-
-# console_ui.c:411
-#: dialog_ui.c:444
-#, fuzzy
-msgid "Please enter the path in which to install manual pages"
-msgstr "Введите путь, в котором нужно создать символьную связь"
-
-# console_ui.c:328
-#: dialog_ui.c:480
-#, fuzzy
-msgid "Please choose the components to install"
-msgstr "Выберите программу для установки или Q для выхода"
-
-# console_ui.c:328
-#: dialog_ui.c:482
-#, fuzzy
-msgid "Please choose the options to install"
-msgstr "Выберите программу для установки или Q для выхода"
-
-#: dialog_ui.c:519
-msgid "CD Key"
-msgstr ""
-
-# image/setup.data/setup.glade:1183
-#: dialog_ui.c:533
-msgid "vcdk is missing. Installation aborted.\n"
-msgstr ""
-
-#: dialog_ui.c:540 gtk_ui.c:515 gtk_ui.c:524
-msgid "Problem"
-msgstr ""
-
-# console_ui.c:493
-#: dialog_ui.c:583
-#, fuzzy, c-format
-msgid "Installing %s ..."
-msgstr "Установка %s ..."
-
-# console_ui.c:493
-#: dialog_ui.c:584 dialog_ui.c:586
-msgid "Installing..."
-msgstr ""
-
-#: dialog_ui.c:601
-msgid "Aborting"
-msgstr ""
-
-# console_ui.c:520
-#: dialog_ui.c:611
-#, fuzzy
-msgid "Would you like to launch a Web browser?"
-msgstr "Вы хотите запустить игру?"
-
-#: dialog_ui.c:625
-msgid ""
-"Installation complete!\n"
-"Would you like to start now?"
-msgstr ""
-
-#: dialog_ui.c:629
-msgid "Finished"
-msgstr ""
-
-# console_ui.c:516
-#: dialog_ui.c:629
-msgid "Installation complete!"
-msgstr ""
-
-#: dialog_ui.c:638
-msgid "Express installation using detected defaults"
-msgstr ""
-
-# console_ui.c:358
-#: dialog_ui.c:639
-#, fuzzy
-msgid "Full control over the installation parameters"
-msgstr "Введите путь установки"
-
-# gtk_ui.c:527
-#: dialog_ui.c:654
-#, fuzzy
-msgid "Please select the class of installation"
-msgstr "Выберите по крайней мере одну опцию"
-
-# gtk_ui.c:408
-#: gtk_ui.c:447
-msgid ""
-"If you run this as root, the preferences will be stored in\n"
-"root's home directory instead of your user account directory."
-msgstr ""
-"Если вы запустите программу с правами root, установки будут сохранены в\n"
-"домашний каталог root, а не в ваш каталог пользователя."
-
-#: gtk_ui.c:481 carbon_ui.c:479
-msgid ""
-"Are you sure you want to abort\n"
-"this installation?"
-msgstr ""
-
-#: gtk_ui.c:524
-msgid ""
-"CD key is invalid!\n"
-"Please double check your key and enter it again."
-msgstr ""
-
-# gtk_ui.c:522
-#: gtk_ui.c:578
-msgid "Please respond to the license dialog"
-msgstr "Пожалуйста ответьте на лицензионное соглашение"
-
-# gtk_ui.c:550
-#: gtk_ui.c:598 carbon_ui.c:300
-msgid "Ready to install!"
-msgstr "Готов к установке!"
-
-# gtk_ui.c:563 gtk_ui.c:577
-#: gtk_ui.c:611 gtk_ui.c:625 carbon_ui.c:322 carbon_ui.c:334
-#, c-format
-msgid "%d MB"
-msgstr "%d Мб"
-
-#: gtk_ui.c:863 xsu.c:453
-msgid "OK"
-msgstr ""
-
-# gtk_ui.c:730
-#: gtk_ui.c:876
-msgid "Yes"
-msgstr "Да"
-
-# gtk_ui.c:731
-#: gtk_ui.c:877
-msgid "No"
-msgstr "Нет"
-
-#: gtk_ui.c:888
-msgid "Choice Requested"
-msgstr ""
-
-# gtk_ui.c:806
-#: gtk_ui.c:1002
-msgid "Fatal error:  out of memory\n"
-msgstr "Фатальная ошибка:  нехватка памяти\n"
-
-# gtk_ui.c:813
-#: gtk_ui.c:1009
-#, c-format
-msgid "Error: maximum of %d install_path entries exceeded\n"
-msgstr "Ошибка: максимальное число %d  вхождений install_path превышено\n"
-
-# gtk_ui.c:931
-#: gtk_ui.c:1195
-msgid "Warning: No writable targets in path... You may want to be root.\n"
-msgstr "Предупреждение: Возможно у вас должны быть права root\n"
-
-# gtk_ui.c:950
-#: gtk_ui.c:1215
-msgid "Unable to locate 'setup_menuitems_checkbox'"
-msgstr "Невозможно найти 'setup_menuitems_checkbox'"
-
-# gtk_ui.c:1163
-#: gtk_ui.c:1484 carbon_ui.c:889
-#, c-format
-msgid "%s / %s Setup"
-msgstr "%s / %s Установка"
-
-# gtk_ui.c:1165
-#: gtk_ui.c:1486 carbon_ui.c:891
-#, c-format
-msgid "%s Setup"
-msgstr "%s Установка"
-
-# gtk_ui.c:1422
-#: gtk_ui.c:1823
-#, c-format
-msgid "Unable to open %s, aborting!\n"
-msgstr "Невозможно открыть %s, прекращение работы!\n"
-
-# gtk_ui.c:1477
-#: gtk_ui.c:1878 carbon_ui.c:1405
-#, c-format
-msgid "Type '%s' to start the program"
-msgstr "Наберите '%s' для запуска программы"
-
-#: carbon_ui.c:359
-msgid "Can't find default install dir!"
-msgstr ""
-
-#: carbon_ui.c:688
-msgid "CD keys do not match.  Please try again."
-msgstr ""
-
-#: carbon_ui.c:690
-msgid "Please specify a CD key!"
-msgstr ""
-
-#: carbon_ui.c:708
-msgid "CD key is invalid!"
-msgstr ""
-
-# console_ui.c:493
-#: carbon_ui.c:1226
-#, c-format
-msgid "Installing %s : %d%%"
-msgstr ""
-
-#: xsu.c:336
-msgid "Login Prompt"
-msgstr ""
-
-#: xsu.c:348
-msgid "Username : "
-msgstr ""
-
-#: xsu.c:360
-msgid "Command :"
-msgstr ""
-
-#: xsu.c:375
-msgid ""
-"This installer requires root privileges.\n"
-"Please enter the correct password for it\n"
-"below and press [Return] or click OK."
-msgstr ""
-
-#: xsu.c:410
-msgid "Type the password here"
-msgstr ""
-
-#: xsu.c:423
-msgid "Type the username here"
-msgstr ""
-
-#: xsu.c:435
-msgid "Type the command here"
-msgstr ""
-
-#: xsu.c:458
-msgid "Press this button when finished"
-msgstr ""
-
-#: xsu.c:464
-msgid "Press this button to Cancel"
-msgstr ""
-
-#: xsu.c:466
-msgid "Password :"
-msgstr ""
+msgid "Error trying to load %s plugin: %s\n"
+msgstr "п·я┬п╦п╠п╨п╟ п╥п╟пЁя─я┐п╥п╨п╦ п╪п╬п╢я┐п╩я▐ %s: %s\n"
 
 # plugins/outrage.c:73
 #: plugins/cpio.c:113
 msgid "Invalid CPIO header\n"
-msgstr ""
+msgstr "п²п╣п╢п╬п©я┐я│я┌п╦п╪я▀п╧ п╥п╟пЁп╬п╩п╬п╡п╬п╨ CPIO\n"
 
 # plugins/cpio.c:155
 #: plugins/cpio.c:173
 #, c-format
 msgid "Bad checksum for file '%s'"
-msgstr "Неверная контрольная сумма файла '%s'"
+msgstr "п²п╣п╡п╣я─п╫п╟я▐ п╨п╬п╫я┌я─п╬п╩я▄п╫п╟я▐ я│я┐п╪п╪п╟ я└п╟п╧п╩п╟ '%s'"
 
 # plugins/rpm.c:64 plugins/rpm.c:97
 #: plugins/rpm.c:73 plugins/rpm.c:107
 #, c-format
 msgid "RPM error: %s"
-msgstr "ошибка RPM: %s"
+msgstr "п╬я┬п╦п╠п╨п╟ RPM: %s"
 
 # plugins/rpm.c:145 plugins/rpm.c:151
 #: plugins/rpm.c:156 plugins/rpm.c:163
 #, c-format
 msgid "Unable to install RPM file: '%s'"
-msgstr "Невозможно установить RPM %s"
+msgstr "п²п╣п╡п╬п╥п╪п╬п╤п╫п╬ я┐я│я┌п╟п╫п╬п╡п╦я┌я▄ RPM %s"
 
 # plugins/tar.c:105
 #: plugins/tar.c:138
 #, c-format
 msgid "Tar: '%s' is unknown file type: %c"
-msgstr "Tar: '%s' неизвестный тип файла: %c"
+msgstr "Tar: '%s' п╫п╣п╦п╥п╡п╣я│я┌п╫я▀п╧ я┌п╦п© я└п╟п╧п╩п╟: %c"
 
 #: plugins/tar.c:140
 msgid "Unexpected data in installation file!"
-msgstr ""
+msgstr "п²п╣п╬п╤п╦п╢п╟п╫п╫я▀п╣ п╢п╟п╫п╫я▀п╣ п╡ я└п╟п╧п╩п╣ я┐я│я┌п╟п╫п╬п╡п╨п╦."
+
+#~ msgid "Login Prompt"
+#~ msgstr "п▓я┘п╬п╢ п╡ я│п╦я│я┌п╣п╪я┐"
+
+#~ msgid "Username : "
+#~ msgstr "п≤п╪я▐ п©п╬п╩я▄п╥п╬п╡п╟я┌п╣п╩я▐: "
+
+#~ msgid "Command :"
+#~ msgstr "п п╬п╪п╟п╫п╢п╟:"
+
+#~ msgid ""
+#~ "This installer requires root privileges.\n"
+#~ "Please enter the correct password for it\n"
+#~ "below and press [Return] or click OK."
+#~ msgstr ""
+#~ "п■п╩я▐ я┐я│я┌п╟п╫п╬п╡п╨п╦ п╫я┐п╤п╫я▀ п©я─п╟п╡п╟ я│я┐п©п╣я─п©п╬п╩я▄п╥п╬п╡п╟я┌п╣п╩я▐.\n"
+#~ "п▓п╡п╣п╢п╦я┌п╣ п©п╟я─п╬п╩я▄ п╦ п╫п╟п╤п╪п╦я┌п╣ Enter п╦п╩п╦ п╨п╫п╬п©п╨я┐ б╚п·п б╩."
+
+#~ msgid "Type the password here"
+#~ msgstr "п▓п╡п╣п╢п╦я┌п╣ п©п╟я─п╬п╩я▄"
+
+#~ msgid "Type the username here"
+#~ msgstr "п▓п╡п╣п╢п╦я┌п╣ п╦п╪я▐ п©п╬п╩я▄п╥п╬п╡п╟я┌п╣п╩я▐"
+
+#~ msgid "Type the command here"
+#~ msgstr "п▓п╡п╣п╢п╦я┌п╣ п╨п╬п╪п╟п╫п╢я┐"
+
+#~ msgid "Press this button when finished"
+#~ msgstr "п²п╟п╤п╪п╦я┌п╣ я█я┌я┐ п╨п╫п╬п©п╨я┐, п╨п╬пЁп╢п╟ п╥п╟п╨п╬п╫я┤п╦я┌п╣"
+
+#~ msgid "Press this button to Cancel"
+#~ msgstr "п²п╟п╤п╪п╦я┌п╣ п╢п╩я▐ п╬я┌п╪п╣п╫я▀"
+
+#~ msgid "Password :"
+#~ msgstr "п÷п╟я─п╬п╩я▄:"
+
+# image/setup.data/setup.glade:193
+#~ msgid "Link path:"
+#~ msgstr "п÷я┐я┌я▄ я│п╡я▐п╥п╦:"
+
+# image/setup.data/setup.glade:912 image/setup.data/setup.glade:1148
+# image/setup.data/setup.glade:1394
+#, fuzzy
+#~ msgid "_Exit"
+#~ msgstr "п▓я▀я┘п╬п╢"
+
+# main.c:318
+#, c-format
+#~ msgid "Detected locale is %s"
+#~ msgstr "п═п╟я│п©п╬п╥п╫п╟п╫п╫п╟я▐ п╨п╬п╢п╦я─п╬п╡п╨п╟ %s"
+
+# install.c:833
+#, fuzzy
+#~ msgid "XML: 'require' tag doesn't have a mandatory 'command' attribute"
+#~ msgstr "XML: я┌я█пЁ 'lang' п╫п╣ п╦п╪п╣п╣я┌ п╬п╠я▐п╥п╟я┌п╣п╩я▄п╫п╬пЁп╬ п╟я┌я─п╦п╠я┐я┌п╟ 'lang'"
+
+# copy.c:508
+#~ msgid "Running script"
+#~ msgstr "п▓я▀п©п╬п╩п╫п╣п╫п╦п╣ я│я├п╣п╫п╟я─п╦я▐"
+
+# console_ui.c:241
+#, c-format
+#~ msgid "You are running a %s machine with %s\n"
+#~ msgstr "пё п╡п╟я│ п╥п╟п©я┐я┴п╣п╫п╟ %s п╪п╟я┬п╦п╫п╟ я│ %s\n"
+
+# console_ui.c:242
+#~ msgid "Hit Control-C anytime to cancel this installation program.\n"
+#~ msgstr "п▓я▀ п╪п╬п╤п╣я┌п╣ п╫п╟п╤п╟я┌я▄ ^C п╢п╩я▐ п©я─п╣п╨я─п╟я┴п╣п╫п╦я▐ я┐я│я┌п╟п╫п╬п╡п╨п╦\n"
 
 # copy.c:298 copy.c:346 copy.c:445 copy.c:446 copy.c:449 copy.c:450
 # copy.c:462 copy.c:463 copy.c:466 copy.c:467
 #~ msgid "Unable to find file '%s'"
-#~ msgstr "Невозможно найти файл '%s'"
+#~ msgstr "п²п╣п╡п╬п╥п╪п╬п╤п╫п╬ п╫п╟п╧я┌п╦ я└п╟п╧п╩ '%s'"
 
 # image/setup.data/setup.glade:293
 #~ msgid "Install Options"
-#~ msgstr "Параметры установки"
+#~ msgstr "п÷п╟я─п╟п╪п╣я┌я─я▀ я┐я│я┌п╟п╫п╬п╡п╨п╦"
 
 # console_ui.c:174
 #~ msgid "Install %s?"
-#~ msgstr "Установить %s?"
+#~ msgstr "пёя│я┌п╟п╫п╬п╡п╦я┌я▄ %s?"
 
 # gtk_ui.c:758
 #~ msgid "Setup"
-#~ msgstr "Установка"
+#~ msgstr "пёя│я┌п╟п╫п╬п╡п╨п╟"
 
 # image/setup.data/setup.glade:938
 #~ msgid "Play!"
-#~ msgstr "Играть!"
+#~ msgstr "п≤пЁя─п╟я┌я▄!"
 
 # plugins/outrage.c:66
 #~ msgid "OPKG: Unable to open package file %s"
-#~ msgstr "OPKG: Невозможно открыть файл пакета %s"
+#~ msgstr "OPKG: п²п╣п╡п╬п╥п╪п╬п╤п╫п╬ п╬я┌п╨я─я▀я┌я▄ я└п╟п╧п╩ п©п╟п╨п╣я┌п╟ %s"
 
 # plugins/outrage.c:98
 #~ msgid "OPKG: malloc() failed!"
-#~ msgstr "OPKG: ошибка malloc()!"
+#~ msgstr "OPKG: п╬я┬п╦п╠п╨п╟ malloc()!"
 
 # plugins/outrage.c:116
 #~ msgid "realloc() failed!"
-#~ msgstr "ошибка realloc()!"
+#~ msgstr "п╬я┬п╦п╠п╨п╟ realloc()!"
 
 # plugins/outrage.c:137
 #~ msgid "read() failure accessing file size!"
-#~ msgstr "ошибка read() при определении размера файла!"
+#~ msgstr "п╬я┬п╦п╠п╨п╟ read() п©я─п╦ п╬п©я─п╣п╢п╣п╩п╣п╫п╦п╦ я─п╟п╥п╪п╣я─п╟ я└п╟п╧п╩п╟!"
 
 # plugins/outrage.c:156
 #~ msgid "OPKG: read() failure accessing timestamp!"
-#~ msgstr "OPKG: ошибка read() при определении даты файла!"
+#~ msgstr "OPKG: п╬я┬п╦п╠п╨п╟ read() п©я─п╦ п╬п©я─п╣п╢п╣п╩п╣п╫п╦п╦ п╢п╟я┌я▀ я└п╟п╧п╩п╟!"
 
 # plugins/outrage.c:226
 #~ msgid "read() failed!"
-#~ msgstr "ошибка read()!"
+#~ msgstr "п╬я┬п╦п╠п╨п╟ read()!"

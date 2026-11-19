@@ -1,3 +1,5 @@
+#include <stdint.h>
+#include <errno.h>
 /* TAR plugin for setup */
 /* $Id: tar.c,v 1.14 2005-08-23 00:48:00 megastep Exp $ */
 
@@ -37,6 +39,20 @@ static size_t TarSize(install_info *info, const char *path)
 	return file_size(info, path) - sizeof(tar_record);
 }
 
+static int tar_octal(const char *field, size_t width, unsigned long *value)
+{
+    char digits[13], *start, *end;
+
+    memcpy(digits, field, width);
+    digits[width] = '\0';
+    start = digits + strspn(digits, " ");
+    if (*start < '0' || *start > '7')
+        return 0;
+    errno = 0;
+    *value = strtoul(start, &end, 8);
+    return !errno && end[strspn(end, " ")] == '\0';
+}
+
 /* Extract the file */
 static size_t TarCopy(install_info *info, const char *path, const char *dest, const char *current_option, 
 		      xmlNodePtr node,
@@ -44,12 +60,10 @@ static size_t TarCopy(install_info *info, const char *path, const char *dest, co
 {
     static tar_record zeroes;
     tar_record record;
-    char final[PATH_MAX];
+    char final[PATH_MAX], name[sizeof(record.hdr.prefix) + NAMSIZ + 2];
     stream *input, *output;
-    size_t size, copied;
-    size_t this_size;
-    unsigned int mode, user_mode = 0;
-    int blocks, left, length;
+    size_t size;
+    unsigned int user_mode = 0;
     /* Optional MD5 sum can be specified in the XML file */
     const char *md5 = (char *)xmlGetProp(node, BAD_CAST "md5sum");
     const char *mut = (char *)xmlGetProp(node, BAD_CAST "mutable");
@@ -66,87 +80,85 @@ static size_t TarCopy(install_info *info, const char *path, const char *dest, co
     if ( input == NULL ) {
         return(-1);
     }
-    while ( ! file_eof(info, input) ) {
-        int cur_size;
-        if ( file_read(info, &record, (sizeof record), input)
-                                            != (sizeof record) ) {
+    for (;;) {
+        int bytes = file_read(info, &record, sizeof(record), input);
+        unsigned long mode, parsed_size;
+        size_t left;
+
+        if (!bytes || (bytes == sizeof(record) && !memcmp(&record, &zeroes, sizeof(record))))
+            break;
+        if (bytes != sizeof(record)) {
+            log_fatal(_("Unexpected data in installation file!"));
+            goto done;
+        }
+        if (!memcmp(record.hdr.magic, "ustar", sizeof(record.hdr.magic)) && record.hdr.prefix[0]) {
+            snprintf(name, sizeof(name), "%.*s/%.*s", (int)sizeof(record.hdr.prefix),
+                     record.hdr.prefix, NAMSIZ, record.hdr.name);
+        } else {
+            snprintf(name, sizeof(name), "%.*s", NAMSIZ, record.hdr.name);
+        }
+        if (!archive_path(final, dest, name) ||
+            !tar_octal(record.hdr.mode, sizeof(record.hdr.mode), &mode) ||
+            !tar_octal(record.hdr.size, sizeof(record.hdr.size), &parsed_size) ||
+            parsed_size > SIZE_MAX) {
+            log_fatal(_("Unexpected data in installation file!"));
+            goto done;
+        }
+
+        output = NULL;
+        switch (record.hdr.typeflag) {
+        case TF_OLDNORMAL:
+        case TF_NORMAL:
+            output = file_open_install(info, final, mut && *mut == 'y' ? "wm" : "wb");
+            break;
+        case TF_SYMLINK:
+            if (!restoring_corrupt()) {
+                char target[NAMSIZ + 1];
+                snprintf(target, sizeof(target), "%.*s", NAMSIZ, record.hdr.linkname);
+                if (archive_symlink(info, dest, name, target, final) < 0)
+                    log_fatal(_("Unexpected data in installation file!"));
+            }
+            break;
+        case TF_DIR:
+            if (!restoring_corrupt())
+                dir_create_hierarchy(info, final, mode & 0777);
+            break;
+        default:
+            log_warning(_("Tar: '%s' is unknown file type: %c"), name, record.hdr.typeflag);
+            log_fatal(_("Unexpected data in installation file!"));
             break;
         }
-        if ( memcmp(&record, &zeroes, (sizeof record)) == 0 ) {
-            continue;
-        }
-        snprintf(final, sizeof(final), "%s/%s", dest, record.hdr.name);
 
-        sscanf(record.hdr.mode, "%o", &mode);
-        sscanf(record.hdr.size, "%o", &left);
-        cur_size = left;
-        blocks = (left+RECORDSIZE-1)/RECORDSIZE;
-        switch (record.hdr.typeflag) {
-            case TF_OLDNORMAL:
-            case TF_NORMAL:
-				if ( restoring_corrupt() && !file_is_corrupt(info->product, final) ) {
-					file_skip(info, left, input);
-				} else {
-					this_size = 0;
-					output = file_open_install(info, final, (mut && *mut=='y') ? "wm" : "wb");
-					if ( output ) {
-						while ( blocks-- > 0 ) {
-							if ( file_read(info, &record, (sizeof record), input)
-								 != (sizeof record) ) {
-								break;
-							}
-							if ( left < (sizeof record) ) {
-								length = left;
-							} else {
-								length = (sizeof record);
-							}
-							copied = file_write(info, &record, length, output);
-							info->installed_bytes += copied;
-							size += copied;
-							left -= copied;
-							this_size += copied;
-
-							if ( update ) {
-								if ( ! update(info, final, this_size, cur_size, current_option) )
-									break;
-							}
-						}
-						file_close(info, output);
-						if ( md5 ) { /* Verify the output file */
-							char sum[CHECKSUM_SIZE+1];
-							
-							strcpy(sum, get_md5(output->md5.buf));
-							if ( strcasecmp(md5, sum) ) {
-								log_fatal(_("File '%s' has an invalid checksum! Aborting."), final);
-							}
-						}
-						file_chmod(info, final, user_mode ? user_mode : mode);
-					}
-				}
-                break;
-            case TF_SYMLINK:
-				if ( !restoring_corrupt() ) {
-					file_symlink(info, record.hdr.linkname, final);
-				}
-                break;
-            case TF_DIR:
-				if ( !restoring_corrupt() ) {
-					dir_create_hierarchy(info, final, mode);
-				}
-                break;
-            default:
-                log_warning(_("Tar: '%s' is unknown file type: %c"),
-                            record.hdr.name, record.hdr.typeflag);
+        for (left = parsed_size; left;) {
+            size_t length = left < sizeof(record) ? left : sizeof(record);
+            if (file_read(info, &record, sizeof(record), input) != sizeof(record)) {
+                file_close(info, output);
                 log_fatal(_("Unexpected data in installation file!"));
-                break;
+                goto done;
+            }
+            left -= length;
+            if (output) {
+                size_t written = file_write(info, &record, length, output);
+                info->installed_bytes += written;
+                size += written;
+                if (update && !update(info, final, parsed_size - left, parsed_size, current_option)) {
+                    file_close(info, output);
+                    goto done;
+                }
+            }
         }
-        while ( blocks-- > 0 ) {
-            file_read(info, &record, (sizeof record), input);
+        if (output) {
+            file_verify_checksum(output, md5);
+            file_close(info, output);
+            file_chmod(info, final, user_mode ? user_mode : mode);
         }
-        size += left;
     }
+done:
     file_close(info, input);
 
+    xmlFree((void *)md5);
+    xmlFree((void *)mut);
+    xmlFree((void *)mode_str);
     return size;
 }
 

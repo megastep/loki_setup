@@ -9,30 +9,33 @@
 #include "md5.h"
 
 #include <stdlib.h>
+#include <errno.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#define device(ma, mi) (((ma) << 8) | (mi))
-#ifndef major
-#define major(dev) ((int)(((dev) >> 8) & 0xff))
-#endif
-#ifndef minor
-#define minor(dev) ((int)((dev) & 0xff))
-#endif
-
-/* calculates and skips the zeros after the filename and after the file data
-   when reading from a cpio archive. */
-static void skip_zeros(install_info *info, stream *input, int *count, int modulo)
+/* Parse a fixed-width unsigned field without reading adjacent fields. */
+static int cpio_number(const char *field, size_t width, int base, unsigned long *value)
 {
-    int buf[10];
-    int amount;
-    
-    amount = (modulo - *count % modulo) % modulo;
-    file_read(info, buf, amount, input);
-    *count += amount;
+    char digits[12], *end;
+    const char *valid = base == 8 ? "01234567" : "0123456789abcdefABCDEF";
+
+    memcpy(digits, field, width);
+    digits[width] = '\0';
+    if (strspn(digits, valid) != width)
+        return 0;
+    errno = 0;
+    *value = strtoul(digits, &end, base);
+    return !errno && *end == '\0';
 }
 
+static int cpio_padding(install_info *info, stream *input, unsigned long size)
+{
+    char padding[3];
+    int count = (4 - size % 4) % 4;
+
+    return file_read(info, padding, count, input) == count;
+}
 
 /* Initialize the plugin */
 static int CPIOInitPlugin(void)
@@ -49,7 +52,8 @@ static int CPIOFreePlugin(void)
 /* Get the size of the file */
 static size_t CPIOSize(install_info *info, const char *path)
 {
-	return file_size(info, path) - 118;
+	size_t size = file_size(info, path);
+	return size > 118 ? size - 118 : 0;
 }
 
 /* Exported so that the RPM plugin can access it */
@@ -57,144 +61,105 @@ size_t copy_cpio_stream(install_info *info, stream *input, const char *dest, con
 			xmlNodePtr node,
                         UIUpdateFunc update)
 {
-    stream *output;
-    char magic[6];
-    char ascii_header[112];
-    struct new_cpio_header file_hdr;
-    int has_crc;
-    int dir_len = strlen(dest) + 1;
-    size_t nread, left, copied;
+    char header[110], name[PATH_MAX], final[PATH_MAX], buf[BUFSIZ];
     size_t size = 0;
-    char buf[PATH_MAX];
-    int count = 0;
-	unsigned int user_mode = 0;
-    /* Optional MD5 sum can be specified in the XML file */
     const char *md5 = (char *)xmlGetProp(node, BAD_CAST "md5sum");
     const char *mut = (char *)xmlGetProp(node, BAD_CAST "mutable");
     const char *mode_str = (char *)xmlGetProp(node, BAD_CAST "mode");
+    unsigned int user_mode = mode_str ? strtol(mode_str, NULL, 8) : 0;
 
-	if ( mode_str ) {
-		user_mode = (unsigned int) strtol(mode_str, NULL, 8);
-	}
+    for (;;) {
+        unsigned long mode, namesize, filesize, checksum = 0, sum = 0, left;
+        int aligned, header_size;
+        stream *output = NULL;
 
-    memset(&file_hdr, 0, sizeof(file_hdr));
-    while ( ! file_eof(info, input) ) {
-		has_crc = 0;
-		file_read(info, magic, 6, input);
-		count += 6;
-		if(!strncmp(magic,"070701",6) || !strncmp(magic,"070702",6)){ /* New format */
-			has_crc = (magic[5] == '2');
-			file_read(info, ascii_header, 104, input);
-			count += 104;
-			ascii_header[104] = '\0';
-			sscanf (ascii_header,
-					"%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx%8lx",
-					&file_hdr.c_ino, &file_hdr.c_mode, &file_hdr.c_uid,
-					&file_hdr.c_gid, &file_hdr.c_nlink, &file_hdr.c_mtime,
-					&file_hdr.c_filesize, &file_hdr.c_dev_maj, &file_hdr.c_dev_min,
-					&file_hdr.c_rdev_maj, &file_hdr.c_rdev_min, &file_hdr.c_namesize,
-					&file_hdr.c_chksum);
-		}else if(!strncmp(magic,"070707",6)){ /* Old format */
-			unsigned long dev, rdev;
-			file_read(info, ascii_header, 70, input);
-			count += 70;
-			ascii_header[70] = '\0';
-			sscanf (ascii_header,
-					"%6lo%6lo%6lo%6lo%6lo%6lo%6lo%11lo%6lo%11lo",
-					&dev, &file_hdr.c_ino,
-					&file_hdr.c_mode, &file_hdr.c_uid, &file_hdr.c_gid,
-					&file_hdr.c_nlink, &rdev, &file_hdr.c_mtime,
-					&file_hdr.c_namesize, &file_hdr.c_filesize);
-			file_hdr.c_dev_maj = major (dev);
-			file_hdr.c_dev_min = minor (dev);
-			file_hdr.c_rdev_maj = major (rdev);
-			file_hdr.c_rdev_min = minor (rdev);
-		} else {
-			log_fatal(_("Invalid CPIO header\n"));
-		}
-		if(file_hdr.c_name != NULL)
-			free(file_hdr.c_name);
-		file_hdr.c_name = (char *) malloc(file_hdr.c_namesize + dir_len);
-		strcpy(file_hdr.c_name, dest);
-		strcat(file_hdr.c_name, "/");
-		file_read(info, file_hdr.c_name + dir_len, file_hdr.c_namesize, input);
-		count += file_hdr.c_namesize;
-		if(!strncmp(file_hdr.c_name + dir_len,"TRAILER!!!",10)) /* End of archive marker */
-			break;
-		/* Skip padding zeros after the file name */
-		skip_zeros(info, input, &count, 4);     
-		if(S_ISDIR(file_hdr.c_mode)){
-			file_create_hierarchy(info, file_hdr.c_name);
-			file_mkdir(info, file_hdr.c_name, file_hdr.c_mode & C_MODE);
-		}else if(S_ISFIFO(file_hdr.c_mode) && !restoring_corrupt() ){
-			file_mkfifo(info, file_hdr.c_name, file_hdr.c_mode & C_MODE);
-		}else if(S_ISBLK(file_hdr.c_mode) && !restoring_corrupt() ){
-			file_mknod(info, file_hdr.c_name, S_IFBLK|(file_hdr.c_mode & C_MODE), 
-					   device(file_hdr.c_rdev_maj,file_hdr.c_rdev_min));
-		}else if(S_ISCHR(file_hdr.c_mode) && !restoring_corrupt() ){
-			file_mknod(info, file_hdr.c_name, S_IFCHR|(file_hdr.c_mode & C_MODE), 
-					   device(file_hdr.c_rdev_maj,file_hdr.c_rdev_min));
-		}else if(S_ISSOCK(file_hdr.c_mode) && !restoring_corrupt() ){
-			// TODO: create Unix socket
-		}else if(S_ISLNK(file_hdr.c_mode) && !restoring_corrupt() ){
-			char *lnk = (char *)malloc(file_hdr.c_filesize+1);
-			file_read(info, lnk, file_hdr.c_filesize, input);
-			count += file_hdr.c_filesize;
-			lnk[file_hdr.c_filesize] = '\0';
-			file_symlink(info, lnk, file_hdr.c_name);
-			free(lnk);
-		}else{
-			if ( restoring_corrupt() && !file_is_corrupt(info->product, file_hdr.c_name) ) {
-				file_skip(info, file_hdr.c_filesize, input);
-			} else {
-				unsigned long chk = 0;
-				/* Open the file for output */
-				output = file_open_install(info, file_hdr.c_name, (mut && *mut=='y') ? "wm" : "wb"); /* FIXME: Mmh, is the path expanded??? */
-				if(output){
-					left = file_hdr.c_filesize;
-					while(left && (nread=file_read(info, buf, (left >= BUFSIZ) ? BUFSIZ : left, input))){
-						count += nread;
-						copied = file_write(info, buf, nread, output);
-						left -= nread;
-						if(has_crc && file_hdr.c_chksum){
-							int i;
-							for(i=0; i<BUFSIZ; i++)
-								chk += buf[i];
-						}
-				
-						info->installed_bytes += copied;
-						if(update){
-							if ( !update(info, file_hdr.c_name, file_hdr.c_filesize-left, file_hdr.c_filesize, current_option) ) {
-								break; /* Abort */
-							}
-						}
-					}
-					if(has_crc && file_hdr.c_chksum && file_hdr.c_chksum != chk)
-						log_warning(_("Bad checksum for file '%s'"), file_hdr.c_name);
-					size += file_hdr.c_filesize;
-					file_close(info, output);
-					if ( md5 ) { /* Verify the output file */
-						char sum[CHECKSUM_SIZE+1];
-						
-						strcpy(sum, get_md5(output->md5.buf));
-						if ( strcasecmp(md5, sum) ) {
-							log_fatal(_("File '%s' has an invalid checksum! Aborting."), file_hdr.c_name);
-						}
-					}
-					file_chmod(info, file_hdr.c_name, user_mode ? user_mode : (file_hdr.c_mode & C_MODE));
-				}else { /* Skip the file data */
-					file_skip(info, file_hdr.c_filesize, input);
-					count += file_hdr.c_filesize;
-				}
-			}
-		}
-		/* More padding zeroes after the data */
-		skip_zeros(info, input, &count, 4);
+        if (file_read(info, header, 6, input) != 6)
+            goto invalid;
+        if (!memcmp(header, "070701", 6) || !memcmp(header, "070702", 6)) {
+            aligned = 1;
+            header_size = 110;
+            if (file_read(info, header + 6, 104, input) != 104 ||
+                !cpio_number(header + 14, 8, 16, &mode) ||
+                !cpio_number(header + 54, 8, 16, &filesize) ||
+                !cpio_number(header + 94, 8, 16, &namesize) ||
+                !cpio_number(header + 102, 8, 16, &checksum))
+                goto invalid;
+        } else if (!memcmp(header, "070707", 6)) {
+            aligned = 0;
+            header_size = 76;
+            if (file_read(info, header + 6, 70, input) != 70 ||
+                !cpio_number(header + 18, 6, 8, &mode) ||
+                !cpio_number(header + 59, 6, 8, &namesize) ||
+                !cpio_number(header + 65, 11, 8, &filesize))
+                goto invalid;
+        } else {
+            goto invalid;
+        }
+        if (!namesize || namesize > sizeof(name) ||
+            file_read(info, name, namesize, input) != (int)namesize ||
+            name[namesize - 1] != '\0' || memchr(name, '\0', namesize - 1))
+            goto invalid;
+        if (!strcmp(name, "TRAILER!!!"))
+            break;
+        if (!archive_path(final, dest, name) ||
+            (aligned && !cpio_padding(info, input, header_size + namesize)))
+            goto invalid;
+
+        if (S_ISLNK(mode)) {
+            if (!filesize || filesize >= sizeof(buf) ||
+                file_read(info, buf, filesize, input) != (int)filesize ||
+                memchr(buf, '\0', filesize))
+                goto invalid;
+            buf[filesize] = '\0';
+            if (!restoring_corrupt() && archive_symlink(info, dest, name, buf, final) < 0)
+                goto invalid;
+        } else {
+            if (S_ISDIR(mode) && !restoring_corrupt())
+                dir_create_hierarchy(info, final, mode & 0777);
+            if (S_ISREG(mode) && (!restoring_corrupt() || file_is_corrupt(final)))
+                output = file_open_install(info, final, mut && *mut == 'y' ? "wm" : "wb");
+            for (left = filesize; left;) {
+                int count = left > sizeof(buf) ? sizeof(buf) : left;
+                if (file_read(info, buf, count, input) != count) {
+                    file_close(info, output);
+                    goto invalid;
+                }
+                left -= count;
+                if (output) {
+                    int i;
+                    size_t written = file_write(info, buf, count, output);
+                    for (i = 0; i < count && header[5] == '2'; ++i)
+                        sum = (sum + (unsigned char)buf[i]) & 0xffffffffUL;
+                    size += written;
+                    info->installed_bytes += written;
+                    if (update && !update(info, final, filesize - left, filesize, current_option)) {
+                        file_close(info, output);
+                        goto done;
+                    }
+                }
+            }
+            if (output) {
+                if (header[5] == '2' && sum != checksum) {
+                    file_close(info, output);
+                    goto invalid;
+                }
+                file_verify_checksum(output, md5);
+                file_close(info, output);
+                file_chmod(info, final, user_mode ? user_mode : mode);
+            }
+        }
+        if (aligned && !cpio_padding(info, input, filesize))
+            goto invalid;
     }
-    file_close(info, input);  
-    if(file_hdr.c_name != NULL)
-		free(file_hdr.c_name);
-	
+    goto done;
+
+invalid:
+    log_fatal(_("Invalid CPIO header\n"));
+done:
+    file_close(info, input);
+    xmlFree((void *)md5);
+    xmlFree((void *)mut);
+    xmlFree((void *)mode_str);
     return size;
 }
 

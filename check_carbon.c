@@ -1,3 +1,4 @@
+#include "registry.h"
 /*
  * Check and Rescue Tool for Loki Setup packages. Verifies the consistency of the files,
  * and optionally restores them from the original installation medium.
@@ -154,26 +155,12 @@ static void add_message(const char *str, ...)
     CFRelease(CFMessage);
 }
 
-int check_xml_setup(const char *file, const char *product)
-{
-    carbon_debug("check_xml_setup()\n");
 
-	int ret = 0;
-	xmlDocPtr doc = xmlParseFile(file);
-	if ( doc ) {
-		const char *prod = xmlGetProp(XML_ROOT(doc), "product");
-		if ( prod && !strcmp(prod, product) ) {
-			ret = 1;
-		}
-		xmlFreeDoc(doc);
-	}
-	return ret;
-}
 
 void DoMediaCheck(const char *Dir)
 {
     carbon_debug("DoMediaCheck()\n");
-	char path[PATH_MAX], root[PATH_MAX];
+	char path[PATH_MAX] = "", root[PATH_MAX] = "";
 	install_info *install;
 	
 	//if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(radio)) ) {
@@ -184,7 +171,7 @@ void DoMediaCheck(const char *Dir)
 		snprintf(path, sizeof(path), "%s/setup.data/setup.xml", Dir);
 		if ( access( path, R_OK) ) {
 			/* Doesn't look like a setup archive */
-            carbon_SetLabelText(Res, CHECK_STATUS_LABEL_ID, _("Unable to identify an installation media."));
+            carbon_SetLabelText(Res, CHECK_STATUS_LABEL_ID, _("Unable to identify the installation media."));
 			return;
 		}
 		strncpy(root, Dir, sizeof(root));
@@ -207,7 +194,7 @@ void DoMediaCheck(const char *Dir)
 	}
 
 	/* Verify that the package is the same (product name and version) */
-	if(!check_xml_setup(path, info->name))
+	if(!matches_repair_media(path, product))
     {
         carbon_SetLabelText(Res, CHECK_STATUS_LABEL_ID, _("Installation media doesn't match the product."));
 		return;		
@@ -216,24 +203,17 @@ void DoMediaCheck(const char *Dir)
     carbon_SetLabelText(Res, CHECK_STATUS_LABEL_ID, _("Restoring files..."));    
 	
 	/* Fetch the files to be refreshed, i.e install with a restricted set of files  */
+    begin_repair();
 	install = create_install(path, info->root, NULL, info->prefix);
-	if ( install ) {
+	if (install && chdir(root) == 0) {
 		const char *f;
 
-		if ( chdir(root) < 0 ) {
-			fprintf(stderr, _("Unable to change to directory %s\n"), root);
-		} else {
-			/* Update the setup path */
-			strncpy(install->setup_path, root, sizeof(install->setup_path));
-		}
+        snprintf(install->setup_path, sizeof(install->setup_path), "%s", root);
 
 		/* Check if we need to create a default component entry */
 		if ( GetProductNumComponents(install) == 0 ) {
 			current_component = add_component_entry(install, "Default", install->version, 1, NULL, NULL);
 		}
-
-		/* Restore any environment */
-		loki_put_envvars_component(loki_find_component(product, current_component->name));
 
 		/* Enable the relevant options */
 		select_corrupt_options(install);
@@ -255,11 +235,17 @@ void DoMediaCheck(const char *Dir)
 
 	}
 
+    if (!repair_complete()) {
+        carbon_SetLabelText(Res, CHECK_STATUS_LABEL_ID, _("Installation media doesn't match the product."));
+        unmount_filesystems();
+        return;
+    }
+
 	/* Print end message and disable the "Rescue" button */
-    carbon_SetLabelText(Res, CHECK_STATUS_LABEL_ID, _("Files successfully restored !"));
+    carbon_SetLabelText(Res, CHECK_STATUS_LABEL_ID, _("Files successfully restored!"));
     carbon_DisableControl(Res, CHECK_RESCUE_BUTTON_ID);
 
-	carbon_Prompt(Res, PromptType_OK, _("Files successfully restored !"), NULL, 0);
+	carbon_Prompt(Res, PromptType_OK, _("Files successfully restored!"), NULL, 0);
 
 	/* Unmount filesystems that may have been mounted */
 	unmount_filesystems();
@@ -361,8 +347,8 @@ int main(int argc, char *argv[])
 
 	argv0 = argv[0];
 
-	product = loki_openproduct(argv[1]);
-	if ( ! product ) {
+	product = open_registered_product(argv[1]);
+	if (!product || !trusted_product_files(loki_getinfo_product(product))) {
 	  carbon_Prompt(Res, PromptType_OK, _("Impossible to locate the product information.\nMaybe another user installed it?"), NULL, 0);
 		return 1;
 	}
@@ -394,12 +380,12 @@ int main(int argc, char *argv[])
 				case LOKI_REMOVED:
 					add_message(_("%s was REMOVED"), loki_getpath_file(file));
 					removed ++;
-					add_corrupt_file(product, loki_getpath_file(file), loki_getname_option(option));
+					add_corrupt_file(file, loki_getname_option(option));
 					break;
 				case LOKI_CHANGED:
 					add_message(_("%s was MODIFIED"), loki_getpath_file(file));
 					modified ++;
-					add_corrupt_file(product, loki_getpath_file(file), loki_getname_option(option));
+					add_corrupt_file(file, loki_getname_option(option));
 					break;
 				case LOKI_OK:
 					add_message(_("%s is OK"), loki_getpath_file(file));

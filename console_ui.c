@@ -35,7 +35,9 @@
 #define DEFAULT_PAGER_COMMAND   "more"
 
 static char pagercmd[PATH_MAX];
+/* TRANSLATORS: Use the single-character shortcut shown in the yes/no prompts. */
 static const char *yes_letter = gettext_noop("Y");
+/* TRANSLATORS: Use the single-character shortcut shown in the yes/no prompts. */
 static const char *no_letter  = gettext_noop("N");
 
 static int prompt_user(const char *prompt, const char *default_answer,
@@ -45,7 +47,7 @@ static int prompt_user(const char *prompt, const char *default_answer,
     printf(" [%s] ", default_answer && *default_answer ? default_answer : "");
     fflush(stdout);
     if ( fgets(answer, maxlen, stdin) ) {
-        answer[strlen(answer)-1] = '\0';
+        answer[strcspn(answer, "\n")] = '\0';
         if ( (answer[0] == '\0') && default_answer ) {
             strcpy(answer, default_answer);
         }
@@ -73,9 +75,9 @@ static yesno_answer console_prompt(const char *prompt, yesno_answer suggest)
         fprintf(stderr, _("Warning, invalid yesno prompt: %s\n"), prompt);
         return(RESPONSE_INVALID);
     }
-	if(!strncasecmp(line, _(yes_letter), 1)) {
+	if(response_matches(line, _(yes_letter))) {
 		return RESPONSE_YES;
-	} else if(!strncasecmp(line, _(no_letter), 1)) {
+	} else if(response_matches(line, _(no_letter))) {
 		return RESPONSE_NO;
 	} else {
 		return RESPONSE_INVALID;
@@ -99,9 +101,9 @@ static yesno_answer prompt_yesnohelp(const char *prompt, yesno_answer suggest)
             fprintf(stderr, _("Warning, invalid yesno prompt: %s\n"), prompt);
             return(RESPONSE_INVALID);
     }
-	if(!strncasecmp(line, _(yes_letter), 1)) {
+	if(response_matches(line, _(yes_letter))) {
 		return RESPONSE_YES;
-	} else if(!strncasecmp(line, _(no_letter), 1)) {
+	} else if(response_matches(line, _(no_letter))) {
 		return RESPONSE_NO;
 	} else if(!strncasecmp(line, "?", 1)) {
 		return RESPONSE_HELP;
@@ -318,7 +320,7 @@ static install_state console_init(install_info *info, int argc, char **argv, int
 #else
     printf(_("You are running a %s machine (%s)\n"), info->arch, distribution_name[info->distro]);
 #endif
-    printf(_("Hit Control-C anytime to cancel this installation program.\n"));
+    printf(_("Press Ctrl+C at any time to cancel installation.\n"));
     printf("\n");
     if ( GetProductEULA(info, NULL) ) {
         state = SETUP_LICENSE;
@@ -586,8 +588,6 @@ static install_state console_setup(install_info *info)
     /* HACK: Use external cd key validation program, if it exists. --ryan. */
     if(GetProductCDKey(info))
     {
-        #define CDKEYCHECK_PROGRAM "./vcdk"
-        char cmd[sizeof (gCDKeyString) + sizeof (CDKEYCHECK_PROGRAM) + 1];
         char *p;
         int cdkey_is_okay = 0;
         while (!cdkey_is_okay)
@@ -597,16 +597,15 @@ static install_state console_setup(install_info *info)
 					return SETUP_ABORT;
 			}
 
-            snprintf(cmd, sizeof (cmd), "%s-%s", CDKEYCHECK_PROGRAM, info->arch);
-            if (access(cmd, X_OK) != 0)
+            int validation = validate_cdkey(info->arch, gCDKeyString);
+            if (validation < 0)
             {
     		    printf(_("ERROR: vcdk is missing. Installation aborted.\n"));
 	    	    return SETUP_ABORT;
             }
             else
             {
-                snprintf(cmd, sizeof (cmd), "%s-%s %s", CDKEYCHECK_PROGRAM, info->arch, gCDKeyString);
-                if (system(cmd) == 0)  /* binary ran and reported key invalid? */
+                if (validation == 0)
     			    printf(_("CD key is invalid!\nPlease double check your key and enter it again.\n"));
                 else
                     cdkey_is_okay = 1;
@@ -616,7 +615,7 @@ static install_state console_setup(install_info *info)
         p = gCDKeyString;
         while(*p)
         {
-            *p = toupper(*p);
+            *p = toupper((unsigned char)*p);
             p++;
         }
     }

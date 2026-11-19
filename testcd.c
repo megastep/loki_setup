@@ -12,6 +12,9 @@
 
 /* Required to link */
 const char *argv0 = NULL;
+#ifdef __linux
+int have_selinux = 0;
+#endif
 
 void abort_install(void)
 {

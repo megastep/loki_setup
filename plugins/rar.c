@@ -1,3 +1,4 @@
+#include "safe_path.h"
 /* RAR files (.rar) plugin for setup, using unrar's library version. */
 /* $Id: rar.c,v 1.1 2005-05-17 16:24:10 icculus Exp $ */
 
@@ -207,8 +208,16 @@ static size_t RARCopy(install_info *info, const char *path, const char *dest, co
          */
         int operation = RAR_TEST;
 
-        snprintf(final, sizeof(final), "%s/%s", dest, rarhdx.FileName);
-        update(info, final, 0, rarhdx.UnpSize, current_option);
+        if (!memchr(rarhdx.FileName, '\0', sizeof(rarhdx.FileName)) ||
+            !archive_path(final, dest, rarhdx.FileName))
+            log_fatal(_("Unexpected data in installation file!"));
+        if (restoring_corrupt() && !file_is_corrupt(final)) {
+            if (RARProcessFile(h, RAR_SKIP, NULL, NULL) != 0)
+                break;
+            continue;
+        }
+        if (update)
+            update(info, final, 0, rarhdx.UnpSize, current_option);
         file_create_hierarchy(info, final);
         out = file_open_install(info, final, (mut && *mut=='y') ? "wm" : "wb");
 
@@ -227,25 +236,17 @@ static size_t RARCopy(install_info *info, const char *path, const char *dest, co
                         rarhdx.FileName, path, rar_strerror(rc));
         }
 
-        if (out)
+        if (out) {
+            if (!rc)
+                file_verify_checksum(out, md5);
             file_close(info, out);
-
-        if ((!out) || (rc))
-            unlink(final);
-        else
-            retval += rarhdx.UnpSize;
-
-        if (out)
-        {
-            if ( user_mode )
-                file_chmod(info, final, user_mode);
-
-            if ( md5 ) /* Verify the output file */
-            {
-                char sum[CHECKSUM_SIZE+1];
-                strcpy(sum, get_md5(out->md5.buf));
-                if ( strcasecmp(md5, sum) )
-                    log_fatal(_("File '%s' has an invalid checksum! Aborting."), final);
+            if (rc) {
+                if (!restoring_corrupt())
+                    remove_path(final, 0);
+            } else {
+                retval += rarhdx.UnpSize;
+                if (user_mode)
+                    file_chmod(info, final, user_mode);
             }
         }
 

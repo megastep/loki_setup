@@ -121,7 +121,10 @@ static size_t UZ2Copy(install_info *info, const char *path, const char *dest, co
 	}
 
     if (dstrename)
-        snprintf(final, sizeof(final), "%s/%s", dest, dstrename);
+    {
+        if (!archive_path(final, dest, dstrename))
+            return 0;
+    }
     else
     {
         if (strlen(path) < 4)
@@ -130,7 +133,8 @@ static size_t UZ2Copy(install_info *info, const char *path, const char *dest, co
         if (strcasecmp(path + (strlen(path) - 4), ".uz2") != 0)
             return 0; /* just in case. */
 
-        snprintf(final, sizeof(final), "%s/%s", dest, path);
+        if (!archive_path(final, dest, path))
+            return 0;
         final[strlen(final) - 4] = '\0'; /* chop off ".uz2" */
     }
 
@@ -146,7 +150,8 @@ static size_t UZ2Copy(install_info *info, const char *path, const char *dest, co
     while (insize < in->size)
     {
         uLongf x;
-        update(info, final, insize, in->size, current_option);
+        if (update)
+            update(info, final, insize, in->size, current_option);
 
         if ( (!readui32(info, in, &csize)) || (!readui32(info, in, &usize)) )
             break;
@@ -180,7 +185,8 @@ static size_t UZ2Copy(install_info *info, const char *path, const char *dest, co
         insize += 8 + csize;
     }
 
-    update(info, final, insize, in->size, current_option);
+    if (update)
+        update(info, final, insize, in->size, current_option);
 
     if (insize != in->size)
     {
@@ -196,13 +202,7 @@ static size_t UZ2Copy(install_info *info, const char *path, const char *dest, co
     if ( user_mode )
         file_chmod(info, final, user_mode);
 
-    if ( md5 ) { /* Verify the output file */
-        char sum[CHECKSUM_SIZE+1];
-        strcpy(sum, get_md5(out->md5.buf));
-        if ( strcasecmp(md5, sum) ) {
-            log_fatal(_("File '%s' has an invalid checksum! Aborting."), final);
-        }
-    }
+    file_verify_checksum(out, md5);
 
     file_close(info, out);
 

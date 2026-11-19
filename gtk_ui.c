@@ -595,14 +595,12 @@ void setup_cdkey_entry_changed_slot(GtkEntry *entry, gpointer user_data)
 void setup_button_cdkey_continue_slot( GtkWidget* widget, gpointer func_data )
 {
     /* HACK: Use external cd key validation program, if it exists. --ryan. */
-    #define CDKEYCHECK_PROGRAM "./vcdk"
-    char cmd[sizeof (gCDKeyString) + sizeof (CDKEYCHECK_PROGRAM) + 64];
     GtkWidget *entry = glade_xml_get_widget(setup_glade, "setup_cdkey_entry");
     char *CDKey = (char *) gtk_entry_get_text( GTK_ENTRY(entry) );
     char *p;
 
-    snprintf(cmd, sizeof (cmd), "%s-%s", CDKEYCHECK_PROGRAM, cur_info->arch);
-    if (access(cmd, X_OK) != 0)
+    int validation = validate_cdkey(cur_info->arch, CDKey);
+    if (validation < 0)
     {
         message_dialog(_("ERROR: vcdk is missing. Installation aborted.\n"), _("Problem"));
         cur_state = SETUP_ABORT;
@@ -610,8 +608,7 @@ void setup_button_cdkey_continue_slot( GtkWidget* widget, gpointer func_data )
     }
     else
     {
-        snprintf(cmd, sizeof (cmd), "%s-%s %s", CDKEYCHECK_PROGRAM, cur_info->arch, CDKey);
-        if (system(cmd) == 0)  /* binary ran and reported key invalid? */
+        if (validation == 0)
         {
             message_dialog(_("CD key is invalid!\nPlease double check your key and enter it again."), _("Problem"));
             return;
@@ -623,7 +620,7 @@ void setup_button_cdkey_continue_slot( GtkWidget* widget, gpointer func_data )
     p = gCDKeyString;
     while(*p)
     {
-        *p = toupper(*p);
+        *p = toupper((unsigned char)*p);
         p++;
     }
 
@@ -1116,42 +1113,44 @@ static inline int str_in_g_list(const char *str, GList *list)
 //   the installation, let's enable that.
 static void check_program_to_start(install_info *info)
 {
-    int i;
     xmlNodePtr node;
 
-    /*----------------------------------------------------------------------
-    **  Find a program to start, if any.
-    **--------------------------------------------------------------------*/
-    for (i = 0, node = XML_CHILDREN(XML_ROOT(cur_info->config)); node;  node = node->next) {
-        if (strcmp((char *)node->name, "program_to_start") == 0) {
-            /* Retrieve the value - note that it's up to us to free
-                the memory, which means we can use it without copying it */
-            char *content = (char *)xmlNodeGetContent(node);
-            char *p, *q;
-            if (content) {
-                if ( info->installed_symlink && info->symlinks_path && *info->symlinks_path ) {
-                    log_warning(_("Warning: program_to_start is only meaningful when there are no symlinks.\n"));
-                    return;
-                }
+    if (geteuid() == 0)
+        return;
+    for (node = XML_CHILDREN(XML_ROOT(info->config)); node; node = node->next) {
+        char *content, path[PATH_MAX];
+        const char *value;
+        int len;
 
-				g_strstrip(content);
-                for (p = content, q = info->play_binary; (q - info->play_binary) < (PATH_MAX - 20) && *p; )
-                {
-                    if (memcmp(p, "$INSTALLDIR", 11) == 0) {
-                        strcpy(q, info->install_path);
-                        q += strlen(info->install_path);
-                        p += 11;
-                        if (*(q - 1) == '/' && *p == '/')
-                            p++;
+        if (strcmp((const char *)node->name, "program_to_start"))
+            continue;
+        if (info->installed_symlink && *info->symlinks_path) {
+            log_warning(_("Warning: program_to_start is only meaningful when there are no symlinks.\n"));
+            return;
+        }
+        content = (char *)xmlNodeGetContent(node);
+        if (!content)
+            return;
+        value = g_strstrip(content);
+        if (!strncmp(value, "$INSTALLDIR/", 12))
+            value += 12;
+        len = *value == '/' ? snprintf(path, sizeof(path), "%s", value) :
+                             snprintf(path, sizeof(path), "%s/%s", info->install_path, value);
+        xmlFree(content);
+        if (len < 0 || len >= sizeof(path))
+            return;
+
+        for (struct component_elem *comp = info->components_list; comp; comp = comp->next) {
+            for (struct option_elem *opt = comp->options_list; opt; opt = opt->next) {
+                for (struct file_elem *file = opt->file_list; file; file = file->next) {
+                    if (!file->symlink && !strcmp(remove_root(info, path), file->path)) {
+                        memcpy(info->play_binary, path, len + 1);
+                        return;
                     }
-                    else
-                        *q++ = *p++;
                 }
-
-                g_free(content);
-                return;
             }
         }
+        return;
     }
 }
 
@@ -2180,8 +2179,7 @@ static install_state gtkui_complete(install_info *info)
 
     /* Hide the play game button if there's no game to play. :) */
     widget = glade_xml_get_widget(setup_glade, "play_game_button");
-    if ( widget && 
-		 (!info->installed_symlink || !info->symlinks_path || !*info->symlinks_path ) && ! *info->play_binary) {
+    if (widget && (geteuid() == 0 || !*info->play_binary)) {
         gtk_widget_hide(widget);
     }
 

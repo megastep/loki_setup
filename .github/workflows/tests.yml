@@ -1,0 +1,167 @@
+name: Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: ${{ matrix.runner }} / ${{ matrix.variant }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            variant: GTK 2
+            configure_args: --enable-gtk2
+          - runner: ubuntu-24.04-arm
+            variant: Console with dynamic plugins
+            configure_args: --disable-gtk --disable-dialog --enable-dynamic-plugins
+          - runner: macos-15
+            variant: Console with ncurses
+            configure_args: --disable-gtk
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: loki_setup
+
+    steps:
+      - &checkout_installer
+        uses: actions/checkout@v7
+        with:
+          path: loki_setup
+          persist-credentials: false
+      - &read_setupdb_revision
+        name: Read the SetupDB revision
+        id: setupdb_revision
+        working-directory: loki_setup
+        shell: bash
+        run: |
+          revision=$(cat setupdb.rev)
+          if [[ ! "$revision" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "Record a full, published SetupDB commit SHA in setupdb.rev." >&2
+            exit 1
+          fi
+          echo "sha=$revision" >> "$GITHUB_OUTPUT"
+      - &checkout_setupdb
+        uses: actions/checkout@v7
+        with:
+          repository: megastep/loki_setupdb
+          ref: ${{ steps.setupdb_revision.outputs.sha }}
+          path: loki_setupdb
+          persist-credentials: false
+
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        env:
+          VARIANT: ${{ matrix.variant }}
+        run: |
+          packages=(autoconf automake pkg-config libxml2-dev zlib1g-dev)
+          if [[ "$VARIANT" == 'GTK 2' ]]; then
+            packages+=(libncurses-dev libglade2-dev)
+          fi
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends "${packages[@]}"
+      - name: Install macOS dependencies
+        if: runner.os == 'macOS'
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: '1'
+        run: |
+          brew install autoconf automake pkgconf libxml2
+          echo "PKG_CONFIG_PATH=$(brew --prefix libxml2)/lib/pkgconfig" >> "$GITHUB_ENV"
+
+      - name: Build SetupDB
+        working-directory: loki_setupdb
+        run: |
+          ./autogen.sh
+          ./configure --with-libxml2
+          make -j2
+      - name: Build installer and diagnostic tools
+        env:
+          CONFIGURE_ARGS: ${{ matrix.configure_args }}
+        run: |
+          read -r -a configure_args <<< "$CONFIGURE_ARGS"
+          ./autogen.sh
+          ./configure "${configure_args[@]}"
+          make -j2 all testcd testxml
+      - name: Build GTK verification and uninstall tools
+        if: matrix.variant == 'GTK 2'
+        run: make -j2 check loki_uninstall
+      - name: Test the staged launcher and XML parser
+        run: |
+          make install
+          ./image/setup.sh -V
+          fixture=$(mktemp -d)
+          trap 'rm -rf "$fixture"' EXIT
+          cp image/setup.data/setup.xml "$fixture/"
+          (cd "$fixture" && "$GITHUB_WORKSPACE/loki_setup/testxml" && test -s foo.xml)
+      - name: Run installer smoke test
+        run: |
+          if [[ "$RUNNER_OS" == macOS ]]; then
+            script -q -e /dev/null make smoke </dev/null
+          else
+            script -qec 'make smoke' /dev/null </dev/null
+          fi
+
+  bsd:
+    name: ${{ matrix.os }} / VMActions
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [FreeBSD, OpenBSD]
+    steps:
+      - *checkout_installer
+      - *read_setupdb_revision
+      - *checkout_setupdb
+      - name: Build and test on FreeBSD
+        if: matrix.os == 'FreeBSD'
+        uses: vmactions/freebsd-vm@811efaaac0668df8bfb8308c3ec997b5ab50037b # v1.6.0
+        with:
+          release: '15.1'
+          sync: rsync
+          copyback: false
+          prepare: pkg install -y autoconf automake gmake libxml2 pkgconf
+          run: &bsd_build |
+            set -eu
+            if [ "$(uname -s)" = OpenBSD ]; then
+              export AUTOCONF_VERSION=2.73 AUTOMAKE_VERSION=1.19
+            fi
+            cd loki_setupdb
+            ./autogen.sh
+            ./configure
+            gmake -j2
+
+            cd ../loki_setup
+            ./autogen.sh
+            ./configure --disable-gtk --disable-dialog
+            gmake -j2 all testcd testxml
+            case "$(uname -s)" in
+              FreeBSD) script -q -e /dev/null gmake smoke </dev/null ;;
+              OpenBSD)
+                # script can return before the command exits on EOF.
+                smoke_log=$(mktemp)
+                trap 'rm -f "$smoke_log"' EXIT
+                script -c 'gmake smoke' /dev/null </dev/null | tee "$smoke_log"
+                tr -d '\r' < "$smoke_log" | grep -Fxq 'Staged install and uninstall passed'
+                ;;
+              *) exit 1 ;;
+            esac
+      - name: Build and test on OpenBSD
+        if: matrix.os == 'OpenBSD'
+        uses: vmactions/openbsd-vm@f1ca8bc8ecc5b6ef7218e5b914836e067e1546d3 # v1.4.9
+        with:
+          release: '8.0'
+          sync: rsync
+          copyback: false
+          prepare: pkg_add autoconf%2.73 automake%1.19 gmake libxml libiconv pkgconfig
+          run: *bsd_build

@@ -1,7 +1,5 @@
 #include <stdlib.h>
 #include <unistd.h>
-#include <Security/Authorization.h>
-#include <Security/AuthorizationTags.h>
 
 #include "setup-locale.h"
 #include "carbonres.h"
@@ -1867,64 +1865,5 @@ void carbon_RefreshOptions(OptionsBox *Box)
    
     for(i = 0; i < Box->ButtonCount; i++)
         Box->OptionClickCallback(Box->Buttons[i]);
-}
-
-// Authorizes user so they have Admin privileges.  If they do not, then it prompts
-//  for appropriate authorization and spawns setup again with admin privs if
-//  authorization was successful.
-void carbon_AuthorizeUser()
-{
-    /* This code is taken from Apple's developer documentation with some minor mods */
-    OSStatus myStatus;
-    AuthorizationFlags myFlags = kAuthorizationFlagDefaults;		//1
-    AuthorizationRef myAuthorizationRef;		//2
-
-    myStatus = AuthorizationCreate(NULL, kAuthorizationEmptyEnvironment,		//3
-                myFlags, &myAuthorizationRef);		//4
-    if (myStatus != errAuthorizationSuccess)
-        return; //myStatus;
-
-    do 
-    {
-        {
-            AuthorizationItem myItems = {kAuthorizationRightExecute, 0,		//5
-                    NULL, 0};		//6
-            AuthorizationRights myRights = {1, &myItems};		//7
-
-            myFlags = kAuthorizationFlagDefaults |		//8
-                    kAuthorizationFlagInteractionAllowed |		//9
-                    kAuthorizationFlagPreAuthorize |		//10
-                    kAuthorizationFlagExtendRights;		//11
-            myStatus = AuthorizationCopyRights (myAuthorizationRef, &myRights, NULL, myFlags, NULL );		//12
-        }
-		
-        if (myStatus != errAuthorizationSuccess) break;
-		
-        {
-            const char *myToolPath = GetEXEPath();
-            char *myArguments[] = { NULL };
-            //FILE *myCommunicationsPipe = NULL;
-            //char myReadBuffer[128];
-
-            myFlags = kAuthorizationFlagDefaults;		//13
-            myStatus = AuthorizationExecuteWithPrivileges		//14
-                    (myAuthorizationRef, myToolPath, myFlags, myArguments,		//15
-                    NULL);		//16
-
-            /*if (myStatus == errAuthorizationSuccess)
-                for(;;)
-                {
-                    int bytesRead = read (fileno (myCommunicationsPipe),
-                            myReadBuffer, sizeof (myReadBuffer));
-                    if (bytesRead < 1) break;
-                write (fileno (stdout), myReadBuffer, bytesRead);
-                }*/
-        }
-    } while (0);
-
-    AuthorizationFree (myAuthorizationRef, kAuthorizationFlagDefaults);		//17
-
-    //if (myStatus) printf("Status: %i\n", myStatus);
-    //return myStatus;
 }
 

@@ -9,6 +9,7 @@
 #include "setup-locale.h"
 
 #include <limits.h>
+#include <stdio.h>
 
 #include "setup-xml.h"
 
@@ -424,13 +425,22 @@ extern void push_curdir(const char *path);
 extern void pop_curdir(void);
 
 /* Run a program in the background */
+/* Returns 1 if accepted, 0 if rejected, or -1 if the validator could not run. */
+int validate_cdkey(const char *arch, const char *key);
+FILE *open_command(char *const argv[], pid_t *child);
+int close_command(FILE *stream, pid_t child);
 int run_command(install_info *info, const char *cmd, const char *arg1, const char *arg2, int warn);
 int run_command3(install_info *info, const char *cmd, const char *arg1, const char *arg2, const char *arg3, int warn);
 
 /* Manage the list of corrupt files if we're restoring */
-extern void add_corrupt_file(const product_t *prod, const char *path, const char *option);
+extern void add_corrupt_file(product_file_t *file, const char *option);
 extern void free_corrupt_files(void);
-extern int file_is_corrupt(const product_t *prod, const char *path);
+extern int file_is_corrupt(const char *path);
+extern int repair_metadata(const char *path, unsigned char digest[16], unsigned int *mode);
+extern void repair_committed(const char *path);
+extern int repair_complete(void);
+extern void begin_repair(void);
+int matches_repair_media(const char *path, product_t *product);
 extern int restoring_corrupt(void);
 extern void select_corrupt_options(install_info *info);
 
