@@ -51,8 +51,10 @@ def run(build, setupdb, work):
     media = work / "media"
     installed = work / "installed files"
     registry = work / "registry"
+    man_dir = work / "manuals"
+    man_dir.mkdir()
     env = dict(os.environ, LC_ALL="C.UTF-8", NO_AT_BRIDGE="0", G_DEBUG="fatal-warnings",
-               SETUPDB_ROOT=str(registry), SETUP_EXEC_TMPDIR=str(work))
+               SETUPDB_ROOT=str(registry), SETUP_EXEC_TMPDIR=str(work), MANPATH=str(man_dir))
     for key in ("SETUP_GLADE_FILE", "SETUP_GTK3_UI_FILE", "SETUP_ARCH", "SETUPDB_XML_BASE"):
         env.pop(key, None)
 
@@ -61,11 +63,17 @@ def run(build, setupdb, work):
     shutil.copy2(build / "image/setup.sh", media)
     (media / "setup.data/config.sh").write_text("GET_ROOT=0\n")
     manifest = """<install product="gtk3-smoke" desc="GTK3 Smoke" version="1"
-         nobinaries="yes">
+         manpages="yes">
   <eula>License.txt</eula>
   <readme>Readme.txt</readme>
   <require condition="+(gtk3,!gtk2)">This fixture requires GTK3.</require>
-  <option install="true" required="true">Core<files>payload.tar.gz</files></option>
+  <option install="true" required="true">Core
+    <files>payload.tar.gz</files>
+    <manpage name="gtk3-smoke" section="1" />
+    <binary inline="true" binpath="gtk3-smoke">#!/bin/sh
+exit 0
+    </binary>
+  </option>
   <option install="false" if="gtk3">Extras<files>extra.txt</files></option>
   <option install="false">Skip me<files>skip.txt</files></option>
 </install>
@@ -80,6 +88,9 @@ def run(build, setupdb, work):
     (media / "skip.txt").write_text("Unselected extra\n")
     (media / "License.txt").write_text("Fixture license agreement.\n")
     (media / "Readme.txt").write_text("Fixture installation notes.\n")
+    man_page = Path("man/man1/gtk3-smoke.1")
+    (media / man_page.parent).mkdir(parents=True)
+    (media / man_page).write_text(".TH GTK3-SMOKE 1\n")
     wrong = work / "other media"
     shutil.copytree(media / "setup.data", wrong / "setup.data", ignore=shutil.ignore_patterns("bin"))
     (wrong / "setup.data/setup.xml").write_text(manifest.replace('version="1"', 'version="2"'))
@@ -114,6 +125,14 @@ def run(build, setupdb, work):
         click("License Agreement", "Agree")
         click("GTK3 Smoke Setup", "View Readme")
         click("Readme", "Close")
+        menu = widget("GTK3 Smoke Setup", "Startup menu entries", "check box")
+        assert menu.getState().contains(pyatspi.STATE_CHECKED)
+        window = widget("GTK3 Smoke Setup", "GTK3 Smoke Setup", "frame")
+        man_entry = next((item for item in descendants(window) if item.getRoleName() == "text"
+                          and item.queryText().getText(0, -1) == str(man_dir)), None)
+        assert man_entry is not None, "The default man-page path should be visible"
+        assert man_entry.queryComponent().grabFocus()
+        assert menu.queryComponent().grabFocus()
         click("GTK3 Smoke Setup", "View Readme")
         click("Readme", "Close")
         click("GTK3 Smoke Setup", "Extras", "check box")
@@ -122,6 +141,8 @@ def run(build, setupdb, work):
         assert setup.wait(timeout=10) == 0
         assert (installed / "payload.txt").read_bytes() == payload
         assert (installed / "extra.txt").read_text() == "Selected extra\n"
+        man_link = man_dir / "man1" / man_page.name
+        assert man_link.is_symlink() and man_link.resolve(strict=True) == installed / man_page
         assert not (installed / "skip.txt").exists()
         files = subprocess.check_output([setupdb, "gtk3-smoke", "listfiles"], env=env, text=True)
         assert str(installed / "payload.txt") in files

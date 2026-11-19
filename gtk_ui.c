@@ -1401,6 +1401,9 @@ static void init_man_path(void)
 	widget = ui_widget(setup_glade, "manpage_combo");
 	set_path_choices(widget, list);
 	set_manpath(cur_info, list->data);
+#ifdef LOKI_GTK3
+	gtk_entry_set_text(path_entry(widget), cur_info->man_path);
+#endif
 }
 
 static void init_binary_path(void)

@@ -228,6 +228,7 @@
                       <object class="GtkCheckButton" id="setup_menuitems_checkbox">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">Startup menu entries</property>
+                        <property name="active">True</property>
                         <signal name="toggled" handler="setup_checkbox_menuitems_slot" />
                       </object>
                     </child>
