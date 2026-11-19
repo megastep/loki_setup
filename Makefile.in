@@ -27,7 +27,7 @@ SETUP_GTK = @SETUP_GTK@
 DYN_PLUGINS = @DYN_PLUGINS@
 
 # The supported locales so far
-LOCALES = fr de es sv it nl ru en_GB
+LOCALES = fr de es sv it nl ru en_GB pt
 XGETTEXT = xgettext
 MSGMERGE = msgmerge
 MSGFMT = msgfmt

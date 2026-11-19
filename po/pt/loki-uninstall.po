@@ -1,0 +1,1052 @@
+# Portuguese translation for Loki Setup Uninstaller and Check and Rescue.
+# This file is distributed under the same license as the loki_setup package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Loki Setup 2.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-18 05:13-0800\n"
+"PO-Revision-Date: 2026-11-18 17:00-0800\n"
+"Last-Translator: Loki Setup contributors\n"
+"Language-Team: Portuguese\n"
+"Language: pt\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: check.c:126 check_carbon.c:116 uninstall.c:529
+#, c-format
+msgid "Couldn't change to install directory\n"
+msgstr "Não foi possível mudar para a pasta de instalação\n"
+
+#: check.c:158 uninstall_ui.c:79
+msgid "OK"
+msgstr "OK"
+
+#: check.c:256 check_carbon.c:187
+msgid "Unable to identify the installation media."
+msgstr "Não foi possível identificar o suporte de instalação."
+
+#: check.c:278 check_carbon.c:212
+msgid "Installation media doesn't match the product."
+msgstr "O suporte de instalação não corresponde ao produto."
+
+#: check.c:283 check_carbon.c:216
+msgid "Restoring files..."
+msgstr "A restaurar ficheiros..."
+
+#: check.c:292 check_carbon.c:224
+#, c-format
+msgid "Unable to change to directory %s\n"
+msgstr "Não foi possível mudar para a pasta %s\n"
+
+#: check.c:327 check.c:331 check_carbon.c:259 check_carbon.c:262
+msgid "Files successfully restored!"
+msgstr "Ficheiros restaurados com sucesso!"
+
+#: check.c:331
+msgid "Success"
+msgstr "Concluído"
+
+#: check.c:347
+#, c-format
+msgid "Warning: '%s' is not an accessible directory."
+msgstr "Aviso: não é possível aceder à pasta «%s»."
+
+#: check.c:348
+msgid "Warning"
+msgstr "Aviso"
+
+#: check.c:356
+msgid "Please select a directory"
+msgstr "Selecione uma pasta"
+
+#: check.c:429 check_carbon.c:353
+#, c-format
+msgid "Usage: %s product\n"
+msgstr "Utilização: %s produto\n"
+
+#: check.c:458 check_carbon.c:366
+msgid ""
+"Impossible to locate the product information.\n"
+"Maybe another user installed it?"
+msgstr ""
+"Não foi possível encontrar as informações do produto.\n"
+"Terá sido instalado por outro utilizador?"
+
+#: check.c:459
+msgid "Error"
+msgstr "Erro"
+
+#: check.c:476 check_carbon.c:380
+#, c-format
+msgid "---> Checking component '%s'..."
+msgstr "---> A verificar o componente «%s»..."
+
+#: check.c:482 check_carbon.c:386
+#, c-format
+msgid "-> Checking option '%s'..."
+msgstr "-> A verificar a opção «%s»..."
+
+#: check.c:491 check_carbon.c:395
+#, c-format
+msgid "%s was REMOVED"
+msgstr "%s foi REMOVIDO"
+
+#: check.c:496 check_carbon.c:400
+#, c-format
+msgid "%s was MODIFIED"
+msgstr "%s foi MODIFICADO"
+
+#: check.c:501 check_carbon.c:405
+#, c-format
+msgid "%s is OK"
+msgstr "%s está OK"
+
+#: check.c:511 check_carbon.c:415
+#, c-format
+msgid "Changes detected: %d files removed, %d files modified."
+msgstr "Alterações detetadas: %d ficheiros removidos, %d ficheiros modificados."
+
+#: check.c:516 check_carbon.c:421
+msgid "No problems were found."
+msgstr "Não foram encontrados problemas."
+
+#: check.glade:26 check.gtk2.glade:8
+msgid "Check And Rescue"
+msgstr "Verificação e recuperação"
+
+#: check.glade:80 check.gtk2.glade:83
+msgid "_Dismiss"
+msgstr "_Fechar"
+
+#: check.glade:103 check.gtk2.glade:155
+msgid "_Rescue"
+msgstr "_Recuperar"
+
+#: check.glade:131 check.gtk2.glade:261
+msgid "Checking installed files"
+msgstr "A verificar os ficheiros instalados"
+
+#: check.glade:174
+msgid "..."
+msgstr "..."
+
+#: check.glade:199 check.gtk2.glade:317
+msgid "Media Selection"
+msgstr "Seleção do suporte de instalação"
+
+#: check.glade:254
+msgid "_Cancel"
+msgstr "_Cancelar"
+
+#: check.glade:277
+msgid "_OK"
+msgstr "_OK"
+
+#: check.glade:302 check.gtk2.glade:388
+msgid "Please indicate where the original package is located :"
+msgstr "Indique onde se encontra o pacote original:"
+
+#: check.glade:325
+msgid "CD-ROM"
+msgstr "CD-ROM"
+
+#: check.glade:356 check.gtk2.glade:494
+msgid "Other directory: "
+msgstr "Outra pasta: "
+
+#: check.glade:391 check.gtk2.glade:576
+msgid "_Pick..."
+msgstr "_Escolher..."
+
+#: check.gtk2.glade:455
+msgid "CD-ROM / DVD-ROM"
+msgstr "CD-ROM / DVD-ROM"
+
+#: copy.c:301
+#, c-format
+msgid "Unable to create %s symlink pointing to %s"
+msgstr "Não foi possível criar a ligação simbólica %s para %s"
+
+#: copy.c:382
+#, c-format
+msgid "Failed to update check sum for %s"
+msgstr "Não foi possível atualizar a soma de verificação de %s"
+
+#: copy.c:386
+#, c-format
+msgid "Error while running process command: %s"
+msgstr "Erro ao executar o comando de processamento: %s"
+
+#: copy.c:403
+#, c-format
+msgid "Failed to change SELinux context for file '%s' - not supported"
+msgstr "Não foi possível alterar o contexto SELinux do ficheiro «%s»: operação não suportada"
+
+#: copy.c:405
+#, c-format
+msgid "Failed to change SELinux context for file '%s'"
+msgstr "Não foi possível alterar o contexto SELinux do ficheiro «%s»"
+
+#: copy.c:410
+#, c-format
+msgid "Invalid SELinux context '%s' for file '%s'"
+msgstr "Contexto SELinux «%s» inválido para o ficheiro «%s»"
+
+#: copy.c:420 plugins/cpio.c:181 plugins/rar.c:248 plugins/tar.c:120
+#: plugins/uz2.c:203 plugins/zip.c:887
+#, c-format
+msgid "File '%s' has an invalid checksum! Aborting."
+msgstr "O ficheiro «%s» tem uma soma de verificação inválida! A interromper."
+
+#: copy.c:463
+#, c-format
+msgid "Unable to copy directory '%s'"
+msgstr "Não foi possível copiar a pasta «%s»"
+
+#: copy.c:498
+#, c-format
+msgid "1 Unable to find file '%s' in '%s'"
+msgstr "1 Não foi possível encontrar o ficheiro «%s» em «%s»"
+
+#: copy.c:543
+#, c-format
+msgid "Unable to find file '%s' on any of the CDROM drives"
+msgstr "Não foi possível encontrar o ficheiro «%s» em nenhuma unidade de CD-ROM"
+
+#: copy.c:561
+#, c-format
+msgid "2 Unable to find file '%s' in '%s'"
+msgstr "2 Não foi possível encontrar o ficheiro «%s» em «%s»"
+
+#: copy.c:616 copy.c:617
+#, c-format
+msgid "Unable to copy man page '%s'"
+msgstr "Não foi possível copiar a página de manual «%s»"
+
+#: copy.c:660 copy.c:667
+#, c-format
+msgid "Could not create temporary script: %s"
+msgstr "Não foi possível criar o script temporário: %s"
+
+#: copy.c:710
+msgid "'binpath' attribute is mandatory for inline 'binary' tag"
+msgstr "O atributo «binpath» é obrigatório na etiqueta «binary» quando o executável está incorporado"
+
+#: copy.c:715
+msgid "'binpath' attribute must not contain slashes for inline 'binary' tag"
+msgstr "O atributo «binpath» não pode conter barras na etiqueta «binary» quando o executável está incorporado"
+
+#: copy.c:753
+msgid "Binary install path is too long"
+msgstr "O caminho de instalação dos executáveis é demasiado longo"
+
+#: copy.c:790
+#, c-format
+msgid "find '%s'"
+msgstr "procurar «%s»"
+
+#: copy.c:812 copy.c:813
+#, c-format
+msgid "Unable to find file '%s' in '%s'"
+msgstr "Não foi possível encontrar o ficheiro «%s» em «%s»"
+
+#: copy.c:834 copy.c:835
+#, c-format
+msgid "Unable to copy file '%s'"
+msgstr "Não foi possível copiar o ficheiro «%s»"
+
+#: copy.c:884
+msgid "Running script. Please wait..."
+msgstr "A executar o script. Aguarde..."
+
+#: copy.c:1088
+msgid "The remove_msg element should be within a component!\n"
+msgstr "O elemento remove_msg deve estar dentro de um componente!\n"
+
+#: copy.c:1106
+msgid "Component element needs to have a name"
+msgstr "O elemento component tem de ter um nome"
+
+#: copy.c:1109
+msgid "Component element needs to have a version"
+msgstr "O elemento component tem de ter uma versão"
+
+#: copy.c:1133
+msgid "Malformed 'environment' element in XML file : missing 'var' property"
+msgstr "Elemento «environment» inválido no XML: falta o atributo «var»"
+
+#: copy.c:1310
+#, c-format
+msgid "Suspect size value for option %s\n"
+msgstr "Valor de tamanho suspeito para a opção %s\n"
+
+#: detect.c:344
+#, c-format
+msgid "Unmounting device %s"
+msgstr "A desmontar o dispositivo %s"
+
+#: detect.c:346 detect.c:377 detect.c:393
+#, c-format
+msgid "Failed to unmount device %s mounted on %s"
+msgstr "Não foi possível desmontar o dispositivo %s montado em %s"
+
+#: detect.c:462 detect.c:545 detect.c:585 detect.c:629
+#, c-format
+msgid "Mounted device %s"
+msgstr "Dispositivo %s montado"
+
+#: detect.c:820 detect.c:824
+#, c-format
+msgid ""
+"\n"
+"Please insert %s.\n"
+"Choose Yes to retry, No to cancel"
+msgstr ""
+"\n"
+"Insira %s.\n"
+"Escolha Sim para tentar novamente ou Não para cancelar"
+
+#: detect.c:827
+#, c-format
+msgid ""
+"\n"
+"Please mount %s.\n"
+"Choose Yes to retry, No to cancel"
+msgstr ""
+"\n"
+"Monte %s.\n"
+"Escolha Sim para tentar novamente ou Não para cancelar"
+
+#: detect.c:892
+#, c-format
+msgid "Detected locale is %s\n"
+msgstr "Definição regional detetada: %s\n"
+
+#: detect.c:1069
+#, c-format
+msgid "Invalid matching policy: %s"
+msgstr "Critério de correspondência inválido: %s"
+
+#: file.c:119 file.c:165 file.c:172 install.c:1196 install.c:1218
+#: install.c:1240 install.c:1261 install.c:1276 install.c:1327
+msgid "Out of memory"
+msgstr "Memória insuficiente"
+
+#: file.c:144
+#, c-format
+msgid "File '%25s' already exists, overwrite?"
+msgstr "O ficheiro «%25s» já existe. Substituí-lo?"
+
+#: file.c:149
+#, c-format
+msgid "File exists: '%s'"
+msgstr "O ficheiro existe: «%s»"
+
+#: file.c:183
+#, c-format
+msgid "Failed to open file %s"
+msgstr "Não foi possível abrir o ficheiro %s"
+
+#: file.c:213
+#, c-format
+msgid "File '%s' may be in BZIP2 format, but support was not compiled in!"
+msgstr "O ficheiro «%s» pode estar no formato BZIP2, mas o programa foi compilado sem suporte para esse formato!"
+
+#: file.c:224
+#, c-format
+msgid "Couldn't read from file: %s"
+msgstr "Não foi possível ler o ficheiro: %s"
+
+#: file.c:232
+#, c-format
+msgid "Installing file %s"
+msgstr "A instalar o ficheiro %s"
+
+#: file.c:237
+#, c-format
+msgid "Couldn't write to file: %s"
+msgstr "Não foi possível escrever no ficheiro: %s"
+
+#: file.c:263
+msgid "Read on write stream"
+msgstr "Tentativa de leitura num fluxo de escrita"
+
+#: file.c:302
+#, c-format
+msgid "Read failure on %s"
+msgstr "Falha de leitura em %s"
+
+#: file.c:373
+msgid "Skip zeroes on write stream"
+msgstr "Tentativa de ignorar zeros num fluxo de escrita"
+
+#: file.c:393 file.c:459 file.c:466
+#, c-format
+msgid "Short write on %s"
+msgstr "Escrita incompleta em %s"
+
+#: file.c:399
+msgid "Write on read stream"
+msgstr "Tentativa de escrita num fluxo de leitura"
+
+#: file.c:429
+#, c-format
+msgid "Write failure on %s"
+msgstr "Falha de escrita em %s"
+
+#: file.c:492
+#, c-format
+msgid "Trying to create a symbolic link on the same file: %s\n"
+msgstr "Tentativa de criar uma ligação simbólica para o próprio ficheiro: %s\n"
+
+#: file.c:497
+#, c-format
+msgid "Creating symbolic link: %s --> %s\n"
+msgstr "A criar a ligação simbólica: %s --> %s\n"
+
+#: file.c:506
+#, c-format
+msgid "Can't remove existing symlink %s: %s"
+msgstr "Não foi possível remover a ligação simbólica existente %s: %s"
+
+#: file.c:510 file.c:541 file.c:561 file.c:580
+#, c-format
+msgid "Can't create %s: %s"
+msgstr "Não foi possível criar %s: %s"
+
+#: file.c:535
+#, c-format
+msgid "Creating directory: %s\n"
+msgstr "A criar a pasta: %s\n"
+
+#: file.c:554
+#, c-format
+msgid "Creating FIFO: %s\n"
+msgstr "A criar o canal FIFO: %s\n"
+
+#: file.c:573
+#, c-format
+msgid "Creating device: %s\n"
+msgstr "A criar o dispositivo: %s\n"
+
+#: file.c:593
+#, c-format
+msgid "Can't change permissions for %s: %s"
+msgstr "Não foi possível alterar as permissões de %s: %s"
+
+#: file.c:627 file.c:651
+#, c-format
+msgid "Unable to read %s"
+msgstr "Não foi possível ler %s"
+
+#: file.c:729
+msgid "BZ2 support not available"
+msgstr "O suporte para BZ2 não está disponível"
+
+#: file.c:754
+#, c-format
+msgid "BZ2: *** Symbol \"%s\" not found, bzip2 support disabled"
+msgstr "BZ2: *** O símbolo «%s» não foi encontrado. Suporte para bzip2 desativado."
+
+#: file.c:767
+#, c-format
+msgid "BZ2: Try open %s"
+msgstr "BZ2: A tentar abrir %s"
+
+#: file.c:773
+msgid "BZ2: *** Unable to open bzip2 library. bzip2 support disabled"
+msgstr "BZ2: *** Não foi possível abrir a biblioteca bzip2. Suporte para bzip2 desativado."
+
+#: file.c:777
+#, c-format
+msgid "BZ2: got %s"
+msgstr "BZ2: %s encontrado"
+
+#: file.c:808
+#, c-format
+msgid "Unable to create temporary directory: %s"
+msgstr "Não foi possível criar a pasta temporária: %s"
+
+#: file.c:827
+#, c-format
+msgid "Can not chdir to temporary directory: %s"
+msgstr "Não foi possível mudar para a pasta temporária: %s"
+
+#: file.c:834
+#, c-format
+msgid "Can not open temporary directory: %s"
+msgstr "Não foi possível abrir a pasta temporária: %s"
+
+#: file.c:845
+#, c-format
+msgid "Can not remove %s/%s: %s"
+msgstr "Não foi possível remover %s/%s: %s"
+
+#. TRANSLATORS: The placeholders are a directory, its owner, and the suggested user.
+#: install.c:450
+#, c-format
+msgid ""
+"%s is owned by %s. You may need to run this installer as user %s or choose "
+"another directory."
+msgstr "%s pertence a %s. Poderá ter de executar o instalador como %s ou escolher outra pasta."
+
+#: install.c:478
+msgid "No destination directory selected"
+msgstr "Nenhuma pasta de destino selecionada"
+
+#: install.c:481
+msgid "Please select at least one option"
+msgstr "Selecione pelo menos uma opção"
+
+#: install.c:484
+msgid "Not enough free space for the selected options."
+msgstr "Não há espaço livre suficiente para as opções selecionadas."
+
+#: install.c:486
+msgid "Install path is not a directory."
+msgstr "O caminho de instalação não é uma pasta."
+
+#: install.c:487 install.c:508
+msgid "Please choose an existing directory."
+msgstr "Escolha uma pasta existente."
+
+#: install.c:489
+msgid "No write permissions on the install directory."
+msgstr "Sem permissão de escrita na pasta de instalação."
+
+#: install.c:492
+msgid "Binary path and install path must be different."
+msgstr "Os caminhos de instalação e dos executáveis têm de ser diferentes."
+
+#: install.c:494
+msgid "No write permissions to install a selected package."
+msgstr "Sem permissão de escrita para instalar um dos pacotes selecionados."
+
+#: install.c:499
+msgid "Binary path is not a directory."
+msgstr "O caminho dos executáveis não é uma pasta."
+
+#: install.c:502
+msgid "No write permissions on the binary directory."
+msgstr "Sem permissão de escrita na pasta dos executáveis."
+
+#: install.c:507
+msgid "Binary directory does not exist."
+msgstr "A pasta dos executáveis não existe."
+
+#: install.c:688
+msgid "Failed to allocate new bool"
+msgstr "Não foi possível reservar memória para um novo valor booleano"
+
+#: install.c:707
+msgid "Must have at least 'script' or 'env' attribute for <bool>"
+msgstr "O elemento <bool> deve ter pelo menos um atributo «script» ou «env»"
+
+#: install.c:959 install_log.c:19
+#, c-format
+msgid "Out of memory\n"
+msgstr "Memória insuficiente\n"
+
+#: install.c:981
+#, c-format
+msgid "Detected distribution: %s %d.%d"
+msgstr "Distribuição detetada: %s %d.%d"
+
+#: install.c:1150
+#, c-format
+msgid ""
+"Could not find default component. Make sure to define components for all "
+"entries."
+msgstr "Não foi possível encontrar o componente predefinido. Defina um componente para cada entrada."
+
+#: install.c:1301
+msgid "You must use a 'symlink' attribute with 'play'"
+msgstr "É necessário utilizar o atributo «symlink» com «play»"
+
+#: install.c:1313
+msgid "There can be only one binary with a 'play' attribute"
+msgstr "Só pode existir um executável com o atributo «play»"
+
+#: install.c:1316
+msgid "The only valid values for the 'play' attribute are yes, gui and no"
+msgstr "Os únicos valores válidos para o atributo «play» são yes, gui e no"
+
+#: install.c:1345
+msgid "Couldn't find your home directory"
+msgstr "Não foi possível encontrar a sua pasta pessoal"
+
+#: install.c:1363
+#, c-format
+msgid "Couldn't find home directory for %s"
+msgstr "Não foi possível encontrar a pasta pessoal de %s"
+
+#: install.c:1493
+msgid ""
+"XML: 'require' tag doesn't have a mandatory 'command', 'condition' or "
+"'feature' attribute"
+msgstr "XML: falta um atributo obrigatório «command», «condition» ou «feature» na etiqueta «require»"
+
+#: install.c:1543
+#, c-format
+msgid ""
+"The installer is not suitable for installing this product (missing feature "
+"'%s' version '%u')"
+msgstr "Este instalador não pode instalar o produto (falta a funcionalidade «%s», versão «%u»)"
+
+#: install.c:1586
+msgid "XML: 'lang' tag does not have a mandatory 'lang' attribute"
+msgstr "XML: falta o atributo obrigatório «lang» na etiqueta «lang»"
+
+#: install.c:1595
+#, c-format
+msgid "XML: option listed without translated description for locale '%s'"
+msgstr "XML: opção indicada sem descrição traduzida para a definição regional «%s»"
+
+#: install.c:1603
+msgid "XML: option listed without description"
+msgstr "XML: opção indicada sem descrição"
+
+#: install.c:1865
+msgid "CDKey file could not be opened."
+msgstr "Não foi possível abrir o ficheiro da chave do CD."
+
+#: install.c:1972 install.c:1978 install.c:1997
+#, c-format
+msgid "Unable to remove '%s'"
+msgstr "Não foi possível remover «%s»"
+
+#: install.c:1988
+#, c-format
+msgid "The '%s' RPM was installed or upgraded (version %s, release %d)"
+msgstr "O RPM «%s» foi instalado ou atualizado (versão %s, revisão %d)"
+
+#: install.c:2121
+msgid "Options tag string maxed out!"
+msgstr "A lista de etiquetas das opções atingiu o limite!"
+
+#: install.c:2172 install.c:2321 install.c:2349
+msgid "Could not create temporary script"
+msgstr "Não foi possível criar o script temporário"
+
+#: install.c:2298
+#, c-format
+msgid "Could not register binary: %s"
+msgstr "Não foi possível registar o executável: %s"
+
+#: install.c:2340
+#, c-format
+msgid "Could not write temporary pre-uninstall script in %s"
+msgstr "Não foi possível escrever o script temporário de pré-desinstalação em %s"
+
+#: install.c:2365
+#, c-format
+msgid "Could not write post-uninstall script in %s"
+msgstr "Não foi possível escrever o script de pós-desinstalação em %s"
+
+#: install.c:2412
+msgid "Could not create install log"
+msgstr "Não foi possível criar o registo da instalação"
+
+#: install.c:2439
+#, c-format
+msgid "Please visit %s"
+msgstr "Visite %s"
+
+#: install.c:2493
+msgid "Missing 'command' attribute for an option"
+msgstr "Falta o atributo «command» numa opção"
+
+#: install.c:2507
+#, c-format
+msgid "Expression '%s' did not parse"
+msgstr "Não foi possível interpretar a expressão «%s»"
+
+#: install.c:2511
+msgid "Missing 'condition' attribute for an option"
+msgstr "Falta o atributo «condition» numa opção"
+
+#: install.c:2752 install.c:2818
+#, c-format
+msgid "Unable to create desktop file '%s'"
+msgstr "Não foi possível criar o ficheiro de atalho «%s»"
+
+#: install.c:2885 install.c:2888
+#, c-format
+msgid "Unable to create CDE desktop file '%s'"
+msgstr "Não foi possível criar o ficheiro de atalho CDE «%s»"
+
+#: install.c:2924
+#, c-format
+msgid "Unable to create ToolChest menu file '%s'"
+msgstr "Não foi possível criar o ficheiro de menu ToolChest «%s»"
+
+#: log.c:47
+msgid "loki_setup: "
+msgstr "loki_setup: "
+
+#: network.c:156
+msgid "Out of memory, no network check"
+msgstr "Memória insuficiente para verificar a rede"
+
+#: network.c:166
+msgid "Unable to create pipe, no network check"
+msgstr "Não foi possível criar um canal para verificar a rede"
+
+#: network.c:180
+msgid "Fork failed, no network check"
+msgstr "Não foi possível criar um processo para verificar a rede"
+
+#: plugins.c:96
+#, c-format
+msgid ""
+"Registered plugins :\n"
+"\n"
+msgstr ""
+"Módulos registados:\n"
+"\n"
+
+#: plugins.c:98
+#, c-format
+msgid ""
+"\tDescription: %s\n"
+"\tVersion: %s\n"
+"\tAuthor: %s\n"
+msgstr ""
+"\tDescrição: %s\n"
+"\tVersão: %s\n"
+"\tAutor: %s\n"
+
+#: plugins.c:101
+#, c-format
+msgid "\tPlugin is statically linked.\n"
+msgstr "\tMódulo ligado estaticamente.\n"
+
+#: plugins.c:103
+#, c-format
+msgid "\tRecognizes %d extensions: "
+msgstr "\tReconhece %d extensões: "
+
+#: plugins.c:153
+#, c-format
+msgid "Error registering %s plugin: %s\n"
+msgstr "Erro ao registar o módulo %s: %s\n"
+
+#: plugins.c:156
+#, c-format
+msgid "Error initializing %s plugin"
+msgstr "Erro ao inicializar o módulo %s"
+
+#: plugins.c:160
+#, c-format
+msgid "Error trying to load %s plugin: %s\n"
+msgstr "Erro ao tentar carregar o módulo %s: %s\n"
+
+#: plugins/cpio.c:113
+msgid "Invalid CPIO header\n"
+msgstr "Cabeçalho CPIO inválido\n"
+
+#: plugins/cpio.c:173
+#, c-format
+msgid "Bad checksum for file '%s'"
+msgstr "Soma de verificação incorreta para o ficheiro «%s»"
+
+#: plugins/rpm.c:73 plugins/rpm.c:107
+#, c-format
+msgid "RPM error: %s"
+msgstr "Erro do RPM: %s"
+
+#: plugins/rpm.c:156 plugins/rpm.c:163
+#, c-format
+msgid "Unable to install RPM file: '%s'"
+msgstr "Não foi possível instalar o ficheiro RPM: «%s»"
+
+#: plugins/tar.c:138
+#, c-format
+msgid "Tar: '%s' is unknown file type: %c"
+msgstr "Tar: «%s» tem um tipo de ficheiro desconhecido: %c"
+
+#: plugins/tar.c:140
+msgid "Unexpected data in installation file!"
+msgstr "Dados inesperados no ficheiro de instalação!"
+
+#: uninstall.c:49
+#, c-format
+msgid ""
+"Usage: %s [options] [product [component ...]]\n"
+"\n"
+"  -h, --help             Show this help.\n"
+"  -l, --list             List installed products or a product's components.\n"
+"  -v, --version          Show version information.\n"
+"  -L, --locale product   Use translations from the product's installation.\n"
+"\n"
+"Without --list, specify a product to uninstall it or name individual "
+"components.\n"
+msgstr ""
+"Utilização: %s [opções] [produto [componente ...]]\n"
+"\n"
+"  -h, --help             Mostra esta ajuda.\n"
+"  -l, --list             Lista os produtos instalados ou os componentes de um produto.\n"
+"  -v, --version          Mostra as informações da versão.\n"
+"  -L, --locale product   Usa as traduções da instalação do produto indicado.\n"
+"\n"
+"Para desinstalar sem --list, indique o produto e, se necessário, os componentes a remover.\n"
+
+#: uninstall.c:123
+#, c-format
+msgid "Signal %d caught. Aborting.\n"
+msgstr "Recebido o sinal %d. A interromper.\n"
+
+#: uninstall.c:138
+#, c-format
+msgid "Could not change to directory: %s\n"
+msgstr "Não foi possível mudar para a pasta: %s\n"
+
+#: uninstall.c:163
+#, c-format
+msgid "Notice: the %s RPM was installed for this product.\n"
+msgstr "Nota: o RPM %s foi instalado para este produto.\n"
+
+#: uninstall.c:196
+#, c-format
+msgid "Post-uninstall scripts for %s have failed.\n"
+msgstr "Os scripts de pós-desinstalação de %s falharam.\n"
+
+#: uninstall.c:201
+#, c-format
+msgid ""
+"Component %s has been successfully uninstalled.\n"
+"\n"
+msgstr ""
+"O componente %s foi desinstalado com sucesso.\n"
+"\n"
+
+#. TRANSLATORS: The negative shortcut in brackets must match "N".
+#: uninstall.c:222
+#, c-format
+msgid "Uninstall? [Y/n] "
+msgstr "Desinstalar? [S/n] "
+
+#: uninstall.c:225
+msgid "N"
+msgstr "N"
+
+#: uninstall.c:226
+#, c-format
+msgid "Aborted.\n"
+msgstr "Operação interrompida.\n"
+
+#: uninstall.c:276
+#, c-format
+msgid ""
+"No write access to the installation directory.\n"
+"Aborting.\n"
+msgstr ""
+"Sem permissão de escrita na pasta de instalação.\n"
+"A interromper.\n"
+
+#: uninstall.c:284
+#, c-format
+msgid ""
+"No write access to the registry file: %s.\n"
+"Aborting.\n"
+msgstr ""
+"Sem permissão de escrita no ficheiro de registo: %s.\n"
+"A interromper.\n"
+
+#: uninstall.c:509
+#, c-format
+msgid "Warning: Unable to replicate uninstallation program.\n"
+msgstr "Aviso: não foi possível copiar o programa de desinstalação.\n"
+
+#: uninstall.c:513
+#, c-format
+msgid "Unable to open %s for writing.\n"
+msgstr "Não foi possível abrir %s para escrita.\n"
+
+#: uninstall.c:517
+#, c-format
+msgid "Unable to open %s for copying.\n"
+msgstr "Não foi possível abrir %s para cópia.\n"
+
+#: uninstall.c:581
+#, c-format
+msgid "Installed products:\n"
+msgstr "Produtos instalados:\n"
+
+#: uninstall.c:589
+#, c-format
+msgid ""
+"installed in %s\n"
+"\tComponents:\n"
+msgstr ""
+"instalado em %s\n"
+"\tComponentes:\n"
+
+#: uninstall.c:596
+#, c-format
+msgid " Error while accessing product info\n"
+msgstr " Erro ao aceder às informações do produto\n"
+
+#: uninstall.c:600
+#, c-format
+msgid ""
+"No products could be found. Maybe you need to run as a different user?\n"
+msgstr "Não foram encontrados produtos. Terá de executar o programa como outro utilizador?\n"
+
+#: uninstall.c:612
+#, c-format
+msgid "Could not open product information for %s\n"
+msgstr "Não foi possível abrir as informações do produto %s\n"
+
+#: uninstall.c:620
+#, c-format
+msgid ""
+"Product: %s\n"
+"Installed in %s\n"
+msgstr ""
+"Produto: %s\n"
+"Instalado em %s\n"
+
+#: uninstall.c:626
+#, c-format
+msgid "Components:\n"
+msgstr "Componentes:\n"
+
+#: uninstall.c:648
+#, c-format
+msgid "Failed to properly uninstall component %s\n"
+msgstr "Não foi possível desinstalar corretamente o componente %s\n"
+
+#: uninstall.c:651
+#, c-format
+msgid "Unable to find component %s\n"
+msgstr "Não foi possível encontrar o componente %s\n"
+
+#: uninstall.c:662
+#, c-format
+msgid "Uninstallation did not complete.\n"
+msgstr "A desinstalação não foi concluída.\n"
+
+#: uninstall.c:666
+#, c-format
+msgid ""
+"%s has been successfully uninstalled.\n"
+"\n"
+msgstr ""
+"%s foi desinstalado com sucesso.\n"
+"\n"
+
+#: uninstall.glade:28 uninstall.gtk2.glade:8
+msgid "Uninstall Tool"
+msgstr "Ferramenta de desinstalação"
+
+#: uninstall.glade:56 uninstall.gtk2.glade:31
+msgid "Please select the packages you would like to uninstall:"
+msgstr "Selecione os pacotes que pretende desinstalar:"
+
+#: uninstall.glade:99 uninstall.gtk2.glade:61
+msgid "... LOADING PRODUCT LIST ..."
+msgstr "... A CARREGAR A LISTA DE PRODUTOS ..."
+
+#: uninstall.glade:130 uninstall.gtk2.glade:92
+msgid "Recovered space: "
+msgstr "Espaço libertado: "
+
+#: uninstall.glade:147 uninstall.gtk2.glade:105
+msgid "0 MB"
+msgstr "0 MB"
+
+#: uninstall.glade:198
+msgid "_Exit"
+msgstr "_Sair"
+
+#: uninstall.glade:212
+msgid "_Uninstall"
+msgstr "_Desinstalar"
+
+#: uninstall.glade:241 uninstall.gtk2.glade:198
+msgid "Performing uninstall:"
+msgstr "A desinstalar:"
+
+#: uninstall.glade:275 uninstall.gtk2.glade:226
+msgid "[current component]"
+msgstr "[componente atual]"
+
+#: uninstall.glade:310
+msgid "%P %%"
+msgstr "%P %%"
+
+#: uninstall.glade:369
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: uninstall.glade:383
+msgid "Finished"
+msgstr "Terminado"
+
+#: uninstall.gtk2.glade:151
+msgid "Uninstall"
+msgstr "Desinstalar"
+
+#: uninstall_ui.c:86
+msgid "Abort"
+msgstr "Interromper"
+
+#: uninstall_ui.c:101
+msgid "Message"
+msgstr "Mensagem"
+
+#: uninstall_ui.c:236
+#, c-format
+msgid "%d MB"
+msgstr "%d MB"
+
+#: uninstall_ui.c:345
+#, c-format
+msgid ""
+"Uninstallation of component %s has failed!\n"
+"The whole uninstallation may be incomplete.\n"
+msgstr ""
+"A desinstalação do componente %s falhou!\n"
+"A desinstalação poderá estar incompleta.\n"
+
+#: uninstall_ui.c:397
+#, c-format
+msgid ""
+"Uninstallation of product %s has failed!\n"
+"Aborting the rest of the uninstallation.\n"
+msgstr ""
+"A desinstalação do produto %s falhou!\n"
+"A interromper os restantes passos da desinstalação.\n"
+
+#: uninstall_ui.c:424
+msgid "Uninstall cancelled"
+msgstr "Desinstalação cancelada"
+
+#: uninstall_ui.c:427
+msgid "Uninstall aborted"
+msgstr "Desinstalação interrompida"
+
+#: uninstall_ui.c:430
+msgid "Uninstall complete"
+msgstr "Desinstalação concluída"
+
+#: uninstall_ui.c:540
+#, c-format
+msgid "No uninstall_vbox in glade file!\n"
+msgstr "O ficheiro Glade não contém uninstall_vbox!\n"
+
+#: uninstall_ui.c:572
+msgid "Complete uninstall"
+msgstr "Desinstalação completa"
+
+#: uninstall_ui.c:609
+msgid ""
+"No products were installed by this user.\n"
+"You may need to run this tool as an administrator."
+msgstr ""
+"Este utilizador não instalou nenhum produto.\n"
+"Poderá ter de executar esta ferramenta como administrador."
