@@ -34,7 +34,7 @@ New since 1.1:
 ------------------------------------------
 
 This installer uses an XML description file to describe a package,
-and provides both a console and a GTk front-end to install it.
+and provides both a console and GTK front ends to install it.
 
 ## Building the installer
 
@@ -55,9 +55,16 @@ fixture, verifies its registration, and runs the generated uninstaller.
 The test uses a temporary SetupDB registry. `make install` stages binaries
 under `image/setup.data/bin/<OS>/<arch>/` for the media launcher.
 
-Configure detects GTK 2 and libglade 2 when installed. Use `--enable-gtk2`
-to require that front end, `--disable-gtk` for a console-only build, or
-`--disable-dialog` to omit the ncurses UI. Use `--with-setupdb=/path/to/loki_setupdb`
+Configure detects GTK 3 (3.10 or newer) and GTK 2 with libglade 2 independently.
+Use `--enable-gtk3` or `--enable-gtk2` to require a toolkit. Use
+`--disable-gtk3` or `--disable-gtk2` to omit one toolkit, `--disable-gtk` for
+a console-only build, or `--disable-dialog` to omit the ncurses UI.
+`make check loki_uninstall` builds the graphical verification/rescue and
+uninstall tools with the preferred toolkit. Use the versioned executables to select a specific toolkit, for example
+`./check.gtk3 product-id` or `./loki_uninstall.gtk3`. Keep
+`check.gtk3.ui` and `uninstall.gtk3.ui` beside their binaries. The
+`install-check` and `install-loki_uninstall` media targets stage these layouts
+with the tools. Use `--with-setupdb=/path/to/loki_setupdb`
 for a different library checkout. See `./configure --help` for archive
 formats and static-link options. Builds use shared system libraries by default.
 Build both projects with the same libxml major version.
@@ -93,12 +100,16 @@ CD-ROM install file layout:
 setup.sh	(A shell script to run the correct setup binary)
 setup.data/
    setup.xml            (XML file defining the install options)
-   setup.glade          (XML file defining the GTk UI)
+   setup.gtk3.ui        (GtkBuilder layout for the GTK 3 installer)
+   setup.gtk2.glade     (libglade layout for the GTK 2 installer)
+   setup.glade          (libglade layout for legacy GTK 1 media)
    splash.xpm           (Optional splash image for the GTk UI)
    config.sh            (Optional bootstrap configuration script)
    bin/
-   bin/<OS>/<arch>/setup		    (Statically linked console version)
-   bin/<OS>/<arch>/<libc>/setup.gtk	(Dynamically linked GTk version)
+   bin/<OS>/<arch>/setup                 (Console installer)
+   bin/<OS>/<arch>/<libc>/setup.gtk3      (GTK 3 installer)
+   bin/<OS>/<arch>/<libc>/setup.gtk2      (GTK 2 installer)
+   bin/<OS>/<arch>/<libc>/setup.gtk       (Legacy GTK 1 installer)
 
 autorun.inf             (Windows CD autorun file that runs win32/autorun.exe)
 win32/
@@ -114,9 +125,13 @@ You should edit the setup.data/setup.xml file to match your product,
 and add a new splash.xpm which will be displayed during the install.
 There is documentation for the XML setup specification in README.xml
 
-Make sure to copy over the setup.glade file in your setup.data directory
-every time you update 'setup', because the interface definition may
-change between revisions and be incompatible with earlier versions.
+The launcher tries GTK 3, GTK 2, legacy GTK 1, then the console.
+Run `./setup.sh -n` to select the console directly. Ship the layout that
+matches each installer binary. To customize GTK 3, edit
+`setup.data/setup.gtk3.ui` while preserving the widget IDs, types, signal
+handlers, and notebook page order. Set `SETUP_GTK3_UI_FILE` to use a different
+GtkBuilder file. Media that sets `SETUP_GLADE_FILE` can supply both overrides
+to offer its customized layouts in both toolkits.
 
 The binaries for your product are expected to be in bin/<OS>/<arch>/<libc>/
 on the CD.  The appropriate binary for the current architecture will

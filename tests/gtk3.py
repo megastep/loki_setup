@@ -1,0 +1,181 @@
+"""Run from the build directory with xvfb-run and a D-Bus session."""
+
+import os
+from pathlib import Path
+import shutil
+import signal
+import subprocess
+import sys
+import tarfile
+import tempfile
+import time
+
+import pyatspi
+
+
+def descendants(node):
+    yield node
+    for child in node:
+        yield from descendants(child)
+
+
+def wait_for(predicate, description):
+    deadline = time.monotonic() + 15
+    while time.monotonic() < deadline:
+        result = predicate()
+        if result:
+            return result
+        time.sleep(0.1)
+    raise AssertionError(f"Timed out waiting for {description}")
+
+
+def widget(window, name=None, role=None):
+    def find():
+        for node in descendants(pyatspi.Registry.getDesktop(0)):
+            if node.name != window or node.getRoleName() not in ("frame", "dialog", "alert"):
+                continue
+            for item in descendants(node):
+                if (name is None or item.name == name) and (role is None or item.getRoleName() == role):
+                    if item.getState().contains(pyatspi.STATE_SHOWING):
+                        return item
+        return None
+
+    return wait_for(find, f"{role or 'widget'} {name!r} in {window!r}")
+
+
+def click(window, name, role="push button"):
+    assert widget(window, name, role).queryAction().doAction(0), name
+
+
+def run(build, setupdb, work):
+    media = work / "media"
+    installed = work / "installed files"
+    registry = work / "registry"
+    env = dict(os.environ, LC_ALL="C.UTF-8", NO_AT_BRIDGE="0", G_DEBUG="fatal-warnings",
+               SETUPDB_ROOT=str(registry), SETUP_EXEC_TMPDIR=str(work))
+    for key in ("SETUP_GLADE_FILE", "SETUP_GTK3_UI_FILE", "SETUP_ARCH", "SETUPDB_XML_BASE"):
+        env.pop(key, None)
+
+    subprocess.run(["make", "install-image", f"IMAGE={media}", "CONVERT_IMAGE="],
+                   cwd=build, check=True)
+    shutil.copy2(build / "image/setup.sh", media)
+    (media / "setup.data/config.sh").write_text("GET_ROOT=0\n")
+    manifest = """<install product="gtk3-smoke" desc="GTK3 Smoke" version="1"
+         nobinaries="yes">
+  <eula>License.txt</eula>
+  <readme>Readme.txt</readme>
+  <require condition="+(gtk3,!gtk2)">This fixture requires GTK3.</require>
+  <option install="true" required="true">Core<files>payload.tar.gz</files></option>
+  <option install="false" if="gtk3">Extras<files>extra.txt</files></option>
+  <option install="false">Skip me<files>skip.txt</files></option>
+</install>
+"""
+    (media / "setup.data/setup.xml").write_text(manifest)
+    payload = b"Original file from the installer archive\n"
+    (media / "payload.txt").write_bytes(payload)
+    with tarfile.open(media / "payload.tar.gz", "w:gz", format=tarfile.USTAR_FORMAT) as archive:
+        archive.add(media / "payload.txt", arcname="payload.txt")
+    (media / "payload.txt").unlink()
+    (media / "extra.txt").write_text("Selected extra\n")
+    (media / "skip.txt").write_text("Unselected extra\n")
+    (media / "License.txt").write_text("Fixture license agreement.\n")
+    (media / "Readme.txt").write_text("Fixture installation notes.\n")
+    wrong = work / "other media"
+    shutil.copytree(media / "setup.data", wrong / "setup.data", ignore=shutil.ignore_patterns("bin"))
+    (wrong / "setup.data/setup.xml").write_text(manifest.replace('version="1"', 'version="2"'))
+
+    setup_binary, = (media / "setup.data/bin").glob("*/*/*/setup.gtk3")
+    platform = setup_binary.parent.parent
+    check_tools = media / "bin" / platform.parent.name / platform.name
+    check_tools.mkdir(parents=True)
+    uninstall_tools = media / "loki_uninstall/bin" / platform.name / setup_binary.parent.name
+    uninstall_tools.mkdir(parents=True)
+    subprocess.run(["make", "install-check", "install-loki_uninstall", f"IMAGE={media}",
+                    f"UPDATES={work / 'updates'}"], cwd=build, check=True)
+
+    no_display = dict(env, GDK_BACKEND="x11", DISPLAY="")
+    assert subprocess.run([setup_binary], cwd=media, env=no_display).returncode == 4
+    missing_layout = dict(env, SETUP_GTK3_UI_FILE="missing.ui")
+    assert subprocess.run([setup_binary], cwd=media, env=missing_layout).returncode == 4
+
+    processes = []
+    logs = []
+
+    def launch(*args, cwd):
+        log = tempfile.TemporaryFile()
+        logs.append(log)
+        proc = subprocess.Popen(args, cwd=cwd, env=env, stdout=log, stderr=subprocess.STDOUT,
+                                start_new_session=True)
+        processes.append(proc)
+        return proc
+
+    try:
+        setup = launch("./setup.sh", "-i", str(installed), cwd=media)
+        click("License Agreement", "Agree")
+        click("GTK3 Smoke Setup", "View Readme")
+        click("Readme", "Close")
+        click("GTK3 Smoke Setup", "View Readme")
+        click("Readme", "Close")
+        click("GTK3 Smoke Setup", "Extras", "check box")
+        click("GTK3 Smoke Setup", "Begin Install")
+        click("GTK3 Smoke Setup", "Quit")
+        assert setup.wait(timeout=10) == 0
+        assert (installed / "payload.txt").read_bytes() == payload
+        assert (installed / "extra.txt").read_text() == "Selected extra\n"
+        assert not (installed / "skip.txt").exists()
+        files = subprocess.check_output([setupdb, "gtk3-smoke", "listfiles"], env=env, text=True)
+        assert str(installed / "payload.txt") in files
+        assert str(installed / "extra.txt") in files
+
+        (installed / "payload.txt").write_text("Modified file\n")
+        (installed / "extra.txt").unlink()
+        check = launch("./check.gtk3", "gtk3-smoke", cwd=check_tools)
+        widget("Check Installed Files", "Changes detected: 1 files removed, 1 files modified.", "label")
+
+        def rescue_from(directory):
+            click("Check Installed Files", "Rescue")
+            click("Select Installation Media", "Other directory:", "radio button")
+            widget("Select Installation Media", role="text").queryEditableText().setTextContents(str(directory))
+            click("Select Installation Media", "OK")
+
+        rescue_from(wrong)
+        widget("Check Installed Files", "Installation media doesn't match the product.", "label")
+        assert (installed / "payload.txt").read_text() == "Modified file\n"
+        assert not (installed / "extra.txt").exists()
+        rescue_from(media)
+        widget("Check Installed Files", "Files successfully restored!", "label")
+        assert (installed / "payload.txt").read_bytes() == payload
+        assert (installed / "extra.txt").read_text() == "Selected extra\n"
+        click("Check Installed Files", "Close")
+        assert check.wait(timeout=10) == 0
+
+        uninstall = launch("./loki_uninstall.gtk3", cwd=uninstall_tools)
+        click("Loki Uninstall", "Complete uninstall", "check box")
+        click("Loki Uninstall", "Uninstall")
+        widget("Loki Uninstall", "Uninstall complete", "label")
+        click("Loki Uninstall", "Quit")
+        assert uninstall.wait(timeout=10) == 0
+        assert not (installed / "payload.txt").exists()
+        assert not (installed / "extra.txt").exists()
+        assert not os.path.lexists(registry / "installed/gtk3-smoke.xml")
+    except Exception:
+        for node in descendants(pyatspi.Registry.getDesktop(0)):
+            if node.name and node.getState().contains(pyatspi.STATE_SHOWING):
+                print(node.getRoleName(), repr(node.name), file=sys.stderr)
+        for proc, log in zip(processes, logs):
+            log.seek(0)
+            print(f"{proc.args}: {log.read().decode(errors='replace')}", file=sys.stderr)
+        raise
+    finally:
+        for proc in processes:
+            if proc.poll() is None:
+                os.killpg(proc.pid, signal.SIGKILL)
+                proc.wait(timeout=5)
+        for log in logs:
+            log.close()
+
+
+if __name__ == "__main__":
+    with tempfile.TemporaryDirectory(prefix="loki-gtk3-") as directory:
+        run(Path.cwd(), Path(sys.argv[1]).resolve(), Path(directory).resolve())
+    print("GTK3 install, verification, rescue and uninstall passed")

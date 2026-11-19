@@ -1,7 +1,8 @@
 #!/bin/sh
 set -eu
 
-bin=$1/setup.data/bin/$2/$3
+media=$1
+bin=$media/setup.data/bin/$2/$3
 os=$2
 libc_bin=$bin/$4
 target=$5
@@ -11,7 +12,7 @@ mkdir -p "$libc_bin"
 case $target in
     install | install.dbg | install-image)
         # Replace only generated files for this platform. Keep other media assets.
-        rm -f "$libc_bin/setup.gtk" "$libc_bin/setup.gtk2" "$libc_bin/xsu"
+        rm -f "$libc_bin/setup.gtk2" "$libc_bin/setup.gtk3" "$libc_bin/xsu"
         mkdir -p "$libc_bin/plugins"
         for plugin in tar zip uz2 rar rpm; do
             rm -f "$libc_bin/plugins/$plugin.so"
@@ -24,6 +25,16 @@ for source do
         setup | uninstall)
             dest=$bin/$source
             rm -f "$libc_bin/$source"
+            ;;
+        setup.gtk2|setup.gtk3)
+            case $source in
+                setup.gtk2) layout=setup.gtk2.glade ;;
+                setup.gtk3) layout=setup.gtk3.ui ;;
+            esac
+            dest=$libc_bin/$source
+            if [ ! -e "$media/setup.data/$layout" ]; then
+                cp "image/setup.data/$layout" "$media/setup.data/$layout"
+            fi
             ;;
         *) dest=$libc_bin/$source ;;
     esac

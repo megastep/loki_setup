@@ -50,8 +50,6 @@ LD="$CC"
 CFLAGS="$CFLAGS -fsigned-char -Wall -I."
 CONSOLE_LIBS=""
 
-GTK_SUBDIR=gtk1
-
 STATIC=""
 RDYNAMIC="-rdynamic"
 BSTATIC="-Wl,-Bstatic"
@@ -309,25 +307,47 @@ AC_CHECK_HEADERS(ncurses/curses.h)
 AC_CHECK_HEADERS(ncurses.h)
 AC_CHECK_LIB(ncurses, keypad, USE_NCURSES=yes)
 
-AC_ARG_ENABLE([gtk], AS_HELP_STRING([--disable-gtk], [build only the console installer and uninstaller]), [], [enable_gtk=auto])
+AC_ARG_ENABLE([gtk], AS_HELP_STRING([--disable-gtk], [build without GTK front ends]), [], [enable_gtk=auto])
 AC_ARG_ENABLE([gtk2], AS_HELP_STRING([--enable-gtk2], [require GTK 2 and libglade 2]), [], [enable_gtk2=auto])
+AC_ARG_ENABLE([gtk3], AS_HELP_STRING([--enable-gtk3], [require GTK 3]), [], [enable_gtk3=auto])
+
 AC_PATH_TOOL([PKG_CONFIG], [pkg-config])
-SETUP_GTK=
-if test "$enable_gtk" != no && test "$enable_gtk2" != no; then
-    if test -n "$PKG_CONFIG" && "$PKG_CONFIG" --exists gtk+-2.0 libglade-2.0; then
-        AC_DEFINE([ENABLE_GTK2], [1], [GTK2 support.])
-        CFLAGS="$CFLAGS `$PKG_CONFIG --cflags gtk+-2.0 libglade-2.0`"
-        GUI_LIBS="`$PKG_CONFIG --libs gtk+-2.0 libglade-2.0`"
-        if test -n "$GLADE_STATIC"; then
-            GUI_LIBS="$GLADE_STATIC -lglade-2.0 $BDYNAMIC $GUI_LIBS"
+GTK_VERSIONS=
+if test "$enable_gtk" != no; then
+    if test "$enable_gtk3" != no; then
+        if test -n "$PKG_CONFIG" && "$PKG_CONFIG" --exists 'gtk+-3.0 >= 3.10'; then
+            GTK3_CFLAGS=`$PKG_CONFIG --cflags gtk+-3.0`
+            GTK3_LIBS=`$PKG_CONFIG --libs gtk+-3.0`
+            GTK_VERSIONS=gtk3
+        elif test "$enable_gtk3" = yes; then
+            AC_MSG_ERROR([the GTK 3 front end requires gtk+-3.0 >= 3.10])
         fi
-        SETUP_GTK=setup.gtk2
-        GTK_SUBDIR=gtk2
-    elif test "$enable_gtk2" = yes || test "$enable_gtk" = yes; then
-        AC_MSG_ERROR([the GTK installer requires gtk+-2.0 and libglade-2.0])
     fi
+    if test "$enable_gtk2" != no; then
+        if test -n "$PKG_CONFIG" && "$PKG_CONFIG" --exists gtk+-2.0 libglade-2.0; then
+            GTK2_CFLAGS=`$PKG_CONFIG --cflags gtk+-2.0 libglade-2.0`
+            GTK2_LIBS=`$PKG_CONFIG --libs gtk+-2.0 libglade-2.0`
+            if test -n "$GLADE_STATIC"; then
+                GTK2_LIBS="$GLADE_STATIC -lglade-2.0 $BDYNAMIC $GTK2_LIBS"
+            fi
+            GTK_VERSIONS="${GTK_VERSIONS:+$GTK_VERSIONS }gtk2"
+            AC_DEFINE([ENABLE_GTK2], [1], [GTK2 is available for legacy manifest conditions.])
+        elif test "$enable_gtk2" = yes; then
+            AC_MSG_ERROR([the GTK 2 front end requires gtk+-2.0 and libglade-2.0])
+        fi
+    fi
+    if test "$enable_gtk" = yes && test -z "$GTK_VERSIONS"; then
+        AC_MSG_ERROR([the GTK front ends require GTK 3 or GTK 2 with libglade 2])
+    fi
+elif test "$enable_gtk2" = yes || test "$enable_gtk3" = yes; then
+    AC_MSG_ERROR([--disable-gtk conflicts with an explicitly enabled GTK front end])
 fi
-AC_MSG_NOTICE([GTK installer: ${SETUP_GTK:-disabled}])
+AC_MSG_NOTICE([GTK front ends: ${GTK_VERSIONS:-disabled}])
+AC_SUBST([GTK_VERSIONS])
+AC_SUBST([GTK2_CFLAGS])
+AC_SUBST([GTK2_LIBS])
+AC_SUBST([GTK3_CFLAGS])
+AC_SUBST([GTK3_LIBS])
 
 AC_ARG_WITH([libxml2], AS_HELP_STRING([--with-libxml2], [use libxml2 (required)]), [], [with_libxml2=yes])
 AS_IF([test "$with_libxml2" = no], [AC_MSG_ERROR([libxml2 is required])])
@@ -547,8 +567,6 @@ AC_SUBST(IMAGE)
 AC_SUBST(BRAND)
 AC_SUBST(BDYNAMIC)
 AC_SUBST(LD)
-AC_SUBST(SETUP_GTK)
-AC_SUBST(GTK_SUBDIR)
 
 AS_IF([test "$GCC" = yes], [DEPFLAGS="-MMD -MP"])
 AC_SUBST([DEPFLAGS])

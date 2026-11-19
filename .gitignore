@@ -11,9 +11,15 @@ config.status
 setup
 setup.gtk
 setup.gtk2
+setup.gtk3
 xsu
 loki_uninstall
+loki_uninstall.gtk2
+loki_uninstall.gtk3
 uninstall
+check
+check.gtk2
+check.gtk3
 config.guess
 config.sub
 install-sh
