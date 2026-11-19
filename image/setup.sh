@@ -254,6 +254,13 @@ try_run()
         return "$unavailable"
     fi
     trap 'rm -f "$setup"; exit 1' 1 2 3 15
+    # Probe the dynamic loader before an installation can start. Some
+    # platforms report a missing library with a signal instead of 127.
+    if [ "$unavailable" = 4 ] && ! ( "$setup" -V ) >/dev/null 2>&1; then
+        rm -f "$setup"
+        trap - 1 2 3 15
+        return "$unavailable"
+    fi
     "$setup" "$@"
     failed=$?
     rm -f "$setup"
@@ -280,22 +287,19 @@ elif wants_text_ui $args "$@" 2>/dev/null; then
 else
     try_run setup.gtk3 $args "$@"
     status=$?
-    # GTK3 reports an unusable display or layout as 4. The shell and
-    # dynamic linker use 126/127 when the executable cannot run.
-    case "$status" in
-        4|126|127)
-            try_run setup.gtk2 $args "$@" 2>/dev/null
+    # Status 4 means GTK3 could not start. All other statuses belong to the
+    # installer and must be propagated once the loader probe has succeeded.
+    if [ "$status" -eq 4 ]; then
+        for legacy in setup.gtk2 setup.gtk; do
+            try_run "$legacy" $args "$@" 2>/dev/null
             status=$?
-            if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then
-                try_run setup.gtk $args "$@"
-                status=$?
-                if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then
-                    try_run setup $args "$@"
-                    status=$?
-                fi
-            fi
-            ;;
-    esac
+            case "$status" in 0|2) break ;; esac
+        done
+        if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then
+            try_run setup $args "$@"
+            status=$?
+        fi
+    fi
 fi
 
 if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then

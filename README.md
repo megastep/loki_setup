@@ -128,8 +128,8 @@ There is documentation for the XML setup specification in README.xml
 The launcher tries GTK 3, GTK 2, legacy GTK 1, then the console.
 Run `./setup.sh -n` to select the console directly. Ship the layout that
 matches each installer binary. To customize GTK 3, edit
-`setup.data/setup.gtk3.ui` while preserving the widget IDs, types, signal
-handlers, and notebook page order. Set `SETUP_GTK3_UI_FILE` to use a different
+`setup.data/setup.gtk3.ui` while preserving the widget IDs and widget types. The installer
+binds actions in C and finds notebook pages by ID. Set `SETUP_GTK3_UI_FILE` to use a different
 GtkBuilder file. Media that sets `SETUP_GLADE_FILE` can supply both overrides
 to offer its customized layouts in both toolkits.
 

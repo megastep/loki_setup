@@ -7,7 +7,6 @@
     <property name="default-height">420</property>
     <property name="modal">False</property>
     <property name="window-position">center</property>
-    <signal name="delete-event" handler="close_setup_window" />
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
@@ -72,7 +71,6 @@
                             <property name="label" translatable="yes">_Cancel</property>
                             <property name="use-underline">True</property>
                             <property name="sensitive">True</property>
-                            <signal name="clicked" handler="setup_button_exit_slot" />
                           </object>
                         </child>
                         <child>
@@ -81,7 +79,6 @@
                             <property name="label" translatable="yes">_View Readme</property>
                             <property name="use-underline">True</property>
                             <property name="sensitive">True</property>
-                            <signal name="clicked" handler="setup_button_view_readme_slot" />
                           </object>
                         </child>
                         <child>
@@ -90,7 +87,6 @@
                             <property name="label" translatable="yes">_Continue</property>
                             <property name="use-underline">True</property>
                             <property name="sensitive">True</property>
-                            <signal name="clicked" handler="on_class_continue_clicked" />
                           </object>
                         </child>
                       </object>
@@ -98,7 +94,7 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkBox">
+                  <object class="GtkBox" id="options_page">
                     <property name="visible">True</property>
                     <property name="orientation">vertical</property>
                     <property name="spacing">8</property>
@@ -147,7 +143,6 @@
                                 <property name="visible">True</property>
                                 <property name="label" translatable="yes">Install a symbolic link into the path</property>
                                 <property name="active">True</property>
-                                <signal name="toggled" handler="on_use_binary_toggled" />
                               </object>
                             </child>
                             <child>
@@ -229,7 +224,6 @@
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">Startup menu entries</property>
                         <property name="active">True</property>
-                        <signal name="toggled" handler="setup_checkbox_menuitems_slot" />
                       </object>
                     </child>
                     <child>
@@ -256,7 +250,6 @@
                             <property name="label" translatable="yes">_Cancel</property>
                             <property name="use-underline">True</property>
                             <property name="sensitive">True</property>
-                            <signal name="clicked" handler="setup_button_exit_slot" />
                           </object>
                         </child>
                         <child>
@@ -265,7 +258,6 @@
                             <property name="label" translatable="yes">_View Readme</property>
                             <property name="use-underline">True</property>
                             <property name="sensitive">True</property>
-                            <signal name="clicked" handler="setup_button_view_readme_slot" />
                           </object>
                         </child>
                         <child>
@@ -274,7 +266,6 @@
                             <property name="label" translatable="yes">_Begin Install</property>
                             <property name="use-underline">True</property>
                             <property name="sensitive">False</property>
-                            <signal name="clicked" handler="setup_button_install_slot" />
                     <style>
                       <class name="suggested-action" />
                     </style>
@@ -285,7 +276,7 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkBox">
+                  <object class="GtkBox" id="copy_page">
                     <property name="visible">True</property>
                     <property name="orientation">vertical</property>
                     <property name="spacing">8</property>
@@ -336,7 +327,6 @@
                             <property name="label" translatable="yes">_Cancel</property>
                             <property name="use-underline">True</property>
                             <property name="sensitive">True</property>
-                            <signal name="clicked" handler="setup_button_cancel_slot" />
                           </object>
                         </child>
                         <child>
@@ -345,7 +335,6 @@
                             <property name="label" translatable="yes">_View Readme</property>
                             <property name="use-underline">True</property>
                             <property name="sensitive">True</property>
-                            <signal name="clicked" handler="setup_button_view_readme_slot" />
                           </object>
                         </child>
                       </object>
@@ -353,7 +342,7 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkBox">
+                  <object class="GtkBox" id="done_page">
                     <property name="visible">True</property>
                     <property name="orientation">vertical</property>
                     <property name="spacing">8</property>
@@ -391,7 +380,6 @@
                             <property name="label" translatable="yes">_Quit</property>
                             <property name="use-underline">True</property>
                             <property name="sensitive">True</property>
-                            <signal name="clicked" handler="setup_button_exit_slot" />
                           </object>
                         </child>
                         <child>
@@ -400,7 +388,6 @@
                             <property name="label" translatable="yes">_View Readme</property>
                             <property name="use-underline">True</property>
                             <property name="sensitive">True</property>
-                            <signal name="clicked" handler="setup_button_view_readme_slot" />
                           </object>
                         </child>
                         <child>
@@ -409,7 +396,6 @@
                             <property name="label" translatable="yes">_Play</property>
                             <property name="use-underline">True</property>
                             <property name="sensitive">True</property>
-                            <signal name="clicked" handler="setup_button_play_slot" />
                           </object>
                         </child>
                       </object>
@@ -417,7 +403,7 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkBox">
+                  <object class="GtkBox" id="abort_page">
                     <property name="visible">True</property>
                     <property name="orientation">vertical</property>
                     <property name="spacing">8</property>
@@ -442,7 +428,6 @@
                             <property name="label" translatable="yes">_Quit</property>
                             <property name="use-underline">True</property>
                             <property name="sensitive">True</property>
-                            <signal name="clicked" handler="setup_button_abort_slot" />
                           </object>
                         </child>
                       </object>
@@ -450,7 +435,7 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkBox">
+                  <object class="GtkBox" id="warning_page">
                     <property name="visible">True</property>
                     <property name="orientation">vertical</property>
                     <property name="spacing">8</property>
@@ -474,7 +459,6 @@
                             <property name="label" translatable="yes">_Cancel</property>
                             <property name="use-underline">True</property>
                             <property name="sensitive">True</property>
-                            <signal name="clicked" handler="setup_button_warning_cancel_slot" />
                           </object>
                         </child>
                         <child>
@@ -483,7 +467,6 @@
                             <property name="label" translatable="yes">_Continue</property>
                             <property name="use-underline">True</property>
                             <property name="sensitive">True</property>
-                            <signal name="clicked" handler="setup_button_warning_continue_slot" />
                           </object>
                         </child>
                       </object>
@@ -491,7 +474,7 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkBox">
+                  <object class="GtkBox" id="website_page">
                     <property name="visible">True</property>
                     <property name="orientation">vertical</property>
                     <property name="spacing">8</property>
@@ -531,7 +514,6 @@
                             <property name="label" translatable="yes">Launch _Browser</property>
                             <property name="use-underline">True</property>
                             <property name="sensitive">True</property>
-                            <signal name="clicked" handler="setup_button_browser_slot" />
                           </object>
                         </child>
                       </object>
@@ -548,7 +530,6 @@
                             <property name="label" translatable="yes">_Quit</property>
                             <property name="use-underline">True</property>
                             <property name="sensitive">True</property>
-                            <signal name="clicked" handler="setup_button_exit_slot" />
                           </object>
                         </child>
                         <child>
@@ -557,7 +538,6 @@
                             <property name="label" translatable="yes">_View Readme</property>
                             <property name="use-underline">True</property>
                             <property name="sensitive">True</property>
-                            <signal name="clicked" handler="setup_button_view_readme_slot" />
                           </object>
                         </child>
                         <child>
@@ -566,7 +546,6 @@
                             <property name="label" translatable="yes">_Continue</property>
                             <property name="use-underline">True</property>
                             <property name="sensitive">True</property>
-                            <signal name="clicked" handler="setup_button_complete_slot" />
                           </object>
                         </child>
                       </object>
@@ -574,7 +553,7 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkBox">
+                  <object class="GtkBox" id="cdkey_page">
                     <property name="visible">True</property>
                     <property name="orientation">vertical</property>
                     <property name="spacing">8</property>
@@ -590,7 +569,6 @@
                     <child>
                       <object class="GtkEntry" id="setup_cdkey_entry">
                         <property name="visible">True</property>
-                        <signal name="changed" handler="setup_cdkey_entry_changed_slot" />
                       </object>
                     </child>
                     <child>
@@ -605,7 +583,6 @@
                             <property name="label" translatable="yes">_Cancel</property>
                             <property name="use-underline">True</property>
                             <property name="sensitive">True</property>
-                            <signal name="clicked" handler="setup_button_cancel_slot" />
                           </object>
                         </child>
                         <child>
@@ -614,7 +591,6 @@
                             <property name="label" translatable="yes">_Continue</property>
                             <property name="use-underline">True</property>
                             <property name="sensitive">False</property>
-                            <signal name="clicked" handler="setup_button_cdkey_continue_slot" />
                           </object>
                         </child>
                       </object>
@@ -640,7 +616,6 @@
     <property name="default-height">440</property>
     <property name="modal">True</property>
     <property name="window-position">center</property>
-    <signal name="delete-event" handler="close_license_window" />
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
@@ -678,7 +653,6 @@
                 <property name="label" translatable="yes">_Cancel</property>
                 <property name="use-underline">True</property>
                 <property name="sensitive">True</property>
-                <signal name="clicked" handler="setup_destroy_license_slot" />
               </object>
             </child>
             <child>
@@ -687,7 +661,6 @@
                 <property name="label" translatable="yes">_Agree</property>
                 <property name="use-underline">True</property>
                 <property name="sensitive">True</property>
-                <signal name="clicked" handler="setup_button_license_agree_slot" />
               </object>
             </child>
           </object>
@@ -701,7 +674,6 @@
     <property name="default-height">440</property>
     <property name="modal">False</property>
     <property name="window-position">center</property>
-    <signal name="delete-event" handler="close_readme_window" />
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
@@ -739,7 +711,6 @@
                 <property name="label" translatable="yes">_Close</property>
                 <property name="use-underline">True</property>
                 <property name="sensitive">True</property>
-                <signal name="clicked" handler="setup_close_view_readme_slot" />
               </object>
             </child>
           </object>

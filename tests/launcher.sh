@@ -125,6 +125,9 @@ printf '%s\n' 'Launcher elevation tests passed'
 
 cat > "$bin/glibc-2.1/setup.gtk3" <<'GTK'
 #!/bin/sh
+if [ "$1" = -V ]; then
+    exit "$TEST_GTK3_PROBE_STATUS"
+fi
 printf '%s\n' "gtk3:$TEST_UID" "$@" >> "$TRACE"
 exit "$TEST_GTK3_STATUS"
 GTK
@@ -132,19 +135,24 @@ chmod +x "$bin/glibc-2.1/setup.gtk3"
 TEST_OS=Linux
 TEST_UID=1000
 
-export TEST_GTK3_STATUS=0
+export TEST_GTK3_STATUS=0 TEST_GTK3_PROBE_STATUS=0
 run 0 0
 printf '%s\n' gtk3:1000 -i "$dest" -o 'Base & extras' > "$work/expected-gtk3"
 cmp "$work/expected-gtk3" "$TRACE"
 
-for TEST_GTK3_STATUS in 4 126 127; do
+for TEST_GTK3_PROBE_STATUS in 126 127 134; do
     run 0 0
-    cp "$work/expected-gtk3" "$work/expected"
-    printf '%s\n' gtk:1000 -i "$dest" -o 'Base & extras' >> "$work/expected"
+    printf '%s\n' gtk:1000 -i "$dest" -o 'Base & extras' > "$work/expected"
     cmp "$work/expected" "$TRACE"
 done
+TEST_GTK3_PROBE_STATUS=0
+TEST_GTK3_STATUS=4
+run 0 0
+cp "$work/expected-gtk3" "$work/expected"
+printf '%s\n' gtk:1000 -i "$dest" -o 'Base & extras' >> "$work/expected"
+cmp "$work/expected" "$TRACE"
 
-for TEST_GTK3_STATUS in 1 2 3; do
+for TEST_GTK3_STATUS in 1 2 3 134; do
     run 0 "$TEST_GTK3_STATUS"
     cmp "$work/expected-gtk3" "$TRACE"
 done

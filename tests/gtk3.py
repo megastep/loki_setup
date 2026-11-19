@@ -9,6 +9,7 @@ import sys
 import tarfile
 import tempfile
 import time
+from xml.etree import ElementTree
 
 import pyatspi
 
@@ -74,7 +75,7 @@ def run(build, setupdb, work):
 exit 0
     </binary>
   </option>
-  <option install="false" if="gtk3">Extras<files>extra.txt</files></option>
+  <option install="false" if="gtk3">Extras<eula>ExtraLicense.txt</eula><files>extra.txt</files></option>
   <option install="false">Skip me<files>skip.txt</files></option>
 </install>
 """
@@ -87,6 +88,7 @@ exit 0
     (media / "extra.txt").write_text("Selected extra\n")
     (media / "skip.txt").write_text("Unselected extra\n")
     (media / "License.txt").write_text("Fixture license agreement.\n")
+    (media / "ExtraLicense.txt").write_text("Optional extras license.\n")
     (media / "Readme.txt").write_text("Fixture installation notes.\n")
     man_page = Path("man/man1/gtk3-smoke.1")
     (media / man_page.parent).mkdir(parents=True)
@@ -99,15 +101,39 @@ exit 0
     platform = setup_binary.parent.parent
     check_tools = media / "bin" / platform.parent.name / platform.name
     check_tools.mkdir(parents=True)
+    vendor_tools = check_tools / "bin"
+    vendor_tools.mkdir()
     uninstall_tools = media / "loki_uninstall/bin" / platform.name / setup_binary.parent.name
     uninstall_tools.mkdir(parents=True)
-    subprocess.run(["make", "install-check", "install-loki_uninstall", f"IMAGE={media}",
-                    f"UPDATES={work / 'updates'}"], cwd=build, check=True)
+    updates = work / "updates"
+    updates.mkdir()
+
+    def stage_utilities(*options):
+        subprocess.run(["make", *options, "install-check", "install-loki_uninstall",
+                        "copy-loki_uninstall", f"IMAGE={media}", f"UPDATES={updates}"],
+                       cwd=build, check=True)
+
+    stage_utilities()
 
     no_display = dict(env, GDK_BACKEND="x11", DISPLAY="")
     assert subprocess.run([setup_binary], cwd=media, env=no_display).returncode == 4
     missing_layout = dict(env, SETUP_GTK3_UI_FILE="missing.ui")
     assert subprocess.run([setup_binary], cwd=media, env=missing_layout).returncode == 4
+    layout = ElementTree.parse(media / "setup.data/setup.gtk3.ui")
+    agree = layout.find(".//object[@id='license_agree']")
+    agree.set("id", "unused_button")
+    incomplete = work / "incomplete.ui"
+    layout.write(incomplete, encoding="utf-8")
+    assert subprocess.run([setup_binary], cwd=media,
+                          env=dict(env, SETUP_GTK3_UI_FILE=str(incomplete))).returncode == 4
+    agree.set("id", "license_agree")
+    book = layout.find(".//object[@id='setup_notebook']")
+    options = book.find("child/object[@id='options_page']/..")
+    book.remove(options)
+    book.append(options)
+    reordered = work / "reordered.ui"
+    layout.write(reordered, encoding="utf-8")
+    env["SETUP_GTK3_UI_FILE"] = str(reordered)
 
     processes = []
     logs = []
@@ -135,7 +161,23 @@ exit 0
         assert menu.queryComponent().grabFocus()
         click("GTK3 Smoke Setup", "View Readme")
         click("Readme", "Close")
-        click("GTK3 Smoke Setup", "Extras", "check box")
+        def select_extras():
+            # Dispatch a keyboard event so AT-SPI remains available while
+            # the option callback waits for a license response.
+            extra = widget("GTK3 Smoke Setup", "Extras", "check box")
+            window_id = subprocess.check_output(
+                ["xdotool", "search", "--onlyvisible", "--name", "^GTK3 Smoke Setup$"],
+                text=True).strip()
+            subprocess.run(["xdotool", "windowfocus", "--sync", window_id], check=True)
+            assert extra.queryComponent().grabFocus()
+            subprocess.run(["xdotool", "key", "space"], check=True)
+
+        select_extras()
+        click("License Agreement", "Cancel")
+        extra = widget("GTK3 Smoke Setup", "Extras", "check box")
+        wait_for(lambda: not extra.getState().contains(pyatspi.STATE_CHECKED), "declined option")
+        select_extras()
+        click("License Agreement", "Agree")
         click("GTK3 Smoke Setup", "Begin Install")
         click("GTK3 Smoke Setup", "Quit")
         assert setup.wait(timeout=10) == 0
@@ -179,6 +221,24 @@ exit 0
         assert not (installed / "payload.txt").exists()
         assert not (installed / "extra.txt").exists()
         assert not os.path.lexists(registry / "installed/gtk3-smoke.xml")
+
+        update_bin, = updates.glob("bin-*")
+        vendor_uninstaller, = (vendor_tools / "gtk3").glob("*-uninstall")
+        gtk3_tools = (check_tools / "check.gtk3", uninstall_tools / "loki_uninstall.gtk3",
+                      update_bin / "loki_uninstall.gtk3", vendor_uninstaller)
+        assert all(path.is_file() for path in gtk3_tools)
+        keep = vendor_uninstaller.with_name("package-notes")
+        keep.write_text("Media-owned content")
+        if (build / "check.gtk2").is_file():
+            stage_utilities("GTK_VERSIONS=gtk2", "-W", "check.gtk2", "-W", "loki_uninstall.gtk2")
+            assert (check_tools / "check.gtk2").is_file()
+            assert (uninstall_tools / "loki_uninstall.gtk2").is_file()
+            assert all(not path.exists() for path in gtk3_tools)
+        stage_utilities("GTK_VERSIONS=")
+        assert all(not path.exists() for path in gtk3_tools)
+        assert not (check_tools / "check").exists()
+        assert not (uninstall_tools / "loki_uninstall").exists()
+        assert keep.read_text() == "Media-owned content"
     except Exception:
         for node in descendants(pyatspi.Registry.getDesktop(0)):
             if node.name and node.getState().contains(pyatspi.STATE_SHOWING):
