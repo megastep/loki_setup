@@ -950,9 +950,9 @@ int matches_repair_media(const char *path, product_t *product)
     product_component_t *component = loki_getdefault_component(product);
     const product_info_t *registered = loki_getinfo_product(product);
     xmlDocPtr document;
-    xmlNodePtr root;
-    xmlChar *name, *version;
-    int matches;
+    xmlNodePtr root, node;
+    xmlChar *name;
+    int matches = 0, has_components = 0;
 
     if (!component || (geteuid() == 0 &&
         (!trusted_product_files(registered) || !trusted_path(path, 0))))
@@ -962,11 +962,32 @@ int matches_repair_media(const char *path, product_t *product)
         return 0;
     root = xmlDocGetRootElement(document);
     name = root ? xmlGetProp(root, BAD_CAST "product") : NULL;
-    version = root ? xmlGetProp(root, BAD_CAST "version") : NULL;
-    matches = name && version && !strcmp((const char *)name, registered->name) &&
-              !strcmp((const char *)version, loki_getversion_component(component));
+    if (name && xmlStrEqual(name, BAD_CAST registered->name)) {
+        const xmlChar *component_name = BAD_CAST loki_getname_component(component);
+        const xmlChar *component_version = BAD_CAST loki_getversion_component(component);
+
+        for (node = root->children; node; node = node->next) {
+            xmlChar *media_name, *media_version;
+
+            if (node->type != XML_ELEMENT_NODE || !xmlStrEqual(node->name, BAD_CAST "component"))
+                continue;
+            has_components = 1;
+            media_name = xmlGetProp(node, BAD_CAST "name");
+            media_version = xmlGetProp(node, BAD_CAST "version");
+            matches = xmlStrEqual(media_name, component_name) &&
+                      xmlStrEqual(media_version, component_version);
+            xmlFree(media_name);
+            xmlFree(media_version);
+            if (matches)
+                break;
+        }
+        if (!has_components) {
+            xmlChar *version = xmlGetProp(root, BAD_CAST "version");
+            matches = xmlStrEqual(version, component_version);
+            xmlFree(version);
+        }
+    }
     xmlFree(name);
-    xmlFree(version);
     xmlFreeDoc(document);
     return matches;
 }
@@ -1093,9 +1114,8 @@ install_info *create_install(const char *configfile,
         info->lookup = NULL;
     }
 
-	/* Init the booleans before starting to call commands */
-    if (!restoring_corrupt())
-        setup_init_bools(info);
+    /* Built-in booleans are also needed to select files during repair. */
+    setup_init_bools(info);
 
     /* That was easy.. :) */
     return(info);

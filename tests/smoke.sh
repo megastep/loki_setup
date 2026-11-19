@@ -19,8 +19,8 @@ cd "$work/media"
 printf '%s\n' 'Loki Setup build test' > payload.txt
 chmod u+s payload.txt
 case "$(uname -s)" in
-    OpenBSD) set -- -F ustar ;;
-    *) set -- --format=ustar ;;
+    OpenBSD) set -- -F ustar; cpio_format=sv4cpio ;;
+    *) set -- --format=ustar; cpio_format=newc ;;
 esac
 COPYFILE_DISABLE=1 tar "$@" -czf payload.tar.gz payload.txt
 mv payload.txt "$work/expected"
@@ -32,7 +32,7 @@ if command -v zip >/dev/null 2>&1; then
 fi
 if command -v cpio >/dev/null 2>&1; then
     cp extras/extra.txt extras/cpio.txt
-    printf '%s\n' extras/cpio.txt | cpio -o -H newc > extras.cpio 2>/dev/null
+    printf '%s\n' extras/cpio.txt | cpio -o -H "$cpio_format" > extras.cpio
 fi
 export SMOKE_TRACE="$work/hooks"
 cat > preinstall.sh <<'SH'
