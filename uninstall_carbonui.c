@@ -1,3 +1,4 @@
+#include "registry.h"
 #include "carbon/carbonres.h"
 #include "carbon/carbondebug.h"
 #include <stdlib.h>
@@ -469,7 +470,7 @@ int uninstall_ui(int argc, char *argv[])
         product_name=loki_getnextproduct())
     {
         // See if we can open the product
-        product = loki_openproduct(product_name);
+        product = open_registered_product(product_name);
         if(!product)
             continue;
 

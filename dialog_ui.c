@@ -556,8 +556,6 @@ install_state dialog_setup(install_info *info)
     /* HACK: Use external cd key validation program, if it exists. --ryan. */
     if(GetProductCDKey(info))
     {
-        #define CDKEYCHECK_PROGRAM "./vcdk"
-        char cmd[sizeof (gCDKeyString) + sizeof (CDKEYCHECK_PROGRAM) + 64];
         char *p;
         int cdkey_is_okay = 0;
         while (!cdkey_is_okay)
@@ -574,16 +572,15 @@ install_state dialog_setup(install_info *info)
             strncpy(gCDKeyString, dialog_vars.input_result, sizeof(gCDKeyString));
             gCDKeyString[sizeof (gCDKeyString) - 1] = '\0';
 
-            snprintf(cmd, sizeof (cmd), "%s-%s", CDKEYCHECK_PROGRAM, info->arch);
-            if (access(cmd, X_OK) != 0)
+            int validation = validate_cdkey(info->arch, gCDKeyString);
+            if (validation < 0)
             {
     		    dialog_msgbox(_("Error"), _("vcdk is missing. Installation aborted.\n"), 10, 40, 1);
 	    	    return SETUP_ABORT;
             }
             else
             {
-                snprintf(cmd, sizeof (cmd), "%s-%s %s", CDKEYCHECK_PROGRAM, info->arch, gCDKeyString);
-                if (system(cmd) == 0)  /* binary ran and reported key invalid? */
+                if (validation == 0)
     			    dialog_msgbox(_("Problem"), _("CD key is invalid!\nPlease double check your key and enter it again.\n"), 10, 40, 1);
                 else
                     cdkey_is_okay = 1;
@@ -593,7 +590,7 @@ install_state dialog_setup(install_info *info)
         p = gCDKeyString;
         while(*p)
         {
-            *p = toupper(*p);
+            *p = toupper((unsigned char)*p);
             p++;
         }
     }

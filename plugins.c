@@ -1,3 +1,4 @@
+#include "safe_path.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -144,7 +145,11 @@ int InitPlugins(void)
         }
 
 		for( i = 0; i < glb.gl_pathc; ++i ) {
-			void *dl = dlopen(glb.gl_pathv[i], RTLD_NOW | RTLD_GLOBAL );
+            void *dl;
+            if ((geteuid() == 0 || getuid() != geteuid() || getgid() != getegid()) &&
+                !trusted_path(glb.gl_pathv[i], 0))
+                continue;
+            dl = dlopen(glb.gl_pathv[i], RTLD_NOW | RTLD_GLOBAL);
 			if ( dl ) {
 				char *error;
 				GetSetupPluginPtr fnc = dlsym(dl,"GetSetupPlugin");

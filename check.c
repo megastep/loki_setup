@@ -1,3 +1,4 @@
+#include "registry.h"
 /*
  * Check and Rescue Tool for Loki Setup packages. Verifies the consistency of the files,
  * and optionally restores them from the original installation medium.
@@ -223,26 +224,14 @@ on_media_cancel_clicked (GtkButton       *button,
 	gtk_widget_hide(glade_xml_get_widget(rescue_glade, "media_select"));
 }
 
-int check_xml_setup(const char *file, const char *product)
-{
-	int ret = 0;
-	xmlDocPtr doc = xmlParseFile(file);
-	if ( doc ) {
-		const char *prod = xmlGetProp(XML_ROOT(doc), "product");
-		if ( prod && !strcmp(prod, product) ) {
-			ret = 1;
-		}
-		xmlFreeDoc(doc);
-	}
-	return ret;
-}
+
 
 void
 on_media_ok_clicked (GtkButton       *button,
 					 gpointer         user_data)
 {
 	GtkWidget *diag = glade_xml_get_widget(check_glade, "diagnostic_label"), *radio;
-	char path[PATH_MAX], root[PATH_MAX];
+	char path[PATH_MAX] = "", root[PATH_MAX] = "";
 	install_info *install;
 	
 	radio = glade_xml_get_widget(rescue_glade, "dir_radio");
@@ -274,7 +263,7 @@ on_media_ok_clicked (GtkButton       *button,
 	}
 
 	/* Verify that the package is the same (product name and version) */
-	if ( ! check_xml_setup(path, info->name) ) {
+	if ( ! matches_repair_media(path, product) ) {
 		gtk_label_set_text(GTK_LABEL(diag), _("Installation media doesn't match the product."));
 		gtk_widget_hide(glade_xml_get_widget(rescue_glade, "media_select"));
 		return;		
@@ -284,24 +273,17 @@ on_media_ok_clicked (GtkButton       *button,
 	gtk_widget_realize(diag);
 	
 	/* Fetch the files to be refreshed, i.e install with a restricted set of files  */
+    begin_repair();
 	install = create_install(path, info->root, NULL, info->prefix);
-	if ( install ) {
+	if (install && chdir(root) == 0) {
 		const char *f;
 
-		if ( chdir(root) < 0 ) {
-			fprintf(stderr, _("Unable to change to directory %s\n"), root);
-		} else {
-			/* Update the setup path */
-			strncpy(install->setup_path, root, sizeof(install->setup_path));
-		}
+        snprintf(install->setup_path, sizeof(install->setup_path), "%s", root);
 
 		/* Check if we need to create a default component entry */
 		if ( GetProductNumComponents(install) == 0 ) {
 			current_component = add_component_entry(install, "Default", install->version, 1, NULL, NULL);
 		}
-
-		/* Restore any environment */
-		loki_put_envvars_component(loki_find_component(product, current_component->name));
 
 		/* Enable the relevant options */
 		select_corrupt_options(install);
@@ -322,6 +304,13 @@ on_media_ok_clicked (GtkButton       *button,
 		}
 
 	}
+
+    if (!repair_complete()) {
+        gtk_label_set_text(GTK_LABEL(diag), _("Installation media doesn't match the product."));
+        gtk_widget_hide(glade_xml_get_widget(rescue_glade, "media_select"));
+        unmount_filesystems();
+        return;
+    }
 
 	/* Print end message and disable the "Rescue" button */
 	gtk_label_set_text(GTK_LABEL(diag), _("Files successfully restored!"));
@@ -453,8 +442,8 @@ int main(int argc, char *argv[])
 	list = glade_xml_get_widget(check_glade, "main_list");
 	scroll = glade_xml_get_widget(check_glade, "scrolledwindow");
 
-	product = loki_openproduct(argv[1]);
-	if ( ! product ) {
+	product = open_registered_product(argv[1]);
+	if (!product || !trusted_product_files(loki_getinfo_product(product))) {
 	  message_dialog(_("Impossible to locate the product information.\nMaybe another user installed it?"),
 					 _("Error"));
 		return 1;
@@ -490,12 +479,12 @@ int main(int argc, char *argv[])
 				case LOKI_REMOVED:
 					add_message(list, _("%s was REMOVED"), loki_getpath_file(file));
 					removed ++;
-					add_corrupt_file(product, loki_getpath_file(file), loki_getname_option(option));
+					add_corrupt_file(file, loki_getname_option(option));
 					break;
 				case LOKI_CHANGED:
 					add_message(list, _("%s was MODIFIED"), loki_getpath_file(file));
 					modified ++;
-					add_corrupt_file(product, loki_getpath_file(file), loki_getname_option(option));
+					add_corrupt_file(file, loki_getname_option(option));
 					break;
 				case LOKI_OK:
 					add_message(list, _("%s is OK"), loki_getpath_file(file));

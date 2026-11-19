@@ -77,6 +77,10 @@ installer binary directly.
 Run `./setup.sh` from a terminal to authenticate with `sudo`, or with `doas`
 on OpenBSD. Automatic elevation uses the terminal UI. You can also run
 `sudo ./setup.sh -n` or `doas ./setup.sh -n` directly for trusted media.
+For administrator installs, stage the media in a root-owned directory whose
+files and directories are protected from group and other writes. Use a
+protected installation directory for the files and uninstall registry.
+The installer offers to launch the installed program in user sessions.
 
 ## Installation media
 

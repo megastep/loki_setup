@@ -5,6 +5,7 @@
 
 /* Functions to handle logging and low level file functions */
 
+#include <limits.h>
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -30,6 +31,10 @@ typedef struct {
 	BZFILE *bzfp;
 	MD5_CONTEXT md5;
 	struct file_elem *elem;
+    char *repair_temp;
+    int repair_parent;
+    unsigned int repair_mode;
+    unsigned char repair_digest[16];
 } stream;
 
 extern void file_init(void);
@@ -46,8 +51,10 @@ extern int file_close(install_info *info, stream *streamp);
 extern int file_symlink(install_info *info, const char *oldpath, const char *newpath);
 extern int file_issymlink(install_info *info, const char *path);
 extern int file_mkdir(install_info *info, const char *path, int mode);
-extern int file_mkfifo(install_info *info, const char *path, int mode);
-extern int file_mknod(install_info *info, const char *path, int mode, dev_t dev);
+extern int archive_path(char out[PATH_MAX], const char *dest, const char *name);
+extern int archive_symlink(install_info *info, const char *dest, const char *name,
+                           const char *target, const char *path);
+extern void file_verify_checksum(stream *output, const char *expected);
 extern int file_chmod(install_info *info, const char *path, int mode);
 extern size_t file_size(install_info *info, const char *path);
 extern int file_exists(const char *path);

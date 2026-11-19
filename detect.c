@@ -342,7 +342,7 @@ void unmount_filesystems(void)
     struct mounted_elem *mnt = mounted_list, *oldmnt;
     while ( mnt ) {
         log_normal(_("Unmounting device %s"), mnt->device);
-        if ( run_command(NULL, UMOUNT_PATH, "-l", mnt->dir, 1) ) {
+        if ( run_command(NULL, UMOUNT_PATH, mnt->dir, NULL, 1) ) {
             log_warning(_("Failed to unmount device %s mounted on %s"), mnt->device, mnt->dir);
         }
         free(mnt->device);
@@ -352,55 +352,6 @@ void unmount_filesystems(void)
         free(oldmnt);
     }
 
-#if defined(HAVE_MNTENT_H) || defined(__svr4__)
-    const char *mtab, *mnttype;
-    FILE *mountfp;
-    //Now go through the list of filesystems left that may not be in fstab,
-    //such as ones automounted through the gnome automounter or manually
-    //mounted on loop - MS:LGP
-    if ( !access("/etc/pfs_fstab", F_OK) ) {
-		mtab = "/etc/pfs_mtab";
-		mnttype = "pfs-rrip";
-    } else {
-		mtab = MOUNTS_FILE;
-		mnttype = MNTTYPE_CDROM;
-    }
-
-#if defined(__svr4__)
-	mountfp = fopen(MOUNTS_FILE, "r");
-	if ( mountfp != NULL ) {
-		struct mnttab mnt;
-
-		while ( getmntent(mountfp, &mnt)==0 ) {
-			if ( !strcmp(mnt.mnt_fstype, mnttype) ) {
-				if ( ! run_command(NULL, UMOUNT_PATH, "-l", mnt.mnt_special, 1) ) {
-					log_warning(_("Failed to unmount device %s mounted on %s"), mnt.mnt_special, mnt.mnt_mountp);
-				}
-			}
-		}
- 		fclose(mountfp);
-	}
-#else
-    struct mntent *mntent;
-    mountfp = setmntent( mtab, "r" );
-    if( mountfp != NULL ) {
-        while( (mntent = getmntent( mountfp )) != NULL ){
-            if ( !strcmp(mntent->mnt_type, mnttype) ) {
-                char *fsname = strdup(mntent->mnt_fsname);
-                char *dir = strdup(mntent->mnt_dir);
-
-				if ( ! run_command(NULL, UMOUNT_PATH, "-l", fsname, 1) ) {
-					log_warning(_("Failed to unmount device %s mounted on %s"), fsname, dir);
-				}
-                free(fsname);
-                free(dir);
-            }
-        }
-        endmntent(mountfp);
-    }
-#endif
-
-#endif
     mounted_list = NULL;
 }
 

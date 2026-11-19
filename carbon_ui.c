@@ -735,19 +735,8 @@ static void OnCommandCDKeyContinue()
         carbon_Prompt(MyRes, PromptType_OK, _("Please specify a CD key!"), NULL, 0);
     else
     {
-        CDKeyOK = true;
-
-        // HACK: Use external cd key validation program, if it exists. --ryan.
-        #define CDKEYCHECK_PROGRAM "./vcdk"
-        if (access(CDKEYCHECK_PROGRAM, X_OK) == 0)
-        {
-            char cmd[sizeof (CDKey) + sizeof (CDKEYCHECK_PROGRAM) + 1];
-            strcpy(cmd, CDKEYCHECK_PROGRAM);
-            strcat(cmd, " ");
-            strcat(cmd, CDKey);
-            if (system(cmd) == 0)  // binary ran and reported key invalid?
-                CDKeyOK = false;
-        }
+        int validation = access("./vcdk", F_OK) == 0 ? validate_cdkey(NULL, CDKey) : 1;
+        CDKeyOK = validation == 1;
 
         if (CDKeyOK == false)
             carbon_Prompt(MyRes, PromptType_OK, _("CD key is invalid!"), NULL, 0);
@@ -757,7 +746,7 @@ static void OnCommandCDKeyContinue()
             p = CDKey;
             while(*p != 0x00)
             {
-                *p = toupper(*p);
+                *p = toupper((unsigned char)*p);
                 p++;
             }
             strncpy(gCDKeyString, CDKey, sizeof (gCDKeyString));

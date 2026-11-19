@@ -357,18 +357,11 @@ int main(int argc, char **argv)
 					continue;
 				}
                 
-				/* Check if we should be root.  Under the Mac, we'll do the standard authorization
-                   stuff that most installers do at startup. */
-                if ( GetProductRequireRoot(info) && geteuid()!=0 ) {
-#if defined(LOKI_CARBON)
-					carbon_AuthorizeUser();
-					state = SETUP_EXIT;
-					break;
-#else
-					UI.prompt(_("You need to run this installer as the super-user.\n"), RESPONSE_OK);
-					state = SETUP_EXIT;
-					continue;
-#endif
+                if (GetProductRequireRoot(info) && geteuid() != 0) {
+                    UI.prompt(_("You need to run this installer as the super-user.\n"), RESPONSE_OK);
+                    exit_status = 3;
+                    state = SETUP_EXIT;
+                    continue;
                 }
 
 				if ( info->product && GetProductInstallOnce(info) ) {

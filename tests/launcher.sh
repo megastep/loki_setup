@@ -4,14 +4,19 @@ set -eu
 
 test -t 0
 work=$(mktemp -d /tmp/loki-launcher.XXXXXX)
+work=$(cd "$work" && pwd -P)
 trap 'rm -rf "$work"' 0
 media="$work/installer's media"
 bin="$media/setup.data/bin/Linux/aarch64"
 mkdir -p "$bin/glibc-2.1" "$work/system" "$work/local" "$work/home"
-ln -s Linux "$media/setup.data/bin/OpenBSD"
+mkdir -p "$media/setup.data/bin/OpenBSD/aarch64/glibc-2.1"
+fixture_uid=$(id -u)
 sed -e "s|/usr/bin/|$work/system/|g" -e "s|/usr/local/bin/|$work/local/|g" \
+    -e "s|PATH=/usr/bin:|PATH=$work/system:/usr/bin:|" \
+    -e "s#\[ \"\$1\" = \"\$trust_owner\" \]#{ [ \"\$1\" = \"\$trust_owner\" ] || [ \"\$1\" = $fixture_uid ]; }#" \
     image/setup.sh > "$media/setup.sh"
 
+ln -s "$(command -v stat)" "$work/system/stat"
 export HOME="$work/home" TRACE="$work/trace"
 export PATH="$work/system:$PATH"
 export TEST_UID=1000 TEST_OS=Linux TEST_AUTHORIZE=yes TEST_STATUS=0
@@ -42,7 +47,7 @@ export TEST_UID=0
 exec "$@"
 SH
 cp "$work/system/sudo" "$work/system/doas"
-chmod +x "$work/system/"*
+chmod +x "$work/system/id" "$work/system/uname" "$work/system/sudo" "$work/system/doas"
 
 cat > "$bin/setup" <<'SH'
 #!/bin/sh
@@ -53,6 +58,8 @@ cat > "$bin/glibc-2.1/setup.gtk2" <<'SH'
 #!/bin/sh
 printf '%s\n' "gtk:$TEST_UID" "$@" >> "$TRACE"
 SH
+cp "$bin/setup" "$media/setup.data/bin/OpenBSD/aarch64/setup"
+cp "$bin/glibc-2.1/setup.gtk2" "$media/setup.data/bin/OpenBSD/aarch64/glibc-2.1/setup.gtk2"
 
 dest="$work/output's folder"
 run()
@@ -75,6 +82,17 @@ cmp "$work/expected" "$TRACE"
 run 2 0
 printf '%s\n' sudo console:0 -n -i "$dest" -o 'Base & extras' > "$work/expected"
 cmp "$work/expected" "$TRACE"
+
+chmod g+w "$media"
+run 2 1
+test ! -s "$TRACE"
+chmod g-w "$media"
+
+chmod g+w "$work/system/sudo"
+run 2 0
+printf '%s\n' doas console:0 -n -i "$dest" -o 'Base & extras' > "$work/expected-fallback"
+cmp "$work/expected-fallback" "$TRACE"
+chmod g-w "$work/system/sudo"
 
 TEST_STATUS=1
 run 1 1

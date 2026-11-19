@@ -21,7 +21,10 @@ esac
 
 for source do
     case $source in
-        setup | uninstall) dest=$bin/$source ;;
+        setup | uninstall)
+            dest=$bin/$source
+            rm -f "$libc_bin/$source"
+            ;;
         *) dest=$libc_bin/$source ;;
     esac
     cp "$source" "$dest"

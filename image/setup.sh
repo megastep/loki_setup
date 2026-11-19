@@ -2,10 +2,50 @@
 #
 # Product setup script
 #
+uid=$(/usr/bin/id -u) || exit 1
+if [ "$uid" = 0 ]; then
+    PATH=/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/local/sbin
+    export PATH
+fi
+
+# The same check runs on both sides of the authorization boundary.
+trusted_path_code='
+trusted_path()
+(
+    path=$1
+    kind=$2
+    trust_owner=0
+    case "$path" in /*) ;; *) return 1 ;; esac
+    [ "$kind" = directory ] && [ -d "$path" ] ||
+        { [ "$kind" = file ] && [ -f "$path" ]; } || return 1
+    while :; do
+        [ ! -L "$path" ] || return 1
+        metadata=$(/usr/bin/stat -c "%u %a" "$path" 2>/dev/null) ||
+            metadata=$(/usr/bin/stat -f "%u %Op" "$path" 2>/dev/null) || return 1
+        set -- $metadata
+        [ "$#" = 2 ] && [ "$1" = "$trust_owner" ] || return 1
+        case "$2" in ""|*[!0-7]*) return 1 ;; esac
+        mode=$((0$2))
+        if [ $((mode & 022)) -ne 0 ]; then
+            [ "$kind" = ancestor ] && [ $((mode & 01000)) -ne 0 ] || return 1
+        fi
+        [ "$path" = / ] && return 0
+        path=${path%/*}
+        path=${path:-/}
+        kind=ancestor
+    done
+)
+'
+eval "$trusted_path_code"
+
 # Go to the proper setup directory (if not already there)
 CDPATH= cd "$(dirname "$0")" || exit 1
 media_dir=$(pwd -P) || exit 1
 launcher=$media_dir/${0##*/}
+if [ "$uid" = 0 ] && ! trusted_path "$launcher" file; then
+    printf '%s\n' "Administrator access requires protected installation media." >&2
+    exit 1
+fi
 
 # defaults
 FATAL_ERROR="Fatal error, no tech support email configured in this setup"
@@ -83,9 +123,11 @@ args=""
 
 # Import preferences from a secondary script
 if [ -f setup.data/config.sh ]; then
+    [ "$uid" != 0 ] || trusted_path "$media_dir/setup.data/config.sh" file || exit 1
     . setup.data/config.sh
 elif [ -f SETUP.DAT/CONFIG.SH\;1 ]; then
 	# HP-UX and other systems unable to get LFN correctly
+    [ "$uid" != 0 ] || trusted_path "$media_dir/SETUP.DAT/CONFIG.SH;1" file || exit 1
 	. SETUP.DAT/CONFIG.SH\;1
 fi
 
@@ -95,12 +137,12 @@ PATH=$PATH:/usr/ucb
 # Prefer the platform's usual authorization tool, using system paths.
 find_root_helper()
 {
-    if [ "$os" = OpenBSD ] && [ -x /usr/bin/doas ]; then
+    if [ "$os" = OpenBSD ] && [ -x /usr/bin/doas ] && trusted_path /usr/bin/doas file; then
         printf '%s\n' /usr/bin/doas
         return
     fi
     for helper in /usr/bin/sudo /usr/local/bin/sudo /usr/bin/doas /usr/local/bin/doas; do
-        if [ -x "$helper" ] && [ -f "$helper" ]; then
+        if [ -x "$helper" ] && trusted_path "$helper" file; then
             printf '%s\n' "$helper"
             return
         fi
@@ -108,7 +150,6 @@ find_root_helper()
     return 1
 }
 
-uid=$(/usr/bin/id -u) || exit 1
 console_only=0
 if [ "${1-}" = "-auth" ]; then
     # Private re-entry flag. The authorization helper must actually grant root.
@@ -123,14 +164,15 @@ case "$GET_ROOT" in
         if [ "$uid" = 0 ]; then
             console_only=1
         else
-            if [ -t 0 ] && helper=$(find_root_helper); then
+            if [ -t 0 ] && trusted_path "$launcher" file && helper=$(find_root_helper); then
                 home_option=
                 case "$helper" in */sudo) home_option=-H ;; esac
                 # Both helpers return 1 for authorization failures. Keep a
                 # launched installer's status 1 distinct so it cannot retry.
-                "$helper" ${home_option:+"$home_option"} -u root -- /bin/sh -c '
+                "$helper" ${home_option:+"$home_option"} -u root -- /bin/sh -c "$trusted_path_code"'
                     [ "$(/usr/bin/id -u)" = 0 ] || exit 1
-                    unset SETUP_EXEC_TMPDIR
+                    unset SETUP_EXEC_TMPDIR TMPDIR
+                    trusted_path "$0" file || exit 125
                     /bin/sh "$0" -auth "$@"
                     status=$?
                     [ "$status" -ne 1 ] || exit 125
@@ -182,6 +224,10 @@ then
   shift
 fi
 
+case "$arch" in
+    ''|*[!a-zA-Z0-9_.-]*|.|..) exit 1 ;;
+esac
+
 
 # Copy the selected binary off media that may be mounted noexec.
 try_run()
@@ -194,7 +240,13 @@ try_run()
         [ -f "$setup_bin" ] || return 1
     fi
 
-    setup=$(mktemp "${SETUP_EXEC_TMPDIR:-$HOME}/.setup.XXXXXX") || return 1
+    tmpbase=${SETUP_EXEC_TMPDIR:-$HOME}
+    if [ "$uid" = 0 ]; then
+        trusted_path "$media_dir/$setup_bin" file || return 1
+        tmpbase=$(CDPATH= cd "$HOME" && pwd -P) || return 1
+        trusted_path "$tmpbase" directory || return 1
+    fi
+    setup=$(mktemp "$tmpbase/.setup.XXXXXX") || return 1
     if ! cp "$setup_bin" "$setup" || ! chmod 700 "$setup"; then
         rm -f "$setup"
         return 1

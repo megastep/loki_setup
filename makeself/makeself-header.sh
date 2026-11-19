@@ -4,7 +4,15 @@ cat << EOF  > "$archname"
 
 CRCsum="$CRCsum"
 MD5="$MD5sum"
-TMPROOT=\${TMPDIR:=/tmp}
+TMPROOT=\${TMPDIR:-/tmp}
+MS_UID=\$(/usr/bin/id -u) || exit 1
+if test "\$MS_UID" = 0; then
+    PATH=/usr/bin:/bin:/usr/sbin:/sbin
+    export PATH
+    TMPROOT=/tmp
+    unset GUESS_MD5_PATH TAR_OPTIONS SETUP_NOCHECK
+fi
+TMPROOT=\$(CDPATH= cd "\$TMPROOT" && pwd -P) || exit 1
 
 label="$LABEL"
 script="$SCRIPT"
@@ -23,6 +31,23 @@ else
 fi
 
 unset CDPATH
+
+MS_ProtectedDirectory()
+(
+    path=\$1
+    while :; do
+        metadata=\$(/usr/bin/stat -c "%u %a" "\$path" 2>/dev/null) ||
+            metadata=\$(/usr/bin/stat -f "%u %Op" "\$path" 2>/dev/null) || return 1
+        set -- \$metadata
+        [ "\$#" = 2 ] && [ "\$1" = 0 ] || return 1
+        case "\$2" in ""|*[!0-7]*) return 1 ;; esac
+        mode=\$((0\$2))
+        [ \$((mode & 022)) = 0 ] || [ \$((mode & 01000)) != 0 ] || return 1
+        [ "\$path" = / ] && return 0
+        path=\${path%/*}
+        path=\${path:-/}
+    done
+)
 
 MS_Printf()
 {
@@ -145,6 +170,17 @@ copy=$COPY
 ownership=y
 verbose=n
 
+if [ "\${1-}" = --phase2 ]; then
+    shift
+elif [ "\$copy" = copy ]; then
+    copydir=\$(mktemp -d "\$TMPROOT/makeself.XXXXXX") || exit 1
+    trap 'rm -rf "\$copydir"' 0
+    trap 'exit 15' 1 2 3 15
+    cp "\$0" "\$copydir/makeself" && chmod 700 "\$copydir/makeself" || exit 1
+    (cd "\$TMPROOT" && "\$copydir/makeself" --phase2 "\$@")
+    exit \$?
+fi
+
 initargs="\$@"
 
 while true
@@ -253,10 +289,6 @@ EOLSM
 	xterm_loop=1
 	shift
 	;;
-    --phase2)
-	copy=phase2
-	shift
-	;;
     --)
 	shift
 	break ;;
@@ -269,25 +301,6 @@ EOLSM
 	break ;;
     esac
 done
-
-case "\$copy" in
-copy)
-    tmpdir=\$TMPROOT/makeself.\$RANDOM.\`date +"%y%m%d%H%M%S"\`.\$\$
-    mkdir "\$tmpdir" || {
-	echo "Could not create temporary directory \$tmpdir" >&2
-	exit 1
-    }
-    SCRIPT_COPY="\$tmpdir/makeself"
-    echo "Copying to a temporary location..." >&2
-    cp "\$0" "\$SCRIPT_COPY"
-    chmod +x "\$SCRIPT_COPY"
-    cd "\$TMPROOT"
-    exec "\$SCRIPT_COPY" --phase2 -- \$initargs
-    ;;
-phase2)
-    finish="\$finish ; rm -rf \`dirname \$0\`"
-    ;;
-esac
 
 if test "\$nox11" = "n"; then
     if tty -s; then                 # Do we have a terminal?
@@ -313,26 +326,27 @@ if test "\$nox11" = "n"; then
     fi
 fi
 
-if test "\$targetdir" = "."; then
-    tmpdir="."
-else
-    if test "\$keep" = y; then
-	echo "Creating directory \$targetdir" >&2
-	tmpdir="\$targetdir"
-	dashp="-p"
-    else
-	tmpdir="\$TMPROOT/selfgz\$\$\$RANDOM"
-	dashp=""
+if [ "\$keep" = n ]; then
+    tmpdir=\$(mktemp -d "\$TMPROOT/selfgz.XXXXXX") || exit 1
+    trap 'cd /; /bin/rm -rf "\$tmpdir"' 0
+    trap 'exit 15' 1 2 3 15
+elif [ "\$MS_UID" = 0 ]; then
+    case "\$targetdir" in /*) ;; *) targetdir=./\$targetdir ;; esac
+    parent=\$(cd "\${targetdir%/*}/" && pwd -P) || exit 1
+    leaf=\${targetdir##*/}
+    case "\$leaf" in ''|.|..) exit 1 ;; esac
+    if ! MS_ProtectedDirectory "\$parent" ||
+       ! (umask 077; mkdir "\$parent/\$leaf"); then
+        echo "Administrator extraction requires a new target in a protected directory." >&2
+        exit 1
     fi
-    mkdir \$dashp \$tmpdir || {
-	echo 'Cannot create target directory' \$tmpdir >&2
-	echo 'You should try option --target OtherDirectory' >&2
-	eval \$finish
-	exit 1
-    }
+    tmpdir=\$parent/\$leaf
+else
+    tmpdir=\$targetdir
+    case "\$tmpdir" in /*) ;; *) tmpdir=./\$tmpdir ;; esac
+    mkdir -p "\$tmpdir" || exit 1
 fi
 
-location="\`pwd\`"
 if test x\$SETUP_NOCHECK != x1; then
     MS_Check "\$0"
 fi
@@ -348,11 +362,7 @@ fi
 
 MS_Printf "Uncompressing \$label"
 res=3
-if test "\$keep" = n; then
-    trap 'echo Signal caught, cleaning up >&2; cd \$TMPROOT; /bin/rm -rf \$tmpdir; eval \$finish; exit 15' 1 2 3 15
-fi
-
-leftspace=\`MS_diskspace \$tmpdir\`
+leftspace=\`MS_diskspace "\$tmpdir"\`
 if test \$leftspace -lt $USIZE; then
     echo
     echo "Not enough space left in "\`dirname \$tmpdir\`" (\$leftspace KB) to decompress \$0 ($USIZE KB)" >&2
@@ -364,9 +374,9 @@ fi
 
 for s in \$filesizes
 do
-    if MS_dd "\$0" \$offset \$s | eval "$GUNZIP_CMD" | ( cd "\$tmpdir"; UnTAR x ) | MS_Progress; then
+    if MS_dd "\$0" \$offset \$s | eval "$GUNZIP_CMD" | ( cd "\$tmpdir" && UnTAR x ) | MS_Progress; then
 		if test x"\$ownership" = xy; then
-			(PATH=/usr/xpg4/bin:\$PATH; cd "\$tmpdir"; chown -R \`id -u\` .;  chgrp -R \`id -g\` .)
+			(PATH=/usr/xpg4/bin:\$PATH; cd "\$tmpdir" && chown -R \`id -u\` .;  chgrp -R \`id -g\` .)
 		fi
     else
 		echo
@@ -377,25 +387,21 @@ do
 done
 echo
 
-cd "\$tmpdir"
+cd "\$tmpdir" || exit 1
 res=0
 if test x"\$script" != x; then
     if test x"\$verbose" = xy; then
 		MS_Printf "OK to execute: \$script \$scriptargs \$* ? [Y/n] "
 		read yn
 		if test x"\$yn" = x -o x"\$yn" = xy -o x"\$yn" = xY; then
-			eval \$script \$scriptargs \$*; res=\$?;
+			eval '"\$script"' "\$scriptargs" '"\$@"'; res=\$?;
 		fi
     else
-		eval \$script \$scriptargs \$*; res=\$?
+		eval '"\$script"' "\$scriptargs" '"\$@"'; res=\$?
     fi
     if test \$res -ne 0; then
 		test x"\$verbose" = xy && echo "The program '\$script' returned an error code (\$res)" >&2
     fi
-fi
-if test "\$keep" = n; then
-    cd \$TMPROOT
-    /bin/rm -rf \$tmpdir
 fi
 eval \$finish; exit \$res
 EOF

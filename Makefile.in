@@ -46,10 +46,10 @@ OPTIONS = -DSTUB_UI -DSETUP_VERSION_MAJOR=@SETUP_VERSION_MAJOR@ \
 CFLAGS = @CFLAGS@ $(OPTIONS)
 CXXFLAGS = @CXXFLAGS@ -DRARDLL -DSILENT
 
-COMMON_OBJS = log.o install_log.o
+COMMON_OBJS = log.o install_log.o safe_path.o registry.o
 CORE_OBJS   = detect.o encoding.o plugins.o network.o install.o copy.o file.o loki_launchurl.o bools.o
 OBJS 		= $(COMMON_OBJS) $(CORE_OBJS) main.o 
-LOKI_UNINSTALL_OBJS = loki_uninstall.o uninstall_ui.o
+LOKI_UNINSTALL_OBJS = loki_uninstall.o uninstall_ui.o safe_path.o registry.o
 CARBON_UNINSTALL_OBJS = $(COMMON_OBJS) carbon_uninstall.o uninstall_carbonui.o
 UNINSTALL_OBJS 		= $(COMMON_OBJS) uninstall.o
 CHECK_OBJS			= $(COMMON_OBJS) $(CORE_OBJS) check.o
@@ -73,7 +73,7 @@ CONSOLE_LIBS = $(LIBS) @CONSOLE_LIBS@ -lm
 all: setup uninstall $(SETUP_GTK)
 
 smoke: export TEST_MAKE = $(MAKE)
-smoke: all testencoding
+smoke: all testencoding testrepair
 	./testencoding
 	sh tests/launcher.sh
 	$(MAKE) -C "$(SETUPDB)" setupdb
@@ -116,6 +116,9 @@ check.carbon: $(CHECK_CARBON_OBJS)  $(COMMON_LIBS)
 	cp ./check.carbon ./check.APP/Contents/MacOS
 
 testcd: testcd.o $(CORE_OBJS) $(COMMON_OBJS) $(COMMON_LIBS)
+	$(LD) $(LDFLAGS) -o $@ $^ @LIBS@ @CONSOLE_LIBS@ @STATIC@
+
+testrepair: tests/testrepair.o $(CORE_OBJS) $(COMMON_OBJS) $(COMMON_LIBS)
 	$(LD) $(LDFLAGS) -o $@ $^ @LIBS@ @CONSOLE_LIBS@ @STATIC@
 
 setup: $(CONSOLE_OBJS) $(COMMON_LIBS)
@@ -258,7 +261,7 @@ clean:
 
 distclean: clean
 	rm -f Makefile dialog/Makefile plugins/Makefile .depend dialog/.depend plugins/.depend config.h config.cache config.status config.log
-	rm -f setup setup.gtk setup.gtk2 setup.carbon uninstall loki_uninstall testxml testcd testencoding xsu check check.carbon carbon_uninstall
+	rm -f setup setup.gtk setup.gtk2 setup.carbon uninstall loki_uninstall testxml testcd testencoding testrepair xsu check check.carbon carbon_uninstall
 
 DISTFILES = $(wildcard *.c *.h *.glade README*) configure.ac configure config.h.in \
             config.guess config.sub install-sh autogen.sh Makefile Makefile.in \
@@ -308,5 +311,5 @@ update-po: po/setup.pot po/loki-uninstall.pot
 dep depend: all
 
 # Recompile when configuration or a header used by an object changes.
-$(sort $(SRCS:.c=.o) $(UNINSTALL_OBJS) $(CHECK_OBJS) $(LOKI_UNINSTALL_OBJS) testxml.o testcd.o tests/testencoding.o $(filter %.o,$(COMMON_LIBS))): Makefile config.h
+$(sort $(SRCS:.c=.o) $(UNINSTALL_OBJS) $(CHECK_OBJS) $(LOKI_UNINSTALL_OBJS) testxml.o testcd.o tests/testencoding.o tests/testrepair.o $(filter %.o,$(COMMON_LIBS))): Makefile config.h
 -include $(wildcard *.d carbon/*.d unrar/*.d tests/*.d)

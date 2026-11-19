@@ -19,6 +19,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           path: loki_setup
+          persist-credentials: false
       - name: Read the SetupDB revision
         id: setupdb_revision
         working-directory: loki_setup
@@ -35,21 +36,27 @@ jobs:
           repository: megastep/loki_setupdb
           ref: ${{ steps.setupdb_revision.outputs.sha }}
           path: loki_setupdb
+          persist-credentials: false
       - uses: github/codeql-action/init@v4
         with:
           languages: c-cpp
-          build-mode: manual
+          # Pull requests are scanned without running their build scripts in
+          # the job that can upload code-scanning results.
+          build-mode: ${{ github.event_name == 'pull_request' && 'none' || 'manual' }}
       - name: Install build dependencies
+        if: github.event_name != 'pull_request'
         run: |
           sudo apt-get update
           sudo apt-get install -y autoconf automake pkg-config libxml2-dev zlib1g-dev libncurses-dev libglade2-dev
       - name: Build SetupDB
+        if: github.event_name != 'pull_request'
         working-directory: loki_setupdb
         run: |
           ./autogen.sh
           ./configure --with-libxml2
           make -j2
       - name: Build and verify the installer
+        if: github.event_name != 'pull_request'
         working-directory: loki_setup
         run: |
           ./autogen.sh
