@@ -15,12 +15,12 @@ leaves unspecified. The example below gives the windows a warm background
 and styles the **Begin Install** button.
 
 ```css
-window.loki-setup {
+.loki-setup {
   background-color: #f4f1e8;
   color: #1b3831;
 }
 
-.loki-setup button.suggested-action {
+.loki-setup .suggested-action {
   background-image: none;
   background-color: #12675b;
   border-color: #12675b;
@@ -28,7 +28,7 @@ window.loki-setup {
   text-shadow: none;
 }
 
-.loki-setup button.suggested-action:hover {
+.loki-setup .suggested-action:hover {
   background-color: #0c5449;
   border-color: #0c5449;
 }

@@ -48,6 +48,30 @@ def click(window, name, role="push button"):
     assert widget(window, name, role).queryAction().doAction(0), name
 
 
+def check_theme_staging(build, work):
+    source = work / "theme-source"
+    (source / "image/setup.data").mkdir(parents=True)
+    for name in ("setup.gtk3", "image/setup.data/setup.gtk3.ui"):
+        (source / name).symlink_to(build / name)
+
+    css_path = "setup.data/setup.gtk3.css"
+    default_theme = b".loki-setup { color: #1b3831; }\n"
+    custom_theme = b".loki-setup { color: #12675b; }\n"
+    (source / "image" / css_path).write_bytes(default_theme)
+    media = work / "theme-media"
+    stage = ["sh", build / "extras/stage-media.sh", media,
+             "Linux", "test-arch", "test-libc", "install-image", "setup.gtk3"]
+    env = dict(os.environ, STRIP_MEDIA="no")
+
+    subprocess.run(stage, cwd=source, env=env, check=True)
+    staged_theme = media / css_path
+    assert staged_theme.read_bytes() == default_theme, "Staging should copy the source theme"
+
+    staged_theme.write_bytes(custom_theme)
+    subprocess.run(stage, cwd=source, env=env, check=True)
+    assert staged_theme.read_bytes() == custom_theme, "Staging should preserve the media theme"
+
+
 def run(build, setupdb, work):
     media = work / "media"
     installed = work / "installed files"
@@ -61,6 +85,7 @@ def run(build, setupdb, work):
 
     subprocess.run(["make", "install-image", f"IMAGE={media}", "CONVERT_IMAGE="],
                    cwd=build, check=True)
+    check_theme_staging(build, work)
     shutil.copy2(build / "image/setup.sh", media)
     (media / "setup.data/config.sh").write_text("GET_ROOT=0\n")
     manifest = """<install product="gtk3-smoke" desc="GTK3 Smoke" version="1"
@@ -281,4 +306,4 @@ exit 0
 if __name__ == "__main__":
     with tempfile.TemporaryDirectory(prefix="loki-gtk3-") as directory:
         run(Path.cwd(), Path(sys.argv[1]).resolve(), Path(directory).resolve())
-    print("GTK3 install, verification, rescue and uninstall passed")
+    print("GTK3 theme staging, install, verification, rescue and uninstall passed")
