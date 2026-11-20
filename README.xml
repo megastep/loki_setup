@@ -412,7 +412,7 @@ Standard booleans defined by the installer :
 - 'is-root' is TRUE if the installer is running as root.
 - 'reinstalling' is TRUE if the product is already installed.
 - 'bzip2' is TRUE if Bzip2 decompression is available in the installer.
-- One boolean corresponding to the selected user interface: gtk1, gtk2, carbon, dialog, console
+- One boolean corresponding to the selected user interface: gtk1, gtk2, gtk3, carbon, dialog, console
 - One boolean for the CPU architecture: x86, ppc, sparc, alpha, etc
 - One boolean for the detected libc version: libc5, glibc-2.1, etc.
 - One boolean for the distribution / OS name : redhat, suse, aix, sco, etc.

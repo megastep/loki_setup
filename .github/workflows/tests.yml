@@ -19,8 +19,8 @@ jobs:
       matrix:
         include:
           - runner: ubuntu-24.04
-            variant: GTK 2
-            configure_args: --enable-gtk2
+            variant: GTK 2 and GTK 3
+            configure_args: --enable-gtk2 --enable-gtk3
           - runner: ubuntu-24.04-arm
             variant: Console with dynamic plugins
             configure_args: --disable-gtk --disable-dialog --enable-dynamic-plugins
@@ -65,8 +65,8 @@ jobs:
           VARIANT: ${{ matrix.variant }}
         run: |
           packages=(autoconf automake pkg-config libxml2-dev zlib1g-dev)
-          if [[ "$VARIANT" == 'GTK 2' ]]; then
-            packages+=(libncurses-dev libglade2-dev)
+          if [[ "$VARIANT" == 'GTK 2 and GTK 3' ]]; then
+            packages+=(libncurses-dev libglade2-dev libgtk-3-dev libgtk-3-bin xvfb xauth xdotool dbus-x11 at-spi2-core python3-pyatspi shared-mime-info librsvg2-common)
           fi
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends "${packages[@]}"
@@ -92,9 +92,25 @@ jobs:
           ./autogen.sh
           ./configure "${configure_args[@]}"
           make -j2 all testcd testxml
-      - name: Build GTK verification and uninstall tools
-        if: matrix.variant == 'GTK 2'
-        run: make -j2 check loki_uninstall
+      - name: Validate and exercise the GTK3 front ends
+        if: matrix.variant == 'GTK 2 and GTK 3'
+        run: |
+          make -j2 check loki_uninstall
+          make -C ../loki_setupdb setupdb
+          for tool in setup.gtk3 check.gtk3 loki_uninstall.gtk3; do
+            dependencies=$(ldd "$tool")
+            grep -q 'libgtk-3' <<< "$dependencies"
+            if grep -Eq 'libgtk-x11-2|libglade' <<< "$dependencies"; then
+              echo "$tool unexpectedly uses GTK2 or libglade"
+              exit 1
+            fi
+          done
+          xvfb-run -a sh -ec '
+            for ui in image/setup.data/setup.gtk3.ui check.gtk3.ui uninstall.gtk3.ui; do
+              gtk-builder-tool validate "$ui"
+            done
+          '
+          xvfb-run -a dbus-run-session -- /usr/bin/python3 tests/gtk3.py ../loki_setupdb/setupdb
       - name: Test the staged launcher and XML parser
         run: |
           make install
@@ -110,6 +126,22 @@ jobs:
           else
             script -qec 'make smoke' /dev/null </dev/null
           fi
+
+      - name: Verify GTK3-only configuration and dependency errors
+        if: matrix.variant == 'GTK 2 and GTK 3'
+        run: |
+          make distclean
+          ./configure --enable-gtk3 --disable-gtk2
+          make -j2 all check loki_uninstall
+          test -x setup.gtk3
+          test ! -e setup.gtk2
+          cmp check check.gtk3
+          cmp loki_uninstall loki_uninstall.gtk3
+          if PKG_CONFIG=/usr/bin/false ./configure --enable-gtk3 > missing-gtk3.log 2>&1; then
+            echo 'Configure accepted a missing required GTK3 dependency'
+            exit 1
+          fi
+          grep -F 'the GTK 3 front end requires gtk+-3.0' missing-gtk3.log
 
   bsd:
     name: ${{ matrix.os }} / VMActions

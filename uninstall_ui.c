@@ -9,7 +9,13 @@
 #define _(String) gettext (String)
 
 #include <gtk/gtk.h>
+#ifdef LOKI_GTK3
+#include "gtk3_layout.h"
+#else
 #include <glade/glade.h>
+typedef GladeXML UiLayout;
+#define ui_widget glade_xml_get_widget
+#endif
 
 #include "config.h"
 #include "setupdb.h"
@@ -17,15 +23,20 @@
 #include "uninstall.h"
 #include "uninstall_ui.h"
 
-#if defined(ENABLE_GTK2)
+#if defined(LOKI_GTK3)
+    #define UNINSTALL_GLADE "uninstall.gtk3.ui"
+#elif defined(ENABLE_GTK2)
     #define UNINSTALL_GLADE "uninstall.gtk2.glade"
 #else
     #define UNINSTALL_GLADE "uninstall.glade"
 #endif
 
-static GladeXML *uninstall_glade;
+static UiLayout *uninstall_glade;
 static int uninstall_cancelled = 0;
 
+#ifdef LOKI_GTK3
+#define gtk_button_set_sensitive gtk_widget_set_sensitive
+#else
 /* GTk utility function */
 void gtk_button_set_sensitive(GtkWidget *button, gboolean sensitive)
 {
@@ -54,9 +65,6 @@ void gtk_button_set_sensitive(GtkWidget *button, gboolean sensitive)
 
 static int dialog_done;
 
-#define BUTTON_OK    1
-#define BUTTON_ABORT 2
-
 static void prompt_okbutton_slot( GtkWidget* widget, gpointer func_data)
 {
     dialog_done = 1;
@@ -67,8 +75,27 @@ static void prompt_nobutton_slot( GtkWidget* widget, gpointer func_data)
     dialog_done = 2;
 }
 
+#endif
+
+#define BUTTON_OK    1
+#define BUTTON_ABORT 2
+
 static int display_message(const char *txt, int buttons)
 {
+#ifdef LOKI_GTK3
+    GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(ui_widget(uninstall_glade, "loki_uninstall")),
+                                               GTK_DIALOG_MODAL, GTK_MESSAGE_INFO,
+                                               GTK_BUTTONS_NONE, "%s", txt);
+    int response;
+
+    if (buttons & BUTTON_OK)
+        gtk_dialog_add_button(GTK_DIALOG(dialog), _("OK"), GTK_RESPONSE_OK);
+    if (buttons & BUTTON_ABORT)
+        gtk_dialog_add_button(GTK_DIALOG(dialog), _("Abort"), GTK_RESPONSE_CANCEL);
+    response = gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);
+    return response == GTK_RESPONSE_OK;
+#else
     GtkWidget *dialog, *label, *ok_button, *abort_button;
        
     /* Create the widgets */
@@ -109,6 +136,7 @@ static int display_message(const char *txt, int buttons)
     }
     gtk_widget_destroy(dialog);
 	return  dialog_done == 1;
+#endif
 }
 
 /* List of open products that need closing */
@@ -205,7 +233,7 @@ static void add_component_list(component_list *list, GtkWidget *widget)
 static size_t calculate_recovered_space(void)
 {
     GtkWidget *widget;
-    GList *list, *poopy, *clist;
+    GList *products, *list, *components, *clist;
     GtkWidget *button;
     component_list *component;
     gboolean ready;
@@ -213,31 +241,34 @@ static size_t calculate_recovered_space(void)
 
     ready = FALSE;
     size = 0;
-    widget = glade_xml_get_widget(uninstall_glade, "uninstall_vbox");
-    list = gtk_container_children(GTK_CONTAINER(widget));
+    widget = ui_widget(uninstall_glade, "uninstall_vbox");
+    products = gtk_container_get_children(GTK_CONTAINER(widget));
+    list = products;
     while ( list ) {
         widget = GTK_WIDGET(list->data);
-        poopy = gtk_container_children(GTK_CONTAINER(widget));
-        widget = GTK_WIDGET(poopy->data);
-        clist = gtk_container_children(GTK_CONTAINER(widget));
+        widget = gtk_bin_get_child(GTK_BIN(widget));
+        components = gtk_container_get_children(GTK_CONTAINER(widget));
+        clist = components;
         while ( clist ) {
             button = GTK_WIDGET(clist->data);
             if ( gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)) ) {
-                component = gtk_object_get_data(GTK_OBJECT(button), "data");
+                component = g_object_get_data(G_OBJECT(button), "data");
                 size += component->size / 1024;
                 ready = TRUE;
             }
             clist = clist->next;
         }
+        g_list_free(components);
         list = list->next;
     }
-    widget = glade_xml_get_widget(uninstall_glade, "recovered_space_label");
+    g_list_free(products);
+    widget = ui_widget(uninstall_glade, "recovered_space_label");
     if ( widget ) {
         char text[128];
-        sprintf(text, _("%d MB"), size/1024);
+        snprintf(text, sizeof(text), _("%d MB"), (int)(size/1024));
         gtk_label_set_text(GTK_LABEL(widget), text);
     }
-    widget = glade_xml_get_widget(uninstall_glade, "uninstall_button");
+    widget = ui_widget(uninstall_glade, "uninstall_button");
     if ( widget ) {
         gtk_button_set_sensitive(widget, ready);
     }
@@ -264,7 +295,7 @@ static void set_status_text(const char *text)
 {
     GtkWidget *widget;
 
-    widget = glade_xml_get_widget(uninstall_glade, "uninstall_status_label");
+    widget = ui_widget(uninstall_glade, "uninstall_status_label");
     if ( widget ) {
         gtk_label_set_text(GTK_LABEL(widget), text);
     }
@@ -275,7 +306,7 @@ void perform_uninstall_slot(GtkWidget* w, gpointer data)
     GtkWidget *notebook;
     GtkWidget *progress;
     GtkWidget *widget;
-    GList *list, *poopy, *clist;
+    GList *products, *list, *components, *clist;
     GtkWidget *button;
     component_list *component;
     size_t size, total;
@@ -294,29 +325,30 @@ void perform_uninstall_slot(GtkWidget* w, gpointer data)
 
 
     /* First switch to the next notebook page */
-    notebook = glade_xml_get_widget(uninstall_glade, "uninstall_notebook");
-    gtk_notebook_set_page(GTK_NOTEBOOK(notebook), 1);
-    widget = glade_xml_get_widget(uninstall_glade, "finished_button");
+    notebook = ui_widget(uninstall_glade, "uninstall_notebook");
+    gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook), 1);
+    widget = ui_widget(uninstall_glade, "finished_button");
     if ( widget ) {
         gtk_button_set_sensitive(widget, FALSE);
     }
 
     /* Now uninstall all the selected components */
-    progress = glade_xml_get_widget(uninstall_glade, "uninstall_progress");
+    progress = ui_widget(uninstall_glade, "uninstall_progress");
     size = 0;
     total = calculate_recovered_space();
-    widget = glade_xml_get_widget(uninstall_glade, "uninstall_vbox");
-    list = gtk_container_children(GTK_CONTAINER(widget));
+    widget = ui_widget(uninstall_glade, "uninstall_vbox");
+    products = gtk_container_get_children(GTK_CONTAINER(widget));
+    list = products;
     while ( list && ! uninstall_cancelled ) {
         widget = GTK_WIDGET(list->data);
-        poopy = gtk_container_children(GTK_CONTAINER(widget));
-        widget = GTK_WIDGET(poopy->data);
+        widget = gtk_bin_get_child(GTK_BIN(widget));
         /* First do the addon components */
-        clist = gtk_container_children(GTK_CONTAINER(widget));
+        components = gtk_container_get_children(GTK_CONTAINER(widget));
+        clist = components;
         while ( clist && ! uninstall_cancelled ) {
             button = GTK_WIDGET(clist->data);
             if ( gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)) ) {
-                component = gtk_object_get_data(GTK_OBJECT(button), "data");
+                component = g_object_get_data(G_OBJECT(button), "data");
                 if ( loki_isdefault_component(component->component) ) {
                     clist = clist->next;
                     continue;
@@ -331,7 +363,9 @@ void perform_uninstall_slot(GtkWidget* w, gpointer data)
                 while( gtk_events_pending() ) {
                     gtk_main_iteration();
                 }
-				
+                if (uninstall_cancelled)
+                    break;
+
 				/* Display an optional message to the user */
 				message = loki_getmessage_component(component->component);
 				if (show_messages && message && !display_message(message, BUTTON_OK|BUTTON_ABORT) ) {
@@ -353,8 +387,8 @@ void perform_uninstall_slot(GtkWidget* w, gpointer data)
                 /* Update the progress bar */
                 if ( total && progress ) {
                     size += component->size/1024;
-                    gtk_progress_set_percentage(GTK_PROGRESS(progress),
-                                                (float)size/total);
+                    gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progress),
+                                                CLAMP((double)size/total, 0.0, 1.0));
                 }
                 gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), FALSE);
 
@@ -366,11 +400,11 @@ void perform_uninstall_slot(GtkWidget* w, gpointer data)
             clist = clist->next;
         }
         /* Now do the primary components */
-        clist = gtk_container_children(GTK_CONTAINER(widget));
+        clist = components;
         while ( clist && ! uninstall_cancelled ) {
             button = GTK_WIDGET(clist->data);
             if ( gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)) ) {
-                component = gtk_object_get_data(GTK_OBJECT(button), "data");
+                component = g_object_get_data(G_OBJECT(button), "data");
                 if ( ! loki_isdefault_component(component->component) ) {
                     clist = clist->next;
                     continue;
@@ -383,10 +417,12 @@ void perform_uninstall_slot(GtkWidget* w, gpointer data)
                 while( gtk_events_pending() ) {
                     gtk_main_iteration();
                 }
+                if (uninstall_cancelled)
+                    break;
 
 				/* Display an optional message to the user */
 				message = loki_getmessage_component(component->component);
-				if ( message && !display_message(message, BUTTON_OK|BUTTON_ABORT) ) {
+				if (show_messages && message && !display_message(message, BUTTON_OK|BUTTON_ABORT)) {
                     clist = clist->next;
 					uninstall_cancelled = 1;
 					break;
@@ -406,8 +442,8 @@ void perform_uninstall_slot(GtkWidget* w, gpointer data)
                 /* Update the progress bar */
                 if ( total && progress ) {
                     size += component->size/1024;
-                    gtk_progress_set_percentage(GTK_PROGRESS(progress),
-                                                (float)size/total);
+                    gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progress),
+                                                CLAMP((double)size/total, 0.0, 1.0));
                 }
 
                 /* See if the user wants to cancel the uninstall */
@@ -418,8 +454,10 @@ void perform_uninstall_slot(GtkWidget* w, gpointer data)
             }
             clist = clist->next;
         }
+        g_list_free(components);
         list = list->next;
     }
+    g_list_free(products);
     switch ( uninstall_cancelled ) {
 	case 1:
         set_status_text(_("Uninstall cancelled"));
@@ -429,14 +467,14 @@ void perform_uninstall_slot(GtkWidget* w, gpointer data)
 		break;
 	default:
         set_status_text(_("Uninstall complete"));
-		gtk_progress_set_percentage(GTK_PROGRESS(progress), 1.0f);
+		gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progress), 1.0f);
 		break;
     }
-    widget = glade_xml_get_widget(uninstall_glade, "cancel_button");
+    widget = ui_widget(uninstall_glade, "cancel_button");
     if ( widget ) {
         gtk_button_set_sensitive(widget, FALSE);
     }
-    widget = glade_xml_get_widget(uninstall_glade, "finished_button");
+    widget = ui_widget(uninstall_glade, "finished_button");
     if ( widget ) {
         gtk_button_set_sensitive(widget, TRUE);
     }
@@ -476,6 +514,7 @@ static void empty_container(GtkWidget *widget, gpointer data)
     gtk_container_remove(GTK_CONTAINER(data), widget);
 }
 
+#ifndef LOKI_GTK3
 static void log_handler(const gchar *log_domain,
 					 GLogLevelFlags log_level,
 					 const gchar *message,
@@ -483,6 +522,33 @@ static void log_handler(const gchar *log_domain,
 {
 	/*	log_debug("Glib-WARNING(%s): %s\n", log_domain, message); */
 }
+
+#else
+static gboolean close_uninstall_window(GtkWidget *widget, GdkEvent *event, gpointer data)
+{
+    GtkNotebook *notebook = GTK_NOTEBOOK(ui_widget(uninstall_glade, "uninstall_notebook"));
+    if (gtk_notebook_get_current_page(notebook) == 1 &&
+        !gtk_widget_get_sensitive(ui_widget(uninstall_glade, "finished_button")))
+        cancel_uninstall_slot(widget, data);
+    else
+        main_quit_slot(widget, data);
+    return TRUE;
+}
+
+static int load_uninstall_layout(void)
+{
+    uninstall_glade = load_gtk3_layout(DATADIR "/" UNINSTALL_GLADE, "loki-uninstall");
+    if (!uninstall_glade)
+        return 0;
+
+    GTK3_CALLBACK(uninstall_glade, close_uninstall_window);
+    GTK3_CALLBACK(uninstall_glade, main_quit_slot);
+    GTK3_CALLBACK(uninstall_glade, perform_uninstall_slot);
+    GTK3_CALLBACK(uninstall_glade, cancel_uninstall_slot);
+    gtk_builder_connect_signals(uninstall_glade, NULL);
+    return 1;
+}
+#endif
 
 /* Run a GUI to select and uninstall products */
 int uninstall_ui(int argc, char *argv[])
@@ -500,6 +566,14 @@ int uninstall_ui(int argc, char *argv[])
     component_list *component_list, *addon_list;
     char text[1024];
 
+#ifdef LOKI_GTK3
+    if (!gtk_init_check(NULL, NULL)) {
+        fprintf(stderr, "%s\n", _("Unable to open the GTK display."));
+        return 1;
+    }
+    if (!load_uninstall_layout())
+        return 1;
+#else
 #ifdef ENABLE_GTK2
     // Turn off any themes
     setenv("GTK2_RC_FILES", "", 1);
@@ -517,14 +591,19 @@ int uninstall_ui(int argc, char *argv[])
 
     /* Add all signal handlers defined in glade file */
     glade_xml_signal_autoconnect(uninstall_glade);
+#endif
 
     /* Make sure the window is visible */
-    widget = glade_xml_get_widget(uninstall_glade, "uninstall_button");
+    widget = ui_widget(uninstall_glade, "uninstall_button");
     if ( widget ) {
         gtk_button_set_sensitive(widget, FALSE);
     }
-    window = glade_xml_get_widget(uninstall_glade, "loki_uninstall");
+    window = ui_widget(uninstall_glade, "loki_uninstall");
+#ifdef LOKI_GTK3
+    gtk_widget_show(window);
+#else
     gtk_widget_realize(window);
+#endif
     while( gtk_events_pending() ) {
         gtk_main_iteration();
     }
@@ -536,7 +615,7 @@ int uninstall_ui(int argc, char *argv[])
     signal(SIGTERM, main_signal_abort);
 
     /* Fill in the list of products and components */
-    widget = glade_xml_get_widget(uninstall_glade, "uninstall_vbox");
+    widget = ui_widget(uninstall_glade, "uninstall_vbox");
     if ( ! widget ) {
         fprintf(stderr, _("No uninstall_vbox in glade file!\n"));
         return(-1);
@@ -562,7 +641,11 @@ int uninstall_ui(int argc, char *argv[])
         gtk_container_set_border_width(GTK_CONTAINER(frame), 4);
         gtk_box_pack_start(GTK_BOX(widget), frame, FALSE, TRUE, 0);
         gtk_widget_show(frame);
+#ifdef LOKI_GTK3
+        vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+#else
         vbox = gtk_vbox_new(FALSE, 0);
+#endif
         gtk_container_add (GTK_CONTAINER (frame), vbox);
         gtk_widget_show(vbox);
         component = loki_getdefault_component(product);
@@ -573,10 +656,8 @@ int uninstall_ui(int argc, char *argv[])
             strncpy(text, _("Complete uninstall"), sizeof(text));
             button = gtk_check_button_new_with_label(text);
             gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, FALSE, 0);
-            gtk_signal_connect(GTK_OBJECT(button), "toggled",
-                               GTK_SIGNAL_FUNC(component_toggled_slot),
-                               (gpointer)component_list);
-            gtk_object_set_data(GTK_OBJECT(button), "data",
+            g_signal_connect(button, "toggled", G_CALLBACK(component_toggled_slot), component_list);
+            g_object_set_data(G_OBJECT(button), "data",
                                 (gpointer)component_list);
             gtk_widget_show(button);
         }
@@ -591,10 +672,8 @@ int uninstall_ui(int argc, char *argv[])
             strncpy(text, loki_getname_component(component), sizeof(text));
             button = gtk_check_button_new_with_label(text);
             gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, FALSE, 0);
-            gtk_signal_connect(GTK_OBJECT(button), "toggled",
-                               GTK_SIGNAL_FUNC(component_toggled_slot),
-                               (gpointer)addon_list);
-            gtk_object_set_data(GTK_OBJECT(button), "data",
+            g_signal_connect(button, "toggled", G_CALLBACK(component_toggled_slot), addon_list);
+            g_object_set_data(G_OBJECT(button), "data",
                                 (gpointer)addon_list);
             gtk_widget_show(button);
             add_component_list(component_list, button);

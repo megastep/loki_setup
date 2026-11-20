@@ -122,3 +122,63 @@ printf '%s\n' console:0 -n -i "$dest" -o 'Base & extras' > "$work/expected"
 cmp "$work/expected" "$TRACE"
 
 printf '%s\n' 'Launcher elevation tests passed'
+
+cat > "$bin/glibc-2.1/setup.gtk3" <<'GTK'
+#!/bin/sh
+if [ "$1" = -V ]; then
+    exit "$TEST_GTK3_PROBE_STATUS"
+fi
+printf '%s\n' "gtk3:$TEST_UID" "$@" >> "$TRACE"
+exit "$TEST_GTK3_STATUS"
+GTK
+chmod +x "$bin/glibc-2.1/setup.gtk3"
+TEST_OS=Linux
+TEST_UID=1000
+
+export TEST_GTK3_STATUS=0 TEST_GTK3_PROBE_STATUS=0
+run 0 0
+printf '%s\n' gtk3:1000 -i "$dest" -o 'Base & extras' > "$work/expected-gtk3"
+cmp "$work/expected-gtk3" "$TRACE"
+
+for TEST_GTK3_PROBE_STATUS in 126 127 134; do
+    run 0 0
+    printf '%s\n' gtk:1000 -i "$dest" -o 'Base & extras' > "$work/expected"
+    cmp "$work/expected" "$TRACE"
+done
+TEST_GTK3_PROBE_STATUS=0
+TEST_GTK3_STATUS=4
+run 0 0
+cp "$work/expected-gtk3" "$work/expected"
+printf '%s\n' gtk:1000 -i "$dest" -o 'Base & extras' >> "$work/expected"
+cmp "$work/expected" "$TRACE"
+
+for TEST_GTK3_STATUS in 1 2 3 134; do
+    run 0 "$TEST_GTK3_STATUS"
+    cmp "$work/expected-gtk3" "$TRACE"
+done
+
+: > "$TRACE"
+sh "$media/setup.sh" -arch aarch64 -i "$dest" -n -o 'Base & extras'
+printf '%s\n' console:1000 -i "$dest" -n -o 'Base & extras' > "$work/expected"
+cmp "$work/expected" "$TRACE"
+
+: > "$TRACE"
+TEST_GTK3_STATUS=0
+sh "$media/setup.sh" -arch aarch64 -o '-n'
+printf '%s\n' gtk3:1000 -o -n > "$work/expected"
+cmp "$work/expected" "$TRACE"
+
+mv "$bin/glibc-2.1/setup.gtk2" "$bin/glibc-2.1/setup.gtk"
+TEST_GTK3_STATUS=4
+run 0 0
+cp "$work/expected-gtk3" "$work/expected"
+printf '%s\n' gtk:1000 -i "$dest" -o 'Base & extras' >> "$work/expected"
+cmp "$work/expected" "$TRACE"
+
+rm "$bin/glibc-2.1/setup.gtk"
+run 0 0
+cp "$work/expected-gtk3" "$work/expected"
+printf '%s\n' console:1000 -i "$dest" -o 'Base & extras' >> "$work/expected"
+cmp "$work/expected" "$TRACE"
+
+printf '%s\n' 'GTK3 launcher selection tests passed'

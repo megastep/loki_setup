@@ -23,7 +23,11 @@ IMAGE = @IMAGE@
 BRAND = @BRAND@
 UPDATES = /loki/updates/loki_uninstall
 CONVERT_IMAGE = /loki/patch-tools/convert-image
-SETUP_GTK = @SETUP_GTK@
+GTK_VERSIONS = @GTK_VERSIONS@
+DEFAULT_GTK = $(firstword $(GTK_VERSIONS))
+SETUP_GTK = $(addprefix setup.,$(GTK_VERSIONS))
+CHECK_GTK = $(addprefix check.,$(GTK_VERSIONS))
+UNINSTALL_GTK = $(addprefix loki_uninstall.,$(GTK_VERSIONS))
 DYN_PLUGINS = @DYN_PLUGINS@
 
 # The supported locales so far
@@ -55,22 +59,21 @@ UNINSTALL_OBJS 		= $(COMMON_OBJS) uninstall.o
 CHECK_OBJS			= $(COMMON_OBJS) $(CORE_OBJS) check.o
 CHECK_CARBON_OBJS	= $(COMMON_OBJS) $(CORE_OBJS) check_carbon.o
 CONSOLE_OBJS 		= $(OBJS) console_ui.o @CONSOLE_OBJS@
-GUI_OBJS 			= $(OBJS) gtk_ui.o
 CARBON_OBJS          = $(OBJS) carbon_ui.o
-SRCS = $(OBJS:.o=.c) $(CONSOLE_OBJS:.o=.c) $(GUI_OBJS:.o=.c) $(CARBON_OBJS:.o=.c) testcd.c
+SRCS = $(OBJS:.o=.c) $(CONSOLE_OBJS:.o=.c) gtk_ui.c gtk_setup_view.c $(CARBON_OBJS:.o=.c) testcd.c
 
 COMMON_LIBS = plugins/libplugins.a @COMMON_LIBS@ \
 	      $(SETUPDB)/$(arch)/libsetupdb.a
 LIBS =  $(COMMON_LIBS) @LIBS@
 ifeq ($(os),Linux)
-GUI_LIBS = $(COMMON_LIBS) @LIBS@ @GUI_LIBS@
+GUI_LIBS = $(COMMON_LIBS) @LIBS@ $(1) @GUI_LIBS@
 else
-GUI_LIBS = $(COMMON_LIBS) @GUI_LIBS@ @LIBS@
+GUI_LIBS = $(COMMON_LIBS) $(1) @GUI_LIBS@ @LIBS@
 endif
 CARBON_LIBS = $(COMMON_LIBS) @LIBS@ @CARBON_LIBS@
 CONSOLE_LIBS = $(LIBS) @CONSOLE_LIBS@ -lm
 
-all: setup uninstall $(SETUP_GTK)
+all: setup uninstall $(SETUP_GTK) $(CHECK_GTK) $(UNINSTALL_GTK)
 
 smoke: export TEST_MAKE = $(MAKE)
 smoke: all testencoding testrepair
@@ -88,9 +91,6 @@ testxml: testxml.o $(COMMON_LIBS)
 loki_uninstall.o: uninstall.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $< -DUNINSTALL_UI -DVERSION=\"$(UNINSTALL_VERSION)\"
 
-loki_uninstall: $(LOKI_UNINSTALL_OBJS) $(COMMON_LIBS)
-	$(LD) $(LDFLAGS) -o $@ $(LOKI_UNINSTALL_OBJS) $(GUI_LIBS)
-
 carbon_uninstall.o: uninstall.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $< -DUNINSTALL_CARBONUI -DUNINSTALL_UI -DVERSION=\"$(UNINSTALL_VERSION)\"
 
@@ -103,9 +103,6 @@ carbon_uninstall: $(CARBON_UNINSTALL_OBJS) $(COMMON_LIBS)
 	cp ./carbon_uninstall ./uninstall.APP/Contents/MacOS
 uninstall: $(UNINSTALL_OBJS) $(COMMON_LIBS)
 	$(LD) $(LDFLAGS) -o $@ $(UNINSTALL_OBJS) $(CONSOLE_LIBS) @STATIC@
-
-check: $(CHECK_OBJS)  $(COMMON_LIBS)
-	$(LD) $(LDFLAGS) -o $@ $(CHECK_OBJS) $(GUI_LIBS)
 
 check.carbon: $(CHECK_CARBON_OBJS)  $(COMMON_LIBS)
 	$(LD) $(LDFLAGS) -o $@ $(CHECK_CARBON_OBJS) $(CARBON_LIBS)
@@ -124,10 +121,45 @@ testrepair: tests/testrepair.o $(CORE_OBJS) $(COMMON_OBJS) $(COMMON_LIBS)
 setup: $(CONSOLE_OBJS) $(COMMON_LIBS)
 	$(LD) $(LDFLAGS) -o $@ $(CONSOLE_OBJS) $(CONSOLE_LIBS) @STATIC@
 
-ifneq ($(SETUP_GTK),)
-$(SETUP_GTK): $(GUI_OBJS) $(COMMON_LIBS)
-	$(LD) $(LDFLAGS) -o $@ $(GUI_OBJS) $(GUI_LIBS)
+# Each front end gets its own objects and toolkit flags. Keep the shared
+# installer engine independent of GTK.
+gtk2_CFLAGS = @GTK2_CFLAGS@
+gtk3_CFLAGS = @GTK3_CFLAGS@ -DLOKI_GTK3
+gtk2_LIBS = @GTK2_LIBS@
+gtk3_LIBS = @GTK3_LIBS@
+gtk2_BOOLS = bools.o
+gtk3_BOOLS = bools.gtk3.o
 
+define gtk_targets
+gtk_ui.$1.o gtk_setup_view.$1.o check.$1.o uninstall_ui.$1.o: %.$1.o: %.c Makefile config.h
+	$$(CC) $$(CPPFLAGS) $$(CFLAGS) $$($1_CFLAGS) -c -o $$@ $$<
+
+setup.$1: $$(filter-out bools.o,$$(OBJS)) $$($1_BOOLS) gtk_ui.$1.o gtk_setup_view.$1.o $$(COMMON_LIBS)
+	$$(LD) $$(LDFLAGS) -o $$@ $$(filter-out $$(COMMON_LIBS),$$^) $$(call GUI_LIBS,$$($1_LIBS))
+
+check.$1: $$(filter-out check.o bools.o,$$(CHECK_OBJS)) $$($1_BOOLS) check.$1.o $$(COMMON_LIBS)
+	$$(LD) $$(LDFLAGS) -o $$@ $$(filter-out $$(COMMON_LIBS),$$^) $$(call GUI_LIBS,$$($1_LIBS))
+
+loki_uninstall.$1: $$(filter-out uninstall_ui.o,$$(LOKI_UNINSTALL_OBJS)) uninstall_ui.$1.o $$(COMMON_LIBS)
+	$$(LD) $$(LDFLAGS) -o $$@ $$(filter-out $$(COMMON_LIBS),$$^) $$(call GUI_LIBS,$$($1_LIBS))
+endef
+
+$(foreach version,$(GTK_VERSIONS),$(eval $(call gtk_targets,$(version))))
+
+bools.gtk3.o: bools.c Makefile config.h
+	$(CC) $(CPPFLAGS) $(CFLAGS) -DLOKI_GTK3 -c -o $@ $<
+
+ifneq ($(DEFAULT_GTK),)
+check: check.$(DEFAULT_GTK) Makefile
+	cp $< $@
+
+loki_uninstall: loki_uninstall.$(DEFAULT_GTK) Makefile
+	cp $< $@
+else
+.PHONY: check loki_uninstall
+check loki_uninstall:
+	@echo "Configure with GTK 3 or GTK 2 to build $@" >&2
+	@exit 1
 endif
 
 #!!!TODO - Take dependency of dialog libs out of carbon	
@@ -176,65 +208,72 @@ install install.dbg install-image install-setup install-uninstall:
 	    $(BRANDELF) -t "$(os)" "$(CONVERT_IMAGE)/bin/$(os)/$(arch)/uninstall"; \
 	fi
 
-# Pretty LPP-specific
-install-check: check
-	@if [ -d $(IMAGE)/bin/$(os)/$(arch)/ ]; then \
-	    cp check $(IMAGE)/bin/$(os)/$(arch)/; \
-	    strip $(IMAGE)/bin/$(os)/$(arch)/check; \
-	    cp check.glade check.gtk2.glade $(IMAGE)/misc/; \
-	else \
-		echo No directory to copy the binary files to.; \
+# Keep each graphical utility and its layout together. The legacy names
+# point to the preferred version for media that invokes them directly.
+.PHONY: install-check copy-loki_uninstall copy-image install-loki_uninstall
+# Remove generated executable names only. Layouts and other media content can
+# be shared with other builds or customized by the packager.
+DISABLED_GTK = $(filter-out $(GTK_VERSIONS),gtk2 gtk3)
+remove_disabled_gtk = rm -f $(if $(DEFAULT_GTK),,"$(1)/$(2)") $(foreach version,$(DISABLED_GTK),"$(1)/$(2).$(version)")
+
+install-check: $(if $(DEFAULT_GTK),check $(CHECK_GTK))
+	@dir="$(IMAGE)/bin/$(os)/$(arch)"; \
+	if [ -d "$$dir" ]; then \
+	    set -e; $(call remove_disabled_gtk,$$dir,check); \
+	    [ -n "$(DEFAULT_GTK)" ] || exit 0; \
+	    cp check $(CHECK_GTK) check.glade check.gtk2.glade check.gtk3.ui "$$dir/"; \
+	    for tool in check $(CHECK_GTK); do strip "$$dir/$$tool"; done; \
+	    mkdir -p "$(IMAGE)/misc"; cp check.glade check.gtk2.glade "$(IMAGE)/misc/"; \
 	fi
 
-# Copy loki_uninstall and the required files
-
-copy-loki_uninstall: loki_uninstall
-	@if [ -d $(IMAGE)/bin/$(os)/$(arch)/bin ]; then \
-		if [ -d $(IMAGE)/bin/$(os)/$(arch)/bin/@GTK_SUBDIR@ ]; then \
-		    cp loki_uninstall $(IMAGE)/bin/$(os)/$(arch)/bin/@GTK_SUBDIR@/$(BRAND)-uninstall; \
-		    strip $(IMAGE)/bin/$(os)/$(arch)/bin/@GTK_SUBDIR@/$(BRAND)-uninstall; \
-		else \
-		    cp loki_uninstall $(IMAGE)/bin/$(os)/$(arch)/bin/$(BRAND)-uninstall; \
-		    strip $(IMAGE)/bin/$(os)/$(arch)/bin/$(BRAND)-uninstall; \
-		fi; \
-	    for file in `find image/setup.data -name loki-uninstall.mo -print`; \
-	    do  path="$(IMAGE)/`dirname $$file | sed 's,image/setup.data/,,'`"; \
-	        mkdir -p $$path; \
-	        cp $$file $$path; \
+copy-loki_uninstall: $(if $(DEFAULT_GTK),loki_uninstall $(UNINSTALL_GTK))
+	@dir="$(IMAGE)/bin/$(os)/$(arch)/bin"; \
+	if [ -d "$$dir" ]; then \
+	    set -e; for version in $(DISABLED_GTK); do rm -f "$$dir/$$version/$(BRAND)-uninstall"; done; \
+	    [ -n "$(DEFAULT_GTK)" ] || { rm -f "$$dir/$(BRAND)-uninstall"; exit 0; }; \
+	    cp uninstall.glade uninstall.gtk2.glade uninstall.gtk3.ui "$$dir/"; \
+	    cp loki_uninstall "$$dir/$(BRAND)-uninstall"; strip "$$dir/$(BRAND)-uninstall"; \
+	    for version in $(GTK_VERSIONS); do \
+	        mkdir -p "$$dir/$$version"; \
+	        cp loki_uninstall.$$version "$$dir/$$version/$(BRAND)-uninstall"; \
+	        cp uninstall.$$version.* "$$dir/$$version/"; \
+	        strip "$$dir/$$version/$(BRAND)-uninstall"; \
 	    done; \
-	else \
-		echo No directory to copy the $(BRAND)-uninstall binary file to.; \
-	fi
-
-copy-image: install-image $(if $(SETUP_GTK),copy-loki_uninstall) po-image
-
-install-loki_uninstall: loki_uninstall
-	@if [ -d $(IMAGE)/loki_uninstall/bin/$(arch)/$(libc)/ ]; then \
-	    cp loki_uninstall $(IMAGE)/loki_uninstall/bin/$(arch)/$(libc)/; \
-	    strip $(IMAGE)/loki_uninstall/bin/$(arch)/$(libc)/loki_uninstall; \
-	    cp README.loki_uninstall $(IMAGE)/loki_uninstall/README; \
-	    cp icon.xpm uninstall.glade uninstall.gtk2.glade $(IMAGE)/loki_uninstall/; \
-	    for file in `find image/setup.data -name loki-uninstall.mo -print`; \
-	    do  path="$(IMAGE)/loki_uninstall/`dirname $$file | sed 's,image/setup.data/,,'`"; \
-	        mkdir -p $$path; \
-	        cp $$file $$path; \
+	    for file in `find image/setup.data -name loki-uninstall.mo -print`; do \
+	        path="$(IMAGE)/`dirname $$file | sed 's,image/setup.data/,,'`"; \
+	        mkdir -p "$$path"; cp "$$file" "$$path"; \
 	    done; \
-	else \
-		echo No directory to copy the binary files to.; \
 	fi
-	@if [ -d $(UPDATES) ]; then \
-	    rm -rf $(UPDATES)/bin-$(arch)-$(UNINSTALL_VERSION)/; \
-	    mkdir $(UPDATES)/bin-$(arch)-$(UNINSTALL_VERSION)/; \
-	    cp loki_uninstall $(UPDATES)/bin-$(arch)-$(UNINSTALL_VERSION)/; \
-	    strip $(UPDATES)/bin-$(arch)-$(UNINSTALL_VERSION)/loki_uninstall; \
-	    rm -rf $(UPDATES)/data-$(UNINSTALL_VERSION)/; \
-	    mkdir $(UPDATES)/data-$(UNINSTALL_VERSION)/; \
-	    cp README.loki_uninstall $(UPDATES)/data-$(UNINSTALL_VERSION)/README; \
-	    cp icon.xpm uninstall.glade uninstall.gtk2.glade $(UPDATES)/data-$(UNINSTALL_VERSION)/; \
-	    for file in `find image/setup.data -name loki-uninstall.mo -print`; \
-	    do  path="$(UPDATES)/data-$(UNINSTALL_VERSION)/`dirname $$file | sed 's,image/setup.data/,,'`"; \
-	        mkdir -p $$path; \
-	        cp $$file $$path; \
+
+copy-image: install-image copy-loki_uninstall po-image
+
+install-loki_uninstall: $(if $(DEFAULT_GTK),loki_uninstall $(UNINSTALL_GTK))
+	@dir="$(IMAGE)/loki_uninstall/bin/$(arch)/$(libc)"; \
+	if [ -d "$$dir" ]; then \
+	    set -e; $(call remove_disabled_gtk,$$dir,loki_uninstall); \
+	fi; \
+	if [ -n "$(DEFAULT_GTK)" ] && [ -d "$$dir" ]; then \
+	    set -e; cp loki_uninstall $(UNINSTALL_GTK) uninstall.glade uninstall.gtk2.glade uninstall.gtk3.ui "$$dir/"; \
+	    for tool in loki_uninstall $(UNINSTALL_GTK); do strip "$$dir/$$tool"; done; \
+	    cp README.loki_uninstall "$(IMAGE)/loki_uninstall/README"; \
+	    cp icon.xpm uninstall.glade uninstall.gtk2.glade uninstall.gtk3.ui "$(IMAGE)/loki_uninstall/"; \
+	    for file in `find image/setup.data -name loki-uninstall.mo -print`; do \
+	        path="$(IMAGE)/loki_uninstall/`dirname $$file | sed 's,image/setup.data/,,'`"; \
+	        mkdir -p "$$path"; cp "$$file" "$$path"; \
+	    done; \
+	fi
+	@dir="$(UPDATES)/bin-$(arch)-$(UNINSTALL_VERSION)"; \
+	if [ -d "$$dir" ]; then \
+	    set -e; $(call remove_disabled_gtk,$$dir,loki_uninstall); \
+	fi; \
+	if [ -n "$(DEFAULT_GTK)" ] && [ -d "$(UPDATES)" ]; then \
+	    set -e; mkdir -p "$(UPDATES)/bin-$(arch)-$(UNINSTALL_VERSION)" "$(UPDATES)/data-$(UNINSTALL_VERSION)"; \
+	    cp loki_uninstall $(UNINSTALL_GTK) "$(UPDATES)/bin-$(arch)-$(UNINSTALL_VERSION)/"; \
+	    for tool in loki_uninstall $(UNINSTALL_GTK); do strip "$(UPDATES)/bin-$(arch)-$(UNINSTALL_VERSION)/$$tool"; done; \
+	    cp icon.xpm uninstall.glade uninstall.gtk2.glade uninstall.gtk3.ui "$(UPDATES)/data-$(UNINSTALL_VERSION)/"; \
+	    for file in `find image/setup.data -name loki-uninstall.mo -print`; do \
+	        path="$(UPDATES)/data-$(UNINSTALL_VERSION)/`dirname $$file | sed 's,image/setup.data/,,'`"; \
+	        mkdir -p "$$path"; cp "$$file" "$$path"; \
 	    done; \
 	fi
 	@echo "Don't forget to update the version in setup.xml to $(UNINSTALL_VERSION)"
@@ -261,9 +300,9 @@ clean:
 
 distclean: clean
 	rm -f Makefile dialog/Makefile plugins/Makefile .depend dialog/.depend plugins/.depend config.h config.cache config.status config.log
-	rm -f setup setup.gtk setup.gtk2 setup.carbon uninstall loki_uninstall testxml testcd testencoding testrepair xsu check check.carbon carbon_uninstall
+	rm -f setup setup.gtk setup.gtk2 setup.gtk3 setup.carbon uninstall loki_uninstall loki_uninstall.gtk2 loki_uninstall.gtk3 testxml testcd testencoding testrepair xsu check check.gtk2 check.gtk3 check.carbon carbon_uninstall
 
-DISTFILES = $(wildcard *.c *.h *.glade README*) configure.ac configure config.h.in \
+DISTFILES = $(wildcard *.c *.h *.glade *.ui README*) THEMING.md configure.ac configure config.h.in \
             config.guess config.sub install-sh autogen.sh Makefile Makefile.in \
             BUGS CHANGES COPYING Patches icon.xpm loki_uninstall.spec setupdb.rev .github .gitignore \
             carbon dialog extras image makeself plugins po setup.APP tests unrar
@@ -277,9 +316,9 @@ dist:
 	mv "$$work/release.tar.gz" "$(DISTDIR)/$(PACKAGE).tar.gz"
 
 PO_PLUGINS = $(wildcard plugins/*.c)
-PO_SETUP = $(sort $(SRCS) dialog_ui.c $(PO_PLUGINS) $(wildcard image/setup.data/setup*.glade))
+PO_SETUP = $(sort $(SRCS) dialog_ui.c $(PO_PLUGINS) $(wildcard image/setup.data/setup*.glade image/setup.data/setup*.ui))
 PO_UNINSTALL = $(sort $(CHECK_OBJS:.o=.c) check_carbon.c uninstall.c uninstall_ui.c \
-                    uninstall_carbonui.c $(PO_PLUGINS) $(wildcard check*.glade uninstall*.glade))
+                    uninstall_carbonui.c $(PO_PLUGINS) $(wildcard check*.glade uninstall*.glade check*.ui uninstall*.ui))
 XGETTEXT_FLAGS = --from-code=UTF-8 --keyword=_ --keyword=gettext_noop \
                  --add-comments=TRANSLATORS: --package-name='Loki Setup' \
                  --package-version=$(SETUP_VERSION)

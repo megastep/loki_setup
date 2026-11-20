@@ -19,13 +19,21 @@
 #include <locale.h>
 
 #include <gtk/gtk.h>
+#ifdef LOKI_GTK3
+#include "gtk3_layout.h"
+#else
 #include <glade/glade.h>
+typedef GladeXML UiLayout;
+#define ui_widget glade_xml_get_widget
+#endif
 
 #include "config.h"
 #include "arch.h"
 #include "setupdb.h"
 #include "install.h"
 #include "copy.h"
+#include "plugins.h"
+#include "file.h"
 
 #ifdef HAVE_SELINUX_SELINUX_H
 #include <selinux/selinux.h>
@@ -34,15 +42,19 @@
 #undef PACKAGE
 #define PACKAGE "loki-uninstall"
 
-#if defined(ENABLE_GTK2)
+#if defined(LOKI_GTK3)
+    #define CHECK_GLADE "check.gtk3.ui"
+#elif defined(ENABLE_GTK2)
     #define CHECK_GLADE "check.gtk2.glade"
 #else
     #define CHECK_GLADE "check.glade"
 #endif
 
 product_t *product = NULL;
+#ifndef LOKI_GTK3
 GtkWidget *file_selector;
-GladeXML *check_glade, *rescue_glade = NULL;
+#endif
+UiLayout *check_glade, *rescue_glade = NULL;
 extern struct component_elem *current_component;
 
 #ifdef __linux
@@ -141,6 +153,7 @@ static void init_locale(void)
 	DetectLocale();
 }
 
+#ifndef LOKI_GTK3
 static int prompt_response;
 
 static void prompt_button_slot( GtkWidget* widget, gpointer func_data)
@@ -148,8 +161,18 @@ static void prompt_button_slot( GtkWidget* widget, gpointer func_data)
     prompt_response = 1;
 }
 
+#endif
+
 static void message_dialog(const char *txt, const char *title)
 {
+#ifdef LOKI_GTK3
+    GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(ui_widget(check_glade, "check_dialog")),
+                                               GTK_DIALOG_MODAL, GTK_MESSAGE_INFO,
+                                               GTK_BUTTONS_OK, "%s", txt);
+    gtk_window_set_title(GTK_WINDOW(dialog), title);
+    gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);
+#else
     GtkWidget *dialog, *label, *ok_button;
        
     /* Create the widgets */
@@ -182,46 +205,67 @@ static void message_dialog(const char *txt, const char *title)
 	    gtk_main_iteration();
 	}
 
-    gtk_widget_destroy(dialog);	
+    gtk_widget_destroy(dialog);
+#endif
 }
 
 static void add_message(GtkWidget *list, const char *str, ...)
 {
-	static int line = 0;
+
     va_list ap;
     char buf[BUFSIZ];
+#ifndef LOKI_GTK3
 	GList *items = NULL;
 	GtkWidget *item;
+#endif
 
     va_start(ap, str);
     vsnprintf(buf, sizeof(buf), str, ap);
     va_end(ap);
 
+#ifdef LOKI_GTK3
+    GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(list));
+    GtkTextIter end;
+    gchar *line = g_locale_to_utf8(buf, -1, NULL, NULL, NULL);
+
+    gtk_text_buffer_get_end_iter(buffer, &end);
+    gtk_text_buffer_insert(buffer, &end, line ? line : buf, -1);
+    gtk_text_buffer_insert(buffer, &end, "\n", 1);
+    g_free(line);
+#else
 	item = gtk_list_item_new_with_label(buf);
 	gtk_widget_show(item);
 	items = g_list_append(items, item);
 	gtk_list_append_items(GTK_LIST(list), items);
-	line++;
 	gtk_list_scroll_vertical(GTK_LIST(list), GTK_SCROLL_JUMP, 1.0);
+#endif
 }
 
 void on_cdrom_radio_toggled(GtkWidget *widget, gpointer user_data)
 {
-	gtk_widget_set_sensitive(glade_xml_get_widget(rescue_glade, "dir_entry"), FALSE);
-	gtk_widget_set_sensitive(glade_xml_get_widget(rescue_glade, "pick_dir_but"), FALSE);
+#ifdef LOKI_GTK3
+    if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
+        return;
+#endif
+	gtk_widget_set_sensitive(ui_widget(rescue_glade, "dir_entry"), FALSE);
+	gtk_widget_set_sensitive(ui_widget(rescue_glade, "pick_dir_but"), FALSE);
 }
 
 void on_dir_radio_toggled(GtkWidget *widget, gpointer user_data)
 {
-	gtk_widget_set_sensitive(glade_xml_get_widget(rescue_glade, "dir_entry"), TRUE);
-	gtk_widget_set_sensitive(glade_xml_get_widget(rescue_glade, "pick_dir_but"), TRUE);
+#ifdef LOKI_GTK3
+    if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
+        return;
+#endif
+	gtk_widget_set_sensitive(ui_widget(rescue_glade, "dir_entry"), TRUE);
+	gtk_widget_set_sensitive(ui_widget(rescue_glade, "pick_dir_but"), TRUE);
 }
 
 void
 on_media_cancel_clicked (GtkButton       *button,
 						 gpointer         user_data)
 {
-	gtk_widget_hide(glade_xml_get_widget(rescue_glade, "media_select"));
+	gtk_widget_hide(ui_widget(rescue_glade, "media_select"));
 }
 
 
@@ -230,20 +274,20 @@ void
 on_media_ok_clicked (GtkButton       *button,
 					 gpointer         user_data)
 {
-	GtkWidget *diag = glade_xml_get_widget(check_glade, "diagnostic_label"), *radio;
+	GtkWidget *diag = ui_widget(check_glade, "diagnostic_label"), *radio;
 	char path[PATH_MAX] = "", root[PATH_MAX] = "";
 	install_info *install;
 	
-	radio = glade_xml_get_widget(rescue_glade, "dir_radio");
+	radio = ui_widget(rescue_glade, "dir_radio");
 	if ( gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(radio)) ) {
 		/* Directory */
-		const gchar *str = gtk_entry_get_text(GTK_ENTRY(glade_xml_get_widget(rescue_glade, "dir_entry")));
+		const gchar *str = gtk_entry_get_text(GTK_ENTRY(ui_widget(rescue_glade, "dir_entry")));
 		/* We ignore the CDROM prefix in that case */
 		snprintf(path, sizeof(path), "%s/setup.data/setup.xml", str);
 		if ( access( path, R_OK) ) {
 			/* Doesn't look like a setup archive */
 			gtk_label_set_text(GTK_LABEL(diag), _("Unable to identify the installation media."));
-			gtk_widget_hide(glade_xml_get_widget(rescue_glade, "media_select"));
+			gtk_widget_hide(ui_widget(rescue_glade, "media_select"));
 			return;
 		}
 		strncpy(root, str, sizeof(root));
@@ -265,7 +309,7 @@ on_media_ok_clicked (GtkButton       *button,
 	/* Verify that the package is the same (product name and version) */
 	if ( ! matches_repair_media(path, product) ) {
 		gtk_label_set_text(GTK_LABEL(diag), _("Installation media doesn't match the product."));
-		gtk_widget_hide(glade_xml_get_widget(rescue_glade, "media_select"));
+		gtk_widget_hide(ui_widget(rescue_glade, "media_select"));
 		return;		
 	}
 
@@ -273,9 +317,10 @@ on_media_ok_clicked (GtkButton       *button,
 	gtk_widget_realize(diag);
 	
 	/* Fetch the files to be refreshed, i.e install with a restricted set of files  */
+    char directory[PATH_MAX];
     begin_repair();
-	install = create_install(path, info->root, NULL, info->prefix);
-	if (install && chdir(root) == 0) {
+    install = create_install(path, info->root, NULL, info->prefix);
+    if (install && getcwd(directory, sizeof(directory)) && chdir(root) == 0) {
 		const char *f;
 
         snprintf(install->setup_path, sizeof(install->setup_path), "%s", root);
@@ -303,33 +348,43 @@ on_media_ok_clicked (GtkButton       *button,
 			copy_path(install, f, install->install_path, NULL, 1, NULL, NULL, NULL);
 		}
 
-	}
+        if (chdir(directory) < 0)
+            perror(directory);
+    }
+
+    if (install) {
+        delete_install(install);
+        current_component = NULL;
+    }
 
     if (!repair_complete()) {
         gtk_label_set_text(GTK_LABEL(diag), _("Installation media doesn't match the product."));
-        gtk_widget_hide(glade_xml_get_widget(rescue_glade, "media_select"));
+        gtk_widget_hide(ui_widget(rescue_glade, "media_select"));
         unmount_filesystems();
         return;
     }
 
 	/* Print end message and disable the "Rescue" button */
 	gtk_label_set_text(GTK_LABEL(diag), _("Files successfully restored!"));
-	gtk_widget_set_sensitive(glade_xml_get_widget(check_glade, "rescue_button"), FALSE);
-	gtk_widget_hide(glade_xml_get_widget(rescue_glade, "media_select"));
+	gtk_widget_set_sensitive(ui_widget(check_glade, "rescue_button"), FALSE);
+	gtk_widget_hide(ui_widget(rescue_glade, "media_select"));
 
-	message_dialog(_("Files successfully restored!"), _("Success"));
+#ifndef LOKI_GTK3
+    message_dialog(_("Files successfully restored!"), _("Success"));
+#endif
 
 	/* Unmount filesystems that may have been mounted */
 	unmount_filesystems();
 }
 
+#ifndef LOKI_GTK3
 void store_filename(GtkButton *but, GtkWidget *entry)
 {
 	const gchar *str = gtk_file_selection_get_filename(GTK_FILE_SELECTION(file_selector));
 	struct stat st;
 
 	if ( stat(str, &st)==0 && S_ISDIR(st.st_mode) ) {
-		gtk_entry_set_text(GTK_ENTRY(glade_xml_get_widget(rescue_glade, "dir_entry")), str);
+		gtk_entry_set_text(GTK_ENTRY(ui_widget(rescue_glade, "dir_entry")), str);
 	} else {
 	    char buf[PATH_MAX];
 		/* Warn that there is no such directory ? */
@@ -338,10 +393,25 @@ void store_filename(GtkButton *but, GtkWidget *entry)
 	}
 }
 
+#endif
+
 void
 on_pick_dir_but_clicked (GtkButton       *button,
 						 gpointer         user_data)
 {
+#ifdef LOKI_GTK3
+    GtkWidget *chooser = gtk_file_chooser_dialog_new(_("Please select a directory"),
+        GTK_WINDOW(ui_widget(rescue_glade, "media_select")), GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+        _("_Cancel"), GTK_RESPONSE_CANCEL, _("_Open"), GTK_RESPONSE_ACCEPT, NULL);
+
+    if (gtk_dialog_run(GTK_DIALOG(chooser)) == GTK_RESPONSE_ACCEPT) {
+        char *directory = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(chooser));
+        if (directory)
+            gtk_entry_set_text(GTK_ENTRY(ui_widget(rescue_glade, "dir_entry")), directory);
+        g_free(directory);
+    }
+    gtk_widget_destroy(chooser);
+#else
 	file_selector = gtk_file_selection_new(_("Please select a directory"));
 	
 	gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION(file_selector)->ok_button),
@@ -358,12 +428,13 @@ on_pick_dir_but_clicked (GtkButton       *button,
 							   (gpointer) file_selector);
 
 	gtk_window_set_transient_for(GTK_WINDOW(file_selector), 
-								 GTK_WINDOW(glade_xml_get_widget(rescue_glade, 
+								 GTK_WINDOW(ui_widget(rescue_glade,
 																 "media_select")));
 	
 	/* Display that dialog */
 	
 	gtk_widget_show (file_selector);
+#endif
 }
 
 void
@@ -372,12 +443,22 @@ on_rescue_button_clicked            (GtkButton       *button,
 {
 	GtkWidget *window;
 
+#ifdef LOKI_GTK3
+    rescue_glade = check_glade;
+#else
     rescue_glade = GLADE_XML_NEW(CHECK_GLADE, "media_select"); 
     glade_xml_signal_autoconnect(rescue_glade);
+#endif
 
 	/* Ask the user to insert the media */
-    window = glade_xml_get_widget(rescue_glade, "media_select");
+    window = ui_widget(rescue_glade, "media_select");
+#ifdef LOKI_GTK3
+    GtkWidget *radio = ui_widget(rescue_glade, "cdrom_radio");
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(radio), TRUE);
+    on_cdrom_radio_toggled(radio, NULL);
+#else
 	on_cdrom_radio_toggled(NULL, NULL);
+#endif
 
 	gtk_widget_show(window);
 }
@@ -386,13 +467,55 @@ void
 on_dismiss_button_clicked            (GtkButton       *button,
 									  gpointer         user_data)
 {
+#ifdef LOKI_GTK3
+    if (!gtk_main_level())
+        return;
+#endif
 	gtk_main_quit();
 }
 
+#ifdef LOKI_GTK3
+static gboolean close_check_window(GtkWidget *widget, GdkEvent *event, gpointer data)
+{
+    on_dismiss_button_clicked(NULL, data);
+    return TRUE;
+}
+
+static gboolean close_media_window(GtkWidget *widget, GdkEvent *event, gpointer data)
+{
+    on_media_cancel_clicked(NULL, data);
+    return TRUE;
+}
+
+static int load_check_layout(void)
+{
+    check_glade = load_gtk3_layout(CHECK_GLADE, PACKAGE);
+    if (!check_glade)
+        return 0;
+
+    GTK3_CALLBACK(check_glade, close_check_window);
+    GTK3_CALLBACK(check_glade, close_media_window);
+    GTK3_CALLBACK(check_glade, on_dismiss_button_clicked);
+    GTK3_CALLBACK(check_glade, on_rescue_button_clicked);
+    GTK3_CALLBACK(check_glade, on_media_cancel_clicked);
+    GTK3_CALLBACK(check_glade, on_media_ok_clicked);
+    GTK3_CALLBACK(check_glade, on_cdrom_radio_toggled);
+    GTK3_CALLBACK(check_glade, on_dir_radio_toggled);
+    GTK3_CALLBACK(check_glade, on_pick_dir_but_clicked);
+    gtk_builder_connect_signals(check_glade, NULL);
+    gtk_window_set_transient_for(GTK_WINDOW(ui_widget(check_glade, "media_select")),
+                                 GTK_WINDOW(ui_widget(check_glade, "check_dialog")));
+    return 1;
+}
+#endif
+
 int main(int argc, char *argv[])
 {
-	GtkWidget *window, *ok_but, *fix_but, *diag, *list, *scroll;
-	GtkAdjustment *adj;
+	GtkWidget *window, *fix_but, *diag, *list;
+#ifndef LOKI_GTK3
+    GtkWidget *scroll;
+    GtkAdjustment *adj;
+#endif
     product_component_t *component;
 	product_option_t *option;
 	product_file_t *file;
@@ -419,28 +542,43 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
+#ifdef LOKI_GTK3
+    if (!gtk_init_check(NULL, NULL)) {
+        fprintf(stderr, "%s\n", _("Unable to open the GTK display."));
+        return 1;
+    }
+#else
     gtk_init(&argc,&argv);
+#endif
 
 	argv0 = argv[0];
 
+#ifdef LOKI_GTK3
+    if (!load_check_layout())
+        return 1;
+#else
     /* Initialize Glade */
     glade_init();
     check_glade = GLADE_XML_NEW(CHECK_GLADE, "check_dialog"); 
 
     /* Add all signal handlers defined in glade file */
     glade_xml_signal_autoconnect(check_glade);
+#endif
 
-    window = glade_xml_get_widget(check_glade, "check_dialog");
+    window = ui_widget(check_glade, "check_dialog");
+#ifdef LOKI_GTK3
+    gtk_widget_show(window);
+#else
     gtk_widget_realize(window);
+#endif
     while( gtk_events_pending() ) {
         gtk_main_iteration();
     }
 
-	diag = glade_xml_get_widget(check_glade, "diagnostic_label");
-	ok_but = glade_xml_get_widget(check_glade, "dismiss_button");
-	fix_but = glade_xml_get_widget(check_glade, "rescue_button");
-	list = glade_xml_get_widget(check_glade, "main_list");
-	scroll = glade_xml_get_widget(check_glade, "scrolledwindow");
+	diag = ui_widget(check_glade, "diagnostic_label");
+	fix_but = ui_widget(check_glade, "rescue_button");
+	list = ui_widget(check_glade, "main_list");
+
 
 	product = open_registered_product(argv[1]);
 	if (!product || !trusted_product_files(loki_getinfo_product(product))) {
@@ -454,8 +592,15 @@ int main(int argc, char *argv[])
 	gtk_label_set_text(GTK_LABEL(diag), "");
 	gtk_widget_set_sensitive(fix_but, FALSE);
 
+    /* Initialize the verifier's plugins before opening any rescue media. */
+    InitPlugins();
+    file_init();
+
+#ifndef LOKI_GTK3
+    scroll = ui_widget(check_glade, "scrolledwindow");
 	adj = GTK_ADJUSTMENT(gtk_adjustment_new(100.0, 1.0, 100.0, 1.0, 10.0, 10.0));
 	gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(scroll), adj);
+#endif
 
 	/* Iterate through the components */
 	for ( component = loki_getfirst_component(product);
@@ -474,7 +619,12 @@ int main(int argc, char *argv[])
 				  file;
 				  file = loki_getnext_file(file) ) {
 
+#ifdef LOKI_GTK3
+                while (gtk_events_pending())
+                    gtk_main_iteration();
+#else
 				gtk_main_iteration();
+#endif
 				switch ( loki_check_file(file) ) {
 				case LOKI_REMOVED:
 					add_message(list, _("%s was REMOVED"), loki_getpath_file(file));
@@ -507,6 +657,9 @@ int main(int argc, char *argv[])
 
     /* Run the UI.. */
     gtk_main();
+    free_corrupt_files();
+    FreePlugins();
+    loki_closeproduct(product);
 
 	return 0;
 }

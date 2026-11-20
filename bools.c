@@ -66,7 +66,9 @@ void setup_init_bools(install_info *info)
 
 	/* We must define this here instead of in the backend in case we use a non-GTK installer for
 	   a GTK app that uses these flags */
-#ifdef ENABLE_GTK2
+#if defined(LOKI_GTK3)
+	setup_add_bool("gtk3", 1);
+#elif defined(ENABLE_GTK2)
 	setup_add_bool("gtk2", 1);
 #else
 	setup_add_bool("gtk1", 1);

@@ -234,24 +234,33 @@ try_run()
 {
     setup=$1
     shift
+    unavailable=1
+    [ "$setup" != setup.gtk3 ] || unavailable=4
     setup_bin="setup.data/bin/$os/$arch/$libc/$setup"
     if [ ! -f "$setup_bin" ]; then
         setup_bin="setup.data/bin/$os/$arch/$setup"
-        [ -f "$setup_bin" ] || return 1
+        [ -f "$setup_bin" ] || return "$unavailable"
     fi
 
     tmpbase=${SETUP_EXEC_TMPDIR:-$HOME}
     if [ "$uid" = 0 ]; then
-        trusted_path "$media_dir/$setup_bin" file || return 1
-        tmpbase=$(CDPATH= cd "$HOME" && pwd -P) || return 1
-        trusted_path "$tmpbase" directory || return 1
+        trusted_path "$media_dir/$setup_bin" file || return "$unavailable"
+        tmpbase=$(CDPATH= cd "$HOME" && pwd -P) || return "$unavailable"
+        trusted_path "$tmpbase" directory || return "$unavailable"
     fi
-    setup=$(mktemp "$tmpbase/.setup.XXXXXX") || return 1
+    setup=$(mktemp "$tmpbase/.setup.XXXXXX") || return "$unavailable"
     if ! cp "$setup_bin" "$setup" || ! chmod 700 "$setup"; then
         rm -f "$setup"
-        return 1
+        return "$unavailable"
     fi
     trap 'rm -f "$setup"; exit 1' 1 2 3 15
+    # Probe the dynamic loader before an installation can start. Some
+    # platforms report a missing library with a signal instead of 127.
+    if [ "$unavailable" = 4 ] && ! ( "$setup" -V ) >/dev/null 2>&1; then
+        rm -f "$setup"
+        trap - 1 2 3 15
+        return "$unavailable"
+    fi
     "$setup" "$@"
     failed=$?
     rm -f "$setup"
@@ -259,15 +268,33 @@ try_run()
     return "$failed"
 }
 
+# Follow the installer's options so a path or option named "-n" is not a flag.
+wants_text_ui()
+(
+    OPTIND=1
+    while getopts 'hnc:f:r:v:Vi:b:mo:p:' opt; do
+        [ "$opt" != n ] || exit 0
+    done
+    exit 1
+)
+
 if [ "$console_only" = 1 ]; then
     try_run setup $args -n "$@"
     status=$?
-else
-    try_run setup.gtk2 $args "$@" 2> /dev/null
+elif wants_text_ui $args "$@" 2>/dev/null; then
+    try_run setup $args "$@"
     status=$?
-    if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then
-        try_run setup.gtk $args "$@"
-        status=$?
+else
+    try_run setup.gtk3 $args "$@"
+    status=$?
+    # Status 4 means GTK3 could not start. All other statuses belong to the
+    # installer and must be propagated once the loader probe has succeeded.
+    if [ "$status" -eq 4 ]; then
+        for legacy in setup.gtk2 setup.gtk; do
+            try_run "$legacy" $args "$@" 2>/dev/null
+            status=$?
+            case "$status" in 0|2) break ;; esac
+        done
         if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then
             try_run setup $args "$@"
             status=$?
