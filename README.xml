@@ -768,7 +768,10 @@ There are several optional attributes of the binary element:
             for the first binary with a symlink.
             With 'gui', the graphical installer can offer to launch the
             binary on its completion page. When GTK 3 setup is run through
-            sudo, it launches the binary as the invoking user.
+            sudo, it launches the binary as the invoking user by default.
+            Set launch-as-root="true" on the top-level install element to keep
+            setup's privileges for this explicitly marked binary. A privileged
+            launch requires a protected installed executable.
 
  icon       This is an optional icon file that you should install into
             the top level of the install directory.  If both a symlink

@@ -104,6 +104,7 @@
 #include "copy.h"
 #include "bools.h"
 #include "loki_launchurl.h"
+#include "safe_path.h"
 
 #define MAX_TEXTLEN	40	/* The maximum length of current filename */
 
@@ -344,24 +345,14 @@ static void drop_launch_privileges(gpointer data)
         _exit(126);
 }
 
-static gboolean launch_installed_program_as_user(install_info *info)
+static gboolean launch_as_root(install_info *info)
 {
-    struct passwd *user = loki_sudo_user();
+    return xmlNodePropIsTrue(XML_ROOT(info->config), "launch-as-root");
+}
+
+static gboolean launch_installed_program_as_user(gchar **argv, const struct passwd *user)
+{
     struct stat st;
-
-    if (!user || !*info->play_binary || lstat(info->play_binary, &st) < 0 ||
-        !S_ISREG(st.st_mode))
-        return FALSE;
-
-    gchar **args = NULL;
-    gint count = 0;
-    if (*info->args && !g_shell_parse_argv(info->args, &count, &args, NULL))
-        return FALSE;
-    gchar **argv = g_new0(gchar *, count + 2);
-    argv[0] = info->play_binary;
-    for (gint i = 0; i < count; ++i)
-        argv[i + 1] = args[i];
-
     struct launch_user_ids ids = { user->pw_uid, user->pw_gid };
     gchar **env = g_get_environ();
     env = g_environ_setenv(env, "HOME", user->pw_dir, TRUE);
@@ -385,6 +376,32 @@ static gboolean launch_installed_program_as_user(install_info *info)
                                        drop_launch_privileges, &ids, NULL, NULL);
     g_free(default_runtime);
     g_strfreev(env);
+    return launched;
+}
+
+static gboolean launch_installed_program(install_info *info)
+{
+    gboolean as_root = launch_as_root(info);
+    struct passwd *user = as_root ? NULL : loki_sudo_user();
+    struct stat st;
+
+    if (!*info->play_binary || (!as_root && !user) ||
+        lstat(info->play_binary, &st) < 0 || !S_ISREG(st.st_mode) ||
+        (as_root && !trusted_path(info->play_binary, 0)))
+        return FALSE;
+
+    gchar **args = NULL;
+    gint count = 0;
+    if (*info->args && !g_shell_parse_argv(info->args, &count, &args, NULL))
+        return FALSE;
+    gchar **argv = g_new0(gchar *, count + 2);
+    argv[0] = info->play_binary;
+    for (gint i = 0; i < count; ++i)
+        argv[i + 1] = args[i];
+
+    gboolean launched = as_root ?
+        g_spawn_async(info->install_path, argv, NULL, 0, NULL, NULL, NULL, NULL) :
+        launch_installed_program_as_user(argv, user);
     g_strfreev(args);
     g_free(argv);
     return launched;
@@ -395,7 +412,7 @@ void setup_button_play_slot( GtkWidget* _widget, gpointer func_data )
 {
 #ifdef LOKI_GTK3
     if (geteuid() == 0) {
-        if (launch_installed_program_as_user(cur_info))
+        if (launch_installed_program(cur_info))
             cur_state = SETUP_EXIT;
         else
             UI.prompt(_("Could not start the installed program."), RESPONSE_OK);
@@ -1666,8 +1683,10 @@ static install_state gtkui_complete(install_info *info)
 
     widget = gtk_setup_widget("play_game_button");
 #ifdef LOKI_GTK3
-    if (widget && *info->play_binary && (geteuid() != 0 || loki_sudo_user())) {
-        gchar *label = g_strdup_printf(_("_Start %s"), info->desc);
+    gboolean as_root = geteuid() == 0 && launch_as_root(info);
+    if (widget && *info->play_binary && (as_root || geteuid() != 0 || loki_sudo_user())) {
+        const char *format = as_root ? _("_Start %s as Administrator") : _("_Start %s");
+        gchar *label = g_strdup_printf(format, info->desc);
         gtk_button_set_label(GTK_BUTTON(widget), label);
         g_free(label);
     } else if (widget) {
