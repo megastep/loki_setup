@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Loki Setup 2.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-18 05:22-0800\n"
+"POT-Creation-Date: 2026-11-20 21:42-0800\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Anatoly Zhigunov <anatol_z@mail.ru>\n"
 "Language-Team: \n"
@@ -16,12 +16,12 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 # gtk_ui.c:550
-#: carbon_ui.c:315 gtk_ui.c:707
+#: carbon_ui.c:315 gtk_ui.c:591
 msgid "Ready to install!"
 msgstr "Готов к установке!"
 
 # gtk_ui.c:563 gtk_ui.c:577
-#: carbon_ui.c:337 carbon_ui.c:349 gtk_ui.c:724 gtk_ui.c:738
+#: carbon_ui.c:337 carbon_ui.c:349 gtk_ui.c:608 gtk_ui.c:622
 #, c-format
 msgid "%d MB"
 msgstr "%d Мб"
@@ -34,7 +34,7 @@ msgstr "Каталог установки не найден."
 msgid "Can't find default install dir!"
 msgstr "Не удалось найти каталог установки по умолчанию."
 
-#: carbon_ui.c:478 console_ui.c:695 dialog_ui.c:710 gtk_ui.c:399
+#: carbon_ui.c:478 console_ui.c:692 dialog_ui.c:707 gtk_ui.c:222
 #, c-format
 msgid ""
 "Installation could not proceed due to the following error:\n"
@@ -45,7 +45,7 @@ msgstr ""
 "%s\n"
 "Попробуйте расширенный режим установки."
 
-#: carbon_ui.c:524 gtk_ui.c:573
+#: carbon_ui.c:524 gtk_ui.c:461
 msgid ""
 "Are you sure you want to abort\n"
 "this installation?"
@@ -59,35 +59,35 @@ msgstr "Введённые ключи CD не совпадают. Попробу
 msgid "Please specify a CD key!"
 msgstr "Введите ключ CD."
 
-#: carbon_ui.c:753
+#: carbon_ui.c:742
 msgid "CD key is invalid!"
 msgstr "Недействительный ключ CD."
 
-#: carbon_ui.c:952
+#: carbon_ui.c:941
 #, c-format
 msgid "This install requires Mac OS X %s or later."
 msgstr "Для этой установки требуется Mac OS X %s или новее."
 
 # gtk_ui.c:1163
-#: carbon_ui.c:983 gtk_ui.c:1732
+#: carbon_ui.c:972 gtk_ui.c:1284
 #, c-format
 msgid "%s / %s Setup"
 msgstr "%s / %s Установка"
 
 # gtk_ui.c:1165
-#: carbon_ui.c:985 gtk_ui.c:1734
+#: carbon_ui.c:974 gtk_ui.c:1286
 #, c-format
 msgid "%s Setup"
 msgstr "%s Установка"
 
 # console_ui.c:493
-#: carbon_ui.c:1335
+#: carbon_ui.c:1324
 #, c-format
 msgid "Installing %s : %d%%"
 msgstr "Установка %s: %d%%"
 
 # gtk_ui.c:1477
-#: carbon_ui.c:1515 gtk_ui.c:2172 gtk_ui.c:2175
+#: carbon_ui.c:1504 gtk_ui.c:1675 gtk_ui.c:1678
 #, c-format
 msgid "Type '%s' to start the program"
 msgstr "Наберите '%s' для запуска программы"
@@ -294,16 +294,16 @@ msgstr "%d Мб свободно, %d Мб будет установлено.\n"
 msgid "Continue install?"
 msgstr "Продолжить установку?"
 
-#: console_ui.c:597 dialog_ui.c:567
+#: console_ui.c:595 dialog_ui.c:565
 msgid "Please enter your CD key"
 msgstr "Введите ключ CD"
 
-#: console_ui.c:605 gtk_ui.c:607
+#: console_ui.c:603 gtk_ui.c:492
 #, c-format
 msgid "ERROR: vcdk is missing. Installation aborted.\n"
 msgstr "ОШИБКА: программа vcdk не найдена. Установка прервана.\n"
 
-#: console_ui.c:612 dialog_ui.c:587
+#: console_ui.c:609 dialog_ui.c:584
 #, c-format
 msgid ""
 "CD key is invalid!\n"
@@ -313,30 +313,30 @@ msgstr ""
 "Проверьте ключ и введите его снова.\n"
 
 # console_ui.c:493
-#: console_ui.c:636
+#: console_ui.c:633
 #, c-format
 msgid "Installing %s ...\n"
 msgstr "Установка %s ...\n"
 
 # console_ui.c:508
-#: console_ui.c:657 dialog_ui.c:648
+#: console_ui.c:654 dialog_ui.c:645
 #, c-format
 msgid "Install aborted - cleaning up files\n"
 msgstr "Установка прервана - удаление временных файлов\n"
 
 # console_ui.c:516
-#: console_ui.c:665
+#: console_ui.c:662
 #, c-format
 msgid "Installation complete.\n"
 msgstr "Установка завершена.\n"
 
 # console_ui.c:520
-#: console_ui.c:669
+#: console_ui.c:666
 msgid "Would you like to start now?"
 msgstr "Запустить программу сейчас?"
 
 # console_ui.c:525
-#: console_ui.c:674
+#: console_ui.c:671
 msgid ""
 "If you run the program as root, the preferences will be stored in\n"
 "root's home directory instead of your user account directory."
@@ -344,18 +344,18 @@ msgstr ""
 "При запуске программы от имени root настройки сохранятся\n"
 "в домашнем каталоге root, а не в вашем домашнем каталоге."
 
-#: console_ui.c:690
+#: console_ui.c:687
 msgid "Do you want to proceed with Recommended installation?"
 msgstr "Продолжить рекомендуемую установку?"
 
 # console_ui.c:541
-#: console_ui.c:707
+#: console_ui.c:704
 #, c-format
 msgid "Thank you for installing %s!\n"
 msgstr "Спасибо за установку %s!\n"
 
 # console_ui.c:546
-#: console_ui.c:712
+#: console_ui.c:709
 #, c-format
 msgid "Please visit our website for updates and support.\n"
 msgstr ""
@@ -363,150 +363,156 @@ msgstr ""
 "поддержки\n"
 
 # console_ui.c:551
-#: console_ui.c:717
+#: console_ui.c:714
 msgid "Would you like to launch web browser?"
 msgstr "Открыть браузер?"
 
 # console_ui.c:562
-#: console_ui.c:728
+#: console_ui.c:725
 #, c-format
 msgid "Standard input is not a terminal!\n"
 msgstr "Стандартный ввод не терминал!\n"
 
+# file.c:66 file.c:86 file.c:93 install.c:599 install.c:621 install.c:643
+# install.c:664 install.c:703
+#: copy.c:136 copy.c:140 file.c:123 file.c:200 file.c:207 install.c:1254
+#: install.c:1276 install.c:1298 install.c:1319 install.c:1334 install.c:1380
+msgid "Out of memory"
+msgstr "Нехватка памяти"
+
 # copy.c:207
-#: copy.c:301
+#: copy.c:344
 #, c-format
 msgid "Unable to create %s symlink pointing to %s"
 msgstr "Невозможно создать символьную ссылку %s, указывающую на %s"
 
 # detect.c:75
-#: copy.c:382
+#: copy.c:432
 #, c-format
 msgid "Failed to update check sum for %s"
 msgstr "Не удалось обновить контрольную сумму для %s"
 
-#: copy.c:386
+#: copy.c:436
 #, c-format
 msgid "Error while running process command: %s"
 msgstr "Ошибка при выполнении команды: %s"
 
-#: copy.c:403
+#: copy.c:453
 #, c-format
 msgid "Failed to change SELinux context for file '%s' - not supported"
 msgstr ""
 "Не удалось изменить контекст SELinux файла «%s»: операция не поддерживается."
 
-#: copy.c:405
+#: copy.c:455
 #, c-format
 msgid "Failed to change SELinux context for file '%s'"
 msgstr "Не удалось изменить контекст SELinux файла «%s»."
 
-#: copy.c:410
+#: copy.c:460
 #, c-format
 msgid "Invalid SELinux context '%s' for file '%s'"
 msgstr "Недопустимый контекст SELinux «%s» для файла «%s»."
 
-#: copy.c:420 plugins/cpio.c:181 plugins/rar.c:248 plugins/tar.c:120
-#: plugins/uz2.c:203 plugins/zip.c:887
+#: copy.c:470 file.c:718
 #, c-format
 msgid "File '%s' has an invalid checksum! Aborting."
 msgstr "Недействительная контрольная сумма файла «%s». Операция прервана."
 
 # copy.c:269
-#: copy.c:463
+#: copy.c:515
 #, c-format
 msgid "Unable to copy directory '%s'"
 msgstr "Невозможно скопировать каталог '%s'"
 
 # copy.c:298 copy.c:346 copy.c:445 copy.c:446 copy.c:449 copy.c:450
 # copy.c:462 copy.c:463 copy.c:466 copy.c:467
-#: copy.c:498
+#: copy.c:550
 #, c-format
 msgid "1 Unable to find file '%s' in '%s'"
 msgstr "1 Не удалось найти файл «%s» в «%s»"
 
 # copy.c:332
-#: copy.c:543
+#: copy.c:595
 #, c-format
 msgid "Unable to find file '%s' on any of the CDROM drives"
 msgstr "Файл '%s' не найден ни на одном приводе CDROM"
 
 # copy.c:298 copy.c:346 copy.c:445 copy.c:446 copy.c:449 copy.c:450
 # copy.c:462 copy.c:463 copy.c:466 copy.c:467
-#: copy.c:561
+#: copy.c:613
 #, c-format
 msgid "2 Unable to find file '%s' in '%s'"
 msgstr "2 Не удалось найти файл «%s» в «%s»"
 
 # copy.c:298 copy.c:346 copy.c:445 copy.c:446 copy.c:449 copy.c:450
 # copy.c:462 copy.c:463 copy.c:466 copy.c:467
-#: copy.c:616 copy.c:617
+#: copy.c:679 copy.c:680
 #, c-format
 msgid "Unable to copy man page '%s'"
 msgstr "Не удалось скопировать справочную страницу man «%s»"
 
-#: copy.c:660 copy.c:667
+#: copy.c:723 copy.c:730
 #, c-format
 msgid "Could not create temporary script: %s"
 msgstr "Не удалось создать временный сценарий: %s"
 
-#: copy.c:710
+#: copy.c:773
 msgid "'binpath' attribute is mandatory for inline 'binary' tag"
 msgstr "Атрибут «binpath» обязателен для встроенного тега «binary»"
 
-#: copy.c:715
+#: copy.c:778
 msgid "'binpath' attribute must not contain slashes for inline 'binary' tag"
 msgstr ""
 "Атрибут «binpath» встроенного тега «binary» не должен содержать косые черты"
 
-#: copy.c:753
+#: copy.c:818
 msgid "Binary install path is too long"
 msgstr "Путь установки исполняемых файлов слишком длинный"
 
-#: copy.c:790
+#: copy.c:856
 #, c-format
 msgid "find '%s'"
 msgstr "find '%s'"
 
 # copy.c:298 copy.c:346 copy.c:445 copy.c:446 copy.c:449 copy.c:450
 # copy.c:462 copy.c:463 copy.c:466 copy.c:467
-#: copy.c:812 copy.c:813
+#: copy.c:879 copy.c:880
 #, c-format
 msgid "Unable to find file '%s' in '%s'"
 msgstr "Не удалось найти файл «%s» в «%s»"
 
 # copy.c:298 copy.c:346 copy.c:445 copy.c:446 copy.c:449 copy.c:450
 # copy.c:462 copy.c:463 copy.c:466 copy.c:467
-#: copy.c:834 copy.c:835
+#: copy.c:903 copy.c:904
 #, c-format
 msgid "Unable to copy file '%s'"
 msgstr "Не удалось скопировать файл «%s»"
 
-#: copy.c:884
+#: copy.c:955
 msgid "Running script. Please wait..."
 msgstr "Выполняется сценарий. Подождите…"
 
-#: copy.c:1088
+#: copy.c:1164
 msgid "The remove_msg element should be within a component!\n"
 msgstr "Элемент remove_msg должен находиться внутри компонента.\n"
 
 # copy.c:642
-#: copy.c:1106
+#: copy.c:1182
 msgid "Component element needs to have a name"
 msgstr "Элемент компонента должен иметь имя"
 
 # copy.c:645
-#: copy.c:1109
+#: copy.c:1185
 msgid "Component element needs to have a version"
 msgstr "Элемент компонента должен иметь версию"
 
-#: copy.c:1133
+#: copy.c:1209
 msgid "Malformed 'environment' element in XML file : missing 'var' property"
 msgstr ""
 "Некорректный элемент «environment» в XML-файле: отсутствует свойство «var»"
 
 # copy.c:797
-#: copy.c:1310
+#: copy.c:1386
 #, c-format
 msgid "Suspect size value for option %s\n"
 msgstr "Подозрительное значение параметра %s\n"
@@ -518,19 +524,19 @@ msgid "Unmounting device %s"
 msgstr "Размонтирование устройства %s"
 
 # detect.c:75
-#: detect.c:346 detect.c:377 detect.c:393
+#: detect.c:346
 #, c-format
 msgid "Failed to unmount device %s mounted on %s"
 msgstr "Ошибка при размантировании устройства %s примонтированного к %s"
 
 # detect.c:167 detect.c:209
-#: detect.c:462 detect.c:545 detect.c:585 detect.c:629
+#: detect.c:413 detect.c:496 detect.c:536 detect.c:580
 #, c-format
 msgid "Mounted device %s"
 msgstr "Примонтированное устройство %s"
 
 # main.c:176
-#: detect.c:820 detect.c:824
+#: detect.c:771 detect.c:775
 #, c-format
 msgid ""
 "\n"
@@ -542,7 +548,7 @@ msgstr ""
 "Выберите «Да» для повторной попытки или «Нет» для отмены"
 
 # main.c:179
-#: detect.c:827
+#: detect.c:778
 #, c-format
 msgid ""
 "\n"
@@ -553,17 +559,17 @@ msgstr ""
 "Подключите %s.\n"
 "Выберите «Да» для повторной попытки или «Нет» для отмены"
 
-#: detect.c:892
+#: detect.c:843
 #, c-format
 msgid "Detected locale is %s\n"
 msgstr "Обнаружена локаль: %s\n"
 
-#: detect.c:1069
+#: detect.c:1020
 #, c-format
 msgid "Invalid matching policy: %s"
 msgstr "Недопустимое правило сопоставления: %s"
 
-#: dialog_ui.c:47 gtk_ui.c:1030
+#: dialog_ui.c:47 gtk_setup_view.c:672
 msgid "Message"
 msgstr "Сообщение"
 
@@ -595,7 +601,7 @@ msgstr ""
 
 # image/setup.data/setup.glade:1723
 #: dialog_ui.c:101 dialog_ui.c:272 image/setup.data/setup.glade:2319
-#: image/setup.data/setup.gtk2.glade:8
+#: image/setup.data/setup.gtk2.glade:8 image/setup.data/setup.gtk3.ui:716
 msgid "License Agreement"
 msgstr "Лицензионное соглашение"
 
@@ -609,7 +615,7 @@ msgid "Component"
 msgstr "Компонент"
 
 # console_ui.c:475
-#: dialog_ui.c:243 dialog_ui.c:700
+#: dialog_ui.c:243 dialog_ui.c:697
 #, c-format
 msgid "Installation of %s"
 msgstr "Установка %s"
@@ -628,7 +634,7 @@ msgstr ""
 msgid "Option-specific EULA not found for '%s', can't toggle\n"
 msgstr "Не найдено лицензионное соглашение для «%s». Изменить выбор нельзя.\n"
 
-#: dialog_ui.c:281 dialog_ui.c:502 dialog_ui.c:514 dialog_ui.c:580
+#: dialog_ui.c:281 dialog_ui.c:502 dialog_ui.c:514 dialog_ui.c:578
 msgid "Error"
 msgstr "Ошибка"
 
@@ -691,40 +697,40 @@ msgstr "Выберите компоненты для установки"
 msgid "Please choose the options to install"
 msgstr "Выберите параметры установки"
 
-#: dialog_ui.c:566
+#: dialog_ui.c:564
 msgid "CD Key"
 msgstr "Ключ CD"
 
 # image/setup.data/setup.glade:1183
-#: dialog_ui.c:580
+#: dialog_ui.c:578
 msgid "vcdk is missing. Installation aborted.\n"
 msgstr "Программа vcdk не найдена. Установка прервана.\n"
 
-#: dialog_ui.c:587 gtk_ui.c:607 gtk_ui.c:616
+#: dialog_ui.c:584 gtk_ui.c:492 gtk_ui.c:500
 msgid "Problem"
 msgstr "Проблема"
 
 # console_ui.c:493
-#: dialog_ui.c:630
+#: dialog_ui.c:627
 #, c-format
 msgid "Installing %s ..."
 msgstr "Установка %s…"
 
 # console_ui.c:493
-#: dialog_ui.c:631 dialog_ui.c:633
+#: dialog_ui.c:628 dialog_ui.c:630
 msgid "Installing..."
 msgstr "Выполняется установка…"
 
-#: dialog_ui.c:648
+#: dialog_ui.c:645
 msgid "Aborting"
 msgstr "Прерывание"
 
 # console_ui.c:520
-#: dialog_ui.c:658
+#: dialog_ui.c:655
 msgid "Would you like to launch a Web browser?"
 msgstr "Открыть браузер?"
 
-#: dialog_ui.c:672
+#: dialog_ui.c:669
 msgid ""
 "Installation complete!\n"
 "Would you like to start now?"
@@ -732,66 +738,59 @@ msgstr ""
 "Установка завершена!\n"
 "Запустить программу сейчас?"
 
-#: dialog_ui.c:676
+#: dialog_ui.c:673
 msgid "Finished"
 msgstr "Готово"
 
 # console_ui.c:516
-#: dialog_ui.c:676
+#: dialog_ui.c:673
 msgid "Installation complete!"
 msgstr "Установка завершена!"
 
-#: dialog_ui.c:685 image/setup.data/setup.glade:152
-#: image/setup.data/setup.gtk2.glade:410
+#: dialog_ui.c:682 image/setup.data/setup.glade:152
+#: image/setup.data/setup.gtk2.glade:410 image/setup.data/setup.gtk3.ui:57
 msgid "Recommended"
 msgstr "Рекомендуемая"
 
-#: dialog_ui.c:685
+#: dialog_ui.c:682
 msgid "Express installation using detected defaults"
 msgstr "Быстрая установка с автоматически подобранными настройками"
 
 # image/setup.data/setup.glade:912 image/setup.data/setup.glade:1148
 # image/setup.data/setup.glade:1394
-#: dialog_ui.c:686 image/setup.data/setup.glade:169
-#: image/setup.data/setup.gtk2.glade:431
+#: dialog_ui.c:683 image/setup.data/setup.glade:169
+#: image/setup.data/setup.gtk2.glade:431 image/setup.data/setup.gtk3.ui:64
 msgid "Expert"
 msgstr "Расширенная"
 
 # console_ui.c:358
-#: dialog_ui.c:686
+#: dialog_ui.c:683
 msgid "Full control over the installation parameters"
 msgstr "Полное управление параметрами установки"
 
 # gtk_ui.c:527
-#: dialog_ui.c:701
+#: dialog_ui.c:698
 msgid "Please select the class of installation"
 msgstr "Выберите тип установки"
 
-# file.c:66 file.c:86 file.c:93 install.c:599 install.c:621 install.c:643
-# install.c:664 install.c:703
-#: file.c:119 file.c:165 file.c:172 install.c:1196 install.c:1218
-#: install.c:1240 install.c:1261 install.c:1276 install.c:1327
-msgid "Out of memory"
-msgstr "Нехватка памяти"
-
-#: file.c:144
+#: file.c:181
 #, c-format
 msgid "File '%25s' already exists, overwrite?"
 msgstr "Файл «%25s» уже существует. Перезаписать?"
 
-#: file.c:149
+#: file.c:186
 #, c-format
 msgid "File exists: '%s'"
 msgstr "Файл «%s» уже существует"
 
 # copy.c:298 copy.c:346 copy.c:445 copy.c:446 copy.c:449 copy.c:450
 # copy.c:462 copy.c:463 copy.c:466 copy.c:467
-#: file.c:183
+#: file.c:218
 #, c-format
 msgid "Failed to open file %s"
 msgstr "Не удалось открыть файл %s"
 
-#: file.c:213
+#: file.c:248
 #, c-format
 msgid "File '%s' may be in BZIP2 format, but support was not compiled in!"
 msgstr ""
@@ -799,154 +798,159 @@ msgstr ""
 "сборку."
 
 # file.c:127
-#: file.c:224
+#: file.c:259
 #, c-format
 msgid "Couldn't read from file: %s"
 msgstr "Невозможно прочитать файл %s"
 
 # file.c:135
-#: file.c:232
+#: file.c:272
 #, c-format
 msgid "Installing file %s"
 msgstr "Установка файла %s"
 
 # file.c:140
-#: file.c:237
+#: file.c:278
 #, c-format
 msgid "Couldn't write to file: %s"
 msgstr "Невозможно записать в файл %s"
 
 # file.c:161
-#: file.c:263
+#: file.c:305
 msgid "Read on write stream"
 msgstr "Чтение из потока только для записи"
 
-#: file.c:302
+#: file.c:344
 #, c-format
 msgid "Read failure on %s"
 msgstr "Ошибка чтения из %s"
 
 # file.c:204
-#: file.c:373
+#: file.c:415
 msgid "Skip zeroes on write stream"
 msgstr "Пропуск нулей в потоке только для записи"
 
 # file.c:221 file.c:252 file.c:259
-#: file.c:393 file.c:459 file.c:466
+#: file.c:435 file.c:511 file.c:518
 #, c-format
 msgid "Short write on %s"
 msgstr "Короткая запись в %s"
 
 # file.c:227
-#: file.c:399
+#: file.c:441
 msgid "Write on read stream"
 msgstr "Запись в поток только для чтения"
 
 # file.c:221 file.c:252 file.c:259
-#: file.c:429
+#: file.c:471
 #, c-format
 msgid "Write failure on %s"
 msgstr "Ошибка записи в %s"
 
-#: file.c:492
+#: file.c:560
 #, c-format
 msgid "Trying to create a symbolic link on the same file: %s\n"
 msgstr "Попытка создать символическую ссылку на тот же файл: %s\n"
 
 # file.c:279
-#: file.c:497
+#: file.c:565
 #, c-format
 msgid "Creating symbolic link: %s --> %s\n"
 msgstr "Создание символьной ссылки: %s --> %s\n"
 
-# file.c:288
-#: file.c:506
-#, c-format
-msgid "Can't remove existing symlink %s: %s"
-msgstr "Невозможно удалить существующую символьную связь %s: %s"
-
 # file.c:292 file.c:323 file.c:343 file.c:362
-#: file.c:510 file.c:541 file.c:561 file.c:580
+#: file.c:579
 #, c-format
 msgid "Can't create %s: %s"
 msgstr "Невозможно создать %s: %s"
 
-# file.c:317
-#: file.c:535
-#, c-format
-msgid "Creating directory: %s\n"
-msgstr "Создание каталога: %s\n"
-
-# file.c:336
-#: file.c:554
-#, c-format
-msgid "Creating FIFO: %s\n"
-msgstr "Создание стэка: %s\n"
-
-# file.c:355
-#: file.c:573
-#, c-format
-msgid "Creating device: %s\n"
-msgstr "Создание устройства: %s\n"
-
 # file.c:375
-#: file.c:593
+#: file.c:636
 #, c-format
 msgid "Can't change permissions for %s: %s"
 msgstr "Невозможно изменить права для %s: %s"
 
 # file.c:409 file.c:433
-#: file.c:627 file.c:651
+#: file.c:751 file.c:775
 #, c-format
 msgid "Unable to read %s"
 msgstr "Невозможно прочитать %s"
 
-#: file.c:729
+#: file.c:853
 msgid "BZ2 support not available"
 msgstr "Поддержка BZ2 недоступна"
 
-#: file.c:754
+#: file.c:878
 #, c-format
 msgid "BZ2: *** Symbol \"%s\" not found, bzip2 support disabled"
 msgstr "BZ2: *** Символ «%s» не найден. Поддержка bzip2 отключена."
 
-#: file.c:767
+#: file.c:891
 #, c-format
 msgid "BZ2: Try open %s"
 msgstr "BZ2: попытка открыть %s"
 
-#: file.c:773
+#: file.c:897
 msgid "BZ2: *** Unable to open bzip2 library. bzip2 support disabled"
 msgstr ""
 "BZ2: *** Не удалось открыть библиотеку bzip2. Поддержка bzip2 отключена."
 
-#: file.c:777
+#: file.c:901
 #, c-format
 msgid "BZ2: got %s"
 msgstr "BZ2: получено %s"
 
-#: file.c:808
+#: file.c:925 file.c:930
 #, c-format
 msgid "Unable to create temporary directory: %s"
 msgstr "Не удалось создать временный каталог: %s"
 
-#: file.c:827
-#, c-format
-msgid "Can not chdir to temporary directory: %s"
-msgstr "Не удалось перейти во временный каталог: %s"
-
-#: file.c:834
+#: file.c:945
 #, c-format
 msgid "Can not open temporary directory: %s"
 msgstr "Не удалось открыть временный каталог: %s"
 
-#: file.c:845
+#: file.c:952
 #, c-format
 msgid "Can not remove %s/%s: %s"
 msgstr "Не удалось удалить %s/%s: %s"
 
+#: gtk_setup_view.c:196
+#, c-format
+msgid "Ignoring stylesheet %s: %s\n"
+msgstr "Таблица стилей %s пропущена: %s\n"
+
+# gtk_ui.c:1422
+#: gtk_setup_view.c:361
+#, c-format
+msgid "Unable to open %s, aborting!\n"
+msgstr "Невозможно открыть %s, прекращение работы!\n"
+
+#: gtk_setup_view.c:643
+msgid "OK"
+msgstr "ОК"
+
+# gtk_ui.c:730
+#: gtk_setup_view.c:656
+msgid "Yes"
+msgstr "Да"
+
+# gtk_ui.c:731
+#: gtk_setup_view.c:657
+msgid "No"
+msgstr "Нет"
+
+#: gtk_setup_view.c:668
+msgid "Choice Requested"
+msgstr "Сделайте выбор"
+
+# install.c:1302
+#: gtk_ui.c:418
+msgid "Could not start the installed program."
+msgstr "Не удалось запустить установленную программу."
+
 # gtk_ui.c:408
-#: gtk_ui.c:539
+#: gtk_ui.c:427
 msgid ""
 "If you run this as root, the preferences will be stored in\n"
 "root's home directory instead of your user account directory."
@@ -954,7 +958,7 @@ msgstr ""
 "Если вы запустите программу с правами root, установки будут сохранены в\n"
 "домашний каталог root, а не в ваш каталог пользователя."
 
-#: gtk_ui.c:616
+#: gtk_ui.c:500
 msgid ""
 "CD key is invalid!\n"
 "Please double check your key and enter it again."
@@ -963,29 +967,11 @@ msgstr ""
 "Проверьте ключ и введите его снова."
 
 # gtk_ui.c:522
-#: gtk_ui.c:688
+#: gtk_ui.c:572
 msgid "Please respond to the license dialog"
 msgstr "Пожалуйста ответьте на лицензионное соглашение"
 
-#: gtk_ui.c:1001
-msgid "OK"
-msgstr "ОК"
-
-# gtk_ui.c:730
-#: gtk_ui.c:1014
-msgid "Yes"
-msgstr "Да"
-
-# gtk_ui.c:731
-#: gtk_ui.c:1015
-msgid "No"
-msgstr "Нет"
-
-#: gtk_ui.c:1026
-msgid "Choice Requested"
-msgstr "Сделайте выбор"
-
-#: gtk_ui.c:1133
+#: gtk_ui.c:809
 msgid ""
 "Warning: program_to_start is only meaningful when there are no symlinks.\n"
 msgstr ""
@@ -993,39 +979,47 @@ msgstr ""
 "символических ссылок.\n"
 
 # gtk_ui.c:806
-#: gtk_ui.c:1197
+#: gtk_ui.c:877
 #, c-format
 msgid "Fatal error:  out of memory\n"
 msgstr "Фатальная ошибка:  нехватка памяти\n"
 
 # gtk_ui.c:813
-#: gtk_ui.c:1206
+#: gtk_ui.c:886
 #, c-format
 msgid "Error: maximum of %d install_path entries exceeded\n"
 msgstr "Ошибка: максимальное число %d  вхождений install_path превышено\n"
 
 # gtk_ui.c:931
-#: gtk_ui.c:1396
+#: gtk_ui.c:1074
 msgid "Warning: No writable targets in path... You may want to be root.\n"
 msgstr "Предупреждение: Возможно у вас должны быть права root\n"
 
 # gtk_ui.c:950
-#: gtk_ui.c:1417
+#: gtk_ui.c:1094
 msgid "Unable to locate 'setup_menuitems_checkbox'"
 msgstr "Невозможно найти 'setup_menuitems_checkbox'"
 
-# gtk_ui.c:1422
-#: gtk_ui.c:1683 gtk_ui.c:2115
-#, c-format
-msgid "Unable to open %s, aborting!\n"
-msgstr "Невозможно открыть %s, прекращение работы!\n"
+#: gtk_ui.c:1423
+msgid "Unable to read the license agreement."
+msgstr "Не удалось прочитать лицензионное соглашение."
 
-#: gtk_ui.c:2197
+#: gtk_ui.c:1688
+#, c-format
+msgid "_Start %s as Administrator"
+msgstr "_Запустить %s от имени администратора"
+
+#: gtk_ui.c:1688
+#, c-format
+msgid "_Start %s"
+msgstr "_Запустить %s"
+
+#: gtk_ui.c:1710
 msgid "The update/reinstall was successfully completed!"
 msgstr "Обновление или повторная установка завершены."
 
 # image/setup.data/setup.glade:990
-#: gtk_ui.c:2199 image/setup.data/setup.glade:1302
+#: gtk_ui.c:1712 image/setup.data/setup.glade:1302
 #: image/setup.data/setup.gtk2.glade:1826
 msgid "The installation was successfully completed!"
 msgstr "Установка была успешно завершена"
@@ -1066,12 +1060,16 @@ msgstr "Отмена"
 #: image/setup.data/setup.gtk2.glade:1195
 #: image/setup.data/setup.gtk2.glade:1609
 #: image/setup.data/setup.gtk2.glade:1690
-#: image/setup.data/setup.gtk2.glade:2391
+#: image/setup.data/setup.gtk2.glade:2391 image/setup.data/setup.gtk3.ui:90
+#: image/setup.data/setup.gtk3.ui:273 image/setup.data/setup.gtk3.ui:364
+#: image/setup.data/setup.gtk3.ui:431 image/setup.data/setup.gtk3.ui:623
 msgid "_View Readme"
 msgstr "_Открыть README"
 
 # image/setup.data/setup.glade:1286 image/setup.data/setup.glade:1420
 #: image/setup.data/setup.glade:256 image/setup.data/setup.gtk2.glade:2448
+#: image/setup.data/setup.gtk3.ui:98 image/setup.data/setup.gtk3.ui:538
+#: image/setup.data/setup.gtk3.ui:631 image/setup.data/setup.gtk3.ui:690
 msgid "_Continue"
 msgstr "_Продолжить"
 
@@ -1082,10 +1080,12 @@ msgstr "Глобальные параметры"
 
 # image/setup.data/setup.glade:126
 #: image/setup.data/setup.glade:323 image/setup.data/setup.gtk2.glade:640
+#: image/setup.data/setup.gtk3.ui:130
 msgid "Install path:"
 msgstr "Путь установки:"
 
 #: image/setup.data/setup.glade:390 image/setup.data/setup.gtk2.glade:719
+#: image/setup.data/setup.gtk3.ui:145
 msgid "Binary path:"
 msgstr "Путь для исполняемых файлов:"
 
@@ -1096,10 +1096,12 @@ msgstr "Символьные ссылки на установленные фай
 
 # image/setup.data/setup.glade:269
 #: image/setup.data/setup.glade:466 image/setup.data/setup.gtk2.glade:801
+#: image/setup.data/setup.gtk3.ui:158
 msgid "Install a symbolic link into the path"
 msgstr "Установка символьной ссылки"
 
 #: image/setup.data/setup.glade:488 image/setup.data/setup.gtk2.glade:823
+#: image/setup.data/setup.gtk3.ui:167
 msgid "Man page path:"
 msgstr "Путь для справочных страниц man:"
 
@@ -1121,11 +1123,13 @@ msgstr "[packages go here]"
 
 # image/setup.data/setup.glade:414
 #: image/setup.data/setup.glade:678 image/setup.data/setup.gtk2.glade:1046
+#: image/setup.data/setup.gtk3.ui:210
 msgid "Free space:"
 msgstr "Свободное место:"
 
 # image/setup.data/setup.glade:440
 #: image/setup.data/setup.glade:704 image/setup.data/setup.gtk2.glade:1074
+#: image/setup.data/setup.gtk3.ui:225
 msgid "Estimated size:"
 msgstr "Примерный размер:"
 
@@ -1136,6 +1140,7 @@ msgstr "Пункты меню запуска (KDE/GNOME/CDE)"
 
 # image/setup.data/setup.glade:572
 #: image/setup.data/setup.glade:848 image/setup.data/setup.gtk2.glade:1251
+#: image/setup.data/setup.gtk3.ui:281
 msgid "_Begin Install"
 msgstr "_Начать установку"
 
@@ -1171,7 +1176,8 @@ msgid "Total Install"
 msgstr "Результат установки"
 
 #: image/setup.data/setup.glade:1206 image/setup.data/setup.glade:1470
-#: image/setup.data/setup.glade:1735
+#: image/setup.data/setup.glade:1735 image/setup.data/setup.gtk3.ui:423
+#: image/setup.data/setup.gtk3.ui:485 image/setup.data/setup.gtk3.ui:615
 msgid "_Quit"
 msgstr "_Выход"
 
@@ -1252,6 +1258,7 @@ msgstr "[product]"
 
 # image/setup.data/setup.glade:1518
 #: image/setup.data/setup.glade:1868 image/setup.data/setup.gtk2.glade:2590
+#: image/setup.data/setup.gtk3.ui:574
 msgid "Please visit our website for updates and support."
 msgstr ""
 "Посетите наш сайт в интернете для получения обновлений и технической "
@@ -1259,17 +1266,22 @@ msgstr ""
 
 # image/setup.data/setup.glade:1569
 #: image/setup.data/setup.glade:1919 image/setup.data/setup.gtk2.glade:2665
+#: image/setup.data/setup.gtk3.ui:582
 msgid "Launching browser, please wait..."
 msgstr "Запуск обозревателя, подождите..."
 
 # image/setup.data/setup.glade:1608
 #: image/setup.data/setup.glade:1958 image/setup.data/setup.gtk2.glade:2698
+#: image/setup.data/setup.gtk3.ui:605
 msgid "Launch _Browser"
 msgstr "Открыть _браузер"
 
 # image/setup.data/setup.glade:546 image/setup.data/setup.glade:838
 # image/setup.data/setup.glade:1273 image/setup.data/setup.glade:1777
 #: image/setup.data/setup.glade:2027 image/setup.data/setup.glade:2378
+#: image/setup.data/setup.gtk3.ui:82 image/setup.data/setup.gtk3.ui:265
+#: image/setup.data/setup.gtk3.ui:356 image/setup.data/setup.gtk3.ui:530
+#: image/setup.data/setup.gtk3.ui:682 image/setup.data/setup.gtk3.ui:755
 msgid "_Cancel"
 msgstr "_Отмена"
 
@@ -1278,6 +1290,7 @@ msgid "CD key"
 msgstr "Ключ CD"
 
 #: image/setup.data/setup.glade:2095 image/setup.data/setup.gtk2.glade:2932
+#: image/setup.data/setup.gtk3.ui:660
 msgid "Please enter your CD key."
 msgstr "Введите ключ CD."
 
@@ -1287,7 +1300,7 @@ msgid "Readme File"
 msgstr "Файл 'Прочти Меня'"
 
 # image/setup.data/setup.glade:1680
-#: image/setup.data/setup.glade:2275
+#: image/setup.data/setup.glade:2275 image/setup.data/setup.gtk3.ui:813
 msgid "_Close"
 msgstr "_Закрыть"
 
@@ -1304,8 +1317,48 @@ msgstr "_Продолжить"
 msgid "Press 'Quit' to clean up temporary files."
 msgstr "Нажмите «Выход», чтобы удалить временные файлы."
 
+# gtk_ui.c:758
+#: image/setup.data/setup.gtk3.ui:5
+msgid "Setup"
+msgstr "Установка"
+
+# gtk_ui.c:527
+#: image/setup.data/setup.gtk3.ui:51
+msgid "Select the type of installation to perform"
+msgstr "Выберите тип установки"
+
+# image/setup.data/setup.glade:472
+#: image/setup.data/setup.gtk3.ui:240
+msgid "Startup menu entries"
+msgstr "Пункты меню приложений"
+
+# image/setup.data/setup.glade:628
+#: image/setup.data/setup.gtk3.ui:333
+msgid "Total progress"
+msgstr "Общий ход установки"
+
+# image/setup.data/setup.glade:938
+#: image/setup.data/setup.gtk3.ui:439
+msgid "_Play"
+msgstr "_Играть"
+
+# image/setup.data/setup.glade:126
+#: image/setup.data/setup.gtk3.ui:468
+msgid "Installation aborted."
+msgstr "Установка прервана."
+
+# image/setup.data/setup.glade:1790
+#: image/setup.data/setup.gtk3.ui:763
+msgid "_Agree"
+msgstr "_Принимаю"
+
+# image/setup.data/setup.glade:1641
+#: image/setup.data/setup.gtk3.ui:774
+msgid "Readme"
+msgstr "Файл README"
+
 #. TRANSLATORS: The placeholders are a directory, its owner, and the suggested user.
-#: install.c:450
+#: install.c:452
 #, c-format
 msgid ""
 "%s is owned by %s. You may need to run this installer as user %s or choose "
@@ -1315,78 +1368,78 @@ msgstr ""
 "%s или выбрать другой каталог."
 
 # gtk_ui.c:524
-#: install.c:478
+#: install.c:480
 msgid "No destination directory selected"
 msgstr "Не выбран каталог назначения"
 
 # gtk_ui.c:527
-#: install.c:481
+#: install.c:483
 msgid "Please select at least one option"
 msgstr "Выберите по крайней мере одну опцию"
 
 # gtk_ui.c:530
-#: install.c:484
+#: install.c:486
 msgid "Not enough free space for the selected options."
 msgstr "Недостаточно свободного пространства для выбранных опций."
 
 # gtk_ui.c:532
-#: install.c:486
+#: install.c:488
 msgid "Install path is not a directory."
 msgstr "Путь установки не каталог."
 
-#: install.c:487 install.c:508
+#: install.c:489 install.c:510
 msgid "Please choose an existing directory."
 msgstr "Выберите существующий каталог."
 
 # gtk_ui.c:534
-#: install.c:489
+#: install.c:491
 msgid "No write permissions on the install directory."
 msgstr "Нет прав на запись в каталог установки."
 
 # gtk_ui.c:536
-#: install.c:492
+#: install.c:494
 msgid "Binary path and install path must be different."
 msgstr "Путь программных файлов и установки должны быть различны."
 
 # gtk_ui.c:538
-#: install.c:494
+#: install.c:496
 msgid "No write permissions to install a selected package."
 msgstr "Нет прав на запись для установки выбранного компонента."
 
-#: install.c:499
+#: install.c:501
 msgid "Binary path is not a directory."
 msgstr "Путь к исполняемым файлам не является каталогом."
 
 # gtk_ui.c:541
-#: install.c:502
+#: install.c:504
 msgid "No write permissions on the binary directory."
 msgstr "Нет прав на запись в каталоге прогрпммных файлов."
 
-#: install.c:507
+#: install.c:509
 msgid "Binary directory does not exist."
 msgstr "Каталог исполняемых файлов не существует."
 
-#: install.c:688
+#: install.c:690
 msgid "Failed to allocate new bool"
 msgstr "Не удалось выделить память для нового логического значения"
 
-#: install.c:707
+#: install.c:709
 msgid "Must have at least 'script' or 'env' attribute for <bool>"
 msgstr "Для элемента <bool> необходимо указать атрибут «script» или «env»"
 
 # install.c:399 install.c:407
-#: install.c:959 install_log.c:19
+#: install.c:1011 install_log.c:19
 #, c-format
 msgid "Out of memory\n"
 msgstr "Нехватка памяти\n"
 
-#: install.c:981
+#: install.c:1033
 #, c-format
 msgid "Detected distribution: %s %d.%d"
 msgstr "Обнаружен дистрибутив: %s %d.%d"
 
 # install.c:561
-#: install.c:1150
+#: install.c:1208
 #, c-format
 msgid ""
 "Could not find default component. Make sure to define components for all "
@@ -1396,32 +1449,32 @@ msgstr ""
 "для всех вхождений."
 
 # install.c:688
-#: install.c:1301
+#: install.c:1359
 msgid "You must use a 'symlink' attribute with 'play'"
 msgstr "Вы должны использовать символьную связь для атрибута 'play'"
 
 # install.c:693
-#: install.c:1313
+#: install.c:1369
 msgid "There can be only one binary with a 'play' attribute"
 msgstr "Может быть только один двоичный файл с атрибутом 'play'"
 
 # install.c:696
-#: install.c:1316
+#: install.c:1372
 msgid "The only valid values for the 'play' attribute are yes, gui and no"
 msgstr "Допустимые значения атрибута «play»: yes, gui и no"
 
 # install.c:721
-#: install.c:1345
+#: install.c:1398
 msgid "Couldn't find your home directory"
 msgstr "Невозможно найти ваш домашний каталог"
 
 # install.c:739
-#: install.c:1363
+#: install.c:1416
 #, c-format
 msgid "Couldn't find home directory for %s"
 msgstr "Невозможно найти домашний каталог %s"
 
-#: install.c:1493
+#: install.c:1546
 msgid ""
 "XML: 'require' tag doesn't have a mandatory 'command', 'condition' or "
 "'feature' attribute"
@@ -1429,7 +1482,7 @@ msgstr ""
 "XML: в теге «require» необходимо указать атрибут «command», «condition» или "
 "«feature»"
 
-#: install.c:1543
+#: install.c:1596
 #, c-format
 msgid ""
 "The installer is not suitable for installing this product (missing feature "
@@ -1439,102 +1492,102 @@ msgstr ""
 "«%u»."
 
 # install.c:833
-#: install.c:1586
+#: install.c:1639
 msgid "XML: 'lang' tag does not have a mandatory 'lang' attribute"
 msgstr "XML: тэг 'lang' не имеет обязательного атрибута 'lang'"
 
 # install.c:841
-#: install.c:1595
+#: install.c:1648
 #, c-format
 msgid "XML: option listed without translated description for locale '%s'"
 msgstr "XML: указан параметр без перевода для кодировки '%s'"
 
 # install.c:848
-#: install.c:1603
+#: install.c:1656
 msgid "XML: option listed without description"
 msgstr "XML: параметр без описания"
 
-#: install.c:1865
+#: install.c:1934 install.c:1940
 msgid "CDKey file could not be opened."
 msgstr "Не удалось открыть файл CDKey."
 
 # install.c:1054 install.c:1060 install.c:1077
-#: install.c:1972 install.c:1978 install.c:1997
+#: install.c:2029 install.c:2033
 #, c-format
 msgid "Unable to remove '%s'"
 msgstr "Невозможно удалить '%s'"
 
 # install.c:1068
-#: install.c:1988
+#: install.c:2036
 #, c-format
 msgid "The '%s' RPM was installed or upgraded (version %s, release %d)"
 msgstr "RPM '%s' был установлен или обновлён (версия %s, релиз %d)"
 
-#: install.c:2121
+#: install.c:2049
 msgid "Options tag string maxed out!"
 msgstr "Превышена допустимая длина строки с тегами параметров."
 
 # install.c:1217
-#: install.c:2172 install.c:2321 install.c:2349
+#: install.c:2206 install.c:2209 install.c:2249 install.c:2369 install.c:2397
 msgid "Could not create temporary script"
 msgstr "Не удалось создать временный сценарий"
 
 # install.c:1179
-#: install.c:2298
+#: install.c:2346
 #, c-format
 msgid "Could not register binary: %s"
 msgstr "Невозможно зарегистрировать двоичный файл: %s"
 
 # install.c:1217
-#: install.c:2340
+#: install.c:2388
 #, c-format
 msgid "Could not write temporary pre-uninstall script in %s"
 msgstr "Невозможно записать временный сценарий удаления в %s"
 
 # install.c:1238
-#: install.c:2365
+#: install.c:2413
 #, c-format
 msgid "Could not write post-uninstall script in %s"
 msgstr "Невозможно записать сценарий удаления в %s"
 
 # install.c:1302
-#: install.c:2412
+#: install.c:2460
 msgid "Could not create install log"
 msgstr "Невозможно создать журнал установки"
 
 # install.c:1329
-#: install.c:2439
+#: install.c:2487
 #, c-format
 msgid "Please visit %s"
 msgstr "Посетите %s"
 
-#: install.c:2493
+#: install.c:2541
 msgid "Missing 'command' attribute for an option"
 msgstr "У параметра отсутствует атрибут «command»"
 
-#: install.c:2507
+#: install.c:2555
 #, c-format
 msgid "Expression '%s' did not parse"
 msgstr "Не удалось разобрать выражение «%s»"
 
-#: install.c:2511
+#: install.c:2559
 msgid "Missing 'condition' attribute for an option"
 msgstr "У параметра отсутствует атрибут «condition»"
 
 # install.c:1531
-#: install.c:2752 install.c:2818
+#: install.c:2803 install.c:2869
 #, c-format
 msgid "Unable to create desktop file '%s'"
 msgstr "Невозможно создать файл '%s' на рабочем столе"
 
 # install.c:1531
-#: install.c:2885 install.c:2888
+#: install.c:2936 install.c:2939
 #, c-format
 msgid "Unable to create CDE desktop file '%s'"
 msgstr "Не удалось создать файл рабочего стола CDE «%s»"
 
 # install.c:1531
-#: install.c:2924
+#: install.c:2975
 #, c-format
 msgid "Unable to create ToolChest menu file '%s'"
 msgstr "Не удалось создать файл меню ToolChest «%s»"
@@ -1657,12 +1710,12 @@ msgstr ""
 "Не удалось определить текущий рабочий каталог.\n"
 "Проверьте права доступа к родительским каталогам.\n"
 
-#: main.c:368
+#: main.c:361
 msgid "You need to run this installer as the super-user.\n"
 msgstr "Запустите установщик от имени суперпользователя.\n"
 
 # main.c:356
-#: main.c:375
+#: main.c:368
 msgid ""
 "\n"
 "This product is already installed.\n"
@@ -1672,7 +1725,7 @@ msgstr ""
 "Этот продукт уже установлен.\n"
 "Удалите его, прежде чем снова запускать установщик.\n"
 
-#: main.c:380
+#: main.c:373
 msgid ""
 "Warning: You are about to reinstall\n"
 "on top of an existing installation. Continue?\n"
@@ -1681,7 +1734,7 @@ msgstr ""
 "Продолжить?\n"
 
 # main.c:352
-#: main.c:392
+#: main.c:385
 msgid ""
 "\n"
 "Illegal installation: do not mix components with a component installation.\n"
@@ -1690,7 +1743,7 @@ msgstr ""
 "Недопустимая установка: не смешивайте компоненты с установкой компонент\n"
 
 # main.c:356
-#: main.c:397
+#: main.c:390
 #, c-format
 msgid ""
 "\n"
@@ -1702,7 +1755,7 @@ msgstr ""
 "Сначала удалите его.\n"
 
 # main.c:363
-#: main.c:405
+#: main.c:398
 #, c-format
 msgid ""
 "\n"
@@ -1714,12 +1767,12 @@ msgstr ""
 "этой программы.\n"
 
 # main.c:392
-#: main.c:440
+#: main.c:433
 #, c-format
 msgid "Could not enable option: %s"
 msgstr "Невозможно включить параметр %s"
 
-#: main.c:465
+#: main.c:458
 msgid "No installation path was specified. Aborting."
 msgstr "Путь установки не указан. Установка прервана."
 
@@ -1739,7 +1792,7 @@ msgid "Fork failed, no network check"
 msgstr "Ошибка fork. Проверка наличия сети не производится"
 
 # plugins.c:96
-#: plugins.c:96
+#: plugins.c:97
 #, c-format
 msgid ""
 "Registered plugins :\n"
@@ -1749,7 +1802,7 @@ msgstr ""
 "\n"
 
 # plugins.c:98
-#: plugins.c:98
+#: plugins.c:99
 #, c-format
 msgid ""
 "\tDescription: %s\n"
@@ -1761,67 +1814,92 @@ msgstr ""
 "\tАвтор: %s\n"
 
 # plugins.c:101
-#: plugins.c:101
+#: plugins.c:102
 #, c-format
 msgid "\tPlugin is statically linked.\n"
 msgstr "\tМодуль статически связан.\n"
 
 # plugins.c:103
-#: plugins.c:103
+#: plugins.c:104
 #, c-format
 msgid "\tRecognizes %d extensions: "
 msgstr "\tРаспознаны %d расширения: "
 
 # plugins.c:148
-#: plugins.c:153
+#: plugins.c:158
 #, c-format
 msgid "Error registering %s plugin: %s\n"
 msgstr "Ошибка регистрации модуля %s: %s\n"
 
 # plugins.c:151
-#: plugins.c:156
+#: plugins.c:161
 #, c-format
 msgid "Error initializing %s plugin"
 msgstr "Ошибка инициализации модуля %s"
 
 # plugins.c:155
-#: plugins.c:160
+#: plugins.c:165
 #, c-format
 msgid "Error trying to load %s plugin: %s\n"
 msgstr "Ошибка загрузки модуля %s: %s\n"
 
 # plugins/outrage.c:73
-#: plugins/cpio.c:113
+#: plugins/cpio.c:157
 msgid "Invalid CPIO header\n"
 msgstr "Недопустимый заголовок CPIO\n"
 
-# plugins/cpio.c:155
-#: plugins/cpio.c:173
-#, c-format
-msgid "Bad checksum for file '%s'"
-msgstr "Неверная контрольная сумма файла '%s'"
+#: plugins/rar.c:213 plugins/tar.c:91 plugins/tar.c:104 plugins/tar.c:119
+#: plugins/tar.c:128 plugins/tar.c:136 plugins/zip.c:662 plugins/zip.c:683
+#: plugins/zip.c:825 plugins/zip.c:830 plugins/zip.c:833
+msgid "Unexpected data in installation file!"
+msgstr "Неожиданные данные в файле установки."
 
 # plugins/rpm.c:64 plugins/rpm.c:97
-#: plugins/rpm.c:73 plugins/rpm.c:107
+#: plugins/rpm.c:75 plugins/rpm.c:112
 #, c-format
 msgid "RPM error: %s"
 msgstr "ошибка RPM: %s"
 
 # plugins/rpm.c:145 plugins/rpm.c:151
-#: plugins/rpm.c:156 plugins/rpm.c:163
+#: plugins/rpm.c:165 plugins/rpm.c:179
 #, c-format
 msgid "Unable to install RPM file: '%s'"
 msgstr "Невозможно установить RPM %s"
 
 # plugins/tar.c:105
-#: plugins/tar.c:138
+#: plugins/tar.c:127
 #, c-format
 msgid "Tar: '%s' is unknown file type: %c"
 msgstr "Tar: '%s' неизвестный тип файла: %c"
 
-#: plugins/tar.c:140
-msgid "Unexpected data in installation file!"
-msgstr "Неожиданные данные в файле установки."
+# file.c:288
+#, c-format
+#~ msgid "Can't remove existing symlink %s: %s"
+#~ msgstr "Невозможно удалить существующую символьную связь %s: %s"
+
+# file.c:317
+#, c-format
+#~ msgid "Creating directory: %s\n"
+#~ msgstr "Создание каталога: %s\n"
+
+# file.c:336
+#, c-format
+#~ msgid "Creating FIFO: %s\n"
+#~ msgstr "Создание стэка: %s\n"
+
+# file.c:355
+#, c-format
+#~ msgid "Creating device: %s\n"
+#~ msgstr "Создание устройства: %s\n"
+
+#, c-format
+#~ msgid "Can not chdir to temporary directory: %s"
+#~ msgstr "Не удалось перейти во временный каталог: %s"
+
+# plugins/cpio.c:155
+#, c-format
+#~ msgid "Bad checksum for file '%s'"
+#~ msgstr "Неверная контрольная сумма файла '%s'"
 
 #~ msgid "Login Prompt"
 #~ msgstr "Вход в систему"
@@ -1903,14 +1981,6 @@ msgstr "Неожиданные данные в файле установки."
 # console_ui.c:174
 #~ msgid "Install %s?"
 #~ msgstr "Установить %s?"
-
-# gtk_ui.c:758
-#~ msgid "Setup"
-#~ msgstr "Установка"
-
-# image/setup.data/setup.glade:938
-#~ msgid "Play!"
-#~ msgstr "Играть!"
 
 # plugins/outrage.c:66
 #~ msgid "OPKG: Unable to open package file %s"

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Loki Setup 2.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-18 05:13-0800\n"
+"POT-Creation-Date: 2026-11-20 19:27-0800\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -16,62 +16,67 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 # uninstall.c:122
-#: check.c:126 check_carbon.c:116 uninstall.c:529
+#: check.c:139 check_carbon.c:117 uninstall.c:500
 #, c-format
 msgid "Couldn't change to install directory\n"
-msgstr ""
-"Не удалось перейти в каталог установки\n"
+msgstr "Не удалось перейти в каталог установки\n"
 
-#: check.c:158 uninstall_ui.c:79
+#: check.c:182 uninstall_ui.c:92 uninstall_ui.c:107
 msgid "OK"
 msgstr "ОК"
 
-#: check.c:256 check_carbon.c:187
+#: check.c:289 check_carbon.c:174
 msgid "Unable to identify the installation media."
 msgstr "Не удалось распознать установочный носитель."
 
-#: check.c:278 check_carbon.c:212
+#: check.c:311 check.c:361 check_carbon.c:199 check_carbon.c:239
 msgid "Installation media doesn't match the product."
 msgstr "Установочный носитель не соответствует продукту."
 
-#: check.c:283 check_carbon.c:216
+#: check.c:316 check_carbon.c:203
 msgid "Restoring files..."
 msgstr "Восстановление файлов…"
 
-#: check.c:292 check_carbon.c:224
-#, c-format
-msgid "Unable to change to directory %s\n"
-msgstr ""
-"Не удалось перейти в каталог %s\n"
-
-#: check.c:327 check.c:331 check_carbon.c:259 check_carbon.c:262
+#: check.c:368 check.c:373 check_carbon.c:245 check_carbon.c:248
 msgid "Files successfully restored!"
 msgstr "Файлы восстановлены!"
 
-#: check.c:331
+#: check.c:373
 msgid "Success"
 msgstr "Успешно"
 
-#: check.c:347
+#: check.c:391
 #, c-format
 msgid "Warning: '%s' is not an accessible directory."
 msgstr "Предупреждение: каталог «%s» недоступен."
 
-#: check.c:348
+#: check.c:392
 msgid "Warning"
 msgstr "Предупреждение"
 
-#: check.c:356
+#: check.c:403 check.c:415
 msgid "Please select a directory"
 msgstr "Выберите каталог"
 
-#: check.c:429 check_carbon.c:353
+#: check.c:405 check.glade:254 check.gtk3.ui:131 uninstall.gtk3.ui:129
+msgid "_Cancel"
+msgstr "_Отмена"
+
+#: check.c:405
+msgid "_Open"
+msgstr "_Открыть"
+
+#: check.c:541 check_carbon.c:339
 #, c-format
 msgid "Usage: %s product\n"
-msgstr ""
-"Использование: %s продукт\n"
+msgstr "Использование: %s продукт\n"
 
-#: check.c:458 check_carbon.c:366
+# uninstall.c:394
+#: check.c:547 uninstall_ui.c:571
+msgid "Unable to open the GTK display."
+msgstr "Не удалось открыть дисплей GTK."
+
+#: check.c:585 check_carbon.c:352
 msgid ""
 "Impossible to locate the product information.\n"
 "Maybe another user installed it?"
@@ -79,41 +84,41 @@ msgstr ""
 "Не удалось найти сведения о продукте.\n"
 "Возможно, его установил другой пользователь?"
 
-#: check.c:459
+#: check.c:586
 msgid "Error"
 msgstr "Ошибка"
 
-#: check.c:476 check_carbon.c:380
+#: check.c:610 check_carbon.c:366
 #, c-format
 msgid "---> Checking component '%s'..."
 msgstr "---> Проверка компонента «%s»…"
 
-#: check.c:482 check_carbon.c:386
+#: check.c:616 check_carbon.c:372
 #, c-format
 msgid "-> Checking option '%s'..."
 msgstr "-> Проверка параметра «%s»…"
 
-#: check.c:491 check_carbon.c:395
+#: check.c:630 check_carbon.c:381
 #, c-format
 msgid "%s was REMOVED"
 msgstr "%s — УДАЛЁН"
 
-#: check.c:496 check_carbon.c:400
+#: check.c:635 check_carbon.c:386
 #, c-format
 msgid "%s was MODIFIED"
 msgstr "%s — ИЗМЕНЁН"
 
-#: check.c:501 check_carbon.c:405
+#: check.c:640 check_carbon.c:391
 #, c-format
 msgid "%s is OK"
 msgstr "%s — в порядке"
 
-#: check.c:511 check_carbon.c:415
+#: check.c:650 check_carbon.c:401
 #, c-format
 msgid "Changes detected: %d files removed, %d files modified."
 msgstr "Обнаружены изменения: удалено файлов — %d, изменено — %d."
 
-#: check.c:516 check_carbon.c:421
+#: check.c:655 check_carbon.c:407
 msgid "No problems were found."
 msgstr "Проблем не обнаружено."
 
@@ -125,7 +130,7 @@ msgstr "Проверка и восстановление"
 msgid "_Dismiss"
 msgstr "_Закрыть"
 
-#: check.glade:103 check.gtk2.glade:155
+#: check.glade:103 check.gtk2.glade:155 check.gtk3.ui:60
 msgid "_Rescue"
 msgstr "_Восстановить"
 
@@ -141,11 +146,7 @@ msgstr "..."
 msgid "Media Selection"
 msgstr "Выбор установочного носителя"
 
-#: check.glade:254
-msgid "_Cancel"
-msgstr "_Отмена"
-
-#: check.glade:277
+#: check.glade:277 check.gtk3.ui:140
 msgid "_OK"
 msgstr "_ОК"
 
@@ -153,7 +154,7 @@ msgstr "_ОК"
 msgid "Please indicate where the original package is located :"
 msgstr "Укажите расположение исходного пакета:"
 
-#: check.glade:325
+#: check.glade:325 check.gtk3.ui:87
 msgid "CD-ROM"
 msgstr "CD-ROM"
 
@@ -169,121 +170,147 @@ msgstr "_Выбрать…"
 msgid "CD-ROM / DVD-ROM"
 msgstr "CD-ROM / DVD-ROM"
 
-#: copy.c:301
+#: check.gtk3.ui:5
+msgid "Check Installed Files"
+msgstr "Проверка установленных файлов"
+
+#: check.gtk3.ui:51
+msgid "_Close"
+msgstr "_Закрыть"
+
+#: check.gtk3.ui:72
+msgid "Select Installation Media"
+msgstr "Выбор установочного носителя"
+
+#: check.gtk3.ui:95
+msgid "Other directory:"
+msgstr "Другой каталог:"
+
+#: check.gtk3.ui:114
+msgid "_Browse…"
+msgstr "_Обзор…"
+
+#: copy.c:136 copy.c:140 file.c:123 file.c:200 file.c:207 install.c:1254
+#: install.c:1276 install.c:1298 install.c:1319 install.c:1334 install.c:1380
+msgid "Out of memory"
+msgstr "Нехватка памяти"
+
+#: copy.c:344
 #, c-format
 msgid "Unable to create %s symlink pointing to %s"
 msgstr "Невозможно создать символьную ссылку %s, указывающую на %s"
 
-#: copy.c:382
+#: copy.c:432
 #, c-format
 msgid "Failed to update check sum for %s"
 msgstr "Не удалось обновить контрольную сумму для %s"
 
-#: copy.c:386
+#: copy.c:436
 #, c-format
 msgid "Error while running process command: %s"
 msgstr "Ошибка при выполнении команды: %s"
 
-#: copy.c:403
+#: copy.c:453
 #, c-format
 msgid "Failed to change SELinux context for file '%s' - not supported"
-msgstr "Не удалось изменить контекст SELinux файла «%s»: операция не поддерживается."
+msgstr ""
+"Не удалось изменить контекст SELinux файла «%s»: операция не поддерживается."
 
-#: copy.c:405
+#: copy.c:455
 #, c-format
 msgid "Failed to change SELinux context for file '%s'"
 msgstr "Не удалось изменить контекст SELinux файла «%s»."
 
-#: copy.c:410
+#: copy.c:460
 #, c-format
 msgid "Invalid SELinux context '%s' for file '%s'"
 msgstr "Недопустимый контекст SELinux «%s» для файла «%s»."
 
-#: copy.c:420 plugins/cpio.c:181 plugins/rar.c:248 plugins/tar.c:120
-#: plugins/uz2.c:203 plugins/zip.c:887
+#: copy.c:470 file.c:718
 #, c-format
 msgid "File '%s' has an invalid checksum! Aborting."
 msgstr "Недействительная контрольная сумма файла «%s». Операция прервана."
 
-#: copy.c:463
+#: copy.c:515
 #, c-format
 msgid "Unable to copy directory '%s'"
 msgstr "Невозможно скопировать каталог '%s'"
 
-#: copy.c:498
+#: copy.c:550
 #, c-format
 msgid "1 Unable to find file '%s' in '%s'"
 msgstr "1 Не удалось найти файл «%s» в «%s»"
 
-#: copy.c:543
+#: copy.c:595
 #, c-format
 msgid "Unable to find file '%s' on any of the CDROM drives"
 msgstr "Файл '%s' не найден ни на одном приводе CDROM"
 
-#: copy.c:561
+#: copy.c:613
 #, c-format
 msgid "2 Unable to find file '%s' in '%s'"
 msgstr "2 Не удалось найти файл «%s» в «%s»"
 
-#: copy.c:616 copy.c:617
+#: copy.c:679 copy.c:680
 #, c-format
 msgid "Unable to copy man page '%s'"
 msgstr "Не удалось скопировать справочную страницу man «%s»"
 
-#: copy.c:660 copy.c:667
+#: copy.c:723 copy.c:730
 #, c-format
 msgid "Could not create temporary script: %s"
 msgstr "Не удалось создать временный сценарий: %s"
 
-#: copy.c:710
+#: copy.c:773
 msgid "'binpath' attribute is mandatory for inline 'binary' tag"
 msgstr "Атрибут «binpath» обязателен для встроенного тега «binary»"
 
-#: copy.c:715
+#: copy.c:778
 msgid "'binpath' attribute must not contain slashes for inline 'binary' tag"
-msgstr "Атрибут «binpath» встроенного тега «binary» не должен содержать косые черты"
+msgstr ""
+"Атрибут «binpath» встроенного тега «binary» не должен содержать косые черты"
 
-#: copy.c:753
+#: copy.c:818
 msgid "Binary install path is too long"
 msgstr "Путь установки исполняемых файлов слишком длинный"
 
-#: copy.c:790
+#: copy.c:856
 #, c-format
 msgid "find '%s'"
 msgstr "find '%s'"
 
-#: copy.c:812 copy.c:813
+#: copy.c:879 copy.c:880
 #, c-format
 msgid "Unable to find file '%s' in '%s'"
 msgstr "Не удалось найти файл «%s» в «%s»"
 
-#: copy.c:834 copy.c:835
+#: copy.c:903 copy.c:904
 #, c-format
 msgid "Unable to copy file '%s'"
 msgstr "Не удалось скопировать файл «%s»"
 
-#: copy.c:884
+#: copy.c:955
 msgid "Running script. Please wait..."
 msgstr "Выполняется сценарий. Подождите…"
 
-#: copy.c:1088
+#: copy.c:1164
 msgid "The remove_msg element should be within a component!\n"
-msgstr ""
-"Элемент remove_msg должен находиться внутри компонента.\n"
+msgstr "Элемент remove_msg должен находиться внутри компонента.\n"
 
-#: copy.c:1106
+#: copy.c:1182
 msgid "Component element needs to have a name"
 msgstr "Элемент компонента должен иметь имя"
 
-#: copy.c:1109
+#: copy.c:1185
 msgid "Component element needs to have a version"
 msgstr "Элемент компонента должен иметь версию"
 
-#: copy.c:1133
+#: copy.c:1209
 msgid "Malformed 'environment' element in XML file : missing 'var' property"
-msgstr "Некорректный элемент «environment» в XML-файле: отсутствует свойство «var»"
+msgstr ""
+"Некорректный элемент «environment» в XML-файле: отсутствует свойство «var»"
 
-#: copy.c:1310
+#: copy.c:1386
 #, c-format
 msgid "Suspect size value for option %s\n"
 msgstr "Подозрительное значение параметра %s\n"
@@ -293,17 +320,17 @@ msgstr "Подозрительное значение параметра %s\n"
 msgid "Unmounting device %s"
 msgstr "Размонтирование устройства %s"
 
-#: detect.c:346 detect.c:377 detect.c:393
+#: detect.c:346
 #, c-format
 msgid "Failed to unmount device %s mounted on %s"
 msgstr "Ошибка при размантировании устройства %s примонтированного к %s"
 
-#: detect.c:462 detect.c:545 detect.c:585 detect.c:629
+#: detect.c:413 detect.c:496 detect.c:536 detect.c:580
 #, c-format
 msgid "Mounted device %s"
 msgstr "Примонтированное устройство %s"
 
-#: detect.c:820 detect.c:824
+#: detect.c:771 detect.c:775
 #, c-format
 msgid ""
 "\n"
@@ -314,7 +341,7 @@ msgstr ""
 "Вставьте %s.\n"
 "Выберите «Да» для повторной попытки или «Нет» для отмены"
 
-#: detect.c:827
+#: detect.c:778
 #, c-format
 msgid ""
 "\n"
@@ -325,244 +352,217 @@ msgstr ""
 "Подключите %s.\n"
 "Выберите «Да» для повторной попытки или «Нет» для отмены"
 
-#: detect.c:892
+#: detect.c:843
 #, c-format
 msgid "Detected locale is %s\n"
-msgstr ""
-"Обнаружена локаль: %s\n"
+msgstr "Обнаружена локаль: %s\n"
 
-#: detect.c:1069
+#: detect.c:1020
 #, c-format
 msgid "Invalid matching policy: %s"
 msgstr "Недопустимое правило сопоставления: %s"
 
-#: file.c:119 file.c:165 file.c:172 install.c:1196 install.c:1218
-#: install.c:1240 install.c:1261 install.c:1276 install.c:1327
-msgid "Out of memory"
-msgstr "Нехватка памяти"
-
-#: file.c:144
+#: file.c:181
 #, c-format
 msgid "File '%25s' already exists, overwrite?"
 msgstr "Файл «%25s» уже существует. Перезаписать?"
 
-#: file.c:149
+#: file.c:186
 #, c-format
 msgid "File exists: '%s'"
 msgstr "Файл «%s» уже существует"
 
-#: file.c:183
+#: file.c:218
 #, c-format
 msgid "Failed to open file %s"
 msgstr "Не удалось открыть файл %s"
 
-#: file.c:213
+#: file.c:248
 #, c-format
 msgid "File '%s' may be in BZIP2 format, but support was not compiled in!"
-msgstr "Возможно, файл «%s» имеет формат BZIP2, поддержка которого не включена в эту сборку."
+msgstr ""
+"Возможно, файл «%s» имеет формат BZIP2, поддержка которого не включена в эту "
+"сборку."
 
-#: file.c:224
+#: file.c:259
 #, c-format
 msgid "Couldn't read from file: %s"
 msgstr "Невозможно прочитать файл %s"
 
-#: file.c:232
+#: file.c:272
 #, c-format
 msgid "Installing file %s"
 msgstr "Установка файла %s"
 
-#: file.c:237
+#: file.c:278
 #, c-format
 msgid "Couldn't write to file: %s"
 msgstr "Невозможно записать в файл %s"
 
-#: file.c:263
+#: file.c:305
 msgid "Read on write stream"
 msgstr "Чтение из потока только для записи"
 
-#: file.c:302
+#: file.c:344
 #, c-format
 msgid "Read failure on %s"
 msgstr "Ошибка чтения из %s"
 
-#: file.c:373
+#: file.c:415
 msgid "Skip zeroes on write stream"
 msgstr "Пропуск нулей в потоке только для записи"
 
-#: file.c:393 file.c:459 file.c:466
+#: file.c:435 file.c:511 file.c:518
 #, c-format
 msgid "Short write on %s"
 msgstr "Короткая запись в %s"
 
-#: file.c:399
+#: file.c:441
 msgid "Write on read stream"
 msgstr "Запись в поток только для чтения"
 
-#: file.c:429
+#: file.c:471
 #, c-format
 msgid "Write failure on %s"
 msgstr "Ошибка записи в %s"
 
-#: file.c:492
+#: file.c:560
 #, c-format
 msgid "Trying to create a symbolic link on the same file: %s\n"
-msgstr ""
-"Попытка создать символическую ссылку на тот же файл: %s\n"
+msgstr "Попытка создать символическую ссылку на тот же файл: %s\n"
 
-#: file.c:497
+#: file.c:565
 #, c-format
 msgid "Creating symbolic link: %s --> %s\n"
 msgstr "Создание символьной ссылки: %s --> %s\n"
 
-#: file.c:506
-#, c-format
-msgid "Can't remove existing symlink %s: %s"
-msgstr "Невозможно удалить существующую символьную связь %s: %s"
-
-#: file.c:510 file.c:541 file.c:561 file.c:580
+#: file.c:579
 #, c-format
 msgid "Can't create %s: %s"
 msgstr "Невозможно создать %s: %s"
 
-#: file.c:535
-#, c-format
-msgid "Creating directory: %s\n"
-msgstr "Создание каталога: %s\n"
-
-#: file.c:554
-#, c-format
-msgid "Creating FIFO: %s\n"
-msgstr "Создание стэка: %s\n"
-
-#: file.c:573
-#, c-format
-msgid "Creating device: %s\n"
-msgstr "Создание устройства: %s\n"
-
-#: file.c:593
+#: file.c:636
 #, c-format
 msgid "Can't change permissions for %s: %s"
 msgstr "Невозможно изменить права для %s: %s"
 
-#: file.c:627 file.c:651
+#: file.c:751 file.c:775
 #, c-format
 msgid "Unable to read %s"
 msgstr "Невозможно прочитать %s"
 
-#: file.c:729
+#: file.c:853
 msgid "BZ2 support not available"
 msgstr "Поддержка BZ2 недоступна"
 
-#: file.c:754
+#: file.c:878
 #, c-format
 msgid "BZ2: *** Symbol \"%s\" not found, bzip2 support disabled"
 msgstr "BZ2: *** Символ «%s» не найден. Поддержка bzip2 отключена."
 
-#: file.c:767
+#: file.c:891
 #, c-format
 msgid "BZ2: Try open %s"
 msgstr "BZ2: попытка открыть %s"
 
-#: file.c:773
+#: file.c:897
 msgid "BZ2: *** Unable to open bzip2 library. bzip2 support disabled"
-msgstr "BZ2: *** Не удалось открыть библиотеку bzip2. Поддержка bzip2 отключена."
+msgstr ""
+"BZ2: *** Не удалось открыть библиотеку bzip2. Поддержка bzip2 отключена."
 
-#: file.c:777
+#: file.c:901
 #, c-format
 msgid "BZ2: got %s"
 msgstr "BZ2: получено %s"
 
-#: file.c:808
+#: file.c:925 file.c:930
 #, c-format
 msgid "Unable to create temporary directory: %s"
 msgstr "Не удалось создать временный каталог: %s"
 
-#: file.c:827
-#, c-format
-msgid "Can not chdir to temporary directory: %s"
-msgstr "Не удалось перейти во временный каталог: %s"
-
-#: file.c:834
+#: file.c:945
 #, c-format
 msgid "Can not open temporary directory: %s"
 msgstr "Не удалось открыть временный каталог: %s"
 
-#: file.c:845
+#: file.c:952
 #, c-format
 msgid "Can not remove %s/%s: %s"
 msgstr "Не удалось удалить %s/%s: %s"
 
 #. TRANSLATORS: The placeholders are a directory, its owner, and the suggested user.
-#: install.c:450
+#: install.c:452
 #, c-format
 msgid ""
 "%s is owned by %s. You may need to run this installer as user %s or choose "
 "another directory."
-msgstr "Владелец %s — %s. Возможно, нужно запустить установщик от имени пользователя %s или выбрать другой каталог."
+msgstr ""
+"Владелец %s — %s. Возможно, нужно запустить установщик от имени пользователя "
+"%s или выбрать другой каталог."
 
-#: install.c:478
+#: install.c:480
 msgid "No destination directory selected"
 msgstr "Не выбран каталог назначения"
 
-#: install.c:481
+#: install.c:483
 msgid "Please select at least one option"
 msgstr "Выберите по крайней мере одну опцию"
 
-#: install.c:484
+#: install.c:486
 msgid "Not enough free space for the selected options."
 msgstr "Недостаточно свободного пространства для выбранных опций."
 
-#: install.c:486
+#: install.c:488
 msgid "Install path is not a directory."
 msgstr "Путь установки не каталог."
 
-#: install.c:487 install.c:508
+#: install.c:489 install.c:510
 msgid "Please choose an existing directory."
 msgstr "Выберите существующий каталог."
 
-#: install.c:489
+#: install.c:491
 msgid "No write permissions on the install directory."
 msgstr "Нет прав на запись в каталог установки."
 
-#: install.c:492
+#: install.c:494
 msgid "Binary path and install path must be different."
 msgstr "Путь программных файлов и установки должны быть различны."
 
-#: install.c:494
+#: install.c:496
 msgid "No write permissions to install a selected package."
 msgstr "Нет прав на запись для установки выбранного компонента."
 
-#: install.c:499
+#: install.c:501
 msgid "Binary path is not a directory."
 msgstr "Путь к исполняемым файлам не является каталогом."
 
-#: install.c:502
+#: install.c:504
 msgid "No write permissions on the binary directory."
 msgstr "Нет прав на запись в каталоге прогрпммных файлов."
 
-#: install.c:507
+#: install.c:509
 msgid "Binary directory does not exist."
 msgstr "Каталог исполняемых файлов не существует."
 
-#: install.c:688
+#: install.c:690
 msgid "Failed to allocate new bool"
 msgstr "Не удалось выделить память для нового логического значения"
 
-#: install.c:707
+#: install.c:709
 msgid "Must have at least 'script' or 'env' attribute for <bool>"
 msgstr "Для элемента <bool> необходимо указать атрибут «script» или «env»"
 
-#: install.c:959 install_log.c:19
+#: install.c:1011 install_log.c:19
 #, c-format
 msgid "Out of memory\n"
 msgstr "Нехватка памяти\n"
 
-#: install.c:981
+#: install.c:1033
 #, c-format
 msgid "Detected distribution: %s %d.%d"
 msgstr "Обнаружен дистрибутив: %s %d.%d"
 
-#: install.c:1150
+#: install.c:1208
 #, c-format
 msgid ""
 "Could not find default component. Make sure to define components for all "
@@ -571,123 +571,127 @@ msgstr ""
 "Невозможно найти компонет по умолчанию. Убедитесь, что определили компоненты "
 "для всех вхождений."
 
-#: install.c:1301
+#: install.c:1359
 msgid "You must use a 'symlink' attribute with 'play'"
 msgstr "Вы должны использовать символьную связь для атрибута 'play'"
 
-#: install.c:1313
+#: install.c:1369
 msgid "There can be only one binary with a 'play' attribute"
 msgstr "Может быть только один двоичный файл с атрибутом 'play'"
 
-#: install.c:1316
+#: install.c:1372
 msgid "The only valid values for the 'play' attribute are yes, gui and no"
 msgstr "Допустимые значения атрибута «play»: yes, gui и no"
 
-#: install.c:1345
+#: install.c:1398
 msgid "Couldn't find your home directory"
 msgstr "Невозможно найти ваш домашний каталог"
 
-#: install.c:1363
+#: install.c:1416
 #, c-format
 msgid "Couldn't find home directory for %s"
 msgstr "Невозможно найти домашний каталог %s"
 
-#: install.c:1493
+#: install.c:1546
 msgid ""
 "XML: 'require' tag doesn't have a mandatory 'command', 'condition' or "
 "'feature' attribute"
-msgstr "XML: в теге «require» необходимо указать атрибут «command», «condition» или «feature»"
+msgstr ""
+"XML: в теге «require» необходимо указать атрибут «command», «condition» или "
+"«feature»"
 
-#: install.c:1543
+#: install.c:1596
 #, c-format
 msgid ""
 "The installer is not suitable for installing this product (missing feature "
 "'%s' version '%u')"
-msgstr "Установщик не может установить этот продукт: отсутствует функция «%s» версии «%u»."
+msgstr ""
+"Установщик не может установить этот продукт: отсутствует функция «%s» версии "
+"«%u»."
 
-#: install.c:1586
+#: install.c:1639
 msgid "XML: 'lang' tag does not have a mandatory 'lang' attribute"
 msgstr "XML: тэг 'lang' не имеет обязательного атрибута 'lang'"
 
-#: install.c:1595
+#: install.c:1648
 #, c-format
 msgid "XML: option listed without translated description for locale '%s'"
 msgstr "XML: указан параметр без перевода для кодировки '%s'"
 
-#: install.c:1603
+#: install.c:1656
 msgid "XML: option listed without description"
 msgstr "XML: параметр без описания"
 
-#: install.c:1865
+#: install.c:1934 install.c:1940
 msgid "CDKey file could not be opened."
 msgstr "Не удалось открыть файл CDKey."
 
-#: install.c:1972 install.c:1978 install.c:1997
+#: install.c:2029 install.c:2033
 #, c-format
 msgid "Unable to remove '%s'"
 msgstr "Невозможно удалить '%s'"
 
-#: install.c:1988
+#: install.c:2036
 #, c-format
 msgid "The '%s' RPM was installed or upgraded (version %s, release %d)"
 msgstr "RPM '%s' был установлен или обновлён (версия %s, релиз %d)"
 
-#: install.c:2121
+#: install.c:2049
 msgid "Options tag string maxed out!"
 msgstr "Превышена допустимая длина строки с тегами параметров."
 
-#: install.c:2172 install.c:2321 install.c:2349
+#: install.c:2206 install.c:2209 install.c:2249 install.c:2369 install.c:2397
 msgid "Could not create temporary script"
 msgstr "Не удалось создать временный сценарий"
 
-#: install.c:2298
+#: install.c:2346
 #, c-format
 msgid "Could not register binary: %s"
 msgstr "Невозможно зарегистрировать двоичный файл: %s"
 
-#: install.c:2340
+#: install.c:2388
 #, c-format
 msgid "Could not write temporary pre-uninstall script in %s"
 msgstr "Невозможно записать временный сценарий удаления в %s"
 
-#: install.c:2365
+#: install.c:2413
 #, c-format
 msgid "Could not write post-uninstall script in %s"
 msgstr "Невозможно записать сценарий удаления в %s"
 
-#: install.c:2412
+#: install.c:2460
 msgid "Could not create install log"
 msgstr "Невозможно создать журнал установки"
 
-#: install.c:2439
+#: install.c:2487
 #, c-format
 msgid "Please visit %s"
 msgstr "Посетите %s"
 
-#: install.c:2493
+#: install.c:2541
 msgid "Missing 'command' attribute for an option"
 msgstr "У параметра отсутствует атрибут «command»"
 
-#: install.c:2507
+#: install.c:2555
 #, c-format
 msgid "Expression '%s' did not parse"
 msgstr "Не удалось разобрать выражение «%s»"
 
-#: install.c:2511
+#: install.c:2559
 msgid "Missing 'condition' attribute for an option"
 msgstr "У параметра отсутствует атрибут «condition»"
 
-#: install.c:2752 install.c:2818
+#: install.c:2803 install.c:2869
 #, c-format
 msgid "Unable to create desktop file '%s'"
 msgstr "Невозможно создать файл '%s' на рабочем столе"
 
-#: install.c:2885 install.c:2888
+#: install.c:2936 install.c:2939
 #, c-format
 msgid "Unable to create CDE desktop file '%s'"
 msgstr "Не удалось создать файл рабочего стола CDE «%s»"
 
-#: install.c:2924
+#: install.c:2975
 #, c-format
 msgid "Unable to create ToolChest menu file '%s'"
 msgstr "Не удалось создать файл меню ToolChest «%s»"
@@ -708,7 +712,7 @@ msgstr "Невозможно создать поток, проверка нал�
 msgid "Fork failed, no network check"
 msgstr "Ошибка fork. Проверка наличия сети не производится"
 
-#: plugins.c:96
+#: plugins.c:97
 #, c-format
 msgid ""
 "Registered plugins :\n"
@@ -717,7 +721,7 @@ msgstr ""
 "Установленные модули:\n"
 "\n"
 
-#: plugins.c:98
+#: plugins.c:99
 #, c-format
 msgid ""
 "\tDescription: %s\n"
@@ -728,61 +732,57 @@ msgstr ""
 "\tВерсия: %s\n"
 "\tАвтор: %s\n"
 
-#: plugins.c:101
+#: plugins.c:102
 #, c-format
 msgid "\tPlugin is statically linked.\n"
 msgstr "\tМодуль статически связан.\n"
 
-#: plugins.c:103
+#: plugins.c:104
 #, c-format
 msgid "\tRecognizes %d extensions: "
 msgstr "\tРаспознаны %d расширения: "
 
-#: plugins.c:153
+#: plugins.c:158
 #, c-format
 msgid "Error registering %s plugin: %s\n"
 msgstr "Ошибка регистрации модуля %s: %s\n"
 
-#: plugins.c:156
+#: plugins.c:161
 #, c-format
 msgid "Error initializing %s plugin"
 msgstr "Ошибка инициализации модуля %s"
 
-#: plugins.c:160
+#: plugins.c:165
 #, c-format
 msgid "Error trying to load %s plugin: %s\n"
 msgstr "Ошибка загрузки модуля %s: %s\n"
 
-#: plugins/cpio.c:113
+#: plugins/cpio.c:157
 msgid "Invalid CPIO header\n"
-msgstr ""
-"Недопустимый заголовок CPIO\n"
+msgstr "Недопустимый заголовок CPIO\n"
 
-#: plugins/cpio.c:173
-#, c-format
-msgid "Bad checksum for file '%s'"
-msgstr "Неверная контрольная сумма файла '%s'"
+#: plugins/rar.c:213 plugins/tar.c:91 plugins/tar.c:104 plugins/tar.c:119
+#: plugins/tar.c:128 plugins/tar.c:136 plugins/zip.c:662 plugins/zip.c:683
+#: plugins/zip.c:825 plugins/zip.c:830 plugins/zip.c:833
+msgid "Unexpected data in installation file!"
+msgstr "Неожиданные данные в файле установки."
 
-#: plugins/rpm.c:73 plugins/rpm.c:107
+#: plugins/rpm.c:75 plugins/rpm.c:112
 #, c-format
 msgid "RPM error: %s"
 msgstr "ошибка RPM: %s"
 
-#: plugins/rpm.c:156 plugins/rpm.c:163
+#: plugins/rpm.c:165 plugins/rpm.c:179
 #, c-format
 msgid "Unable to install RPM file: '%s'"
 msgstr "Невозможно установить RPM %s"
 
-#: plugins/tar.c:138
+#: plugins/tar.c:127
 #, c-format
 msgid "Tar: '%s' is unknown file type: %c"
 msgstr "Tar: '%s' неизвестный тип файла: %c"
 
-#: plugins/tar.c:140
-msgid "Unexpected data in installation file!"
-msgstr "Неожиданные данные в файле установки."
-
-#: uninstall.c:49
+#: uninstall.c:52
 #, c-format
 msgid ""
 "Usage: %s [options] [product [component ...]]\n"
@@ -798,41 +798,40 @@ msgstr ""
 "Использование: %s [параметры] [продукт [компонент ...]]\n"
 "\n"
 "  -h, --help              Показать эту справку.\n"
-"  -l, --list              Показать установленные продукты или компоненты продукта.\n"
+"  -l, --list              Показать установленные продукты или компоненты "
+"продукта.\n"
 "  -v, --version           Показать сведения о версии.\n"
-"  -L, --locale продукт    Использовать переводы из каталога установки продукта.\n"
+"  -L, --locale продукт    Использовать переводы из каталога установки "
+"продукта.\n"
 "\n"
-"Без --list укажите продукт для удаления или перечислите отдельные компоненты.\n"
+"Без --list укажите продукт для удаления или перечислите отдельные "
+"компоненты.\n"
 
 # uninstall.c:108
-#: uninstall.c:123
+#: uninstall.c:126
 #, c-format
 msgid "Signal %d caught. Aborting.\n"
-msgstr ""
-"Получен сигнал %d. Операция прервана.\n"
+msgstr "Получен сигнал %d. Операция прервана.\n"
 
 # uninstall.c:122
-#: uninstall.c:138
+#: uninstall.c:144
 #, c-format
 msgid "Could not change to directory: %s\n"
-msgstr ""
-"Не удалось перейти в каталог %s\n"
+msgstr "Не удалось перейти в каталог %s\n"
 
 # uninstall.c:144
-#: uninstall.c:163
+#: uninstall.c:169
 #, c-format
 msgid "Notice: the %s RPM was installed for this product.\n"
-msgstr ""
-"Примечание: для этого продукта установлен пакет RPM %s.\n"
+msgstr "Примечание: для этого продукта установлен пакет RPM %s.\n"
 
-#: uninstall.c:196
+#: uninstall.c:202
 #, c-format
 msgid "Post-uninstall scripts for %s have failed.\n"
-msgstr ""
-"Не удалось выполнить сценарии после удаления %s.\n"
+msgstr "Не удалось выполнить сценарии после удаления %s.\n"
 
 # uninstall.c:179
-#: uninstall.c:201
+#: uninstall.c:207
 #, c-format
 msgid ""
 "Component %s has been successfully uninstalled.\n"
@@ -842,23 +841,22 @@ msgstr ""
 "\n"
 
 #. TRANSLATORS: The negative shortcut in brackets must match "N".
-#: uninstall.c:222
+#: uninstall.c:228
 #, c-format
 msgid "Uninstall? [Y/n] "
 msgstr "Удалить? [Д/н] "
 
-#: uninstall.c:225
+#: uninstall.c:231
 msgid "N"
 msgstr "Н"
 
-#: uninstall.c:226
+#: uninstall.c:232
 #, c-format
 msgid "Aborted.\n"
-msgstr ""
-"Операция отменена.\n"
+msgstr "Операция отменена.\n"
 
 # uninstall.c:217
-#: uninstall.c:276
+#: uninstall.c:282
 #, c-format
 msgid ""
 "No write access to the installation directory.\n"
@@ -868,7 +866,7 @@ msgstr ""
 "Операция прервана.\n"
 
 # uninstall.c:225
-#: uninstall.c:284
+#: uninstall.c:290
 #, c-format
 msgid ""
 "No write access to the registry file: %s.\n"
@@ -877,35 +875,14 @@ msgstr ""
 "Нет прав на запись в файл реестра %s.\n"
 "Операция прервана.\n"
 
-#: uninstall.c:509
-#, c-format
-msgid "Warning: Unable to replicate uninstallation program.\n"
-msgstr ""
-"Предупреждение: не удалось скопировать программу удаления.\n"
-
-# uninstall.c:394
-#: uninstall.c:513
-#, c-format
-msgid "Unable to open %s for writing.\n"
-msgstr ""
-"Не удалось открыть %s для записи.\n"
-
-# uninstall.c:394
-#: uninstall.c:517
-#, c-format
-msgid "Unable to open %s for copying.\n"
-msgstr ""
-"Не удалось открыть %s для копирования.\n"
-
 # uninstall.c:347
-#: uninstall.c:581
+#: uninstall.c:552
 #, c-format
 msgid "Installed products:\n"
-msgstr ""
-"Установленные продукты:\n"
+msgstr "Установленные продукты:\n"
 
 # uninstall.c:353
-#: uninstall.c:589
+#: uninstall.c:560
 #, c-format
 msgid ""
 "installed in %s\n"
@@ -915,28 +892,27 @@ msgstr ""
 "\tКомпоненты:\n"
 
 # uninstall.c:356
-#: uninstall.c:596
+#: uninstall.c:567
 #, c-format
 msgid " Error while accessing product info\n"
-msgstr ""
-" Ошибка при чтении сведений о продукте\n"
+msgstr " Ошибка при чтении сведений о продукте\n"
 
-#: uninstall.c:600
+#: uninstall.c:571
 #, c-format
 msgid ""
 "No products could be found. Maybe you need to run as a different user?\n"
 msgstr ""
-"Продукты не найдены. Возможно, нужно запустить программу от имени другого пользователя.\n"
+"Продукты не найдены. Возможно, нужно запустить программу от имени другого "
+"пользователя.\n"
 
 # uninstall.c:368
-#: uninstall.c:612
+#: uninstall.c:583
 #, c-format
 msgid "Could not open product information for %s\n"
-msgstr ""
-"Не удалось открыть сведения о продукте «%s»\n"
+msgstr "Не удалось открыть сведения о продукте «%s»\n"
 
 # uninstall.c:374
-#: uninstall.c:620
+#: uninstall.c:591
 #, c-format
 msgid ""
 "Product: %s\n"
@@ -946,34 +922,30 @@ msgstr ""
 "Каталог установки: %s\n"
 
 # uninstall.c:381
-#: uninstall.c:626
+#: uninstall.c:597
 #, c-format
 msgid "Components:\n"
-msgstr ""
-"Компоненты:\n"
+msgstr "Компоненты:\n"
 
 # uninstall.c:394
-#: uninstall.c:648
+#: uninstall.c:619
 #, c-format
 msgid "Failed to properly uninstall component %s\n"
-msgstr ""
-"Не удалось полностью удалить компонент «%s».\n"
+msgstr "Не удалось полностью удалить компонент «%s».\n"
 
 # uninstall.c:394
-#: uninstall.c:651
+#: uninstall.c:622
 #, c-format
 msgid "Unable to find component %s\n"
-msgstr ""
-"Не удалось найти компонент «%s»\n"
+msgstr "Не удалось найти компонент «%s»\n"
 
-#: uninstall.c:662
+#: uninstall.c:633
 #, c-format
 msgid "Uninstallation did not complete.\n"
-msgstr ""
-"Удаление не завершено.\n"
+msgstr "Удаление не завершено.\n"
 
 # uninstall.c:409
-#: uninstall.c:666
+#: uninstall.c:637
 #, c-format
 msgid ""
 "%s has been successfully uninstalled.\n"
@@ -1003,7 +975,7 @@ msgid "Recovered space: "
 msgstr "Освобождено места: "
 
 # uninstall.glade:142
-#: uninstall.glade:147 uninstall.gtk2.glade:105
+#: uninstall.glade:147 uninstall.gtk2.glade:105 uninstall.gtk3.ui:68
 msgid "0 MB"
 msgstr "0 Мб"
 
@@ -1013,7 +985,7 @@ msgid "_Exit"
 msgstr "_Выход"
 
 # uninstall.glade:201
-#: uninstall.glade:212
+#: uninstall.glade:212 uninstall.gtk3.ui:91
 msgid "_Uninstall"
 msgstr "_Удалить"
 
@@ -1047,21 +1019,38 @@ msgstr "Готово"
 msgid "Uninstall"
 msgstr "Удалить"
 
-#: uninstall_ui.c:86
+#: uninstall.gtk3.ui:5
+msgid "Loki Uninstall"
+msgstr "Программа удаления Loki"
+
+#: uninstall.gtk3.ui:29
+msgid "Select products or components to uninstall."
+msgstr "Выберите продукты или компоненты для удаления."
+
+# uninstall.glade:125
+#: uninstall.gtk3.ui:60
+msgid "Recovered space:"
+msgstr "Освобождено места:"
+
+#: uninstall.gtk3.ui:82 uninstall.gtk3.ui:138
+msgid "_Quit"
+msgstr "_Выход"
+
+#: uninstall_ui.c:94 uninstall_ui.c:114
 msgid "Abort"
 msgstr "Прервать"
 
-#: uninstall_ui.c:101
+#: uninstall_ui.c:129
 msgid "Message"
 msgstr "Сообщение"
 
 # uninstall_ui.c:169
-#: uninstall_ui.c:236
+#: uninstall_ui.c:268
 #, c-format
 msgid "%d MB"
 msgstr "%d Мб"
 
-#: uninstall_ui.c:345
+#: uninstall_ui.c:380
 #, c-format
 msgid ""
 "Uninstallation of component %s has failed!\n"
@@ -1070,7 +1059,7 @@ msgstr ""
 "Не удалось удалить компонент «%s».\n"
 "Возможно, продукт удалён не полностью.\n"
 
-#: uninstall_ui.c:397
+#: uninstall_ui.c:434
 #, c-format
 msgid ""
 "Uninstallation of product %s has failed!\n"
@@ -1080,39 +1069,80 @@ msgstr ""
 "Остальные действия по удалению отменены.\n"
 
 # uninstall_ui.c:314
-#: uninstall_ui.c:424
+#: uninstall_ui.c:463
 msgid "Uninstall cancelled"
 msgstr "Удаление отменено"
 
 # uninstall_ui.c:316
-#: uninstall_ui.c:427
+#: uninstall_ui.c:466
 msgid "Uninstall aborted"
 msgstr "Удаление прервано"
 
 # uninstall_ui.c:316
-#: uninstall_ui.c:430
+#: uninstall_ui.c:469
 msgid "Uninstall complete"
 msgstr "Удаление завершено"
 
+#: uninstall_ui.c:606
+#, c-format
+msgid "%s Uninstall"
+msgstr "Программа удаления %s"
+
 # uninstall_ui.c:407
-#: uninstall_ui.c:540
+#: uninstall_ui.c:627
 #, c-format
 msgid "No uninstall_vbox in glade file!\n"
-msgstr ""
-"В файле Glade отсутствует uninstall_vbox.\n"
+msgstr "В файле Glade отсутствует uninstall_vbox.\n"
 
 # uninstall_ui.c:439
-#: uninstall_ui.c:572
+#: uninstall_ui.c:663
 msgid "Complete uninstall"
 msgstr "Полное удаление"
 
-#: uninstall_ui.c:609
+#: uninstall_ui.c:696
 msgid ""
 "No products were installed by this user.\n"
 "You may need to run this tool as an administrator."
 msgstr ""
 "Этот пользователь не устанавливал продукты.\n"
 "Возможно, нужно запустить программу от имени администратора."
+
+#, c-format
+#~ msgid "Unable to change to directory %s\n"
+#~ msgstr "Не удалось перейти в каталог %s\n"
+
+#, c-format
+#~ msgid "Can't remove existing symlink %s: %s"
+#~ msgstr "Невозможно удалить существующую символьную связь %s: %s"
+
+#, c-format
+#~ msgid "Creating directory: %s\n"
+#~ msgstr "Создание каталога: %s\n"
+
+#, c-format
+#~ msgid "Creating FIFO: %s\n"
+#~ msgstr "Создание стэка: %s\n"
+
+#, c-format
+#~ msgid "Creating device: %s\n"
+#~ msgstr "Создание устройства: %s\n"
+
+#, c-format
+#~ msgid "Can not chdir to temporary directory: %s"
+#~ msgstr "Не удалось перейти во временный каталог: %s"
+
+#, c-format
+#~ msgid "Bad checksum for file '%s'"
+#~ msgstr "Неверная контрольная сумма файла '%s'"
+
+#, c-format
+#~ msgid "Warning: Unable to replicate uninstallation program.\n"
+#~ msgstr "Предупреждение: не удалось скопировать программу удаления.\n"
+
+# uninstall.c:394
+#, c-format
+#~ msgid "Unable to open %s for writing.\n"
+#~ msgstr "Не удалось открыть %s для записи.\n"
 
 # uninstall.glade:201
 #, fuzzy
