@@ -186,6 +186,21 @@ static int browser_command(const char *url, char *command_string, size_t capacit
     return length >= 0 && (size_t)length < capacity ? 0 : -1;
 }
 
+struct passwd *loki_sudo_user(void)
+{
+    const char *sudo_uid = getenv("SUDO_UID");
+    if (geteuid() != 0 || !sudo_uid || !*sudo_uid ||
+        sudo_uid[strspn(sudo_uid, "0123456789")])
+        return NULL;
+    errno = 0;
+    unsigned long id = strtoul(sudo_uid, NULL, 10);
+    uid_t uid = (uid_t)id;
+    if (errno || !uid || uid == (uid_t)-1 || (unsigned long)uid != id)
+        return NULL;
+    struct passwd *user = getpwuid(uid);
+    return user && user->pw_gid != 0 ? user : NULL;
+}
+
 /* This function launches the user's web browser with the given URL.
    The browser detection can be overridden by the LOKI_BROWSER environment
    variable, which is used as the format string: %s is replaced with the
@@ -205,17 +220,10 @@ int loki_launchURL(const char *url)
 
     /* Resolve the invoking user before forking. All browser discovery and
        command handling in the child must happen after privileges are dropped. */
-    const char *sudo_uid = getenv("SUDO_UID");
-    if (!sudo_uid || !*sudo_uid || sudo_uid[strspn(sudo_uid, "0123456789")])
+    struct passwd *user = loki_sudo_user();
+    if (!user)
         return -1;
-    errno = 0;
-    unsigned long id = strtoul(sudo_uid, NULL, 10);
-    uid_t uid = (uid_t)id;
-    if (errno || !uid || uid == (uid_t)-1 || (unsigned long)uid != id)
-        return -1;
-    struct passwd *user = getpwuid(uid);
-    if (!user || user->pw_gid == 0)
-        return -1;
+    uid_t uid = user->pw_uid;
     gid_t gid = user->pw_gid;
 
     pid_t child = fork();

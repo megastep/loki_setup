@@ -29,5 +29,9 @@
  */
 extern int loki_launchURL(const char *url);
 
+/* Resolve the non-root user who started setup through sudo. */
+struct passwd;
+extern struct passwd *loki_sudo_user(void);
+
 /* Check if the program is in PATH */
 extern int loki_valid_program(const char *program);

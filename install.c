@@ -1361,7 +1361,8 @@ void add_bin_entry(install_info *info, struct option_elem *comp, struct file_ele
 					info->installed_symlink = symlink;
 					if ( !strcmp(play, "yes") || 
 					     (!strcmp(play, "gui") && UI.is_gui) ) {
-                        if (geteuid() != 0 && file && !install_full_path(info, file->path, info->play_binary))
+                        if ((geteuid() != 0 || !strcmp(play, "gui")) && file &&
+                            !install_full_path(info, file->path, info->play_binary))
                             *info->play_binary = '\0';
 					}
 				} else {
