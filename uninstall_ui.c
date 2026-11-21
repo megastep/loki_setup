@@ -600,6 +600,13 @@ int uninstall_ui(int argc, char *argv[])
     }
     window = ui_widget(uninstall_glade, "loki_uninstall");
 #ifdef LOKI_GTK3
+    if (strcmp(LOKI_PREFIX, "loki")) {
+        char vendor[] = LOKI_PREFIX;
+        vendor[0] = g_ascii_toupper(vendor[0]);
+        gchar *title = g_strdup_printf(_("%s Uninstall"), vendor);
+        gtk_window_set_title(GTK_WINDOW(window), title);
+        g_free(title);
+    }
     gtk_widget_show(window);
 #else
     gtk_widget_realize(window);

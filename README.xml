@@ -766,8 +766,9 @@ There are several optional attributes of the binary element:
             then this binary will explicitly not be used to launch after
             the installation. The default value for this attribute is 'yes'
             for the first binary with a symlink.
-            The value can also be 'gui', which means that the binary will only
-            be launched if the installer is in a graphical environment (e.g X11).
+            With 'gui', the graphical installer can offer to launch the
+            binary on its completion page. When GTK 3 setup is run through
+            sudo, it launches the binary as the invoking user.
 
  icon       This is an optional icon file that you should install into
             the top level of the install directory.  If both a symlink

@@ -90,6 +90,10 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <ctype.h>
+#ifdef LOKI_GTK3
+#include <grp.h>
+#include <pwd.h>
+#endif
 #include "gtk_setup_view.h"
 
 #include "install.h"
@@ -326,8 +330,78 @@ void setup_button_complete_slot( GtkWidget* _widget, gpointer func_data )
     cur_state = SETUP_COMPLETE;
 }
 
+#ifdef LOKI_GTK3
+struct launch_user_ids {
+    uid_t uid;
+    gid_t gid;
+};
+
+static void drop_launch_privileges(gpointer data)
+{
+    const struct launch_user_ids *ids = data;
+
+    if (setgroups(0, NULL) < 0 || setgid(ids->gid) < 0 || setuid(ids->uid) < 0)
+        _exit(126);
+}
+
+static gboolean launch_installed_program_as_user(install_info *info)
+{
+    struct passwd *user = loki_sudo_user();
+    struct stat st;
+
+    if (!user || !*info->play_binary || lstat(info->play_binary, &st) < 0 ||
+        !S_ISREG(st.st_mode))
+        return FALSE;
+
+    gchar **args = NULL;
+    gint count = 0;
+    if (*info->args && !g_shell_parse_argv(info->args, &count, &args, NULL))
+        return FALSE;
+    gchar **argv = g_new0(gchar *, count + 2);
+    argv[0] = info->play_binary;
+    for (gint i = 0; i < count; ++i)
+        argv[i + 1] = args[i];
+
+    struct launch_user_ids ids = { user->pw_uid, user->pw_gid };
+    gchar **env = g_get_environ();
+    env = g_environ_setenv(env, "HOME", user->pw_dir, TRUE);
+    env = g_environ_setenv(env, "USER", user->pw_name, TRUE);
+    env = g_environ_setenv(env, "LOGNAME", user->pw_name, TRUE);
+    env = g_environ_unsetenv(env, "XDG_CONFIG_HOME");
+    env = g_environ_unsetenv(env, "XDG_DATA_HOME");
+    env = g_environ_unsetenv(env, "XDG_CACHE_HOME");
+    env = g_environ_unsetenv(env, "XDG_STATE_HOME");
+    env = g_environ_unsetenv(env, "DBUS_SESSION_BUS_ADDRESS");
+    const char *runtime = getenv("XDG_RUNTIME_DIR");
+    gchar *default_runtime = g_strdup_printf("/run/user/%lu", (unsigned long)ids.uid);
+    if (!runtime || stat(runtime, &st) < 0 || !S_ISDIR(st.st_mode) || st.st_uid != ids.uid)
+        runtime = default_runtime;
+    if (stat(runtime, &st) == 0 && S_ISDIR(st.st_mode) && st.st_uid == ids.uid)
+        env = g_environ_setenv(env, "XDG_RUNTIME_DIR", runtime, TRUE);
+    else
+        env = g_environ_unsetenv(env, "XDG_RUNTIME_DIR");
+
+    gboolean launched = g_spawn_async(user->pw_dir, argv, env, 0,
+                                       drop_launch_privileges, &ids, NULL, NULL);
+    g_free(default_runtime);
+    g_strfreev(env);
+    g_strfreev(args);
+    g_free(argv);
+    return launched;
+}
+#endif
+
 void setup_button_play_slot( GtkWidget* _widget, gpointer func_data )
 {
+#ifdef LOKI_GTK3
+    if (geteuid() == 0) {
+        if (launch_installed_program_as_user(cur_info))
+            cur_state = SETUP_EXIT;
+        else
+            UI.prompt(_("Could not start the installed program."), RESPONSE_OK);
+        return;
+    }
+#endif
 	/* Enable this only if the application actually does that */
 #if 0
     if ( getuid() == 0 ) {
@@ -1590,11 +1664,20 @@ static install_state gtkui_complete(install_info *info)
     }
     gtk_label_set_text(GTK_LABEL(widget), text);
 
-    /* Hide the play game button if there's no game to play. :) */
     widget = gtk_setup_widget("play_game_button");
+#ifdef LOKI_GTK3
+    if (widget && *info->play_binary && (geteuid() != 0 || loki_sudo_user())) {
+        gchar *label = g_strdup_printf(_("_Start %s"), info->desc);
+        gtk_button_set_label(GTK_BUTTON(widget), label);
+        g_free(label);
+    } else if (widget) {
+        gtk_widget_hide(widget);
+    }
+#else
     if (widget && (geteuid() == 0 || !*info->play_binary)) {
         gtk_widget_hide(widget);
     }
+#endif
 
     /* Hide the 'View Readme' button if we have no readme... */
     if ( ! GetProductREADME(info, NULL) ) {
